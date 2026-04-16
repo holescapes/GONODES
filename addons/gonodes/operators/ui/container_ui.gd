@@ -13,6 +13,7 @@ var _container: Container = null
 var _managed_children: Array[Control] = []
 var _prev_managed: Array[Control] = []
 var _current_layout: int = -1
+var _last_inputs: Array[GNData] = []
 
 
 
@@ -62,6 +63,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# Adopt child UI widgets from upstream connections
 	_prev_managed = _managed_children.duplicate()
 	_managed_children.clear()
+	_last_inputs = _inputs
 	_populate_children(_inputs)
 	_remove_stale_children()
 
@@ -123,6 +125,8 @@ func _remove_stale_children() -> void:
 
 ## Overrides base class: aggregates widget_state from ALL connected children
 ## (not just this container's own empty state).
+## Reads from GNUIData (data-type check), not GNUiBase (node-type check),
+## so SubNetworkNode/GNCustomOperator UI outputs work identically.
 func _build_state_chop() -> void:
 	if _cached_state_chop == null:
 		_cached_state_chop = GNChannelData.new()
@@ -130,13 +134,13 @@ func _build_state_chop() -> void:
 	_cached_state_chop.length = 1
 	_cached_state_chop.sample_rate = 60.0
 
-	for upstream in get_input_nodes_sorted():
-		if upstream is GNUiBase:
-			var ui: GNUiBase = upstream as GNUiBase
-			for key in ui.widget_state:
-				var ch_name: String = "%s:%s" % [ui.id, key]
-				_cached_state_chop.set_single_value(ch_name, float(ui.widget_state[key]))
-		# TODO: forward widget_state from SubNetworkNode inner UI nodes
+	for data in _last_inputs:
+		if data is GNUIData:
+			var uid: GNUIData = data as GNUIData
+			var prefix: String = uid.source_id if not uid.source_id.is_empty() else "unknown"
+			for key in uid.widget_state:
+				var ch_name: String = "%s:%s" % [prefix, key]
+				_cached_state_chop.set_single_value(ch_name, float(uid.widget_state[key]))
 
 
 func destroy_control_node() -> void:

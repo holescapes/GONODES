@@ -55,3 +55,41 @@ func duplicate_data() -> GNData:
 	copy.texture = texture
 	copy.viewport = viewport
 	return copy
+
+
+func get_expression_value(key: String, _index: int = -1) -> Variant:
+	match key:
+		"resolution": return resolution
+		"aspect": return get_aspect()
+		"width": return resolution.x
+		"height": return resolution.y
+		_: return 0.0
+
+
+func get_expression_info() -> Dictionary:
+	return {
+		"resolution": resolution,
+		"aspect": get_aspect(),
+	}
+
+
+func get_export_filters() -> Array[Dictionary]:
+	return [
+		{"filter": "*.png", "description": "PNG Image"},
+		{"filter": "*.webp", "description": "WebP Image"},
+		{"filter": "*.exr", "description": "EXR Image (HDR)"},
+	]
+
+
+func export_to_file(path: String) -> Error:
+	if texture == null:
+		return ERR_INVALID_DATA
+	var img: Image = texture.get_image()
+	if img == null:
+		return ERR_INVALID_DATA
+	var ext := path.get_extension().to_lower()
+	match ext:
+		"png": return img.save_png(path)
+		"webp": return img.save_webp(path)
+		"exr": return img.save_exr(path)
+		_: return img.save_png(path)

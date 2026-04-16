@@ -175,6 +175,58 @@ func invalidate() -> void:
 	bounds = AABB()
 	point_attribs.clear()
 
+# ─── Expression Access ────────────────────────────────────────────────────────────────
+
+func get_expression_value(key: String, _index: int = -1) -> Variant:
+	match key:
+		"npoints", "vertex_count":
+			return vertex_count
+		"nprims", "surfaces":
+			return get_surface_count()
+		"has_geo":
+			return 1.0 if has_geometry() else 0.0
+		"bounds_size_x":
+			return bounds.size.x
+		"bounds_size_y":
+			return bounds.size.y
+		"bounds_size_z":
+			return bounds.size.z
+		"bounds_center_x":
+			return bounds.get_center().x
+		"bounds_center_y":
+			return bounds.get_center().y
+		"bounds_center_z":
+			return bounds.get_center().z
+		"attrib_count":
+			return point_attribs.size()
+	return 0.0
+
+
+func get_expression_info() -> Dictionary:
+	return {
+		"npoints": vertex_count,
+		"nprims": get_surface_count(),
+		"has_geo": has_geometry(),
+		"bounds_size_x": bounds.size.x,
+		"bounds_size_y": bounds.size.y,
+		"bounds_size_z": bounds.size.z,
+		"bounds_center_x": bounds.get_center().x,
+		"bounds_center_y": bounds.get_center().y,
+		"bounds_center_z": bounds.get_center().z,
+		"attrib_count": point_attribs.size(),
+	}
+
+
+func get_completions() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for key in ["npoints", "nprims", "has_geo",
+			"bounds_size_x", "bounds_size_y", "bounds_size_z",
+			"bounds_center_x", "bounds_center_y", "bounds_center_z",
+			"attrib_count"]:
+		result.append({"label": key, "kind": "member"})
+	for attrib_name in point_attribs:
+		result.append({"label": attrib_name, "kind": "member"})
+	return result
 
 func duplicate_data() -> GNData:
 	var copy := GNGeoData.new()
@@ -190,6 +242,33 @@ func duplicate_data() -> GNData:
 	for key in point_attribs:
 		copy.point_attribs[key] = point_attribs[key].duplicate()
 	return copy
+
+
+func get_export_filters() -> Array[Dictionary]:
+	return [
+		{"filter": "*.glb", "description": "glTF Binary (mesh only)"},
+	]
+
+
+func export_to_file(path: String) -> Error:
+	if mesh == null:
+		return ERR_INVALID_DATA
+	var mesh_inst := MeshInstance3D.new()
+	mesh_inst.mesh = mesh
+	mesh_inst.transform = transform
+	var tmp_root := Node3D.new()
+	tmp_root.name = "ExportRoot"
+	tmp_root.add_child(mesh_inst)
+	mesh_inst.owner = tmp_root
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	var err := doc.append_from_scene(tmp_root, state)
+	if err == OK:
+		err = doc.write_to_filesystem(state, path)
+	tmp_root.remove_child(mesh_inst)
+	mesh_inst.free()
+	tmp_root.free()
+	return err
 
 
 # ─── Internal ──────────────────────────────────────────────────────────────────

@@ -641,9 +641,9 @@ func set_target(p_node_id: String) -> void:
 	# Reset volume slice state for the new node.
 	vol_slice_pos = 0.5
 	vol_show_mip = false
-	# Reset waveform view state when switching nodes.
-	if _current_control is GNWaveformView:
-		(_current_control as GNWaveformView).reset_view()
+	# Reset custom view state when switching nodes.
+	if _current_control != null and _current_control.has_method("reset_view"):
+		_current_control.reset_view()
 	# Reset wireframe button state.
 	if _wireframe_btn:
 		_wireframe_btn.button_pressed = false
@@ -662,8 +662,9 @@ func update_from_node(node: GNNode) -> void:
 	var family_color := GNFamily.get_color(family)
 	_update_toolbar(family_name, node.id, family_color)
 
-	# Show wireframe toggle for SOP/COMP families.
-	var show_wire := (family == GNFamily.Type.SOP or family == GNFamily.Type.COMP)
+	# Show wireframe toggle when the family renderer supports it.
+	var renderer := GNFamily.get_renderer(family)
+	var show_wire: bool = renderer != null and renderer.supports_wireframe()
 	if _wireframe_btn:
 		_wireframe_btn.visible = show_wire
 

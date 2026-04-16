@@ -175,8 +175,8 @@ The inline field uses a manually managed `PopupMenu`.
 |-----------|--------|
 | `_autocomplete_popup` | `PopupMenu` created lazily on first trigger |
 | `_autocomplete_target` | The `LineEdit` that opened the popup |
-| `_ac_trigger_re` | Static `RegEx` matching `chop("`, `top("`, etc. before the caret |
-| `_ac_second_arg_re` | Static `RegEx` matching `chop("id", "` to detect the channel-name context |
+| `_ac_trigger_re` | Static `RegEx` built dynamically from `GNFamily.get_expression_func_variants()` — matches all registered family expression functions + `op`/`par`/`set_par` before the caret. Rebuilt when the registry changes. |
+| `_ac_second_arg_re` | Static `RegEx` built from same registry — matches any family function's second-arg context (e.g. `chop("id", "` or `sdf("id", "`) |
 
 **Trigger detection** — `_check_inline_autocomplete(edit)` runs on:
 
@@ -193,11 +193,15 @@ The inline field uses a manually managed `PopupMenu`.
 
 - **Node ID suggestions** — `_gather_node_ids(filter_family)` walks the
   network and collects node IDs, optionally filtered to a single family
-  via `_fn_to_family(fn)` (e.g., `chop(` → `GNFamily.Type.CHOP`).
-- **Channel name suggestions** — `_gather_chop_channels(node_id)` reads
-  `node.output_ports` on the referenced CHOP node and collects port
-  names.  Triggers when the caret is inside the second string argument
-  (e.g., `chop("lfo1", "|"`).
+  via `_fn_to_family(fn)` which uses `GNFamily.resolve_expression_func_family()`
+  — the same dynamic registry lookup used by the cook engine.  Extension-
+  registered families (e.g. `sdf(`) are resolved automatically.
+- **Data completions** — `_gather_data_completions(node_id)` reads both
+  `node.cached_output.get_completions()` (e.g. CHOP channel names) and
+  `node.cached_output.get_expression_info()` keys (e.g. "resolution",
+  "aspect" for TOP/IMG).  Triggers when the caret is inside the second
+  string argument (e.g., `chop("lfo1", "|"` or `top("noise1", "|"`).
+  Works for any data type polymorphically.
 
 **Popup display** — `_show_inline_autocomplete(edit, items, partial)`
 positions the `PopupMenu` below the caret, applies a family-colored icon

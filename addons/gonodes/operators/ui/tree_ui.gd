@@ -53,6 +53,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			item.set_text(0, item_name)
 			_items.append(item)
 
+	# Restore saved selection after items are rebuilt
+	if widget_state.has("selected"):
+		var saved := int(widget_state["selected"])
+		if saved >= 0 and saved < _items.size():
+			_items[saved].select(0)
+
 	var selected_idx := -1
 	var sel: TreeItem = _tree.get_selected()
 	if sel != null:

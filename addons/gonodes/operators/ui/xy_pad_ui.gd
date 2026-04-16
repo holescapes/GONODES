@@ -47,8 +47,8 @@ func _ensure_pad() -> void:
 	_pad.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_pad.gui_input.connect(_on_pad_input)
 	_pad.draw.connect(_on_pad_draw)
-	_x = get_param_value("default_x")
-	_y = get_param_value("default_y")
+	_x = widget_state.get("x", get_param_value("default_x"))
+	_y = widget_state.get("y", get_param_value("default_y"))
 	_control_node = _pad
 
 

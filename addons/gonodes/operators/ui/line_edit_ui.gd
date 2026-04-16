@@ -37,6 +37,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	widget_state = {
 		"length": float(_current_text.length()),
 		"submitted": _submitted,
+		"text": _current_text,
 	}
 	_submitted = 0.0
 	return null
@@ -48,7 +49,7 @@ func _ensure_line_edit() -> void:
 	_line_edit = LineEdit.new()
 	_line_edit.name = id + "_lineedit"
 	_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_line_edit.text = get_param_value("default_text")
+	_line_edit.text = widget_state.get("text", get_param_value("default_text"))
 	_line_edit.text_submitted.connect(_on_text_submitted)
 	_line_edit.text_changed.connect(_on_text_changed)
 	_control_node = _line_edit

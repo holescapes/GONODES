@@ -442,7 +442,7 @@ func _publish_introspection() -> void:
 # Internal: Stateful Reload
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Save CHOP channel values and timer positions for stateful reload.
+## Save operator output state and timer positions for stateful reload.
 func _save_runtime_state() -> void:
 	_saved_chop_values.clear()
 	_saved_timer_positions.clear()
@@ -453,20 +453,18 @@ func _save_runtime_state() -> void:
 	for node_id in network.nodes:
 		var node: GNNode = network.nodes[node_id]
 
-		# Save CHOP cached values.
-		if node.cached_output is GNChannelData:
-			var ch: GNChannelData = node.cached_output as GNChannelData
-			var saved: Dictionary = {}
-			for ch_name in ch.channels:
-				saved[ch_name] = ch.channels[ch_name].duplicate()
-			_saved_chop_values[node_id] = saved
+		# Save data state via polymorphic GNData API.
+		if node.cached_output != null and node.cached_output.valid:
+			var state: Dictionary = node.cached_output.save_state()
+			if not state.is_empty():
+				_saved_chop_values[node_id] = state
 
 		# Save timer positions.
 		if node.node_type == "timer" and node.has_method("get_elapsed"):
 			_saved_timer_positions[node_id] = node.call("get_elapsed")
 
 
-## Restore CHOP channel values and timer positions after reload.
+## Restore operator output state and timer positions after reload.
 func _restore_runtime_state() -> void:
 	if network == null:
 		return
@@ -474,11 +472,8 @@ func _restore_runtime_state() -> void:
 	for node_id in _saved_chop_values:
 		if network.nodes.has(node_id):
 			var node: GNNode = network.nodes[node_id]
-			if node.cached_output is GNChannelData:
-				var ch: GNChannelData = node.cached_output as GNChannelData
-				var saved: Dictionary = _saved_chop_values[node_id]
-				for ch_name in saved:
-					ch.channels[ch_name] = saved[ch_name]
+			if node.cached_output != null:
+				node.cached_output.restore_state(_saved_chop_values[node_id])
 
 	for node_id in _saved_timer_positions:
 		if network.nodes.has(node_id):

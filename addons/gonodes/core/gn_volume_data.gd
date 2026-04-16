@@ -114,6 +114,60 @@ func bytes_per_voxel() -> int:
 	return 4
 
 
+# ─── Expression Access ────────────────────────────────────────────────────────────────
+
+func get_expression_value(key: String, _index: int = -1) -> Variant:
+	match key:
+		"res_x":
+			return resolution.x
+		"res_y":
+			return resolution.y
+		"res_z":
+			return resolution.z
+		"voxels", "voxel_count":
+			return voxel_count()
+		"channels":
+			return channel_count
+		"field":
+			return field_name
+		"has_volume":
+			return 1.0 if has_volume() else 0.0
+		"is_cpu":
+			return 1.0 if is_cpu else 0.0
+		"bounds_size_x":
+			return bounds.size.x
+		"bounds_size_y":
+			return bounds.size.y
+		"bounds_size_z":
+			return bounds.size.z
+	return 0.0
+
+
+func get_expression_info() -> Dictionary:
+	return {
+		"res_x": resolution.x,
+		"res_y": resolution.y,
+		"res_z": resolution.z,
+		"voxels": voxel_count(),
+		"channels": channel_count,
+		"field": field_name,
+		"has_volume": has_volume(),
+		"is_cpu": is_cpu,
+		"bounds_size_x": bounds.size.x,
+		"bounds_size_y": bounds.size.y,
+		"bounds_size_z": bounds.size.z,
+	}
+
+
+func get_completions() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for key in ["res_x", "res_y", "res_z", "voxels",
+			"channels", "field", "has_volume", "is_cpu",
+			"bounds_size_x", "bounds_size_y", "bounds_size_z"]:
+		result.append({"label": key, "kind": "member"})
+	return result
+
+
 ## Reads back a single Z-slice as a PackedByteArray (for viewer preview).
 ## Returns raw bytes for one XY plane at the given z index.
 func read_slice_z(z: int) -> PackedByteArray:

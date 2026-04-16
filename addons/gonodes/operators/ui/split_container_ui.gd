@@ -63,7 +63,7 @@ func _build_split(is_vertical: bool) -> void:
 	_split.name = id + "_split"
 	_split.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_split.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_split.split_offset = get_param_value("offset")
+	_split.split_offset = int(widget_state.get("offset", float(get_param_value("offset"))))
 	_split.dragged.connect(_on_dragged)
 	_control_node = _split
 

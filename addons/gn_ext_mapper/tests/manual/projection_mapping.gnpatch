@@ -127,12 +127,6 @@
 			"to_port": 5
 		},
 		{
-			"from": "switch1",
-			"from_port": 0,
-			"to": "window1",
-			"to_port": 0
-		},
-		{
 			"from": "slider1",
 			"from_port": 0,
 			"to": "panel_container1",
@@ -227,6 +221,12 @@
 			"from_port": 0,
 			"to": "container1",
 			"to_port": 1
+		},
+		{
+			"from": "switch1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
 		},
 		{
 			"from": "container1",
@@ -1344,7 +1344,10 @@
 				1760.0,
 				440.0
 			],
-			"type": "SliderUI"
+			"type": "SliderUI",
+			"widget_state": {
+				"value": 6.0
+			}
 		},
 		"stoner": {
 			"parameters": {
@@ -1428,7 +1431,7 @@
 			"dynamic_input_count": 5,
 			"parameters": {
 				"index": {
-					"expression": "int(chop(\"slider1\", \"value\")) - 6 if int(chop(\"slider1\", \"value\")) >= 6 else 4",
+					"expression": "iif(int(chop(\"slider1\", \"value\")) >= 6, int(chop(\"slider1\", \"value\")) - 6, 4)",
 					"mode": "EXPRESSION",
 					"value": 0
 				},
@@ -1638,8 +1641,8 @@
 	},
 	"version": "1.0.0",
 	"viewport": {
-		"scroll_x": 665.602783203125,
-		"scroll_y": 535.338256835938,
-		"zoom": 0.601051032543182
+		"scroll_x": 250.001892089844,
+		"scroll_y": 0.0,
+		"zoom": 0.280394285917282
 	}
 }

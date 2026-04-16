@@ -52,6 +52,7 @@ func _ensure_menu_btn() -> void:
 	_menu_btn.flat = false
 	var popup: PopupMenu = _menu_btn.get_popup()
 	popup.id_pressed.connect(_on_item_pressed)
+	_last_selected = int(widget_state.get("selected", -1.0))
 	_control_node = _menu_btn
 
 

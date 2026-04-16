@@ -50,6 +50,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			var item_text: String = dat.cell(r, 0) if dat.num_cols() > 0 else ""
 			_list.add_item(item_text, icon)
 
+	# Restore saved selection after items are rebuilt
+	if widget_state.has("selected"):
+		var saved := int(widget_state["selected"])
+		if saved >= 0 and saved < _list.item_count:
+			_list.select(saved)
+
 	var selected: Array[int] = _list.get_selected_items()
 	var idx: int = selected[0] if selected.size() > 0 else -1
 

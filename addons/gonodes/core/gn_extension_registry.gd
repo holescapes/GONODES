@@ -601,6 +601,10 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 				GNFamily.register_renderer(fam_id, rend_scr.new())
 		# Register for @input/@output annotation parsing in script nodes
 		GNScriptHelper.register_script_family(fam_name.to_lower(), fam_id)
+		# Register expression function name (e.g. "chop", "top", "sdf")
+		var expr_func: String = cfg.get_value(section, "expression_func", "")
+		if not expr_func.is_empty():
+			GNFamily.register_expression_func(expr_func, fam_id)
 		print("[ExtRegistry] Registered family '%s' (id=%d)" % [fam_name, fam_id])
 
 	# ── Register operators ──

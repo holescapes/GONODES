@@ -46,6 +46,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	widget_state = {
 		"lines": float(_text_edit.get_line_count()),
 		"length": float(_current_text.length()),
+		"text": _current_text,
 	}
 	return null
 
@@ -62,6 +63,9 @@ func _ensure_text_edit() -> void:
 	_text_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_text_edit.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_text_edit.text_changed.connect(_on_text_changed)
+	# Restore text from saved state if available
+	if widget_state.has("text"):
+		_text_edit.text = widget_state["text"]
 	_control_node = _text_edit
 
 

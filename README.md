@@ -56,6 +56,8 @@ set_par("target", "brightness", v) # Write to other nodes from scripts
 
 Autocomplete suggests node IDs filtered by the function's expected family and supports hierarchical subnetwork paths. Rename a node and every expression referencing it updates automatically.
 
+**Extensible** — extensions can register new top-level expression functions for custom data families (e.g. `sdf("node", "key")`) via config, or add utility functions callable as `fn("name", args)` via the `GNExpressionFunctions` API. Autocomplete adapts automatically.
+
 ### 3D Scene Pipeline
 
 Full 3D rendering integrated into the texture pipeline:

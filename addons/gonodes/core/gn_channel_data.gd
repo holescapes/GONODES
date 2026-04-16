@@ -95,3 +95,77 @@ func duplicate_data() -> GNData:
 	for ch_name in channels:
 		copy.channels[ch_name] = channels[ch_name].duplicate()
 	return copy
+
+
+func get_expression_value(key: String, index: int = -1) -> Variant:
+	return get_value(key, index)
+
+
+func get_expression_info() -> Dictionary:
+	return {
+		"channels": get_channel_names(),
+		"length": length,
+		"sample_rate": sample_rate,
+	}
+
+
+func get_completions() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for ch_name in get_channel_names():
+		result.append({"label": ch_name, "kind": "member"})
+	return result
+
+
+func save_state() -> Dictionary:
+	var saved: Dictionary = {}
+	for ch_name in channels:
+		saved[ch_name] = channels[ch_name].duplicate()
+	return saved
+
+
+func restore_state(state: Dictionary) -> void:
+	for ch_name in state:
+		channels[ch_name] = state[ch_name]
+
+
+func get_export_filters() -> Array[Dictionary]:
+	return [
+		{"filter": "*.csv", "description": "CSV (channels as columns)"},
+		{"filter": "*.json", "description": "JSON"},
+	]
+
+
+func export_to_file(path: String) -> Error:
+	var ext := path.get_extension().to_lower()
+	match ext:
+		"json":
+			var dict := {}
+			for ch_name in channels:
+				var arr: PackedFloat32Array = channels[ch_name]
+				var float_arr: Array = []
+				for v in arr:
+					float_arr.append(v)
+				dict[ch_name] = float_arr
+			var json_str := JSON.stringify(dict, "\t")
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			f.store_string(json_str)
+			f.close()
+			return OK
+		_:
+			var names: Array = channels.keys()
+			if names.is_empty():
+				return ERR_INVALID_DATA
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			f.store_csv_line(PackedStringArray(names))
+			for i in range(length):
+				var row := PackedStringArray()
+				for ch_name in names:
+					var arr: PackedFloat32Array = channels[ch_name]
+					row.append(str(arr[i]) if i < arr.size() else "")
+				f.store_csv_line(row)
+			f.close()
+			return OK

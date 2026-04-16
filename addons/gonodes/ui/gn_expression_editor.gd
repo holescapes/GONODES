@@ -208,68 +208,63 @@ func _on_code_completion_requested() -> void:
 	# Detect context: are we inside chop("..., op("..., par("...?
 	var context := _detect_function_context(text_before)
 
-	match context:
-		"node_id_chop":
-			_suggest_node_ids(GNFamily.Type.CHOP)
-		"node_id_top":
-			_suggest_node_ids(GNFamily.Type.TOP)
-		"node_id_sop":
-			_suggest_node_ids(GNFamily.Type.SOP)
-		"node_id_dat":
-			_suggest_node_ids(GNFamily.Type.DAT)
-		"node_id_mat":
-			_suggest_node_ids(GNFamily.Type.MAT)
-		"node_id":
-			_suggest_node_ids(-1)
-		"chop_channel":
-			var node_id := _extract_first_string_arg(text_before)
-			_suggest_chop_channels(node_id)
-		"op_param", "par_param":
-			var node_id := _extract_first_string_arg(text_before)
-			_suggest_op_params(node_id)
-		"top_prop":
-			_suggest_top_properties()
-		"fn_name":
-			_suggest_fn_names()
-		_:
-			_suggest_general()
+	if context.begins_with("node_id:"):
+		# Family-filtered node suggestions (e.g. "node_id:2" for CHOP)
+		var family := int(context.substr(8))
+		_suggest_node_ids(family)
+	elif context == "node_id":
+		_suggest_node_ids(-1)
+	elif context == "data_completions":
+		var node_id := _extract_first_string_arg(text_before)
+		_suggest_data_and_info_completions(node_id)
+	elif context == "op_param" or context == "par_param":
+		var node_id := _extract_first_string_arg(text_before)
+		_suggest_op_params(node_id)
+	elif context == "fn_name":
+		_suggest_fn_names()
+	else:
+		_suggest_general()
 
 
 ## Detects what kind of autocomplete context we're in based on text before cursor.
-## Returns a context string indicating what kind of suggestions to show.
+## Returns a context string: "node_id:<family>", "data_completions",
+## "op_param", "par_param", "fn_name", "node_id", or "" for general.
+## Patterns are built dynamically from GNFamily's expression function registry
+## so extension-defined families get autocomplete automatically.
 func _detect_function_context(text: String) -> String:
-	# Check for patterns like: chop("  op("  par("  set_par("
-	# We look backwards for the most recent unclosed function call
+	var family_alt := _get_family_func_alternation()
+	if family_alt.is_empty():
+		family_alt = "(?!x)"  # no family funcs registered — never-match sentinel
 
-	# Pattern: func_name("first_arg", "  → suggesting second arg
+	# All family funcs now support port args natively, so second-arg
+	# context always suggests data keys/channels.
+	var value_alt := _get_value_func_alternation()
+	if value_alt.is_empty():
+		value_alt = "(?!x)"
+
+	# Pattern: value_func|op|par|set_par("first_arg", "  → suggesting second arg
 	var re_second := RegEx.new()
-	re_second.compile("(chop[sfi]?|op|top|par[sfi]?|set_par)\\s*\\(\\s*\"[^\"]*\"\\s*,\\s*\"[^\"]*$")
+	re_second.compile("(%s|op|par[sfi]?|set_par)\\s*\\(\\s*\"[^\"]*\"\\s*,\\s*\"[^\"]*$" % value_alt)
 	var m_second := re_second.search(text)
 	if m_second:
 		var fn := m_second.get_string(1)
-		if fn.begins_with("chop"):
-			return "chop_channel"
-		elif fn == "op":
+		if fn == "op":
 			return "op_param"
-		elif fn == "top":
-			return "top_prop"
-		elif fn.begins_with("par") or fn == "set_par":
+		if fn.begins_with("par") or fn == "set_par":
 			return "par_param"
+		# Family expression func → offer data completions + expression info keys
+		if GNFamily.resolve_expression_func_family(fn) >= 0:
+			return "data_completions"
 
-	# Pattern: func_name("  → suggesting first arg (node ID)
-	# Family-specific: chop → CHOPs, top → TOPs, etc.
+	# Pattern: family_func("  → suggesting first arg filtered by family
 	var re_family := RegEx.new()
-	re_family.compile("(chop[sfi]?|top|sop|dat|mat)\\s*\\(\\s*\"[^\"]*$")
+	re_family.compile("(%s)\\s*\\(\\s*\"[^\"]*$" % family_alt)
 	var m_family := re_family.search(text)
 	if m_family:
 		var fn := m_family.get_string(1)
-		if fn.begins_with("chop"):
-			return "node_id_chop"
-		match fn:
-			"top": return "node_id_top"
-			"sop": return "node_id_sop"
-			"dat": return "node_id_dat"
-			"mat": return "node_id_mat"
+		var family_id := GNFamily.resolve_expression_func_family(fn)
+		if family_id >= 0:
+			return "node_id:%d" % family_id
 		return "node_id"
 
 	# Pattern: op/par/set_par("  → all node types
@@ -287,11 +282,32 @@ func _detect_function_context(text: String) -> String:
 	return ""
 
 
+## Builds a regex alternation string for all registered expression functions
+## including variant suffixes (f/i/s/p/pf), sorted longest-first.
+func _get_family_func_alternation() -> String:
+	var variants := GNFamily.get_expression_func_variants()
+	if variants.is_empty():
+		return ""
+	return "|".join(variants)
+
+
+## Builds a regex alternation for non-port-aware variants only (f/i/s).
+## Used for second-arg detection where the arg is a data key, not a port.
+func _get_value_func_alternation() -> String:
+	var variants := GNFamily.get_expression_func_value_variants()
+	if variants.is_empty():
+		return ""
+	return "|".join(variants)
+
+
 ## Extracts the first string argument from a function call.
 ## E.g., from 'chop("lfo1", "' returns "lfo1".
 func _extract_first_string_arg(text: String) -> String:
+	var family_alt := _get_family_func_alternation()
+	if family_alt.is_empty():
+		family_alt = "(?!x)"
 	var re := RegEx.new()
-	re.compile("(?:chop[sfi]?|op|top|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]*)\"")
+	re.compile("(?:%s|op|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]*)\"" % family_alt)
 	var m := re.search(text)
 	if m:
 		return m.get_string(1)
@@ -430,20 +446,32 @@ func _extract_partial_path(text: String) -> String:
 	return text.substr(last_quote + 1)
 
 
-## Suggests CHOP channel names for a specific node.
-func _suggest_chop_channels(node_id: String) -> void:
+## Suggests data-specific completion items (e.g. CHOP channel names) plus
+## expression info keys (e.g. "resolution", "aspect" for TOP) for a node.
+## Replaces the former type-specific _suggest_data_completions() and
+## _suggest_top_properties() with a single polymorphic method.
+func _suggest_data_and_info_completions(node_id: String) -> void:
 	if network == null or node_id.is_empty():
 		return
 	var node: GNNode = network.nodes.get(node_id, null)
 	if node == null or node.cached_output == null:
 		return
-	if node.cached_output is GNChannelData:
-		var ch_data: GNChannelData = node.cached_output as GNChannelData
-		for ch_name in ch_data.get_channel_names():
-			_code_edit.add_code_completion_option(
-				CodeEdit.KIND_MEMBER, ch_name, ch_name,
-				Color(0.4, 0.9, 0.5), null, null)
-		_code_edit.update_code_completion_options(true)
+
+	# Data-type-specific completions (e.g. channel names for CHOP)
+	var completions := node.cached_output.get_completions()
+	for item in completions:
+		_code_edit.add_code_completion_option(
+			CodeEdit.KIND_MEMBER, item["label"], item["label"],
+			Color(0.4, 0.9, 0.5), null, null)
+
+	# Expression info keys (e.g. "resolution", "aspect" for TOP/IMG)
+	var info := node.cached_output.get_expression_info()
+	for key: String in info:
+		_code_edit.add_code_completion_option(
+			CodeEdit.KIND_MEMBER, key, key,
+			Color(0.7, 0.5, 0.9), null, str(info[key]))
+
+	_code_edit.update_code_completion_options(true)
 
 
 ## Suggests parameter names for a specific node.
@@ -457,15 +485,6 @@ func _suggest_op_params(node_id: String) -> void:
 		_code_edit.add_code_completion_option(
 			CodeEdit.KIND_MEMBER, param_name, param_name,
 			Color(0.85, 0.85, 0.75), null, null)
-	_code_edit.update_code_completion_options(true)
-
-
-## Suggests TOP property names.
-func _suggest_top_properties() -> void:
-	for prop in ["resolution", "aspect"]:
-		_code_edit.add_code_completion_option(
-			CodeEdit.KIND_MEMBER, prop, prop,
-			Color(0.7, 0.5, 0.9), null, null)
 	_code_edit.update_code_completion_options(true)
 
 

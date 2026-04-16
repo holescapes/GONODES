@@ -57,6 +57,37 @@ func duplicate_data() -> GNData:
 	return copy
 
 
+# ─── Expression Access ────────────────────────────────────────────────────────────────
+
+func get_expression_value(key: String, _index: int = -1) -> Variant:
+	match key:
+		"node_count":
+			return _count_nodes(sdf_tree)
+		"root_op":
+			return sdf_tree.get("op", "")
+		"tree_hash":
+			return tree_hash
+		"is_empty":
+			return 1.0 if sdf_tree.is_empty() else 0.0
+	return 0.0
+
+
+func get_expression_info() -> Dictionary:
+	return {
+		"node_count": _count_nodes(sdf_tree),
+		"root_op": sdf_tree.get("op", ""),
+		"tree_hash": tree_hash,
+		"is_empty": sdf_tree.is_empty(),
+	}
+
+
+func get_completions() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for key in ["node_count", "root_op", "tree_hash", "is_empty"]:
+		result.append({"label": key, "kind": "member"})
+	return result
+
+
 ## Computes a hash of the entire SDF tree for change detection.
 static func compute_tree_hash(tree: Dictionary) -> int:
 	if tree.is_empty():

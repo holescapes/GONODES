@@ -142,15 +142,15 @@ func destroy_scene_node() -> void:
 	_current_joint_type = -1
 
 
-## Walks the network to find Body A and Body B and set their NodePaths.
+## Reads Body A and Body B scene nodes from upstream data and sets their NodePaths.
 func _connect_bodies() -> void:
 	if _joint == null:
 		return
 
-	var body_a_comp: GNCompBase = get_input_node(0) as GNCompBase
-	var body_b_comp: GNCompBase = get_input_node(1) as GNCompBase
-	var body_a_node: Node3D = body_a_comp.get_scene_node() if body_a_comp else null
-	var body_b_node: Node3D = body_b_comp.get_scene_node() if body_b_comp else null
+	var body_a_data := get_input_node(0).cached_output as GNCompData if get_input_node(0) else null
+	var body_b_data := get_input_node(1).cached_output as GNCompData if get_input_node(1) else null
+	var body_a_node: Node3D = body_a_data.scene_node if body_a_data else null
+	var body_b_node: Node3D = body_b_data.scene_node if body_b_data else null
 
 	# Set node paths relative to the joint
 	if body_a_node != null and _joint.is_inside_tree() and body_a_node.is_inside_tree():

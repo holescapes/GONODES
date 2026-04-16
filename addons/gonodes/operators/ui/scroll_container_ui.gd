@@ -39,6 +39,12 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_populate_children(_inputs)
 	_remove_stale_children()
 
+	# Restore scroll position from saved state
+	if widget_state.has("scroll_h"):
+		_scroll.scroll_horizontal = int(widget_state["scroll_h"])
+	if widget_state.has("scroll_v"):
+		_scroll.scroll_vertical = int(widget_state["scroll_v"])
+
 	widget_state = {
 		"scroll_h": float(_scroll.scroll_horizontal),
 		"scroll_v": float(_scroll.scroll_vertical),

@@ -10,6 +10,10 @@ static var _viewer_mesh_instance: MeshInstance3D = null
 static var _viewer_env_node: WorldEnvironment = null
 
 
+func supports_wireframe() -> bool:
+	return true
+
+
 static func _ensure_viewer_scene() -> void:
 	if _viewer_camera != null:
 		return

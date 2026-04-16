@@ -137,9 +137,13 @@ func _sync_children_from_network() -> void:
 	# Build the expected child list from current connections (sorted by port)
 	var expected: Array[Node3D] = []
 	for upstream in get_input_nodes_sorted():
-		if not (upstream is GNCompBase):
-			continue
-		var scene_nd: Node3D = (upstream as GNCompBase).get_scene_node()
+		var scene_nd: Node3D = null
+		if upstream is GNCompBase:
+			scene_nd = (upstream as GNCompBase).get_scene_node()
+		else:
+			var comp_data := upstream.cached_output as GNCompData
+			if comp_data != null:
+				scene_nd = comp_data.scene_node
 		if scene_nd != null:
 			expected.append(scene_nd)
 

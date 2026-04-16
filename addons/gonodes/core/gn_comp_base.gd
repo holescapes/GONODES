@@ -93,23 +93,31 @@ func destroy_scene_node() -> void:
 
 ## Walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP,
 ## AnimationCOMP, etc.) to find the actual scene node.  Cycle-safe.
-static func resolve_scene_node_upstream(comp: GNCompBase, net: GNNetwork) -> Node3D:
-	return _resolve_scene_node_r(comp, net, {})
+## Accepts any GNNode — reads from GNCompData when the node isn't a GNCompBase
+## (e.g. SubNetworkNode emitting COMP data).
+static func resolve_scene_node_upstream(node: GNNode, net: GNNetwork) -> Node3D:
+	return _resolve_scene_node_r(node, net, {})
 
 
-static func _resolve_scene_node_r(comp: GNCompBase, net: GNNetwork,
+static func _resolve_scene_node_r(node: GNNode, net: GNNetwork,
 		visited: Dictionary) -> Node3D:
-	var scene_nd: Node3D = comp.get_scene_node()
-	if scene_nd != null:
-		return scene_nd
-	if visited.has(comp.id):
+	# Try direct scene node accessor (GNCompBase subclasses)
+	if node is GNCompBase:
+		var scene_nd: Node3D = (node as GNCompBase).get_scene_node()
+		if scene_nd != null:
+			return scene_nd
+	else:
+		# Non-GNCompBase (SubNetworkNode, etc.) — read from data
+		var comp_data := node.cached_output as GNCompData
+		if comp_data != null and comp_data.scene_node != null:
+			return comp_data.scene_node
+	if visited.has(node.id):
 		return null
-	visited[comp.id] = true
-	for conn in net.get_input_connections(comp.id):
+	visited[node.id] = true
+	for conn in net.get_input_connections(node.id):
 		var upstream: GNNode = net.nodes.get(conn.from_node, null)
-		if upstream is GNCompBase:
-			var resolved: Node3D = _resolve_scene_node_r(
-				upstream as GNCompBase, net, visited)
+		if upstream != null:
+			var resolved: Node3D = _resolve_scene_node_r(upstream, net, visited)
 			if resolved != null:
 				return resolved
 	return null
@@ -136,3 +144,63 @@ func render_for_preview(host) -> void:
 		host.set_text("%s\n%s" % [_scene_node.get_class(), vis])
 	else:
 		host.set_text("no node")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Export — Scene node export (COMPs export their 3D scene tree, not GNData)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func can_export_output() -> bool:
+	if _scene_node != null:
+		return true
+	return super.can_export_output()
+
+
+func get_exportable_outputs() -> Array[Dictionary]:
+	var result := super.get_exportable_outputs()
+	# Inject scene-node GLB export if we have a 3D scene and it's not already
+	# covered by a data port (COMPs may have both scene + data outputs).
+	if _scene_node != null:
+		result.insert(0, { "port": -1, "label": "Scene (GLB)",
+			"filters": [{"filter": "*.glb", "description": "glTF Binary (scene graph)"}] })
+	return result
+
+
+func get_export_filters(port_index: int = -1) -> Array[Dictionary]:
+	if port_index == -1 and _scene_node != null:
+		return [{"filter": "*.glb", "description": "glTF Binary (scene graph)"}]
+	return super.get_export_filters(port_index)
+
+
+func export_output(path: String, port_index: int = -1) -> Error:
+	if port_index == -1 and _scene_node != null:
+		return _export_scene_to_glb(path)
+	if port_index >= 0:
+		return super.export_output(path, port_index)
+	# Legacy default: scene first, then data
+	if _scene_node != null:
+		return _export_scene_to_glb(path)
+	return super.export_output(path, port_index)
+
+
+func _export_scene_to_glb(path: String) -> Error:
+	var clone: Node3D = _scene_node.duplicate()
+	var tmp_root := Node3D.new()
+	tmp_root.name = "ExportRoot"
+	tmp_root.add_child(clone)
+	_set_owner_recursive(clone, tmp_root)
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	var err := doc.append_from_scene(tmp_root, state)
+	if err == OK:
+		err = doc.write_to_filesystem(state, path)
+	tmp_root.remove_child(clone)
+	clone.queue_free()
+	tmp_root.free()
+	return err
+
+
+static func _set_owner_recursive(node: Node, owner: Node) -> void:
+	node.owner = owner
+	for child in node.get_children():
+		_set_owner_recursive(child, owner)

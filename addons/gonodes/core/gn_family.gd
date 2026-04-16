@@ -85,6 +85,12 @@ static var _data_factories: Dictionary = {}
 ## Lives in the editor UI layer — never loaded by the cook engine or headless player.
 static var _renderer_registry: Dictionary = {}
 
+## Expression function registry: func name (e.g. "chop") → family ID.
+## Populated from "expression_func" key in [family.*] config sections.
+## Used by the cook engine to resolve family-typed expression proxies
+## and by _EXPR_FUNC_TO_FAMILY for wireless demand tracking.
+static var _expression_func_registry: Dictionary = {}
+
 
 ## Registers a family (core or extension) at runtime.
 ## GNFamily is the sole authority on ID assignment.  Core family names
@@ -133,6 +139,52 @@ static func register_renderer(family_id: int, renderer: RefCounted) -> void:
 ## Returns the GNDataRenderer for the given family, or null if none registered.
 static func get_renderer(family_id: int) -> RefCounted:
 	return _renderer_registry.get(family_id, null)
+
+
+## Registers an expression function name for a family.
+## e.g. register_expression_func("chop", Type.CHOP) so users can write chop("lfo1", "out").
+static func register_expression_func(func_name: String, family_id: int) -> void:
+	_expression_func_registry[func_name] = family_id
+
+
+## Returns the full expression function → family mapping (for cook engine).
+static func get_expression_func_registry() -> Dictionary:
+	return _expression_func_registry
+
+
+## Returns all expression function names including variant suffixes
+## (f, i, s) sorted by length descending.  Used by autocomplete
+## to build regex alternation patterns that prefer longer matches first.
+## Note: p/pf suffixes are deprecated — base functions now support port args.
+static func get_expression_func_variants() -> Array[String]:
+	var result: Array[String] = []
+	for func_name: String in _expression_func_registry:
+		result.append(func_name)
+		for suffix in ["f", "i", "s"]:
+			result.append(func_name + suffix)
+	result.sort_custom(func(a: String, b: String) -> bool: return a.length() > b.length())
+	return result
+
+
+## Returns expression function names with value-type suffixes only (f, i, s)
+## — same as get_expression_func_variants() now that p/pf are deprecated.
+## Kept as a separate method for semantic clarity in autocomplete:
+## second-arg context triggers data key/channel completions.
+static func get_expression_func_value_variants() -> Array[String]:
+	return get_expression_func_variants()
+
+
+## Resolves a function name (possibly with a variant suffix like "chopf")
+## to its registered family ID.  Returns -1 if not found.
+static func resolve_expression_func_family(func_name: String) -> int:
+	if _expression_func_registry.has(func_name):
+		return _expression_func_registry[func_name]
+	for suffix in ["f", "i", "s"]:
+		if func_name.ends_with(suffix):
+			var base := func_name.substr(0, func_name.length() - suffix.length())
+			if _expression_func_registry.has(base):
+				return _expression_func_registry[base]
+	return -1
 
 
 ## Returns the display name for a family enum value.

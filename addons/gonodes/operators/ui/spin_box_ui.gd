@@ -47,7 +47,7 @@ func _ensure_spinbox() -> void:
 	_spinbox.min_value = get_param_value("min_val")
 	_spinbox.max_value = get_param_value("max_val")
 	_spinbox.step = get_param_value("step")
-	_spinbox.value = get_param_value("default_val")
+	_spinbox.value = widget_state.get("value", get_param_value("default_val"))
 	_spinbox.value_changed.connect(_on_value_changed)
 	_control_node = _spinbox
 

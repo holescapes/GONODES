@@ -31,6 +31,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_button.custom_minimum_size = Vector2(ms.x, ms.y)
 
 	if _button.toggle_mode:
+		_button.button_pressed = widget_state.get("toggle", 0.0) > 0.5
 		_toggle_value = 1.0 if _button.button_pressed else 0.0
 
 	# Build widget_state: press impulse lasts exactly one cook frame.

@@ -82,13 +82,11 @@ func _init_parameters() -> void:
 
 func _cook(inputs: Array[GNData]) -> GNData:
 	# Get input COMP's scene node
-	var comp_in: GNCompBase = get_input_node(0) as GNCompBase
-	if comp_in == null:
+	var comp_data := inputs[0] as GNCompData if inputs.size() > 0 else null
+	if comp_data == null or comp_data.scene_node == null:
 		return null
 
-	var target_node: Node3D = comp_in.get_scene_node()
-	if target_node == null:
-		return null
+	var target_node: Node3D = comp_data.scene_node
 
 	# Expose the upstream scene node so RenderTOP can find it via get_scene_node()
 	_scene_node = target_node

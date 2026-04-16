@@ -89,6 +89,14 @@ func _notification(what: int) -> void:
 # Control Node Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
+## Widget interaction is serialized state — notify the save system.
+func mark_dirty() -> void:
+	super.mark_dirty()
+	var eng: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
+	if eng != null and eng.network != null:
+		eng.network.notify_state_changed(false)  # not undoable
+
+
 ## Returns the managed Control node.  Subclasses typically provide a typed
 ## accessor (get_button, get_slider, etc.) that casts this.
 func get_control_node() -> Control:
@@ -120,6 +128,8 @@ func _build_ui_data() -> void:
 	_cached_ui_data.control_label = _control_node.get_class() if _control_node != null else ""
 	_cached_ui_data.valid = _control_node != null
 	_cached_ui_data.timestamp = Engine.get_process_frames()
+	_cached_ui_data.widget_state = widget_state.duplicate() if widget_state != null else {}
+	_cached_ui_data.source_id = id
 
 
 ## Converts this widget's widget_state dictionary into GNChannelData.
@@ -144,6 +154,23 @@ func destroy_control_node() -> void:
 		_control_node.queue_free()
 		_control_node = null
 	widget_state.clear()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Serialization
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func to_dict() -> Dictionary:
+	var d := super.to_dict()
+	if not widget_state.is_empty():
+		d["widget_state"] = widget_state.duplicate()
+	return d
+
+
+func from_dict(d: Dictionary) -> void:
+	super.from_dict(d)
+	if d.has("widget_state"):
+		widget_state = d["widget_state"].duplicate()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

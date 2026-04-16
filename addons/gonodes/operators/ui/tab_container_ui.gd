@@ -43,6 +43,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_populate_children(inputs, tab_names)
 	_remove_stale_children()
 
+	# Restore tab selection from saved state
+	if _tabs.get_tab_count() > 0 and widget_state.has("tab"):
+		_tabs.current_tab = clampi(int(widget_state["tab"]), 0, _tabs.get_tab_count() - 1)
+
 	widget_state = {"tab": float(_tabs.current_tab) if _tabs.get_tab_count() > 0 else 0.0}
 	return null
 

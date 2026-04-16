@@ -46,7 +46,7 @@ func _ensure_slider() -> void:
 	_slider.min_value = get_param_value("min_val")
 	_slider.max_value = get_param_value("max_val")
 	_slider.step = get_param_value("step")
-	_slider.value = get_param_value("default_val")
+	_slider.value = widget_state.get("value", get_param_value("default_val"))
 	_slider.value_changed.connect(_on_value_changed)
 	_control_node = _slider
 

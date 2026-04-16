@@ -80,23 +80,45 @@ chop("container1", "colorpicker1:r")
 
 ### `op(node_id, param_name)`
 
-Reads another node's parameter value.
+Reads another node's parameter, or returns a live proxy object for TD-style chaining.
 
 | Argument     | Type   | Required | Description                                  |
 |--------------|--------|----------|----------------------------------------------|
 | `node_id`    | String | yes      | The ID of any node (e.g. `"noise1"`)         |
-| `param_name` | String | yes      | Parameter name (e.g. `"scale"`, `"speed"`)   |
+| `param_name` | String | no       | Parameter name (e.g. `"scale"`, `"speed"`)   |
+
+With two args, returns the parameter value directly. With one arg, returns a
+`GNOpProxy` object with these properties:
+
+| Property         | Type       | Description                         |
+|------------------|------------|-------------------------------------|
+| `id`             | String     | Node ID                             |
+| `type`           | String     | Operator type (e.g. `"NoiseTOP"`)   |
+| `family`         | String     | Family name (e.g. `"TOP"`)          |
+| `family_id`      | int        | Family enum value                   |
+| `digits`         | int        | Trailing digits from ID             |
+| `valid`          | bool       | Cooked successfully last frame      |
+| `cook_time`      | float      | Last cook time (ms)                 |
+| `time_dependent` | bool       | Whether node is time-dependent      |
+| `bypass`         | bool       | Whether node is bypassed            |
+| `num_inputs`     | int        | Number of input ports               |
+| `num_outputs`    | int        | Number of output ports              |
+| `num_params`     | int        | Number of parameters                |
 
 ```gdscript
-# Read noise1's scale parameter
+# Read noise1's scale parameter (direct — preferred)
 op("noise1", "scale")
 
-# Use another node's speed to drive your own
-op("lfo1", "speed") * 2.0
+# TD-style property chaining
+op("noise1").type            # → "NoiseTOP"
+op("noise1").family          # → "TOP"
+op("noise1").digits          # → 1
+op("noise1").valid           # → true
+op("noise1").num_inputs      # → 2
+op("noise1").num_params      # → 5
 
-# Get full node info dictionary (advanced)
-op("noise1")
-# → { "par": { "scale": 1.0, ... }, "family": 1, "cook_time": 0.5, "valid": true }
+# Use in arithmetic
+op("lfo1", "speed") * 2.0
 ```
 
 ### `top(node_id, property)`
@@ -121,51 +143,27 @@ top("noise1", "aspect")
 top("render1", "resolution").x
 ```
 
-### `chopp(node_id, port, channel, index)` — Port-Aware CHOP Read
+### Port-Aware Access (multi-output nodes)
 
-Like `chop()` but targets a **specific output port** by name or index.
-Essential for multi-output nodes (e.g., GDScriptSCRIPT with two CHOP outputs)
-where `chop()` always picks the first CHOP port it finds.
-
-| Argument   | Type          | Required | Description                                    |
-|------------|---------------|----------|------------------------------------------------|
-| `node_id`  | String        | yes      | The ID of the CHOP node                         |
-| `port`     | String or int | yes      | Port name (e.g. `"out2"`) or port index (e.g. `1`) |
-| `channel`  | String        | no       | Channel name (e.g. `"tx"`). Omit for info dict. |
-| `index`    | int           | no       | Sample index. `-1` or omitted = latest sample   |
+`chop()`, `chopf()`, `chopi()`, `chops()`, and `top()` all support an optional
+port argument for multi-output nodes. The port can be specified by name or index:
 
 ```gdscript
-# Read "tx" from the second output port (by name)
-chopp("script1", "out2", "tx")
+# chop() with port — by name or index
+chop("script1", "out2", "tx")       # Channel 'tx' from port named "out2"
+chop("script1", 1, "tx")            # Channel 'tx' from port index 1
+chop("script1", "out2", "tx", 5)    # Sample 5 of 'tx' from port "out2"
+chopf("script1", 1, "tx")           # Same, guaranteed float return
 
-# Read "tx" from port index 1
-chopp("script1", 1, "tx")
-
-# Read sample 5 of "tx" from port "out2"
-chopp("script1", "out2", "tx", 5)
+# top() with port — by name or index
+top("glsl_multi1", "out1", "resolution")  # Resolution from port "out1"
+top("glsl_multi1", 1, "resolution")       # Resolution from port index 1
 ```
 
-**Typed variant:** `choppf()` — guaranteed `float` return (same arguments).
-
-### `topp(node_id, port, property)` — Port-Aware TOP Read
-
-Like `top()` but targets a **specific output port** by name or index.
-For multi-output TOPs (e.g., GLSLMultiTOP, MultiBufferRenderTOP) where
-`top()` picks the first TOP port.
-
-| Argument   | Type          | Required | Description                                    |
-|------------|---------------|----------|------------------------------------------------|
-| `node_id`  | String        | yes      | The ID of the TOP node                          |
-| `port`     | String or int | yes      | Port name (e.g. `"out1"`) or port index (e.g. `1`) |
-| `property` | String        | no       | `"resolution"` or `"aspect"`. Omit for info dict. |
-
-```gdscript
-# Get resolution of GLSLMultiTOP's second output
-topp("glsl_multi1", "out1", "resolution")
-
-# Get resolution of port index 1
-topp("glsl_multi1", 1, "resolution")
-```
+Type dispatch rules for `chop(node, arg2, arg3, arg4)`:
+- `arg2` is **int** → port index, `arg3` = channel, `arg4` = sample index
+- `arg2` is **String** and `arg3` is **String** → port name + channel
+- `arg2` is **String** and `arg3` is **int** → channel + sample index (original form)
 
 ### `par(param_name)` or `par(node_id, param_name)`
 
@@ -711,6 +709,22 @@ These functions are available in all expressions, called directly (no imports ne
 | `noise1` | `noise1(x)` | 1D value noise, returns ~[-1, 1] |
 | `noise2` | `noise2(x, y)` | 2D value noise, returns ~[-1, 1] |
 
+### Conditionals
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `iif` | `iif(condition, true_val, false_val)` | Inline conditional (if/else) |
+
+> **Important:** Godot's `Expression` class does **not** support the GDScript
+> ternary syntax (`X if Y else Z`). Use `iif()` instead:
+> ```gdscript
+> # WRONG — ternary is silently ignored by Expression:
+> (x - 6) if (x >= 6) else 4
+>
+> # CORRECT — use iif():
+> iif(int(chop("slider1", "value")) >= 6, int(chop("slider1", "value")) - 6, 4)
+> ```
+
 ### Examples
 
 ```gdscript
@@ -741,12 +755,236 @@ them from expressions using the `fn()` dispatch method:
 # In expressions:
 fn("my_func", arg1, arg2)
 
-# Registration (in your script):
+# Registration (in your extension's boot script or _ready):
 GNExpressionFunctions.register("my_func", my_callable, "Description", ["arg1", "arg2"])
 ```
 
 Custom functions appear in the expression editor's autocomplete when typing
 inside `fn("`.
+
+> **Why `fn()` and not a top-level name?** See the Architecture section below.
+
+---
+
+## Comparison with TouchDesigner Parameter Modes
+
+TouchDesigner parameters have four modes. GONODES replicates all one-way 
+capabilities through its expression system, without needing separate modes:
+
+| TD Mode | What it does | GONODES equivalent |
+|---|---|---|
+| **Constant** | User types a value | `GNParameter.Mode.CONSTANT` — identical |
+| **Expression** | Python expression computes the value | `GNParameter.Mode.EXPRESSION` — identical (GDScript instead of Python) |
+| **Export** | A CHOP drives the param (via Export CHOP DAT) | Write `chop("lfo1", "out")` as the expression — same result, self-documenting |
+| **Bind** (one-way) | Param follows another param or CHOP value | Write `par("other_node", "scale")` — same result |
+| **Bind** (bi-directional) | Two params mirror each other; editing either propagates | **Not yet supported** — requires a dedicated mode (see below) |
+
+### Why We Don't Need Separate Export/Bind Modes
+
+**Export** in TD is largely legacy. It was the original way to map CHOP channels 
+to parameters before expressions matured. The expression `chop("lfo1", "out")` 
+does exactly the same thing, with two advantages:
+- **Visible**: you can see *why* a param is driven by reading the expression
+- **Flexible**: combine with math — `chop("lfo1", "out") * 2.0 + par("offset")`
+
+**One-way Bind** is identical to a `par()` expression reference. Writing 
+`par("noise1", "scale")` makes param A follow param B.
+
+**Bi-directional Bind** is the only TD capability that cannot be replicated 
+with expressions, because expressions are inherently one-directional. This is 
+a planned feature (see Tier 3 roadmap) that would require a new parameter mode 
+(`GNParameter.Mode.BIND`) with cycle detection and propagation logic.
+
+### Drag-and-Drop Expression Shortcut (planned)
+
+In TD, dragging a CHOP onto a parameter auto-creates an Export. The GONODES 
+equivalent would auto-write an expression:
+
+1. User drags a node from the graph onto a parameter field
+2. If the node has **one CHOP output with one channel**: auto-writes 
+   `chop("lfo1", "out")`
+3. If the node has **multiple outputs or channels**: shows a picker popup 
+   (which port → which channel/property) before writing the expression
+4. For non-CHOP families (TOP, SOP, etc.): offers relevant expression keys 
+   (e.g., `top("noise1", "resolution").x` for a TOP)
+
+This is a UI convenience feature — no new parameter modes required.
+
+---
+
+## Extending the Expression System
+
+There are **two extension mechanisms** depending on what you need:
+
+### 1. Family Expression Functions (top-level syntax)
+
+When an extension defines a **new operator family** with data that supports
+property access, it can register a top-level expression function. Add
+`expression_func` to the `[family.*]` section in `gn_extension.cfg`:
+
+```ini
+[family.SDF]
+color = "0.95,0.65,0.15"
+data_script = "res://addons/gn_ext_sdf/core/gn_sdf_data.gd"
+expression_func = "sdf"
+```
+
+This gives users **top-level syntax** — `sdf("node_id", "key")` — just like
+the core `chop()`, `top()`, `sop()` functions. Requirements:
+
+- Your data class (extending `GNData`) must implement:
+  - `get_expression_value(key, index)` — returns the value for a named key
+  - `get_expression_info()` — returns a summary dict (no-arg call)
+  - `get_completions()` — returns autocomplete items for the second argument
+- **Autocomplete works automatically** — the expression editor and inline LineEdit
+  build their regex patterns from the family registry, so `sdf("` will filter
+  to SDF nodes, and `sdf("node", "` will suggest your data's completions.
+- Typed variants (`sdff`, `sdfi`, `sdfs`) and port-aware variants (`sdfp`,
+  `sdfpf`) are generated automatically.
+
+### 2. Custom Utility Functions (via `fn()`)
+
+For functions that **don't need cook engine context** — pure math helpers,
+lookup tables, format converters — use `GNExpressionFunctions.register()`:
+
+```gdscript
+# In your extension's boot script:
+static func boot() -> void:
+    GNExpressionFunctions.register(
+        "midi_to_freq",
+        func(note: float) -> float: return 440.0 * pow(2.0, (note - 69.0) / 12.0),
+        "Convert MIDI note number to frequency (Hz)",
+        ["note"]
+    )
+```
+
+Users call it as `fn("midi_to_freq", 60)`. Up to 6 arguments are supported.
+
+---
+
+## Architecture — Why Expression Methods Live on CookEngine
+
+Godot's `Expression` class resolves function calls as **method lookups on
+`base_instance`**. When you write:
+
+```gdscript
+chop("lfo1", "out") * 2.0
+```
+
+Godot's Expression internally calls `base_instance.chop("lfo1", "out")`,
+where `base_instance` is the CookEngine passed to `Expression.execute()`.
+This is a hard constraint of Godot's design — you cannot inject new top-level
+functions without having a method on the base instance.
+
+However, the CookEngine methods are **thin routing stubs** — the actual
+family-specific logic lives on the data classes:
+
+```
+User writes:  chop("lfo1", "out")
+              │
+              ▼
+CookEngine.chop()              ← 1-line wrapper (MUST live here for Expression)
+  └→ _make_data_proxy()        ← generic: resolve node → find data by family ID
+       └→ data.get_expression_value("out", -1)   ← polymorphic, on GNChannelData
+```
+
+The cook engine does **zero** family-specific processing — it's a dispatch layer.
+All the actual value resolution, property access, and type handling lives in the
+`GNData` subclasses, which is where extensions implement their logic.
+
+This is why `GNExpressionFunctions` uses `fn("name", ...)` as a wrapper — it's
+the only way to dispatch to user code from within Godot's Expression class
+without modifying CookEngine.
+
+---
+
+## Complete Expression Method Reference
+
+All methods available in expressions, organized by category. These are public
+methods on `GNCookEngine`, callable directly in any expression.
+
+### Cross-Node Data Access
+
+| Method | Signature | Returns | Description |
+|--------|-----------|---------|-------------|
+| `chop` | `chop(node, channel?, index?)` | Variant | Read CHOP channel value |
+| `chopf` | `chopf(node, channel?, index?)` | float | chop() guaranteed float |
+| `chopi` | `chopi(node, channel?, index?)` | int | chop() guaranteed int |
+| `chops` | `chops(node, channel?, index?)` | String | chop() guaranteed String |
+| `top` | `top(node, property?)` | Variant | Read TOP metadata (resolution, aspect) |
+| `sop` | `sop(node, port?)` | GNGeoData | Read SOP geometry data |
+| `dat` | `dat(node, port?)` | GNTableData | Read DAT table data |
+| `vol` | `vol(node, port?)` | GNVolumeData | Read VOL volume data |
+| `img` | `img(node, port?)` | GNImageData | Read IMG image data |
+| `mat` | `mat(node, port?)` | GNMaterialData | Read MAT material data |
+| `output` | `output(node, port?)` | GNData | Universal output accessor (any family) |
+| `op` | `op(node, param?)` | Variant/GNOpProxy | Read param directly or get live proxy object |
+
+### Parameter Access
+
+| Method | Signature | Returns | Description |
+|--------|-----------|---------|-------------|
+| `par` | `par(param)` or `par(node, param)` | Variant | Read parameter (self or cross-node) |
+| `parf` | `parf(...)` | float | par() guaranteed float |
+| `pari` | `pari(...)` | int | par() guaranteed int |
+| `pars` | `pars(...)` | String | par() guaranteed String |
+| `set_par` | `set_par(node, param, val)` or `set_par(param, val)` | bool | Write parameter value |
+| `ramp` | `ramp(param, t)` or `ramp(node, param, t)` | float | Sample a ramp curve at position t |
+
+### Remapping & Math
+
+| Method | Signature | Returns | Description |
+|--------|-----------|---------|-------------|
+| `fit` | `fit(val, in_min, in_max, out_min, out_max)` | float | Linear remap between ranges |
+| `fit01` | `fit01(val, in_min, in_max)` | float | Remap to 0–1 |
+| `step` | `step(edge, val)` | float | 1.0 if val >= edge, else 0.0 |
+| `smoothstep` | `smoothstep(e0, e1, x)` | float | Hermite smoothstep |
+
+### Smoothing & Filtering (stateful)
+
+| Method | Signature | Returns | Description |
+|--------|-----------|---------|-------------|
+| `smooth` | `smooth(key, target, speed?)` | float | Exponential smoothing |
+| `lag` | `lag(key, target, up_spd, down_spd)` | float | Asymmetric lag filter |
+| `trigger` | `trigger(key, value, threshold?)` | float | 1.0 on threshold crossing |
+
+### Waveforms & Noise
+
+| Method | Signature | Returns | Description |
+|--------|-----------|---------|-------------|
+| `pulse` | `pulse(phase, duty?)` | float | Pulse wave |
+| `cycle` | `cycle(period)` | float | Cyclic 0→1 ramp |
+| `bounce` | `bounce(t)` | float | abs(sin(t * PI)) |
+| `noise1` | `noise1(x)` | float | 1D value noise [-1, 1] |
+| `noise2` | `noise2(x, y)` | float | 2D value noise [-1, 1] |
+
+### Timeline
+
+| Method | Signature | Returns | Description |
+|--------|-----------|---------|-------------|
+| `fps` | `fps()` | float | Effective FPS (NRT-aware) |
+| `speed` | `speed()` | float | Current playback speed |
+| `tstart` | `tstart()` | float | Timeline start (seconds) |
+| `tend` | `tend()` | float | Timeline end (seconds) |
+| `frames` | `frames()` | int | Total frames in timeline |
+
+### Logging & Custom Functions
+
+| Method | Signature | Returns | Description |
+|--------|-----------|---------|-------------|
+| `log` | `log(message)` | float (0.0) | Log a message (returns 0 for inline use) |
+| `fn` | `fn(name, a?, b?, c?, d?, e?, f?)` | Variant | Call a registered custom function |
+
+### Network API (Script operators only)
+
+| Method | Signature | Returns | Description |
+|--------|-----------|---------|-------------|
+| `network_add_node` | `network_add_node(type, id?)` | String | Create a new node |
+| `network_remove_node` | `network_remove_node(id)` | bool | Remove a node |
+| `network_connect` | `network_connect(from, fp, to, tp)` | bool | Create a wire |
+| `network_disconnect` | `network_disconnect(from, fp, to, tp)` | bool | Remove a wire |
+| `network_node_ids` | `network_node_ids()` | PackedStringArray | All node IDs |
+| `network_node_info` | `network_node_info(id)` | Dictionary | Node metadata |
 
 ---
 

@@ -41,13 +41,11 @@ func _init_parameters() -> void:
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
-	var comp: GNCompBase = get_input_node(0) as GNCompBase
-	if comp == null:
+	var comp_data := _inputs[0] as GNCompData if _inputs.size() > 0 else null
+	if comp_data == null or comp_data.scene_node == null:
 		return _prepare_output()  # Empty channel data
 
-	var scene_node: Node3D = comp.get_scene_node()
-	if scene_node == null:
-		return _prepare_output()
+	var scene_node: Node3D = comp_data.scene_node
 
 	var out: GNChannelData = _prepare_output()
 

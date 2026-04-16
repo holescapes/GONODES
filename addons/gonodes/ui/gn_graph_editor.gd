@@ -3296,11 +3296,7 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	if selected_ids.size() == 1 and network != null:
 		var export_node: GNNode = network.get_node_by_id(selected_ids[0])
 		if export_node != null:
-			if export_node.cached_output != null and export_node.cached_output.valid:
-				can_export = true
-			elif export_node is GNCompBase and (export_node as GNCompBase).get_scene_node() != null:
-				# COMP nodes like LightCOMP/CameraCOMP return null data but have a scene node
-				can_export = true
+			can_export = export_node.can_export_output()
 	_context_menu.add_item("Export Output…", _CtxID.EXPORT_OUTPUT)
 	_context_menu.set_item_disabled(_context_menu.get_item_index(_CtxID.EXPORT_OUTPUT), not can_export)
 
@@ -3695,32 +3691,37 @@ func _copy_output_ref_to_clipboard() -> void:
 	if node == null:
 		return
 	var family_str := GNFamily.get_family_name(node.family).to_lower()
+	# Check if the expression function registry has a dedicated function for this family
+	var expr_registry: Dictionary = GNFamily.get_expression_func_registry()
+	var expr_func: String = ""
+	for fn_name: String in expr_registry:
+		if expr_registry[fn_name] == node.family:
+			expr_func = fn_name
+			break
+
 	var ref: String
-	match family_str:
-		"chop":
-			# Default to first channel name if available, else "out"
-			var chan := "out"
-			if node.cached_output is GNChannelData:
-				var ch_data: GNChannelData = node.cached_output as GNChannelData
-				var names := ch_data.get_channel_names()
-				if not names.is_empty():
-					chan = names[0]
-			ref = 'chop("%s", "%s")' % [node.id, chan]
-		"top":
-			ref = 'top("%s")' % node.id
-		"ui":
-			# UI nodes output widget_state as a CHOP — use first channel
-			var chan := "%s:value" % node.id
-			var state_port := node.output_ports.size() - 1
-			var state_data: GNData = node.get_output_data(state_port) if state_port >= 0 else null
-			if state_data is GNChannelData:
-				var ch_data: GNChannelData = state_data as GNChannelData
-				var names := ch_data.get_channel_names()
-				if not names.is_empty():
-					chan = names[0]
-			ref = 'chop("%s", "%s")' % [node.id, chan]
-		_:
-			ref = 'op("%s")' % node.id
+	if not expr_func.is_empty():
+		# Family has a registered expression function — use it
+		var completions: Array[Dictionary] = []
+		if node.cached_output != null:
+			completions = node.cached_output.get_completions()
+		if not completions.is_empty():
+			# Has named sub-values (e.g. CHOP channels) — include first one
+			ref = '%s("%s", "%s")' % [expr_func, node.id, completions[0]["label"]]
+		else:
+			ref = '%s("%s")' % [expr_func, node.id]
+	elif family_str == "ui":
+		# UI nodes output widget_state as a CHOP — use first channel
+		var chan := "%s:value" % node.id
+		var state_port := node.output_ports.size() - 1
+		var state_data: GNData = node.get_output_data(state_port) if state_port >= 0 else null
+		if state_data != null:
+			var completions := state_data.get_completions()
+			if not completions.is_empty():
+				chan = completions[0]["label"]
+		ref = 'chop("%s", "%s")' % [node.id, chan]
+	else:
+		ref = 'op("%s")' % node.id
 	DisplayServer.clipboard_set(ref)
 	GNLogger.info("GraphEditor", "Copied output ref: %s" % ref)
 
@@ -3740,23 +3741,63 @@ func _shortcut(keycode: Key, ctrl: bool = false, alt: bool = false) -> Shortcut:
 # Export Output
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Begins the export workflow: identifies the selected node, configures the
-## FileDialog with family-appropriate filters, and shows it.
+## The output port index selected for export (-1 = default / auto).
+var _export_port_index: int = -1
+
+## Begins the export workflow: identifies the selected node, then either opens
+## the FileDialog directly (single exportable output) or shows a port picker
+## popup first (multiple exportable outputs).
 func _begin_export_output() -> void:
 	var selected := _get_selected_node_ids()
 	if selected.size() != 1 or network == null:
 		return
 	var node: GNNode = network.get_node_by_id(selected[0])
-	if node == null:
-		return
-	# COMP nodes may have a scene node even when cached_output is null (Light, Camera)
-	var has_data := node.cached_output != null and node.cached_output.valid
-	var has_scene := node is GNCompBase and (node as GNCompBase).get_scene_node() != null
-	if not has_data and not has_scene:
+	if node == null or not node.can_export_output():
 		return
 	_export_target_node = node
 
-	# Lazy-init the FileDialog
+	var outputs := node.get_exportable_outputs()
+	if outputs.size() <= 1:
+		# Single export — go straight to FileDialog
+		_export_port_index = outputs[0]["port"] if not outputs.is_empty() else -1
+		_open_export_dialog(outputs[0]["filters"] if not outputs.is_empty() else [])
+	else:
+		# Multiple exports — show port picker popup first
+		_show_export_port_picker(outputs)
+
+
+## Shows a popup menu listing the exportable output ports so the user can
+## choose which one to export.
+func _show_export_port_picker(outputs: Array[Dictionary]) -> void:
+	var popup := PopupMenu.new()
+	popup.name = "ExportPortPicker"
+	for i in range(outputs.size()):
+		var entry: Dictionary = outputs[i]
+		var port_idx: int = entry["port"]
+		var label: String = entry["label"]
+		var filters: Array = entry["filters"]
+		var desc := ""
+		if not filters.is_empty():
+			desc = filters[0].get("description", "")
+		popup.add_item("%s  (%s)" % [label, desc] if not desc.is_empty() else label, i)
+		popup.set_item_metadata(popup.get_item_index(i), entry)
+	popup.id_pressed.connect(func(id: int) -> void:
+		var idx := popup.get_item_index(id)
+		var meta: Dictionary = popup.get_item_metadata(idx)
+		_export_port_index = meta["port"]
+		_open_export_dialog(meta["filters"])
+		popup.queue_free()
+	)
+	popup.canceled.connect(func() -> void:
+		_export_target_node = null
+		popup.queue_free()
+	)
+	add_child(popup)
+	popup.popup_centered()
+
+
+## Lazy-inits and configures the FileDialog, then shows it.
+func _open_export_dialog(filters: Array) -> void:
 	if _export_dialog == null:
 		_export_dialog = FileDialog.new()
 		_export_dialog.access = FileDialog.ACCESS_FILESYSTEM
@@ -3766,33 +3807,14 @@ func _begin_export_output() -> void:
 		_export_dialog.file_selected.connect(_on_export_file_selected)
 		add_child(_export_dialog)
 
-	# Clear previous filters and set family-specific ones
 	_export_dialog.clear_filters()
-	var data: GNData = node.cached_output
-	var is_comp := node is GNCompBase
-
-	# COMP check first — COMPs may have null cached_output (Light, Camera)
-	if is_comp:
-		_export_dialog.add_filter("*.glb", "glTF Binary (scene graph — meshes, lights, cameras)")
-	elif data is GNTextureData or data is GNImageData:
-		_export_dialog.add_filter("*.png", "PNG Image")
-		_export_dialog.add_filter("*.webp", "WebP Image")
-		_export_dialog.add_filter("*.exr", "EXR Image (HDR)")
-	elif data is GNGeoData:
-		_export_dialog.add_filter("*.glb", "glTF Binary (mesh only)")
-	elif data is GNChannelData:
-		_export_dialog.add_filter("*.csv", "CSV (channels as columns)")
-		_export_dialog.add_filter("*.json", "JSON")
-	elif data is GNTableData:
-		_export_dialog.add_filter("*.csv", "CSV")
-		_export_dialog.add_filter("*.json", "JSON")
-		_export_dialog.add_filter("*.txt", "Plain Text")
-	elif data is GNMaterialData:
+	if filters.is_empty():
 		_export_dialog.add_filter("*.tres", "Godot Resource")
 	else:
-		_export_dialog.add_filter("*.tres", "Godot Resource")
+		for f in filters:
+			_export_dialog.add_filter(f["filter"], f["description"])
 
-	_export_dialog.current_file = node.id
+	_export_dialog.current_file = _export_target_node.id if _export_target_node else "export"
 	_export_dialog.popup_centered()
 
 
@@ -3800,225 +3822,15 @@ func _begin_export_output() -> void:
 func _on_export_file_selected(path: String) -> void:
 	if _export_target_node == null:
 		return
-	var data: GNData = _export_target_node.cached_output
-	if data == null or not data.valid:
-		GNLogger.warn("Export", "No valid output to export from '%s'" % _export_target_node.id)
-		return
 
-	var is_comp := _export_target_node is GNCompBase
-	var err: Error = OK
-
-	if is_comp:
-		err = _export_comp_glb(path, _export_target_node)
-	elif data is GNTextureData:
-		err = _export_texture(path, data as GNTextureData)
-	elif data is GNImageData:
-		err = _export_image(path, data as GNImageData)
-	elif data is GNGeoData:
-		err = _export_geo_glb(path, data as GNGeoData)
-	elif data is GNChannelData:
-		err = _export_channel(path, data as GNChannelData)
-	elif data is GNTableData:
-		err = _export_table(path, data as GNTableData)
-	elif data is GNMaterialData:
-		err = _export_material(path, data as GNMaterialData)
-	else:
-		GNLogger.warn("Export", "Unsupported data type for export: %s" % data.get_class())
-		return
+	var err: Error = _export_target_node.export_output(path, _export_port_index)
 
 	if err == OK:
-		GNLogger.info("Export", "Exported '%s' → %s" % [_export_target_node.id, path])
+		GNLogger.info("Export", "Exported '%s' (port %d) → %s" % [_export_target_node.id, _export_port_index, path])
 	else:
-		GNLogger.error("Export", "Failed to export '%s' → %s (error %d)" % [_export_target_node.id, path, err])
+		GNLogger.error("Export", "Failed to export '%s' (port %d) → %s (error %d)" % [_export_target_node.id, _export_port_index, path, err])
 	_export_target_node = null
-
-
-## Exports a GNTextureData (TOP) by reading back from GPU to CPU Image.
-func _export_texture(path: String, tex_data: GNTextureData) -> Error:
-	if tex_data.texture == null:
-		return ERR_INVALID_DATA
-	var img: Image = tex_data.texture.get_image()
-	if img == null:
-		return ERR_INVALID_DATA
-	return _save_image_to_path(img, path)
-
-
-## Exports a GNImageData (IMG) directly as an image file.
-func _export_image(path: String, img_data: GNImageData) -> Error:
-	if img_data.image == null:
-		return ERR_INVALID_DATA
-	return _save_image_to_path(img_data.image, path)
-
-
-## Saves a CPU Image to disk based on file extension.
-func _save_image_to_path(img: Image, path: String) -> Error:
-	var ext := path.get_extension().to_lower()
-	match ext:
-		"png":
-			return img.save_png(path)
-		"webp":
-			return img.save_webp(path)
-		"exr":
-			return img.save_exr(path)
-		_:
-			# Default to PNG if unrecognised
-			return img.save_png(path)
-
-
-## Exports a GNGeoData (SOP) as a bare-mesh glTF binary (.glb).
-func _export_geo_glb(path: String, geo_data: GNGeoData) -> Error:
-	if geo_data.mesh == null:
-		return ERR_INVALID_DATA
-	var mesh_inst := MeshInstance3D.new()
-	mesh_inst.mesh = geo_data.mesh
-	mesh_inst.transform = geo_data.transform
-	var err := _write_gltf_scene(path, mesh_inst)
-	mesh_inst.free()
-	return err
-
-
-## Exports any COMP node as a glTF binary (.glb).
-## Deep-clones the full scene subtree from get_scene_node() — handles:
-##   • GeometryCOMP (MeshInstance3D + material_override)
-##   • LightCOMP (DirectionalLight3D / OmniLight3D / SpotLight3D)
-##   • CameraCOMP (Camera3D)
-##   • MergeCOMP (Node3D group with all of the above as children)
-func _export_comp_glb(path: String, node: GNNode) -> Error:
-	var comp := node as GNCompBase
-	if comp == null:
-		return ERR_INVALID_DATA
-	var scene_node: Node3D = comp.get_scene_node()
-	if scene_node == null:
-		# Fallback: try bare mesh from cached_output
-		var geo: GNGeoData = node.cached_output as GNGeoData
-		if geo != null:
-			return _export_geo_glb(path, geo)
-		return ERR_INVALID_DATA
-	# Deep-clone the live subtree so GLTFDocument can own a temporary copy
-	var clone: Node3D = scene_node.duplicate()
-	var err := _write_gltf_scene(path, clone)
-	clone.queue_free()
-	return err
-
-
-## Writes a Node3D subtree to a .glb file using Godot's GLTFDocument.
-func _write_gltf_scene(path: String, root: Node3D) -> Error:
-	# GLTFDocument needs the root in a temporary scene tree
-	var tmp_root := Node3D.new()
-	tmp_root.name = "ExportRoot"
-	tmp_root.add_child(root)
-	# Set owner on the entire subtree so GLTFDocument can traverse all nodes
-	# (lights, cameras, meshes inside MergeCOMP groups, etc.)
-	_set_owner_recursive(root, tmp_root)
-
-	var doc := GLTFDocument.new()
-	var state := GLTFState.new()
-	var err := doc.append_from_scene(tmp_root, state)
-	if err != OK:
-		tmp_root.remove_child(root)
-		tmp_root.free()
-		return err
-	err = doc.write_to_filesystem(state, path)
-	tmp_root.remove_child(root)
-	tmp_root.free()
-	return err
-
-
-## Recursively sets owner on all descendants so GLTFDocument traverses them.
-func _set_owner_recursive(node: Node, owner: Node) -> void:
-	node.owner = owner
-	for child in node.get_children():
-		_set_owner_recursive(child, owner)
-
-
-## Exports GNChannelData (CHOP) as CSV or JSON.
-func _export_channel(path: String, ch_data: GNChannelData) -> Error:
-	var ext := path.get_extension().to_lower()
-	match ext:
-		"json":
-			var dict := {}
-			for ch_name in ch_data.channels:
-				var arr: PackedFloat32Array = ch_data.channels[ch_name]
-				var float_arr: Array = []
-				for v in arr:
-					float_arr.append(v)
-				dict[ch_name] = float_arr
-			var json_str := JSON.stringify(dict, "\t")
-			var f := FileAccess.open(path, FileAccess.WRITE)
-			if f == null:
-				return FileAccess.get_open_error()
-			f.store_string(json_str)
-			f.close()
-			return OK
-		_:
-			# CSV: channels as columns, header row = channel names
-			var names: Array = ch_data.channels.keys()
-			if names.is_empty():
-				return ERR_INVALID_DATA
-			var f := FileAccess.open(path, FileAccess.WRITE)
-			if f == null:
-				return FileAccess.get_open_error()
-			f.store_csv_line(PackedStringArray(names))
-			var length: int = ch_data.length
-			for i in range(length):
-				var row := PackedStringArray()
-				for ch_name in names:
-					var arr: PackedFloat32Array = ch_data.channels[ch_name]
-					row.append(str(arr[i]) if i < arr.size() else "")
-				f.store_csv_line(row)
-			f.close()
-			return OK
-
-
-## Exports GNTableData (DAT) as CSV, JSON, or plain text.
-func _export_table(path: String, tbl_data: GNTableData) -> Error:
-	var ext := path.get_extension().to_lower()
-	match ext:
-		"json":
-			var result: Array = []
-			if tbl_data.is_table:
-				var headers: PackedStringArray = tbl_data.table[0] if tbl_data.has_header and not tbl_data.table.is_empty() else PackedStringArray()
-				var start_row := 1 if tbl_data.has_header else 0
-				for r in range(start_row, tbl_data.table.size()):
-					var row_dict := {}
-					for c in range(tbl_data.table[r].size()):
-						var key: String = headers[c] if c < headers.size() else ("col%d" % c)
-						row_dict[key] = tbl_data.table[r][c]
-					result.append(row_dict)
-			var json_str := JSON.stringify(result, "\t")
-			var f := FileAccess.open(path, FileAccess.WRITE)
-			if f == null:
-				return FileAccess.get_open_error()
-			f.store_string(json_str if tbl_data.is_table else tbl_data.text)
-			f.close()
-			return OK
-		"txt":
-			var f := FileAccess.open(path, FileAccess.WRITE)
-			if f == null:
-				return FileAccess.get_open_error()
-			if tbl_data.is_table:
-				for row in tbl_data.table:
-					f.store_line("\t".join(row))
-			else:
-				f.store_string(tbl_data.text)
-			f.close()
-			return OK
-		_:
-			# CSV
-			var f := FileAccess.open(path, FileAccess.WRITE)
-			if f == null:
-				return FileAccess.get_open_error()
-			for row in tbl_data.table:
-				f.store_csv_line(row)
-			f.close()
-			return OK
-
-
-## Exports GNMaterialData (MAT) as a Godot .tres resource.
-func _export_material(path: String, mat_data: GNMaterialData) -> Error:
-	if mat_data.material == null:
-		return ERR_INVALID_DATA
-	return ResourceSaver.save(mat_data.material, path)
+	_export_port_index = -1
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -4028,15 +3840,21 @@ func _export_material(path: String, mat_data: GNMaterialData) -> Error:
 ## Undoes the last graph action.
 func undo_action() -> void:
 	if _undo_redo.has_undo():
+		var action_name: String = _undo_redo.get_current_action_name()
 		_undo_redo.undo()
-		GNLogger.info("GraphEditor", "Undo: %s" % _undo_redo.get_current_action_name())
+		GNLogger.info("GraphEditor", "Undo: %s  (version %d)" % [action_name, _undo_redo.get_version()])
+		if network != null:
+			network.notify_state_changed()
 
 
 ## Redoes the last undone graph action.
 func redo_action() -> void:
 	if _undo_redo.has_redo():
 		_undo_redo.redo()
-		GNLogger.info("GraphEditor", "Redo")
+		var action_name: String = _undo_redo.get_current_action_name()
+		GNLogger.info("GraphEditor", "Redo: %s  (version %d)" % [action_name, _undo_redo.get_version()])
+		if network != null:
+			network.notify_state_changed()
 
 
 ## Clears all undo/redo history (call on New/Load).
@@ -4365,7 +4183,7 @@ func _ur_set_connections(conn_data: Array) -> void:
 		network.connections.append(
 			GNConnection.create(cd[0], cd[1], cd[2], cd[3]))
 	network._invalidate_topo()
-	network.graph_changed.emit()
+	network.notify_state_changed()
 
 
 ## Redo helper for group-into-subnet: removes original nodes, adds subnet,
@@ -4600,7 +4418,7 @@ func group_selected_into_subnet() -> void:
 
 	# ── Invalidate parent topology ──────────────────────────────────────
 	network._invalidate_topo()
-	network.graph_changed.emit()
+	network.notify_state_changed()
 
 	# ── Record undo action ──────────────────────────────────────────────
 	var post_conns_snapshot: Array = []
@@ -4936,8 +4754,10 @@ func _show_insert_chop_ref_dialog() -> void:
 
 	# Gather available channel names from the CHOP's cached output
 	var channel_names: PackedStringArray = []
-	if _chop_ref_source_node.cached_output is GNChannelData:
-		channel_names = (_chop_ref_source_node.cached_output as GNChannelData).get_channel_names()
+	if _chop_ref_source_node.cached_output != null:
+		var completions := _chop_ref_source_node.cached_output.get_completions()
+		for c in completions:
+			channel_names.append(c["label"])
 
 	var dialog := AcceptDialog.new()
 	dialog.title = "Insert CHOP Reference — %s" % _chop_ref_source_node.id

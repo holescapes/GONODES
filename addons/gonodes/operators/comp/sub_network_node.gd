@@ -227,6 +227,13 @@ func _find_parent_cook_engine() -> GNCookEngine:
 
 func _on_inner_node_added(node_id: String) -> void:
 	var node: GNNode = inner_network.nodes.get(node_id, null)
+	if node == null:
+		return
+	# Propagate inner node dirtiness to the SubNetworkNode so the outer
+	# cook engine re-cooks us when inner UI widgets (drag pads, sliders)
+	# are interacted with at runtime.
+	if not node.node_dirty.is_connected(_on_inner_node_dirty):
+		node.node_dirty.connect(_on_inner_node_dirty)
 	if node is InTunnel or node is OutTunnel:
 		# Listen for tunnel parameter changes (family, index, label)
 		if not node.parameter_changed.is_connected(_on_tunnel_param_changed):
@@ -253,6 +260,29 @@ func _on_tunnel_param_changed(_node_id: String, param_name: String) -> void:
 		mark_dirty()
 
 
+## Propagates inner node dirtiness outward — when an inner widget is
+## interacted with (drag pad, slider), the SubNetworkNode must re-cook
+## so the inner cook engine runs and the outputs update.
+func _on_inner_node_dirty(_inner_node_id: String) -> void:
+	if not dirty:
+		GNLogger.debug("SubNetwork", "'%s' inner node '%s' dirty → marking self dirty" % [id, _inner_node_id])
+	mark_dirty()
+
+
+## Connects node_dirty signals for all existing inner nodes.
+## Called after from_dict() restores a saved inner network.
+func _connect_inner_dirty_signals() -> void:
+	if inner_network == null:
+		return
+	var count := 0
+	for node_id in inner_network.nodes:
+		var node: GNNode = inner_network.nodes[node_id]
+		if not node.node_dirty.is_connected(_on_inner_node_dirty):
+			node.node_dirty.connect(_on_inner_node_dirty)
+			count += 1
+	GNLogger.info("SubNetwork", "'%s' connected dirty signals for %d inner nodes" % [id, count])
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Serialization
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -273,6 +303,10 @@ func from_dict(d: Dictionary) -> void:
 		inner_network.from_dict(d["inner_network"])
 		_ports_dirty = true
 		sync_ports_from_tunnels()
+		# Connect dirty-propagation for all inner nodes loaded from the patch.
+		# _on_inner_node_added only fires for nodes added at runtime,
+		# so deserialized nodes need explicit hookup.
+		_connect_inner_dirty_signals()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

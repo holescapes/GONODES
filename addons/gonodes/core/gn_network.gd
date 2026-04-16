@@ -53,11 +53,23 @@ signal connection_added(connection: GNConnection)
 ## Emitted when a connection is removed.
 signal connection_removed(connection: GNConnection)
 
-## Emitted when the graph structure changes (any add/remove of nodes or connections).
-signal graph_changed()
+## Emitted when serialized state changes (structure, connections, renames,
+## parameter edits, widget interaction).  The editor listens to this for
+## unsaved-changes tracking.  Prefer calling [method notify_state_changed]
+## over emitting directly.
+## [param undoable] is true when the change was recorded in the undo stack.
+signal graph_changed(undoable: bool)
 
 ## Emitted when a node is renamed.
 signal node_renamed(old_id: String, new_id: String)
+
+
+## Central bottleneck for all serializable state changes.
+## [param undoable] — true when this change is tracked by the undo stack
+## (structural edits, parameter changes).  false for ephemeral user state
+## (widget interaction) that bypasses undo.
+func notify_state_changed(undoable: bool = true) -> void:
+	graph_changed.emit(undoable)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -77,7 +89,7 @@ func add_node(node: GNNode) -> bool:
 	_invalidate_topo()
 	GNLogger.info("Network", "Node added: '%s' (%s/%s)" % [node.id, GNFamily.get_family_name(node.family), node.node_type])
 	node_added.emit(node.id)
-	graph_changed.emit()
+	notify_state_changed()
 	return true
 
 
@@ -104,7 +116,7 @@ func remove_node(node_id: String) -> bool:
 	_invalidate_topo()
 	GNLogger.info("Network", "Node removed: '%s' (removed %d connection(s))" % [node_id, to_remove.size()])
 	node_removed.emit(node_id)
-	graph_changed.emit()
+	notify_state_changed()
 
 	# Clean up the Node from the scene tree (children like SubViewports are freed too)
 	if node.is_inside_tree():
@@ -178,7 +190,7 @@ func rename_node(old_id: String, new_id: String) -> bool:
 	_invalidate_topo()
 	GNLogger.info("Network", "Node renamed: '%s' → '%s'" % [old_id, new_id])
 	node_renamed.emit(old_id, new_id)
-	graph_changed.emit()
+	notify_state_changed()
 	return true
 
 
@@ -401,7 +413,7 @@ func connect_nodes(from_id: String, from_port: int,
 	to_node.mark_dirty()
 	GNLogger.info("Network", "Connected %s:%d → %s:%d" % [from_id, from_port, to_id, to_port])
 	connection_added.emit(test_conn)
-	graph_changed.emit()
+	notify_state_changed()
 
 	# Auto-grow dynamic input ports (adds a trailing empty slot)
 	if to_node._dynamic_input:
@@ -424,7 +436,7 @@ func disconnect_nodes(from_id: String, from_port: int,
 				to_node.mark_dirty()
 			GNLogger.info("Network", "Disconnected %s:%d → %s:%d" % [from_id, from_port, to_id, to_port])
 			connection_removed.emit(conn)
-			graph_changed.emit()
+			notify_state_changed()
 
 			# Auto-shrink dynamic input ports (collapse trailing empties)
 			if to_node and to_node._dynamic_input:
@@ -496,7 +508,7 @@ func prune_stale_connections(node_id: String) -> int:
 
 	if stale.size() > 0:
 		_invalidate_topo()
-		graph_changed.emit()
+		notify_state_changed()
 		GNLogger.info("Network", "Pruned %d stale connection(s) on '%s'" % [stale.size(), node_id])
 	return stale.size()
 

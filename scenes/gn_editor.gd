@@ -45,8 +45,12 @@ var _viewer_pinned: bool = false
 ## Path to the currently loaded/saved patch file (empty = unsaved).
 var _current_file_path: String = ""
 
-## Tracks whether the network has unsaved changes since last save/load.
-var _modified: bool = false
+## Undo version at last save/load.  Compared against current version to
+## detect whether undo-tracked changes have been made.
+var _saved_undo_version: int = 0
+
+## True when non-undoable state changed (widget interaction) since last save.
+var _widget_dirty: bool = false
 
 ## Project manager — manages project folder, path resolution, scanning.
 var _project: GNProjectManager = GNProjectManager.new()
@@ -1281,7 +1285,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 ## Shows a Save/Don't Save/Cancel dialog if the patch has unsaved changes.
 ## Runs [param action] immediately if clean, or after user chooses Save/Don't Save.
 func _guard_unsaved(action: Callable) -> void:
-	if not _modified:
+	if not _is_modified():
 		action.call()
 		return
 
@@ -1369,8 +1373,7 @@ func _on_new_confirmed() -> void:
 	graph_editor.update_viewer_pin_highlights("")
 
 	_push_active_sinks()
-	_modified = false
-	_update_title()
+	_clear_modified()
 	GNLogger.info("Editor", "New patch created")
 
 
@@ -1545,8 +1548,7 @@ func _load_from_path(path: String) -> void:
 			vp.get("scroll_y", 0.0))
 
 	_push_active_sinks()
-	_modified = false
-	_update_title()
+	_clear_modified()
 	print("[GONODES] Loaded patch: %s (%d nodes, %d connections)" % [
 		path, network.get_node_count(), network.get_connection_count()])
 
@@ -1563,7 +1565,7 @@ func _remove_network_nodes_from_tree() -> void:
 
 ## Updates the window title to show the current file name.
 func _update_title() -> void:
-	var mod := "*" if _modified else ""
+	var mod := "*" if _is_modified() else ""
 	if _current_file_path.is_empty():
 		get_window().title = "GONODES Editor — Untitled%s" % mod
 	else:
@@ -1571,16 +1573,25 @@ func _update_title() -> void:
 		get_window().title = "GONODES Editor — %s%s" % [file_name, mod]
 
 
-func _mark_modified() -> void:
-	if not _modified:
-		_modified = true
-		_update_title()
+## Returns true if the patch has unsaved changes.
+## Combines undo-stack version tracking (for structural/param edits) with
+## a separate flag for non-undoable widget state changes.
+func _is_modified() -> bool:
+	return _widget_dirty or graph_editor._undo_redo.get_version() != _saved_undo_version
+
+
+func _mark_modified(undoable: bool) -> void:
+	if cook_engine.engine_propagating:
+		return
+	if not undoable:
+		_widget_dirty = true
+	_update_title()
 
 
 func _clear_modified() -> void:
-	if _modified:
-		_modified = false
-		_update_title()
+	_saved_undo_version = graph_editor._undo_redo.get_version()
+	_widget_dirty = false
+	_update_title()
 
 
 ## Intercept window close and quit requests.

@@ -17,12 +17,11 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var upstream: GNUiBase = get_input_node(0) as GNUiBase if get_input_node(0) is GNUiBase else null
-	if upstream != null:
-		var ctrl: Control = upstream.get_control_node()
-		if ctrl != null:
-			_control_node = ctrl
-			widget_state = upstream.widget_state.duplicate() if upstream.widget_state != null else {}
+	if inputs.size() > 0 and inputs[0] is GNUIData:
+		var uid: GNUIData = inputs[0] as GNUIData
+		if uid.control_node != null:
+			_control_node = uid.control_node
+			widget_state = uid.widget_state.duplicate() if uid.widget_state != null else {}
 			return null  # UI output routed via get_control_node()
 
 	# No input — output nothing (null source for gating)

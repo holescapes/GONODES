@@ -37,7 +37,7 @@ func _ensure_check() -> void:
 	_check = CheckButton.new()
 	_check.name = id + "_toggle"
 	_check.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_check.button_pressed = get_param_value("default_on")
+	_check.button_pressed = widget_state.get("value", 1.0 if get_param_value("default_on") else 0.0) > 0.5
 	_check.toggled.connect(_on_toggled)
 	_control_node = _check
 

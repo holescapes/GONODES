@@ -36,7 +36,7 @@ func _ensure_checkbox() -> void:
 	_checkbox = CheckBox.new()
 	_checkbox.name = id + "_checkbox"
 	_checkbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_checkbox.button_pressed = get_param_value("default_on")
+	_checkbox.button_pressed = widget_state.get("value", 1.0 if get_param_value("default_on") else 0.0) > 0.5
 	_checkbox.toggled.connect(_on_toggled)
 	_control_node = _checkbox
 

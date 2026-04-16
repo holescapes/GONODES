@@ -56,7 +56,7 @@ func _ensure_knob() -> void:
 	_knob.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_knob.gui_input.connect(_on_knob_input)
 	_knob.draw.connect(_on_knob_draw)
-	_value = get_param_value("default_val")
+	_value = widget_state.get("value", get_param_value("default_val"))
 	_control_node = _knob
 
 

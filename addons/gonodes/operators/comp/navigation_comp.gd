@@ -205,8 +205,11 @@ func _build_default_nav_mesh() -> void:
 
 func _get_upstream_scene_node(port: int) -> Node3D:
 	var upstream := get_input_node(port)
-	if upstream != null and upstream is GNCompBase:
-		return (upstream as GNCompBase).get_scene_node()
+	if upstream == null:
+		return null
+	var comp_data := upstream.cached_output as GNCompData
+	if comp_data != null:
+		return comp_data.scene_node
 	return null
 
 

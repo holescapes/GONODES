@@ -65,6 +65,41 @@ func duplicate_data() -> GNData:
 	return copy
 
 
+func get_expression_value(key: String, _index: int = -1) -> Variant:
+	match key:
+		"resolution": return resolution
+		"aspect": return get_aspect()
+		"width": return resolution.x
+		"height": return resolution.y
+		_: return 0.0
+
+
+func get_expression_info() -> Dictionary:
+	return {
+		"resolution": resolution,
+		"aspect": get_aspect(),
+	}
+
+
+func get_export_filters() -> Array[Dictionary]:
+	return [
+		{"filter": "*.png", "description": "PNG Image"},
+		{"filter": "*.webp", "description": "WebP Image"},
+		{"filter": "*.exr", "description": "EXR Image (HDR)"},
+	]
+
+
+func export_to_file(path: String) -> Error:
+	if image == null:
+		return ERR_INVALID_DATA
+	var ext := path.get_extension().to_lower()
+	match ext:
+		"png": return image.save_png(path)
+		"webp": return image.save_webp(path)
+		"exr": return image.save_exr(path)
+		_: return image.save_png(path)
+
+
 ## Sets the image and updates cached resolution/format from it.
 func set_image(img: Image) -> void:
 	image = img

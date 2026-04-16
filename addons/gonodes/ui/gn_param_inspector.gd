@@ -343,10 +343,12 @@ func _on_node_cooked(node_id: String) -> void:
 					var conn: GNConnection = engine.network.get_connection_at_input(_current_node.id, i)
 					if conn:
 						var upstream: GNNode = engine.network.get_node_by_id(conn.from_node)
-						if upstream and upstream.cached_output is GNTextureData:
-							var td: GNTextureData = upstream.cached_output as GNTextureData
-							in_res.append("%s:%dx%d" % [label, td.resolution.x, td.resolution.y])
-							found = true
+						if upstream and upstream.cached_output != null:
+							var info: Dictionary = upstream.cached_output.get_expression_info()
+							if info.has("resolution"):
+								var res: Vector2i = info["resolution"]
+								in_res.append("%s:%dx%d" % [label, res.x, res.y])
+								found = true
 			if not found:
 				in_res.append("%s:--" % label)
 
@@ -354,9 +356,13 @@ func _on_node_cooked(node_id: String) -> void:
 			res_parts.append("In [%s]" % ", ".join(in_res))
 
 		# Output resolution
-		if _current_node.cached_output is GNTextureData:
-			var out_td: GNTextureData = _current_node.cached_output as GNTextureData
-			res_parts.append("Out %dx%d" % [out_td.resolution.x, out_td.resolution.y])
+		if _current_node.cached_output != null:
+			var out_info: Dictionary = _current_node.cached_output.get_expression_info()
+			if out_info.has("resolution"):
+				var out_res: Vector2i = out_info["resolution"]
+				res_parts.append("Out %dx%d" % [out_res.x, out_res.y])
+			else:
+				res_parts.append("Out --")
 		else:
 			res_parts.append("Out --")
 
@@ -494,6 +500,8 @@ func _do_bulk_param_undo(action_name: String, callable: Callable) -> void:
 				node.parameters[pname].restore_snapshot(before[pname])
 	)
 	undo_redo.commit_action(false)  # already applied
+	if network != null:
+		network.notify_state_changed()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

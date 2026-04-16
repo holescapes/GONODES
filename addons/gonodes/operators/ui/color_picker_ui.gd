@@ -35,7 +35,12 @@ func _ensure_picker() -> void:
 	_picker = ColorPickerButton.new()
 	_picker.name = id + "_colorpicker"
 	_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_picker.color = get_param_value("default_color")
+	var def: Color = get_param_value("default_color")
+	_picker.color = Color(
+		widget_state.get("r", def.r),
+		widget_state.get("g", def.g),
+		widget_state.get("b", def.b),
+		widget_state.get("a", def.a))
 	_picker.edit_alpha = get_param_value("edit_alpha")
 	_picker.color_changed.connect(_on_color_changed)
 	_control_node = _picker

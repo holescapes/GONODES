@@ -52,6 +52,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var ms: Vector2i = get_param_value("min_size")
 	_tex_btn.custom_minimum_size = Vector2(ms.x, ms.y)
 
+	# Restore toggle state from saved widget_state
+	if _tex_btn.toggle_mode:
+		_tex_btn.button_pressed = widget_state.get("toggle", 0.0) > 0.5
+
 	widget_state = {
 		"press": 0.0,
 		"toggle": 1.0 if _tex_btn.button_pressed else 0.0,

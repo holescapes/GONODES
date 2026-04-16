@@ -118,10 +118,8 @@ These variables are available in every script, injected automatically:
 
 | Function | Returns | Description |
 |----------|---------|-------------|
-| `chop(id, chan, index)` | float | Read a CHOP channel value |
-| `chopp(id, port, chan, index)` | float | Read a CHOP channel from a specific output port (multi-output nodes) |
-| `top(id, property)` | Variant | Read a TOP property (resolution, format) |
-| `topp(id, port, property)` | Variant | Read a TOP property from a specific output port |
+| `chop(id, chan, index)` | float | Read a CHOP channel value (also accepts port arg) |
+| `top(id, property)` | Variant | Read a TOP property (also accepts port arg) |
 | `sop(id)` | GNGeoData | Get a SOP node's geometry data |
 | `dat(id, row, col)` | Variant | Read a DAT cell or full table |
 | `op_ref(id, param)` | Variant | Read any node's parameter |

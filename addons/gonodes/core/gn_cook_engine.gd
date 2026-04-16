@@ -106,6 +106,10 @@ var _lag_state: Dictionary = {}
 ## Per-key state for the trigger() expression function.
 var _trigger_state: Dictionary = {}
 
+## Per-node persistent state for store()/fetch() expression functions.
+## Keyed by node_id → Dictionary of key → value.
+var _store_state: Dictionary = {}
+
 ## The node currently being evaluated for expressions.
 ## Set before each expression eval so par() can resolve self-references.
 var _current_eval_node: GNNode = null
@@ -160,6 +164,11 @@ var _active_set: Dictionary = {}
 ## When true, _active_set needs recomputing. Set by topology/sink changes.
 var _active_set_dirty: bool = true
 
+## When true, mark_dirty() calls originate from engine internals (propagation,
+## expression re-eval, set_par, invalidate_all) — NOT from user interaction.
+## GNUiBase checks this to avoid false "unsaved changes" signals.
+var engine_propagating: bool = false
+
 ## Tracks node IDs whose expressions were already evaluated this frame
 ## by [method _try_expression_dirty], so [method _resolve_node_parameters]
 ## can skip redundant re-evaluation.
@@ -176,19 +185,24 @@ static var _expr_ref_regex: RegEx = null
 static var _expr_demand_regex: RegEx = null
 
 ## Maps expression function names to the GNFamily.Type they demand.
+## Built lazily from the dynamic GNFamily expression function registry,
+## plus hardcoded variant suffixes (chopf, chopi, chops → CHOP).
 ## "op" and "output" are resolved at stamp time from the target node's ports.
-static var _EXPR_FUNC_TO_FAMILY: Dictionary = {
-	"chop": GNFamily.Type.CHOP, "chops": GNFamily.Type.CHOP,
-	"chopf": GNFamily.Type.CHOP, "chopi": GNFamily.Type.CHOP,
-	"top": GNFamily.Type.TOP,
-	"img": GNFamily.Type.IMG,
-	"sop": GNFamily.Type.SOP,
-	"dat": GNFamily.Type.DAT,
-	"mat": GNFamily.Type.MAT,
-	"vol": GNFamily.Type.VOL,
-	"pop": GNFamily.Type.POP,
-	# "op" and "output" → -1 (all ports) — handled in _build_wireless_demand_map
-}
+static var _expr_func_to_family_cache: Dictionary = {}
+static var _expr_func_cache_built: bool = false
+
+static func _get_expr_func_to_family() -> Dictionary:
+	if not _expr_func_cache_built:
+		_expr_func_to_family_cache = GNFamily.get_expression_func_registry().duplicate()
+		# Add type-cast variant suffixes (chopf/chopi/chops → CHOP, etc.)
+		var extras: Dictionary = {}
+		for func_name: String in _expr_func_to_family_cache:
+			var fam: int = _expr_func_to_family_cache[func_name]
+			for s in ["f", "i", "s"]:
+				extras[func_name + s] = fam
+		_expr_func_to_family_cache.merge(extras, false)
+		_expr_func_cache_built = true
+	return _expr_func_to_family_cache
 
 ## Per-frame reverse map: target_node_id → Array[int] of demanded family types.
 ## Built by _build_wireless_demand_map() from:
@@ -477,10 +491,14 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 func _build_wireless_demand_map() -> void:
 	_wireless_demand_map.clear()
 
-	# Lazy-init the family-aware expression regex
+	# Lazy-init the family-aware expression regex — built dynamically from
+	# the expression function registry so extension families are included.
 	if _expr_demand_regex == null:
 		_expr_demand_regex = RegEx.new()
-		_expr_demand_regex.compile("(chop[sfi]?|top|sop|dat|mat|vol|img|pop|op|output)\\s*\\(\\s*\"([^\"]+)\"")
+		var func_names := _get_expr_func_to_family().keys()
+		func_names.sort_custom(func(a: String, b: String) -> bool: return a.length() > b.length())
+		var alternation := "|".join(func_names) if not func_names.is_empty() else "(?!x)"
+		_expr_demand_regex.compile("(%s|op|output)\\s*\\(\\s*\"([^\"]+)\"" % alternation)
 
 	for node_id in _active_set:
 		var node: GNNode = network.nodes.get(node_id, null)
@@ -539,8 +557,8 @@ func _extract_expr_demand(expr: String, owner_id: String) -> void:
 		var target_id: String = m.get_string(2)
 		if target_id == owner_id:
 			continue
-		if _EXPR_FUNC_TO_FAMILY.has(func_name):
-			_add_wireless_demand(target_id, _EXPR_FUNC_TO_FAMILY[func_name])
+		if _get_expr_func_to_family().has(func_name):
+			_add_wireless_demand(target_id, _get_expr_func_to_family()[func_name])
 		else:
 			# op() / output() → demand all ports on the target
 			_add_wireless_demand(target_id, -1)
@@ -835,12 +853,14 @@ func _compute_cook_input_hash(node: GNNode, inputs: Array[GNData]) -> int:
 ## is sufficient — further propagation cascades naturally as each downstream
 ## node reaches the input hash guard and checks its own inputs.
 func _dirty_immediate_downstream(node_id: String) -> void:
+	engine_propagating = true
 	for ds_id in network.get_immediate_downstream(node_id):
 		var ds_node: GNNode = network.nodes.get(ds_id, null)
 		if ds_node and not ds_node.dirty:
 			ds_node.mark_dirty()
 			if editor_mode:
 				last_dirty_ids[ds_id] = true
+	engine_propagating = false
 
 
 ## Evaluates expression parameters on a non-dirty node and checks whether any
@@ -874,7 +894,9 @@ func _try_expression_dirty(node: GNNode) -> bool:
 	for param_name in old_values:
 		var param: GNParameter = node.parameters[param_name]
 		if old_values[param_name] != param.resolved_value:
+			engine_propagating = true
 			node.mark_dirty()
+			engine_propagating = false
 			# If this node selectively routes inputs (Switch, CubeMap, etc.),
 			# an expression-driven routing param may have changed which
 			# upstream branch is active.  Recompute the active set next frame.
@@ -1192,15 +1214,41 @@ func _get_root_engine() -> GNCookEngine:
 # directly: chop("lfo1", "out"), op("noise1", "scale"), etc.
 # ═════════════════════════════════════════════════════════════════════════════
 
-## Read a CHOP channel value. Called by Expression as chop("lfo1", "out").
-func chop(node_name: String, channel: String = "", index: int = -1) -> Variant:
+## Read a CHOP channel value. Supports optional port for multi-output nodes.
+## Usage:
+##   chop("lfo1", "out")               → channel "out" from first CHOP port
+##   chop("lfo1", "out", 5)             → sample 5 of channel "out"
+##   chop("script1", 1, "tx")           → channel "tx" from port index 1
+##   chop("script1", "out2", "tx")      → channel "tx" from port named "out2"
+##   chop("script1", 1, "tx", 5)        → sample 5 of "tx" from port index 1
+##   chop("script1", "out2", "tx", 5)   → sample 5 of "tx" from port "out2"
+func chop(node_name: String, arg2: Variant = "", arg3: Variant = -1, arg4: Variant = -1) -> Variant:
+	var port: Variant = null
+	var channel: String = ""
+	var index: int = -1
+	if arg2 is int:
+		# chop("n", portIndex, "channel", sampleIndex)
+		port = arg2
+		channel = str(arg3) if arg3 is String else ""
+		index = int(arg4) if arg4 is int or arg4 is float else -1
+	elif arg2 is String and arg3 is String:
+		# chop("n", "portName", "channel", sampleIndex)
+		port = arg2 as String
+		channel = arg3 as String
+		index = int(arg4) if arg4 is int or arg4 is float else -1
+	else:
+		# chop("n", "channel", sampleIndex)  ← original 2/3-arg form
+		channel = str(arg2) if arg2 is String else ""
+		index = int(arg3) if arg3 is int or arg3 is float else -1
+	if port != null:
+		return _make_data_port_proxy(node_name, GNFamily.Type.CHOP, port, channel, index)
 	return _make_chop_proxy(node_name, channel, index)
 
 
-## Read a CHOP channel value as float. Guaranteed float return.
-## Usage: chopf("lfo1", "out")
-func chopf(node_name: String, channel: String = "", index: int = -1) -> float:
-	var v: Variant = _make_chop_proxy(node_name, channel, index)
+## Read a CHOP channel value as float. Supports optional port argument.
+## Usage: chopf("lfo1", "out")  or  chopf("script1", 1, "tx")
+func chopf(node_name: String, arg2: Variant = "", arg3: Variant = -1, arg4: Variant = -1) -> float:
+	var v: Variant = chop(node_name, arg2, arg3, arg4)
 	if v is float:
 		return v
 	if v is int:
@@ -1208,10 +1256,10 @@ func chopf(node_name: String, channel: String = "", index: int = -1) -> float:
 	return 0.0
 
 
-## Read a CHOP channel value as int. Guaranteed int return.
-## Usage: chopi("lfo1", "out")
-func chopi(node_name: String, channel: String = "", index: int = -1) -> int:
-	var v: Variant = _make_chop_proxy(node_name, channel, index)
+## Read a CHOP channel value as int. Supports optional port argument.
+## Usage: chopi("lfo1", "out")  or  chopi("script1", 1, "tx")
+func chopi(node_name: String, arg2: Variant = "", arg3: Variant = -1, arg4: Variant = -1) -> int:
+	var v: Variant = chop(node_name, arg2, arg3, arg4)
 	if v is int:
 		return v
 	if v is float:
@@ -1219,10 +1267,10 @@ func chopi(node_name: String, channel: String = "", index: int = -1) -> int:
 	return 0
 
 
-## Read a CHOP channel value as string. Guaranteed String return.
-## Usage: chops("lfo1", "out")  →  "0.735"
-func chops(node_name: String, channel: String = "", index: int = -1) -> String:
-	var v: Variant = _make_chop_proxy(node_name, channel, index)
+## Read a CHOP channel value as string. Supports optional port argument.
+## Usage: chops("lfo1", "out")  or  chops("script1", 1, "tx")
+func chops(node_name: String, arg2: Variant = "", arg3: Variant = -1, arg4: Variant = -1) -> String:
+	var v: Variant = chop(node_name, arg2, arg3, arg4)
 	if v is float:
 		return "%.4f" % v
 	return str(v)
@@ -1233,8 +1281,27 @@ func op(node_name: String, param_name: String = "") -> Variant:
 	return _make_op_proxy(node_name, param_name)
 
 
-## Read TOP info. Called by Expression as top("noise1", "resolution").
-func top(node_name: String, property: String = "") -> Variant:
+## Read TOP info. Supports optional port for multi-output nodes.
+## Usage:
+##   top("noise1", "resolution")              → from first TOP port
+##   top("glsl_multi1", 1, "resolution")      → from port index 1
+##   top("glsl_multi1", "out1", "resolution") → from port named "out1"
+func top(node_name: String, arg2: Variant = "", arg3: Variant = "") -> Variant:
+	var port: Variant = null
+	var property: String = ""
+	if arg2 is int:
+		# top("n", portIndex, "property")
+		port = arg2
+		property = str(arg3) if arg3 is String else ""
+	elif arg2 is String and arg3 is String and not (arg3 as String).is_empty():
+		# top("n", "portName", "property")
+		port = arg2 as String
+		property = arg3 as String
+	else:
+		# top("n", "property")  ← original 2-arg form
+		property = str(arg2) if arg2 is String else ""
+	if port != null:
+		return _make_data_port_proxy(node_name, GNFamily.Type.TOP, port, property)
 	return _make_top_proxy(node_name, property)
 
 
@@ -1305,7 +1372,9 @@ func set_par(name_or_node: String, param_or_value = null, value_arg = null) -> b
 		return false
 
 	p.set_value(new_value)
+	engine_propagating = true
 	target_node.mark_dirty()
+	engine_propagating = false
 	return true
 
 
@@ -1332,67 +1401,36 @@ func output(node_name: String, port = null) -> Variant:
 
 ## Read VOL data. Usage:
 ##   vol("fluid1")                     → GNVolumeData from first VOL port
-##   vol("fluid1", "Density")          → GNVolumeData by port name/label
-##   vol("fluid1", "density_out")      → GNVolumeData by port_name
-##   vol("fluid1", 1)                  → GNVolumeData by port index
+##   vol("fluid1", "Density")          → data by port name/label
+##   vol("fluid1", 1)                  → data by port index
 func vol(node_name: String, port = null) -> Variant:
-	return _resolve_output(node_name, port, "GNVolumeData")
+	return _resolve_output(node_name, port, GNFamily.Type.VOL)
 
 
 ## Read SOP data. Usage:
 ##   sop("grid1")                      → GNGeoData from first SOP port
-##   sop("grid1", "out")               → GNGeoData by port name
+##   sop("grid1", "out")               → data by port name
 func sop(node_name: String, port = null) -> Variant:
-	return _resolve_output(node_name, port, "GNGeoData")
+	return _resolve_output(node_name, port, GNFamily.Type.SOP)
 
 
 ## Read DAT data. Usage:
 ##   dat("table1")                     → GNTableData from first DAT port
-##   dat("table1", "out")              → GNTableData by port name
+##   dat("table1", "out")              → data by port name
 func dat(node_name: String, port = null) -> Variant:
-	return _resolve_output(node_name, port, "GNTableData")
+	return _resolve_output(node_name, port, GNFamily.Type.DAT)
 
 
 ## Read IMG data. Usage:
 ##   img("noise_img1")                 → GNImageData from first IMG port
 func img(node_name: String, port = null) -> Variant:
-	return _resolve_output(node_name, port, "GNImageData")
+	return _resolve_output(node_name, port, GNFamily.Type.IMG)
 
 
 ## Read MAT data. Usage:
 ##   mat("pbr1")                       → GNMaterialData from first MAT port
 func mat(node_name: String, port = null) -> Variant:
-	return _resolve_output(node_name, port, "GNMaterialData")
-
-
-## Read a CHOP channel from a specific output port.  For multi-output nodes
-## (e.g. GDScriptSCRIPT with two CHOP outputs) where chop() always picks the
-## first CHOP port it finds.
-## Usage:
-##   chopp("script1", "out2", "tx")          → last sample of "tx" from port "out2"
-##   chopp("script1", "out2", "tx", 5)       → sample 5 of "tx" from port "out2"
-##   chopp("script1", 1, "tx")               → last sample of "tx" from port index 1
-func chopp(node_name: String, port = null, channel: String = "", index: int = -1) -> Variant:
-	return _make_chop_port_proxy(node_name, port, channel, index)
-
-
-## Port-aware CHOP read, guaranteed float.
-func choppf(node_name: String, port = null, channel: String = "", index: int = -1) -> float:
-	var v: Variant = _make_chop_port_proxy(node_name, port, channel, index)
-	if v is float:
-		return v
-	if v is int:
-		return float(v)
-	return 0.0
-
-
-## Read TOP info from a specific output port.  For multi-output nodes
-## (e.g. GLSLMultiTOP, MultiBufferRenderTOP) where top() picks the first TOP port.
-## Usage:
-##   topp("glsl_multi1", "out1", "resolution")  → Vector2i from port "out1"
-##   topp("glsl_multi1", 1, "resolution")        → Vector2i from port index 1
-func topp(node_name: String, port = null, property: String = "") -> Variant:
-	return _make_top_port_proxy(node_name, port, property)
+	return _resolve_output(node_name, port, GNFamily.Type.MAT)
 
 
 # ─── Timeline Expression Functions ───────────────────────────────────────────────
@@ -1491,35 +1529,30 @@ func _make_par_proxy(name_or_node: String, param_name: String = "") -> Variant:
 	return p.get_resolved_value()
 
 
-## Returns a proxy dictionary for the given node (used inside expressions as op("name")).
+## Returns a GNOpProxy for the given node (used inside expressions as op("name")).
+## Enables TD-style chaining: op("noise1").type, op("noise1").digits, etc.
 ## Can also be called as op("name", "param") to get a parameter value directly.
 ## Supports hierarchical paths: op("subnet1/noise1"), op("../lfo1"), op("/root_node").
 func _make_op_proxy(node_name: String, param_name: String = "") -> Variant:
 	if network == null:
 		if not param_name.is_empty():
 			return 0.0
-		return {}
+		return null
 	var node: GNNode = resolve_node(node_name)
 	if node == null:
 		if not param_name.is_empty():
 			return 0.0
-		return {}
+		return null
 	# If a param name was given, return its value directly
 	if not param_name.is_empty():
 		var param: GNParameter = node.parameters.get(param_name, null)
 		if param:
 			return param.get_resolved_value()
 		return 0.0
-	# Otherwise return a proxy dict
-	var par_dict := {}
-	for p_name in node.parameters:
-		par_dict[p_name] = node.parameters[p_name].get_resolved_value()
-	return {
-		"par": par_dict,
-		"family": node.family,
-		"cook_time": node.cook_time_ms,
-		"valid": node.cook_valid,
-	}
+	# Otherwise return a live proxy object
+	var proxy := GNOpProxy.new()
+	proxy._node = node
+	return proxy
 
 
 ## Returns a CHOP channel value. Usage in expressions:
@@ -1527,38 +1560,7 @@ func _make_op_proxy(node_name: String, param_name: String = "") -> Variant:
 ##   chop("lfo1", "out", 0)        → float (sample at index 0)
 ##   chop("lfo1")                  → Dictionary with channel info (advanced)
 func _make_chop_proxy(node_name: String, channel: String = "", index: int = -1) -> Variant:
-	if network == null:
-		if not channel.is_empty():
-			return 0.0
-		return {}
-	var node: GNNode = resolve_node(node_name)
-	if node == null:
-		if not channel.is_empty():
-			return 0.0
-		return {}
-	# Try cached_output first; if it's not CHOP data, scan output ports
-	# (supports multi-output nodes like PanelTOP with CHOP on port 1).
-	var data: GNData = node.cached_output
-	if data == null or not data is GNChannelData:
-		for p in range(node.output_ports.size()):
-			var port_data: GNData = node.get_output_data(p)
-			if port_data is GNChannelData:
-				data = port_data
-				break
-	if data == null or not data is GNChannelData:
-		if not channel.is_empty():
-			return 0.0
-		return {}
-	var ch_data: GNChannelData = data as GNChannelData
-	# If a channel name was given, return the value directly
-	if not channel.is_empty():
-		return ch_data.get_value(channel, index)
-	# Otherwise return a dict with channel info
-	return {
-		"channels": ch_data.get_channel_names(),
-		"length": ch_data.length,
-		"sample_rate": ch_data.sample_rate,
-	}
+	return _make_data_proxy(node_name, GNFamily.Type.CHOP, channel, index)
 
 
 ## Returns TOP info. Usage in expressions:
@@ -1566,48 +1568,42 @@ func _make_chop_proxy(node_name: String, channel: String = "", index: int = -1) 
 ##   top("noise1", "aspect")       → float
 ##   top("noise1")                 → Dictionary with all info
 func _make_top_proxy(node_name: String, property: String = "") -> Variant:
+	return _make_data_proxy(node_name, GNFamily.Type.TOP, property)
+
+
+## Generic data property proxy — resolves a node, finds data matching the
+## requested family, and delegates to GNData.get_expression_value() /
+## get_expression_info().  Used by all family expression functions.
+func _make_data_proxy(node_name: String, family: int, key: String = "", index: int = -1) -> Variant:
 	if network == null:
-		if not property.is_empty():
-			return 0.0
-		return {}
+		return 0.0 if not key.is_empty() else {}
 	var node: GNNode = resolve_node(node_name)
 	if node == null:
-		if not property.is_empty():
-			return 0.0
-		return {}
+		return 0.0 if not key.is_empty() else {}
+	# Find the first output matching the requested family
 	var data: GNData = node.cached_output
-	if data == null or not data is GNTextureData:
-		# Scan output ports for multi-output nodes (e.g., SubNetworkNode with TOP on port N).
+	if data == null or data.get_family() != family:
+		data = null
 		for p in range(node.output_ports.size()):
 			var port_data: GNData = node.get_output_data(p)
-			if port_data is GNTextureData:
+			if port_data != null and port_data.get_family() == family:
 				data = port_data
 				break
-	if data == null or not data is GNTextureData:
-		if not property.is_empty():
-			return 0.0
-		return {"resolution": Vector2i.ZERO, "aspect": 1.0}
-	var tex_data: GNTextureData = data as GNTextureData
-	var info := {
-		"resolution": tex_data.resolution,
-		"aspect": tex_data.get_aspect(),
-	}
-	if not property.is_empty():
-		return info.get(property, 0.0)
-	return info
+	if data == null:
+		return 0.0 if not key.is_empty() else {}
+	if not key.is_empty():
+		return data.get_expression_value(key, index)
+	return data.get_expression_info()
 
 
-## Port-aware CHOP proxy: resolves a specific output port, then extracts channel.
-func _make_chop_port_proxy(node_name: String, port = null, channel: String = "", index: int = -1) -> Variant:
+## Generic port-aware data proxy — resolves a specific output port, then
+## delegates to GNData.get_expression_value() / get_expression_info().
+func _make_data_port_proxy(node_name: String, family: int, port = null, key: String = "", index: int = -1) -> Variant:
 	if network == null:
-		if not channel.is_empty():
-			return 0.0
-		return {}
+		return 0.0 if not key.is_empty() else {}
 	var node: GNNode = resolve_node(node_name)
 	if node == null:
-		if not channel.is_empty():
-			return 0.0
-		return {}
+		return 0.0 if not key.is_empty() else {}
 
 	var data: GNData = null
 	if port != null:
@@ -1615,61 +1611,21 @@ func _make_chop_port_proxy(node_name: String, port = null, channel: String = "",
 			data = node.get_output_data(port)
 		elif port is String and not (port as String).is_empty():
 			data = node.get_output_data_by_name(port as String)
-	if data == null or not data is GNChannelData:
-		if not channel.is_empty():
-			return 0.0
-		return {}
+	if data == null or data.get_family() != family:
+		return 0.0 if not key.is_empty() else {}
 
-	var ch_data: GNChannelData = data as GNChannelData
-	if not channel.is_empty():
-		return ch_data.get_value(channel, index)
-	return {
-		"channels": ch_data.get_channel_names(),
-		"length": ch_data.length,
-		"sample_rate": ch_data.sample_rate,
-	}
-
-
-## Port-aware TOP proxy: resolves a specific output port, then extracts property.
-func _make_top_port_proxy(node_name: String, port = null, property: String = "") -> Variant:
-	if network == null:
-		if not property.is_empty():
-			return 0.0
-		return {}
-	var node: GNNode = resolve_node(node_name)
-	if node == null:
-		if not property.is_empty():
-			return 0.0
-		return {}
-
-	var data: GNData = null
-	if port != null:
-		if port is int:
-			data = node.get_output_data(port)
-		elif port is String and not (port as String).is_empty():
-			data = node.get_output_data_by_name(port as String)
-	if data == null or not data is GNTextureData:
-		if not property.is_empty():
-			return 0.0
-		return {"resolution": Vector2i.ZERO, "aspect": 1.0}
-
-	var tex_data: GNTextureData = data as GNTextureData
-	var info := {
-		"resolution": tex_data.resolution,
-		"aspect": tex_data.get_aspect(),
-	}
-	if not property.is_empty():
-		return info.get(property, 0.0)
-	return info
+	if not key.is_empty():
+		return data.get_expression_value(key, index)
+	return data.get_expression_info()
 
 
 ## Universal output port resolver.  Supports access by port index (int),
-## port name/label (String), or default (null → port 0 / first matching type).
-## When [param type_filter] is set, scans ports for the first output of that
-## class.  This powers [code]vol()[/code], [code]sop()[/code],
+## port name/label (String), or default (null → port 0 / first matching family).
+## When [param family_filter] is >= 0, scans ports for the first output of that
+## family.  This powers [code]vol()[/code], [code]sop()[/code],
 ## [code]dat()[/code], [code]img()[/code], [code]mat()[/code], and
 ## [code]output()[/code].
-func _resolve_output(node_name: String, port = null, type_filter: String = "") -> Variant:
+func _resolve_output(node_name: String, port = null, family_filter: int = -1) -> Variant:
 	if network == null:
 		return null
 	var node: GNNode = resolve_node(node_name)
@@ -1687,18 +1643,18 @@ func _resolve_output(node_name: String, port = null, type_filter: String = "") -
 			return data
 		return null
 
-	# ── Default: port 0 or first port matching the type filter ──
-	if type_filter.is_empty():
+	# ── Default: port 0 or first port matching the family filter ──
+	if family_filter < 0:
 		return node.get_output_data(0)
 
 	# Try cached_output first
 	var data: GNData = node.cached_output
-	if data != null and data.get_class() == type_filter:
+	if data != null and data.get_family() == family_filter:
 		return data
-	# Scan all output ports for the right type
+	# Scan all output ports for the right family
 	for p in range(node.output_ports.size()):
 		var port_data: GNData = node.get_output_data(p)
-		if port_data != null and port_data.get_class() == type_filter:
+		if port_data != null and port_data.get_family() == family_filter:
 			return port_data
 	return null
 
@@ -1896,6 +1852,107 @@ func trigger(key: String, value: float, threshold: float = 0.5) -> float:
 	return 1.0 if prev < threshold and value >= threshold else 0.0
 
 
+## Extracts trailing digits from the current node's ID.
+## Usage: digits()  →  "lfo3" returns 3, "noise12" returns 12, "const" returns 0.
+func digits() -> int:
+	if _current_eval_node == null:
+		return 0
+	var id: String = _current_eval_node.id
+	var i := id.length() - 1
+	while i >= 0 and id[i].is_valid_int():
+		i -= 1
+	if i >= id.length() - 1:
+		return 0
+	return id.substr(i + 1).to_int()
+
+
+## Inline conditional — replacement for GDScript ternary (X if Y else Z)
+## which Godot's Expression class does NOT support.
+## Usage: iif(chop("slider1", "value") >= 6, chop("slider1", "value") - 6, 4)
+func iif(condition: bool, true_val: Variant, false_val: Variant) -> Variant:
+	return true_val if condition else false_val
+
+
+## Deterministic pseudo-random number in [0, 1) from an integer seed.
+## Same seed always produces same result — no per-frame state.
+## Usage: rand(42), rand(digits()), rand(frame_count + 7)
+func rand(seed_val: int) -> float:
+	# Murmur-inspired integer hash → normalized float
+	var h := seed_val
+	h = ((h >> 16) ^ h) * 0x45d9f3b
+	h = ((h >> 16) ^ h) * 0x45d9f3b
+	h = (h >> 16) ^ h
+	return absf(float(h % 100000) / 100000.0)
+
+
+## Simple 3D value noise. Returns ~[-1, 1].
+## Usage: noise3(x, y, z)
+func noise3(x: float, y: float, z: float) -> float:
+	var ix := floorf(x)
+	var iy := floorf(y)
+	var iz := floorf(z)
+	var fx := x - ix
+	var fy := y - iy
+	var fz := z - iz
+	fx = fx * fx * (3.0 - 2.0 * fx)
+	fy = fy * fy * (3.0 - 2.0 * fy)
+	fz = fz * fz * (3.0 - 2.0 * fz)
+	var a0 := lerpf(_hash3(ix, iy, iz), _hash3(ix + 1.0, iy, iz), fx)
+	var b0 := lerpf(_hash3(ix, iy + 1.0, iz), _hash3(ix + 1.0, iy + 1.0, iz), fx)
+	var c0 := lerpf(a0, b0, fy)
+	var a1 := lerpf(_hash3(ix, iy, iz + 1.0), _hash3(ix + 1.0, iy, iz + 1.0), fx)
+	var b1 := lerpf(_hash3(ix, iy + 1.0, iz + 1.0), _hash3(ix + 1.0, iy + 1.0, iz + 1.0), fx)
+	var c1 := lerpf(a1, b1, fy)
+	return lerpf(c0, c1, fz)
+
+
+# ─── Per-Node State: store() / fetch() ─────────────────────────────────────────
+
+## Stores a value in per-node persistent state (survives across frames).
+## Usage: store("my_key", some_value)  →  returns the stored value.
+func store(key: String, value: Variant) -> Variant:
+	if _current_eval_node == null:
+		return value
+	if not _store_state.has(_current_eval_node.id):
+		_store_state[_current_eval_node.id] = {}
+	_store_state[_current_eval_node.id][key] = value
+	return value
+
+
+## Fetches a previously stored value from per-node persistent state.
+## Returns [param default_val] if the key was never stored.
+## Usage: fetch("my_key", 0.0)
+func fetch(key: String, default_val: Variant = 0.0) -> Variant:
+	if _current_eval_node == null:
+		return default_val
+	var node_store: Dictionary = _store_state.get(_current_eval_node.id, {})
+	return node_store.get(key, default_val)
+
+
+# ─── Data Shorthand Accessors ───────────────────────────────────────────────────
+
+## Returns the vertex count of a SOP node. Shorthand for sop("n").npoints.
+## Usage: npoints("grid1")
+func npoints(node_name: String) -> int:
+	var data: Variant = _make_data_proxy(node_name, GNFamily.Type.SOP, "npoints")
+	if data is int:
+		return data
+	if data is float:
+		return int(data)
+	return 0
+
+
+## Returns the number of data rows in a DAT node.
+## Usage: ncells("table1")
+func ncells(node_name: String) -> int:
+	var data: Variant = _make_data_proxy(node_name, GNFamily.Type.DAT, "nrows")
+	if data is int:
+		return data
+	if data is float:
+		return int(data)
+	return 0
+
+
 ## Dispatch to a user-defined custom function registered via GNExpressionFunctions.
 ## Usage: fn("my_func", arg1, arg2, ...)
 func fn(func_name: String, a = null, b = null, c = null,
@@ -1956,6 +2013,10 @@ func _hash1(n: float) -> float:
 
 func _hash2(x: float, y: float) -> float:
 	return fmod(sin(x * 127.1 + y * 311.7) * 43758.5453, 1.0) * 2.0 - 1.0
+
+
+func _hash3(x: float, y: float, z: float) -> float:
+	return fmod(sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453, 1.0) * 2.0 - 1.0
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -2215,8 +2276,10 @@ func _cook_cpu_batch_parallel(batch: Array) -> void:
 func invalidate_all() -> void:
 	if network == null:
 		return
+	engine_propagating = true
 	for node_id in network.nodes:
 		network.nodes[node_id].mark_dirty()
+	engine_propagating = false
 	GNLogger.info("CookEngine", "Invalidated all %d node(s)" % network.nodes.size())
 
 
@@ -2229,6 +2292,7 @@ func reset() -> void:
 	_smooth_state.clear()
 	_lag_state.clear()
 	_trigger_state.clear()
+	_store_state.clear()
 	_active_set.clear()
 	_active_set_dirty = true
 	_consumer_counts.clear()

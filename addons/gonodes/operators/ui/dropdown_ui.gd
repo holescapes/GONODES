@@ -25,6 +25,12 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var items: PackedStringArray = items_str.split(",")
 	_sync_items(items)
 
+	# Restore saved selection after items are rebuilt
+	if widget_state.has("index"):
+		var saved := int(widget_state["index"])
+		if saved >= 0 and saved < _option.item_count:
+			_option.selected = saved
+
 	var ms: Vector2i = get_param_value("min_size")
 	_option.custom_minimum_size = Vector2(ms.x, ms.y)
 

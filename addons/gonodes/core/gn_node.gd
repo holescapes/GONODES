@@ -386,6 +386,69 @@ func _pre_cook(delta: float) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Export — Polymorphic output export (graph editor delegates here)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Returns true if this node has at least one exportable output (data or scene).
+## Override in subclasses with non-data exports (e.g. COMP scene nodes).
+func can_export_output() -> bool:
+	return not get_exportable_outputs().is_empty()
+
+
+## Returns an array of exportable output descriptors, one per port that has
+## valid data with export filters.  Each entry:
+##   { "port": int, "label": String, "filters": Array[Dictionary] }
+## Override in subclasses that produce non-data exports.
+func get_exportable_outputs() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for i in range(output_ports.size()):
+		var data: GNData = get_output_data(i)
+		if data == null or not data.valid:
+			continue
+		var filters := data.get_export_filters()
+		if filters.is_empty():
+			continue
+		var label: String = output_ports[i].label
+		if label.is_empty():
+			label = output_ports[i].port_name
+		if label.is_empty():
+			label = GNFamily.get_family_name(output_ports[i].family)
+		result.append({ "port": i, "label": label, "filters": filters })
+	return result
+
+
+## Returns file-dialog filters for exporting this node's output.
+## When [param port_index] is -1, returns filters for the first exportable port.
+## Override in subclasses with non-data exports.
+func get_export_filters(port_index: int = -1) -> Array[Dictionary]:
+	if port_index >= 0:
+		var data: GNData = get_output_data(port_index)
+		if data != null:
+			return data.get_export_filters()
+		return []
+	# Legacy: first exportable port
+	var outputs := get_exportable_outputs()
+	if not outputs.is_empty():
+		return outputs[0]["filters"]
+	return []
+
+
+## Exports this node's output to disk.  Returns OK on success.
+## When [param port_index] is -1, exports the first exportable port.
+## Override in subclasses with non-data exports.
+func export_output(path: String, port_index: int = -1) -> Error:
+	if port_index >= 0:
+		var data: GNData = get_output_data(port_index)
+		if data != null and data.valid:
+			return data.export_to_file(path)
+		return ERR_UNAVAILABLE
+	# Legacy: first exportable port
+	if cached_output != null and cached_output.valid:
+		return cached_output.export_to_file(path)
+	return ERR_UNAVAILABLE
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Preview — Output-Type Based (auto-selects from first output port / cached data)
 # ═══════════════════════════════════════════════════════════════════════════════
 

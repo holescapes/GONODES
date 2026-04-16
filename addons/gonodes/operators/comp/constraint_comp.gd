@@ -126,24 +126,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return source_comp
 
 
-## Walk upstream to find the scene node owned by a COMP.
+## Extracts the scene node from COMP data.
 func _get_comp_scene_node(data: GNData) -> Node3D:
-	# The data flowing through COMP wires is the output of a GNCompBase,
-	# which typically stores a reference to a scene node.  We look at the
-	# producing node's _scene_node via the cook engine's owner tracking.
-	var producing_node := _find_producing_comp_node(data)
-	if producing_node != null and producing_node is GNCompBase:
-		return (producing_node as GNCompBase).get_scene_node()
-	return null
-
-
-func _find_producing_comp_node(data: GNData) -> GNNode:
-	if data == null:
-		return null
-	# Walk inputs to find upstream COMP
-	for i in range(input_ports.size()):
-		var upstream := get_input_node(i)
-		if upstream != null and upstream is GNCompBase:
-			if upstream.cached_output == data:
-				return upstream
+	var comp_data := data as GNCompData
+	if comp_data != null:
+		return comp_data.scene_node
 	return null

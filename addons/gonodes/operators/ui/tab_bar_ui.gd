@@ -40,11 +40,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			var tab_name: String = dat.cell(r, 0) if dat.num_cols() > 0 else "Tab %d" % r
 			_tab_bar.add_tab(tab_name)
 
-	# Restore default selection
+	# Restore selection — prefer saved state, then parameter default
 	if _tab_bar.tab_count > 0:
-		var def: int = get_param_value("default_tab")
-		if _tab_bar.current_tab < 0:
-			_tab_bar.current_tab = clampi(def, 0, _tab_bar.tab_count - 1)
+		if widget_state.has("tab"):
+			_tab_bar.current_tab = clampi(int(widget_state["tab"]), 0, _tab_bar.tab_count - 1)
+		elif _tab_bar.current_tab < 0:
+			_tab_bar.current_tab = clampi(get_param_value("default_tab"), 0, _tab_bar.tab_count - 1)
 
 	widget_state = {"tab": float(_tab_bar.current_tab) if _tab_bar.tab_count > 0 else 0.0}
 	return null

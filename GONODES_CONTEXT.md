@@ -118,7 +118,7 @@ Embedding Model (libgonodes — IMPLEMENTED):
 | Parameter Reference   | GDScript expression evaluated at cook time               |
 | Timeline              | Godot `_process()` driving cook engine each frame        |
 | Parameter             | `GNParameter` — typed value with optional expression     |
-| Param References      | `op("name").par.X` / `chop("name").value("ch")` syntax   |
+| Param References      | `op("name", "param")` / `chop("name", "ch")` syntax      |
 | Patch Export           | Godot export system → standalone runnable per platform   |
 
 ---
@@ -219,7 +219,7 @@ GNMaterialData wraps Godot's `Material` base class, allowing any material type (
 
 ### GNNode (Root Base)
 
-GNNode is **fully type-agnostic** — it contains no references to any family-specific data types. Preview dispatch lives in GNNode itself, keyed on the **actual output data type** (not the family). This means cross-family nodes (e.g. a VOL operator outputting a texture, or a POP operator outputting SOP geometry) automatically get the correct preview without per-node overrides.
+GNNode is **fully type-agnostic** — it contains no references to any family-specific data types. Preview dispatch lives in GNNode itself, keyed on the **actual output data type** (not the family). Export dispatch delegates to `can_export_output()`/`get_export_filters()`/`export_output(path)` virtuals — GNCompBase overrides for scene-node GLB export; all other families use `cached_output.export_to_file()`. This means cross-family nodes (e.g. a VOL operator outputting a texture, or a POP operator outputting SOP geometry) automatically get the correct preview and export without per-node overrides.
 
 ```gdscript
 class_name GNNode extends Node
@@ -653,15 +653,21 @@ detects the stolen Control parent and sets `node_warning` on both nodes
 
 ### Right-Click Export Output
 
-Any node's cached output can be exported to disk via the context menu.  Right-click
-a single node → **Export Output…** opens a FileDialog with family-appropriate
-format filters.  The menu item is disabled when no node is selected, multiple nodes
-are selected, or the selected node has no valid `cached_output` (exception: COMP
-nodes with a live `get_scene_node()` are also exportable even when `cached_output`
-is null — this covers LightCOMP and CameraCOMP which return null data but own
-a Light3D / Camera3D).
+Any node's output can be exported to disk via the context menu.  Right-click
+a single node → **Export Output…** starts the export workflow.  For nodes with
+a single exportable output, a FileDialog opens directly with data-type-appropriate
+format filters.  For **multi-output nodes** (e.g. a GDScript operator with both
+a TOP and CHOP output), a **port picker popup** appears first, listing each
+exportable output port with its label and format.  The user selects which port
+to export, then the FileDialog opens with that port's filters.
 
-**Format mapping by family:**
+The menu item is disabled when no node is selected, multiple nodes are selected,
+or the selected node has no valid exportable output.  Exception: COMP nodes with
+a live `get_scene_node()` are also exportable even when `cached_output` is null
+— this covers LightCOMP and CameraCOMP which return null data but own a
+Light3D / Camera3D.
+
+**Format mapping by data type:**
 
 | Data Type | Family | Formats | Notes |
 |-----------|--------|---------|-------|
@@ -672,6 +678,14 @@ a Light3D / Camera3D).
 | `GNChannelData` | CHOP | CSV, JSON | CSV: channels as columns, header row = names |
 | `GNTableData` | DAT | CSV, JSON, Text | JSON: array of {header: value} dicts |
 | `GNMaterialData` | MAT | .tres | Godot `ResourceSaver` |
+
+**Multi-output export flow:**
+
+1. `node.get_exportable_outputs()` scans all output ports for valid data with non-empty `get_export_filters()`
+2. If 1 result → skip picker, open FileDialog immediately
+3. If >1 → show `PopupMenu` listing each port: label + first filter description
+4. User picks a port → `_export_port_index` set → FileDialog opens with that port's filters
+5. `node.export_output(path, port_index)` exports the specific port's data
 
 **COMP export supports the full scene graph:**
 
@@ -689,13 +703,10 @@ any glTF-compatible tool.
 **Implementation:**
 
 - `_CtxID.EXPORT_OUTPUT` added to context menu enum
-- `_begin_export_output()` — validates selection (checks `cached_output` OR `get_scene_node()` for COMPs), lazy-inits `FileDialog`, sets filters
-- `_on_export_file_selected(path)` — dispatches to family-specific export functions
-- `_export_texture()`, `_export_image()`, `_export_geo_glb()`, `_export_comp_glb()`,
-  `_export_channel()`, `_export_table()`, `_export_material()`
-- `_export_comp_glb()` — deep-clones via `get_scene_node().duplicate()`, works for any COMP type
-- `_write_gltf_scene()` — shared helper: parents clone under tmp root, calls `_set_owner_recursive()` so GLTFDocument traverses the full subtree, then `append_from_scene()` + `write_to_filesystem()`
-- `_set_owner_recursive()` — sets `owner` on all descendants (required for GLTFDocument to see children)
+- `_begin_export_output()` — validates via `node.can_export_output()`, checks `get_exportable_outputs()` count; if >1, shows port picker popup before FileDialog
+- `_open_export_dialog(filters)` — lazy-inits FileDialog, populates filters, shows it
+- `_on_export_file_selected(path)` — delegates to `node.export_output(path, port_index)` (fully polymorphic — GNNode base calls `get_output_data(port).export_to_file(path)`, GNCompBase overrides for GLB scene export)
+- Scene export logic (GLTFDocument deep-clone, `_set_owner_recursive()`) now lives in `GNCompBase._export_scene_to_glb()` — graph editor has zero family-specific export code
 
 **COMP vs SOP glTF export:** SOP exports a bare mesh (no material).  COMP
 nodes export from the scene graph level — GeometryCOMP provides mesh + material,
@@ -1513,7 +1524,7 @@ GONODES/
   - [x] Node lock toggle (L key — prevents parameter changes, ?? indicator, inspector dims and disables inputs).
   - [x] Wire style options (W key to cycle, toolbar dropdown — curved/straight/right-angle via `connection_lines_curvature`).
 - [x] **Expression & scripting system refinement**:
-  - [x] Autocomplete / intellisense for expression fields — works in **both** the inline LineEdit and the popup CodeEdit editor. Family-aware node filtering (chop(" shows CHOPs only, top(" shows TOPs only, op("/par("/set_par(" show all). Hierarchical path completion (type "subnet1/" to browse subnetwork nodes, "../" for parent). par()/set_par() context detection with second-arg param name suggestions. Node IDs color-coded by family. **Inline LineEdit** uses a manual PopupMenu triggered on text changes, arrow-key/mouse caret movement (via `gui_input` + `call_deferred`), and gathers node IDs or CHOP channel names from the network. **Popup CodeEdit** force-triggers `request_code_completion(true)` inside string regions where Godot normally suppresses the signal.
+  - [x] Autocomplete / intellisense for expression fields — works in **both** the inline LineEdit and the popup CodeEdit editor. **Registry-driven**: all regex patterns for function-name detection are built dynamically from `GNFamily.get_expression_func_variants()`, so extension-defined families (e.g. `sdf()`) get autocomplete automatically. Family-aware node filtering (chop(" shows CHOPs only, top(" shows TOPs only, op("/par("/set_par(" show all). Second-arg completions combine `data.get_completions()` (e.g. channel names) + `data.get_expression_info()` keys (e.g. "resolution", "aspect") — works for any data type, not just CHOP/TOP. Hierarchical path completion (type "subnet1/" to browse subnetwork nodes, "../" for parent). par()/set_par() context detection with second-arg param name suggestions. Node IDs color-coded by family. **Inline LineEdit** uses a manual PopupMenu with regexes rebuilt from the registry on each keystroke. **Popup CodeEdit** force-triggers `request_code_completion(true)` inside string regions where Godot normally suppresses the signal.
   - [x] Expression syntax highlighting (CodeHighlighter in GNExpressionEditor — GONODES keywords green/purple, context vars cyan, math funcs blue, built-in utilities teal, GDScript keywords pink).
   - [x] Custom user-defined expression functions — `GNExpressionFunctions` registry + `fn()` dispatch on CookEngine. Register via `GNExpressionFunctions.register()`, call via `fn("name", args...)`.
   - [x] Multi-line expression editor popup — `GNExpressionEditor` (Window) with CodeEdit, syntax highlighting, live validation, autocomplete, Ctrl+Enter confirm, Escape cancel. Opened via ↗ button next to expression fields.
@@ -2428,6 +2439,28 @@ Therefore:
 
 This was a hard-won architectural insight — the original design passed Callable lambdas as input vars, which silently failed (Expression returned 0.0 fallback → static noise).
 
+**Extensible Expression, Export & Introspection System:**
+
+The entire expression, export, and UI introspection pipeline is **fully polymorphic** — zero family-specific data type casts exist in the cook engine, graph editor, or any UI host file.
+
+- **GNData Polymorphic API:** Each data subclass implements:
+  - `get_expression_value(key, index)` — returns a typed property for expression access
+  - `get_expression_info()` — returns a summary dict (keys vary by family: "channels"/"length" for CHOP, "resolution"/"aspect" for TOP, etc.)
+  - `get_export_filters()` — returns file dialog filter dicts (`[{"filter": "*.png", "description": "PNG Image"}, ...]`)
+  - `export_to_file(path)` — writes data to disk, returns Error
+  - `get_completions()` — returns autocomplete items for expression editors (`[{"label": "tx", "kind": "member"}, ...]`)
+  - `save_state()` / `restore_state(state)` — hot-reload state preservation (CHOP channels, etc.)
+- **GNNode Export API:** `can_export_output()`, `get_exportable_outputs()`, `get_export_filters(port_index)`, `export_output(path, port_index)` — virtuals on GNNode. `get_exportable_outputs()` scans all output ports and returns an array of `{port, label, filters}` for each valid exportable output. `export_output(path, port_index)` defaults to port 0 when port_index is -1. GNCompBase overrides for scene-node-based GLB export (deep-clone + GLTFDocument via `_export_scene_to_glb()`). Graph editor uses port count to decide: 1 port → straight to FileDialog, >1 → show port picker popup first.
+- **Cook engine proxies:** `_make_data_proxy()` and `_make_data_port_proxy()` resolve the node, find data matching the requested family via `data.get_family()`, and delegate to `data.get_expression_value()` / `data.get_expression_info()`. The public `chop()`, `top()`, `sop()`, `dat()`, `vol()`, `img()`, `mat()` are thin wrappers. `_resolve_output()` uses integer family ID filtering (not class name strings).
+- **Family expression function registration:** `expression_func` key in `[family.*]` config sections (e.g. `expression_func="chop"`). Parsed by `GNExtensionRegistry`, stored in `GNFamily._expression_func_registry`. The cook engine's `_get_expr_func_to_family()` builds a demand map dynamically from this registry (including auto-generated suffixes: type-cast `f/i/s` and port-aware `p/pf`).
+- **UI introspection:** Expression editor autocomplete, param row inline autocomplete, CHOP ref picker, and "Copy Output Ref" all use `data.get_completions()` — no family type checks. Inspector resolution bar uses `data.get_expression_info()["resolution"]` — works for any data type that reports resolution. Embedded host state save/restore uses `data.save_state()`/`data.restore_state()`.
+- **Extension author workflow:** Define a new family in `gn_extension.cfg`:
+  1. Add `expression_func="mytype"` to `[family.MYTYPE]`
+  2. Implement `get_expression_value()`/`get_expression_info()` on the data class
+  3. Implement `get_completions()` if data has named sub-values
+  4. Implement `get_export_filters()`/`export_to_file()` if data is exportable
+  5. `mytype("node", "key")` works in expressions, autocomplete populates, export dialog shows filters — all automatically
+
 Expression context provides:
 - `me` — reference to the owning node (GNNode)
 - `chop(name, channel)` — method on base_instance, returns float
@@ -2619,19 +2652,19 @@ chop("lfo1", "out")               # Last sample of channel 'out' from CHOP 'lfo1
 chop("noise_chop1", "tx")         # Last sample of channel 'tx'
 chop("math1", "out", 5)           # Sample at index 5
 
-# Port-aware CHOP access (for multi-output nodes)
-chopp("script1", "out2", "tx")    # Channel 'tx' from output port named "out2"
-chopp("script1", 1, "tx")         # Channel 'tx' from output port index 1
-chopp("script1", "out2", "tx", 5) # Sample 5 of 'tx' from port "out2"
-choppf("script1", "out2", "tx")   # Same, guaranteed float return
+# Port-aware CHOP access (for multi-output nodes) — same chop() function
+chop("script1", "out2", "tx")    # Channel 'tx' from output port named "out2"
+chop("script1", 1, "tx")          # Channel 'tx' from output port index 1
+chop("script1", "out2", "tx", 5)  # Sample 5 of 'tx' from port "out2"
+chopf("script1", 1, "tx")         # Same, guaranteed float return
 
 # Reference TOP properties
 top("noise1", "resolution").x     # Width of TOP output
 top("noise1", "resolution").y     # Height of TOP output
 
-# Port-aware TOP access (for multi-output TOPs like GLSLMultiTOP)
-topp("glsl1", "out1", "resolution")  # Resolution from output port "out1"
-topp("glsl1", 1, "resolution")       # Resolution from output port index 1
+# Port-aware TOP access (for multi-output TOPs) — same top() function
+top("glsl1", "out1", "resolution")  # Resolution from output port "out1"
+top("glsl1", 1, "resolution")       # Resolution from output port index 1
 
 # Math with references
 chop("lfo1", "out") * 10.0 + par("offset")
@@ -2658,13 +2691,19 @@ If `par("a")` references `par("b")` which references `par("a")`, the engine dete
 
 Each family has its own reference proxy with family-specific accessors. **MVP implements CHOP and TOP proxies. Others are designed here for future implementation.**
 
-#### `op(name)` — Generic (all families)
+#### `op(name)` — Generic (all families) — Returns GNOpProxy
 ```gdscript
-op("any_node", "param_name")     # Resolved parameter value (2-arg shortcut)
-op("any_node").par.<param_name>   # Resolved parameter value (proxy dict)
-op("any_node").family             # GNFamily enum
+op("any_node", "param_name")     # Resolved parameter value (preferred)
+op("any_node").type               # Operator type string e.g. "NoiseTOP"
+op("any_node").family             # Family name string e.g. "TOP"
+op("any_node").family_id          # GNFamily enum int
+op("any_node").digits             # Trailing digits from ID (e.g. 1 for "noise1")
 op("any_node").cook_time          # Last cook duration in ms
 op("any_node").valid              # Whether node cooked successfully
+op("any_node").num_inputs         # Number of input ports
+op("any_node").num_outputs        # Number of output ports
+op("any_node").time_dependent     # Whether node is time-dependent
+op("any_node").bypass             # Whether node is bypassed
 ```
 
 #### `par(name)` / `par(node, name)` — Parameter Reference (Houdini ch() equivalent) ✅
@@ -2701,14 +2740,14 @@ chop("lfo1").sample_rate          # Sample rate (float)
 chop("lfo1")["out"]               # Shorthand for .value("out") — TD syntax compatibility
 ```
 
-#### `chopp(name, port, channel)` — Port-Aware CHOP Access ✅
+#### Port-Aware CHOP Access (via `chop()`)
 ```gdscript
-chopp("script1", "out2", "tx")       # Channel 'tx' from output port "out2"
-chopp("script1", 1, "tx")            # Channel 'tx' from port index 1
-chopp("script1", "out2", "tx", 5)    # Sample 5 from port "out2", channel "tx"
-choppf("script1", "out2", "tx")      # Same, guaranteed float return
+chop("script1", "out2", "tx")       # Channel 'tx' from output port "out2"
+chop("script1", 1, "tx")            # Channel 'tx' from port index 1
+chop("script1", "out2", "tx", 5)    # Sample 5 from port "out2", channel "tx"
+chopf("script1", "out2", "tx")      # Same, guaranteed float return
 ```
-**When to use:** For multi-output nodes (e.g. GDScriptSCRIPT with multiple CHOP outputs). `chop()` always finds the first CHOP port; `chopp()` targets a specific port by name or index.
+**When to use:** For multi-output nodes (e.g. GDScriptSCRIPT with multiple CHOP outputs). Without port arg, `chop()` finds the first CHOP port; with port arg it targets a specific port.
 
 #### `top(name)` — TOP Proxy (MVP)
 ```gdscript
@@ -2718,13 +2757,13 @@ top("noise1").resolution.y        # Height
 top("noise1").aspect              # float (width / height)
 ```
 
-#### `topp(name, port)` — Port-Aware TOP Access ✅
+#### Port-Aware TOP Access (via `top()`)
 ```gdscript
-topp("glsl_multi1", "out1", "resolution")   # Resolution from port "out1"
-topp("glsl_multi1", 1, "resolution")         # Resolution from port index 1
-topp("multi_buf1", "normal", "aspect")       # Aspect ratio from "normal" output
+top("glsl_multi1", "out1", "resolution")   # Resolution from port "out1"
+top("glsl_multi1", 1, "resolution")         # Resolution from port index 1
+top("multi_buf1", "normal", "aspect")       # Aspect ratio from "normal" output
 ```
-**When to use:** For multi-output TOPs (e.g. GLSLMultiTOP with 8 outputs, MultiBufferRenderTOP). `top()` finds the first TOP port; `topp()` targets a specific port.
+**When to use:** For multi-output TOPs (e.g. GLSLMultiTOP with 8 outputs, MultiBufferRenderTOP). Without port arg, `top()` finds the first TOP port; with port arg it targets a specific port.
 
 #### `sop(name, port)` — SOP Output Access
 ```gdscript
@@ -2905,10 +2944,11 @@ Expression dependencies (implicit, via param references):
 
 **Mode switching:** Click the C/E toggle button on any parameter row, or right-click → "Insert Parameter Reference…" / "Insert CHOP Reference…" to auto-generate an expression.
 
-**Autocomplete (implemented):**
-- Typing `chop("`, `top("`, `sop("`, etc. in either the inline LineEdit or popup CodeEdit shows a dropdown of matching node IDs, filtered to the relevant family.
-- Inside the second string arg (e.g., `chop("lfo1", "`), CHOP channel names are suggested from the referenced node's `output_ports`.
-- Inline LineEdit: `PopupMenu` driven by `_check_inline_autocomplete()` — triggers on text changes and caret movement (arrow keys, mouse clicks via `gui_input` + `call_deferred`).
+**Autocomplete (implemented — registry-driven):**
+- All function-name detection regexes are **built dynamically** from `GNFamily.get_expression_func_variants()`. Extension-defined families (e.g. `sdf("`) get autocomplete automatically — no core code changes needed.
+- Typing `chop("`, `top("`, `sop("`, etc. in either the inline LineEdit or popup CodeEdit shows a dropdown of matching node IDs, filtered to the relevant family.  `GNFamily.resolve_expression_func_family()` maps the matched function name (including variant suffixes like `chopf`) back to its family ID.
+- Inside the second string arg (e.g., `chop("lfo1", "`), a **unified data completions method** (`_suggest_data_and_info_completions()`) combines `data.get_completions()` (e.g. channel names) + `data.get_expression_info()` keys (e.g. "resolution", "aspect"). Works for any data type — no type-specific suggestion methods.
+- Inline LineEdit: `PopupMenu` driven by `_check_inline_autocomplete()` — triggers on text changes and caret movement (arrow keys, mouse clicks via `gui_input` + `call_deferred`). Regexes rebuilt from the registry snapshot on each check; cached while the registry is unchanged.
 - Popup CodeEdit: built-in completion API; `_maybe_request_completion()` force-calls `request_code_completion(true)` inside string regions where Godot suppresses the signal.
 - Provides discoverability without memorizing node/param/channel names.
 

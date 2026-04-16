@@ -36,6 +36,11 @@ func render_for_preview(_data: GNData, _host) -> void:
 		_host.set_text(_data.get_preview_text())
 
 
+## Whether this family supports wireframe display in the viewer.
+func supports_wireframe() -> bool:
+	return false
+
+
 ## Handles user input forwarded from the viewer panel.
 ## Returns true if the event was consumed.
 func handle_viewer_input(_data: GNData, _event: InputEvent, _viewer) -> bool:

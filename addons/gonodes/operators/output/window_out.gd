@@ -526,10 +526,11 @@ func _update_panel_layer(inputs: Array[GNData]) -> void:
 	if _panel_ui_root == null:
 		return
 
-	# Find the upstream UI node on port 1
-	var ui_node: GNUiBase = get_input_node(1) as GNUiBase
+	# Find UI data on port 1 — works for both GNUiBase nodes and
+	# SubNetworkNode/GNCustomOperator that output GNUIData on their UI port.
+	var ui_data: GNUIData = inputs[1] as GNUIData if inputs.size() > 1 else null
 
-	if ui_node == null:
+	if ui_data == null or ui_data.control_node == null:
 		# No UI connected — hide panel layer and remove stale controls
 		_panel_ui_root.visible = false
 		_clear_managed_controls()
@@ -540,9 +541,7 @@ func _update_panel_layer(inputs: Array[GNData]) -> void:
 	_managed_controls.clear()
 
 	# Adopt the UI widget's Control node
-	var ctrl: Control = ui_node.get_control_node()
-	if ctrl != null:
-		_adopt_control(ctrl)
+	_adopt_control(ui_data.control_node)
 
 	_remove_stale_controls()
 

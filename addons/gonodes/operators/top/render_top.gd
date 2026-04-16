@@ -252,12 +252,15 @@ func _populate_scene_from_network() -> void:
 			_env_comp = upstream_node as EnvironmentCOMP
 			continue
 
-		if not (upstream_node is GNCompBase):
-			continue
-
-		# Resolve the scene node — walks through pass-through COMPs automatically
+		# Resolve the scene node — walks through pass-through COMPs and
+		# data-path fallback for SubNetworkNode/GNCustomOperator.
 		var scene_nd: Node3D = GNCompBase.resolve_scene_node_upstream(
-			upstream_node as GNCompBase, net) if net != null else (upstream_node as GNCompBase).get_scene_node()
+			upstream_node, net) if net != null else null
+		if scene_nd == null:
+			# Direct fallback when no network context
+			var comp_data := upstream_node.cached_output as GNCompData
+			if comp_data != null:
+				scene_nd = comp_data.scene_node
 		if scene_nd == null:
 			continue
 

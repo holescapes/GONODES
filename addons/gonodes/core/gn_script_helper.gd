@@ -82,30 +82,20 @@ func par(p_name: String) -> Variant:
 		return null
 	return me.get_param_value(p_name)
 
-func chop(id: String, chan: String = "", index: int = -1) -> Variant:
+func chop(id: String, arg2: Variant = "", arg3: Variant = -1, arg4: Variant = -1) -> Variant:
 	if _engine == null:
 		return 0.0
-	return _engine.chop(id, chan, index)
-
-func chopp(id: String, port = null, chan: String = "", index: int = -1) -> Variant:
-	if _engine == null:
-		return 0.0
-	return _engine.chopp(id, port, chan, index)
+	return _engine.chop(id, arg2, arg3, arg4)
 
 func op_ref(id: String, param_name: String = "") -> Variant:
 	if _engine == null:
 		return 0.0
 	return _engine.op(id, param_name)
 
-func top(id: String, property: String = "") -> Variant:
+func top(id: String, arg2: Variant = "", arg3: Variant = "") -> Variant:
 	if _engine == null:
 		return 0.0
-	return _engine.top(id, property)
-
-func topp(id: String, port = null, property: String = "") -> Variant:
-	if _engine == null:
-		return 0.0
-	return _engine.topp(id, port, property)
+	return _engine.top(id, arg2, arg3)
 
 func sop(id: String) -> Variant:
 	if _engine == null:

@@ -31,13 +31,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# PhysicsCHOP reads from scene nodes — C++ acceleration is for the
 	# spring/damping simulation on the channel data, not scene node access.
 	# The _processor handles per-channel damped spring physics.
-	var comp: GNCompBase = get_input_node(0) as GNCompBase
-	if comp == null:
+	var comp_data := inputs[0] as GNCompData if inputs.size() > 0 else null
+	if comp_data == null or comp_data.scene_node == null:
 		return null
 
-	var scene_node: Node3D = comp._scene_node if comp is GNCompBase and comp._scene_node is Node3D else null
-	if scene_node == null:
-		return null
+	var scene_node: Node3D = comp_data.scene_node
 
 	var out: GNChannelData = _prepare_output(60.0)
 	var xform: Transform3D = scene_node.global_transform

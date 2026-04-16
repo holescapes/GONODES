@@ -125,6 +125,7 @@ requires_renderers = ["forward_plus"]
 | `color` | Yes | Wire/node color as `"R,G,B"` floats (0.0–1.0) |
 | `data_script` | No | Resource path to data class (must extend `GNData`) |
 | `renderer_script` | No | Resource path to viewer renderer (must extend `GNDataRenderer`) |
+| `expression_func` | No | Expression function name (e.g. `"sdf"`). Registers a `sdf("node", "key")` expression function on CookEngine. See [Extending the Expression System](#extending-the-expression-system) below. |
 
 ### Operator Fields (`[operator.ClassName]`)
 
@@ -327,7 +328,115 @@ static func boot() -> void:
 
 ---
 
-## 6. UI Registries
+## 6. Extending the Expression System
+
+Extensions can add new callable functions to the GONODES expression engine
+using two complementary mechanisms.
+
+### Architecture Constraint
+
+Godot's `Expression` class resolves function calls as **method lookups on
+`base_instance`** — the `GNCookEngine` instance passed to `execute()`.
+You cannot inject arbitrary top-level functions; only methods on the cook
+engine (or functions registered through the two hooks below) are callable.
+
+The cook engine's expression methods are **thin routing stubs** — the actual
+logic lives on `GNData` subclasses. The call chain for e.g. `chop("lfo1", "out")`:
+
+```
+Expression.execute() → CookEngine.chop("lfo1", "out")   ← method on base_instance
+  → _make_data_proxy("lfo1", CHOP, "out")               ← generic router
+    → node.cached_output.get_expression_value("out", -1) ← polymorphic, on GNChannelData
+```
+
+The cook engine does **zero** family-specific processing.
+
+### 6.1 Family Expression Functions (top-level syntax)
+
+When an extension defines a new operator family with property-accessible
+data, it can register a top-level expression function via config:
+
+```ini
+[family.SDF]
+color = "0.95,0.65,0.15"
+data_script = "res://addons/gn_ext_sdf/core/gn_sdf_data.gd"
+expression_func = "sdf"
+```
+
+This registers `sdf("node_id", "key")` as a first-class expression function.
+The cook engine automatically generates the routing stub and variant suffixes
+(`sdff`, `sdfi`, `sdfs`, `sdfp`, `sdfpf`).
+
+**Data class requirements:**
+
+```gdscript
+## gn_sdf_data.gd
+extends GNData
+
+func get_expression_value(key: String, index: int = -1) -> Variant:
+    match key:
+        "distance": return distance
+        "gradient": return gradient
+    return 0.0
+
+func get_expression_info() -> Dictionary:
+    return { "distance": distance, "gradient": gradient }
+
+func get_completions() -> Array[Dictionary]:
+    return [
+        {"label": "distance", "kind": "member"},
+        {"label": "gradient", "kind": "member"},
+    ]
+```
+
+**What you get automatically:**
+- `sdf("node", "key")` top-level syntax in expressions
+- Autocomplete: `sdf("` filters to SDF nodes; `sdf("node", "` shows completions
+- Typed variants: `sdff()`, `sdfi()`, `sdfs()` with guaranteed return types
+- Port-aware variants: `sdfp()`, `sdfpf()` for multi-output nodes
+- Demand mapping: the cook engine tracks `sdf()` references for active-set pruning
+
+### 6.2 Custom Utility Functions (via `fn()`)
+
+For pure utility functions that don't need cook-engine context (math
+helpers, lookup tables, format converters), use `GNExpressionFunctions`:
+
+```gdscript
+# In your extension's boot script:
+static func boot() -> void:
+    GNExpressionFunctions.register(
+        "midi_to_freq",
+        func(note: float) -> float: return 440.0 * pow(2.0, (note - 69.0) / 12.0),
+        "Convert MIDI note to frequency (Hz)",
+        ["note"]
+    )
+```
+
+Users call: `fn("midi_to_freq", 60)`.
+
+| API | Description |
+|-----|-------------|
+| `GNExpressionFunctions.register(name, callable, desc, arg_names)` | Register a custom function |
+| `GNExpressionFunctions.unregister(name)` | Remove a custom function (built-ins cannot be removed) |
+| `GNExpressionFunctions.register_builtin(name, callable, desc, arg_names)` | Register a non-removable function |
+
+Custom functions appear in autocomplete when typing `fn("` in both the
+inline LineEdit and the popup expression editor.
+
+Up to 6 arguments are supported via `fn()`. For more complex APIs,
+consider returning a Dictionary from a single `fn()` call.
+
+### Why Not Move Built-in Expressions to `fn()`?
+
+The built-in `chop()`, `top()`, etc. must remain as methods on the cook
+engine because Godot's `Expression.execute()` resolves them via method
+lookup. Moving them to `GNExpressionFunctions` would change the syntax from
+`chop("lfo1", "out")` to `fn("chop", "lfo1", "out")` — a significant UX
+regression for every expression in every project.
+
+---
+
+## 7. UI Registries
 
 Three static registries allow extensions to hook into core UI without
 core code importing any extension module.
@@ -432,7 +541,7 @@ just override the virtual.
 
 ---
 
-## 7. Platform, Architecture & Renderer Guards
+## 8. Platform, Architecture & Renderer Guards
 
 Extensions can restrict themselves to specific environments:
 
@@ -456,7 +565,7 @@ no boot script execution.
 
 ---
 
-## 8. Dependency Guards
+## 9. Dependency Guards
 
 The `dependencies` field is an array of ClassDB class names. This is
 primarily used by native extensions that require GDExtension binaries:
@@ -472,7 +581,7 @@ operators referencing unavailable native classes.
 
 ---
 
-## 9. Extension Directory Layout
+## 10. Extension Directory Layout
 
 ```
 addons/gn_ext_myext/
@@ -521,7 +630,7 @@ The test runner automatically discovers `test_*.gd` files under
 
 ---
 
-## 10. Writing a New Family Extension
+## 11. Writing a New Family Extension
 
 To add a completely new data family (like SDF did):
 
@@ -594,7 +703,7 @@ family name string.
 
 ---
 
-## 11. Shipped Extensions
+## 12. Shipped Extensions
 
 | Extension | Boot Script | Registers | Operators |
 |-----------|-------------|-----------|-----------|
@@ -621,7 +730,7 @@ family name string.
 
 ---
 
-## 12. Extension-Shipped Assets (.gnasset)
+## 13. Extension-Shipped Assets (.gnasset)
 
 Extensions can ship reusable custom operator assets (`.gnasset` files) that
 appear in the palette under the extension's display name. These are

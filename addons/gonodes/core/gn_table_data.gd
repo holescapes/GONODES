@@ -127,6 +127,53 @@ func get_col_by_name(col_name: String) -> PackedStringArray:
 	return get_col(idx)
 
 
+# ─── Expression Access ──────────────────────────────────────────────────────────
+
+func get_expression_value(key: String, index: int = -1) -> Variant:
+	match key:
+		"nrows", "num_rows":
+			return num_rows()
+		"ncols", "num_cols":
+			return num_cols()
+		"has_header":
+			return 1.0 if has_header else 0.0
+		"is_table":
+			return 1.0 if is_table else 0.0
+		"text_length":
+			return text.length()
+	# Cell access: key = "row:col" e.g. "0:1" or "0:name"
+	if key.contains(":"):
+		var parts := key.split(":")
+		if parts.size() == 2:
+			var row_str := parts[0]
+			var col_str := parts[1]
+			var row := row_str.to_int() if row_str.is_valid_int() else 0
+			if col_str.is_valid_int():
+				return cell(row, col_str.to_int()).to_float()
+			else:
+				return cell_by_name(row, col_str).to_float()
+	return 0.0
+
+
+func get_expression_info() -> Dictionary:
+	return {
+		"nrows": num_rows(),
+		"ncols": num_cols(),
+		"has_header": has_header,
+		"is_table": is_table,
+		"text_length": text.length(),
+	}
+
+
+func get_completions() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for key in ["nrows", "ncols", "has_header", "is_table", "text_length"]:
+		result.append({"label": key, "kind": "member"})
+	for h in get_headers():
+		result.append({"label": h, "kind": "member"})
+	return result
+
+
 # ─── Table Building ───────────────────────────────────────────────────────────
 
 ## Sets the header row. Clears existing data rows.
@@ -211,6 +258,56 @@ func duplicate_data() -> GNData:
 	for row in table:
 		copy.table.append(row.duplicate())
 	return copy
+
+
+func get_export_filters() -> Array[Dictionary]:
+	return [
+		{"filter": "*.csv", "description": "CSV"},
+		{"filter": "*.json", "description": "JSON"},
+		{"filter": "*.txt", "description": "Plain Text"},
+	]
+
+
+func export_to_file(path: String) -> Error:
+	var ext := path.get_extension().to_lower()
+	match ext:
+		"json":
+			var result: Array = []
+			if is_table:
+				var headers: PackedStringArray = table[0] if has_header and not table.is_empty() else PackedStringArray()
+				var start_row := 1 if has_header else 0
+				for r in range(start_row, table.size()):
+					var row_dict := {}
+					for c in range(table[r].size()):
+						var key: String = headers[c] if c < headers.size() else ("col%d" % c)
+						row_dict[key] = table[r][c]
+					result.append(row_dict)
+			var json_str := JSON.stringify(result, "\t")
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			f.store_string(json_str if is_table else text)
+			f.close()
+			return OK
+		"txt":
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			if is_table:
+				for row in table:
+					f.store_line("\t".join(row))
+			else:
+				f.store_string(text)
+			f.close()
+			return OK
+		_:
+			var f := FileAccess.open(path, FileAccess.WRITE)
+			if f == null:
+				return FileAccess.get_open_error()
+			for row in table:
+				f.store_csv_line(row)
+			f.close()
+			return OK
 
 
 # ─── Internal ──────────────────────────────────────────────────────────────────

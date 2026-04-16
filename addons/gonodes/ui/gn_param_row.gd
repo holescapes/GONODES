@@ -927,6 +927,8 @@ func _set_value_with_undo(new_value: Variant, mergeable: bool = false) -> void:
 	undo_redo.add_do_method(Callable(p, "set_value").bind(new_value))
 	undo_redo.add_undo_method(Callable(p, "set_value").bind(old_value))
 	undo_redo.commit_action()
+	if network != null:
+		network.notify_state_changed()
 
 
 ## Snapshot-based undo for complex changes (mode toggles, expressions, bulk ops).
@@ -943,6 +945,8 @@ func _do_with_snapshot_undo(action_name: String, callable: Callable) -> void:
 	undo_redo.add_do_method(Callable(p, "restore_snapshot").bind(after))
 	undo_redo.add_undo_method(Callable(p, "restore_snapshot").bind(before))
 	undo_redo.commit_action(false)  # already applied
+	if network != null:
+		network.notify_state_changed()
 
 
 func _on_float_field_changed(val: float) -> void:
@@ -2131,24 +2135,40 @@ func _show_chop_reference_picker() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Regex matching function call patterns that should trigger node-ID autocomplete.
-## Matches: chop(" chopf(" chopi(" chops(" top(" sop(" dat(" mat(" op(" par(" set_par("
+## Built dynamically from GNFamily's expression function registry so extension-
+## defined families get autocomplete automatically.
 static var _ac_trigger_re: RegEx = null
+static var _ac_second_arg_re: RegEx = null
+static var _ac_regex_snapshot: PackedStringArray = []
 
-## Returns the shared trigger regex, compiling it on first use.
+## Returns the shared trigger regex, rebuilding if the registry changed.
 static func _get_ac_trigger_re() -> RegEx:
-	if _ac_trigger_re == null:
-		_ac_trigger_re = RegEx.new()
-		_ac_trigger_re.compile("(chop[sfi]?|top|sop|dat|mat|op|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]*)$")
+	_ensure_ac_regexes()
 	return _ac_trigger_re
 
-## Regex for detecting second-argument context (channel names after first arg).
-static var _ac_second_arg_re: RegEx = null
-
+## Returns the shared second-arg regex, rebuilding if the registry changed.
 static func _get_ac_second_arg_re() -> RegEx:
-	if _ac_second_arg_re == null:
-		_ac_second_arg_re = RegEx.new()
-		_ac_second_arg_re.compile("(chop[sfi]?)\\s*\\(\\s*\"([^\"]*)\"\\s*,\\s*\"([^\"]*)$")
+	_ensure_ac_regexes()
 	return _ac_second_arg_re
+
+## Rebuilds autocomplete regexes when the expression function registry changes.
+static func _ensure_ac_regexes() -> void:
+	var variants := GNFamily.get_expression_func_variants()
+	var snapshot := PackedStringArray(variants)
+	if _ac_trigger_re != null and snapshot == _ac_regex_snapshot:
+		return
+	_ac_regex_snapshot = snapshot
+	var family_alt := "|".join(variants) if not variants.is_empty() else "(?!x)"
+	# All family funcs now support port args natively, so second-arg
+	# context always suggests data keys/channels.
+	var value_variants := GNFamily.get_expression_func_value_variants()
+	var value_alt := "|".join(value_variants) if not value_variants.is_empty() else "(?!x)"
+	# First arg: (family_func|op|par|set_par)("partial...
+	_ac_trigger_re = RegEx.new()
+	_ac_trigger_re.compile("(%s|op|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]*)$" % family_alt)
+	# Second arg: (value_func|op)("node", "partial...
+	_ac_second_arg_re = RegEx.new()
+	_ac_second_arg_re.compile("(%s|op)\\s*\\(\\s*\"([^\"]*)\"\\s*,\\s*\"([^\"]*)$" % value_alt)
 
 ## Called on every text change in an expression LineEdit.
 func _on_expr_text_changed(edit: LineEdit) -> void:
@@ -2172,9 +2192,15 @@ func _check_inline_autocomplete(edit: LineEdit) -> void:
 	# Check for second-arg context first (channel suggestions)
 	var m2 := _get_ac_second_arg_re().search(before)
 	if m2:
+		var fn2 := m2.get_string(1)
 		var node_id := m2.get_string(2)
 		var partial := m2.get_string(3)
-		_show_inline_autocomplete(edit, _gather_chop_channels(node_id), partial)
+		var completions: Array[Dictionary]
+		if fn2 == "op":
+			completions = _gather_param_completions(node_id)
+		else:
+			completions = _gather_data_completions(node_id)
+		_show_inline_autocomplete(edit, completions, partial)
 		return
 
 	# Check for first-arg context (node ID suggestions)
@@ -2191,14 +2217,12 @@ func _check_inline_autocomplete(edit: LineEdit) -> void:
 
 
 ## Maps a function name to the expected family filter (-1 = all).
+## Uses the dynamic expression function registry so extension families
+## like sdf(), audio(), etc. resolve automatically.
 func _fn_to_family(fn: String) -> int:
-	if fn.begins_with("chop"):
-		return GNFamily.Type.CHOP
-	match fn:
-		"top": return GNFamily.Type.TOP
-		"sop": return GNFamily.Type.SOP
-		"dat": return GNFamily.Type.DAT
-		"mat": return GNFamily.Type.MAT
+	var family_id := GNFamily.resolve_expression_func_family(fn)
+	if family_id >= 0:
+		return family_id
 	return -1  # op, par, set_par → all families
 
 
@@ -2225,18 +2249,39 @@ func _gather_node_ids(filter_family: int) -> Array[Dictionary]:
 	return results
 
 
-## Gathers channel names from a specific CHOP node's cached output.
-func _gather_chop_channels(node_id: String) -> Array[Dictionary]:
+## Gathers parameter names from a node for op() second-arg autocomplete.
+func _gather_param_completions(node_id: String) -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	if network == null:
+		return results
+	var node: GNNode = network.get_node_by_id(node_id)
+	if node == null:
+		return results
+	for p_name: String in node.parameters:
+		results.append({ "id": p_name, "family": node.family })
+	results.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return str(a.id).naturalnocasecmp_to(str(b.id)) < 0)
+	return results
+
+
+## Gathers completion items (e.g. channel names, expression info keys) from
+## a node's cached output.  Combines data.get_completions() + expression info
+## keys so the inline LineEdit offers the same completions as the popup editor.
+func _gather_data_completions(node_id: String) -> Array[Dictionary]:
 	var results: Array[Dictionary] = []
 	if network == null:
 		return results
 	var node: GNNode = network.get_node_by_id(node_id)
 	if node == null or node.cached_output == null:
 		return results
-	if node.cached_output is GNChannelData:
-		var chop_data: GNChannelData = node.cached_output as GNChannelData
-		for ch_name in chop_data.channels:
-			results.append({ "id": ch_name, "family": GNFamily.Type.CHOP })
+	# Data-specific completions (e.g. channel names for CHOP)
+	var completions := node.cached_output.get_completions()
+	for item in completions:
+		results.append({ "id": item["label"], "family": node.family })
+	# Expression info keys (e.g. "resolution", "aspect" for TOP/IMG)
+	var info := node.cached_output.get_expression_info()
+	for key: String in info:
+		results.append({ "id": key, "family": node.family })
 	return results
 
 

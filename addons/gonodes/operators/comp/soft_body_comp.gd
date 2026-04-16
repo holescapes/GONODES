@@ -147,12 +147,11 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	# Vertices are already in world space (transform baked at _init_simulation),
 	# so leave _mesh_inst at identity.  Sync material/visibility only.
-	var upstream_comp: GNCompBase = get_input_node(0) as GNCompBase
-	if upstream_comp != null:
-		var src_node: Node3D = upstream_comp.get_scene_node()
-		if src_node is MeshInstance3D:
-			_mesh_inst.material_override = (src_node as MeshInstance3D).material_override
-			_mesh_inst.visible = src_node.visible
+	var comp_data := get_input_node(0).cached_output as GNCompData if get_input_node(0) else null
+	if comp_data != null and comp_data.scene_node is MeshInstance3D:
+		var src_mesh := comp_data.scene_node as MeshInstance3D
+		_mesh_inst.material_override = src_mesh.material_override
+		_mesh_inst.visible = comp_data.scene_node.visible
 
 	return _build_comp_data()
 
@@ -403,14 +402,15 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 
 ## Resolves the MeshInstance3D from the upstream COMP.
 func _resolve_upstream_mesh() -> MeshInstance3D:
-	var comp: GNCompBase = get_input_node(0) as GNCompBase
-	if comp == null:
+	var upstream := get_input_node(0)
+	if upstream == null:
 		return null
-	if comp is GeometryCOMP:
-		return (comp as GeometryCOMP).get_mesh_instance()
-	var sn: Node3D = comp.get_scene_node()
-	if sn == null:
+	if upstream is GeometryCOMP:
+		return (upstream as GeometryCOMP).get_mesh_instance()
+	var comp_data := upstream.cached_output as GNCompData
+	if comp_data == null or comp_data.scene_node == null:
 		return null
+	var sn: Node3D = comp_data.scene_node
 	if sn is MeshInstance3D:
 		return sn as MeshInstance3D
 	for child in sn.get_children():

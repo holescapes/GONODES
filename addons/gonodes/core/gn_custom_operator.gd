@@ -76,6 +76,9 @@ func load_from_asset(path: String) -> bool:
 		inner_network.from_dict(inner_dict)
 		_ports_dirty = true
 		sync_ports_from_tunnels()
+		# Wire dirty-propagation so inner widget interactions (drag pads,
+		# sliders) bubble up and trigger a re-cook of this operator.
+		_connect_inner_dirty_signals()
 
 	# Build promoted parameters
 	_promoted_defs.clear()
@@ -414,8 +417,9 @@ func discard_asset_edits() -> void:
 	if not _pre_edit_snapshot.is_empty():
 		inner_network.from_dict(_pre_edit_snapshot)
 		sync_ports_from_tunnels()
+		_connect_inner_dirty_signals()
 	else:
-		# Fallback: reload from disk
+		# Fallback: reload from disk (load_from_asset already connects signals)
 		load_from_asset(asset_path)
 	asset_editing = false
 	_pre_edit_snapshot = {}

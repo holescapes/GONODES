@@ -284,16 +284,20 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 
 
 ## Resolves the MeshInstance3D from the upstream COMP.
-## GeometryCOMP provides direct typed access; for other COMPs, walks children.
+## GeometryCOMP provides direct typed access; for other COMPs (including
+## SubNetworkNode), reads scene_node from GNCompData and walks children.
 func _resolve_upstream_mesh() -> MeshInstance3D:
-	var comp: GNCompBase = get_input_node(0) as GNCompBase
-	if comp == null:
+	var upstream := get_input_node(0)
+	if upstream == null:
 		return null
-	if comp is GeometryCOMP:
-		return (comp as GeometryCOMP).get_mesh_instance()
-	var sn: Node3D = comp.get_scene_node()
-	if sn == null:
+	# Fast path for direct GeometryCOMP
+	if upstream is GeometryCOMP:
+		return (upstream as GeometryCOMP).get_mesh_instance()
+	# Data path — works for SubNetworkNode, GNCustomOperator, etc.
+	var comp_data := upstream.cached_output as GNCompData
+	if comp_data == null or comp_data.scene_node == null:
 		return null
+	var sn: Node3D = comp_data.scene_node
 	if sn is MeshInstance3D:
 		return sn as MeshInstance3D
 	for child in sn.get_children():

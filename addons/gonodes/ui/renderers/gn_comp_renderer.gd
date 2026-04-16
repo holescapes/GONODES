@@ -7,6 +7,10 @@ extends GNDataRenderer
 ## where the output is GNCompData itself (scene node info).
 
 
+func supports_wireframe() -> bool:
+	return true
+
+
 func render_for_viewer(data: GNData, viewer) -> void:
 	if data is GNCompData:
 		var cd: GNCompData = data as GNCompData

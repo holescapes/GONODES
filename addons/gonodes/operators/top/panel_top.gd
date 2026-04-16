@@ -88,7 +88,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_managed_controls.clear()
 
 	# Scan UI inputs and adopt their Control nodes
-	_populate_ui_from_network()
+	_populate_ui_from_inputs(inputs)
 
 	# Remove controls that were not re-adopted this frame
 	_remove_stale_controls()
@@ -192,20 +192,21 @@ func _update_bg_color(color: Color) -> void:
 
 
 ## Populates the viewport with Control nodes from connected UI widgets.
-func _populate_ui_from_network() -> void:
+## Uses GNUIData (data-type check) instead of GNUiBase (node-type check)
+## so SubNetworkNode/GNCustomOperator UI outputs work correctly.
+func _populate_ui_from_inputs(inputs: Array[GNData]) -> void:
 	if _viewport == null or _ui_root == null:
 		return
 
-	for upstream_node in get_input_nodes_sorted():
-		if upstream_node is GNUiBase:
-			var ui_node: GNUiBase = upstream_node as GNUiBase
-			var ctrl: Control = ui_node.get_control_node()
+	for data in inputs:
+		if data is GNUIData:
+			var ctrl: Control = (data as GNUIData).control_node
 			if ctrl != null:
-				_adopt_control(ctrl, ui_node.sort_order)
+				_adopt_control(ctrl)
 
 
 ## Adds a Control node to the UI root if not already there.
-func _adopt_control(ctrl: Control, _sort_order: int = 0) -> void:
+func _adopt_control(ctrl: Control) -> void:
 	if ctrl.get_parent() != _ui_root:
 		if ctrl.get_parent() != null:
 			ctrl.get_parent().remove_child(ctrl)
