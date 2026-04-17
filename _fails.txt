@@ -1,1 +1,0 @@
-L3328: SCRIPT ERROR: Assertion failed: AttractPOP CPU should produce output

@@ -3,7 +3,7 @@ import os, re, sys
 from pathlib import Path
 from collections import defaultdict
 
-ROOT = Path(r"c:\MeOwn\Gonodes")
+ROOT = Path(__file__).resolve().parent.parent
 
 # Directories to scan
 SCAN_DIRS = [

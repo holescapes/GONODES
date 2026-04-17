@@ -4,7 +4,9 @@ import re
 import json
 from pathlib import Path
 
-OPS_DIR = Path(r"c:\MeOwn\Gonodes\addons\gonodes\operators")
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_ROOT = _SCRIPT_DIR.parent
+OPS_DIR = _ROOT / "addons" / "gonodes" / "operators"
 
 FAMILIES = ["chop", "comp", "dat", "img", "mat", "output", "pop", "sop", "top", "ui", "vol"]
 
@@ -120,8 +122,4 @@ def main():
 
 
 if __name__ == "__main__":
-    import sys
-    outf = open(r"c:\MeOwn\Gonodes\scripts\catalog_output.txt", "w", encoding="utf-8")
-    sys.stdout = outf
     main()
-    outf.close()

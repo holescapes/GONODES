@@ -1,7 +1,9 @@
 """Audit which multi-port operators still lack port labels."""
 import os, re
 
-root = r"c:\MeOwn\Gonodes\addons\gonodes\operators"
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_root = os.path.dirname(_script_dir)
+root = os.path.join(_root, "addons", "gonodes", "operators")
 labeled = 0
 unlabeled = []
 
@@ -18,7 +20,7 @@ for dirpath, dirs, files in os.walk(root):
         if has_label:
             labeled += 1
         elif len(inputs) > 1 or len(outputs) > 1:
-            rel = os.path.relpath(path, r"c:\MeOwn\Gonodes")
+            rel = os.path.relpath(path, _root)
             unlabeled.append(f"{rel} ({len(inputs)}in/{len(outputs)}out)")
 
 print(f"Files with labels: {labeled}")

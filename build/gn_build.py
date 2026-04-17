@@ -145,10 +145,11 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
     python_config_script = os.path.join(native_dir, "python_config.py")
     if os.path.isfile(python_config_script):
         # Use GONODES_PYTHON_HOME or the toolchain embeddable if available
-        toolchain_python = os.path.join(native_dir, "..", "toolchain", "python", "python.exe")
+        _py_bin = "python.exe" if sys.platform == "win32" else "python3"
+        toolchain_python = os.path.join(native_dir, "..", "toolchain", "python", _py_bin)
         py_exe = os.environ.get("GONODES_PYTHON_HOME", "")
         if py_exe:
-            py_exe = os.path.join(py_exe, "python.exe") if os.path.isdir(py_exe) else py_exe
+            py_exe = os.path.join(py_exe, _py_bin) if os.path.isdir(py_exe) else py_exe
         elif os.path.isfile(toolchain_python):
             py_exe = toolchain_python
         else:

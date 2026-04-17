@@ -78,9 +78,16 @@ __pycache__/
 # ── Build/test logs & scratch output (local dev only) ────────────────────────
 build_output*.txt
 build_native.log
-test_results.txt
+test_results*.txt
+test_run_output*.txt
+test_stdout*.txt
+test_stderr*.txt
 failures.txt
 parse_fails.py
+
+# ── Scratch / one-off files (underscore-prefixed at root) ────────────────────
+/_*.txt
+/_*.py
 
 # ── OS files ──────────────────────────────────────────────────────────────────
 Thumbs.db
