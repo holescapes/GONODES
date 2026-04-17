@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **528 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 21 extension addons.
+> **532 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 22 extension addons.
 
 ---
 
@@ -2055,6 +2055,42 @@ Anti-aliased 2D vector graphics rendering — polylines, polygons, circles, arcs
 
 ---
 
+#### NDIInTOP
+
+Receive an NDI video stream over the network and output it as a texture. Requires the `gn_ext_ndi` GDExtension and the NDI SDK runtime.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| source | String | "" | — | NDI source name (e.g. 'OBS (DESKTOP-ABC)') |
+| resolution | Vector2i | 1920×1080 | — | Output resolution (auto-set from stream) |
+| bandwidth | Enum | Highest | Highest, Audio Only, Lowest | NDI receive quality |
+| timeout_ms | Int | 16 | 0–1000 | Frame capture timeout in milliseconds |
+| active | Bool | true | — | Enable / disable receiving |
+
+**No inputs** — receives video from the network via NDI protocol.
+**Output:** `out` (TOP — received video frame).
+
+**How it works:** Lazily instantiates a `GNNDIReceiver` (C++ GDExtension class) on first cook. When the source name changes, the old receiver is released and a new one is created for the specified source. Each cook calls `receive_video()` with the configured timeout, returning RGBA pixel data. The resolution parameter auto-updates to match the incoming stream dimensions.
+
+---
+
+#### NDIOutTOP
+
+Send an input texture as an NDI video stream on the network. Requires the `gn_ext_ndi` GDExtension and the NDI SDK runtime.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| name | String | "GoNodes" | — | NDI sender name visible on the network |
+| fps_n | Int | 30 | 1–120 | Frame-rate numerator |
+| fps_d | Int | 1 | 1–1001 | Frame-rate denominator |
+| active | Bool | true | — | Enable / disable sending |
+
+**Input:** `in` (TOP — texture to send). **Output:** `thru` (TOP — pass-through of input).
+
+**How it works:** Lazily instantiates a `GNNDISender` (C++ GDExtension class). Each cook reads the input texture into CPU memory via `get_image()`, converts to RGBA8 if needed, and sends the pixel data with the configured frame rate. The pass-through output allows the texture to continue downstream for local display.
+
+---
+
 #### HostInTOP
 
 Receive textures from a host application via the C API (`libgonodes`). Zero-copy in shared GPU contexts.
@@ -3230,6 +3266,40 @@ Pen tablet/stylus input. Outputs position, pressure, tilt, and button state.
 | `active` | Bool | true | Enable input capture |
 
 **Output:** CHOP (x, y, pressure, tilt_x, tilt_y, button).
+
+---
+
+#### NDIAudioInCHOP
+
+Receive NDI audio from the network and output it as CHOP channel data. Each audio channel from the NDI source becomes a separate CHOP channel named "ch0", "ch1", etc. Requires the `gn_ext_ndi` GDExtension and the NDI SDK runtime.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| source | String | "" | — | NDI source name (e.g. 'OBS (DESKTOP-ABC)') |
+| bandwidth | Enum | Audio Only | Highest, Audio Only, Lowest | NDI receive quality |
+| timeout_ms | Int | 16 | 0–1000 | Audio capture timeout in milliseconds |
+| active | Bool | true | — | Enable / disable receiving |
+
+**No inputs** — receives audio from the network via NDI protocol.
+**Output:** `out` (CHOP — one channel per NDI audio channel).
+
+**How it works:** Lazily instantiates a `GNNDIReceiver` (C++ GDExtension class). Each cook calls `receive_audio()` with the configured timeout, returning interleaved float samples. The samples are de-interleaved into separate CHOP channels. The sample rate matches the NDI source. The bandwidth parameter defaults to "Audio Only" for minimal network overhead.
+
+---
+
+#### NDIAudioOutCHOP
+
+Send CHOP channel data as NDI audio to the network. Each CHOP channel is mapped to an NDI audio channel in order. Requires the `gn_ext_ndi` GDExtension and the NDI SDK runtime.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| name | String | "GoNodes Audio" | — | NDI sender name visible on the network |
+| sample_rate | Int | 48000 | 8000–192000 | Audio sample rate in Hz |
+| active | Bool | true | — | Enable / disable sending |
+
+**Input:** `in` (CHOP — audio channel data to send). **Output:** `thru` (CHOP — pass-through of input).
+
+**How it works:** Lazily instantiates a `GNNDISender` (C++ GDExtension class). Each cook interleaves the input CHOP channels and sends them via `send_audio()` at the configured sample rate. The pass-through output allows the audio data to continue downstream for local processing.
 
 ---
 
@@ -6040,7 +6110,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
 | **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **372** | *Core operators only. With extensions (91), SDF (27), SCRIPT (3), and native variants, total reaches 528.* |
+| **Total** | **372** | *Core operators only. With extensions (95), SDF (27), SCRIPT (3), and native variants, total reaches 532.* |
 
 ### Extension Operators (not included in count above)
 
@@ -6056,6 +6126,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **gn_ext_gpu_encode** | MovieFileOutTOP | Hardware GPU video encoding to H.264 MP4 (MF/VideoToolbox) |
 | **gn_ext_mapper** | QuadMapTOP, BezierMapTOP, GridWarpTOP, EdgeBlendTOP, ProjectionMaskTOP, StonerTOP, ProjectorBlendTOP | GPU projection mapping — bezier/quad/grid warp, edge blend, masking |
 | **gn_ext_hap** | HapInTOP, HapOUT | GPU-direct HAP video codec — DXT-compressed frames upload to GPU with zero CPU decode. Supports HAP, HAP Alpha, HAP Q variants in QuickTime MOV containers |
+| **gn_ext_ndi** | NDIInTOP, NDIOutTOP, NDIAudioInCHOP, NDIAudioOutCHOP | NDI video & audio I/O over the network via NewTek/Vizrt NDI SDK (cross-platform) |
 
 > **Note:** SDF operators (26 total — 10 primitives, 5 booleans, 8 domain modifiers, 2 materials, 1 renderer) were promoted from `gn_ext_sdf` to **core** as the 12th family type. See the SDF section above.
 

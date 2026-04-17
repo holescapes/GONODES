@@ -1,0 +1,59 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "emitter1": {
+            "type": "EmitterPOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "rate": {
+                    "value": 200
+                }
+            }
+        },
+        "focus1": {
+            "type": "HostOutPOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "particles"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "emitter1",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostOut POP \u2014 Basic\n\nExpose particle data to the host application via libgonodes.\nSet label to identify this output when reading from C/C++/Python.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

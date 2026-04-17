@@ -1,0 +1,798 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_manual_test",
+	"nodes": {
+		"box1": {
+			"type": "BoxSDF",
+			"position": [
+				0,
+				200
+			],
+			"parameters": {
+				"size_x": {
+					"value": 0.3
+				},
+				"size_y": {
+					"value": 0.3
+				},
+				"size_z": {
+					"value": 0.3
+				}
+			}
+		},
+		"sphere1": {
+			"type": "SphereSDF",
+			"position": [
+				0,
+				320
+			],
+			"parameters": {
+				"radius": {
+					"value": 0.4
+				}
+			}
+		},
+		"union1": {
+			"type": "UnionSDF",
+			"position": [
+				300,
+				200
+			]
+		},
+		"raymarch1": {
+			"type": "RaymarchSDF",
+			"position": [
+				600,
+				200
+			]
+		},
+		"OUTChain1": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				200
+			]
+		},
+		"torus1": {
+			"type": "TorusSDF",
+			"position": [
+				0,
+				400
+			],
+			"parameters": {
+				"radius_major": {
+					"value": 0.4
+				},
+				"radius_minor": {
+					"value": 0.1
+				}
+			}
+		},
+		"capsule1": {
+			"type": "CapsuleSDF",
+			"position": [
+				0,
+				520
+			],
+			"parameters": {
+				"height": {
+					"value": 0.6
+				},
+				"radius": {
+					"value": 0.15
+				}
+			}
+		},
+		"smoothunion1": {
+			"type": "SmoothUnionSDF",
+			"position": [
+				300,
+				400
+			],
+			"parameters": {
+				"smoothness": {
+					"value": 0.1
+				}
+			}
+		},
+		"round1": {
+			"type": "RoundSDF",
+			"position": [
+				600,
+				400
+			],
+			"parameters": {
+				"radius": {
+					"value": 0.02
+				}
+			}
+		},
+		"raymarch2": {
+			"type": "RaymarchSDF",
+			"position": [
+				900,
+				400
+			]
+		},
+		"OUTChain2": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				400
+			]
+		},
+		"cone1": {
+			"type": "ConeSDF",
+			"position": [
+				0,
+				600
+			],
+			"parameters": {
+				"height": {
+					"value": 0.6
+				},
+				"radius": {
+					"value": 0.3
+				}
+			}
+		},
+		"cylinder1": {
+			"type": "CylinderSDF",
+			"position": [
+				0,
+				720
+			],
+			"parameters": {
+				"height": {
+					"value": 0.8
+				},
+				"radius": {
+					"value": 0.15
+				}
+			}
+		},
+		"subtract1": {
+			"type": "SubtractSDF",
+			"position": [
+				300,
+				600
+			]
+		},
+		"smoothsubtract1": {
+			"type": "SmoothSubtractSDF",
+			"position": [
+				600,
+				600
+			],
+			"parameters": {
+				"smoothness": {
+					"value": 0.1
+				}
+			}
+		},
+		"raymarch3": {
+			"type": "RaymarchSDF",
+			"position": [
+				900,
+				600
+			]
+		},
+		"OUTChain3": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				600
+			]
+		},
+		"octahedron1": {
+			"type": "OctahedronSDF",
+			"position": [
+				0,
+				800
+			],
+			"parameters": {
+				"size": {
+					"value": 0.5
+				}
+			}
+		},
+		"plane1": {
+			"type": "PlaneSDF",
+			"position": [
+				0,
+				920
+			]
+		},
+		"intersection1": {
+			"type": "IntersectionSDF",
+			"position": [
+				300,
+				800
+			]
+		},
+		"onion1": {
+			"type": "OnionSDF",
+			"position": [
+				600,
+				800
+			],
+			"parameters": {
+				"thickness": {
+					"value": 0.03
+				}
+			}
+		},
+		"elongate1": {
+			"type": "ElongateSDF",
+			"position": [
+				900,
+				800
+			],
+			"parameters": {
+				"x": {
+					"value": 0.2
+				},
+				"y": {
+					"value": 0.0
+				},
+				"z": {
+					"value": 0.0
+				}
+			}
+		},
+		"raymarch4": {
+			"type": "RaymarchSDF",
+			"position": [
+				1200,
+				800
+			]
+		},
+		"OUTChain4": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				800
+			]
+		},
+		"pyramid1": {
+			"type": "PyramidSDF",
+			"position": [
+				0,
+				1000
+			],
+			"parameters": {
+				"height": {
+					"value": 0.5
+				}
+			}
+		},
+		"bend1": {
+			"type": "BendSDF",
+			"position": [
+				300,
+				1000
+			],
+			"parameters": {
+				"amount": {
+					"value": 0.5
+				}
+			}
+		},
+		"twist1": {
+			"type": "TwistSDF",
+			"position": [
+				600,
+				1000
+			],
+			"parameters": {
+				"amount": {
+					"value": 2.0
+				}
+			}
+		},
+		"mirror1": {
+			"type": "MirrorSDF",
+			"position": [
+				900,
+				1000
+			]
+		},
+		"repeat1": {
+			"type": "RepeatSDF",
+			"position": [
+				1200,
+				1000
+			],
+			"parameters": {
+				"period_x": {
+					"value": 2.0
+				},
+				"period_y": {
+					"value": 2.0
+				},
+				"period_z": {
+					"value": 2.0
+				}
+			}
+		},
+		"raymarch5": {
+			"type": "RaymarchSDF",
+			"position": [
+				1500,
+				1000
+			]
+		},
+		"OUTChain5": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1000
+			]
+		},
+		"gyroid1": {
+			"type": "GyroidSDF",
+			"position": [
+				0,
+				1200
+			],
+			"parameters": {
+				"scale": {
+					"value": 3.0
+				}
+			}
+		},
+		"displace1": {
+			"type": "DisplaceSDF",
+			"position": [
+				300,
+				1200
+			],
+			"parameters": {
+				"amplitude": {
+					"value": 0.1
+				}
+			}
+		},
+		"material1": {
+			"type": "MaterialSDF",
+			"position": [
+				600,
+				1200
+			],
+			"parameters": {
+				"color": {
+					"value": {
+						"_type": "Color",
+						"r": 0.8,
+						"g": 0.3,
+						"b": 0.1,
+						"a": 1.0
+					}
+				}
+			}
+		},
+		"gradient1": {
+			"type": "GradientSDF",
+			"position": [
+				900,
+				1200
+			]
+		},
+		"raymarch6": {
+			"type": "RaymarchSDF",
+			"position": [
+				1200,
+				1200
+			]
+		},
+		"OUTChain6": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1200
+			]
+		},
+		"sphere2": {
+			"type": "SphereSDF",
+			"position": [
+				0,
+				1400
+			],
+			"parameters": {
+				"radius": {
+					"value": 0.3
+				}
+			}
+		},
+		"null1": {
+			"type": "NullSDF",
+			"position": [
+				300,
+				1400
+			]
+		},
+		"select1": {
+			"type": "SelectSDF",
+			"position": [
+				600,
+				1400
+			]
+		},
+		"switch1": {
+			"type": "SwitchSDF",
+			"position": [
+				900,
+				1400
+			],
+			"parameters": {
+				"index": {
+					"value": 0
+				}
+			}
+		},
+		"raymarch7": {
+			"type": "RaymarchSDF",
+			"position": [
+				1200,
+				1400
+			]
+		},
+		"OUTChain7": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1400
+			]
+		},
+		"switch_main": {
+			"type": "SwitchTOP",
+			"position": [
+				-400,
+				0
+			]
+		},
+		"window_out1": {
+			"type": "WindowOUT",
+			"position": [
+				-700,
+				0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"chain_slider": {
+			"type": "SliderUI",
+			"position": [
+				-700,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Chain"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 7.0
+				},
+				"value": {
+					"value": 0.0
+				}
+			}
+		},
+		"chain_label": {
+			"type": "LabelUI",
+			"position": [
+				-700,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "ALL CORE SDFs \u2014 7 chains"
+				}
+			}
+		},
+		"panel_container": {
+			"type": "PanelContainerUI",
+			"position": [
+				-900,
+				200
+			]
+		}
+	},
+	"connections": [
+		{
+			"from": "box1",
+			"from_port": 0,
+			"to": "union1",
+			"to_port": 0
+		},
+		{
+			"from": "sphere1",
+			"from_port": 0,
+			"to": "union1",
+			"to_port": 1
+		},
+		{
+			"from": "union1",
+			"from_port": 0,
+			"to": "raymarch1",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch1",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "torus1",
+			"from_port": 0,
+			"to": "smoothunion1",
+			"to_port": 0
+		},
+		{
+			"from": "capsule1",
+			"from_port": 0,
+			"to": "smoothunion1",
+			"to_port": 1
+		},
+		{
+			"from": "smoothunion1",
+			"from_port": 0,
+			"to": "round1",
+			"to_port": 0
+		},
+		{
+			"from": "round1",
+			"from_port": 0,
+			"to": "raymarch2",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch2",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "cone1",
+			"from_port": 0,
+			"to": "subtract1",
+			"to_port": 0
+		},
+		{
+			"from": "cylinder1",
+			"from_port": 0,
+			"to": "subtract1",
+			"to_port": 1
+		},
+		{
+			"from": "subtract1",
+			"from_port": 0,
+			"to": "smoothsubtract1",
+			"to_port": 0
+		},
+		{
+			"from": "smoothsubtract1",
+			"from_port": 0,
+			"to": "raymarch3",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch3",
+			"from_port": 0,
+			"to": "OUTChain3",
+			"to_port": 0
+		},
+		{
+			"from": "octahedron1",
+			"from_port": 0,
+			"to": "intersection1",
+			"to_port": 0
+		},
+		{
+			"from": "plane1",
+			"from_port": 0,
+			"to": "intersection1",
+			"to_port": 1
+		},
+		{
+			"from": "intersection1",
+			"from_port": 0,
+			"to": "onion1",
+			"to_port": 0
+		},
+		{
+			"from": "onion1",
+			"from_port": 0,
+			"to": "elongate1",
+			"to_port": 0
+		},
+		{
+			"from": "elongate1",
+			"from_port": 0,
+			"to": "raymarch4",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch4",
+			"from_port": 0,
+			"to": "OUTChain4",
+			"to_port": 0
+		},
+		{
+			"from": "pyramid1",
+			"from_port": 0,
+			"to": "bend1",
+			"to_port": 0
+		},
+		{
+			"from": "bend1",
+			"from_port": 0,
+			"to": "twist1",
+			"to_port": 0
+		},
+		{
+			"from": "twist1",
+			"from_port": 0,
+			"to": "mirror1",
+			"to_port": 0
+		},
+		{
+			"from": "mirror1",
+			"from_port": 0,
+			"to": "repeat1",
+			"to_port": 0
+		},
+		{
+			"from": "repeat1",
+			"from_port": 0,
+			"to": "raymarch5",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch5",
+			"from_port": 0,
+			"to": "OUTChain5",
+			"to_port": 0
+		},
+		{
+			"from": "gyroid1",
+			"from_port": 0,
+			"to": "displace1",
+			"to_port": 0
+		},
+		{
+			"from": "displace1",
+			"from_port": 0,
+			"to": "material1",
+			"to_port": 0
+		},
+		{
+			"from": "material1",
+			"from_port": 0,
+			"to": "gradient1",
+			"to_port": 0
+		},
+		{
+			"from": "gradient1",
+			"from_port": 0,
+			"to": "raymarch6",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch6",
+			"from_port": 0,
+			"to": "OUTChain6",
+			"to_port": 0
+		},
+		{
+			"from": "sphere2",
+			"from_port": 0,
+			"to": "null1",
+			"to_port": 0
+		},
+		{
+			"from": "null1",
+			"from_port": 0,
+			"to": "select1",
+			"to_port": 0
+		},
+		{
+			"from": "select1",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 0
+		},
+		{
+			"from": "switch1",
+			"from_port": 0,
+			"to": "raymarch7",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch7",
+			"from_port": 0,
+			"to": "OUTChain7",
+			"to_port": 0
+		},
+		{
+			"from": "switch_main",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "chain_slider",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 0
+		},
+		{
+			"from": "chain_label",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain2",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain3",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 2
+		},
+		{
+			"from": "OUTChain4",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 3
+		},
+		{
+			"from": "OUTChain5",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 4
+		},
+		{
+			"from": "OUTChain6",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 5
+		},
+		{
+			"from": "OUTChain7",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 6
+		}
+	]
+}

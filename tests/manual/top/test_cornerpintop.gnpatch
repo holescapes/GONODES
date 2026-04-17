@@ -1,0 +1,51 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES_manual_test",
+    "nodes": {
+        "src": {
+            "class_name": "NoiseTOP",
+            "position": [
+                0,
+                0
+            ],
+            "parameters": {}
+        },
+        "test": {
+            "class_name": "CornerPinTOP",
+            "position": [
+                350,
+                0
+            ],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        {
+            "from": "src",
+            "from_port": 0,
+            "to": "test",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "MANUAL TEST: NoiseTOP \u2192 CornerPinTOP\n\nVerify: texture is perspective-warped by the four corner positions",
+            "position": [
+                -120.0,
+                -140.0
+            ],
+            "size": [
+                480.0,
+                130.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                0.6,
+                0.9
+            ]
+        }
+    ]
+}

@@ -1,0 +1,131 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "monochrome": {
+                    "value": true
+                }
+            }
+        },
+        "top2img": {
+            "type": "TOPtoIMG",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "focus1": {
+            "type": "BackgroundSubtractIMG",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "method": {
+                    "value": 0
+                },
+                "history": {
+                    "value": 500
+                },
+                "threshold": {
+                    "value": 16.0
+                },
+                "detect_shadows": {
+                    "value": true
+                },
+                "active": {
+                    "value": true
+                }
+            }
+        },
+        "img2top": {
+            "type": "ImgToTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1300,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src1",
+            "from_port": 0,
+            "to": "top2img",
+            "to_port": 0
+        },
+        {
+            "from": "top2img",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "img2top",
+            "to_port": 0
+        },
+        {
+            "from": "img2top",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Background Subtract IMG \u2014 Basic\n\nSubtracts a learned background model to isolate foreground motion.\nAdjust history length and threshold to tune sensitivity.\ndetect_shadows separates shadow pixels from foreground.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                520,
+                140
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

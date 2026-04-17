@@ -1,0 +1,112 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "top2img": {
+            "type": "TOPtoIMG",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "focus1": {
+            "type": "SelectIMG",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "img2top": {
+            "type": "ImgToTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1300,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src1",
+            "from_port": 0,
+            "to": "top2img",
+            "to_port": 0
+        },
+        {
+            "from": "top2img",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "img2top",
+            "to_port": 0
+        },
+        {
+            "from": "img2top",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Select IMG \u2014 Basic\n\nReference another IMG operator by name or wire.\nUseful for re-using image data without duplicating processing.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

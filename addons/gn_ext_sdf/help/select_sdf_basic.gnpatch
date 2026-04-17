@@ -1,0 +1,104 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "box1": {
+            "type": "BoxSDF",
+            "position": [
+                200,
+                200
+            ],
+            "parameters": {}
+        },
+        "focus1": {
+            "type": "SelectSDF",
+            "position": [
+                550,
+                200
+            ],
+            "parameters": {}
+        },
+        "raymarch1": {
+            "type": "RaymarchSDF",
+            "position": [
+                900,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "cam_distance": {
+                    "value": 5.0
+                },
+                "show_ao": {
+                    "value": true
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1300,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Select SDF \u2014 Basic\n\nReference another SDF operator by name or wire.\nRe-use an SDF field in multiple places without recalculating it.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -1,0 +1,69 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "focus1": {
+            "type": "WebRenderTOP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "mode": {
+                    "value": 0
+                },
+                "url": {
+                    "value": "https://example.com"
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Web Render TOP \u2014 Basic\n\nRender a web page or custom HTML to a texture.\nmode selects URL or inline HTML. Set url for web pages.\nUse html parameter for custom markup.\nPowered by an embedded Chromium renderer.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

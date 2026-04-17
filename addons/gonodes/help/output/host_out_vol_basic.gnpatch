@@ -1,0 +1,55 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise_vol": {
+            "type": "NoiseVOL",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "focus1": {
+            "type": "HostOutVOL",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "density"
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise_vol",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostOut VOL \u2014 Basic\n\nExpose volume data to the host application via libgonodes.\nSet label to identify this output when reading from C/C++/Python.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

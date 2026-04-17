@@ -246,6 +246,38 @@ editor UX problems, and visual correctness that headless tests cannot verify.
 
 **Estimated time: 3–4 hours total.**
 
+#### ALL_CORE comprehensive test patches
+
+Before starting manual QA, regenerate the ALL_CORE patches to ensure they cover
+all currently registered operators:
+
+```bash
+python scripts/gen_all_core_patches.py
+```
+
+This creates 13 `.gnpatch` files covering **all 539 operators** across every family,
+organized into logical chains with a SwitchTOP → WindowOUT for visual inspection.
+Use the chain slider to step through each operator group.
+
+| Patch | Location | Operators |
+|-------|----------|-----------|
+| ALL_CORE_CHOPs | `tests/manual/chop/` | 85 CHOPs in 22 chains |
+| ALL_CORE_SOPs | `tests/manual/sop/` | 76 SOPs in 22 chains |
+| ALL_CORE_TOPs | `tests/manual/top/` | 143 TOPs in 20 chains |
+| ALL_CORE_COMPs | `tests/manual/comp/` | 26 COMPs in 5 chains |
+| ALL_CORE_DATs | `tests/manual/dat/` | 48 DATs in 13 chains |
+| ALL_CORE_IMGs | `tests/manual/img/` | 34 IMGs in 9 chains |
+| ALL_CORE_MATs | `tests/manual/mat/` | 12 MATs in 12 chains |
+| ALL_CORE_UIs | `tests/manual/ui/` | 33 UIs in 7 chains |
+| ALL_CORE_POPs | `tests/manual/pop/` | 14 POPs in 5 chains |
+| ALL_CORE_VOLs | `tests/manual/vol/` | 15 VOLs in 6 chains |
+| ALL_CORE_OUTs | `tests/manual/output/` | 17 OUTs in 6 chains |
+| ALL_CORE_SDFs | `addons/gn_ext_sdf/tests/manual/` | 29 SDFs in 7 chains |
+| ALL_CORE_SCRIPTs | `tests/manual/script/` | 3 SCRIPTs in 1 chain |
+
+- [ ] Open each ALL_CORE patch → step through all chains → no red errors, no crashes
+- [ ] Visual output for GPU families (TOP, COMP, MAT, POP, VOL, SDF) looks reasonable
+
 #### Phase A: Editor smoke (30 min)
 
 - [ ] Open editor — graph canvas renders, no visual glitches

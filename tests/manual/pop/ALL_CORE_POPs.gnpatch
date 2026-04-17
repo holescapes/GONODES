@@ -1,0 +1,551 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_manual_test",
+	"nodes": {
+		"source1": {
+			"type": "SourcePOP",
+			"position": [
+				0,
+				200
+			],
+			"parameters": {
+				"emit_rate": {
+					"value": 500
+				},
+				"lifetime": {
+					"value": 3.0
+				}
+			}
+		},
+		"force1": {
+			"type": "ForcePOP",
+			"position": [
+				300,
+				200
+			],
+			"parameters": {
+				"gravity_y": {
+					"value": -9.81
+				},
+				"strength": {
+					"value": 1.0
+				}
+			}
+		},
+		"turbulence1": {
+			"type": "TurbulencePOP",
+			"position": [
+				600,
+				200
+			],
+			"parameters": {
+				"amplitude": {
+					"value": 2.0
+				},
+				"frequency": {
+					"value": 1.5
+				}
+			}
+		},
+		"limit1": {
+			"type": "LimitPOP",
+			"position": [
+				900,
+				200
+			],
+			"parameters": {
+				"max_particles": {
+					"value": 5000
+				}
+			}
+		},
+		"collision1": {
+			"type": "CollisionPOP",
+			"position": [
+				1200,
+				200
+			],
+			"parameters": {
+				"floor_y": {
+					"value": -1.0
+				}
+			}
+		},
+		"pointcloud1": {
+			"type": "PointCloudRenderTOP",
+			"position": [
+				1500,
+				200
+			]
+		},
+		"OUTChain1": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				200
+			]
+		},
+		"source2": {
+			"type": "SourcePOP",
+			"position": [
+				0,
+				400
+			],
+			"parameters": {
+				"emit_rate": {
+					"value": 300
+				},
+				"lifetime": {
+					"value": 5.0
+				}
+			}
+		},
+		"attract1": {
+			"type": "AttractPOP",
+			"position": [
+				300,
+				400
+			],
+			"parameters": {
+				"strength": {
+					"value": 3.0
+				},
+				"radius": {
+					"value": 2.0
+				}
+			}
+		},
+		"boids1": {
+			"type": "BoidsPOP",
+			"position": [
+				600,
+				400
+			],
+			"parameters": {
+				"separation": {
+					"value": 0.5
+				},
+				"alignment": {
+					"value": 1.0
+				},
+				"cohesion": {
+					"value": 0.8
+				}
+			}
+		},
+		"pointcloud2": {
+			"type": "PointCloudRenderTOP",
+			"position": [
+				900,
+				400
+			]
+		},
+		"OUTChain2": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				400
+			]
+		},
+		"source3": {
+			"type": "SourcePOP",
+			"position": [
+				0,
+				600
+			],
+			"parameters": {
+				"emit_rate": {
+					"value": 200
+				}
+			}
+		},
+		"advect1": {
+			"type": "AdvectPOP",
+			"position": [
+				300,
+				600
+			]
+		},
+		"null1": {
+			"type": "NullPOP",
+			"position": [
+				600,
+				600
+			]
+		},
+		"select1": {
+			"type": "SelectPOP",
+			"position": [
+				900,
+				600
+			]
+		},
+		"switch1": {
+			"type": "SwitchPOP",
+			"position": [
+				1200,
+				600
+			],
+			"parameters": {
+				"index": {
+					"value": 0
+				}
+			}
+		},
+		"pointcloud3": {
+			"type": "PointCloudRenderTOP",
+			"position": [
+				1500,
+				600
+			]
+		},
+		"particlestate1": {
+			"type": "ParticleStateTOP",
+			"position": [
+				1500,
+				700
+			]
+		},
+		"OUTChain3": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				600
+			]
+		},
+		"source4": {
+			"type": "SourcePOP",
+			"position": [
+				0,
+				800
+			],
+			"parameters": {
+				"emit_rate": {
+					"value": 100
+				}
+			}
+		},
+		"instance1": {
+			"type": "InstancePOP",
+			"position": [
+				300,
+				800
+			]
+		},
+		"render1": {
+			"type": "RenderPOP",
+			"position": [
+				600,
+				800
+			]
+		},
+		"pointcloud4": {
+			"type": "PointCloudRenderTOP",
+			"position": [
+				900,
+				800
+			]
+		},
+		"OUTChain4": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				800
+			]
+		},
+		"hostin1": {
+			"type": "HostInPOP",
+			"position": [
+				0,
+				1000
+			]
+		},
+		"hostout1": {
+			"type": "HostOutPOP",
+			"position": [
+				300,
+				1000
+			]
+		},
+		"pointcloud5": {
+			"type": "PointCloudRenderTOP",
+			"position": [
+				600,
+				1000
+			]
+		},
+		"OUTChain5": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1000
+			]
+		},
+		"switch_main": {
+			"type": "SwitchTOP",
+			"position": [
+				-400,
+				0
+			]
+		},
+		"window_out1": {
+			"type": "WindowOUT",
+			"position": [
+				-700,
+				0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"chain_slider": {
+			"type": "SliderUI",
+			"position": [
+				-700,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Chain"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 5.0
+				},
+				"value": {
+					"value": 0.0
+				}
+			}
+		},
+		"chain_label": {
+			"type": "LabelUI",
+			"position": [
+				-700,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "ALL CORE POPs \u2014 5 chains"
+				}
+			}
+		},
+		"panel_container": {
+			"type": "PanelContainerUI",
+			"position": [
+				-900,
+				200
+			]
+		}
+	},
+	"connections": [
+		{
+			"from": "source1",
+			"from_port": 0,
+			"to": "force1",
+			"to_port": 0
+		},
+		{
+			"from": "force1",
+			"from_port": 0,
+			"to": "turbulence1",
+			"to_port": 0
+		},
+		{
+			"from": "turbulence1",
+			"from_port": 0,
+			"to": "limit1",
+			"to_port": 0
+		},
+		{
+			"from": "limit1",
+			"from_port": 0,
+			"to": "collision1",
+			"to_port": 0
+		},
+		{
+			"from": "collision1",
+			"from_port": 0,
+			"to": "pointcloud1",
+			"to_port": 0
+		},
+		{
+			"from": "pointcloud1",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "source2",
+			"from_port": 0,
+			"to": "attract1",
+			"to_port": 0
+		},
+		{
+			"from": "attract1",
+			"from_port": 0,
+			"to": "boids1",
+			"to_port": 0
+		},
+		{
+			"from": "boids1",
+			"from_port": 0,
+			"to": "pointcloud2",
+			"to_port": 0
+		},
+		{
+			"from": "pointcloud2",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "source3",
+			"from_port": 0,
+			"to": "advect1",
+			"to_port": 0
+		},
+		{
+			"from": "advect1",
+			"from_port": 0,
+			"to": "null1",
+			"to_port": 0
+		},
+		{
+			"from": "null1",
+			"from_port": 0,
+			"to": "select1",
+			"to_port": 0
+		},
+		{
+			"from": "select1",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 0
+		},
+		{
+			"from": "switch1",
+			"from_port": 0,
+			"to": "pointcloud3",
+			"to_port": 0
+		},
+		{
+			"from": "switch1",
+			"from_port": 0,
+			"to": "particlestate1",
+			"to_port": 0
+		},
+		{
+			"from": "pointcloud3",
+			"from_port": 0,
+			"to": "OUTChain3",
+			"to_port": 0
+		},
+		{
+			"from": "source4",
+			"from_port": 0,
+			"to": "instance1",
+			"to_port": 0
+		},
+		{
+			"from": "instance1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 0
+		},
+		{
+			"from": "render1",
+			"from_port": 0,
+			"to": "pointcloud4",
+			"to_port": 0
+		},
+		{
+			"from": "pointcloud4",
+			"from_port": 0,
+			"to": "OUTChain4",
+			"to_port": 0
+		},
+		{
+			"from": "hostin1",
+			"from_port": 0,
+			"to": "hostout1",
+			"to_port": 0
+		},
+		{
+			"from": "hostin1",
+			"from_port": 0,
+			"to": "pointcloud5",
+			"to_port": 0
+		},
+		{
+			"from": "pointcloud5",
+			"from_port": 0,
+			"to": "OUTChain5",
+			"to_port": 0
+		},
+		{
+			"from": "switch_main",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "chain_slider",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 0
+		},
+		{
+			"from": "chain_label",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain2",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain3",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 2
+		},
+		{
+			"from": "OUTChain4",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 3
+		},
+		{
+			"from": "OUTChain5",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 4
+		}
+	]
+}

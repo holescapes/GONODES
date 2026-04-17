@@ -1,0 +1,163 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_manual_test",
+	"nodes": {
+		"gdscriptscript1": {
+			"type": "GDScriptSCRIPT",
+			"position": [
+				0,
+				200
+			]
+		},
+		"pythonscript1": {
+			"type": "PythonSCRIPT",
+			"position": [
+				300,
+				200
+			]
+		},
+		"nativescript1": {
+			"type": "NativeSCRIPT",
+			"position": [
+				600,
+				200
+			]
+		},
+		"choptotop1": {
+			"type": "CHOPtoTOP",
+			"position": [
+				900,
+				200
+			]
+		},
+		"OUTChain1": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				200
+			]
+		},
+		"switch_main": {
+			"type": "SwitchTOP",
+			"position": [
+				-400,
+				0
+			]
+		},
+		"window_out1": {
+			"type": "WindowOUT",
+			"position": [
+				-700,
+				0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"chain_slider": {
+			"type": "SliderUI",
+			"position": [
+				-700,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Chain"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 1.0
+				},
+				"value": {
+					"value": 0.0
+				}
+			}
+		},
+		"chain_label": {
+			"type": "LabelUI",
+			"position": [
+				-700,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "ALL CORE SCRIPTs \u2014 1 chains"
+				}
+			}
+		},
+		"panel_container": {
+			"type": "PanelContainerUI",
+			"position": [
+				-900,
+				200
+			]
+		}
+	},
+	"connections": [
+		{
+			"from": "gdscriptscript1",
+			"from_port": 0,
+			"to": "pythonscript1",
+			"to_port": 0
+		},
+		{
+			"from": "pythonscript1",
+			"from_port": 0,
+			"to": "nativescript1",
+			"to_port": 0
+		},
+		{
+			"from": "nativescript1",
+			"from_port": 0,
+			"to": "choptotop1",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop1",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "switch_main",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "chain_slider",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 0
+		},
+		{
+			"from": "chain_label",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 0
+		}
+	]
+}

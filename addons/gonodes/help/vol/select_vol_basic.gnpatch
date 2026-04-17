@@ -1,0 +1,90 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise_vol": {
+            "type": "NoiseVOL",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "focus1": {
+            "type": "SelectVOL",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise_vol",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Select VOL \u2014 Basic\n\nReference another VOL operator by name or wire.\nRe-use a volume field without recalculating it.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

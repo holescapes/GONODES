@@ -1,0 +1,896 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_manual_test",
+	"nodes": {
+		"container1": {
+			"type": "ContainerUI",
+			"position": [
+				1800,
+				200
+			]
+		},
+		"btn1": {
+			"type": "ButtonUI",
+			"position": [
+				0,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Test Button"
+				}
+			}
+		},
+		"slider1": {
+			"type": "SliderUI",
+			"position": [
+				300,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Slider"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 100.0
+				}
+			}
+		},
+		"toggle1": {
+			"type": "ToggleUI",
+			"position": [
+				600,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Toggle"
+				}
+			}
+		},
+		"knob1": {
+			"type": "KnobUI",
+			"position": [
+				900,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Knob"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 1.0
+				}
+			}
+		},
+		"xypad1": {
+			"type": "XYPadUI",
+			"position": [
+				1200,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "XY Pad"
+				}
+			}
+		},
+		"dropdown1": {
+			"type": "DropdownUI",
+			"position": [
+				1500,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Dropdown"
+				}
+			}
+		},
+		"paneltop1": {
+			"type": "PanelTOP",
+			"position": [
+				2100,
+				200
+			]
+		},
+		"OUTChain1": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				200
+			]
+		},
+		"container2": {
+			"type": "ScrollContainerUI",
+			"position": [
+				1500,
+				400
+			]
+		},
+		"label1": {
+			"type": "LabelUI",
+			"position": [
+				0,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "Hello GONODES"
+				}
+			}
+		},
+		"lineedit1": {
+			"type": "LineEditUI",
+			"position": [
+				300,
+				400
+			],
+			"parameters": {
+				"placeholder": {
+					"value": "Type here..."
+				}
+			}
+		},
+		"textedit1": {
+			"type": "TextEditUI",
+			"position": [
+				600,
+				400
+			]
+		},
+		"rtlabel1": {
+			"type": "RichTextLabelUI",
+			"position": [
+				900,
+				400
+			],
+			"parameters": {
+				"bbcode_text": {
+					"value": "[b]Bold[/b] [i]Italic[/i]"
+				}
+			}
+		},
+		"spinbox1": {
+			"type": "SpinBoxUI",
+			"position": [
+				1200,
+				400
+			],
+			"parameters": {
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 100.0
+				},
+				"value": {
+					"value": 50.0
+				}
+			}
+		},
+		"paneltop2": {
+			"type": "PanelTOP",
+			"position": [
+				1800,
+				400
+			]
+		},
+		"OUTChain2": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				400
+			]
+		},
+		"container3": {
+			"type": "MarginContainerUI",
+			"position": [
+				1200,
+				600
+			]
+		},
+		"colorpicker1": {
+			"type": "ColorPickerUI",
+			"position": [
+				0,
+				600
+			]
+		},
+		"progressbar1": {
+			"type": "ProgressBarUI",
+			"position": [
+				300,
+				600
+			],
+			"parameters": {
+				"value": {
+					"value": 65.0
+				}
+			}
+		},
+		"checkbox1": {
+			"type": "CheckBoxUI",
+			"position": [
+				600,
+				600
+			],
+			"parameters": {
+				"label": {
+					"value": "Check me"
+				}
+			}
+		},
+		"texprogress1": {
+			"type": "TextureProgressBarUI",
+			"position": [
+				900,
+				600
+			],
+			"parameters": {
+				"value": {
+					"value": 50.0
+				}
+			}
+		},
+		"paneltop3": {
+			"type": "PanelTOP",
+			"position": [
+				1500,
+				600
+			]
+		},
+		"OUTChain3": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				600
+			]
+		},
+		"container4": {
+			"type": "ContainerUI",
+			"position": [
+				1500,
+				800
+			]
+		},
+		"tabcontainer1": {
+			"type": "TabContainerUI",
+			"position": [
+				0,
+				800
+			]
+		},
+		"splitcontainer1": {
+			"type": "SplitContainerUI",
+			"position": [
+				300,
+				800
+			]
+		},
+		"panelcontainer1": {
+			"type": "PanelContainerUI",
+			"position": [
+				600,
+				800
+			]
+		},
+		"tabbar1": {
+			"type": "TabBarUI",
+			"position": [
+				900,
+				800
+			]
+		},
+		"menubutton1": {
+			"type": "MenuButtonUI",
+			"position": [
+				1200,
+				800
+			],
+			"parameters": {
+				"text": {
+					"value": "Menu"
+				}
+			}
+		},
+		"paneltop4": {
+			"type": "PanelTOP",
+			"position": [
+				1800,
+				800
+			]
+		},
+		"OUTChain4": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				800
+			]
+		},
+		"container5": {
+			"type": "ContainerUI",
+			"position": [
+				2400,
+				1000
+			]
+		},
+		"tree1": {
+			"type": "TreeUI",
+			"position": [
+				0,
+				1000
+			]
+		},
+		"itemlist1": {
+			"type": "ItemListUI",
+			"position": [
+				300,
+				1000
+			]
+		},
+		"texrect1": {
+			"type": "TextureRectUI",
+			"position": [
+				600,
+				1000
+			]
+		},
+		"colorrect1": {
+			"type": "ColorRectUI",
+			"position": [
+				900,
+				1000
+			],
+			"parameters": {
+				"color": {
+					"value": {
+						"_type": "Color",
+						"r": 0.3,
+						"g": 0.6,
+						"b": 0.9,
+						"a": 1.0
+					}
+				}
+			}
+		},
+		"ninepatch1": {
+			"type": "NinePatchRectUI",
+			"position": [
+				1200,
+				1000
+			]
+		},
+		"separator1": {
+			"type": "SeparatorUI",
+			"position": [
+				1500,
+				1000
+			]
+		},
+		"linkbtn1": {
+			"type": "LinkButtonUI",
+			"position": [
+				1800,
+				1000
+			],
+			"parameters": {
+				"text": {
+					"value": "Click Me"
+				}
+			}
+		},
+		"texbtn1": {
+			"type": "TextureButtonUI",
+			"position": [
+				2100,
+				1000
+			]
+		},
+		"paneltop5": {
+			"type": "PanelTOP",
+			"position": [
+				2700,
+				1000
+			]
+		},
+		"OUTChain5": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1000
+			]
+		},
+		"nullui1": {
+			"type": "NullUI",
+			"position": [
+				0,
+				1200
+			]
+		},
+		"switchui1": {
+			"type": "SwitchUI",
+			"position": [
+				300,
+				1200
+			],
+			"parameters": {
+				"index": {
+					"value": 0
+				}
+			}
+		},
+		"paneltop6": {
+			"type": "PanelTOP",
+			"position": [
+				600,
+				1200
+			]
+		},
+		"OUTChain6": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1200
+			]
+		},
+		"container6": {
+			"type": "ContainerUI",
+			"position": [
+				900,
+				1400
+			]
+		},
+		"bezierdrag1": {
+			"type": "BezierDragUI",
+			"position": [
+				0,
+				1400
+			]
+		},
+		"cornerdrag1": {
+			"type": "CornerDragUI",
+			"position": [
+				300,
+				1400
+			]
+		},
+		"griddrag1": {
+			"type": "GridDragUI",
+			"position": [
+				600,
+				1400
+			]
+		},
+		"paneltop7": {
+			"type": "PanelTOP",
+			"position": [
+				1200,
+				1400
+			]
+		},
+		"OUTChain7": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1400
+			]
+		},
+		"switch_main": {
+			"type": "SwitchTOP",
+			"position": [
+				-400,
+				0
+			]
+		},
+		"window_out1": {
+			"type": "WindowOUT",
+			"position": [
+				-700,
+				0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"chain_slider": {
+			"type": "SliderUI",
+			"position": [
+				-700,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Chain"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 7.0
+				},
+				"value": {
+					"value": 0.0
+				}
+			}
+		},
+		"chain_label": {
+			"type": "LabelUI",
+			"position": [
+				-700,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "ALL CORE UIs \u2014 7 chains"
+				}
+			}
+		},
+		"panel_container": {
+			"type": "PanelContainerUI",
+			"position": [
+				-900,
+				200
+			]
+		}
+	},
+	"connections": [
+		{
+			"from": "btn1",
+			"from_port": 0,
+			"to": "container1",
+			"to_port": 0
+		},
+		{
+			"from": "slider1",
+			"from_port": 0,
+			"to": "container1",
+			"to_port": 1
+		},
+		{
+			"from": "toggle1",
+			"from_port": 0,
+			"to": "container1",
+			"to_port": 2
+		},
+		{
+			"from": "knob1",
+			"from_port": 0,
+			"to": "container1",
+			"to_port": 3
+		},
+		{
+			"from": "xypad1",
+			"from_port": 0,
+			"to": "container1",
+			"to_port": 4
+		},
+		{
+			"from": "dropdown1",
+			"from_port": 0,
+			"to": "container1",
+			"to_port": 5
+		},
+		{
+			"from": "container1",
+			"from_port": 0,
+			"to": "paneltop1",
+			"to_port": 0
+		},
+		{
+			"from": "paneltop1",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "label1",
+			"from_port": 0,
+			"to": "container2",
+			"to_port": 0
+		},
+		{
+			"from": "lineedit1",
+			"from_port": 0,
+			"to": "container2",
+			"to_port": 1
+		},
+		{
+			"from": "textedit1",
+			"from_port": 0,
+			"to": "container2",
+			"to_port": 2
+		},
+		{
+			"from": "rtlabel1",
+			"from_port": 0,
+			"to": "container2",
+			"to_port": 3
+		},
+		{
+			"from": "spinbox1",
+			"from_port": 0,
+			"to": "container2",
+			"to_port": 4
+		},
+		{
+			"from": "container2",
+			"from_port": 0,
+			"to": "paneltop2",
+			"to_port": 0
+		},
+		{
+			"from": "paneltop2",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "colorpicker1",
+			"from_port": 0,
+			"to": "container3",
+			"to_port": 0
+		},
+		{
+			"from": "progressbar1",
+			"from_port": 0,
+			"to": "container3",
+			"to_port": 1
+		},
+		{
+			"from": "checkbox1",
+			"from_port": 0,
+			"to": "container3",
+			"to_port": 2
+		},
+		{
+			"from": "texprogress1",
+			"from_port": 0,
+			"to": "container3",
+			"to_port": 3
+		},
+		{
+			"from": "container3",
+			"from_port": 0,
+			"to": "paneltop3",
+			"to_port": 0
+		},
+		{
+			"from": "paneltop3",
+			"from_port": 0,
+			"to": "OUTChain3",
+			"to_port": 0
+		},
+		{
+			"from": "tabcontainer1",
+			"from_port": 0,
+			"to": "container4",
+			"to_port": 0
+		},
+		{
+			"from": "splitcontainer1",
+			"from_port": 0,
+			"to": "container4",
+			"to_port": 1
+		},
+		{
+			"from": "panelcontainer1",
+			"from_port": 0,
+			"to": "container4",
+			"to_port": 2
+		},
+		{
+			"from": "tabbar1",
+			"from_port": 0,
+			"to": "container4",
+			"to_port": 3
+		},
+		{
+			"from": "menubutton1",
+			"from_port": 0,
+			"to": "container4",
+			"to_port": 4
+		},
+		{
+			"from": "container4",
+			"from_port": 0,
+			"to": "paneltop4",
+			"to_port": 0
+		},
+		{
+			"from": "paneltop4",
+			"from_port": 0,
+			"to": "OUTChain4",
+			"to_port": 0
+		},
+		{
+			"from": "tree1",
+			"from_port": 0,
+			"to": "container5",
+			"to_port": 0
+		},
+		{
+			"from": "itemlist1",
+			"from_port": 0,
+			"to": "container5",
+			"to_port": 1
+		},
+		{
+			"from": "texrect1",
+			"from_port": 0,
+			"to": "container5",
+			"to_port": 2
+		},
+		{
+			"from": "colorrect1",
+			"from_port": 0,
+			"to": "container5",
+			"to_port": 3
+		},
+		{
+			"from": "ninepatch1",
+			"from_port": 0,
+			"to": "container5",
+			"to_port": 4
+		},
+		{
+			"from": "separator1",
+			"from_port": 0,
+			"to": "container5",
+			"to_port": 5
+		},
+		{
+			"from": "linkbtn1",
+			"from_port": 0,
+			"to": "container5",
+			"to_port": 6
+		},
+		{
+			"from": "texbtn1",
+			"from_port": 0,
+			"to": "container5",
+			"to_port": 7
+		},
+		{
+			"from": "container5",
+			"from_port": 0,
+			"to": "paneltop5",
+			"to_port": 0
+		},
+		{
+			"from": "paneltop5",
+			"from_port": 0,
+			"to": "OUTChain5",
+			"to_port": 0
+		},
+		{
+			"from": "nullui1",
+			"from_port": 0,
+			"to": "switchui1",
+			"to_port": 0
+		},
+		{
+			"from": "switchui1",
+			"from_port": 0,
+			"to": "paneltop6",
+			"to_port": 0
+		},
+		{
+			"from": "paneltop6",
+			"from_port": 0,
+			"to": "OUTChain6",
+			"to_port": 0
+		},
+		{
+			"from": "bezierdrag1",
+			"from_port": 0,
+			"to": "container6",
+			"to_port": 0
+		},
+		{
+			"from": "cornerdrag1",
+			"from_port": 0,
+			"to": "container6",
+			"to_port": 1
+		},
+		{
+			"from": "griddrag1",
+			"from_port": 0,
+			"to": "container6",
+			"to_port": 2
+		},
+		{
+			"from": "container6",
+			"from_port": 0,
+			"to": "paneltop7",
+			"to_port": 0
+		},
+		{
+			"from": "paneltop7",
+			"from_port": 0,
+			"to": "OUTChain7",
+			"to_port": 0
+		},
+		{
+			"from": "switch_main",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "chain_slider",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 0
+		},
+		{
+			"from": "chain_label",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain2",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain3",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 2
+		},
+		{
+			"from": "OUTChain4",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 3
+		},
+		{
+			"from": "OUTChain5",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 4
+		},
+		{
+			"from": "OUTChain6",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 5
+		},
+		{
+			"from": "OUTChain7",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 6
+		}
+	]
+}

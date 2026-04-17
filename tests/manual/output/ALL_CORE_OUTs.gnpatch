@@ -1,0 +1,522 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_manual_test",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [
+				0,
+				200
+			]
+		},
+		"sink1": {
+			"type": "SinkOUT",
+			"position": [
+				300,
+				200
+			]
+		},
+		"OUTChain1": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				200
+			]
+		},
+		"noise2": {
+			"type": "NoiseTOP",
+			"position": [
+				0,
+				400
+			]
+		},
+		"imgsave1": {
+			"type": "ImageSaveOUT",
+			"position": [
+				300,
+				400
+			],
+			"parameters": {
+				"file_path": {
+					"value": ""
+				},
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"texsave1": {
+			"type": "TextureSaveOUT",
+			"position": [
+				600,
+				400
+			],
+			"parameters": {
+				"file_path": {
+					"value": ""
+				},
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"OUTChain2": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				400
+			]
+		},
+		"noise3": {
+			"type": "NoiseTOP",
+			"position": [
+				0,
+				600
+			]
+		},
+		"movieout1": {
+			"type": "MovieOUT",
+			"position": [
+				300,
+				600
+			],
+			"parameters": {
+				"file_path": {
+					"value": ""
+				},
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"ffmpegout1": {
+			"type": "FFmpegOUT",
+			"position": [
+				600,
+				600
+			],
+			"parameters": {
+				"file_path": {
+					"value": ""
+				},
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"record1": {
+			"type": "RecordOUT",
+			"position": [
+				900,
+				600
+			],
+			"parameters": {
+				"file_path": {
+					"value": ""
+				},
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"OUTChain3": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				600
+			]
+		},
+		"wave1": {
+			"type": "WaveCHOP",
+			"position": [
+				0,
+				800
+			],
+			"parameters": {
+				"shape": {
+					"value": 0
+				},
+				"length": {
+					"value": 100
+				}
+			}
+		},
+		"choptotop1": {
+			"type": "CHOPtoTOP",
+			"position": [
+				300,
+				800
+			]
+		},
+		"oscout1": {
+			"type": "OscOUT",
+			"position": [
+				300,
+				900
+			],
+			"parameters": {
+				"address": {
+					"value": "/test"
+				},
+				"host": {
+					"value": "127.0.0.1"
+				},
+				"port": {
+					"value": 9000
+				},
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"audiodevice1": {
+			"type": "AudioDeviceOUT",
+			"position": [
+				600,
+				900
+			],
+			"parameters": {
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"tablesave1": {
+			"type": "TableSaveOUT",
+			"position": [
+				900,
+				900
+			],
+			"parameters": {
+				"file_path": {
+					"value": ""
+				},
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"OUTChain4": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				800
+			]
+		},
+		"noise4": {
+			"type": "NoiseTOP",
+			"position": [
+				0,
+				1000
+			]
+		},
+		"hapout1": {
+			"type": "HapOUT",
+			"position": [
+				300,
+				1000
+			],
+			"parameters": {
+				"file_path": {
+					"value": ""
+				},
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"OUTChain5": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1000
+			]
+		},
+		"noise5": {
+			"type": "NoiseTOP",
+			"position": [
+				0,
+				1200
+			]
+		},
+		"hostouttop1": {
+			"type": "HostOutTOP",
+			"position": [
+				300,
+				1200
+			]
+		},
+		"hostoutchop1": {
+			"type": "HostOutCHOP",
+			"position": [
+				600,
+				1200
+			]
+		},
+		"hostoutdat1": {
+			"type": "HostOutDAT",
+			"position": [
+				900,
+				1200
+			]
+		},
+		"hostoutsop1": {
+			"type": "HostOutSOP",
+			"position": [
+				1200,
+				1200
+			]
+		},
+		"hostoutpop1": {
+			"type": "HostOutPOP",
+			"position": [
+				1500,
+				1200
+			]
+		},
+		"hostoutvol1": {
+			"type": "HostOutVOL",
+			"position": [
+				1800,
+				1200
+			]
+		},
+		"OUTChain6": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1200
+			]
+		},
+		"switch_main": {
+			"type": "SwitchTOP",
+			"position": [
+				-400,
+				0
+			]
+		},
+		"window_out1": {
+			"type": "WindowOUT",
+			"position": [
+				-700,
+				0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"chain_slider": {
+			"type": "SliderUI",
+			"position": [
+				-700,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Chain"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 6.0
+				},
+				"value": {
+					"value": 0.0
+				}
+			}
+		},
+		"chain_label": {
+			"type": "LabelUI",
+			"position": [
+				-700,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "ALL CORE OUTs \u2014 6 chains"
+				}
+			}
+		},
+		"panel_container": {
+			"type": "PanelContainerUI",
+			"position": [
+				-900,
+				200
+			]
+		}
+	},
+	"connections": [
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "sink1",
+			"to_port": 0
+		},
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "noise2",
+			"from_port": 0,
+			"to": "imgsave1",
+			"to_port": 0
+		},
+		{
+			"from": "noise2",
+			"from_port": 0,
+			"to": "texsave1",
+			"to_port": 0
+		},
+		{
+			"from": "noise2",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "noise3",
+			"from_port": 0,
+			"to": "movieout1",
+			"to_port": 0
+		},
+		{
+			"from": "noise3",
+			"from_port": 0,
+			"to": "ffmpegout1",
+			"to_port": 0
+		},
+		{
+			"from": "noise3",
+			"from_port": 0,
+			"to": "record1",
+			"to_port": 0
+		},
+		{
+			"from": "noise3",
+			"from_port": 0,
+			"to": "OUTChain3",
+			"to_port": 0
+		},
+		{
+			"from": "wave1",
+			"from_port": 0,
+			"to": "choptotop1",
+			"to_port": 0
+		},
+		{
+			"from": "wave1",
+			"from_port": 0,
+			"to": "oscout1",
+			"to_port": 0
+		},
+		{
+			"from": "wave1",
+			"from_port": 0,
+			"to": "audiodevice1",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop1",
+			"from_port": 0,
+			"to": "OUTChain4",
+			"to_port": 0
+		},
+		{
+			"from": "noise4",
+			"from_port": 0,
+			"to": "hapout1",
+			"to_port": 0
+		},
+		{
+			"from": "noise4",
+			"from_port": 0,
+			"to": "OUTChain5",
+			"to_port": 0
+		},
+		{
+			"from": "noise5",
+			"from_port": 0,
+			"to": "hostouttop1",
+			"to_port": 0
+		},
+		{
+			"from": "noise5",
+			"from_port": 0,
+			"to": "OUTChain6",
+			"to_port": 0
+		},
+		{
+			"from": "switch_main",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "chain_slider",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 0
+		},
+		{
+			"from": "chain_label",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain2",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain3",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 2
+		},
+		{
+			"from": "OUTChain4",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 3
+		},
+		{
+			"from": "OUTChain5",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 4
+		},
+		{
+			"from": "OUTChain6",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 5
+		}
+	]
+}

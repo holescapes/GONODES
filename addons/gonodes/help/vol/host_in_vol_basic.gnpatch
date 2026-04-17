@@ -1,0 +1,83 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "focus1": {
+            "type": "HostInVOL",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "density_field"
+                },
+                "field_name": {
+                    "value": "density"
+                }
+            }
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostIn VOL \u2014 Basic\n\nReceive volume data from the host application via libgonodes.\nSet label and field_name to match the host's volume source.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

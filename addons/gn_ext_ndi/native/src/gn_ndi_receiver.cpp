@@ -221,7 +221,7 @@ PackedFloat32Array GNNDIReceiver::receive_audio(int p_timeout_ms) {
             result.resize(total_samples);
             interleaved.p_data = result.ptrw();
 
-            NDIlib_util_audio_to_interleaved_32f_v2(&audio_frame, &interleaved);
+            NDIlib_util_audio_to_interleaved_32f_v3(&audio_frame, &interleaved);
             NDIlib_recv_free_audio_v3(m_receiver, &audio_frame);
             break;
         }

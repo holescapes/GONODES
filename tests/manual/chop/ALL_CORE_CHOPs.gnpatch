@@ -1,0 +1,2252 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_manual_test",
+	"nodes": {
+		"lfo1": {
+			"type": "LFO_CHOP",
+			"position": [
+				0,
+				200
+			],
+			"parameters": {
+				"frequency": {
+					"value": 2.0
+				}
+			}
+		},
+		"noise1": {
+			"type": "NoiseCHOP",
+			"position": [
+				300,
+				200
+			],
+			"parameters": {
+				"type": {
+					"value": 1
+				},
+				"channels": {
+					"value": 3
+				}
+			}
+		},
+		"math1": {
+			"type": "MathCHOP",
+			"position": [
+				600,
+				200
+			],
+			"parameters": {
+				"gain": {
+					"value": 2.0
+				},
+				"operation": {
+					"value": 0
+				}
+			}
+		},
+		"null1": {
+			"type": "NullCHOP",
+			"position": [
+				900,
+				200
+			]
+		},
+		"choptotop1": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1200,
+				200
+			]
+		},
+		"OUTChain1": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				200
+			]
+		},
+		"wave1": {
+			"type": "WaveCHOP",
+			"position": [
+				0,
+				400
+			],
+			"parameters": {
+				"shape": {
+					"value": 2
+				},
+				"frequency": {
+					"value": 3.0
+				},
+				"length": {
+					"value": 100
+				}
+			}
+		},
+		"analyze1": {
+			"type": "AnalyzeCHOP",
+			"position": [
+				300,
+				400
+			],
+			"parameters": {
+				"function": {
+					"value": 0
+				}
+			}
+		},
+		"choptotop2": {
+			"type": "CHOPtoTOP",
+			"position": [
+				600,
+				400
+			]
+		},
+		"OUTChain2": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				400
+			]
+		},
+		"pattern1": {
+			"type": "PatternCHOP",
+			"position": [
+				0,
+				600
+			],
+			"parameters": {
+				"type": {
+					"value": 0
+				},
+				"length": {
+					"value": 200
+				}
+			}
+		},
+		"ramp1": {
+			"type": "RampCHOP",
+			"position": [
+				300,
+				600
+			]
+		},
+		"lookup1": {
+			"type": "LookupCHOP",
+			"position": [
+				600,
+				600
+			]
+		},
+		"channel1": {
+			"type": "ChannelCHOP",
+			"position": [
+				900,
+				600
+			]
+		},
+		"choptotop3": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1200,
+				600
+			]
+		},
+		"OUTChain3": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				600
+			]
+		},
+		"constant1": {
+			"type": "ConstantCHOP",
+			"position": [
+				0,
+				800
+			],
+			"parameters": {
+				"value0": {
+					"value": 1.0
+				},
+				"name0": {
+					"value": "tx"
+				}
+			}
+		},
+		"rename1": {
+			"type": "RenameCHOP",
+			"position": [
+				300,
+				800
+			],
+			"parameters": {
+				"from0": {
+					"value": "tx"
+				}
+			}
+		},
+		"select1": {
+			"type": "SelectCHOP",
+			"position": [
+				600,
+				800
+			],
+			"parameters": {
+				"pattern": {
+					"value": "*"
+				}
+			}
+		},
+		"shuffle1": {
+			"type": "ShuffleCHOP",
+			"position": [
+				900,
+				800
+			],
+			"parameters": {
+				"method": {
+					"value": 0
+				}
+			}
+		},
+		"null2": {
+			"type": "NullCHOP",
+			"position": [
+				1200,
+				800
+			]
+		},
+		"choptotop4": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1500,
+				800
+			]
+		},
+		"OUTChain4": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				800
+			]
+		},
+		"lfo2": {
+			"type": "LFO_CHOP",
+			"position": [
+				0,
+				1000
+			],
+			"parameters": {
+				"frequency": {
+					"value": 4.0
+				}
+			}
+		},
+		"lag1": {
+			"type": "LagCHOP",
+			"position": [
+				300,
+				1000
+			],
+			"parameters": {
+				"lag_up": {
+					"value": 0.2
+				},
+				"lag_down": {
+					"value": 0.1
+				}
+			}
+		},
+		"smooth1": {
+			"type": "SmoothCHOP",
+			"position": [
+				600,
+				1000
+			],
+			"parameters": {
+				"width": {
+					"value": 5
+				}
+			}
+		},
+		"filter1": {
+			"type": "FilterCHOP",
+			"position": [
+				900,
+				1000
+			],
+			"parameters": {
+				"type": {
+					"value": 0
+				},
+				"cutoff": {
+					"value": 0.3
+				}
+			}
+		},
+		"limit1": {
+			"type": "LimitCHOP",
+			"position": [
+				1200,
+				1000
+			],
+			"parameters": {
+				"min": {
+					"value": -0.5
+				},
+				"max": {
+					"value": 0.5
+				}
+			}
+		},
+		"clip1": {
+			"type": "ClipCHOP",
+			"position": [
+				1500,
+				1000
+			],
+			"parameters": {
+				"min": {
+					"value": -0.3
+				},
+				"max": {
+					"value": 0.3
+				}
+			}
+		},
+		"choptotop5": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1800,
+				1000
+			]
+		},
+		"OUTChain5": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1000
+			]
+		},
+		"wave2": {
+			"type": "WaveCHOP",
+			"position": [
+				0,
+				1200
+			],
+			"parameters": {
+				"shape": {
+					"value": 0
+				},
+				"length": {
+					"value": 100
+				}
+			}
+		},
+		"delay1": {
+			"type": "DelayCHOP",
+			"position": [
+				300,
+				1200
+			],
+			"parameters": {
+				"delay": {
+					"value": 10
+				}
+			}
+		},
+		"stretch1": {
+			"type": "StretchCHOP",
+			"position": [
+				600,
+				1200
+			],
+			"parameters": {
+				"length": {
+					"value": 200
+				}
+			}
+		},
+		"trim1": {
+			"type": "TrimCHOP",
+			"position": [
+				900,
+				1200
+			],
+			"parameters": {
+				"start": {
+					"value": 10
+				},
+				"end": {
+					"value": 80
+				}
+			}
+		},
+		"extend1": {
+			"type": "ExtendCHOP",
+			"position": [
+				1200,
+				1200
+			],
+			"parameters": {
+				"extend_left": {
+					"value": 1
+				}
+			}
+		},
+		"speed1": {
+			"type": "SpeedCHOP",
+			"position": [
+				1500,
+				1200
+			],
+			"parameters": {
+				"speed": {
+					"value": 2.0
+				}
+			}
+		},
+		"resample1": {
+			"type": "ResampleCHOP",
+			"position": [
+				1800,
+				1200
+			],
+			"parameters": {
+				"rate": {
+					"value": 30.0
+				}
+			}
+		},
+		"choptotop6": {
+			"type": "CHOPtoTOP",
+			"position": [
+				2100,
+				1200
+			]
+		},
+		"OUTChain6": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1200
+			]
+		},
+		"constant2": {
+			"type": "ConstantCHOP",
+			"position": [
+				0,
+				1400
+			],
+			"parameters": {
+				"value0": {
+					"value": 3.0
+				},
+				"name0": {
+					"value": "a"
+				}
+			}
+		},
+		"composite1": {
+			"type": "CompositeCHOP",
+			"position": [
+				300,
+				1400
+			],
+			"parameters": {
+				"operation": {
+					"value": 0
+				}
+			}
+		},
+		"cross1": {
+			"type": "CrossCHOP",
+			"position": [
+				600,
+				1400
+			],
+			"parameters": {
+				"cross": {
+					"value": 0.5
+				}
+			}
+		},
+		"blend1": {
+			"type": "BlendCHOP",
+			"position": [
+				900,
+				1400
+			],
+			"parameters": {
+				"blend": {
+					"value": 0.5
+				}
+			}
+		},
+		"choptotop7": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1200,
+				1400
+			]
+		},
+		"OUTChain7": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1400
+			]
+		},
+		"keyframe1": {
+			"type": "KeyframeCHOP",
+			"position": [
+				0,
+				1600
+			]
+		},
+		"sequence1": {
+			"type": "SequenceCHOP",
+			"position": [
+				300,
+				1600
+			]
+		},
+		"timer1": {
+			"type": "TimerCHOP",
+			"position": [
+				600,
+				1600
+			]
+		},
+		"cue1": {
+			"type": "CueCHOP",
+			"position": [
+				900,
+				1600
+			]
+		},
+		"choptotop8": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1200,
+				1600
+			]
+		},
+		"OUTChain8": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1600
+			]
+		},
+		"lfo3": {
+			"type": "LFO_CHOP",
+			"position": [
+				0,
+				1800
+			],
+			"parameters": {
+				"frequency": {
+					"value": 1.0
+				}
+			}
+		},
+		"logic1": {
+			"type": "LogicCHOP",
+			"position": [
+				300,
+				1800
+			],
+			"parameters": {
+				"operation": {
+					"value": 0
+				}
+			}
+		},
+		"hold1": {
+			"type": "HoldCHOP",
+			"position": [
+				600,
+				1800
+			]
+		},
+		"expression1": {
+			"type": "ExpressionCHOP",
+			"position": [
+				900,
+				1800
+			]
+		},
+		"parameter1": {
+			"type": "ParameterCHOP",
+			"position": [
+				1200,
+				1800
+			]
+		},
+		"choptotop9": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1500,
+				1800
+			]
+		},
+		"OUTChain9": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1800
+			]
+		},
+		"clock1": {
+			"type": "ClockCHOP",
+			"position": [
+				0,
+				2000
+			]
+		},
+		"count1": {
+			"type": "CountCHOP",
+			"position": [
+				300,
+				2000
+			],
+			"parameters": {
+				"threshold": {
+					"value": 0.5
+				},
+				"limit_max": {
+					"value": 10
+				}
+			}
+		},
+		"trigger1": {
+			"type": "TriggerCHOP",
+			"position": [
+				600,
+				2000
+			],
+			"parameters": {
+				"attack": {
+					"value": 0.1
+				},
+				"decay": {
+					"value": 0.5
+				}
+			}
+		},
+		"trail1": {
+			"type": "TrailCHOP",
+			"position": [
+				900,
+				2000
+			]
+		},
+		"choptotop10": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1200,
+				2000
+			]
+		},
+		"OUTChain10": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2000
+			]
+		},
+		"noise2": {
+			"type": "NoiseCHOP",
+			"position": [
+				0,
+				2200
+			],
+			"parameters": {
+				"type": {
+					"value": 0
+				},
+				"channels": {
+					"value": 1
+				}
+			}
+		},
+		"spring1": {
+			"type": "SpringCHOP",
+			"position": [
+				300,
+				2200
+			],
+			"parameters": {
+				"stiffness": {
+					"value": 10.0
+				},
+				"damping": {
+					"value": 0.5
+				}
+			}
+		},
+		"envelope1": {
+			"type": "EnvelopeCHOP",
+			"position": [
+				600,
+				2200
+			],
+			"parameters": {
+				"attack": {
+					"value": 0.1
+				}
+			}
+		},
+		"beat1": {
+			"type": "BeatCHOP",
+			"position": [
+				900,
+				2200
+			],
+			"parameters": {
+				"threshold": {
+					"value": 0.3
+				}
+			}
+		},
+		"object1": {
+			"type": "ObjectCHOP",
+			"position": [
+				1200,
+				2200
+			]
+		},
+		"choptotop11": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1500,
+				2200
+			]
+		},
+		"OUTChain11": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2200
+			]
+		},
+		"wave3": {
+			"type": "WaveCHOP",
+			"position": [
+				0,
+				2400
+			],
+			"parameters": {
+				"shape": {
+					"value": 1
+				},
+				"length": {
+					"value": 50
+				}
+			}
+		},
+		"copy1": {
+			"type": "CopyCHOP",
+			"position": [
+				300,
+				2400
+			],
+			"parameters": {
+				"copies": {
+					"value": 3
+				}
+			}
+		},
+		"delete1": {
+			"type": "DeleteCHOP",
+			"position": [
+				600,
+				2400
+			],
+			"parameters": {
+				"channel_names": {
+					"value": "chan2"
+				}
+			}
+		},
+		"join1": {
+			"type": "JoinCHOP",
+			"position": [
+				900,
+				2400
+			]
+		},
+		"fan1": {
+			"type": "FanCHOP",
+			"position": [
+				1200,
+				2400
+			],
+			"parameters": {
+				"fan_out": {
+					"value": 4
+				}
+			}
+		},
+		"split1": {
+			"type": "SplitCHOP",
+			"position": [
+				1500,
+				2400
+			]
+		},
+		"choptotop12": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1800,
+				2400
+			]
+		},
+		"OUTChain12": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2400
+			]
+		},
+		"noise3": {
+			"type": "NoiseCHOP",
+			"position": [
+				0,
+				2600
+			],
+			"parameters": {
+				"channels": {
+					"value": 3
+				}
+			}
+		},
+		"transform1": {
+			"type": "TransformCHOP",
+			"position": [
+				300,
+				2600
+			],
+			"parameters": {
+				"tx": {
+					"value": 1.0
+				},
+				"ry": {
+					"value": 45.0
+				}
+			}
+		},
+		"slope1": {
+			"type": "SlopeCHOP",
+			"position": [
+				600,
+				2600
+			]
+		},
+		"interpolate1": {
+			"type": "InterpolateCHOP",
+			"position": [
+				900,
+				2600
+			],
+			"parameters": {
+				"length": {
+					"value": 200
+				}
+			}
+		},
+		"skeleton1": {
+			"type": "SkeletonCHOP",
+			"position": [
+				1200,
+				2600
+			]
+		},
+		"ik1": {
+			"type": "IKCHOP",
+			"position": [
+				1500,
+				2600
+			]
+		},
+		"choptotop13": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1800,
+				2600
+			]
+		},
+		"OUTChain13": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2600
+			]
+		},
+		"perform1": {
+			"type": "PerformCHOP",
+			"position": [
+				0,
+				2800
+			]
+		},
+		"timeline1": {
+			"type": "TimelineCHOP",
+			"position": [
+				300,
+				2800
+			]
+		},
+		"keyboardin1": {
+			"type": "KeyboardInCHOP",
+			"position": [
+				600,
+				2800
+			]
+		},
+		"mousein1": {
+			"type": "MouseInCHOP",
+			"position": [
+				900,
+				2800
+			]
+		},
+		"tabletin1": {
+			"type": "TabletInCHOP",
+			"position": [
+				1200,
+				2800
+			]
+		},
+		"gamepad1": {
+			"type": "GamepadCHOP",
+			"position": [
+				1500,
+				2800
+			]
+		},
+		"choptotop14": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1800,
+				2800
+			]
+		},
+		"OUTChain14": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2800
+			]
+		},
+		"wave4": {
+			"type": "WaveCHOP",
+			"position": [
+				0,
+				3000
+			],
+			"parameters": {
+				"shape": {
+					"value": 3
+				},
+				"length": {
+					"value": 100
+				}
+			}
+		},
+		"sopto1": {
+			"type": "SOPtoCHOP",
+			"position": [
+				300,
+				3000
+			]
+		},
+		"topto1": {
+			"type": "TOPtoCHOP",
+			"position": [
+				600,
+				3000
+			]
+		},
+		"datto1": {
+			"type": "DATtoCHOP",
+			"position": [
+				900,
+				3000
+			]
+		},
+		"feedback1": {
+			"type": "FeedbackCHOP",
+			"position": [
+				1200,
+				3000
+			]
+		},
+		"warp1": {
+			"type": "WarpCHOP",
+			"position": [
+				1500,
+				3000
+			],
+			"parameters": {
+				"speed": {
+					"value": 1.5
+				}
+			}
+		},
+		"choptotop15": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1800,
+				3000
+			]
+		},
+		"OUTChain15": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3000
+			]
+		},
+		"audioin1": {
+			"type": "AudioInCHOP",
+			"position": [
+				0,
+				3200
+			]
+		},
+		"audiofilein1": {
+			"type": "AudioFileInCHOP",
+			"position": [
+				300,
+				3200
+			]
+		},
+		"audiospectrum1": {
+			"type": "AudioSpectrumCHOP",
+			"position": [
+				600,
+				3200
+			]
+		},
+		"audioband1": {
+			"type": "AudioBandCHOP",
+			"position": [
+				900,
+				3200
+			],
+			"parameters": {
+				"bands": {
+					"value": 8
+				}
+			}
+		},
+		"audiodynamics1": {
+			"type": "AudioDynamicsCHOP",
+			"position": [
+				1200,
+				3200
+			]
+		},
+		"choptotop16": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1500,
+				3200
+			]
+		},
+		"OUTChain16": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3200
+			]
+		},
+		"laser1": {
+			"type": "LaserCHOP",
+			"position": [
+				0,
+				3400
+			],
+			"parameters": {
+				"points": {
+					"value": 50
+				},
+				"shape": {
+					"value": 0
+				}
+			}
+		},
+		"physics1": {
+			"type": "PhysicsCHOP",
+			"position": [
+				300,
+				3400
+			]
+		},
+		"null3": {
+			"type": "NullCHOP",
+			"position": [
+				600,
+				3400
+			]
+		},
+		"choptotop17": {
+			"type": "CHOPtoTOP",
+			"position": [
+				900,
+				3400
+			]
+		},
+		"OUTChain17": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3400
+			]
+		},
+		"noise4": {
+			"type": "NoiseCHOP",
+			"position": [
+				0,
+				3600
+			],
+			"parameters": {
+				"channels": {
+					"value": 2
+				}
+			}
+		},
+		"merge1": {
+			"type": "MergeCHOP",
+			"position": [
+				300,
+				3600
+			]
+		},
+		"switch1": {
+			"type": "SwitchCHOP",
+			"position": [
+				600,
+				3600
+			],
+			"parameters": {
+				"index": {
+					"value": 0
+				}
+			}
+		},
+		"choptotop18": {
+			"type": "CHOPtoTOP",
+			"position": [
+				900,
+				3600
+			]
+		},
+		"OUTChain18": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3600
+			]
+		},
+		"midiin1": {
+			"type": "MidiInCHOP",
+			"position": [
+				0,
+				3800
+			]
+		},
+		"rtmidiin1": {
+			"type": "RtMidiInCHOP",
+			"position": [
+				300,
+				3800
+			]
+		},
+		"rtmidiout1": {
+			"type": "RtMidiOutCHOP",
+			"position": [
+				600,
+				3800
+			]
+		},
+		"choptotop19": {
+			"type": "CHOPtoTOP",
+			"position": [
+				900,
+				3800
+			]
+		},
+		"OUTChain19": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3800
+			]
+		},
+		"oscin1": {
+			"type": "OscInCHOP",
+			"position": [
+				0,
+				4000
+			],
+			"parameters": {
+				"port": {
+					"value": 7000
+				}
+			}
+		},
+		"ndiaudioin1": {
+			"type": "NDIAudioInCHOP",
+			"position": [
+				300,
+				4000
+			]
+		},
+		"ndiaudioout1": {
+			"type": "NDIAudioOutCHOP",
+			"position": [
+				600,
+				4000
+			]
+		},
+		"choptotop20": {
+			"type": "CHOPtoTOP",
+			"position": [
+				900,
+				4000
+			]
+		},
+		"OUTChain20": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				4000
+			]
+		},
+		"hostin1": {
+			"type": "HostInCHOP",
+			"position": [
+				0,
+				4200
+			]
+		},
+		"hostout1": {
+			"type": "HostOutCHOP",
+			"position": [
+				300,
+				4200
+			]
+		},
+		"choptotop21": {
+			"type": "CHOPtoTOP",
+			"position": [
+				600,
+				4200
+			]
+		},
+		"OUTChain21": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				4200
+			]
+		},
+		"depthhand1": {
+			"type": "DepthHandCHOP",
+			"position": [
+				0,
+				4400
+			]
+		},
+		"depthskeleton1": {
+			"type": "DepthSkeletonCHOP",
+			"position": [
+				300,
+				4400
+			]
+		},
+		"facedetect1": {
+			"type": "FaceDetectCHOP",
+			"position": [
+				600,
+				4400
+			]
+		},
+		"handdetect1": {
+			"type": "HandDetectCHOP",
+			"position": [
+				900,
+				4400
+			]
+		},
+		"posedetect1": {
+			"type": "PoseDetectCHOP",
+			"position": [
+				1200,
+				4400
+			]
+		},
+		"choptotop22": {
+			"type": "CHOPtoTOP",
+			"position": [
+				1500,
+				4400
+			]
+		},
+		"OUTChain22": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				4400
+			]
+		},
+		"switch_main": {
+			"type": "SwitchTOP",
+			"position": [
+				-400,
+				0
+			]
+		},
+		"window_out1": {
+			"type": "WindowOUT",
+			"position": [
+				-700,
+				0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"chain_slider": {
+			"type": "SliderUI",
+			"position": [
+				-700,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Chain"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 22.0
+				},
+				"value": {
+					"value": 0.0
+				}
+			}
+		},
+		"chain_label": {
+			"type": "LabelUI",
+			"position": [
+				-700,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "ALL CORE CHOPs \u2014 22 chains"
+				}
+			}
+		},
+		"panel_container": {
+			"type": "PanelContainerUI",
+			"position": [
+				-900,
+				200
+			]
+		}
+	},
+	"connections": [
+		{
+			"from": "lfo1",
+			"from_port": 0,
+			"to": "noise1",
+			"to_port": 0
+		},
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "math1",
+			"to_port": 0
+		},
+		{
+			"from": "math1",
+			"from_port": 0,
+			"to": "null1",
+			"to_port": 0
+		},
+		{
+			"from": "null1",
+			"from_port": 0,
+			"to": "choptotop1",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop1",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "wave1",
+			"from_port": 0,
+			"to": "analyze1",
+			"to_port": 0
+		},
+		{
+			"from": "analyze1",
+			"from_port": 0,
+			"to": "choptotop2",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop2",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "pattern1",
+			"from_port": 0,
+			"to": "ramp1",
+			"to_port": 0
+		},
+		{
+			"from": "ramp1",
+			"from_port": 0,
+			"to": "lookup1",
+			"to_port": 0
+		},
+		{
+			"from": "lookup1",
+			"from_port": 0,
+			"to": "channel1",
+			"to_port": 0
+		},
+		{
+			"from": "channel1",
+			"from_port": 0,
+			"to": "choptotop3",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop3",
+			"from_port": 0,
+			"to": "OUTChain3",
+			"to_port": 0
+		},
+		{
+			"from": "constant1",
+			"from_port": 0,
+			"to": "rename1",
+			"to_port": 0
+		},
+		{
+			"from": "rename1",
+			"from_port": 0,
+			"to": "select1",
+			"to_port": 0
+		},
+		{
+			"from": "select1",
+			"from_port": 0,
+			"to": "shuffle1",
+			"to_port": 0
+		},
+		{
+			"from": "shuffle1",
+			"from_port": 0,
+			"to": "null2",
+			"to_port": 0
+		},
+		{
+			"from": "null2",
+			"from_port": 0,
+			"to": "choptotop4",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop4",
+			"from_port": 0,
+			"to": "OUTChain4",
+			"to_port": 0
+		},
+		{
+			"from": "lfo2",
+			"from_port": 0,
+			"to": "lag1",
+			"to_port": 0
+		},
+		{
+			"from": "lag1",
+			"from_port": 0,
+			"to": "smooth1",
+			"to_port": 0
+		},
+		{
+			"from": "smooth1",
+			"from_port": 0,
+			"to": "filter1",
+			"to_port": 0
+		},
+		{
+			"from": "filter1",
+			"from_port": 0,
+			"to": "limit1",
+			"to_port": 0
+		},
+		{
+			"from": "limit1",
+			"from_port": 0,
+			"to": "clip1",
+			"to_port": 0
+		},
+		{
+			"from": "clip1",
+			"from_port": 0,
+			"to": "choptotop5",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop5",
+			"from_port": 0,
+			"to": "OUTChain5",
+			"to_port": 0
+		},
+		{
+			"from": "wave2",
+			"from_port": 0,
+			"to": "delay1",
+			"to_port": 0
+		},
+		{
+			"from": "delay1",
+			"from_port": 0,
+			"to": "stretch1",
+			"to_port": 0
+		},
+		{
+			"from": "stretch1",
+			"from_port": 0,
+			"to": "trim1",
+			"to_port": 0
+		},
+		{
+			"from": "trim1",
+			"from_port": 0,
+			"to": "extend1",
+			"to_port": 0
+		},
+		{
+			"from": "extend1",
+			"from_port": 0,
+			"to": "speed1",
+			"to_port": 0
+		},
+		{
+			"from": "speed1",
+			"from_port": 0,
+			"to": "resample1",
+			"to_port": 0
+		},
+		{
+			"from": "resample1",
+			"from_port": 0,
+			"to": "choptotop6",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop6",
+			"from_port": 0,
+			"to": "OUTChain6",
+			"to_port": 0
+		},
+		{
+			"from": "constant2",
+			"from_port": 0,
+			"to": "composite1",
+			"to_port": 0
+		},
+		{
+			"from": "composite1",
+			"from_port": 0,
+			"to": "cross1",
+			"to_port": 0
+		},
+		{
+			"from": "cross1",
+			"from_port": 0,
+			"to": "blend1",
+			"to_port": 0
+		},
+		{
+			"from": "blend1",
+			"from_port": 0,
+			"to": "choptotop7",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop7",
+			"from_port": 0,
+			"to": "OUTChain7",
+			"to_port": 0
+		},
+		{
+			"from": "keyframe1",
+			"from_port": 0,
+			"to": "sequence1",
+			"to_port": 0
+		},
+		{
+			"from": "sequence1",
+			"from_port": 0,
+			"to": "timer1",
+			"to_port": 0
+		},
+		{
+			"from": "timer1",
+			"from_port": 0,
+			"to": "cue1",
+			"to_port": 0
+		},
+		{
+			"from": "cue1",
+			"from_port": 0,
+			"to": "choptotop8",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop8",
+			"from_port": 0,
+			"to": "OUTChain8",
+			"to_port": 0
+		},
+		{
+			"from": "lfo3",
+			"from_port": 0,
+			"to": "logic1",
+			"to_port": 0
+		},
+		{
+			"from": "logic1",
+			"from_port": 0,
+			"to": "hold1",
+			"to_port": 0
+		},
+		{
+			"from": "hold1",
+			"from_port": 0,
+			"to": "expression1",
+			"to_port": 0
+		},
+		{
+			"from": "expression1",
+			"from_port": 0,
+			"to": "parameter1",
+			"to_port": 0
+		},
+		{
+			"from": "parameter1",
+			"from_port": 0,
+			"to": "choptotop9",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop9",
+			"from_port": 0,
+			"to": "OUTChain9",
+			"to_port": 0
+		},
+		{
+			"from": "clock1",
+			"from_port": 0,
+			"to": "count1",
+			"to_port": 0
+		},
+		{
+			"from": "count1",
+			"from_port": 0,
+			"to": "trigger1",
+			"to_port": 0
+		},
+		{
+			"from": "trigger1",
+			"from_port": 0,
+			"to": "trail1",
+			"to_port": 0
+		},
+		{
+			"from": "trail1",
+			"from_port": 0,
+			"to": "choptotop10",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop10",
+			"from_port": 0,
+			"to": "OUTChain10",
+			"to_port": 0
+		},
+		{
+			"from": "noise2",
+			"from_port": 0,
+			"to": "spring1",
+			"to_port": 0
+		},
+		{
+			"from": "spring1",
+			"from_port": 0,
+			"to": "envelope1",
+			"to_port": 0
+		},
+		{
+			"from": "envelope1",
+			"from_port": 0,
+			"to": "beat1",
+			"to_port": 0
+		},
+		{
+			"from": "beat1",
+			"from_port": 0,
+			"to": "object1",
+			"to_port": 0
+		},
+		{
+			"from": "object1",
+			"from_port": 0,
+			"to": "choptotop11",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop11",
+			"from_port": 0,
+			"to": "OUTChain11",
+			"to_port": 0
+		},
+		{
+			"from": "wave3",
+			"from_port": 0,
+			"to": "copy1",
+			"to_port": 0
+		},
+		{
+			"from": "copy1",
+			"from_port": 0,
+			"to": "delete1",
+			"to_port": 0
+		},
+		{
+			"from": "delete1",
+			"from_port": 0,
+			"to": "join1",
+			"to_port": 0
+		},
+		{
+			"from": "join1",
+			"from_port": 0,
+			"to": "fan1",
+			"to_port": 0
+		},
+		{
+			"from": "fan1",
+			"from_port": 0,
+			"to": "split1",
+			"to_port": 0
+		},
+		{
+			"from": "split1",
+			"from_port": 0,
+			"to": "choptotop12",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop12",
+			"from_port": 0,
+			"to": "OUTChain12",
+			"to_port": 0
+		},
+		{
+			"from": "noise3",
+			"from_port": 0,
+			"to": "transform1",
+			"to_port": 0
+		},
+		{
+			"from": "transform1",
+			"from_port": 0,
+			"to": "slope1",
+			"to_port": 0
+		},
+		{
+			"from": "slope1",
+			"from_port": 0,
+			"to": "interpolate1",
+			"to_port": 0
+		},
+		{
+			"from": "interpolate1",
+			"from_port": 0,
+			"to": "skeleton1",
+			"to_port": 0
+		},
+		{
+			"from": "skeleton1",
+			"from_port": 0,
+			"to": "ik1",
+			"to_port": 0
+		},
+		{
+			"from": "ik1",
+			"from_port": 0,
+			"to": "choptotop13",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop13",
+			"from_port": 0,
+			"to": "OUTChain13",
+			"to_port": 0
+		},
+		{
+			"from": "perform1",
+			"from_port": 0,
+			"to": "timeline1",
+			"to_port": 0
+		},
+		{
+			"from": "timeline1",
+			"from_port": 0,
+			"to": "keyboardin1",
+			"to_port": 0
+		},
+		{
+			"from": "keyboardin1",
+			"from_port": 0,
+			"to": "mousein1",
+			"to_port": 0
+		},
+		{
+			"from": "mousein1",
+			"from_port": 0,
+			"to": "tabletin1",
+			"to_port": 0
+		},
+		{
+			"from": "tabletin1",
+			"from_port": 0,
+			"to": "gamepad1",
+			"to_port": 0
+		},
+		{
+			"from": "gamepad1",
+			"from_port": 0,
+			"to": "choptotop14",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop14",
+			"from_port": 0,
+			"to": "OUTChain14",
+			"to_port": 0
+		},
+		{
+			"from": "wave4",
+			"from_port": 0,
+			"to": "sopto1",
+			"to_port": 0
+		},
+		{
+			"from": "sopto1",
+			"from_port": 0,
+			"to": "topto1",
+			"to_port": 0
+		},
+		{
+			"from": "topto1",
+			"from_port": 0,
+			"to": "datto1",
+			"to_port": 0
+		},
+		{
+			"from": "datto1",
+			"from_port": 0,
+			"to": "feedback1",
+			"to_port": 0
+		},
+		{
+			"from": "feedback1",
+			"from_port": 0,
+			"to": "warp1",
+			"to_port": 0
+		},
+		{
+			"from": "warp1",
+			"from_port": 0,
+			"to": "choptotop15",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop15",
+			"from_port": 0,
+			"to": "OUTChain15",
+			"to_port": 0
+		},
+		{
+			"from": "audioin1",
+			"from_port": 0,
+			"to": "audiofilein1",
+			"to_port": 0
+		},
+		{
+			"from": "audiofilein1",
+			"from_port": 0,
+			"to": "audiospectrum1",
+			"to_port": 0
+		},
+		{
+			"from": "audiospectrum1",
+			"from_port": 0,
+			"to": "audioband1",
+			"to_port": 0
+		},
+		{
+			"from": "audioband1",
+			"from_port": 0,
+			"to": "audiodynamics1",
+			"to_port": 0
+		},
+		{
+			"from": "audiodynamics1",
+			"from_port": 0,
+			"to": "choptotop16",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop16",
+			"from_port": 0,
+			"to": "OUTChain16",
+			"to_port": 0
+		},
+		{
+			"from": "laser1",
+			"from_port": 0,
+			"to": "physics1",
+			"to_port": 0
+		},
+		{
+			"from": "physics1",
+			"from_port": 0,
+			"to": "null3",
+			"to_port": 0
+		},
+		{
+			"from": "null3",
+			"from_port": 0,
+			"to": "choptotop17",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop17",
+			"from_port": 0,
+			"to": "OUTChain17",
+			"to_port": 0
+		},
+		{
+			"from": "noise4",
+			"from_port": 0,
+			"to": "merge1",
+			"to_port": 0
+		},
+		{
+			"from": "merge1",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 0
+		},
+		{
+			"from": "switch1",
+			"from_port": 0,
+			"to": "choptotop18",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop18",
+			"from_port": 0,
+			"to": "OUTChain18",
+			"to_port": 0
+		},
+		{
+			"from": "midiin1",
+			"from_port": 0,
+			"to": "rtmidiin1",
+			"to_port": 0
+		},
+		{
+			"from": "rtmidiin1",
+			"from_port": 0,
+			"to": "rtmidiout1",
+			"to_port": 0
+		},
+		{
+			"from": "rtmidiout1",
+			"from_port": 0,
+			"to": "choptotop19",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop19",
+			"from_port": 0,
+			"to": "OUTChain19",
+			"to_port": 0
+		},
+		{
+			"from": "oscin1",
+			"from_port": 0,
+			"to": "ndiaudioin1",
+			"to_port": 0
+		},
+		{
+			"from": "ndiaudioin1",
+			"from_port": 0,
+			"to": "ndiaudioout1",
+			"to_port": 0
+		},
+		{
+			"from": "ndiaudioout1",
+			"from_port": 0,
+			"to": "choptotop20",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop20",
+			"from_port": 0,
+			"to": "OUTChain20",
+			"to_port": 0
+		},
+		{
+			"from": "hostin1",
+			"from_port": 0,
+			"to": "hostout1",
+			"to_port": 0
+		},
+		{
+			"from": "hostout1",
+			"from_port": 0,
+			"to": "choptotop21",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop21",
+			"from_port": 0,
+			"to": "OUTChain21",
+			"to_port": 0
+		},
+		{
+			"from": "depthhand1",
+			"from_port": 0,
+			"to": "depthskeleton1",
+			"to_port": 0
+		},
+		{
+			"from": "depthskeleton1",
+			"from_port": 0,
+			"to": "facedetect1",
+			"to_port": 0
+		},
+		{
+			"from": "facedetect1",
+			"from_port": 0,
+			"to": "handdetect1",
+			"to_port": 0
+		},
+		{
+			"from": "handdetect1",
+			"from_port": 0,
+			"to": "posedetect1",
+			"to_port": 0
+		},
+		{
+			"from": "posedetect1",
+			"from_port": 0,
+			"to": "choptotop22",
+			"to_port": 0
+		},
+		{
+			"from": "choptotop22",
+			"from_port": 0,
+			"to": "OUTChain22",
+			"to_port": 0
+		},
+		{
+			"from": "switch_main",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "chain_slider",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 0
+		},
+		{
+			"from": "chain_label",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain2",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain3",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 2
+		},
+		{
+			"from": "OUTChain4",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 3
+		},
+		{
+			"from": "OUTChain5",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 4
+		},
+		{
+			"from": "OUTChain6",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 5
+		},
+		{
+			"from": "OUTChain7",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 6
+		},
+		{
+			"from": "OUTChain8",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 7
+		},
+		{
+			"from": "OUTChain9",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 8
+		},
+		{
+			"from": "OUTChain10",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 9
+		},
+		{
+			"from": "OUTChain11",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 10
+		},
+		{
+			"from": "OUTChain12",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 11
+		},
+		{
+			"from": "OUTChain13",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 12
+		},
+		{
+			"from": "OUTChain14",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 13
+		},
+		{
+			"from": "OUTChain15",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 14
+		},
+		{
+			"from": "OUTChain16",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 15
+		},
+		{
+			"from": "OUTChain17",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 16
+		},
+		{
+			"from": "OUTChain18",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 17
+		},
+		{
+			"from": "OUTChain19",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 18
+		},
+		{
+			"from": "OUTChain20",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 19
+		},
+		{
+			"from": "OUTChain21",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 20
+		},
+		{
+			"from": "OUTChain22",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 21
+		}
+	]
+}

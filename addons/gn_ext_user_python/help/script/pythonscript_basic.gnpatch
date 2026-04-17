@@ -1,0 +1,112 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "length": {
+                    "value": 100
+                }
+            }
+        },
+        "focus1": {
+            "type": "PythonSCRIPT",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "template": {
+                    "value": 0
+                },
+                "auto_reload": {
+                    "value": true
+                },
+                "time_dep": {
+                    "value": false
+                }
+            }
+        },
+        "choptotop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "choptotop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Python SCRIPT \u2014 Basic\n\nUser-authored Python operator with hot-reload.\nSet py_source to your .py file path and pick a template.\nauto_reload refreshes on save. Output type follows template selection.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                520,
+                140
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

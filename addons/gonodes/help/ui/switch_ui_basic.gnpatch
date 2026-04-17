@@ -1,0 +1,104 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "slider_a": {
+            "type": "SliderUI",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Opacity"
+                },
+                "default_value": {
+                    "value": 0.7
+                }
+            }
+        },
+        "slider_b": {
+            "type": "SliderUI",
+            "position": [
+                100,
+                300
+            ],
+            "parameters": {
+                "label": {
+                    "value": "Brightness"
+                },
+                "default_value": {
+                    "value": 0.3
+                }
+            }
+        },
+        "focus1": {
+            "type": "SwitchUI",
+            "position": [
+                450,
+                200
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 256,
+                        "y": 128
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "slider_a",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "slider_b",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 1
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 1
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Switch UI \u2014 Basic\n\nSelect one of multiple UI widget inputs by index.\nToggle between different control configurations at runtime.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

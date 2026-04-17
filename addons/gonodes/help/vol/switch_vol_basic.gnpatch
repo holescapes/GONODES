@@ -1,0 +1,108 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise_a": {
+            "type": "NoiseVOL",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "noise_b": {
+            "type": "NoiseVOL",
+            "position": [
+                100,
+                300
+            ],
+            "parameters": {
+                "seed": {
+                    "value": 42
+                }
+            }
+        },
+        "focus1": {
+            "type": "SwitchVOL",
+            "position": [
+                450,
+                200
+            ],
+            "parameters": {}
+        },
+        "raymarch1": {
+            "type": "RaymarchVOL",
+            "position": [
+                800,
+                200
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1150,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise_a",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "noise_b",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 1
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Switch VOL \u2014 Basic\n\nSelect one of multiple volume inputs by index.\nToggle between different volume fields at runtime.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -1,0 +1,2706 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_manual_test",
+	"nodes": {
+		"box1": {
+			"type": "BoxSOP",
+			"position": [
+				0,
+				200
+			],
+			"parameters": {
+				"size_x": {
+					"value": 0.5
+				},
+				"size_y": {
+					"value": 0.5
+				},
+				"size_z": {
+					"value": 0.5
+				}
+			}
+		},
+		"transform1": {
+			"type": "TransformSOP",
+			"position": [
+				300,
+				200
+			],
+			"parameters": {
+				"tx": {
+					"value": 0.0
+				},
+				"ry": {
+					"value": 30.0
+				},
+				"scale": {
+					"value": 1.2
+				}
+			}
+		},
+		"null1": {
+			"type": "NullSOP",
+			"position": [
+				600,
+				200
+			]
+		},
+		"geo1": {
+			"type": "GeometryCOMP",
+			"position": [
+				900,
+				200
+			]
+		},
+		"cam1": {
+			"type": "CameraCOMP",
+			"position": [
+				900,
+				300
+			]
+		},
+		"render1": {
+			"type": "RenderTOP",
+			"position": [
+				1200,
+				200
+			]
+		},
+		"OUTChain1": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				200
+			]
+		},
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [
+				0,
+				400
+			],
+			"parameters": {
+				"radius": {
+					"value": 0.5
+				},
+				"rows": {
+					"value": 24
+				},
+				"columns": {
+					"value": 24
+				}
+			}
+		},
+		"noise1": {
+			"type": "NoiseSOP",
+			"position": [
+				300,
+				400
+			],
+			"parameters": {
+				"amplitude": {
+					"value": 0.1
+				},
+				"frequency": {
+					"value": 3.0
+				}
+			}
+		},
+		"smooth1": {
+			"type": "SmoothSOP",
+			"position": [
+				600,
+				400
+			],
+			"parameters": {
+				"iterations": {
+					"value": 2
+				}
+			}
+		},
+		"geo2": {
+			"type": "GeometryCOMP",
+			"position": [
+				900,
+				400
+			]
+		},
+		"cam2": {
+			"type": "CameraCOMP",
+			"position": [
+				900,
+				500
+			]
+		},
+		"render2": {
+			"type": "RenderTOP",
+			"position": [
+				1200,
+				400
+			]
+		},
+		"OUTChain2": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				400
+			]
+		},
+		"grid1": {
+			"type": "GridSOP",
+			"position": [
+				0,
+				600
+			],
+			"parameters": {
+				"rows": {
+					"value": 20
+				},
+				"columns": {
+					"value": 20
+				}
+			}
+		},
+		"mountain1": {
+			"type": "MountainSOP",
+			"position": [
+				300,
+				600
+			],
+			"parameters": {
+				"amplitude": {
+					"value": 0.3
+				},
+				"frequency": {
+					"value": 4.0
+				}
+			}
+		},
+		"subdivide1": {
+			"type": "SubdivideSOP",
+			"position": [
+				600,
+				600
+			],
+			"parameters": {
+				"iterations": {
+					"value": 1
+				}
+			}
+		},
+		"polyreduce1": {
+			"type": "PolyReduceSOP",
+			"position": [
+				900,
+				600
+			],
+			"parameters": {
+				"target_percentage": {
+					"value": 50.0
+				}
+			}
+		},
+		"geo3": {
+			"type": "GeometryCOMP",
+			"position": [
+				1200,
+				600
+			]
+		},
+		"cam3": {
+			"type": "CameraCOMP",
+			"position": [
+				1200,
+				700
+			]
+		},
+		"render3": {
+			"type": "RenderTOP",
+			"position": [
+				1500,
+				600
+			]
+		},
+		"OUTChain3": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				600
+			]
+		},
+		"cylinder1": {
+			"type": "CylinderSOP",
+			"position": [
+				0,
+				800
+			],
+			"parameters": {
+				"rows": {
+					"value": 16
+				},
+				"height": {
+					"value": 2.0
+				}
+			}
+		},
+		"bend1": {
+			"type": "BendSOP",
+			"position": [
+				300,
+				800
+			],
+			"parameters": {
+				"angle": {
+					"value": 45.0
+				},
+				"axis": {
+					"value": 2
+				}
+			}
+		},
+		"twist1": {
+			"type": "TwistSOP",
+			"position": [
+				600,
+				800
+			],
+			"parameters": {
+				"angle": {
+					"value": 90.0
+				},
+				"axis": {
+					"value": 1
+				}
+			}
+		},
+		"taper1": {
+			"type": "TaperSOP",
+			"position": [
+				900,
+				800
+			],
+			"parameters": {
+				"amount": {
+					"value": 0.5
+				},
+				"axis": {
+					"value": 1
+				}
+			}
+		},
+		"geo4": {
+			"type": "GeometryCOMP",
+			"position": [
+				1200,
+				800
+			]
+		},
+		"cam4": {
+			"type": "CameraCOMP",
+			"position": [
+				1200,
+				900
+			]
+		},
+		"render4": {
+			"type": "RenderTOP",
+			"position": [
+				1500,
+				800
+			]
+		},
+		"OUTChain4": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				800
+			]
+		},
+		"grid2": {
+			"type": "GridSOP",
+			"position": [
+				0,
+				1000
+			],
+			"parameters": {
+				"rows": {
+					"value": 5
+				},
+				"columns": {
+					"value": 5
+				}
+			}
+		},
+		"extrude1": {
+			"type": "ExtrudeSOP",
+			"position": [
+				300,
+				1000
+			],
+			"parameters": {
+				"distance": {
+					"value": 0.3
+				}
+			}
+		},
+		"polybevel1": {
+			"type": "PolyBevelSOP",
+			"position": [
+				600,
+				1000
+			],
+			"parameters": {
+				"offset": {
+					"value": 0.05
+				},
+				"segments": {
+					"value": 2
+				}
+			}
+		},
+		"facet1": {
+			"type": "FacetSOP",
+			"position": [
+				900,
+				1000
+			],
+			"parameters": {
+				"mode": {
+					"value": 0
+				}
+			}
+		},
+		"normal1": {
+			"type": "NormalSOP",
+			"position": [
+				1200,
+				1000
+			]
+		},
+		"geo5": {
+			"type": "GeometryCOMP",
+			"position": [
+				1500,
+				1000
+			]
+		},
+		"cam5": {
+			"type": "CameraCOMP",
+			"position": [
+				1500,
+				1100
+			]
+		},
+		"render5": {
+			"type": "RenderTOP",
+			"position": [
+				1800,
+				1000
+			]
+		},
+		"OUTChain5": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1000
+			]
+		},
+		"grid3": {
+			"type": "GridSOP",
+			"position": [
+				0,
+				1200
+			],
+			"parameters": {
+				"rows": {
+					"value": 10
+				}
+			}
+		},
+		"scatter1": {
+			"type": "ScatterSOP",
+			"position": [
+				300,
+				1200
+			],
+			"parameters": {
+				"count": {
+					"value": 200
+				}
+			}
+		},
+		"sort1": {
+			"type": "SortSOP",
+			"position": [
+				600,
+				1200
+			],
+			"parameters": {
+				"mode": {
+					"value": 0
+				}
+			}
+		},
+		"delete1": {
+			"type": "DeleteSOP",
+			"position": [
+				900,
+				1200
+			],
+			"parameters": {
+				"mode": {
+					"value": 0
+				},
+				"start": {
+					"value": 0
+				},
+				"end": {
+					"value": 50
+				}
+			}
+		},
+		"null2": {
+			"type": "NullSOP",
+			"position": [
+				1200,
+				1200
+			]
+		},
+		"geo6": {
+			"type": "GeometryCOMP",
+			"position": [
+				1500,
+				1200
+			]
+		},
+		"cam6": {
+			"type": "CameraCOMP",
+			"position": [
+				1500,
+				1300
+			]
+		},
+		"render6": {
+			"type": "RenderTOP",
+			"position": [
+				1800,
+				1200
+			]
+		},
+		"OUTChain6": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1200
+			]
+		},
+		"box2": {
+			"type": "BoxSOP",
+			"position": [
+				0,
+				1400
+			],
+			"parameters": {
+				"size_x": {
+					"value": 0.8
+				}
+			}
+		},
+		"boolean1": {
+			"type": "BooleanSOP",
+			"position": [
+				300,
+				1400
+			]
+		},
+		"mirror1": {
+			"type": "MirrorSOP",
+			"position": [
+				600,
+				1400
+			],
+			"parameters": {
+				"axis": {
+					"value": 0
+				},
+				"distance": {
+					"value": 0.5
+				}
+			}
+		},
+		"fuse1": {
+			"type": "FuseSOP",
+			"position": [
+				900,
+				1400
+			],
+			"parameters": {
+				"tolerance": {
+					"value": 0.01
+				}
+			}
+		},
+		"copy1": {
+			"type": "CopySOP",
+			"position": [
+				1200,
+				1400
+			],
+			"parameters": {
+				"copies": {
+					"value": 3
+				}
+			}
+		},
+		"merge1": {
+			"type": "MergeSOP",
+			"position": [
+				1500,
+				1400
+			]
+		},
+		"geo7": {
+			"type": "GeometryCOMP",
+			"position": [
+				1800,
+				1400
+			]
+		},
+		"cam7": {
+			"type": "CameraCOMP",
+			"position": [
+				1800,
+				1500
+			]
+		},
+		"render7": {
+			"type": "RenderTOP",
+			"position": [
+				2100,
+				1400
+			]
+		},
+		"OUTChain7": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1400
+			]
+		},
+		"circle1": {
+			"type": "CircleSOP",
+			"position": [
+				0,
+				1600
+			],
+			"parameters": {
+				"radius": {
+					"value": 0.5
+				},
+				"divisions": {
+					"value": 16
+				}
+			}
+		},
+		"sweep1": {
+			"type": "SweepSOP",
+			"position": [
+				300,
+				1600
+			]
+		},
+		"skin1": {
+			"type": "SkinSOP",
+			"position": [
+				600,
+				1600
+			]
+		},
+		"cap1": {
+			"type": "CapSOP",
+			"position": [
+				900,
+				1600
+			]
+		},
+		"geo8": {
+			"type": "GeometryCOMP",
+			"position": [
+				1200,
+				1600
+			]
+		},
+		"cam8": {
+			"type": "CameraCOMP",
+			"position": [
+				1200,
+				1700
+			]
+		},
+		"render8": {
+			"type": "RenderTOP",
+			"position": [
+				1500,
+				1600
+			]
+		},
+		"OUTChain8": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1600
+			]
+		},
+		"torus1": {
+			"type": "TorusSOP",
+			"position": [
+				0,
+				1800
+			],
+			"parameters": {
+				"radius_major": {
+					"value": 0.5
+				},
+				"radius_minor": {
+					"value": 0.2
+				}
+			}
+		},
+		"carve1": {
+			"type": "CarveSOP",
+			"position": [
+				300,
+				1800
+			],
+			"parameters": {
+				"u_start": {
+					"value": 0.0
+				},
+				"u_end": {
+					"value": 0.7
+				}
+			}
+		},
+		"magnet1": {
+			"type": "MagnetSOP",
+			"position": [
+				600,
+				1800
+			],
+			"parameters": {
+				"strength": {
+					"value": 0.3
+				},
+				"radius": {
+					"value": 0.5
+				}
+			}
+		},
+		"spring1": {
+			"type": "SpringSOP",
+			"position": [
+				900,
+				1800
+			]
+		},
+		"ray1": {
+			"type": "RaySOP",
+			"position": [
+				1200,
+				1800
+			]
+		},
+		"geo9": {
+			"type": "GeometryCOMP",
+			"position": [
+				1500,
+				1800
+			]
+		},
+		"cam9": {
+			"type": "CameraCOMP",
+			"position": [
+				1500,
+				1900
+			]
+		},
+		"render9": {
+			"type": "RenderTOP",
+			"position": [
+				1800,
+				1800
+			]
+		},
+		"OUTChain9": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1800
+			]
+		},
+		"box3": {
+			"type": "BoxSOP",
+			"position": [
+				0,
+				2000
+			]
+		},
+		"point1": {
+			"type": "PointSOP",
+			"position": [
+				300,
+				2000
+			]
+		},
+		"attribute1": {
+			"type": "AttributeSOP",
+			"position": [
+				600,
+				2000
+			]
+		},
+		"primitive1": {
+			"type": "PrimitiveSOP",
+			"position": [
+				900,
+				2000
+			]
+		},
+		"group1": {
+			"type": "GroupSOP",
+			"position": [
+				1200,
+				2000
+			]
+		},
+		"select1": {
+			"type": "SelectSOP",
+			"position": [
+				1500,
+				2000
+			]
+		},
+		"objectmerge1": {
+			"type": "ObjectMergeSOP",
+			"position": [
+				1800,
+				2000
+			]
+		},
+		"geo10": {
+			"type": "GeometryCOMP",
+			"position": [
+				2100,
+				2000
+			]
+		},
+		"cam10": {
+			"type": "CameraCOMP",
+			"position": [
+				2100,
+				2100
+			]
+		},
+		"render10": {
+			"type": "RenderTOP",
+			"position": [
+				2400,
+				2000
+			]
+		},
+		"OUTChain10": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2000
+			]
+		},
+		"lsystem1": {
+			"type": "LSystemSOP",
+			"position": [
+				0,
+				2200
+			],
+			"parameters": {
+				"axiom": {
+					"value": "F"
+				},
+				"rule0": {
+					"value": "F=F[+F]F[-F]F"
+				},
+				"generations": {
+					"value": 3
+				}
+			}
+		},
+		"null3": {
+			"type": "NullSOP",
+			"position": [
+				300,
+				2200
+			]
+		},
+		"geo11": {
+			"type": "GeometryCOMP",
+			"position": [
+				600,
+				2200
+			]
+		},
+		"cam11": {
+			"type": "CameraCOMP",
+			"position": [
+				600,
+				2300
+			]
+		},
+		"render11": {
+			"type": "RenderTOP",
+			"position": [
+				900,
+				2200
+			]
+		},
+		"OUTChain11": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2200
+			]
+		},
+		"font1": {
+			"type": "FontSOP",
+			"position": [
+				0,
+				2400
+			],
+			"parameters": {
+				"text": {
+					"value": "GONODES"
+				},
+				"size": {
+					"value": 0.5
+				}
+			}
+		},
+		"divide1": {
+			"type": "DivideSOP",
+			"position": [
+				300,
+				2400
+			],
+			"parameters": {
+				"max_sides": {
+					"value": 3
+				}
+			}
+		},
+		"uvproject1": {
+			"type": "UVProjectSOP",
+			"position": [
+				600,
+				2400
+			],
+			"parameters": {
+				"mode": {
+					"value": 0
+				}
+			}
+		},
+		"remesh1": {
+			"type": "RemeshSOP",
+			"position": [
+				900,
+				2400
+			],
+			"parameters": {
+				"target_edge_length": {
+					"value": 0.05
+				}
+			}
+		},
+		"geo12": {
+			"type": "GeometryCOMP",
+			"position": [
+				1200,
+				2400
+			]
+		},
+		"cam12": {
+			"type": "CameraCOMP",
+			"position": [
+				1200,
+				2500
+			]
+		},
+		"render12": {
+			"type": "RenderTOP",
+			"position": [
+				1500,
+				2400
+			]
+		},
+		"OUTChain12": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2400
+			]
+		},
+		"grid4": {
+			"type": "GridSOP",
+			"position": [
+				0,
+				2600
+			]
+		},
+		"blend1": {
+			"type": "BlendSOP",
+			"position": [
+				300,
+				2600
+			],
+			"parameters": {
+				"mix": {
+					"value": 0.5
+				}
+			}
+		},
+		"switch1": {
+			"type": "SwitchSOP",
+			"position": [
+				600,
+				2600
+			],
+			"parameters": {
+				"index": {
+					"value": 0
+				}
+			}
+		},
+		"wireframe1": {
+			"type": "WireframeSOP",
+			"position": [
+				900,
+				2600
+			],
+			"parameters": {
+				"width": {
+					"value": 0.02
+				}
+			}
+		},
+		"geo13": {
+			"type": "GeometryCOMP",
+			"position": [
+				1200,
+				2600
+			]
+		},
+		"cam13": {
+			"type": "CameraCOMP",
+			"position": [
+				1200,
+				2700
+			]
+		},
+		"render13": {
+			"type": "RenderTOP",
+			"position": [
+				1500,
+				2600
+			]
+		},
+		"OUTChain13": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2600
+			]
+		},
+		"grid5": {
+			"type": "GridSOP",
+			"position": [
+				0,
+				2800
+			],
+			"parameters": {
+				"rows": {
+					"value": 10
+				},
+				"columns": {
+					"value": 10
+				}
+			}
+		},
+		"peak1": {
+			"type": "PeakSOP",
+			"position": [
+				300,
+				2800
+			],
+			"parameters": {
+				"distance": {
+					"value": 0.2
+				}
+			}
+		},
+		"clip1": {
+			"type": "ClipSOP",
+			"position": [
+				600,
+				2800
+			],
+			"parameters": {
+				"distance": {
+					"value": 0.1
+				},
+				"axis": {
+					"value": 1
+				}
+			}
+		},
+		"reverse1": {
+			"type": "ReverseSOP",
+			"position": [
+				900,
+				2800
+			]
+		},
+		"geo14": {
+			"type": "GeometryCOMP",
+			"position": [
+				1200,
+				2800
+			]
+		},
+		"cam14": {
+			"type": "CameraCOMP",
+			"position": [
+				1200,
+				2900
+			]
+		},
+		"render14": {
+			"type": "RenderTOP",
+			"position": [
+				1500,
+				2800
+			]
+		},
+		"OUTChain14": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2800
+			]
+		},
+		"line1": {
+			"type": "LineSOP",
+			"position": [
+				0,
+				3000
+			],
+			"parameters": {
+				"length": {
+					"value": 2.0
+				},
+				"points": {
+					"value": 20
+				}
+			}
+		},
+		"trail1": {
+			"type": "TrailSOP",
+			"position": [
+				300,
+				3000
+			]
+		},
+		"trailribbon1": {
+			"type": "TrailRibbonSOP",
+			"position": [
+				600,
+				3000
+			]
+		},
+		"geo15": {
+			"type": "GeometryCOMP",
+			"position": [
+				900,
+				3000
+			]
+		},
+		"cam15": {
+			"type": "CameraCOMP",
+			"position": [
+				900,
+				3100
+			]
+		},
+		"render15": {
+			"type": "RenderTOP",
+			"position": [
+				1200,
+				3000
+			]
+		},
+		"OUTChain15": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3000
+			]
+		},
+		"metaball1": {
+			"type": "MetaballSOP",
+			"position": [
+				0,
+				3200
+			],
+			"parameters": {
+				"num_balls": {
+					"value": 3
+				}
+			}
+		},
+		"isosurface1": {
+			"type": "IsoSurfaceSOP",
+			"position": [
+				300,
+				3200
+			]
+		},
+		"geo16": {
+			"type": "GeometryCOMP",
+			"position": [
+				600,
+				3200
+			]
+		},
+		"cam16": {
+			"type": "CameraCOMP",
+			"position": [
+				600,
+				3300
+			]
+		},
+		"render16": {
+			"type": "RenderTOP",
+			"position": [
+				900,
+				3200
+			]
+		},
+		"OUTChain16": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3200
+			]
+		},
+		"tube1": {
+			"type": "TubeSOP",
+			"position": [
+				0,
+				3400
+			],
+			"parameters": {
+				"rows": {
+					"value": 8
+				},
+				"columns": {
+					"value": 16
+				}
+			}
+		},
+		"polyloft1": {
+			"type": "PolyLoftSOP",
+			"position": [
+				300,
+				3400
+			]
+		},
+		"polyspline1": {
+			"type": "PolySplineSOP",
+			"position": [
+				600,
+				3400
+			]
+		},
+		"polypatch1": {
+			"type": "PolyPatchSOP",
+			"position": [
+				900,
+				3400
+			]
+		},
+		"polystitch1": {
+			"type": "PolyStitchSOP",
+			"position": [
+				1200,
+				3400
+			]
+		},
+		"polybridge1": {
+			"type": "PolyBridgeSOP",
+			"position": [
+				1500,
+				3400
+			]
+		},
+		"lattice1": {
+			"type": "LatticeSOP",
+			"position": [
+				1800,
+				3400
+			],
+			"parameters": {
+				"divisions_x": {
+					"value": 3
+				}
+			}
+		},
+		"geo17": {
+			"type": "GeometryCOMP",
+			"position": [
+				2100,
+				3400
+			]
+		},
+		"cam17": {
+			"type": "CameraCOMP",
+			"position": [
+				2100,
+				3500
+			]
+		},
+		"render17": {
+			"type": "RenderTOP",
+			"position": [
+				2400,
+				3400
+			]
+		},
+		"OUTChain17": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3400
+			]
+		},
+		"sphere2": {
+			"type": "SphereSOP",
+			"position": [
+				0,
+				3600
+			],
+			"parameters": {
+				"radius": {
+					"value": 0.4
+				}
+			}
+		},
+		"cloth1": {
+			"type": "ClothSOP",
+			"position": [
+				300,
+				3600
+			]
+		},
+		"voronoishatter1": {
+			"type": "VoronoiShatterSOP",
+			"position": [
+				600,
+				3600
+			],
+			"parameters": {
+				"num_points": {
+					"value": 10
+				}
+			}
+		},
+		"particle1": {
+			"type": "ParticleSOP",
+			"position": [
+				900,
+				3600
+			]
+		},
+		"geo18": {
+			"type": "GeometryCOMP",
+			"position": [
+				1200,
+				3600
+			]
+		},
+		"cam18": {
+			"type": "CameraCOMP",
+			"position": [
+				1200,
+				3700
+			]
+		},
+		"render18": {
+			"type": "RenderTOP",
+			"position": [
+				1500,
+				3600
+			]
+		},
+		"OUTChain18": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3600
+			]
+		},
+		"heightfield1": {
+			"type": "HeightfieldSOP",
+			"position": [
+				0,
+				3800
+			],
+			"parameters": {
+				"resolution": {
+					"value": 64
+				},
+				"amplitude": {
+					"value": 0.5
+				}
+			}
+		},
+		"texture1": {
+			"type": "TextureSOP",
+			"position": [
+				300,
+				3800
+			]
+		},
+		"geo19": {
+			"type": "GeometryCOMP",
+			"position": [
+				600,
+				3800
+			]
+		},
+		"cam19": {
+			"type": "CameraCOMP",
+			"position": [
+				600,
+				3900
+			]
+		},
+		"render19": {
+			"type": "RenderTOP",
+			"position": [
+				900,
+				3800
+			]
+		},
+		"OUTChain19": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				3800
+			]
+		},
+		"box4": {
+			"type": "BoxSOP",
+			"position": [
+				0,
+				4000
+			]
+		},
+		"fileout1": {
+			"type": "FileOutSOP",
+			"position": [
+				300,
+				4000
+			],
+			"parameters": {
+				"file_path": {
+					"value": ""
+				},
+				"active": {
+					"value": false
+				}
+			}
+		},
+		"filein1": {
+			"type": "FileInSOP",
+			"position": [
+				600,
+				4000
+			]
+		},
+		"geo20": {
+			"type": "GeometryCOMP",
+			"position": [
+				900,
+				4000
+			]
+		},
+		"cam20": {
+			"type": "CameraCOMP",
+			"position": [
+				900,
+				4100
+			]
+		},
+		"render20": {
+			"type": "RenderTOP",
+			"position": [
+				1200,
+				4000
+			]
+		},
+		"OUTChain20": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				4000
+			]
+		},
+		"chopto1": {
+			"type": "CHOPtoSOP",
+			"position": [
+				0,
+				4200
+			]
+		},
+		"topto1": {
+			"type": "TOPtoSOP",
+			"position": [
+				300,
+				4200
+			]
+		},
+		"datto1": {
+			"type": "DATtoSOP",
+			"position": [
+				600,
+				4200
+			]
+		},
+		"depthpointcloud1": {
+			"type": "DepthPointCloudSOP",
+			"position": [
+				900,
+				4200
+			]
+		},
+		"geo21": {
+			"type": "GeometryCOMP",
+			"position": [
+				1200,
+				4200
+			]
+		},
+		"cam21": {
+			"type": "CameraCOMP",
+			"position": [
+				1200,
+				4300
+			]
+		},
+		"render21": {
+			"type": "RenderTOP",
+			"position": [
+				1500,
+				4200
+			]
+		},
+		"OUTChain21": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				4200
+			]
+		},
+		"hostin1": {
+			"type": "HostInSOP",
+			"position": [
+				0,
+				4400
+			]
+		},
+		"hostout1": {
+			"type": "HostOutSOP",
+			"position": [
+				300,
+				4400
+			]
+		},
+		"geo22": {
+			"type": "GeometryCOMP",
+			"position": [
+				600,
+				4400
+			]
+		},
+		"cam22": {
+			"type": "CameraCOMP",
+			"position": [
+				600,
+				4500
+			]
+		},
+		"render22": {
+			"type": "RenderTOP",
+			"position": [
+				900,
+				4400
+			]
+		},
+		"OUTChain22": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				4400
+			]
+		},
+		"switch_main": {
+			"type": "SwitchTOP",
+			"position": [
+				-400,
+				0
+			]
+		},
+		"window_out1": {
+			"type": "WindowOUT",
+			"position": [
+				-700,
+				0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"chain_slider": {
+			"type": "SliderUI",
+			"position": [
+				-700,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Chain"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 22.0
+				},
+				"value": {
+					"value": 0.0
+				}
+			}
+		},
+		"chain_label": {
+			"type": "LabelUI",
+			"position": [
+				-700,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "ALL CORE SOPs \u2014 22 chains"
+				}
+			}
+		},
+		"panel_container": {
+			"type": "PanelContainerUI",
+			"position": [
+				-900,
+				200
+			]
+		}
+	},
+	"connections": [
+		{
+			"from": "box1",
+			"from_port": 0,
+			"to": "transform1",
+			"to_port": 0
+		},
+		{
+			"from": "transform1",
+			"from_port": 0,
+			"to": "null1",
+			"to_port": 0
+		},
+		{
+			"from": "null1",
+			"from_port": 0,
+			"to": "geo1",
+			"to_port": 0
+		},
+		{
+			"from": "geo1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 0
+		},
+		{
+			"from": "cam1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 1
+		},
+		{
+			"from": "render1",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "sphere1",
+			"from_port": 0,
+			"to": "noise1",
+			"to_port": 0
+		},
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "smooth1",
+			"to_port": 0
+		},
+		{
+			"from": "smooth1",
+			"from_port": 0,
+			"to": "geo2",
+			"to_port": 0
+		},
+		{
+			"from": "geo2",
+			"from_port": 0,
+			"to": "render2",
+			"to_port": 0
+		},
+		{
+			"from": "cam2",
+			"from_port": 0,
+			"to": "render2",
+			"to_port": 1
+		},
+		{
+			"from": "render2",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "grid1",
+			"from_port": 0,
+			"to": "mountain1",
+			"to_port": 0
+		},
+		{
+			"from": "mountain1",
+			"from_port": 0,
+			"to": "subdivide1",
+			"to_port": 0
+		},
+		{
+			"from": "subdivide1",
+			"from_port": 0,
+			"to": "polyreduce1",
+			"to_port": 0
+		},
+		{
+			"from": "polyreduce1",
+			"from_port": 0,
+			"to": "geo3",
+			"to_port": 0
+		},
+		{
+			"from": "geo3",
+			"from_port": 0,
+			"to": "render3",
+			"to_port": 0
+		},
+		{
+			"from": "cam3",
+			"from_port": 0,
+			"to": "render3",
+			"to_port": 1
+		},
+		{
+			"from": "render3",
+			"from_port": 0,
+			"to": "OUTChain3",
+			"to_port": 0
+		},
+		{
+			"from": "cylinder1",
+			"from_port": 0,
+			"to": "bend1",
+			"to_port": 0
+		},
+		{
+			"from": "bend1",
+			"from_port": 0,
+			"to": "twist1",
+			"to_port": 0
+		},
+		{
+			"from": "twist1",
+			"from_port": 0,
+			"to": "taper1",
+			"to_port": 0
+		},
+		{
+			"from": "taper1",
+			"from_port": 0,
+			"to": "geo4",
+			"to_port": 0
+		},
+		{
+			"from": "geo4",
+			"from_port": 0,
+			"to": "render4",
+			"to_port": 0
+		},
+		{
+			"from": "cam4",
+			"from_port": 0,
+			"to": "render4",
+			"to_port": 1
+		},
+		{
+			"from": "render4",
+			"from_port": 0,
+			"to": "OUTChain4",
+			"to_port": 0
+		},
+		{
+			"from": "grid2",
+			"from_port": 0,
+			"to": "extrude1",
+			"to_port": 0
+		},
+		{
+			"from": "extrude1",
+			"from_port": 0,
+			"to": "polybevel1",
+			"to_port": 0
+		},
+		{
+			"from": "polybevel1",
+			"from_port": 0,
+			"to": "facet1",
+			"to_port": 0
+		},
+		{
+			"from": "facet1",
+			"from_port": 0,
+			"to": "normal1",
+			"to_port": 0
+		},
+		{
+			"from": "normal1",
+			"from_port": 0,
+			"to": "geo5",
+			"to_port": 0
+		},
+		{
+			"from": "geo5",
+			"from_port": 0,
+			"to": "render5",
+			"to_port": 0
+		},
+		{
+			"from": "cam5",
+			"from_port": 0,
+			"to": "render5",
+			"to_port": 1
+		},
+		{
+			"from": "render5",
+			"from_port": 0,
+			"to": "OUTChain5",
+			"to_port": 0
+		},
+		{
+			"from": "grid3",
+			"from_port": 0,
+			"to": "scatter1",
+			"to_port": 0
+		},
+		{
+			"from": "scatter1",
+			"from_port": 0,
+			"to": "sort1",
+			"to_port": 0
+		},
+		{
+			"from": "sort1",
+			"from_port": 0,
+			"to": "delete1",
+			"to_port": 0
+		},
+		{
+			"from": "delete1",
+			"from_port": 0,
+			"to": "null2",
+			"to_port": 0
+		},
+		{
+			"from": "null2",
+			"from_port": 0,
+			"to": "geo6",
+			"to_port": 0
+		},
+		{
+			"from": "geo6",
+			"from_port": 0,
+			"to": "render6",
+			"to_port": 0
+		},
+		{
+			"from": "cam6",
+			"from_port": 0,
+			"to": "render6",
+			"to_port": 1
+		},
+		{
+			"from": "render6",
+			"from_port": 0,
+			"to": "OUTChain6",
+			"to_port": 0
+		},
+		{
+			"from": "box2",
+			"from_port": 0,
+			"to": "boolean1",
+			"to_port": 0
+		},
+		{
+			"from": "boolean1",
+			"from_port": 0,
+			"to": "mirror1",
+			"to_port": 0
+		},
+		{
+			"from": "mirror1",
+			"from_port": 0,
+			"to": "fuse1",
+			"to_port": 0
+		},
+		{
+			"from": "fuse1",
+			"from_port": 0,
+			"to": "copy1",
+			"to_port": 0
+		},
+		{
+			"from": "copy1",
+			"from_port": 0,
+			"to": "merge1",
+			"to_port": 0
+		},
+		{
+			"from": "merge1",
+			"from_port": 0,
+			"to": "geo7",
+			"to_port": 0
+		},
+		{
+			"from": "geo7",
+			"from_port": 0,
+			"to": "render7",
+			"to_port": 0
+		},
+		{
+			"from": "cam7",
+			"from_port": 0,
+			"to": "render7",
+			"to_port": 1
+		},
+		{
+			"from": "render7",
+			"from_port": 0,
+			"to": "OUTChain7",
+			"to_port": 0
+		},
+		{
+			"from": "circle1",
+			"from_port": 0,
+			"to": "sweep1",
+			"to_port": 0
+		},
+		{
+			"from": "sweep1",
+			"from_port": 0,
+			"to": "skin1",
+			"to_port": 0
+		},
+		{
+			"from": "skin1",
+			"from_port": 0,
+			"to": "cap1",
+			"to_port": 0
+		},
+		{
+			"from": "cap1",
+			"from_port": 0,
+			"to": "geo8",
+			"to_port": 0
+		},
+		{
+			"from": "geo8",
+			"from_port": 0,
+			"to": "render8",
+			"to_port": 0
+		},
+		{
+			"from": "cam8",
+			"from_port": 0,
+			"to": "render8",
+			"to_port": 1
+		},
+		{
+			"from": "render8",
+			"from_port": 0,
+			"to": "OUTChain8",
+			"to_port": 0
+		},
+		{
+			"from": "torus1",
+			"from_port": 0,
+			"to": "carve1",
+			"to_port": 0
+		},
+		{
+			"from": "carve1",
+			"from_port": 0,
+			"to": "magnet1",
+			"to_port": 0
+		},
+		{
+			"from": "magnet1",
+			"from_port": 0,
+			"to": "spring1",
+			"to_port": 0
+		},
+		{
+			"from": "spring1",
+			"from_port": 0,
+			"to": "ray1",
+			"to_port": 0
+		},
+		{
+			"from": "ray1",
+			"from_port": 0,
+			"to": "geo9",
+			"to_port": 0
+		},
+		{
+			"from": "geo9",
+			"from_port": 0,
+			"to": "render9",
+			"to_port": 0
+		},
+		{
+			"from": "cam9",
+			"from_port": 0,
+			"to": "render9",
+			"to_port": 1
+		},
+		{
+			"from": "render9",
+			"from_port": 0,
+			"to": "OUTChain9",
+			"to_port": 0
+		},
+		{
+			"from": "box3",
+			"from_port": 0,
+			"to": "point1",
+			"to_port": 0
+		},
+		{
+			"from": "point1",
+			"from_port": 0,
+			"to": "attribute1",
+			"to_port": 0
+		},
+		{
+			"from": "attribute1",
+			"from_port": 0,
+			"to": "primitive1",
+			"to_port": 0
+		},
+		{
+			"from": "primitive1",
+			"from_port": 0,
+			"to": "group1",
+			"to_port": 0
+		},
+		{
+			"from": "group1",
+			"from_port": 0,
+			"to": "select1",
+			"to_port": 0
+		},
+		{
+			"from": "select1",
+			"from_port": 0,
+			"to": "objectmerge1",
+			"to_port": 0
+		},
+		{
+			"from": "objectmerge1",
+			"from_port": 0,
+			"to": "geo10",
+			"to_port": 0
+		},
+		{
+			"from": "geo10",
+			"from_port": 0,
+			"to": "render10",
+			"to_port": 0
+		},
+		{
+			"from": "cam10",
+			"from_port": 0,
+			"to": "render10",
+			"to_port": 1
+		},
+		{
+			"from": "render10",
+			"from_port": 0,
+			"to": "OUTChain10",
+			"to_port": 0
+		},
+		{
+			"from": "lsystem1",
+			"from_port": 0,
+			"to": "null3",
+			"to_port": 0
+		},
+		{
+			"from": "null3",
+			"from_port": 0,
+			"to": "geo11",
+			"to_port": 0
+		},
+		{
+			"from": "geo11",
+			"from_port": 0,
+			"to": "render11",
+			"to_port": 0
+		},
+		{
+			"from": "cam11",
+			"from_port": 0,
+			"to": "render11",
+			"to_port": 1
+		},
+		{
+			"from": "render11",
+			"from_port": 0,
+			"to": "OUTChain11",
+			"to_port": 0
+		},
+		{
+			"from": "font1",
+			"from_port": 0,
+			"to": "divide1",
+			"to_port": 0
+		},
+		{
+			"from": "divide1",
+			"from_port": 0,
+			"to": "uvproject1",
+			"to_port": 0
+		},
+		{
+			"from": "uvproject1",
+			"from_port": 0,
+			"to": "remesh1",
+			"to_port": 0
+		},
+		{
+			"from": "remesh1",
+			"from_port": 0,
+			"to": "geo12",
+			"to_port": 0
+		},
+		{
+			"from": "geo12",
+			"from_port": 0,
+			"to": "render12",
+			"to_port": 0
+		},
+		{
+			"from": "cam12",
+			"from_port": 0,
+			"to": "render12",
+			"to_port": 1
+		},
+		{
+			"from": "render12",
+			"from_port": 0,
+			"to": "OUTChain12",
+			"to_port": 0
+		},
+		{
+			"from": "grid4",
+			"from_port": 0,
+			"to": "blend1",
+			"to_port": 0
+		},
+		{
+			"from": "blend1",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 0
+		},
+		{
+			"from": "switch1",
+			"from_port": 0,
+			"to": "wireframe1",
+			"to_port": 0
+		},
+		{
+			"from": "wireframe1",
+			"from_port": 0,
+			"to": "geo13",
+			"to_port": 0
+		},
+		{
+			"from": "geo13",
+			"from_port": 0,
+			"to": "render13",
+			"to_port": 0
+		},
+		{
+			"from": "cam13",
+			"from_port": 0,
+			"to": "render13",
+			"to_port": 1
+		},
+		{
+			"from": "render13",
+			"from_port": 0,
+			"to": "OUTChain13",
+			"to_port": 0
+		},
+		{
+			"from": "grid5",
+			"from_port": 0,
+			"to": "peak1",
+			"to_port": 0
+		},
+		{
+			"from": "peak1",
+			"from_port": 0,
+			"to": "clip1",
+			"to_port": 0
+		},
+		{
+			"from": "clip1",
+			"from_port": 0,
+			"to": "reverse1",
+			"to_port": 0
+		},
+		{
+			"from": "reverse1",
+			"from_port": 0,
+			"to": "geo14",
+			"to_port": 0
+		},
+		{
+			"from": "geo14",
+			"from_port": 0,
+			"to": "render14",
+			"to_port": 0
+		},
+		{
+			"from": "cam14",
+			"from_port": 0,
+			"to": "render14",
+			"to_port": 1
+		},
+		{
+			"from": "render14",
+			"from_port": 0,
+			"to": "OUTChain14",
+			"to_port": 0
+		},
+		{
+			"from": "line1",
+			"from_port": 0,
+			"to": "trail1",
+			"to_port": 0
+		},
+		{
+			"from": "trail1",
+			"from_port": 0,
+			"to": "trailribbon1",
+			"to_port": 0
+		},
+		{
+			"from": "trailribbon1",
+			"from_port": 0,
+			"to": "geo15",
+			"to_port": 0
+		},
+		{
+			"from": "geo15",
+			"from_port": 0,
+			"to": "render15",
+			"to_port": 0
+		},
+		{
+			"from": "cam15",
+			"from_port": 0,
+			"to": "render15",
+			"to_port": 1
+		},
+		{
+			"from": "render15",
+			"from_port": 0,
+			"to": "OUTChain15",
+			"to_port": 0
+		},
+		{
+			"from": "metaball1",
+			"from_port": 0,
+			"to": "isosurface1",
+			"to_port": 0
+		},
+		{
+			"from": "isosurface1",
+			"from_port": 0,
+			"to": "geo16",
+			"to_port": 0
+		},
+		{
+			"from": "geo16",
+			"from_port": 0,
+			"to": "render16",
+			"to_port": 0
+		},
+		{
+			"from": "cam16",
+			"from_port": 0,
+			"to": "render16",
+			"to_port": 1
+		},
+		{
+			"from": "render16",
+			"from_port": 0,
+			"to": "OUTChain16",
+			"to_port": 0
+		},
+		{
+			"from": "tube1",
+			"from_port": 0,
+			"to": "polyloft1",
+			"to_port": 0
+		},
+		{
+			"from": "polyloft1",
+			"from_port": 0,
+			"to": "polyspline1",
+			"to_port": 0
+		},
+		{
+			"from": "polyspline1",
+			"from_port": 0,
+			"to": "polypatch1",
+			"to_port": 0
+		},
+		{
+			"from": "polypatch1",
+			"from_port": 0,
+			"to": "polystitch1",
+			"to_port": 0
+		},
+		{
+			"from": "polystitch1",
+			"from_port": 0,
+			"to": "polybridge1",
+			"to_port": 0
+		},
+		{
+			"from": "polybridge1",
+			"from_port": 0,
+			"to": "lattice1",
+			"to_port": 0
+		},
+		{
+			"from": "lattice1",
+			"from_port": 0,
+			"to": "geo17",
+			"to_port": 0
+		},
+		{
+			"from": "geo17",
+			"from_port": 0,
+			"to": "render17",
+			"to_port": 0
+		},
+		{
+			"from": "cam17",
+			"from_port": 0,
+			"to": "render17",
+			"to_port": 1
+		},
+		{
+			"from": "render17",
+			"from_port": 0,
+			"to": "OUTChain17",
+			"to_port": 0
+		},
+		{
+			"from": "sphere2",
+			"from_port": 0,
+			"to": "cloth1",
+			"to_port": 0
+		},
+		{
+			"from": "cloth1",
+			"from_port": 0,
+			"to": "voronoishatter1",
+			"to_port": 0
+		},
+		{
+			"from": "voronoishatter1",
+			"from_port": 0,
+			"to": "particle1",
+			"to_port": 0
+		},
+		{
+			"from": "particle1",
+			"from_port": 0,
+			"to": "geo18",
+			"to_port": 0
+		},
+		{
+			"from": "geo18",
+			"from_port": 0,
+			"to": "render18",
+			"to_port": 0
+		},
+		{
+			"from": "cam18",
+			"from_port": 0,
+			"to": "render18",
+			"to_port": 1
+		},
+		{
+			"from": "render18",
+			"from_port": 0,
+			"to": "OUTChain18",
+			"to_port": 0
+		},
+		{
+			"from": "heightfield1",
+			"from_port": 0,
+			"to": "texture1",
+			"to_port": 0
+		},
+		{
+			"from": "texture1",
+			"from_port": 0,
+			"to": "geo19",
+			"to_port": 0
+		},
+		{
+			"from": "geo19",
+			"from_port": 0,
+			"to": "render19",
+			"to_port": 0
+		},
+		{
+			"from": "cam19",
+			"from_port": 0,
+			"to": "render19",
+			"to_port": 1
+		},
+		{
+			"from": "render19",
+			"from_port": 0,
+			"to": "OUTChain19",
+			"to_port": 0
+		},
+		{
+			"from": "box4",
+			"from_port": 0,
+			"to": "fileout1",
+			"to_port": 0
+		},
+		{
+			"from": "fileout1",
+			"from_port": 0,
+			"to": "filein1",
+			"to_port": 0
+		},
+		{
+			"from": "filein1",
+			"from_port": 0,
+			"to": "geo20",
+			"to_port": 0
+		},
+		{
+			"from": "geo20",
+			"from_port": 0,
+			"to": "render20",
+			"to_port": 0
+		},
+		{
+			"from": "cam20",
+			"from_port": 0,
+			"to": "render20",
+			"to_port": 1
+		},
+		{
+			"from": "render20",
+			"from_port": 0,
+			"to": "OUTChain20",
+			"to_port": 0
+		},
+		{
+			"from": "chopto1",
+			"from_port": 0,
+			"to": "topto1",
+			"to_port": 0
+		},
+		{
+			"from": "topto1",
+			"from_port": 0,
+			"to": "datto1",
+			"to_port": 0
+		},
+		{
+			"from": "datto1",
+			"from_port": 0,
+			"to": "depthpointcloud1",
+			"to_port": 0
+		},
+		{
+			"from": "depthpointcloud1",
+			"from_port": 0,
+			"to": "geo21",
+			"to_port": 0
+		},
+		{
+			"from": "geo21",
+			"from_port": 0,
+			"to": "render21",
+			"to_port": 0
+		},
+		{
+			"from": "cam21",
+			"from_port": 0,
+			"to": "render21",
+			"to_port": 1
+		},
+		{
+			"from": "render21",
+			"from_port": 0,
+			"to": "OUTChain21",
+			"to_port": 0
+		},
+		{
+			"from": "hostin1",
+			"from_port": 0,
+			"to": "hostout1",
+			"to_port": 0
+		},
+		{
+			"from": "hostout1",
+			"from_port": 0,
+			"to": "geo22",
+			"to_port": 0
+		},
+		{
+			"from": "geo22",
+			"from_port": 0,
+			"to": "render22",
+			"to_port": 0
+		},
+		{
+			"from": "cam22",
+			"from_port": 0,
+			"to": "render22",
+			"to_port": 1
+		},
+		{
+			"from": "render22",
+			"from_port": 0,
+			"to": "OUTChain22",
+			"to_port": 0
+		},
+		{
+			"from": "switch_main",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "chain_slider",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 0
+		},
+		{
+			"from": "chain_label",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain2",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain3",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 2
+		},
+		{
+			"from": "OUTChain4",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 3
+		},
+		{
+			"from": "OUTChain5",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 4
+		},
+		{
+			"from": "OUTChain6",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 5
+		},
+		{
+			"from": "OUTChain7",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 6
+		},
+		{
+			"from": "OUTChain8",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 7
+		},
+		{
+			"from": "OUTChain9",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 8
+		},
+		{
+			"from": "OUTChain10",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 9
+		},
+		{
+			"from": "OUTChain11",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 10
+		},
+		{
+			"from": "OUTChain12",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 11
+		},
+		{
+			"from": "OUTChain13",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 12
+		},
+		{
+			"from": "OUTChain14",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 13
+		},
+		{
+			"from": "OUTChain15",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 14
+		},
+		{
+			"from": "OUTChain16",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 15
+		},
+		{
+			"from": "OUTChain17",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 16
+		},
+		{
+			"from": "OUTChain18",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 17
+		},
+		{
+			"from": "OUTChain19",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 18
+		},
+		{
+			"from": "OUTChain20",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 19
+		},
+		{
+			"from": "OUTChain21",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 20
+		},
+		{
+			"from": "OUTChain22",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 21
+		}
+	]
+}

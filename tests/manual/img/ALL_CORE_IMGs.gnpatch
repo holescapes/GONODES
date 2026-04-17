@@ -1,0 +1,890 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_manual_test",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseIMG",
+			"position": [
+				0,
+				200
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			}
+		},
+		"blur1": {
+			"type": "BlurIMG",
+			"position": [
+				300,
+				200
+			],
+			"parameters": {
+				"radius": {
+					"value": 3
+				}
+			}
+		},
+		"edgedetect1": {
+			"type": "EdgeDetectIMG",
+			"position": [
+				600,
+				200
+			]
+		},
+		"threshold1": {
+			"type": "ThresholdIMG",
+			"position": [
+				900,
+				200
+			],
+			"parameters": {
+				"threshold": {
+					"value": 128
+				}
+			}
+		},
+		"morph1": {
+			"type": "MorphIMG",
+			"position": [
+				1200,
+				200
+			]
+		},
+		"imgtotop1": {
+			"type": "ImgToTOP",
+			"position": [
+				1500,
+				200
+			]
+		},
+		"OUTChain1": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				200
+			]
+		},
+		"checkerboard1": {
+			"type": "CheckerboardIMG",
+			"position": [
+				0,
+				400
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"size": {
+					"value": 32
+				}
+			}
+		},
+		"pixelsort1": {
+			"type": "PixelSortIMG",
+			"position": [
+				300,
+				400
+			],
+			"parameters": {
+				"threshold": {
+					"value": 0.3
+				}
+			}
+		},
+		"histogram1": {
+			"type": "HistogramIMG",
+			"position": [
+				600,
+				400
+			]
+		},
+		"convolve1": {
+			"type": "ConvolveIMG",
+			"position": [
+				900,
+				400
+			]
+		},
+		"contour1": {
+			"type": "ContourIMG",
+			"position": [
+				1200,
+				400
+			]
+		},
+		"imgtotop2": {
+			"type": "ImgToTOP",
+			"position": [
+				1500,
+				400
+			]
+		},
+		"OUTChain2": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				400
+			]
+		},
+		"imagefilein1": {
+			"type": "ImageFileInIMG",
+			"position": [
+				0,
+				600
+			]
+		},
+		"imagesequence1": {
+			"type": "ImageSequenceIMG",
+			"position": [
+				300,
+				600
+			]
+		},
+		"topto1": {
+			"type": "TOPtoIMG",
+			"position": [
+				600,
+				600
+			]
+		},
+		"imgtotop3": {
+			"type": "ImgToTOP",
+			"position": [
+				900,
+				600
+			]
+		},
+		"OUTChain3": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				600
+			]
+		},
+		"noise2": {
+			"type": "NoiseIMG",
+			"position": [
+				0,
+				800
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 128,
+						"y": 128
+					}
+				}
+			}
+		},
+		"stereogram1": {
+			"type": "StereogramIMG",
+			"position": [
+				300,
+				800
+			]
+		},
+		"stereodepth1": {
+			"type": "StereoDepthIMG",
+			"position": [
+				600,
+				800
+			]
+		},
+		"imgtotop4": {
+			"type": "ImgToTOP",
+			"position": [
+				900,
+				800
+			]
+		},
+		"OUTChain4": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				800
+			]
+		},
+		"noise3": {
+			"type": "NoiseIMG",
+			"position": [
+				0,
+				1000
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			}
+		},
+		"null1": {
+			"type": "NullIMG",
+			"position": [
+				300,
+				1000
+			]
+		},
+		"select1": {
+			"type": "SelectIMG",
+			"position": [
+				600,
+				1000
+			]
+		},
+		"switch1": {
+			"type": "SwitchIMG",
+			"position": [
+				900,
+				1000
+			],
+			"parameters": {
+				"index": {
+					"value": 0
+				}
+			}
+		},
+		"imgtotop5": {
+			"type": "ImgToTOP",
+			"position": [
+				1200,
+				1000
+			]
+		},
+		"OUTChain5": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1000
+			]
+		},
+		"screengrab1": {
+			"type": "ScreenGrabIMG",
+			"position": [
+				0,
+				1200
+			]
+		},
+		"drawoverlay1": {
+			"type": "DrawOverlayIMG",
+			"position": [
+				300,
+				1200
+			]
+		},
+		"perspectivewarp1": {
+			"type": "PerspectiveWarpIMG",
+			"position": [
+				600,
+				1200
+			]
+		},
+		"imgtotop6": {
+			"type": "ImgToTOP",
+			"position": [
+				900,
+				1200
+			]
+		},
+		"OUTChain6": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1200
+			]
+		},
+		"webcam1": {
+			"type": "WebcamIMG",
+			"position": [
+				0,
+				1400
+			]
+		},
+		"videodevicein1": {
+			"type": "VideoDeviceInIMG",
+			"position": [
+				300,
+				1400
+			]
+		},
+		"cameraundistort1": {
+			"type": "CameraUndistortIMG",
+			"position": [
+				600,
+				1400
+			]
+		},
+		"backgroundsubtract1": {
+			"type": "BackgroundSubtractIMG",
+			"position": [
+				900,
+				1400
+			]
+		},
+		"imgtotop7": {
+			"type": "ImgToTOP",
+			"position": [
+				1200,
+				1400
+			]
+		},
+		"OUTChain7": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1400
+			]
+		},
+		"noise4": {
+			"type": "NoiseIMG",
+			"position": [
+				0,
+				1600
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			}
+		},
+		"colortrack1": {
+			"type": "ColorTrackIMG",
+			"position": [
+				300,
+				1600
+			]
+		},
+		"blobtrack1": {
+			"type": "BlobTrackIMG",
+			"position": [
+				600,
+				1600
+			]
+		},
+		"objecttrack1": {
+			"type": "ObjectTrackIMG",
+			"position": [
+				900,
+				1600
+			]
+		},
+		"opticalflow1": {
+			"type": "OpticalFlowIMG",
+			"position": [
+				1200,
+				1600
+			]
+		},
+		"imgtotop8": {
+			"type": "ImgToTOP",
+			"position": [
+				1500,
+				1600
+			]
+		},
+		"OUTChain8": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1600
+			]
+		},
+		"noise5": {
+			"type": "NoiseIMG",
+			"position": [
+				0,
+				1800
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			}
+		},
+		"houghlines1": {
+			"type": "HoughLinesIMG",
+			"position": [
+				300,
+				1800
+			]
+		},
+		"houghcircles1": {
+			"type": "HoughCirclesIMG",
+			"position": [
+				600,
+				1800
+			]
+		},
+		"featurematch1": {
+			"type": "FeatureMatchIMG",
+			"position": [
+				900,
+				1800
+			]
+		},
+		"arucodetect1": {
+			"type": "ArucoDetectIMG",
+			"position": [
+				1200,
+				1800
+			]
+		},
+		"imgtotop9": {
+			"type": "ImgToTOP",
+			"position": [
+				1500,
+				1800
+			]
+		},
+		"OUTChain9": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1800
+			]
+		},
+		"switch_main": {
+			"type": "SwitchTOP",
+			"position": [
+				-400,
+				0
+			]
+		},
+		"window_out1": {
+			"type": "WindowOUT",
+			"position": [
+				-700,
+				0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"chain_slider": {
+			"type": "SliderUI",
+			"position": [
+				-700,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Chain"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 9.0
+				},
+				"value": {
+					"value": 0.0
+				}
+			}
+		},
+		"chain_label": {
+			"type": "LabelUI",
+			"position": [
+				-700,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "ALL CORE IMGs \u2014 9 chains"
+				}
+			}
+		},
+		"panel_container": {
+			"type": "PanelContainerUI",
+			"position": [
+				-900,
+				200
+			]
+		}
+	},
+	"connections": [
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "blur1",
+			"to_port": 0
+		},
+		{
+			"from": "blur1",
+			"from_port": 0,
+			"to": "edgedetect1",
+			"to_port": 0
+		},
+		{
+			"from": "edgedetect1",
+			"from_port": 0,
+			"to": "threshold1",
+			"to_port": 0
+		},
+		{
+			"from": "threshold1",
+			"from_port": 0,
+			"to": "morph1",
+			"to_port": 0
+		},
+		{
+			"from": "morph1",
+			"from_port": 0,
+			"to": "imgtotop1",
+			"to_port": 0
+		},
+		{
+			"from": "imgtotop1",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "checkerboard1",
+			"from_port": 0,
+			"to": "pixelsort1",
+			"to_port": 0
+		},
+		{
+			"from": "pixelsort1",
+			"from_port": 0,
+			"to": "histogram1",
+			"to_port": 0
+		},
+		{
+			"from": "histogram1",
+			"from_port": 0,
+			"to": "convolve1",
+			"to_port": 0
+		},
+		{
+			"from": "convolve1",
+			"from_port": 0,
+			"to": "contour1",
+			"to_port": 0
+		},
+		{
+			"from": "contour1",
+			"from_port": 0,
+			"to": "imgtotop2",
+			"to_port": 0
+		},
+		{
+			"from": "imgtotop2",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "imagefilein1",
+			"from_port": 0,
+			"to": "imagesequence1",
+			"to_port": 0
+		},
+		{
+			"from": "imagesequence1",
+			"from_port": 0,
+			"to": "topto1",
+			"to_port": 0
+		},
+		{
+			"from": "topto1",
+			"from_port": 0,
+			"to": "imgtotop3",
+			"to_port": 0
+		},
+		{
+			"from": "imgtotop3",
+			"from_port": 0,
+			"to": "OUTChain3",
+			"to_port": 0
+		},
+		{
+			"from": "noise2",
+			"from_port": 0,
+			"to": "stereogram1",
+			"to_port": 0
+		},
+		{
+			"from": "stereogram1",
+			"from_port": 0,
+			"to": "stereodepth1",
+			"to_port": 0
+		},
+		{
+			"from": "stereodepth1",
+			"from_port": 0,
+			"to": "imgtotop4",
+			"to_port": 0
+		},
+		{
+			"from": "imgtotop4",
+			"from_port": 0,
+			"to": "OUTChain4",
+			"to_port": 0
+		},
+		{
+			"from": "noise3",
+			"from_port": 0,
+			"to": "null1",
+			"to_port": 0
+		},
+		{
+			"from": "null1",
+			"from_port": 0,
+			"to": "select1",
+			"to_port": 0
+		},
+		{
+			"from": "select1",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 0
+		},
+		{
+			"from": "switch1",
+			"from_port": 0,
+			"to": "imgtotop5",
+			"to_port": 0
+		},
+		{
+			"from": "imgtotop5",
+			"from_port": 0,
+			"to": "OUTChain5",
+			"to_port": 0
+		},
+		{
+			"from": "screengrab1",
+			"from_port": 0,
+			"to": "drawoverlay1",
+			"to_port": 0
+		},
+		{
+			"from": "drawoverlay1",
+			"from_port": 0,
+			"to": "perspectivewarp1",
+			"to_port": 0
+		},
+		{
+			"from": "perspectivewarp1",
+			"from_port": 0,
+			"to": "imgtotop6",
+			"to_port": 0
+		},
+		{
+			"from": "imgtotop6",
+			"from_port": 0,
+			"to": "OUTChain6",
+			"to_port": 0
+		},
+		{
+			"from": "webcam1",
+			"from_port": 0,
+			"to": "videodevicein1",
+			"to_port": 0
+		},
+		{
+			"from": "videodevicein1",
+			"from_port": 0,
+			"to": "cameraundistort1",
+			"to_port": 0
+		},
+		{
+			"from": "cameraundistort1",
+			"from_port": 0,
+			"to": "backgroundsubtract1",
+			"to_port": 0
+		},
+		{
+			"from": "backgroundsubtract1",
+			"from_port": 0,
+			"to": "imgtotop7",
+			"to_port": 0
+		},
+		{
+			"from": "imgtotop7",
+			"from_port": 0,
+			"to": "OUTChain7",
+			"to_port": 0
+		},
+		{
+			"from": "noise4",
+			"from_port": 0,
+			"to": "colortrack1",
+			"to_port": 0
+		},
+		{
+			"from": "colortrack1",
+			"from_port": 0,
+			"to": "blobtrack1",
+			"to_port": 0
+		},
+		{
+			"from": "blobtrack1",
+			"from_port": 0,
+			"to": "objecttrack1",
+			"to_port": 0
+		},
+		{
+			"from": "objecttrack1",
+			"from_port": 0,
+			"to": "opticalflow1",
+			"to_port": 0
+		},
+		{
+			"from": "opticalflow1",
+			"from_port": 0,
+			"to": "imgtotop8",
+			"to_port": 0
+		},
+		{
+			"from": "imgtotop8",
+			"from_port": 0,
+			"to": "OUTChain8",
+			"to_port": 0
+		},
+		{
+			"from": "noise5",
+			"from_port": 0,
+			"to": "houghlines1",
+			"to_port": 0
+		},
+		{
+			"from": "houghlines1",
+			"from_port": 0,
+			"to": "houghcircles1",
+			"to_port": 0
+		},
+		{
+			"from": "houghcircles1",
+			"from_port": 0,
+			"to": "featurematch1",
+			"to_port": 0
+		},
+		{
+			"from": "featurematch1",
+			"from_port": 0,
+			"to": "arucodetect1",
+			"to_port": 0
+		},
+		{
+			"from": "arucodetect1",
+			"from_port": 0,
+			"to": "imgtotop9",
+			"to_port": 0
+		},
+		{
+			"from": "imgtotop9",
+			"from_port": 0,
+			"to": "OUTChain9",
+			"to_port": 0
+		},
+		{
+			"from": "switch_main",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "chain_slider",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 0
+		},
+		{
+			"from": "chain_label",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain2",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain3",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 2
+		},
+		{
+			"from": "OUTChain4",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 3
+		},
+		{
+			"from": "OUTChain5",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 4
+		},
+		{
+			"from": "OUTChain6",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 5
+		},
+		{
+			"from": "OUTChain7",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 6
+		},
+		{
+			"from": "OUTChain8",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 7
+		},
+		{
+			"from": "OUTChain9",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 8
+		}
+	]
+}

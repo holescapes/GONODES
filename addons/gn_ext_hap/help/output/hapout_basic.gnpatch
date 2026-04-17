@@ -1,0 +1,97 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1920,
+                        "y": 1080
+                    }
+                }
+            }
+        },
+        "focus1": {
+            "type": "HapOUT",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "file_path": {
+                    "value": "output.mov"
+                },
+                "variant": {
+                    "value": 0
+                },
+                "fps": {
+                    "value": 30
+                },
+                "record": {
+                    "value": false
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src1",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "src1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Hap OUT \u2014 Basic\n\nRecord TOP texture to HAP-encoded .mov video file.\nHAP uses GPU-accelerated compression for real-time recording.\nSet file_path, fps, and toggle record to start/stop capture.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                520,
+                140
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

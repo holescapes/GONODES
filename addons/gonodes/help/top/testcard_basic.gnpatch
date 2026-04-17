@@ -1,0 +1,85 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "focus1": {
+            "type": "TestCardTOP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1920,
+                        "y": 1080
+                    }
+                },
+                "card_type": {
+                    "value": 0
+                },
+                "show_grid": {
+                    "value": true
+                },
+                "show_center": {
+                    "value": true
+                },
+                "show_color_bars": {
+                    "value": true
+                },
+                "show_safe_area": {
+                    "value": true
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Test Card TOP \u2014 Basic\n\nGenerate calibration/test pattern textures.\ncard_type selects pattern style. Toggle individual elements:\ngrid, center crosshair, color bars, grayscale ramp, safe area.\nUseful for monitor calibration and debugging output pipelines.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                520,
+                140
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

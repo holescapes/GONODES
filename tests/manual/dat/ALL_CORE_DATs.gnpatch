@@ -1,0 +1,1171 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_manual_test",
+	"nodes": {
+		"table1": {
+			"type": "TableDAT",
+			"position": [
+				0,
+				200
+			]
+		},
+		"sort1": {
+			"type": "SortDAT",
+			"position": [
+				300,
+				200
+			],
+			"parameters": {
+				"column": {
+					"value": 0
+				},
+				"order": {
+					"value": 0
+				}
+			}
+		},
+		"transpose1": {
+			"type": "TransposeDAT",
+			"position": [
+				600,
+				200
+			]
+		},
+		"select1": {
+			"type": "SelectDAT",
+			"position": [
+				900,
+				200
+			],
+			"parameters": {
+				"rows": {
+					"value": "0-2"
+				}
+			}
+		},
+		"texttop1": {
+			"type": "TextTOP",
+			"position": [
+				1200,
+				200
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('select1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain1": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				200
+			]
+		},
+		"constant1": {
+			"type": "ConstantDAT",
+			"position": [
+				0,
+				400
+			]
+		},
+		"merge1": {
+			"type": "MergeDAT",
+			"position": [
+				300,
+				400
+			]
+		},
+		"insert1": {
+			"type": "InsertDAT",
+			"position": [
+				600,
+				400
+			],
+			"parameters": {
+				"row": {
+					"value": 0
+				},
+				"value": {
+					"value": "inserted"
+				}
+			}
+		},
+		"delete1": {
+			"type": "DeleteDAT",
+			"position": [
+				900,
+				400
+			],
+			"parameters": {
+				"mode": {
+					"value": 0
+				},
+				"row": {
+					"value": 1
+				}
+			}
+		},
+		"substitute1": {
+			"type": "SubstituteDAT",
+			"position": [
+				1200,
+				400
+			],
+			"parameters": {
+				"find": {
+					"value": "inserted"
+				},
+				"replace": {
+					"value": "REPLACED"
+				}
+			}
+		},
+		"texttop2": {
+			"type": "TextTOP",
+			"position": [
+				1500,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('substitute1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain2": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				400
+			]
+		},
+		"text1": {
+			"type": "TextDAT",
+			"position": [
+				0,
+				600
+			],
+			"parameters": {
+				"text": {
+					"value": "Hello GONODES!\nLine 2\nLine 3"
+				}
+			}
+		},
+		"evaluate1": {
+			"type": "EvaluateDAT",
+			"position": [
+				300,
+				600
+			]
+		},
+		"fifo1": {
+			"type": "FIFODAT",
+			"position": [
+				600,
+				600
+			],
+			"parameters": {
+				"max_rows": {
+					"value": 100
+				}
+			}
+		},
+		"null1": {
+			"type": "NullDAT",
+			"position": [
+				900,
+				600
+			]
+		},
+		"switch1": {
+			"type": "SwitchDAT",
+			"position": [
+				1200,
+				600
+			],
+			"parameters": {
+				"index": {
+					"value": 0
+				}
+			}
+		},
+		"texttop3": {
+			"type": "TextTOP",
+			"position": [
+				1500,
+				600
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('switch1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain3": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				600
+			]
+		},
+		"json1": {
+			"type": "JSONDAT",
+			"position": [
+				0,
+				800
+			],
+			"parameters": {
+				"json_string": {
+					"value": "{\"name\":\"test\",\"value\":42}"
+				}
+			}
+		},
+		"xml1": {
+			"type": "XMLDAT",
+			"position": [
+				300,
+				800
+			],
+			"parameters": {
+				"xml_string": {
+					"value": "<root><item>Test</item></root>"
+				}
+			}
+		},
+		"null2": {
+			"type": "NullDAT",
+			"position": [
+				600,
+				800
+			]
+		},
+		"texttop4": {
+			"type": "TextTOP",
+			"position": [
+				900,
+				800
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('null2', 0, 0)"
+				}
+			}
+		},
+		"OUTChain4": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				800
+			]
+		},
+		"filein1": {
+			"type": "FileInDAT",
+			"position": [
+				0,
+				1000
+			]
+		},
+		"folder1": {
+			"type": "FolderDAT",
+			"position": [
+				300,
+				1000
+			],
+			"parameters": {
+				"path": {
+					"value": "res://addons/gonodes/"
+				}
+			}
+		},
+		"opfind1": {
+			"type": "OPFindDAT",
+			"position": [
+				600,
+				1000
+			]
+		},
+		"info1": {
+			"type": "InfoDAT",
+			"position": [
+				900,
+				1000
+			]
+		},
+		"texttop5": {
+			"type": "TextTOP",
+			"position": [
+				1200,
+				1000
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('info1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain5": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1000
+			]
+		},
+		"error1": {
+			"type": "ErrorDAT",
+			"position": [
+				0,
+				1200
+			]
+		},
+		"callback1": {
+			"type": "CallbackDAT",
+			"position": [
+				300,
+				1200
+			]
+		},
+		"panelexecute1": {
+			"type": "PanelExecuteDAT",
+			"position": [
+				600,
+				1200
+			]
+		},
+		"renderpick1": {
+			"type": "RenderPickDAT",
+			"position": [
+				900,
+				1200
+			]
+		},
+		"texttop6": {
+			"type": "TextTOP",
+			"position": [
+				1200,
+				1200
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('renderpick1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain6": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1200
+			]
+		},
+		"oscin1": {
+			"type": "OscInDAT",
+			"position": [
+				0,
+				1400
+			],
+			"parameters": {
+				"port": {
+					"value": 7000
+				}
+			}
+		},
+		"mqtt1": {
+			"type": "MqttDAT",
+			"position": [
+				300,
+				1400
+			]
+		},
+		"network1": {
+			"type": "NetworkDAT",
+			"position": [
+				600,
+				1400
+			]
+		},
+		"websocket1": {
+			"type": "WebSocketDAT",
+			"position": [
+				900,
+				1400
+			]
+		},
+		"webserver1": {
+			"type": "WebServerDAT",
+			"position": [
+				1200,
+				1400
+			]
+		},
+		"web1": {
+			"type": "WebDAT",
+			"position": [
+				1500,
+				1400
+			]
+		},
+		"texttop7": {
+			"type": "TextTOP",
+			"position": [
+				1800,
+				1400
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('web1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain7": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1400
+			]
+		},
+		"serial1": {
+			"type": "SerialDAT",
+			"position": [
+				0,
+				1600
+			]
+		},
+		"serialreceive1": {
+			"type": "SerialReceiveDAT",
+			"position": [
+				300,
+				1600
+			]
+		},
+		"serialsend1": {
+			"type": "SerialSendDAT",
+			"position": [
+				600,
+				1600
+			]
+		},
+		"texttop8": {
+			"type": "TextTOP",
+			"position": [
+				900,
+				1600
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('serialsend1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain8": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1600
+			]
+		},
+		"chop1": {
+			"type": "CHOPDAT",
+			"position": [
+				0,
+				1800
+			]
+		},
+		"sopto1": {
+			"type": "SOPtoDAT",
+			"position": [
+				300,
+				1800
+			]
+		},
+		"topto1": {
+			"type": "TOPtoDAT",
+			"position": [
+				600,
+				1800
+			]
+		},
+		"tochop1": {
+			"type": "DATtoCHOP",
+			"position": [
+				900,
+				1800
+			]
+		},
+		"texttop9": {
+			"type": "TextTOP",
+			"position": [
+				1200,
+				1800
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('tochop1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain9": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				1800
+			]
+		},
+		"cue1": {
+			"type": "CueDAT",
+			"position": [
+				0,
+				2000
+			]
+		},
+		"dmx1": {
+			"type": "DMXDAT",
+			"position": [
+				300,
+				2000
+			]
+		},
+		"midiin1": {
+			"type": "MidiInDAT",
+			"position": [
+				600,
+				2000
+			]
+		},
+		"multitouchin1": {
+			"type": "MultiTouchInDAT",
+			"position": [
+				900,
+				2000
+			]
+		},
+		"texttop10": {
+			"type": "TextTOP",
+			"position": [
+				1200,
+				2000
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('multitouchin1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain10": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2000
+			]
+		},
+		"arucopose1": {
+			"type": "ArucoPoseDAT",
+			"position": [
+				0,
+				2200
+			]
+		},
+		"cameracalib1": {
+			"type": "CameraCalibDAT",
+			"position": [
+				300,
+				2200
+			]
+		},
+		"qrcode1": {
+			"type": "QRCodeDAT",
+			"position": [
+				600,
+				2200
+			]
+		},
+		"objectdetect1": {
+			"type": "ObjectDetectDAT",
+			"position": [
+				900,
+				2200
+			]
+		},
+		"depthsensor1": {
+			"type": "DepthSensorDAT",
+			"position": [
+				1200,
+				2200
+			]
+		},
+		"texttop11": {
+			"type": "TextTOP",
+			"position": [
+				1500,
+				2200
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('depthsensor1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain11": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2200
+			]
+		},
+		"blackmagic1": {
+			"type": "BlackmagicDAT",
+			"position": [
+				0,
+				2400
+			]
+		},
+		"null3": {
+			"type": "NullDAT",
+			"position": [
+				300,
+				2400
+			]
+		},
+		"texttop12": {
+			"type": "TextTOP",
+			"position": [
+				600,
+				2400
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('null3', 0, 0)"
+				}
+			}
+		},
+		"OUTChain12": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2400
+			]
+		},
+		"hostin1": {
+			"type": "HostInDAT",
+			"position": [
+				0,
+				2600
+			]
+		},
+		"hostout1": {
+			"type": "HostOutDAT",
+			"position": [
+				300,
+				2600
+			]
+		},
+		"texttop13": {
+			"type": "TextTOP",
+			"position": [
+				600,
+				2600
+			],
+			"parameters": {
+				"text": {
+					"value": "",
+					"expression": "dat('hostout1', 0, 0)"
+				}
+			}
+		},
+		"OUTChain13": {
+			"type": "NullTOP",
+			"position": [
+				-200,
+				2600
+			]
+		},
+		"switch_main": {
+			"type": "SwitchTOP",
+			"position": [
+				-400,
+				0
+			]
+		},
+		"window_out1": {
+			"type": "WindowOUT",
+			"position": [
+				-700,
+				0
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"chain_slider": {
+			"type": "SliderUI",
+			"position": [
+				-700,
+				200
+			],
+			"parameters": {
+				"label": {
+					"value": "Chain"
+				},
+				"min": {
+					"value": 0.0
+				},
+				"max": {
+					"value": 13.0
+				},
+				"value": {
+					"value": 0.0
+				}
+			}
+		},
+		"chain_label": {
+			"type": "LabelUI",
+			"position": [
+				-700,
+				400
+			],
+			"parameters": {
+				"text": {
+					"value": "ALL CORE DATs \u2014 13 chains"
+				}
+			}
+		},
+		"panel_container": {
+			"type": "PanelContainerUI",
+			"position": [
+				-900,
+				200
+			]
+		}
+	},
+	"connections": [
+		{
+			"from": "table1",
+			"from_port": 0,
+			"to": "sort1",
+			"to_port": 0
+		},
+		{
+			"from": "sort1",
+			"from_port": 0,
+			"to": "transpose1",
+			"to_port": 0
+		},
+		{
+			"from": "transpose1",
+			"from_port": 0,
+			"to": "select1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop1",
+			"from_port": 0,
+			"to": "OUTChain1",
+			"to_port": 0
+		},
+		{
+			"from": "constant1",
+			"from_port": 0,
+			"to": "merge1",
+			"to_port": 0
+		},
+		{
+			"from": "merge1",
+			"from_port": 0,
+			"to": "insert1",
+			"to_port": 0
+		},
+		{
+			"from": "insert1",
+			"from_port": 0,
+			"to": "delete1",
+			"to_port": 0
+		},
+		{
+			"from": "delete1",
+			"from_port": 0,
+			"to": "substitute1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop2",
+			"from_port": 0,
+			"to": "OUTChain2",
+			"to_port": 0
+		},
+		{
+			"from": "text1",
+			"from_port": 0,
+			"to": "evaluate1",
+			"to_port": 0
+		},
+		{
+			"from": "evaluate1",
+			"from_port": 0,
+			"to": "fifo1",
+			"to_port": 0
+		},
+		{
+			"from": "fifo1",
+			"from_port": 0,
+			"to": "null1",
+			"to_port": 0
+		},
+		{
+			"from": "null1",
+			"from_port": 0,
+			"to": "switch1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop3",
+			"from_port": 0,
+			"to": "OUTChain3",
+			"to_port": 0
+		},
+		{
+			"from": "json1",
+			"from_port": 0,
+			"to": "xml1",
+			"to_port": 0
+		},
+		{
+			"from": "xml1",
+			"from_port": 0,
+			"to": "null2",
+			"to_port": 0
+		},
+		{
+			"from": "texttop4",
+			"from_port": 0,
+			"to": "OUTChain4",
+			"to_port": 0
+		},
+		{
+			"from": "filein1",
+			"from_port": 0,
+			"to": "folder1",
+			"to_port": 0
+		},
+		{
+			"from": "folder1",
+			"from_port": 0,
+			"to": "opfind1",
+			"to_port": 0
+		},
+		{
+			"from": "opfind1",
+			"from_port": 0,
+			"to": "info1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop5",
+			"from_port": 0,
+			"to": "OUTChain5",
+			"to_port": 0
+		},
+		{
+			"from": "error1",
+			"from_port": 0,
+			"to": "callback1",
+			"to_port": 0
+		},
+		{
+			"from": "callback1",
+			"from_port": 0,
+			"to": "panelexecute1",
+			"to_port": 0
+		},
+		{
+			"from": "panelexecute1",
+			"from_port": 0,
+			"to": "renderpick1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop6",
+			"from_port": 0,
+			"to": "OUTChain6",
+			"to_port": 0
+		},
+		{
+			"from": "oscin1",
+			"from_port": 0,
+			"to": "mqtt1",
+			"to_port": 0
+		},
+		{
+			"from": "mqtt1",
+			"from_port": 0,
+			"to": "network1",
+			"to_port": 0
+		},
+		{
+			"from": "network1",
+			"from_port": 0,
+			"to": "websocket1",
+			"to_port": 0
+		},
+		{
+			"from": "websocket1",
+			"from_port": 0,
+			"to": "webserver1",
+			"to_port": 0
+		},
+		{
+			"from": "webserver1",
+			"from_port": 0,
+			"to": "web1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop7",
+			"from_port": 0,
+			"to": "OUTChain7",
+			"to_port": 0
+		},
+		{
+			"from": "serial1",
+			"from_port": 0,
+			"to": "serialreceive1",
+			"to_port": 0
+		},
+		{
+			"from": "serialreceive1",
+			"from_port": 0,
+			"to": "serialsend1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop8",
+			"from_port": 0,
+			"to": "OUTChain8",
+			"to_port": 0
+		},
+		{
+			"from": "chop1",
+			"from_port": 0,
+			"to": "sopto1",
+			"to_port": 0
+		},
+		{
+			"from": "sopto1",
+			"from_port": 0,
+			"to": "topto1",
+			"to_port": 0
+		},
+		{
+			"from": "topto1",
+			"from_port": 0,
+			"to": "tochop1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop9",
+			"from_port": 0,
+			"to": "OUTChain9",
+			"to_port": 0
+		},
+		{
+			"from": "cue1",
+			"from_port": 0,
+			"to": "dmx1",
+			"to_port": 0
+		},
+		{
+			"from": "dmx1",
+			"from_port": 0,
+			"to": "midiin1",
+			"to_port": 0
+		},
+		{
+			"from": "midiin1",
+			"from_port": 0,
+			"to": "multitouchin1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop10",
+			"from_port": 0,
+			"to": "OUTChain10",
+			"to_port": 0
+		},
+		{
+			"from": "arucopose1",
+			"from_port": 0,
+			"to": "cameracalib1",
+			"to_port": 0
+		},
+		{
+			"from": "cameracalib1",
+			"from_port": 0,
+			"to": "qrcode1",
+			"to_port": 0
+		},
+		{
+			"from": "qrcode1",
+			"from_port": 0,
+			"to": "objectdetect1",
+			"to_port": 0
+		},
+		{
+			"from": "objectdetect1",
+			"from_port": 0,
+			"to": "depthsensor1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop11",
+			"from_port": 0,
+			"to": "OUTChain11",
+			"to_port": 0
+		},
+		{
+			"from": "blackmagic1",
+			"from_port": 0,
+			"to": "null3",
+			"to_port": 0
+		},
+		{
+			"from": "texttop12",
+			"from_port": 0,
+			"to": "OUTChain12",
+			"to_port": 0
+		},
+		{
+			"from": "hostin1",
+			"from_port": 0,
+			"to": "hostout1",
+			"to_port": 0
+		},
+		{
+			"from": "texttop13",
+			"from_port": 0,
+			"to": "OUTChain13",
+			"to_port": 0
+		},
+		{
+			"from": "switch_main",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 0
+		},
+		{
+			"from": "chain_slider",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 0
+		},
+		{
+			"from": "chain_label",
+			"from_port": 0,
+			"to": "panel_container",
+			"to_port": 1
+		},
+		{
+			"from": "panel_container",
+			"from_port": 0,
+			"to": "window_out1",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain1",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 0
+		},
+		{
+			"from": "OUTChain2",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 1
+		},
+		{
+			"from": "OUTChain3",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 2
+		},
+		{
+			"from": "OUTChain4",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 3
+		},
+		{
+			"from": "OUTChain5",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 4
+		},
+		{
+			"from": "OUTChain6",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 5
+		},
+		{
+			"from": "OUTChain7",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 6
+		},
+		{
+			"from": "OUTChain8",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 7
+		},
+		{
+			"from": "OUTChain9",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 8
+		},
+		{
+			"from": "OUTChain10",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 9
+		},
+		{
+			"from": "OUTChain11",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 10
+		},
+		{
+			"from": "OUTChain12",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 11
+		},
+		{
+			"from": "OUTChain13",
+			"from_port": 0,
+			"to": "switch_main",
+			"to_port": 12
+		}
+	]
+}

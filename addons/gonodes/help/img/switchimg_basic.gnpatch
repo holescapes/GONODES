@@ -1,0 +1,154 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_a": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "monochrome": {
+                    "value": true
+                }
+            }
+        },
+        "src_b": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                300
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "seed": {
+                    "value": 42
+                }
+            }
+        },
+        "top2img_a": {
+            "type": "TOPtoIMG",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "top2img_b": {
+            "type": "TOPtoIMG",
+            "position": [
+                400,
+                300
+            ],
+            "parameters": {}
+        },
+        "focus1": {
+            "type": "SwitchIMG",
+            "position": [
+                700,
+                200
+            ],
+            "parameters": {}
+        },
+        "img2top": {
+            "type": "ImgToTOP",
+            "position": [
+                1000,
+                200
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1300,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_a",
+            "from_port": 0,
+            "to": "top2img_a",
+            "to_port": 0
+        },
+        {
+            "from": "src_b",
+            "from_port": 0,
+            "to": "top2img_b",
+            "to_port": 0
+        },
+        {
+            "from": "top2img_a",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "top2img_b",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 1
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "img2top",
+            "to_port": 0
+        },
+        {
+            "from": "img2top",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Switch IMG \u2014 Basic\n\nSelect one of multiple IMG inputs by index.\nWire several image sources and use the index parameter to pick which one passes through.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

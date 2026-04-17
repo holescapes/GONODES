@@ -1,0 +1,79 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "focus1": {
+            "type": "BlackmagicInTOP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "device": {
+                    "value": 0
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1920,
+                        "y": 1080
+                    }
+                },
+                "fps": {
+                    "value": 30
+                },
+                "active": {
+                    "value": true
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Blackmagic In TOP \u2014 Basic\n\nCapture video from a Blackmagic DeckLink device.\nSet device index, resolution, and fps to match your hardware.\nToggle active to start/stop capture.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -1,0 +1,88 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "bm1": {
+            "type": "BlackmagicDAT",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "rescan": {
+                    "value": false
+                }
+            }
+        },
+        "dattotop1": {
+            "type": "DATtoTOP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 256
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "bm1",
+            "from_port": 0,
+            "to": "dattotop1",
+            "to_port": 0
+        },
+        {
+            "from": "dattotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Blackmagic DAT \u2014 Basic\n\nLists detected Blackmagic DeckLink devices.\nOutputs a table of device names, modes, and status.\nToggle Rescan to refresh connected hardware.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

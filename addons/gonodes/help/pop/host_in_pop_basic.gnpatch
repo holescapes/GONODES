@@ -1,0 +1,90 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "focus1": {
+            "type": "HostInPOP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "input_particles"
+                },
+                "max_particles": {
+                    "value": 10000
+                }
+            }
+        },
+        "pstate1": {
+            "type": "ParticleStateTOP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {
+                "width": {
+                    "value": 512
+                },
+                "attribute": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "pstate1",
+            "to_port": 0
+        },
+        {
+            "from": "pstate1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostIn POP \u2014 Basic\n\nReceive particle data from the host application via libgonodes.\nSet label to match the host's particle source name.\nmax_particles caps the buffer size.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                520,
+                140
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

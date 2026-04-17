@@ -1,0 +1,185 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "grid1": {
+            "type": "GridSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "rows": {
+                    "value": 20
+                },
+                "cols": {
+                    "value": 20
+                }
+            }
+        },
+        "mat_a": {
+            "type": "ConstantMAT",
+            "position": [
+                100,
+                300
+            ],
+            "parameters": {
+                "color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 1.0,
+                        "g": 0.2,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "mat_b": {
+            "type": "ConstantMAT",
+            "position": [
+                100,
+                500
+            ],
+            "parameters": {
+                "color": {
+                    "value": {
+                        "_type": "Color",
+                        "r": 0.2,
+                        "g": 1.0,
+                        "b": 0.2,
+                        "a": 1.0
+                    }
+                }
+            }
+        },
+        "focus1": {
+            "type": "SwitchMAT",
+            "position": [
+                450,
+                400
+            ],
+            "parameters": {}
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                800,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 4
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "mat_a",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "mat_b",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 1
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 1
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Switch MAT \u2014 Basic\n\nSelect one of multiple material inputs by index.\nWire several materials and switch between them for A/B comparison or animated transitions.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

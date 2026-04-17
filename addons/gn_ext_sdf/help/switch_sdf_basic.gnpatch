@@ -1,0 +1,118 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sphere1": {
+            "type": "SphereSDF",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {}
+        },
+        "box1": {
+            "type": "BoxSDF",
+            "position": [
+                200,
+                300
+            ],
+            "parameters": {}
+        },
+        "focus1": {
+            "type": "SwitchSDF",
+            "position": [
+                550,
+                200
+            ],
+            "parameters": {}
+        },
+        "raymarch1": {
+            "type": "RaymarchSDF",
+            "position": [
+                900,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "cam_distance": {
+                    "value": 5.0
+                },
+                "show_ao": {
+                    "value": true
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1300,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sphere1",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 0
+        },
+        {
+            "from": "box1",
+            "from_port": 0,
+            "to": "focus1",
+            "to_port": 1
+        },
+        {
+            "from": "focus1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Switch SDF \u2014 Basic\n\nSelect one of multiple SDF inputs by index.\nToggle between different SDF shapes or scenes at runtime.",
+            "position": [
+                -100,
+                -100
+            ],
+            "size": [
+                500,
+                120
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}
