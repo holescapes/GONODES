@@ -54,8 +54,8 @@ func _ensure_knob() -> void:
 	_knob = Control.new()
 	_knob.name = id + "_knob"
 	_knob.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	_knob.gui_input.connect(_on_knob_input)
-	_knob.draw.connect(_on_knob_draw)
+	_register_signal(_knob.gui_input, _on_knob_input)
+	_register_signal(_knob.draw, _on_knob_draw)
 	_value = widget_state.get("value", get_param_value("default_val"))
 	_control_node = _knob
 
@@ -117,11 +117,6 @@ func _on_knob_draw() -> void:
 
 
 func destroy_control_node() -> void:
-	if _knob != null:
-		if _knob.gui_input.is_connected(_on_knob_input):
-			_knob.gui_input.disconnect(_on_knob_input)
-		if _knob.draw.is_connected(_on_knob_draw):
-			_knob.draw.disconnect(_on_knob_draw)
 	_knob = null
 	_value = 0.5
 	_dragging = false

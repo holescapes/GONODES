@@ -48,6 +48,13 @@ func _get_output(node: GNNode) -> GNChannelData:
 	return node.cached_output as GNChannelData
 
 
+func _sink(ids: Array) -> void:
+	var typed: Array[String] = []
+	for id in ids:
+		typed.append(str(id))
+	_engine.set_active_sinks(typed)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Constant → Null Passthrough
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -60,6 +67,7 @@ func test_constant_to_null_passthrough() -> void:
 
 	var n := _make_node(NullCHOP, "null1")
 	_network.connect_nodes("const1", 0, "null1", 0)
+	_sink(["null1"])
 
 	_cook_one_frame()
 
@@ -82,6 +90,7 @@ func test_constant_plus_scalar() -> void:
 	m.set_param_value("operation", 0)  # Add
 	m.set_param_value("operand", 5.0)
 	_network.connect_nodes("const1", 0, "math1", 0)
+	_sink(["math1"])
 
 	_cook_one_frame()
 
@@ -100,6 +109,7 @@ func test_constant_multiply_scalar() -> void:
 	m.set_param_value("operation", 2)  # Multiply
 	m.set_param_value("operand", 3.0)
 	_network.connect_nodes("const1", 0, "math1", 0)
+	_sink(["math1"])
 
 	_cook_one_frame()
 
@@ -126,6 +136,7 @@ func test_two_constants_binary_add() -> void:
 	m.set_param_value("operation", 0)  # Add
 	_network.connect_nodes("constA", 0, "math1", 0)
 	_network.connect_nodes("constB", 0, "math1", 1)
+	_sink(["math1"])
 
 	_cook_one_frame()
 
@@ -153,6 +164,7 @@ func test_three_node_chain() -> void:
 	m2.set_param_value("operation", 0)  # Add
 	m2.set_param_value("operand", 100.0)
 	_network.connect_nodes("mul", 0, "add", 0)
+	_sink(["add"])
 
 	_cook_one_frame()
 
@@ -179,6 +191,7 @@ func test_merge_chop_combines_channels() -> void:
 	var mg := _make_node(MergeCHOP, "merge1")
 	_network.connect_nodes("constA", 0, "merge1", 0)
 	_network.connect_nodes("constB", 0, "merge1", 1)
+	_sink(["merge1"])
 
 	_cook_one_frame()
 
@@ -208,6 +221,7 @@ func test_expression_par_ref_through_cook() -> void:
 	# Set value0 to expression mode referencing ctrl
 	var p: GNParameter = target.parameters["value0"]
 	p.set_expression('par("ctrl", "value0")')
+	_sink(["target"])
 
 	_cook_one_frame()
 
@@ -233,6 +247,7 @@ func test_expression_chop_ref_through_cook() -> void:
 	reader.set_param_value("name0", "out")
 	var p: GNParameter = reader.parameters["value0"]
 	p.set_expression('chop("source", "sig")')
+	_sink(["reader"])
 
 	_cook_one_frame()
 
@@ -260,6 +275,7 @@ func test_dirty_propagation_recooks_downstream() -> void:
 
 	var c := _make_node(NullCHOP, "c")
 	_network.connect_nodes("b", 0, "c", 0)
+	_sink(["c"])
 
 	# First cook
 	_cook_one_frame()
@@ -303,6 +319,7 @@ func test_diamond_topology() -> void:
 	var mg := _make_node(MergeCHOP, "merge1")
 	_network.connect_nodes("mul", 0, "merge1", 0)
 	_network.connect_nodes("add", 0, "merge1", 1)
+	_sink(["merge1"])
 
 	_cook_one_frame()
 
@@ -329,6 +346,7 @@ func test_bypass_passes_input_through() -> void:
 	m.set_param_value("operand", 100.0)
 	m.bypass = true
 	_network.connect_nodes("const1", 0, "math1", 0)
+	_sink(["math1"])
 
 	_cook_one_frame()
 
@@ -355,6 +373,7 @@ func test_multi_channel_math() -> void:
 	var m := _make_node(MathCHOP, "math1")
 	m.set_param_value("operation", 4)  # Abs
 	_network.connect_nodes("const1", 0, "math1", 0)
+	_sink(["math1"])
 
 	_cook_one_frame()
 
@@ -375,6 +394,7 @@ func test_time_expression_in_cook() -> void:
 	c.set_param_value("name0", "t")
 	var p: GNParameter = c.parameters["value0"]
 	p.set_expression("time * 10.0")
+	_sink(["const1"])
 
 	_cook_one_frame()
 
@@ -405,6 +425,7 @@ func test_binary_math_mismatched_names_single_broadcast() -> void:
 	m.set_param_value("operand", 999.0)  # Should NOT be used
 	_network.connect_nodes("constA", 0, "math1", 0)
 	_network.connect_nodes("constB", 0, "math1", 1)
+	_sink(["math1"])
 
 	_cook_one_frame()
 
@@ -440,6 +461,7 @@ func test_binary_math_mismatched_names_index_match() -> void:
 	m.set_param_value("operand", 999.0)  # Should NOT be used
 	_network.connect_nodes("constA", 0, "math1", 0)
 	_network.connect_nodes("constB", 0, "math1", 1)
+	_sink(["math1"])
 
 	_cook_one_frame()
 
@@ -472,6 +494,7 @@ func test_binary_math_channel_name_selector() -> void:
 	m.set_param_value("channel_name", "b")
 	_network.connect_nodes("constA", 0, "math1", 0)
 	_network.connect_nodes("constB", 0, "math1", 1)
+	_sink(["math1"])
 
 	_cook_one_frame()
 

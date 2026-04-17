@@ -241,6 +241,11 @@ func test_dirty_propagation() -> void:
 	_network.connect_nodes("a", 0, "b", 0)
 	_network.connect_nodes("b", 0, "c", 0)
 
+	# BFS only traverses active nodes, so mark all active
+	a.is_active = true
+	b.is_active = true
+	c.is_active = true
+
 	# Clear all dirty flags
 	a.dirty = false
 	b.dirty = false

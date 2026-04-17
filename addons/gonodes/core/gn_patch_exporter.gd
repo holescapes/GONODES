@@ -349,6 +349,14 @@ func _write_config(config_path: String, patch_filename: String) -> Error:
 	else:
 		config = { "patch": patch_filename, "renderer": target_renderer }
 
+	# Bake runtime-relevant preferences so the Player inherits them.
+	config["settings"] = {
+		"log_level": GNSettings.get_value("log_level", 1),
+		"log_to_file": GNSettings.get_value("log_to_file", false),
+		"parallel_cook_enabled": GNSettings.get_value("parallel_cook_enabled", false),
+		"max_cooks_per_frame": GNSettings.get_value("max_cooks_per_frame", 0),
+	}
+
 	var json_string := JSON.stringify(config, "\t")
 	var file := FileAccess.open(config_path, FileAccess.WRITE)
 	if file == null:

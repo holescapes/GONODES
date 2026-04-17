@@ -47,6 +47,13 @@ func _cook_frame() -> void:
 	_engine.cook_frame(_engine.current_delta)
 
 
+func _sink(ids: Array) -> void:
+	var typed: Array[String] = []
+	for id in ids:
+		typed.append(str(id))
+	_engine.set_active_sinks(typed)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # SOP chains
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -56,6 +63,7 @@ func test_box_into_transform_sop() -> void:
 	var xf := _add(TransformSOP.new(), "xf1")
 	xf.set_param_value("ty", 5.0)
 	_wire("box1", 0, "xf1", 0)
+	_sink(["xf1"])
 	_cook_frame()
 
 	var geo: GNGeoData = xf.cached_output as GNGeoData
@@ -75,6 +83,7 @@ func test_box_into_null_sop_passthrough() -> void:
 	_add(BoxSOP.new(), "box1")
 	var ns := _add(NullSOP.new(), "null1")
 	_wire("box1", 0, "null1", 0)
+	_sink(["null1"])
 	_cook_frame()
 
 	var geo: GNGeoData = ns.cached_output as GNGeoData
@@ -89,6 +98,7 @@ func test_sop_three_node_chain() -> void:
 	_add(NullSOP.new(), "null1")
 	_wire("box1", 0, "xf1", 0)
 	_wire("xf1", 0, "null1", 0)
+	_sink(["null1"])
 	_cook_frame()
 
 	var geo: GNGeoData = _network.nodes["null1"].cached_output as GNGeoData
@@ -106,6 +116,7 @@ func test_constant_into_null_chop() -> void:
 	c.set_param_value("value0", 42.0)
 	_add(NullCHOP.new(), "null1")
 	_wire("const1", 0, "null1", 0)
+	_sink(["null1"])
 	_cook_frame()
 
 	var chop: GNChannelData = _network.nodes["null1"].cached_output as GNChannelData
@@ -123,6 +134,7 @@ func test_constant_into_math_chop() -> void:
 	m.set_param_value("operation", 2)  # Multiply
 	m.set_param_value("operand", 2.0)
 	_wire("const1", 0, "math1", 0)
+	_sink(["math1"])
 	_cook_frame()
 
 	var chop: GNChannelData = m.cached_output as GNChannelData
@@ -141,6 +153,7 @@ func test_constant_dat_into_null_dat() -> void:
 	cd.set_param_value("value", "hello")
 	_add(NullDAT.new(), "null1")
 	_wire("cdat1", 0, "null1", 0)
+	_sink(["null1"])
 	_cook_frame()
 
 	var dat: GNTableData = _network.nodes["null1"].cached_output as GNTableData
@@ -153,6 +166,7 @@ func test_dat_into_transpose_chain() -> void:
 	td.set_param_value("rows", 2)
 	var tr := _add(TransposeDAT.new(), "tr1")
 	_wire("tbl1", 0, "tr1", 0)
+	_sink(["tr1"])
 	_cook_frame()
 
 	var out: GNTableData = tr.cached_output as GNTableData
@@ -173,6 +187,7 @@ func test_dirty_propagation_through_chain() -> void:
 	_wire("const1", 0, "null1", 0)
 
 	# First cook
+	_sink(["null1"])
 	_cook_frame()
 	var v1: float = 0.0
 	var chop: GNChannelData = _network.nodes["null1"].cached_output as GNChannelData

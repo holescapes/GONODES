@@ -57,7 +57,7 @@ func _ensure_tab_bar() -> void:
 	_tab_bar = TabBar.new()
 	_tab_bar.name = id + "_tabbar"
 	_tab_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_tab_bar.tab_changed.connect(_on_tab_changed)
+	_register_signal(_tab_bar.tab_changed, _on_tab_changed)
 	_control_node = _tab_bar
 
 
@@ -67,7 +67,5 @@ func _on_tab_changed(tab: int) -> void:
 
 
 func destroy_control_node() -> void:
-	if _tab_bar != null and _tab_bar.tab_changed.is_connected(_on_tab_changed):
-		_tab_bar.tab_changed.disconnect(_on_tab_changed)
 	_tab_bar = null
 	super.destroy_control_node()

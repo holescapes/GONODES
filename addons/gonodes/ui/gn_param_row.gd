@@ -121,8 +121,11 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 	_name_label.add_theme_font_size_override("font_size", 12)
 	_name_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	_name_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	var tip_parts: PackedStringArray = PackedStringArray()
+	tip_parts.append("expr: %s" % param.param_name)
 	if not param.description.is_empty():
-		_name_label.tooltip_text = param.description
+		tip_parts.append(param.description)
+	_name_label.tooltip_text = "\n".join(tip_parts)
 	_name_label.gui_input.connect(_on_name_label_input)
 	add_child(_name_label)
 

@@ -47,7 +47,7 @@ func _ensure_slider() -> void:
 	_slider.max_value = get_param_value("max_val")
 	_slider.step = get_param_value("step")
 	_slider.value = widget_state.get("value", get_param_value("default_val"))
-	_slider.value_changed.connect(_on_value_changed)
+	_register_signal(_slider.value_changed, _on_value_changed)
 	_control_node = _slider
 
 
@@ -81,7 +81,5 @@ func _set_slider_from_pos(x: float) -> void:
 
 
 func destroy_control_node() -> void:
-	if _slider != null and _slider.value_changed.is_connected(_on_value_changed):
-		_slider.value_changed.disconnect(_on_value_changed)
 	_slider = null
 	super.destroy_control_node()

@@ -411,22 +411,22 @@ int gonodes_set_input_geometry_direct(inst, node_id,
 
 ## Bridge Operators
 
-Twelve operators bridge data between the host and the GONODES patch graph.  They appear in the node palette like any other operator and are wired into the graph normally.  Bridge operators cover six data domains — textures (TOP), channels (CHOP), tables (DAT), geometry (SOP), volumetric grids (VOL), and particle systems (POP).
+Twelve operators bridge data between the host and the GONODES patch graph.  They appear in the node palette like any other operator and are wired into the graph normally.  Bridge operators cover six data domains — textures (TOP), channels (CHOP), tables (DAT), geometry (SOP), volumetric grids (VOL), and particle systems (POP).  All host bridge operators belong to the **NET** family (network infrastructure).
 
 | Operator | Family | Direction | C API Function | File |
 |----------|--------|-----------|----------------|------|
-| **HostInTOP** | TOP | Host → GONODES | `gonodes_set_input_texture()` | `operators/top/host_in_top.gd` |
-| **HostInCHOP** | CHOP | Host → GONODES | `gonodes_set_input_chop()` | `operators/chop/host_in_chop.gd` |
-| **HostInDAT** | DAT | Host → GONODES | `gonodes_set_input_table()` | `operators/dat/host_in_dat.gd` |
-| **HostInSOP** | SOP | Host → GONODES | `gonodes_set_input_geometry()` | C API only (see `gonodes_host.cpp`) |
-| **HostInVOL** | VOL | Host → GONODES | `gonodes_set_input_volume()` | `operators/vol/host_in_vol.gd` |
-| **HostInPOP** | POP | Host → GONODES | `gonodes_set_input_particles()` | `operators/pop/host_in_pop.gd` |
-| **HostOutTOP** | OUT | GONODES → Host | `gonodes_get_output_texture()` | `operators/output/host_out_top.gd` |
-| **HostOutCHOP** | OUT | GONODES → Host | `gonodes_get_output_chop()` | `operators/output/host_out_chop.gd` |
-| **HostOutDAT** | OUT | GONODES → Host | `gonodes_get_output_table()` | `operators/output/host_out_dat.gd` |
-| **HostOutSOP** | OUT | GONODES → Host | `gonodes_get_output_geometry()` | C API only (see `gonodes_host.cpp`) |
-| **HostOutVOL** | OUT | GONODES → Host | `gonodes_get_output_volume()` | `operators/output/host_out_vol.gd` |
-| **HostOutPOP** | OUT | GONODES → Host | `gonodes_get_output_particles()` | `operators/output/host_out_pop.gd` |
+| **HostInTOP** | NET | Host → GONODES | `gonodes_set_input_texture()` | `operators/net/host_in_top.gd` |
+| **HostInCHOP** | NET | Host → GONODES | `gonodes_set_input_chop()` | `operators/net/host_in_chop.gd` |
+| **HostInDAT** | NET | Host → GONODES | `gonodes_set_input_table()` | `operators/net/host_in_dat.gd` |
+| **HostInSOP** | NET | Host → GONODES | `gonodes_set_input_geometry()` | C API only (see `gonodes_host.cpp`) |
+| **HostInVOL** | NET | Host → GONODES | `gonodes_set_input_volume()` | `operators/net/host_in_vol.gd` |
+| **HostInPOP** | NET | Host → GONODES | `gonodes_set_input_particles()` | `operators/net/host_in_pop.gd` |
+| **HostOutTOP** | NET | GONODES → Host | `gonodes_get_output_texture()` | `operators/net/host_out_top.gd` |
+| **HostOutCHOP** | NET | GONODES → Host | `gonodes_get_output_chop()` | `operators/net/host_out_chop.gd` |
+| **HostOutDAT** | NET | GONODES → Host | `gonodes_get_output_table()` | `operators/net/host_out_dat.gd` |
+| **HostOutSOP** | NET | GONODES → Host | `gonodes_get_output_geometry()` | C API only (see `gonodes_host.cpp`) |
+| **HostOutVOL** | NET | GONODES → Host | `gonodes_get_output_volume()` | `operators/net/host_out_vol.gd` |
+| **HostOutPOP** | NET | GONODES → Host | `gonodes_get_output_particles()` | `operators/net/host_out_pop.gd` |
 
 > **Note:** HostInSOP / HostOutSOP are implemented in the C API layer only (`gonodes_host.cpp`) because SOP geometry conversion requires access to Godot's `MeshDataTool` internals.  The other 10 bridge operators have GDScript implementations.
 
@@ -843,17 +843,22 @@ addons/gonodes/core/
 └── gn_embedded_host.gd           # GDScript bridge singleton
 
 addons/gonodes/operators/
-├── top/host_in_top.gd            # HostInTOP bridge
-├── chop/host_in_chop.gd          # HostInCHOP bridge
-├── dat/host_in_dat.gd            # HostInDAT bridge
-├── vol/host_in_vol.gd            # HostInVOL bridge
-├── pop/host_in_pop.gd            # HostInPOP bridge
-└── output/
+└── net/
+    ├── host_in_top.gd            # HostInTOP bridge
+    ├── host_in_chop.gd           # HostInCHOP bridge
+    ├── host_in_dat.gd            # HostInDAT bridge
+    ├── host_in_vol.gd            # HostInVOL bridge
+    ├── host_in_pop.gd            # HostInPOP bridge
+    ├── host_in_sop.gd            # HostInSOP bridge
     ├── host_out_top.gd           # HostOutTOP bridge (sink)
     ├── host_out_chop.gd          # HostOutCHOP bridge (sink)
     ├── host_out_dat.gd           # HostOutDAT bridge (sink)
     ├── host_out_vol.gd           # HostOutVOL bridge (sink)
-    └── host_out_pop.gd           # HostOutPOP bridge (sink)
+    ├── host_out_pop.gd           # HostOutPOP bridge (sink)
+    ├── host_out_sop.gd           # HostOutSOP bridge (sink)
+    ├── in_tunnel.gd              # InTunnel (polymorphic)
+    ├── out_tunnel.gd             # OutTunnel (polymorphic)
+    └── sub_network_node.gd       # SubNetworkNode (subgraph container)
 ```
 
 ---

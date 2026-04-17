@@ -412,6 +412,7 @@ func test_select_chop_filter_channel() -> void:
 
 func test_rename_chop() -> void:
 	var node := _make_node(RenameCHOP.new(), "rename1")
+	node.set_param_value("mode", 1)  # Manual Rows mode
 	node.set_param_value("renames", 1)
 	node.set_param_value("from0", "x")
 	node.set_param_value("to0", "tx")

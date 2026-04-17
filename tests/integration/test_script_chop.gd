@@ -48,6 +48,13 @@ func _get_chop_output(node: GNNode) -> GNChannelData:
 	return node.cached_output as GNChannelData
 
 
+func _sink(ids: Array) -> void:
+	var typed: Array[String] = []
+	for id in ids:
+		typed.append(str(id))
+	_engine.set_active_sinks(typed)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Basic Script — Single Channel Output
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -60,6 +67,7 @@ func test_script_chop_basic_output() -> void:
 func cook():
 	op.set_single_value("result", 42.0)
 """.strip_edges())
+	_sink(["script1"])
 
 	_cook_one_frame()
 
@@ -80,6 +88,7 @@ func test_script_chop_uses_time() -> void:
 func cook():
 	op.set_single_value("t", time * 100.0)
 """.strip_edges())
+	_sink(["script1"])
 
 	_cook_one_frame()
 
@@ -103,6 +112,7 @@ func cook():
 """.strip_edges())
 
 	# First cook compiles and creates dynamic params
+	_sink(["script1"])
 	_cook_one_frame()
 
 	# The annotation should have created a "gain" parameter with default 5.0
@@ -135,6 +145,7 @@ func cook():
 """.strip_edges())
 
 	_network.connect_nodes("const1", 0, "script1", 0)
+	_sink(["script1"])
 
 	_cook_one_frame()
 
@@ -157,6 +168,7 @@ func cook():
 	op.set_single_value("y", 2.0)
 	op.set_single_value("z", 3.0)
 """.strip_edges())
+	_sink(["script1"])
 
 	_cook_one_frame()
 
@@ -180,6 +192,7 @@ func test_script_chop_syntax_error_graceful() -> void:
 func cook():
 	this is not valid gdscript !!!
 """.strip_edges())
+	_sink(["script1"])
 
 	_cook_one_frame()
 
@@ -204,6 +217,7 @@ func cook():
 	m.set_param_value("operation", 2)  # Multiply
 	m.set_param_value("operand", 3.0)
 	_network.connect_nodes("script1", 0, "math1", 0)
+	_sink(["math1"])
 
 	_cook_one_frame()
 

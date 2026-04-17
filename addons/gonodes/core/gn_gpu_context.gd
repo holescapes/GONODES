@@ -1,13 +1,18 @@
 class_name GNGpuContext
 extends RefCounted
-## Singleton providing a shared RenderingDevice for all GPU-compute operators
-## (POP, VOL, TOP families).  Wraps the main RenderingDevice from
-## RenderingServer.get_rendering_device() so all GPU resources live in a
-## single context — zero-copy texture sharing, no readback overhead.
+## Singleton providing GPU RenderingDevice access for all compute operators.
+##
+## Two devices:
+##   rd       — local RenderingDevice (submit/sync allowed). Used by POP/VOL
+##              operators via dispatch() for immediate compute results.
+##   main_rd  — the renderer's own device (no submit/sync). Used by TOP
+##              operators that wrap output textures as Texture2DRD for
+##              zero-copy display in the scene tree.
 ##
 ## Usage:
 ##   var ctx := GNGpuContext.get_context()
-##   var rd := ctx.rd                # shared RenderingDevice
+##   var rd := ctx.rd        # local device — POP/VOL dispatch
+##   var mrd := ctx.main_rd  # main device — TOP Texture2DRD output
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Singleton
@@ -27,9 +32,15 @@ static func get_context() -> GNGpuContext:
 # State
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## The shared RenderingDevice — the main renderer's device.
-## All POP/VOL/TOP operators use this.
+## Primary RenderingDevice — the renderer's own device.
+## All GPU operators (TOP, POP, VOL) dispatch compute shaders through this.
+## Texture2DRD output wraps textures on this device for zero-copy display.
+## Does NOT allow submit()/sync() — dispatches are fire-and-forget.
 var rd: RenderingDevice = null
+
+## Alias for rd.  Kept for API compatibility with code that explicitly
+## targets the renderer device (e.g. Texture2DRD creation helpers).
+var main_rd: RenderingDevice = null
 
 ## Compiled shader cache: shader_source_path → RID
 var _shader_cache: Dictionary = {}
@@ -105,7 +116,11 @@ static func are_threads_available() -> bool:
 
 
 func _init_rd() -> void:
+	# Unified device — the renderer's own RD.  All families (TOP, POP, VOL)
+	# dispatch through this.  Texture2DRD output, native handle extraction,
+	# and Host I/O all live on the same device — enabling zero-copy throughout.
 	rd = RenderingServer.get_rendering_device()
+	main_rd = rd
 	if rd == null:
 		push_error("GNGpuContext: RenderingDevice unavailable — GPU compute disabled (Compatibility renderer?)")
 
@@ -351,6 +366,7 @@ func download_image(tex_rid: RID, width: int, height: int) -> Image:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Dispatches a compute shader with the given uniform set and workgroup counts.
+## Fire-and-forget — the renderer executes dispatches in submission order.
 func dispatch(shader_rid: RID, uniform_set: RID,
 		groups_x: int, groups_y: int = 1, groups_z: int = 1,
 		push_constants: PackedByteArray = PackedByteArray()) -> void:
@@ -364,8 +380,84 @@ func dispatch(shader_rid: RID, uniform_set: RID,
 		rd.compute_list_set_push_constant(compute_list, push_constants, push_constants.size())
 	rd.compute_list_dispatch(compute_list, groups_x, groups_y, groups_z)
 	rd.compute_list_end()
-	rd.submit()
-	rd.sync()
+
+
+## Dispatches a compute shader on the main renderer device (no submit/sync).
+## Now identical to dispatch() since all operators use the unified device.
+## Kept for API compatibility with TOP operators that explicitly target main_rd.
+func dispatch_on_main(shader_rid: RID, uniform_set: RID,
+		groups_x: int, groups_y: int = 1, groups_z: int = 1,
+		push_constants: PackedByteArray = PackedByteArray()) -> void:
+	if main_rd == null:
+		return
+	var pipeline: RID = _get_or_create_main_pipeline(shader_rid)
+	var compute_list: int = main_rd.compute_list_begin()
+	main_rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
+	main_rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
+	if push_constants.size() > 0:
+		main_rd.compute_list_set_push_constant(compute_list, push_constants, push_constants.size())
+	main_rd.compute_list_dispatch(compute_list, groups_x, groups_y, groups_z)
+	main_rd.compute_list_end()
+
+
+## Compiles a compute shader on main_rd (cached).
+## Now identical to get_shader() since all operators share the unified device.
+## Kept for API compatibility.
+func get_shader_on_main(glsl_path: String) -> RID:
+	return get_shader(glsl_path)
+
+
+## Creates a 2D storage texture on main_rd for Texture2DRD output.
+## Now delegates to rd since all operators share the unified device.
+func create_texture_2d_on_main(width: int, height: int,
+		data_format: int = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM) -> RID:
+	if rd == null:
+		return RID()
+	var fmt := RDTextureFormat.new()
+	fmt.texture_type = RenderingDevice.TEXTURE_TYPE_2D
+	fmt.width = width
+	fmt.height = height
+	fmt.depth = 1
+	fmt.format = data_format
+	fmt.usage_bits = (
+		RenderingDevice.TEXTURE_USAGE_STORAGE_BIT |
+		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
+		RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
+	)
+	fmt.mipmaps = 1
+	return rd.texture_create(fmt, RDTextureView.new())
+
+
+## Creates a storage buffer on main_rd from raw bytes.
+## Now delegates to rd since all operators share the unified device.
+func create_buffer_on_main(data: PackedByteArray) -> RID:
+	if rd == null:
+		return RID()
+	return rd.storage_buffer_create(data.size(), data)
+
+
+## Returns a cached compute pipeline for main_rd.
+## Now delegates to get_pipeline() since all operators share the unified device.
+func _get_or_create_main_pipeline(shader_rid: RID) -> RID:
+	return get_pipeline(shader_rid)
+
+
+## Creates an RDUniform for a storage buffer on main_rd at [param binding].
+func uniform_buffer_main(binding: int, buffer_rid: RID) -> RDUniform:
+	var u := RDUniform.new()
+	u.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	u.binding = binding
+	u.add_id(buffer_rid)
+	return u
+
+
+## Creates an RDUniform for a storage image on main_rd at [param binding].
+func uniform_image_main(binding: int, texture_rid: RID) -> RDUniform:
+	var u := RDUniform.new()
+	u.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	u.binding = binding
+	u.add_id(texture_rid)
+	return u
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -392,6 +484,7 @@ func shutdown() -> void:
 			if rid.is_valid():
 				rd.free_rid(rid)
 	_texture_pool.clear()
-	# Do NOT call rd.free() — we don't own the main RenderingDevice.
+	# Do NOT free rd — the engine owns the renderer device.
 	rd = null
+	main_rd = null
 	_instance = null

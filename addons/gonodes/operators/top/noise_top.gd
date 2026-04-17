@@ -15,6 +15,7 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "noise"
+	time_dependent = true
 
 
 func _init_ports() -> void:

@@ -75,7 +75,7 @@ var editor_mode: bool = false
 ## (TOP, POP, VOL) always cook on the main thread (Godot renderer constraint).
 ## Requires _threads_available = true (false on web) AND the patch must have
 ## multithreading_enabled == true  (opt-in per patch, off by default).
-var parallel_cook_enabled: bool = true
+var parallel_cook_enabled: bool = false
 
 ## Minimum number of cookable CPU nodes at a topo level to trigger parallel
 ## dispatch.  Below this threshold, sequential cook is cheaper (avoids
@@ -97,18 +97,15 @@ var _nodes_adopted: bool = false
 ## Keyed by node id, value is Array[GNData] sized to input port count.
 var _input_cache: Dictionary = {}
 
-## Per-key state for the smooth() expression function.
-var _smooth_state: Dictionary = {}
-
-## Per-key state for the lag() expression function.
-var _lag_state: Dictionary = {}
-
-## Per-key state for the trigger() expression function.
-var _trigger_state: Dictionary = {}
-
-## Per-node persistent state for store()/fetch() expression functions.
-## Keyed by node_id → Dictionary of key → value.
-var _store_state: Dictionary = {}
+## Centralized per-key state layers for expression functions.
+## Keys: "smooth", "lag", "trigger", "store" → each is a Dictionary.
+## Consolidates what were separate _smooth_state, _lag_state, etc.
+var _state_layers: Dictionary = {
+	"smooth": {},
+	"lag": {},
+	"trigger": {},
+	"store": {},
+}
 
 ## The node currently being evaluated for expressions.
 ## Set before each expression eval so par() can resolve self-references.
@@ -568,6 +565,22 @@ func _extract_expr_demand(expr: String, owner_id: String) -> void:
 # Cook Loop
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
+## Classifies a node's cook eligibility for the current frame.
+## Returns:  1 = dirty & active (needs cook),
+##           0 = dirty but inactive (count as skipped),
+##          -1 = clean or expression-handled (skip silently).
+func _classify_cook_status(node: GNNode) -> int:
+	if not node.dirty:
+		if node.is_active and _should_eval_expressions(node) and _try_expression_dirty(node):
+			_cooked_this_frame[node.id] = true
+			return 1
+		return -1
+	if not node.is_active:
+		return 0
+	return 1
+
+
 ## Executes one full cook cycle for the current frame.
 func cook_frame(delta: float) -> void:
 	var frame_start := Time.get_ticks_usec()
@@ -664,12 +677,10 @@ func cook_frame(delta: float) -> void:
 			var cpu_batch: Array[GNNode] = []
 			var gpu_batch: Array[GNNode] = []
 			for node in level:
-				if not node.dirty:
-					if node.is_active and _should_eval_expressions(node) and _try_expression_dirty(node):
-						_cooked_this_frame[node.id] = true
-					else:
-						continue
-				if not node.is_active:
+				var cs := _classify_cook_status(node)
+				if cs == -1:
+					continue
+				if cs == 0:
 					skipped_count += 1
 					continue
 				if _is_gpu_family(node):
@@ -719,13 +730,10 @@ func cook_frame(delta: float) -> void:
 	else:
 		# Sequential cook path (original)
 		for node in topo_order:
-			if not node.dirty:
-				if node.is_active and _should_eval_expressions(node) and _try_expression_dirty(node):
-					_cooked_this_frame[node.id] = true
-				else:
-					continue
-
-			if not node.is_active:
+			var cs := _classify_cook_status(node)
+			if cs == -1:
+				continue
+			if cs == 0:
 				skipped_count += 1
 				continue
 
@@ -1245,26 +1253,30 @@ func chop(node_name: String, arg2: Variant = "", arg3: Variant = -1, arg4: Varia
 	return _make_chop_proxy(node_name, channel, index)
 
 
+## Coerce a Variant to float. Returns 0.0 for non-numeric values.
+static func _as_float(v: Variant) -> float:
+	if v is float: return v
+	if v is int: return float(v)
+	return 0.0
+
+
+## Coerce a Variant to int. Returns 0 for non-numeric values.
+static func _as_int(v: Variant) -> int:
+	if v is int: return v
+	if v is float: return int(v)
+	return 0
+
+
 ## Read a CHOP channel value as float. Supports optional port argument.
 ## Usage: chopf("lfo1", "out")  or  chopf("script1", 1, "tx")
 func chopf(node_name: String, arg2: Variant = "", arg3: Variant = -1, arg4: Variant = -1) -> float:
-	var v: Variant = chop(node_name, arg2, arg3, arg4)
-	if v is float:
-		return v
-	if v is int:
-		return float(v)
-	return 0.0
+	return _as_float(chop(node_name, arg2, arg3, arg4))
 
 
 ## Read a CHOP channel value as int. Supports optional port argument.
 ## Usage: chopi("lfo1", "out")  or  chopi("script1", 1, "tx")
 func chopi(node_name: String, arg2: Variant = "", arg3: Variant = -1, arg4: Variant = -1) -> int:
-	var v: Variant = chop(node_name, arg2, arg3, arg4)
-	if v is int:
-		return v
-	if v is float:
-		return int(v)
-	return 0
+	return _as_int(chop(node_name, arg2, arg3, arg4))
 
 
 ## Read a CHOP channel value as string. Supports optional port argument.
@@ -1316,22 +1328,12 @@ func par(name_or_node: String, param_name: String = "") -> Variant:
 
 ## Read a parameter as float. Guaranteed float return.
 func parf(name_or_node: String, param_name: String = "") -> float:
-	var v: Variant = _make_par_proxy(name_or_node, param_name)
-	if v is float:
-		return v
-	if v is int:
-		return float(v)
-	return 0.0
+	return _as_float(_make_par_proxy(name_or_node, param_name))
 
 
 ## Read a parameter as int. Guaranteed int return.
 func pari(name_or_node: String, param_name: String = "") -> int:
-	var v: Variant = _make_par_proxy(name_or_node, param_name)
-	if v is int:
-		return v
-	if v is float:
-		return int(v)
-	return 0
+	return _as_int(_make_par_proxy(name_or_node, param_name))
 
 
 ## Read a parameter as string. Guaranteed String return.
@@ -1768,26 +1770,28 @@ func fit01(value: float, in_min: float, in_max: float) -> float:
 ## [param key] identifies the smoothing instance (use a unique string per usage).
 ## [param speed] controls convergence rate (higher = faster).
 func smooth(key: String, target: float, speed: float = 5.0) -> float:
-	if not _smooth_state.has(key):
-		_smooth_state[key] = target
+	var sl: Dictionary = _state_layers["smooth"]
+	if not sl.has(key):
+		sl[key] = target
 		return target
 	var factor := clampf(speed * current_delta, 0.0, 1.0)
-	_smooth_state[key] = lerpf(_smooth_state[key], target, factor)
-	return _smooth_state[key]
+	sl[key] = lerpf(sl[key], target, factor)
+	return sl[key]
 
 
 ## Asymmetric lag filter. [param up_speed] when target > current,
 ## [param down_speed] when target < current.
 func lag(key: String, target: float,
 		up_speed: float = 5.0, down_speed: float = 5.0) -> float:
-	if not _lag_state.has(key):
-		_lag_state[key] = target
+	var sl: Dictionary = _state_layers["lag"]
+	if not sl.has(key):
+		sl[key] = target
 		return target
-	var current_val: float = _lag_state[key]
+	var current_val: float = sl[key]
 	var spd := up_speed if target > current_val else down_speed
 	var factor := clampf(spd * current_delta, 0.0, 1.0)
-	_lag_state[key] = lerpf(current_val, target, factor)
-	return _lag_state[key]
+	sl[key] = lerpf(current_val, target, factor)
+	return sl[key]
 
 
 ## Pulse wave: returns 1.0 when fmod(phase, 1.0) < duty, else 0.0.
@@ -1847,8 +1851,9 @@ func noise2(x: float, y: float) -> float:
 ## Trigger detection: returns 1.0 on the frame [param value] crosses above
 ## [param threshold], 0.0 otherwise. Uses per-key state.
 func trigger(key: String, value: float, threshold: float = 0.5) -> float:
-	var prev: float = _trigger_state.get(key, 0.0)
-	_trigger_state[key] = value
+	var sl: Dictionary = _state_layers["trigger"]
+	var prev: float = sl.get(key, 0.0)
+	sl[key] = value
 	return 1.0 if prev < threshold and value >= threshold else 0.0
 
 
@@ -1913,9 +1918,10 @@ func noise3(x: float, y: float, z: float) -> float:
 func store(key: String, value: Variant) -> Variant:
 	if _current_eval_node == null:
 		return value
-	if not _store_state.has(_current_eval_node.id):
-		_store_state[_current_eval_node.id] = {}
-	_store_state[_current_eval_node.id][key] = value
+	var sl: Dictionary = _state_layers["store"]
+	if not sl.has(_current_eval_node.id):
+		sl[_current_eval_node.id] = {}
+	sl[_current_eval_node.id][key] = value
 	return value
 
 
@@ -1925,7 +1931,7 @@ func store(key: String, value: Variant) -> Variant:
 func fetch(key: String, default_val: Variant = 0.0) -> Variant:
 	if _current_eval_node == null:
 		return default_val
-	var node_store: Dictionary = _store_state.get(_current_eval_node.id, {})
+	var node_store: Dictionary = _state_layers["store"].get(_current_eval_node.id, {})
 	return node_store.get(key, default_val)
 
 
@@ -2289,10 +2295,8 @@ func reset() -> void:
 	elapsed_time = 0.0
 	current_delta = 0.0
 	frame_cook_time_ms = 0.0
-	_smooth_state.clear()
-	_lag_state.clear()
-	_trigger_state.clear()
-	_store_state.clear()
+	for layer_key in _state_layers:
+		_state_layers[layer_key].clear()
 	_active_set.clear()
 	_active_set_dirty = true
 	_consumer_counts.clear()

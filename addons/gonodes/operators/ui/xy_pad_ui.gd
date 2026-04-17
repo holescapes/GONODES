@@ -103,11 +103,6 @@ func _on_pad_draw() -> void:
 
 
 func destroy_control_node() -> void:
-	if _pad != null:
-		if _pad.gui_input.is_connected(_on_pad_input):
-			_pad.gui_input.disconnect(_on_pad_input)
-		if _pad.draw.is_connected(_on_pad_draw):
-			_pad.draw.disconnect(_on_pad_draw)
 	_pad = null
 	_x = 0.5
 	_y = 0.5

@@ -157,6 +157,7 @@ func test_chain_cook_after_deserialize() -> void:
 	engine2.current_delta = 1.0 / 60.0
 	add_child(engine2)
 
+	engine2.set_active_sinks(["sink"] as Array[String])
 	engine2.cook_frame(engine2.current_delta)
 
 	var sink_node: GNNode = net2.nodes.get("sink", null)

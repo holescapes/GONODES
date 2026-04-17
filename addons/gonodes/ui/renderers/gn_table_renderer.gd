@@ -20,19 +20,18 @@ static func _ensure_viewer_spreadsheet() -> Tree:
 func render_for_viewer(data: GNData, viewer) -> void:
 	if data is GNTableData:
 		var tbl: GNTableData = data as GNTableData
+		if not tbl.is_table:
+			if tbl.text.is_empty():
+				viewer.set_info("(empty text)", "DAT")
+			else:
+				viewer.set_info(tbl.text, "DAT")
+			return
 		if not tbl.table.is_empty():
 			var tree := _ensure_viewer_spreadsheet()
 			_populate_viewer_tree(tree, tbl)
 			viewer.set_control(tree)
 			return
 	viewer.set_info("No DAT output", "")
-
-
-func render_for_preview(data: GNData, host) -> void:
-	if data != null and host.has_method("set_text"):
-		host.set_text(data.get_preview_text())
-	elif host.has_method("set_text"):
-		host.set_text("")
 
 
 ## Populates a Tree control from GNTableData rows/columns.

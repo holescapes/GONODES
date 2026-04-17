@@ -54,6 +54,11 @@ static var log_sink: Callable = Callable()
 ## Signature: func(level: Level, message: String) -> void
 static var toast_sink: Callable = Callable()
 
+## File logging — when a path is set via set_log_file(), every accepted log
+## message is also appended to the file.  Useful for debugging exported apps.
+static var _log_file: FileAccess = null
+static var _log_file_path: String = ""
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Public API
@@ -121,6 +126,11 @@ static func _log(msg_level: Level, category: String, message: String) -> void:
 	if toast_sink.is_valid() and msg_level >= Level.WARN:
 		toast_sink.call(msg_level, message)
 
+	# Append to log file (if open)
+	if _log_file != null:
+		_log_file.store_line(full_msg)
+		_log_file.flush()
+
 
 static func _build_prefix(msg_level: Level, category: String) -> String:
 	var parts := PackedStringArray()
@@ -155,3 +165,29 @@ static func get_status() -> String:
 	var level_names := ["DEBUG", "INFO", "WARN", "ERROR", "NONE"]
 	return "GNLogger: enabled=%s level=%s frame=%s" % [
 		str(enabled), level_names[level], str(show_frame)]
+
+
+## Opens a log file at the given path.  All subsequent accepted messages
+## will be appended to it.  If a file is already open, it is closed first.
+## Pass an empty string to disable file logging without calling close.
+static func set_log_file(path: String) -> void:
+	close_log_file()
+	if path.is_empty():
+		return
+	_log_file = FileAccess.open(path, FileAccess.WRITE)
+	if _log_file != null:
+		_log_file_path = path
+		_log_file.store_line("# GONODES log — %s" % Time.get_datetime_string_from_system())
+		_log_file.flush()
+	else:
+		push_warning("GNLogger: could not open log file '%s' — error %d" % [
+			path, FileAccess.get_open_error()])
+
+
+## Closes the current log file (if any).
+static func close_log_file() -> void:
+	if _log_file != null:
+		_log_file.flush()
+		_log_file.close()
+		_log_file = null
+		_log_file_path = ""

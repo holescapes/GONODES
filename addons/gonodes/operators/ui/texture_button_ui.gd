@@ -72,7 +72,7 @@ func _ensure_tex_btn() -> void:
 	_tex_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_tex_btn.ignore_texture_size = true
 	_tex_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-	_tex_btn.pressed.connect(_on_pressed)
+	_register_signal(_tex_btn.pressed, _on_pressed)
 	_control_node = _tex_btn
 
 
@@ -83,7 +83,5 @@ func _on_pressed() -> void:
 
 
 func destroy_control_node() -> void:
-	if _tex_btn != null and _tex_btn.pressed.is_connected(_on_pressed):
-		_tex_btn.pressed.disconnect(_on_pressed)
 	_tex_btn = null
 	super.destroy_control_node()

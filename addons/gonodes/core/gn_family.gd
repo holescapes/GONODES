@@ -41,6 +41,7 @@ enum Type {
 	UI,    ## UI Operators — 2D interface widgets (buttons, sliders, knobs) for PanelTOP
 	OUT,   ## Output Operators — terminal sinks (display, file save, audio out)
 	SCRIPT,## Script Operators — user-authored GDScript / Python / C++ code nodes
+	NET,   ## Network Operators — sub-networks, tunnels, host I/O bridges
 }
 
 ## Next ID for extension-registered families.
@@ -62,6 +63,7 @@ static var _CORE_FAMILY_IDS: Dictionary = {
 	"UI":     Type.UI,
 	"OUT":    Type.OUT,
 	"SCRIPT": Type.SCRIPT,
+	"NET":    Type.NET,
 }
 
 ## Family display names for UI.  Populated at startup from gn_core.cfg

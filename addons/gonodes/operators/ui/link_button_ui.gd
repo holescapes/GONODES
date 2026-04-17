@@ -42,7 +42,7 @@ func _ensure_link_btn() -> void:
 	_link_btn = LinkButton.new()
 	_link_btn.name = id + "_linkbtn"
 	_link_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_link_btn.pressed.connect(_on_pressed)
+	_register_signal(_link_btn.pressed, _on_pressed)
 	_control_node = _link_btn
 
 
@@ -52,7 +52,5 @@ func _on_pressed() -> void:
 
 
 func destroy_control_node() -> void:
-	if _link_btn != null and _link_btn.pressed.is_connected(_on_pressed):
-		_link_btn.pressed.disconnect(_on_pressed)
 	_link_btn = null
 	super.destroy_control_node()

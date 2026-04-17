@@ -156,63 +156,112 @@ static func create_pop_viewport(size: Vector2i) -> Dictionary:
 	}
 
 
-## Builds a MultiMesh from GNParticleData and renders one frame.
-## [param point_size] — base billboard size for each particle.
-static func render_pop(vp: SubViewport, mmi: MultiMeshInstance3D,
-		pd: GNParticleData, point_size: float = 0.02) -> bool:
+## Renders POP particles via GPU compute shader → Texture2DRD (zero-copy).
+## Returns a Texture2DRD wrapping the rendered output, or null on failure.
+## Uses the same shader as PointCloudRenderTOP.
+static var _pop_output_tex_rid: RID = RID()
+static var _pop_depth_tex_rid: RID = RID()
+static var _pop_output_tex2d_rd: Texture2DRD = null
+static var _pop_prev_res: Vector2i = Vector2i.ZERO
+
+static func render_pop_gpu(pd: GNParticleData, size: Vector2i,
+		orbit_yaw: float, orbit_pitch: float, orbit_distance: float,
+		point_size: float = 4.0) -> Texture2DRD:
 	var ctx := GNGpuContext.get_context()
-	if ctx.rd == null or not pd.rd_buffer.is_valid():
-		return false
+	if ctx == null or ctx.rd == null or not pd.rd_buffer.is_valid():
+		return null
 
-	var byte_count: int = pd.particle_count * pd.stride
-	var raw: PackedByteArray = ctx.rd.buffer_get_data(pd.rd_buffer, 0, byte_count)
+	var w: int = maxi(size.x, 1)
+	var h: int = maxi(size.y, 1)
+	var res := Vector2i(w, h)
+	var mrd := ctx.rd
 
-	# Build MultiMesh
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.instance_count = pd.particle_count
+	# Reallocate if resolution changed
+	if res != _pop_prev_res:
+		_free_pop_textures(mrd)
+		_pop_output_tex_rid = ctx.create_texture_2d_on_main(w, h)
+		_pop_depth_tex_rid = ctx.create_texture_2d_on_main(w, h,
+			RenderingDevice.DATA_FORMAT_R32_SFLOAT)
+		_pop_prev_res = res
 
-	var quad := QuadMesh.new()
-	quad.size = Vector2(1.0, 1.0)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.vertex_color_use_as_albedo = true
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	quad.material = mat
-	mm.mesh = quad
+	# Clear
+	var bg_img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	bg_img.fill(Color(0.08, 0.08, 0.1))
+	mrd.texture_update(_pop_output_tex_rid, 0, bg_img.get_data())
+	var depth_img := Image.create(w, h, false, Image.FORMAT_RF)
+	depth_img.fill(Color(1.0, 0.0, 0.0))
+	mrd.texture_update(_pop_depth_tex_rid, 0, depth_img.get_data())
 
-	var pos_off: int = pd.get_attrib_offset("pos")
-	var color_off: int = pd.get_attrib_offset("color")
-	var pscale_off: int = pd.get_attrib_offset("pscale")
+	# Camera
+	var yaw_rad := deg_to_rad(orbit_yaw)
+	var pitch_rad := deg_to_rad(orbit_pitch)
+	var dist := orbit_distance
+	var eye := Vector3(
+		dist * cos(pitch_rad) * sin(yaw_rad),
+		dist * sin(pitch_rad),
+		dist * cos(pitch_rad) * cos(yaw_rad))
+	var fwd := (-eye).normalized()
+	var world_up := Vector3.UP
+	var right := fwd.cross(world_up).normalized()
+	if right.length_squared() < 0.001:
+		right = Vector3.RIGHT
+	var up := right.cross(fwd).normalized()
+	var fov_rad := deg_to_rad(60.0)
 
-	for i in range(pd.particle_count):
-		var base: int = i * pd.stride
-		var px: float = raw.decode_float(base + pos_off)
-		var py: float = raw.decode_float(base + pos_off + 4)
-		var pz: float = raw.decode_float(base + pos_off + 8)
+	# Push constants (112 bytes, same layout as point_cloud_render.glsl)
+	var pc := PackedByteArray()
+	pc.resize(112)
+	pc.encode_s32(0, w)
+	pc.encode_s32(4, h)
+	pc.encode_s32(8, pd.particle_count)
+	pc.encode_float(12, point_size)
+	pc.encode_float(16, eye.x); pc.encode_float(20, eye.y); pc.encode_float(24, eye.z)
+	pc.encode_float(28, fwd.x); pc.encode_float(32, fwd.y); pc.encode_float(36, fwd.z)
+	pc.encode_float(40, right.x); pc.encode_float(44, right.y); pc.encode_float(48, right.z)
+	pc.encode_float(52, up.x); pc.encode_float(56, up.y); pc.encode_float(60, up.z)
+	pc.encode_float(64, fov_rad)
+	pc.encode_float(68, 0.01)   # near clip
+	pc.encode_float(72, 100.0)  # far clip
+	pc.encode_float(76, 1.0)    # size attenuation
+	pc.encode_float(80, 1.0)    # alpha
+	pc.encode_s32(84, 1)        # use particle color
+	pc.encode_float(88, 0.2)    # fallback color r
+	pc.encode_float(92, 0.8)    # fallback color g
+	pc.encode_float(96, 0.8)    # fallback color b
+	pc.encode_float(100, 0.0)
+	pc.encode_float(104, 0.0)
+	pc.encode_float(108, 0.0)
 
-		var ps: float = point_size
-		if pscale_off >= 0:
-			ps = raw.decode_float(base + pscale_off) * point_size
+	var shader: RID = ctx.get_shader(
+		"res://addons/gonodes/shaders/top/point_cloud_render.glsl")
+	if not shader.is_valid():
+		return null
 
-		var xform := Transform3D(Basis.IDENTITY.scaled(Vector3(ps, ps, ps)),
-			Vector3(px, py, pz))
-		mm.set_instance_transform(i, xform)
+	var us: RID = mrd.uniform_set_create([
+		ctx.uniform_buffer_main(0, pd.rd_buffer),
+		ctx.uniform_image_main(1, _pop_output_tex_rid),
+		ctx.uniform_image_main(2, _pop_depth_tex_rid),
+	], shader, 0)
 
-		if color_off >= 0:
-			var cr: float = raw.decode_float(base + color_off)
-			var cg: float = raw.decode_float(base + color_off + 4)
-			var cb: float = raw.decode_float(base + color_off + 8)
-			var ca: float = raw.decode_float(base + color_off + 12)
-			mm.set_instance_color(i, Color(cr, cg, cb, ca))
-		else:
-			mm.set_instance_color(i, Color(0.2, 0.8, 0.8))
+	var wg_x: int = ceili(float(pd.particle_count) / 64.0)
+	ctx.dispatch(shader, us, wg_x, 1, 1, pc)
+	mrd.free_rid(us)
 
-	mmi.multimesh = mm
-	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
-	return true
+	if _pop_output_tex2d_rd == null:
+		_pop_output_tex2d_rd = Texture2DRD.new()
+	_pop_output_tex2d_rd.texture_rd_rid = _pop_output_tex_rid
+	return _pop_output_tex2d_rd
+
+
+static func _free_pop_textures(mrd: RenderingDevice) -> void:
+	if _pop_output_tex2d_rd != null:
+		_pop_output_tex2d_rd.texture_rd_rid = RID()
+	if _pop_output_tex_rid.is_valid() and mrd != null:
+		mrd.free_rid(_pop_output_tex_rid)
+	_pop_output_tex_rid = RID()
+	if _pop_depth_tex_rid.is_valid() and mrd != null:
+		mrd.free_rid(_pop_depth_tex_rid)
+	_pop_depth_tex_rid = RID()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -474,6 +523,82 @@ static func render_vol_composite(vd: GNVolumeData, size: Vector2i,
 	return img
 
 
+# ── VOL GPU composite (zero-copy) ───────────────────────────────────────────
+
+static var _vol_output_tex_rid: RID = RID()
+static var _vol_output_tex2d_rd: Texture2DRD = null
+static var _vol_prev_res: Vector2i = Vector2i.ZERO
+static var _vol_sampler: RID = RID()
+
+## Renders volume data as a 2×2 composite via compute shader → Texture2DRD.
+## Returns a Texture2DRD wrapping the GPU output, or null on failure.
+static func render_vol_gpu(vd: GNVolumeData, size: Vector2i,
+		slice_pos: float = 0.5, show_mip: bool = false) -> Texture2DRD:
+	var ctx := GNGpuContext.get_context()
+	if ctx == null or ctx.rd == null or not vd.rd_texture.is_valid():
+		return null
+
+	var w: int = maxi(size.x, 1)
+	var h: int = maxi(size.y, 1)
+	var res := Vector2i(w, h)
+	var mrd := ctx.rd
+
+	# Reallocate output texture if resolution changed.
+	if res != _vol_prev_res:
+		_free_vol_textures(mrd)
+		_vol_output_tex_rid = ctx.create_texture_2d_on_main(w, h)
+		_vol_prev_res = res
+
+	# Ensure sampler exists.
+	if not _vol_sampler.is_valid():
+		_vol_sampler = ctx.create_linear_sampler()
+
+	# Clear background.
+	var bg_img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	bg_img.fill(Color(0.06, 0.06, 0.08))
+	mrd.texture_update(_vol_output_tex_rid, 0, bg_img.get_data())
+
+	# Push constants (32 bytes).
+	var pc := PackedByteArray()
+	pc.resize(32)
+	pc.encode_s32(0, w)
+	pc.encode_s32(4, h)
+	pc.encode_s32(8, vd.resolution.x)
+	pc.encode_s32(12, vd.resolution.y)
+	pc.encode_s32(16, vd.resolution.z)
+	pc.encode_float(20, clampf(slice_pos, 0.0, 1.0))
+	pc.encode_s32(24, 1 if show_mip else 0)
+	pc.encode_s32(28, vd.resolution.z)  # mip_steps = volume depth
+
+	var shader: RID = ctx.get_shader(
+		"res://addons/gonodes/shaders/vol/vol_viewer_composite.glsl")
+	if not shader.is_valid():
+		return null
+
+	var us: RID = mrd.uniform_set_create([
+		ctx.uniform_sampler(0, _vol_sampler, vd.rd_texture),
+		ctx.uniform_image(1, _vol_output_tex_rid),
+	], shader, 0)
+
+	var wg_x: int = ceili(float(w) / 8.0)
+	var wg_y: int = ceili(float(h) / 8.0)
+	ctx.dispatch(shader, us, wg_x, wg_y, 1, pc)
+	mrd.free_rid(us)
+
+	if _vol_output_tex2d_rd == null:
+		_vol_output_tex2d_rd = Texture2DRD.new()
+	_vol_output_tex2d_rd.texture_rd_rid = _vol_output_tex_rid
+	return _vol_output_tex2d_rd
+
+
+static func _free_vol_textures(mrd: RenderingDevice) -> void:
+	if _vol_output_tex2d_rd != null:
+		_vol_output_tex2d_rd.texture_rd_rid = RID()
+	if _vol_output_tex_rid.is_valid() and mrd != null:
+		mrd.free_rid(_vol_output_tex_rid)
+	_vol_output_tex_rid = RID()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Internals
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -547,3 +672,63 @@ static func _blit_scaled(dst: Image, src: Image, dx: int, dy: int,
 			var py: int = dy + y
 			if px < dst.get_width() and py < dst.get_height():
 				dst.set_pixel(px, py, src.get_pixel(sx, sy))
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Shared 3D Scene Helpers
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Creates the standard 3D viewer scene nodes shared by SOP, POP, and MAT renderers.
+## Returns a Dictionary: {camera, light, env_node, gizmo}.
+## [param bg_color] sets the environment background tint.
+static func create_3d_viewer_scene(bg_color: Color = Color(0.1, 0.1, 0.12),
+		ambient_color: Color = Color(0.2, 0.2, 0.25)) -> Dictionary:
+	var camera := Camera3D.new()
+	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	camera.fov = 45.0
+
+	var light := DirectionalLight3D.new()
+	light.rotation_degrees = Vector3(-45, 30, 0)
+
+	var gizmo := _create_axis_gizmo()
+
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = bg_color
+	env.ambient_light_color = ambient_color
+	env.ambient_light_energy = 0.5
+	var env_node := WorldEnvironment.new()
+	env_node.environment = env
+
+	return {"camera": camera, "light": light, "env_node": env_node, "gizmo": gizmo}
+
+
+## Re-parents an array of scene nodes into a SubViewport if not already there.
+static func reparent_viewer_nodes(nodes: Array, vp: SubViewport) -> void:
+	for node in nodes:
+		if node.get_parent() != vp:
+			if node.get_parent() != null:
+				node.get_parent().remove_child(node)
+			vp.add_child(node)
+
+
+## Handles standard orbit camera input (left-drag to orbit, scroll to zoom).
+## Returns true if the event was consumed.
+static func handle_orbit_input(event: InputEvent, viewer) -> bool:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.button_index == MOUSE_BUTTON_LEFT:
+			viewer.orbit_dragging = mb.pressed
+			return true
+		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+			viewer.orbit_distance = maxf(viewer.orbit_distance * 0.9, 0.5)
+			return true
+		if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			viewer.orbit_distance = minf(viewer.orbit_distance * 1.1, 50.0)
+			return true
+	if event is InputEventMouseMotion and viewer.orbit_dragging:
+		var mm: InputEventMouseMotion = event
+		viewer.orbit_yaw = fmod(viewer.orbit_yaw + mm.relative.x * 0.5, 360.0)
+		viewer.orbit_pitch = clampf(viewer.orbit_pitch - mm.relative.y * 0.5, -89.0, 89.0)
+		return true
+	return false

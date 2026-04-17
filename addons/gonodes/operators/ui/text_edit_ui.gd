@@ -62,7 +62,7 @@ func _ensure_text_edit() -> void:
 	_text_edit.name = id + "_textedit"
 	_text_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_text_edit.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_text_edit.text_changed.connect(_on_text_changed)
+	_register_signal(_text_edit.text_changed, _on_text_changed)
 	# Restore text from saved state if available
 	if widget_state.has("text"):
 		_text_edit.text = widget_state["text"]
@@ -77,7 +77,5 @@ func _on_text_changed() -> void:
 
 
 func destroy_control_node() -> void:
-	if _text_edit != null and _text_edit.text_changed.is_connected(_on_text_changed):
-		_text_edit.text_changed.disconnect(_on_text_changed)
 	_text_edit = null
 	super.destroy_control_node()

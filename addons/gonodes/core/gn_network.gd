@@ -1248,6 +1248,27 @@ func generate_host_io() -> Dictionary:
 					"node": node_id,
 					"required": false,
 				})
+			"host_in_vol":
+				inputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "VOL",
+					"node": node_id,
+					"required": false,
+				})
+			"host_in_pop":
+				inputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "POP",
+					"node": node_id,
+					"required": false,
+				})
+			"host_in_sop":
+				inputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "SOP",
+					"node": node_id,
+					"required": false,
+				})
 			"host_out":
 				outputs.append({
 					"label": label_val if not label_val.is_empty() else node_id,
@@ -1264,6 +1285,24 @@ func generate_host_io() -> Dictionary:
 				outputs.append({
 					"label": label_val if not label_val.is_empty() else node_id,
 					"family": "DAT",
+					"node": node_id,
+				})
+			"host_out_vol":
+				outputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "VOL",
+					"node": node_id,
+				})
+			"host_out_pop":
+				outputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "POP",
+					"node": node_id,
+				})
+			"host_out_sop":
+				outputs.append({
+					"label": label_val if not label_val.is_empty() else node_id,
+					"family": "SOP",
 					"node": node_id,
 				})
 

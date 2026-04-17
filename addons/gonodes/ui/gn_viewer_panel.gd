@@ -13,7 +13,7 @@ extends Control
 ## only unhandled events are processed for built-in pan/zoom.
 
 
-const BG_COLOR := Color(0.06, 0.06, 0.08)
+const _DEFAULT_BG_COLOR := Color(0.06, 0.06, 0.08)
 const ZOOM_MIN := 0.1
 const ZOOM_MAX := 16.0
 const ZOOM_STEP := 0.1
@@ -94,7 +94,7 @@ func _ready() -> void:
 
 	# Background
 	_bg = ColorRect.new()
-	_bg.color = BG_COLOR
+	_bg.color = _DEFAULT_BG_COLOR
 	_bg.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	_bg.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(_bg)
@@ -127,7 +127,7 @@ func _ready() -> void:
 	_toolbar.add_child(_fit_btn)
 
 	_wireframe_btn = Button.new()
-	_wireframe_btn.text = "Wire"
+	_wireframe_btn.text = "Wireframe"
 	_wireframe_btn.tooltip_text = "Toggle wireframe (W)"
 	_wireframe_btn.flat = true
 	_wireframe_btn.toggle_mode = true
@@ -624,6 +624,11 @@ func _on_resize_settled() -> void:
 # Public API — Node Management
 # ═══════════════════════════════════════════════════════════════════════════════
 
+## Updates the viewer background color (pushed by the editor from Preferences).
+func set_bg_color(color: Color) -> void:
+	if _bg:
+		_bg.color = color
+
 func set_target(p_node_id: String) -> void:
 	if node_id == p_node_id:
 		return
@@ -662,9 +667,11 @@ func update_from_node(node: GNNode) -> void:
 	var family_color := GNFamily.get_color(family)
 	_update_toolbar(family_name, node.id, family_color)
 
-	# Show wireframe toggle when the family renderer supports it.
+	# Show wireframe toggle when the renderer or node supports it.
 	var renderer := GNFamily.get_renderer(family)
 	var show_wire: bool = renderer != null and renderer.supports_wireframe()
+	if not show_wire and node.has_method("supports_wireframe"):
+		show_wire = node.supports_wireframe()
 	if _wireframe_btn:
 		_wireframe_btn.visible = show_wire
 

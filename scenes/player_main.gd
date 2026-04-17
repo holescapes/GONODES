@@ -20,8 +20,21 @@ extends Control
 ## config.json format:
 ##   {
 ##     "patch": "MyShow.gnpatch",
-##     "patch_url": "https://example.com/patches/MyShow.gnpatch"
+##     "patch_url": "https://example.com/patches/MyShow.gnpatch",
+##     "settings": {
+##       "log_level": 1,
+##       "log_to_file": false,
+##       "parallel_cook_enabled": false,
+##       "max_cooks_per_frame": 0
+##     }
 ##   }
+##
+## CLI overrides:
+##   --patch <file.gnpatch>
+##   --log-level <0-3>        (0=Debug, 1=Info, 2=Warn, 3=Error)
+##   --log-file [path]        (enable file logging; default: gonodes.log next to exe)
+##   --parallel-cook          (enable parallel cooking)
+##   --max-cooks <N>          (0=unlimited)
 ##
 ## Rendering backend is automatic — Forward+ with fallback to Compatibility
 ## (OpenGL 3.3) via the fallback_to_opengl3 project setting baked into the .pck.
@@ -133,6 +146,44 @@ func _parse_config() -> void:
 				_patch_path = p
 			else:
 				_patch_path = exe_dir.path_join(p)
+		elif args[i] == "--log-level" and i + 1 < args.size():
+			_config_settings()["log_level"] = int(args[i + 1])
+		elif args[i] == "--parallel-cook":
+			_config_settings()["parallel_cook_enabled"] = true
+		elif args[i] == "--max-cooks" and i + 1 < args.size():
+			_config_settings()["max_cooks_per_frame"] = int(args[i + 1])
+		elif args[i] == "--log-file":
+			# Optional path argument — if next arg doesn't look like a flag, use it
+			if i + 1 < args.size() and not args[i + 1].begins_with("--"):
+				_config_settings()["log_file"] = args[i + 1]
+			else:
+				_config_settings()["log_to_file"] = true
+
+
+## Returns the settings sub-dictionary from config, creating it if absent.
+func _config_settings() -> Dictionary:
+	if not _config.has("settings"):
+		_config["settings"] = {}
+	return _config["settings"]
+
+
+## Applies runtime settings from config.json to the cook engine and logger.
+## Called after cook_engine is created but before add_child.
+## CLI args override config values (already merged in _parse_config).
+func _apply_runtime_settings() -> void:
+	var s: Dictionary = _config_settings()
+	cook_engine.parallel_cook_enabled = s.get("parallel_cook_enabled", false)
+	cook_engine.max_cooks_per_frame = s.get("max_cooks_per_frame", 0)
+	var log_lvl: int = s.get("log_level", 1)
+	GNLogger.level = log_lvl as GNLogger.Level
+
+	# File logging — explicit path wins, then boolean toggle
+	var log_file_path: String = s.get("log_file", "")
+	if not log_file_path.is_empty():
+		GNLogger.set_log_file(log_file_path)
+	elif s.get("log_to_file", false):
+		var exe_dir := OS.get_executable_path().get_base_dir()
+		GNLogger.set_log_file(exe_dir.path_join("gonodes.log"))
 
 
 ## Applies startup settings to the main window.
@@ -172,6 +223,7 @@ func _load_and_run() -> void:
 	cook_engine.name = "CookEngine"
 	cook_engine.network = network
 	cook_engine.project_dir = _project.project_dir
+	_apply_runtime_settings()
 	add_child(cook_engine)
 
 	cook_engine.frame_cooked.connect(_on_frame_cooked)

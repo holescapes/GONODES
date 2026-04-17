@@ -86,4 +86,14 @@ const DEFAULTS: Dictionary = {
 	"graph_snap_distance": 20,
 	"perf_overlay_enabled": false,
 	"log_level": 1,  # 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
+	"log_to_file": false,
+	"parallel_cook_enabled": false,
+	"wire_style": 0,  # 0=Curved, 1=Straight, 2=Right-Angle
+	"viewer_bg_color": Color(0.06, 0.06, 0.08),
+	"max_cooks_per_frame": 0,  # 0=unlimited
+	"recent_patches_count": 10,
+	"confirm_on_delete": false,
+	"auto_save_interval": 0,  # seconds, 0=disabled
+	"default_resolution_x": 512,
+	"default_resolution_y": 512,
 }

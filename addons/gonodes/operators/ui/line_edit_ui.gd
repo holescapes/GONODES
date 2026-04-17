@@ -74,11 +74,6 @@ func _on_text_changed(new_text: String) -> void:
 
 
 func destroy_control_node() -> void:
-	if _line_edit != null:
-		if _line_edit.text_submitted.is_connected(_on_text_submitted):
-			_line_edit.text_submitted.disconnect(_on_text_submitted)
-		if _line_edit.text_changed.is_connected(_on_text_changed):
-			_line_edit.text_changed.disconnect(_on_text_changed)
 	_line_edit = null
 	_submitted = 0.0
 	super.destroy_control_node()

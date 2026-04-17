@@ -93,6 +93,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return geo_in
 
 
+func supports_wireframe() -> bool:
+	return true
+
+
 func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if cached_output is GNGeoData and _mesh_instance != null:
 		var geo: GNGeoData = cached_output as GNGeoData
@@ -100,11 +104,11 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 			GNGeoRenderer._ensure_viewer_scene()
 			var vp: SubViewport = viewer.get_3d_viewport()
 			GNGeoRenderer._reparent_viewer_nodes(vp)
-			GNGeoRenderer._viewer_mesh_instance.mesh = geo.mesh
 			GNGeoRenderer._viewer_mesh_instance.material_override = _mesh_instance.material_override
 			GNViewerRenderHelpers.apply_orbit_camera(
-				GNGeoRenderer._viewer_camera, 45.0, -30.0, 3.0)
-			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+				GNGeoRenderer._viewer_camera, viewer.orbit_yaw, viewer.orbit_pitch, viewer.orbit_distance)
+			GNViewerRenderHelpers.update_gizmo_scale(GNGeoRenderer._viewer_gizmo, viewer.orbit_distance)
+			GNViewerRenderHelpers.render_sop(vp, GNGeoRenderer._viewer_mesh_instance, geo.mesh, viewer.wireframe)
 			viewer.set_info_bar("%d verts" % geo.vertex_count)
 			return
 	super.render_for_viewer(viewer, port_index)

@@ -17,32 +17,21 @@ func supports_wireframe() -> bool:
 static func _ensure_viewer_scene() -> void:
 	if _viewer_camera != null:
 		return
-	_viewer_camera = Camera3D.new()
-	_viewer_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
-	_viewer_camera.fov = 45.0
-
-	_viewer_light = DirectionalLight3D.new()
-	_viewer_light.rotation_degrees = Vector3(-45, 30, 0)
-
+	var scene := GNViewerRenderHelpers.create_3d_viewer_scene(
+		Color(0.1, 0.1, 0.12), Color(0.2, 0.2, 0.25))
+	_viewer_camera = scene.camera
+	_viewer_light = scene.light
+	_viewer_gizmo = scene.gizmo
+	_viewer_env_node = scene.env_node
 	_viewer_mesh_instance = MeshInstance3D.new()
 
-	_viewer_gizmo = GNViewerRenderHelpers._create_axis_gizmo()
 
-	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.1, 0.1, 0.12)
-	env.ambient_light_color = Color(0.2, 0.2, 0.25)
-	env.ambient_light_energy = 0.5
-	_viewer_env_node = WorldEnvironment.new()
-	_viewer_env_node.environment = env
-
-
+## Re-parents the shared SOP viewer nodes into [param vp].
+## Called by COMP operators that render geometry in their viewer override.
 static func _reparent_viewer_nodes(vp: SubViewport) -> void:
-	for node in [_viewer_camera, _viewer_light, _viewer_mesh_instance, _viewer_gizmo, _viewer_env_node]:
-		if node.get_parent() != vp:
-			if node.get_parent() != null:
-				node.get_parent().remove_child(node)
-			vp.add_child(node)
+	_ensure_viewer_scene()
+	GNViewerRenderHelpers.reparent_viewer_nodes(
+		[_viewer_camera, _viewer_light, _viewer_mesh_instance, _viewer_gizmo, _viewer_env_node], vp)
 
 
 func render_for_viewer(data: GNData, viewer) -> void:
@@ -51,7 +40,8 @@ func render_for_viewer(data: GNData, viewer) -> void:
 		if geo.mesh != null:
 			_ensure_viewer_scene()
 			var vp: SubViewport = viewer.get_3d_viewport()
-			_reparent_viewer_nodes(vp)
+			GNViewerRenderHelpers.reparent_viewer_nodes(
+				[_viewer_camera, _viewer_light, _viewer_mesh_instance, _viewer_gizmo, _viewer_env_node], vp)
 			GNViewerRenderHelpers.apply_orbit_camera(
 				_viewer_camera, viewer.orbit_yaw, viewer.orbit_pitch, viewer.orbit_distance)
 			GNViewerRenderHelpers.update_gizmo_scale(_viewer_gizmo, viewer.orbit_distance)
@@ -61,28 +51,5 @@ func render_for_viewer(data: GNData, viewer) -> void:
 	viewer.set_info("No SOP output", "")
 
 
-func render_for_preview(data: GNData, host) -> void:
-	if data != null and host.has_method("set_text"):
-		host.set_text(data.get_preview_text())
-	elif host.has_method("set_text"):
-		host.set_text("")
-
-
 func handle_viewer_input(_data: GNData, event: InputEvent, viewer) -> bool:
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_LEFT:
-			viewer.orbit_dragging = mb.pressed
-			return true
-		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
-			viewer.orbit_distance = maxf(viewer.orbit_distance * 0.9, 0.5)
-			return true
-		if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			viewer.orbit_distance = minf(viewer.orbit_distance * 1.1, 50.0)
-			return true
-	if event is InputEventMouseMotion and viewer.orbit_dragging:
-		var mm: InputEventMouseMotion = event
-		viewer.orbit_yaw = fmod(viewer.orbit_yaw + mm.relative.x * 0.5, 360.0)
-		viewer.orbit_pitch = clampf(viewer.orbit_pitch - mm.relative.y * 0.5, -89.0, 89.0)
-		return true
-	return false
+	return GNViewerRenderHelpers.handle_orbit_input(event, viewer)

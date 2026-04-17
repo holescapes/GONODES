@@ -1,9 +1,6 @@
 class_name GNVolumeRenderer
 extends GNDataRenderer
-## Renders GNVolumeData in the viewer (2×2 slice composite with scroll interaction).
-
-## Shared ImageTexture for uploading composites to the viewer.
-static var _viewer_texture: ImageTexture = null
+## Renders GNVolumeData in the viewer via GPU compute → Texture2DRD (zero-copy).
 
 
 func render_for_viewer(data: GNData, viewer) -> void:
@@ -11,27 +8,15 @@ func render_for_viewer(data: GNData, viewer) -> void:
 		var vd: GNVolumeData = data as GNVolumeData
 		if vd.has_volume():
 			var size: Vector2i = viewer.get_content_size()
-			var img := GNViewerRenderHelpers.render_vol_composite(
+			var tex := GNViewerRenderHelpers.render_vol_gpu(
 				vd, size, viewer.vol_slice_pos, viewer.vol_show_mip)
-			if _viewer_texture == null \
-					or _viewer_texture.get_width() != img.get_width() \
-					or _viewer_texture.get_height() != img.get_height():
-				_viewer_texture = ImageTexture.create_from_image(img)
-			else:
-				_viewer_texture.update(img)
-			var info := "%dx%dx%d %s (slice %.0f%%)" % [
-				vd.resolution.x, vd.resolution.y, vd.resolution.z,
-				vd.field_name, viewer.vol_slice_pos * 100.0]
-			viewer.set_texture(_viewer_texture, info)
-			return
+			if tex != null:
+				var info := "%dx%dx%d %s (slice %.0f%%)" % [
+					vd.resolution.x, vd.resolution.y, vd.resolution.z,
+					vd.field_name, viewer.vol_slice_pos * 100.0]
+				viewer.set_texture(tex, info)
+				return
 	viewer.set_info("No VOL output", "")
-
-
-func render_for_preview(data: GNData, host) -> void:
-	if data != null and host.has_method("set_text"):
-		host.set_text(data.get_preview_text())
-	elif host.has_method("set_text"):
-		host.set_text("")
 
 
 func handle_viewer_input(_data: GNData, event: InputEvent, viewer) -> bool:

@@ -44,7 +44,8 @@ func _init() -> void:
 
 ## Ensures family is set even when subclass _init() doesn't call super().
 func initialize(p_id: String) -> void:
-	family = GNFamily.Type.TOP
+	if family != GNFamily.Type.NET:
+		family = GNFamily.Type.TOP
 	super.initialize(p_id)
 
 
@@ -102,6 +103,14 @@ func _get_input_top(inputs: Array[GNData], port: int = 0) -> GNTextureData:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Viewport Render Control
 # ═══════════════════════════════════════════════════════════════════════════════
+
+## Returns the global default TOP resolution from Preferences.
+## Operators can use this when creating their resolution parameter:
+##   create_vector2i("resolution", _default_resolution(), "Resolution")
+static func _default_resolution() -> Vector2i:
+	return Vector2i(
+		GNSettings.get_value("default_resolution_x", 512),
+		GNSettings.get_value("default_resolution_y", 512))
 
 ## Creates a SubViewport configured for 2D rendering with sensible defaults.
 ## Viewports start with [code]UPDATE_DISABLED[/code] — [method execute_cook]

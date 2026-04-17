@@ -24,7 +24,8 @@ func _init() -> void:
 
 ## Ensures family and sink flag are set even when subclass _init() doesn't call super().
 func initialize(p_id: String) -> void:
-	family = GNFamily.Type.OUT
+	if family != GNFamily.Type.NET:
+		family = GNFamily.Type.OUT
 	is_sink = true
 	super.initialize(p_id)
 

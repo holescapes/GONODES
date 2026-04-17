@@ -1,0 +1,20 @@
+﻿--- LAST 30 LINES ---
+(res://tests/test_cpu_fallback.gd:232)
+       [2] _run_suite (res://tests/test_runner.gd:194)
+       [3] _initialize (res://tests/test_runner.gd:61)
+WARNING: GNNode 'n2': unknown parameter 'resolution'
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] set_param_value (res://addons/gonodes/core/gn_node.gd:488)
+       [1] test_blend_vol_cpu_produces_volume
+(res://tests/test_cpu_fallback.gd:236)
+       [2] _run_suite (res://tests/test_runner.gd:194)
+       [3] _initialize (res://tests/test_runner.gd:61)
+WARNING: GNNode 'n2': unknown parameter 'seed'
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] set_param_value (res://addons/gonodes/core/gn_node.gd:488)
+       [1] test_blend_vol_cpu_produces_volume
+(res://tests/test_cpu_fallback.gd:237)
+       [2] _run_suite (res://tests/test_runner.gd:194)
+       [3] _initialize (res://tests/test_runner.gd:61)

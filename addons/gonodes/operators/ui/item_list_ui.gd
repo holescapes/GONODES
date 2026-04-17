@@ -70,7 +70,7 @@ func _ensure_list() -> void:
 	_list.name = id + "_itemlist"
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_list.item_selected.connect(_on_item_selected)
+	_register_signal(_list.item_selected, _on_item_selected)
 	_control_node = _list
 
 
@@ -80,7 +80,5 @@ func _on_item_selected(index: int) -> void:
 
 
 func destroy_control_node() -> void:
-	if _list != null and _list.item_selected.is_connected(_on_item_selected):
-		_list.item_selected.disconnect(_on_item_selected)
 	_list = null
 	super.destroy_control_node()

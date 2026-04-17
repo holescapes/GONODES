@@ -14,8 +14,8 @@ extends GNTopBase
 ##   - SOP  → orbit camera render (yaw, pitch, distance, wireframe)
 ##   - CHOP → waveform image
 ##   - DAT  → grid-cell table image
-##   - POP  → MultiMesh point-cloud render (orbit, point size)
-##   - VOL  → orthogonal slice composite or MIP
+##   - POP  → GPU compute point-cloud render → Texture2DRD (zero-copy)
+##   - VOL  → GPU compute slice composite / MIP → Texture2DRD (zero-copy)
 ##   - MAT  → sphere preview render
 ##   - IMG  → direct CPU Image upload (pass-through)
 
@@ -46,12 +46,6 @@ var _sop_vp: SubViewport = null
 var _sop_camera: Camera3D = null
 var _sop_mesh_instance: MeshInstance3D = null
 var _sop_gizmo: Node3D = null
-
-## POP viewport (particle point cloud).
-var _pop_vp: SubViewport = null
-var _pop_camera: Camera3D = null
-var _pop_multimesh: MultiMeshInstance3D = null
-var _pop_gizmo: Node3D = null
 
 ## MAT viewport (material sphere).
 var _mat_vp: SubViewport = null
@@ -225,21 +219,21 @@ func _cook_pop(data: GNData, res: Vector2i) -> GNData:
 	if pd == null or pd.particle_count <= 0:
 		return null
 
-	_ensure_pop_viewport(res)
-	_pop_vp.size = res
-
 	var yaw: float = get_param_value("orbit_yaw")
 	var pitch: float = get_param_value("orbit_pitch")
 	var dist: float = get_param_value("orbit_distance")
 	var pt_size: float = get_param_value("point_size")
 
-	GNViewerRenderHelpers.apply_orbit_camera(_pop_camera, yaw, pitch, dist)
-	GNViewerRenderHelpers.update_gizmo_scale(_pop_gizmo, dist)
-
-	if not GNViewerRenderHelpers.render_pop(_pop_vp, _pop_multimesh, pd, pt_size):
+	var tex := GNViewerRenderHelpers.render_pop_gpu(
+		pd, res, yaw, pitch, dist, pt_size)
+	if tex == null:
 		return null
 
-	return _output_from_viewport(_pop_vp, res)
+	if _cached_tex_data == null:
+		_cached_tex_data = GNTextureData.new()
+	_cached_tex_data.texture = tex
+	_cached_tex_data.resolution = res
+	return _cached_tex_data
 
 
 func _cook_vol(data: GNData, res: Vector2i) -> GNData:
@@ -251,8 +245,15 @@ func _cook_vol(data: GNData, res: Vector2i) -> GNData:
 	var slice_pos: float = get_param_value("slice_pos")
 	var show_mip: bool = (vol_view == 1)
 
-	var img := GNViewerRenderHelpers.render_vol_composite(vd, res, slice_pos, show_mip)
-	return _output_from_image(img, res)
+	var tex := GNViewerRenderHelpers.render_vol_gpu(vd, res, slice_pos, show_mip)
+	if tex == null:
+		return null
+
+	if _cached_tex_data == null:
+		_cached_tex_data = GNTextureData.new()
+	_cached_tex_data.texture = tex
+	_cached_tex_data.resolution = res
+	return _cached_tex_data
 
 
 func _cook_mat(data: GNData, res: Vector2i) -> GNData:
@@ -314,17 +315,6 @@ func _ensure_sop_viewport(size: Vector2i) -> void:
 	_sop_mesh_instance = scene["mesh_instance"]
 	_sop_gizmo = scene["gizmo_root"]
 	add_child(_sop_vp)
-
-
-func _ensure_pop_viewport(size: Vector2i) -> void:
-	if _pop_vp != null:
-		return
-	var scene := GNViewerRenderHelpers.create_pop_viewport(size)
-	_pop_vp = scene["viewport"]
-	_pop_camera = scene["camera"]
-	_pop_multimesh = scene["multimesh_instance"]
-	_pop_gizmo = scene["gizmo_root"]
-	add_child(_pop_vp)
 
 
 func _ensure_mat_viewport(size: Vector2i) -> void:

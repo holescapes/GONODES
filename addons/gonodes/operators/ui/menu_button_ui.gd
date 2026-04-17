@@ -51,7 +51,7 @@ func _ensure_menu_btn() -> void:
 	_menu_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_menu_btn.flat = false
 	var popup: PopupMenu = _menu_btn.get_popup()
-	popup.id_pressed.connect(_on_item_pressed)
+	_register_signal(popup.id_pressed, _on_item_pressed)
 	_last_selected = int(widget_state.get("selected", -1.0))
 	_control_node = _menu_btn
 
@@ -128,9 +128,5 @@ func _on_overlay_dismissed() -> void:
 
 
 func destroy_control_node() -> void:
-	if _menu_btn != null:
-		var popup: PopupMenu = _menu_btn.get_popup()
-		if popup != null and popup.id_pressed.is_connected(_on_item_pressed):
-			popup.id_pressed.disconnect(_on_item_pressed)
 	_menu_btn = null
 	super.destroy_control_node()

@@ -79,7 +79,7 @@ func _ensure_progress() -> void:
 	_progress.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_progress.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_progress.value = get_param_value("default_val")
-	_progress.value_changed.connect(_on_value_changed)
+	_register_signal(_progress.value_changed, _on_value_changed)
 	_control_node = _progress
 
 
@@ -91,7 +91,5 @@ func _on_value_changed(value: float) -> void:
 
 
 func destroy_control_node() -> void:
-	if _progress != null and _progress.value_changed.is_connected(_on_value_changed):
-		_progress.value_changed.disconnect(_on_value_changed)
 	_progress = null
 	super.destroy_control_node()

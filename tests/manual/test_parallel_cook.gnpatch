@@ -1,0 +1,132 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "multithreading_enabled": true,
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": { "value": 1.0 }
+            }
+        },
+        "lfo2": {
+            "type": "LFO_CHOP",
+            "position": [100, 250],
+            "parameters": {
+                "frequency": { "value": 2.0 }
+            }
+        },
+        "lfo3": {
+            "type": "LFO_CHOP",
+            "position": [100, 400],
+            "parameters": {
+                "frequency": { "value": 3.0 }
+            }
+        },
+        "noise1": {
+            "type": "NoiseCHOP",
+            "position": [100, 550],
+            "parameters": {}
+        },
+        "const1": {
+            "type": "ConstantCHOP",
+            "position": [100, 700],
+            "parameters": {
+                "value0": { "value": 42.0 }
+            }
+        },
+        "math1": {
+            "type": "MathCHOP",
+            "position": [500, 175],
+            "parameters": {
+                "combine": { "value": 0 }
+            }
+        },
+        "math2": {
+            "type": "MathCHOP",
+            "position": [500, 475],
+            "parameters": {
+                "combine": { "value": 1 }
+            }
+        },
+        "math3": {
+            "type": "MathCHOP",
+            "position": [850, 325],
+            "parameters": {
+                "combine": { "value": 0 }
+            }
+        },
+        "null_out": {
+            "type": "NullCHOP",
+            "position": [1200, 325],
+            "parameters": {}
+        },
+        "grid1": {
+            "type": "GridSOP",
+            "position": [100, 900],
+            "parameters": {
+                "rows": { "value": 20 },
+                "columns": { "value": 20 }
+            }
+        },
+        "grid2": {
+            "type": "GridSOP",
+            "position": [100, 1050],
+            "parameters": {
+                "rows": { "value": 30 },
+                "columns": { "value": 30 }
+            }
+        },
+        "sphere1": {
+            "type": "SphereSOP",
+            "position": [100, 1200],
+            "parameters": {}
+        },
+        "merge1": {
+            "type": "MergeSOP",
+            "position": [500, 1050],
+            "parameters": {}
+        },
+        "transform1": {
+            "type": "TransformSOP",
+            "position": [850, 1050],
+            "parameters": {
+                "ty": {
+                    "value": 0.0,
+                    "expression": "chop('lfo1', 'out')",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "null_sop": {
+            "type": "NullSOP",
+            "position": [1200, 1050],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "lfo1", "from_port": 0, "to": "math1", "to_port": 0 },
+        { "from": "lfo2", "from_port": 0, "to": "math1", "to_port": 1 },
+        { "from": "lfo3", "from_port": 0, "to": "math2", "to_port": 0 },
+        { "from": "noise1", "from_port": 0, "to": "math2", "to_port": 1 },
+        { "from": "math1", "from_port": 0, "to": "math3", "to_port": 0 },
+        { "from": "math2", "from_port": 0, "to": "math3", "to_port": 1 },
+        { "from": "math3", "from_port": 0, "to": "null_out", "to_port": 0 },
+        { "from": "grid1", "from_port": 0, "to": "merge1", "to_port": 0 },
+        { "from": "grid2", "from_port": 0, "to": "merge1", "to_port": 1 },
+        { "from": "sphere1", "from_port": 0, "to": "merge1", "to_port": 2 },
+        { "from": "merge1", "from_port": 0, "to": "transform1", "to_port": 0 },
+        { "from": "transform1", "from_port": 0, "to": "null_sop", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Parallel Cook Test\n\nmultithreading_enabled = true\n\nLevel 0: lfo1, lfo2, lfo3, noise1, const1, grid1, grid2, sphere1 (all independent — should cook in parallel)\nLevel 1: math1, math2, merge1 (independent of each other — should cook in parallel)\nLevel 2: math3, transform1\nLevel 3: null_out, null_sop\n\nCheck the perf overlay (Ctrl+P) to verify parallel dispatch is active.\nExpect 4 topo levels with parallel batches at levels 0 and 1.",
+            "position": [-150.0, -200.0],
+            "size": [700.0, 250.0],
+            "color": [0.3, 0.8, 0.3, 0.8]
+        }
+    ]
+}

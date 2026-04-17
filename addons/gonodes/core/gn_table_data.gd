@@ -24,6 +24,14 @@ func get_family() -> int:
 
 
 func get_preview_text() -> String:
+	if not is_table:
+		if text.is_empty():
+			return "(empty)"
+		var lines := text.split("\n", true, 4)
+		if lines.size() > 3:
+			lines.resize(3)
+			lines.append("…")
+		return "\n".join(lines)
 	if table.is_empty():
 		return "(empty)"
 	var lines := PackedStringArray()

@@ -259,11 +259,11 @@ func _ensure_rd() -> void:
 	if _rd != null:
 		return
 	var ctx := GNGpuContext.get_context()
-	if ctx.rd == null:
+	if ctx.main_rd == null:
 		GNLogger.error("ComputeShaderTOP",
 			"'%s' — RenderingDevice unavailable (Compatibility renderer?)" % id)
 		return
-	_rd = ctx.rd
+	_rd = ctx.main_rd
 	_cached_tex_data = GNTextureData.new()
 
 	# Create a reusable sampler for input textures.

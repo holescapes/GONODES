@@ -61,7 +61,6 @@ var _load_dialog: FileDialog = null
 
 ## Open Recent menu button.
 var _recent_menu: MenuButton = null
-const _MAX_RECENT := 10
 
 ## Floating viewer windows — each pinned to a specific node's output.
 var _viewer_windows: Array[GNViewerWindow] = []
@@ -107,6 +106,12 @@ var _main_help_window: GNMainHelpWindow = null
 
 ## Preferences dialog (lazy-created).
 var _preferences_dialog: GNPreferencesDialog = null
+
+## Toolbar wire style selector — kept in sync via GNSettings listener.
+var _wire_style_option: OptionButton = null
+
+## Auto-save timer (created when auto_save_interval > 0).
+var _auto_save_timer: Timer = null
 
 ## Settings file path for persisting editor state (last opened patch, etc.).
 const _SETTINGS_PATH := "user://gonodes_settings.cfg"
@@ -185,9 +190,13 @@ func _ready() -> void:
 	graph_editor.repromote_asset_requested.connect(_on_repromote_asset_requested)
 	graph_editor.export_subnet_requested.connect(_on_export_subnet_requested)
 	graph_editor.import_patch_requested.connect(_on_import_patch_requested)
+	graph_editor.wire_style_changed.connect(_on_wire_style_cycled)
 
 	# Replace the scene's TextureRect Viewer with a GNViewerPanel
 	_setup_viewer_panel()
+
+	# Push persisted preferences to children (editor is the sole broker)
+	_push_initial_preferences()
 
 	# Bind inspector to network and undo stack
 	inspector.network = network
@@ -234,15 +243,21 @@ func _setup_cook_engine() -> void:
 	cook_engine.network = network
 	cook_engine.project_dir = _project.project_dir
 	cook_engine.editor_mode = true
+	cook_engine.parallel_cook_enabled = GNSettings.get_value("parallel_cook_enabled", true)
+	cook_engine.max_cooks_per_frame = GNSettings.get_value("max_cooks_per_frame", 0)
 	cook_engine.timeline_start = 0.0
 	cook_engine.timeline_end = 600.0
 	add_child(cook_engine)
 
 	cook_engine.frame_cooked.connect(_on_frame_cooked)
 	cook_engine.cook_error.connect(_on_cook_error)
+	GNSettings.add_listener(_on_setting_changed)
 
 	# Initial sink list
 	_push_active_sinks()
+
+	# Auto-save timer
+	_configure_auto_save_timer(GNSettings.get_value("auto_save_interval", 0))
 
 
 ## Replaces the scene's placeholder TextureRect with a GNViewerPanel.
@@ -485,6 +500,48 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 
 func _on_cook_error(node_id: String, error_msg: String) -> void:
 	GNLogger.error("Editor", "Cook error '%s': %s" % [node_id, error_msg])
+
+
+func _on_setting_changed(key: String, value: Variant) -> void:
+	if key == "parallel_cook_enabled" and cook_engine != null:
+		cook_engine.parallel_cook_enabled = value as bool
+	elif key == "max_cooks_per_frame" and cook_engine != null:
+		cook_engine.max_cooks_per_frame = value as int
+	elif key == "wire_style":
+		graph_editor.set_wire_style(value as int)
+		if _wire_style_option != null:
+			_wire_style_option.selected = value as int
+	elif key == "confirm_on_delete":
+		graph_editor.confirm_on_delete = value as bool
+	elif key == "viewer_bg_color" and viewer_panel != null:
+		viewer_panel.set_bg_color(value as Color)
+	elif key == "auto_save_interval":
+		_configure_auto_save_timer(value as int)
+	elif key == "log_to_file":
+		_configure_log_file(value as bool)
+
+
+## Called when graph_editor cycles wire style via W key — persist the change.
+func _on_wire_style_cycled(idx: int) -> void:
+	GNSettings.set_value("wire_style", idx)
+
+
+## Pushes all persisted preference values to children on startup.
+## The editor is the sole broker — children never read GNSettings directly.
+func _push_initial_preferences() -> void:
+	graph_editor.set_wire_style(GNSettings.get_value("wire_style", 0))
+	graph_editor.confirm_on_delete = GNSettings.get_value("confirm_on_delete", false)
+	if viewer_panel:
+		viewer_panel.set_bg_color(GNSettings.get_value("viewer_bg_color",
+				Color(0.06, 0.06, 0.08)))
+	_configure_log_file(GNSettings.get_value("log_to_file", false))
+
+
+func _configure_log_file(enabled: bool) -> void:
+	if enabled:
+		GNLogger.set_log_file("user://gonodes.log")
+	else:
+		GNLogger.close_log_file()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -919,6 +976,27 @@ func _setup_file_dialogs() -> void:
 	add_child(_load_dialog)
 
 
+## Creates a standard toolbar Button and adds it to the parent container.
+func _tb_button(parent: Control, text: String, tooltip: String, callback: Callable) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.tooltip_text = tooltip
+	btn.pressed.connect(callback)
+	parent.add_child(btn)
+	return btn
+
+
+## Creates a standard toolbar CheckButton and adds it to the parent container.
+func _tb_check(parent: Control, text: String, tooltip: String, callback: Callable, initial: bool = false) -> CheckButton:
+	var cb := CheckButton.new()
+	cb.text = text
+	cb.tooltip_text = tooltip
+	cb.button_pressed = initial
+	cb.toggled.connect(callback)
+	parent.add_child(cb)
+	return cb
+
+
 ## Adds New / Open / Save buttons to the InfoBar.
 func _setup_toolbar() -> void:
 	var info_bar := $InfoBar as VBoxContainer
@@ -936,17 +1014,8 @@ func _setup_toolbar() -> void:
 	row1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll1.add_child(row1)
 
-	var btn_new := Button.new()
-	btn_new.text = "New"
-	btn_new.tooltip_text = "New patch (Ctrl+N)"
-	btn_new.pressed.connect(_on_new_pressed)
-	row1.add_child(btn_new)
-
-	var btn_open := Button.new()
-	btn_open.text = "Open"
-	btn_open.tooltip_text = "Open patch (Ctrl+O)"
-	btn_open.pressed.connect(_on_open_pressed)
-	row1.add_child(btn_open)
+	_tb_button(row1, "New", "New patch (Ctrl+N)", _on_new_pressed)
+	_tb_button(row1, "Open", "Open patch (Ctrl+O)", _on_open_pressed)
 
 	_recent_menu = MenuButton.new()
 	_recent_menu.text = "Recent"
@@ -956,97 +1025,35 @@ func _setup_toolbar() -> void:
 	row1.add_child(_recent_menu)
 	_rebuild_recent_menu()
 
-	var btn_save := Button.new()
-	btn_save.text = "Save"
-	btn_save.tooltip_text = "Save patch (Ctrl+S)"
-	btn_save.pressed.connect(_on_save_pressed)
-	row1.add_child(btn_save)
-
-	var btn_save_as := Button.new()
-	btn_save_as.text = "Save As"
-	btn_save_as.tooltip_text = "Save patch as… (Ctrl+Shift+S)"
-	btn_save_as.pressed.connect(_on_save_as_pressed)
-	row1.add_child(btn_save_as)
-
+	_tb_button(row1, "Save", "Save patch (Ctrl+S)", _on_save_pressed)
+	_tb_button(row1, "Save As", "Save patch as… (Ctrl+Shift+S)", _on_save_as_pressed)
 	row1.add_child(VSeparator.new())
-
-	# Build button — opens the export dialog for Quick Build
-	var btn_build := Button.new()
-	btn_build.text = "Build"
-	btn_build.tooltip_text = "Export patch as a standalone application (Quick Build)"
-	btn_build.pressed.connect(_on_build_pressed)
-	row1.add_child(btn_build)
-
-	var btn_host_io := Button.new()
-	btn_host_io.text = "Host I/O"
-	btn_host_io.tooltip_text = "View / edit the Host I/O manifest for embedded integration"
-	btn_host_io.pressed.connect(_on_host_io_pressed)
-	row1.add_child(btn_host_io)
-
-	var btn_refresh := Button.new()
-	btn_refresh.text = "Refresh"
-	btn_refresh.tooltip_text = "Re-scan for new extensions and custom assets added since startup"
-	btn_refresh.pressed.connect(_on_refresh_extensions_pressed)
-	row1.add_child(btn_refresh)
-
+	_tb_button(row1, "Build", "Export patch as a standalone application (Quick Build)", _on_build_pressed)
+	_tb_button(row1, "Host I/O", "View / edit the Host I/O manifest for embedded integration", _on_host_io_pressed)
+	_tb_button(row1, "Refresh", "Re-scan for new extensions and custom assets added since startup", _on_refresh_extensions_pressed)
 	row1.add_child(VSeparator.new())
 
 	# ── Graph View ──
 
-	# Preview toggle
-	preview_toggle = CheckButton.new()
-	preview_toggle.text = "Previews"
-	preview_toggle.tooltip_text = "Show / hide inline node previews"
-	preview_toggle.button_pressed = true
-	preview_toggle.toggled.connect(_on_preview_toggled)
-	row1.add_child(preview_toggle)
+	preview_toggle = _tb_check(row1, "Previews", "Show / hide inline node previews", _on_preview_toggled, true)
+	_tb_check(row1, "Minimap", "Show / hide minimap (M)",
+		func(on: bool): graph_editor.minimap_enabled = on, graph_editor.minimap_enabled)
 
-	# Minimap toggle
-	var minimap_toggle := CheckButton.new()
-	minimap_toggle.text = "Minimap"
-	minimap_toggle.tooltip_text = "Show / hide minimap (M)"
-	minimap_toggle.button_pressed = graph_editor.minimap_enabled
-	minimap_toggle.toggled.connect(func(on: bool):
-		graph_editor.minimap_enabled = on)
-	row1.add_child(minimap_toggle)
-
-	# Wire style OptionButton
+	# Wire style OptionButton — synced via GNSettings
 	var wire_opt := OptionButton.new()
 	wire_opt.tooltip_text = "Wire style (W to cycle)"
 	for wn in GNGraphEditor._WIRE_STYLE_NAMES:
 		wire_opt.add_item(wn)
-	wire_opt.selected = 0
+	wire_opt.selected = GNSettings.get_value("wire_style", 0)
 	wire_opt.item_selected.connect(func(wire_idx: int):
-		graph_editor.set_wire_style(wire_idx))
+		GNSettings.set_value("wire_style", wire_idx))
+	_wire_style_option = wire_opt
 	row1.add_child(wire_opt)
 
-	# Auto-layout button
-	var btn_layout := Button.new()
-	btn_layout.text = "Layout"
-	btn_layout.tooltip_text = "Auto-layout all nodes (Ctrl+L)"
-	btn_layout.pressed.connect(func(): graph_editor.auto_layout())
-	row1.add_child(btn_layout)
-
-	# Open Viewer button
-	var btn_viewer := Button.new()
-	btn_viewer.text = "+ Viewer"
-	btn_viewer.tooltip_text = "Open a floating viewer window for the selected node"
-	btn_viewer.pressed.connect(func(): open_viewer_window())
-	row1.add_child(btn_viewer)
-
-	# Help button
-	var btn_help := Button.new()
-	btn_help.text = "📖 Help"
-	btn_help.tooltip_text = "Open the help reference hub (F1)"
-	btn_help.pressed.connect(_toggle_main_help_window)
-	row1.add_child(btn_help)
-
-	# Preferences button
-	var btn_prefs := Button.new()
-	btn_prefs.text = "⚙ Prefs"
-	btn_prefs.tooltip_text = "Open preferences dialog"
-	btn_prefs.pressed.connect(_open_preferences)
-	row1.add_child(btn_prefs)
+	_tb_button(row1, "Layout", "Auto-layout all nodes (Ctrl+L)", func(): graph_editor.auto_layout())
+	_tb_button(row1, "+ Viewer", "Open a floating viewer window for the selected node", func(): open_viewer_window())
+	_tb_button(row1, "📖 Help", "Open the help reference hub (F1)", _toggle_main_help_window)
+	_tb_button(row1, "⚙ Prefs", "Open preferences dialog", _open_preferences)
 
 	# ── Timeline & Transport Row ─────────────────────────────────────────
 	var scroll_tl := ScrollContainer.new()
@@ -1059,33 +1066,10 @@ func _setup_toolbar() -> void:
 	tl_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll_tl.add_child(tl_row)
 
-	# Play / Pause button
-	play_button = Button.new()
-	play_button.text = "⏸"
-	play_button.tooltip_text = "Pause / Resume cooking (Space)"
-	play_button.pressed.connect(_on_play_pause_pressed)
-	tl_row.add_child(play_button)
-
-	# Reset button
-	reset_button = Button.new()
-	reset_button.text = "⏮"
-	reset_button.tooltip_text = "Reset the patch back to frame 0 (Escape)"
-	reset_button.pressed.connect(_on_reset_pressed)
-	tl_row.add_child(reset_button)
-
-	# Step backward button
-	step_back_button = Button.new()
-	step_back_button.text = "⏪"
-	step_back_button.tooltip_text = "Step back one frame"
-	step_back_button.pressed.connect(_on_step_back_pressed)
-	tl_row.add_child(step_back_button)
-
-	# Step forward button
-	step_fwd_button = Button.new()
-	step_fwd_button.text = "⏩"
-	step_fwd_button.tooltip_text = "Step forward one frame"
-	step_fwd_button.pressed.connect(_on_step_fwd_pressed)
-	tl_row.add_child(step_fwd_button)
+	play_button = _tb_button(tl_row, "⏸", "Pause / Resume cooking (Space)", _on_play_pause_pressed)
+	reset_button = _tb_button(tl_row, "⏮", "Reset the patch back to frame 0 (Escape)", _on_reset_pressed)
+	step_back_button = _tb_button(tl_row, "⏪", "Step back one frame", _on_step_back_pressed)
+	step_fwd_button = _tb_button(tl_row, "⏩", "Step forward one frame", _on_step_fwd_pressed)
 
 	# Speed multiplier
 	speed_spin = SpinBox.new()
@@ -1099,20 +1083,8 @@ func _setup_toolbar() -> void:
 	speed_spin.value_changed.connect(_on_speed_changed)
 	tl_row.add_child(speed_spin)
 
-	# Loop mode cycle button
-	loop_button = Button.new()
-	loop_button.text = "Loop: Off"
-	loop_button.tooltip_text = "Cycle loop mode: Off → Loop → Ping-Pong (requires time range)"
-	loop_button.pressed.connect(_on_loop_pressed)
-	tl_row.add_child(loop_button)
-
-	# Non-Realtime toggle
-	nrt_toggle = CheckButton.new()
-	nrt_toggle.text = "NRT"
-	nrt_toggle.tooltip_text = "Non-Realtime mode — fixed timestep for deterministic, frame-perfect recording"
-	nrt_toggle.button_pressed = false
-	nrt_toggle.toggled.connect(_on_nrt_toggled)
-	tl_row.add_child(nrt_toggle)
+	loop_button = _tb_button(tl_row, "Loop: Off", "Cycle loop mode: Off → Loop → Ping-Pong (requires time range)", _on_loop_pressed)
+	nrt_toggle = _tb_check(tl_row, "NRT", "Non-Realtime mode — fixed timestep for deterministic, frame-perfect recording", _on_nrt_toggled)
 
 	# Non-Realtime FPS SpinBox
 	nrt_fps_spin = SpinBox.new()
@@ -1155,29 +1127,10 @@ func _setup_toolbar() -> void:
 	row3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll3.add_child(row3)
 
-	# Performance overlay toggle
-	perf_toggle = CheckButton.new()
-	perf_toggle.text = "Perf"
-	perf_toggle.tooltip_text = "Show / hide per-node cook time overlay"
-	perf_toggle.button_pressed = false
-	perf_toggle.toggled.connect(_on_perf_toggled)
-	row3.add_child(perf_toggle)
-
-	# VRAM monitoring toggle
-	vram_toggle = CheckButton.new()
-	vram_toggle.text = "VRAM"
-	vram_toggle.tooltip_text = "Show GPU memory usage in the status bar"
-	vram_toggle.button_pressed = false
-	vram_toggle.toggled.connect(func(on: bool): _vram_enabled = on)
-	row3.add_child(vram_toggle)
-
-	# Debug overlay + panel toggle
-	debug_toggle = CheckButton.new()
-	debug_toggle.text = "Debug"
-	debug_toggle.tooltip_text = "Show debug overlay (cook order, active chain, dirty flash, data flow) + debug panel (F2)"
-	debug_toggle.button_pressed = false
-	debug_toggle.toggled.connect(_on_debug_toggled)
-	row3.add_child(debug_toggle)
+	perf_toggle = _tb_check(row3, "Perf", "Show / hide per-node cook time overlay", _on_perf_toggled)
+	vram_toggle = _tb_check(row3, "VRAM", "Show GPU memory usage in the status bar", func(on: bool): _vram_enabled = on)
+	debug_toggle = _tb_check(row3, "Debug",
+		"Show debug overlay (cook order, active chain, dirty flash, data flow) + debug panel (F2)", _on_debug_toggled)
 
 	# Debug layer toggles (only visible when debug is on)
 	_debug_layers_container = HBoxContainer.new()
@@ -1208,20 +1161,10 @@ func _setup_toolbar() -> void:
 	log_toggle.text = "Logs"
 	log_toggle.reparent(row3, false)
 
-	# Compat report toggle
-	compat_toggle = CheckButton.new()
-	compat_toggle.text = "Compat"
-	compat_toggle.tooltip_text = "Show export compatibility report — scan network against target platform/renderer"
-	compat_toggle.button_pressed = false
-	compat_toggle.toggled.connect(_on_compat_toggled)
-	row3.add_child(compat_toggle)
-
-	take_toggle = CheckButton.new()
-	take_toggle.text = "Takes"
-	take_toggle.tooltip_text = "Show take manager — capture, apply and blend named parameter snapshots (Shift+T)"
-	take_toggle.button_pressed = false
-	take_toggle.toggled.connect(_on_take_toggled)
-	row3.add_child(take_toggle)
+	compat_toggle = _tb_check(row3, "Compat",
+		"Show export compatibility report — scan network against target platform/renderer", _on_compat_toggled)
+	take_toggle = _tb_check(row3, "Takes",
+		"Show take manager — capture, apply and blend named parameter snapshots (Shift+T)", _on_take_toggled)
 
 	# Spacer pushes status info to the right
 	var spacer3 := Control.new()
@@ -1299,6 +1242,8 @@ func _guard_unsaved(action: Callable) -> void:
 	var dont_save_btn := dlg.add_button("Don't Save", true)
 
 	dlg.confirmed.connect(func():
+		# Hide the confirmation dialog first — two exclusive windows can't coexist.
+		dlg.hide()
 		# Save first, then run the action
 		if _current_file_path.is_empty():
 			# Need Save-As — connect one-shot to file_selected.
@@ -1323,6 +1268,7 @@ func _guard_unsaved(action: Callable) -> void:
 
 	dont_save_btn.pressed.connect(func():
 		# Skip saving, just run the action
+		dlg.hide()
 		_clear_modified()
 		action.call()
 		dlg.queue_free()
@@ -1637,8 +1583,8 @@ func _push_recent(path: String) -> void:
 	if idx != -1:
 		recents.remove_at(idx)
 	recents.insert(0, path)
-	if recents.size() > _MAX_RECENT:
-		recents.resize(_MAX_RECENT)
+	if recents.size() > GNSettings.get_value("recent_patches_count", 10):
+		recents.resize(GNSettings.get_value("recent_patches_count", 10))
 	_save_setting("recent_patches", recents)
 	_rebuild_recent_menu()
 
@@ -1682,6 +1628,39 @@ func _load_setting(key: String, default: Variant = null) -> Variant:
 	if cfg.load(_SETTINGS_PATH) != OK:
 		return default
 	return cfg.get_value("editor", key, default)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Auto-Save
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Configures (or disables) the auto-save timer based on interval in seconds.
+func _configure_auto_save_timer(interval_sec: int) -> void:
+	if _auto_save_timer != null:
+		_auto_save_timer.stop()
+		_auto_save_timer.queue_free()
+		_auto_save_timer = null
+
+	if interval_sec <= 0:
+		return
+
+	_auto_save_timer = Timer.new()
+	_auto_save_timer.wait_time = float(interval_sec)
+	_auto_save_timer.one_shot = false
+	_auto_save_timer.timeout.connect(_on_auto_save_timeout)
+	add_child(_auto_save_timer)
+	_auto_save_timer.start()
+
+
+## Called by the auto-save timer.  Only saves if the patch has a file path
+## and has been modified since last save.
+func _on_auto_save_timeout() -> void:
+	if _current_file_path.is_empty():
+		return
+	if not _is_modified():
+		return
+	_do_save_to_path(_current_file_path)
+	GNLogger.info("Editor", "Auto-saved: %s" % _current_file_path.get_file())
 
 
 ## Restores all persisted UI state — toggles, split offsets, etc.

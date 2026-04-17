@@ -54,6 +54,13 @@ func _out(node: GNNode) -> GNChannelData:
 	return node.cached_output as GNChannelData
 
 
+func _sink(ids: Array) -> void:
+	var typed: Array[String] = []
+	for id in ids:
+		typed.append(str(id))
+	_engine.set_active_sinks(typed)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Initialization
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -82,6 +89,7 @@ func test_default_init() -> void:
 func test_single_sample_default_ramp() -> void:
 	## Default linear ramp (0→1) sampled at t=1.0 should output 1.0.
 	var r := _make_ramp("r1")
+	_sink(["r1"])
 	_cook()
 	var data := _out(r)
 	GNTestAssert.assert_true(data != null, "output not null")
@@ -101,6 +109,7 @@ func test_multi_sample_linear_ramp() -> void:
 	var r := _make_ramp("r1")
 	r.set_param_value("samples", 5)
 	r.set_param_value("count", 1)
+	_sink(["r1"])
 	_cook()
 	var data := _out(r)
 	GNTestAssert.assert_true(data != null, "output not null")
@@ -119,6 +128,7 @@ func test_empty_name_skipped() -> void:
 	var r := _make_ramp("r1")
 	r.set_param_value("count", 2)
 	r.set_param_value("name1", "")
+	_sink(["r1"])
 	_cook()
 	var data := _out(r)
 	GNTestAssert.assert_true(data.channels.has("ramp0"), "ramp0 present")
@@ -134,6 +144,7 @@ func test_increase_count() -> void:
 	var r := _make_ramp("r1")
 	GNTestAssert.assert_false(r.parameters.has("name2"), "no name2 before increase")
 	r.set_param_value("count", 4)
+	_sink(["r1"])
 	_cook()
 	# After cook, slots 0-3 should exist
 	GNTestAssert.assert_true(r.parameters.has("name2"), "name2 exists after increase")
@@ -147,6 +158,7 @@ func test_increase_count() -> void:
 func test_decrease_count() -> void:
 	var r := _make_ramp("r1")
 	r.set_param_value("count", 4)
+	_sink(["r1"])
 	_cook()  # Build 4 slots
 	GNTestAssert.assert_true(r.parameters.has("ramp3"), "ramp3 before decrease")
 	r.set_param_value("count", 1)
@@ -173,6 +185,7 @@ func test_custom_ramp_curve() -> void:
 		{"pos": 1.0, "value": 1.0, "left_tangent": 0.0, "right_tangent": 0.0},
 	]
 	r.set_param_value("ramp0", v_keys)
+	_sink(["r1"])
 	_cook()
 	var ch := _out(r).get_channel("ramp0")
 	GNTestAssert.assert_eq(ch.size(), 3, "3 samples")
@@ -189,6 +202,7 @@ func test_serialization_round_trip() -> void:
 	## Save with 4 ramp slots, custom name, custom ramp → restore and verify.
 	var r := _make_ramp("r1")
 	r.set_param_value("count", 4)
+	_sink(["r1"])
 	_cook()  # Build the 4 slots first
 	# Now customize slot 2 (exists after cook)
 	r.set_param_value("name2", "falloff")
@@ -238,6 +252,7 @@ func test_chop_expression_reads_ramp_output() -> void:
 	var p: GNParameter = reader.get_parameter("value0")
 	p.mode = GNParameter.Mode.EXPRESSION
 	p.expression = "chop(\"curves\", \"ramp0\")"
+	_sink(["reader"])
 
 	_cook()
 	var data := _out(reader)

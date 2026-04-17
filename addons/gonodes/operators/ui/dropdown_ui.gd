@@ -53,9 +53,9 @@ func _ensure_option() -> void:
 	_option = OptionButton.new()
 	_option.name = id + "_dropdown"
 	_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_option.item_selected.connect(_on_item_selected)
-	_option.mouse_entered.connect(_on_hover_changed.bind(true))
-	_option.mouse_exited.connect(_on_hover_changed.bind(false))
+	_register_signal(_option.item_selected, _on_item_selected)
+	_register_signal(_option.mouse_entered, _on_hover_changed.bind(true))
+	_register_signal(_option.mouse_exited, _on_hover_changed.bind(false))
 	_control_node = _option
 
 	# Populate initial items
@@ -174,12 +174,5 @@ func _on_hover_changed(hovered: bool) -> void:
 
 
 func destroy_control_node() -> void:
-	if _option != null:
-		if _option.item_selected.is_connected(_on_item_selected):
-			_option.item_selected.disconnect(_on_item_selected)
-		if _option.mouse_entered.is_connected(_on_hover_changed):
-			_option.mouse_entered.disconnect(_on_hover_changed)
-		if _option.mouse_exited.is_connected(_on_hover_changed):
-			_option.mouse_exited.disconnect(_on_hover_changed)
 	_option = null
 	super.destroy_control_node()

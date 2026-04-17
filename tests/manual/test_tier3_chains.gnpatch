@@ -1,0 +1,201 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo_smooth": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": { "value": 0.3 },
+                "type": { "value": 2 }
+            }
+        },
+        "const_smooth": {
+            "type": "ConstantCHOP",
+            "position": [500, 100],
+            "parameters": {
+                "value0": {
+                    "value": 0.0,
+                    "expression": "smooth('s1', chop('lfo_smooth', 'out'), 3.0)",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "null_smooth": {
+            "type": "NullCHOP",
+            "position": [900, 100],
+            "parameters": {}
+        },
+
+        "lfo_lag": {
+            "type": "LFO_CHOP",
+            "position": [100, 350],
+            "parameters": {
+                "frequency": { "value": 0.5 },
+                "type": { "value": 2 }
+            }
+        },
+        "const_lag": {
+            "type": "ConstantCHOP",
+            "position": [500, 350],
+            "parameters": {
+                "value0": {
+                    "value": 0.0,
+                    "expression": "lag('l1', chop('lfo_lag', 'out'), 2.0, 8.0)",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "null_lag": {
+            "type": "NullCHOP",
+            "position": [900, 350],
+            "parameters": {}
+        },
+
+        "lfo_trig": {
+            "type": "LFO_CHOP",
+            "position": [100, 600],
+            "parameters": {
+                "frequency": { "value": 1.0 }
+            }
+        },
+        "const_trig": {
+            "type": "ConstantCHOP",
+            "position": [500, 600],
+            "parameters": {
+                "value0": {
+                    "value": 0.0,
+                    "expression": "trigger('t1', chop('lfo_trig', 'out'), 0.5)",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "null_trig": {
+            "type": "NullCHOP",
+            "position": [900, 600],
+            "parameters": {}
+        },
+
+        "const_store": {
+            "type": "ConstantCHOP",
+            "position": [100, 850],
+            "parameters": {
+                "value0": {
+                    "value": 0.0,
+                    "expression": "store('counter', fetch('counter', 0.0) + 1.0)",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "null_store": {
+            "type": "NullCHOP",
+            "position": [500, 850],
+            "parameters": {}
+        },
+
+        "slider1": {
+            "type": "SliderUI",
+            "position": [100, 1150],
+            "parameters": {
+                "min_value": { "value": 0.0 },
+                "max_value": { "value": 100.0 },
+                "default_value": { "value": 50.0 }
+            }
+        },
+        "knob1": {
+            "type": "KnobUI",
+            "position": [500, 1150],
+            "parameters": {
+                "min_value": { "value": 0.0 },
+                "max_value": { "value": 1.0 },
+                "default_value": {
+                    "value": 0.5,
+                    "expression": "chop('slider1', 'value') / 100.0",
+                    "mode": "EXPRESSION"
+                }
+            }
+        },
+        "null_ui1": {
+            "type": "NullCHOP",
+            "position": [900, 1150],
+            "parameters": {}
+        },
+
+        "toggle1": {
+            "type": "ToggleUI",
+            "position": [100, 1400],
+            "parameters": {}
+        },
+        "checkbox1": {
+            "type": "CheckBoxUI",
+            "position": [500, 1400],
+            "parameters": {}
+        },
+        "button1": {
+            "type": "ButtonUI",
+            "position": [900, 1400],
+            "parameters": {}
+        },
+        "null_ui2": {
+            "type": "NullCHOP",
+            "position": [1300, 1400],
+            "parameters": {}
+        },
+
+        "xypad1": {
+            "type": "XYPadUI",
+            "position": [100, 1650],
+            "parameters": {}
+        },
+        "line_edit1": {
+            "type": "LineEditUI",
+            "position": [500, 1650],
+            "parameters": {}
+        },
+        "dropdown1": {
+            "type": "DropdownUI",
+            "position": [900, 1650],
+            "parameters": {}
+        },
+        "null_ui3": {
+            "type": "NullCHOP",
+            "position": [1300, 1650],
+            "parameters": {}
+        }
+    },
+    "connections": [
+        { "from": "const_smooth", "from_port": 0, "to": "null_smooth", "to_port": 0 },
+        { "from": "const_lag", "from_port": 0, "to": "null_lag", "to_port": 0 },
+        { "from": "const_trig", "from_port": 0, "to": "null_trig", "to_port": 0 },
+        { "from": "const_store", "from_port": 0, "to": "null_store", "to_port": 0 },
+
+        { "from": "slider1", "from_port": 1, "to": "knob1", "to_port": 0 },
+        { "from": "knob1", "from_port": 1, "to": "null_ui1", "to_port": 0 },
+
+        { "from": "toggle1", "from_port": 1, "to": "checkbox1", "to_port": 0 },
+        { "from": "checkbox1", "from_port": 1, "to": "button1", "to_port": 0 },
+        { "from": "button1", "from_port": 1, "to": "null_ui2", "to_port": 0 },
+
+        { "from": "xypad1", "from_port": 1, "to": "line_edit1", "to_port": 0 },
+        { "from": "line_edit1", "from_port": 1, "to": "dropdown1", "to_port": 0 },
+        { "from": "dropdown1", "from_port": 1, "to": "null_ui3", "to_port": 0 }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TIER 3 TEST — State Layers (smooth/lag/trigger/store)\n\nChain 1: Square LFO → smooth() expression → Null\n  Expected: Jumpy square wave becomes smooth curve (speed=3)\n\nChain 2: Square LFO → lag() expression → Null\n  Expected: Asymmetric smoothing (fast up=2, slow down=8)\n\nChain 3: Sine LFO → trigger() expression → Null\n  Expected: Spikes to 1.0 each time sine crosses 0.5 upward, then 0.0\n\nChain 4: store/fetch counter → Null\n  Expected: Monotonically increasing count (1, 2, 3, ...)\n  Preview should show ever-growing number",
+            "position": [-150.0, -200.0],
+            "size": [700.0, 250.0],
+            "color": [0.3, 0.6, 1.0, 0.8]
+        },
+        {
+            "id": "ann_2",
+            "type": "note",
+            "text": "TIER 3 TEST — Signal Management (_register_signal / cleanup)\n\nChain 5: Slider → Knob → Null\n  Test: Move slider, knob should track (value/100). State CHOP outputs should update.\n  Delete slider1, knob1 should not crash (cleanup_registered_signals).\n\nChain 6: Toggle → CheckBox → Button → Null\n  Test: Toggle each widget. State CHOP flows through chain.\n  Delete toggle1 mid-chain — no orphan signal errors.\n\nChain 7: XYPad → LineEdit → Dropdown → Null\n  Test: Drag XY pad. State CHOP flows.\n  Delete xypad1 — no crash, no orphan signal disconnect errors.",
+            "position": [-150.0, 1050.0],
+            "size": [700.0, 250.0],
+            "color": [1.0, 0.5, 0.3, 0.8]
+        }
+    ]
+}

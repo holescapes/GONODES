@@ -17,10 +17,3 @@ func render_for_viewer(data: GNData, viewer) -> void:
 			viewer.set_control(_viewer_waveform, info)
 			return
 	viewer.set_info("No CHOP output", "")
-
-
-func render_for_preview(data: GNData, host) -> void:
-	if data != null and host.has_method("set_text"):
-		host.set_text(data.get_preview_text())
-	elif host.has_method("set_text"):
-		host.set_text("")

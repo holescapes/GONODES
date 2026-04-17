@@ -8,7 +8,7 @@ extends GNDataRenderer
 
 
 func supports_wireframe() -> bool:
-	return true
+	return false
 
 
 func render_for_viewer(data: GNData, viewer) -> void:

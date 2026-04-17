@@ -25,7 +25,8 @@ func _init() -> void:
 
 ## Ensures family is set even when subclass _init() doesn't call super().
 func initialize(p_id: String) -> void:
-	family = GNFamily.Type.DAT
+	if family != GNFamily.Type.NET:
+		family = GNFamily.Type.DAT
 	super.initialize(p_id)
 
 
@@ -63,18 +64,6 @@ func _get_input_dat(inputs: Array[GNData], port: int = 0) -> GNTableData:
 	if port < inputs.size() and inputs[port] is GNTableData:
 		return inputs[port] as GNTableData
 	return null
-
-
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
-
-
-func render_for_preview(host) -> void:
-	if cached_output != null:
-		host.set_text(cached_output.get_preview_text())
-	else:
-		host.set_text("")
 
 
 static func _populate_viewer_tree(tree: Tree, tbl: GNTableData) -> void:

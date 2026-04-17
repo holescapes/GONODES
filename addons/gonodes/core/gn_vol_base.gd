@@ -35,7 +35,8 @@ func supported_renderers() -> PackedStringArray:
 
 
 func initialize(p_id: String) -> void:
-	family = GNFamily.Type.VOL
+	if family != GNFamily.Type.NET:
+		family = GNFamily.Type.VOL
 	super.initialize(p_id)
 
 
@@ -64,18 +65,6 @@ func _get_input_vol(inputs: Array[GNData], port: int = 0) -> GNVolumeData:
 	if port < inputs.size() and inputs[port] is GNVolumeData:
 		return inputs[port] as GNVolumeData
 	return null
-
-
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
-
-
-func render_for_preview(host) -> void:
-	if cached_output != null:
-		host.set_text(cached_output.get_preview_text())
-	else:
-		host.set_text("")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

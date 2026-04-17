@@ -66,6 +66,13 @@ func _make_math(id: String, op: int = 0, operand: float = 0.0) -> GNNode:
 	return m
 
 
+func _sink(ids: Array) -> void:
+	var typed: Array[String] = []
+	for id in ids:
+		typed.append(str(id))
+	_engine.set_active_sinks(typed)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Cook Order — nodes cook in topological order
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -77,6 +84,7 @@ func test_cook_order_linear_chain() -> void:
 	var c := _make_null("c")
 	_network.connect_nodes("a", 0, "b", 0)
 	_network.connect_nodes("b", 0, "c", 0)
+	_sink(["c"])
 	_cook()
 	GNTestAssert.assert_not_null(_output(c), "end of chain has output")
 	GNTestAssert.assert_approx(_output(c).get_value("ch"), 5.0, 0.001, "value propagated")
@@ -93,6 +101,7 @@ func test_cook_order_diamond() -> void:
 	_network.connect_nodes("a", 0, "c", 0)
 	_network.connect_nodes("b", 0, "d", 0)
 	_network.connect_nodes("c", 0, "d", 1)
+	_sink(["d"])
 	_cook()
 	var out := _output(d)
 	GNTestAssert.assert_not_null(out, "merge output exists")
@@ -101,9 +110,10 @@ func test_cook_order_diamond() -> void:
 
 
 func test_cook_order_disconnected_island() -> void:
-	## Disconnected nodes still cook (if active via fallback).
+	## Disconnected nodes cook when designated as sinks.
 	var a := _make_constant("a", "x", 7.0)
 	var b := _make_constant("b", "y", 3.0)
+	_sink(["a", "b"])
 	_cook()
 	GNTestAssert.assert_not_null(_output(a), "island A cooked")
 	GNTestAssert.assert_not_null(_output(b), "island B cooked")
@@ -151,14 +161,14 @@ func test_active_set_expression_ref_activates_node() -> void:
 	GNTestAssert.assert_true(reader.is_active, "reader is active (sink)")
 
 
-func test_no_sinks_fallback_all_active() -> void:
-	## When no sinks exist at all, ALL nodes should be active (safety fallback).
+func test_no_sinks_empty_active_set() -> void:
+	## When no sinks exist, no nodes are active — nothing cooks.
 	var a := _make_constant("a", "x", 1.0)
 	var b := _make_constant("b", "y", 2.0)
 	# No sinks set, no is_sink nodes
 	_cook()
-	GNTestAssert.assert_true(a.is_active, "a active in fallback mode")
-	GNTestAssert.assert_true(b.is_active, "b active in fallback mode")
+	GNTestAssert.assert_false(a.is_active, "a inactive without sinks")
+	GNTestAssert.assert_false(b.is_active, "b inactive without sinks")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -170,6 +180,7 @@ func test_hash_guard_skips_unchanged() -> void:
 	var a := _make_constant("a", "ch", 5.0)
 	var b := _make_null("b")
 	_network.connect_nodes("a", 0, "b", 0)
+	_sink(["b"])
 
 	_cook()  # Frame 0: first cook — both cook
 	GNTestAssert.assert_not_null(_output(b), "b cooked on frame 0")
@@ -188,6 +199,7 @@ func test_hash_guard_recooks_on_param_change() -> void:
 	var a := _make_constant("a", "ch", 5.0)
 	var b := _make_null("b")
 	_network.connect_nodes("a", 0, "b", 0)
+	_sink(["b"])
 
 	_cook()
 	GNTestAssert.assert_approx(_output(b).get_value("ch"), 5.0, 0.001)
@@ -204,6 +216,7 @@ func test_hash_guard_recooks_on_param_change() -> void:
 func test_hash_guard_time_dependent_always_cooks() -> void:
 	## Time-dependent nodes should always cook (hash includes elapsed_time).
 	var lfo := _make(LFO_CHOP, "lfo1")
+	_sink(["lfo1"])
 	_cook()
 	var val1 := _output(lfo).get_value("out") if _output(lfo) else 0.0
 
@@ -227,6 +240,7 @@ func test_dirty_propagation_downstream_recooks() -> void:
 	var c := _make_null("c")
 	_network.connect_nodes("a", 0, "b", 0)
 	_network.connect_nodes("b", 0, "c", 0)
+	_sink(["c"])
 
 	_cook()
 	GNTestAssert.assert_approx(_output(c).get_value("ch"), 11.0, 0.001, "1+10=11")
@@ -251,6 +265,7 @@ func test_dirty_sibling_branch_not_affected() -> void:
 	var d := _make_null("d")
 	_network.connect_nodes("a", 0, "b", 0)
 	_network.connect_nodes("c", 0, "d", 0)
+	_sink(["b", "d"])
 
 	_cook()
 
@@ -273,6 +288,7 @@ func test_incremental_dirty_only_direct_successors() -> void:
 	var c := _make_null("c")
 	_network.connect_nodes("a", 0, "b", 0)
 	_network.connect_nodes("b", 0, "c", 0)
+	_sink(["c"])
 
 	_cook()
 	a.set_param_value("value0", 50.0)
@@ -296,6 +312,7 @@ func test_bypass_passes_input_through() -> void:
 	b.bypass = true
 	_network.connect_nodes("a", 0, "b", 0)
 	_network.connect_nodes("b", 0, "c", 0)
+	_sink(["c"])
 
 	_cook()
 
@@ -310,6 +327,7 @@ func test_bypass_cook_time_zero() -> void:
 	var b := _make_null("b")
 	b.bypass = true
 	_network.connect_nodes("a", 0, "b", 0)
+	_sink(["b"])
 
 	_cook()
 	GNTestAssert.assert_approx(b.cook_time_ms, 0.0, 0.001, "bypass cook time is zero")
@@ -377,6 +395,7 @@ func test_reconnect_updates_data_flow() -> void:
 	var b := _make_constant("b", "ch", 20.0)
 	var c := _make_null("c")
 	_network.connect_nodes("a", 0, "c", 0)
+	_sink(["c"])
 
 	_cook()
 	GNTestAssert.assert_approx(_output(c).get_value("ch"), 10.0, 0.001, "initially from a")
@@ -395,6 +414,7 @@ func test_disconnect_nulls_input() -> void:
 	var a := _make_constant("a", "ch", 5.0)
 	var b := _make_null("b")
 	_network.connect_nodes("a", 0, "b", 0)
+	_sink(["b"])
 
 	_cook()
 	GNTestAssert.assert_not_null(_output(b), "b has output initially")
@@ -419,6 +439,7 @@ func test_multi_frame_stable_output() -> void:
 	var a := _make_constant("a", "ch", 7.0)
 	var b := _make_math("b", 0, 3.0)  # Add 3 → 10
 	_network.connect_nodes("a", 0, "b", 0)
+	_sink(["b"])
 
 	_cook()
 	var v1 := _output(b).get_value("ch")
@@ -441,6 +462,7 @@ func test_max_cooks_per_frame_respected() -> void:
 	var a := _make_constant("a", "ch", 1.0)
 	var b := _make_null("b")
 	_network.connect_nodes("a", 0, "b", 0)
+	_sink(["b"])
 
 	_engine.max_cooks_per_frame = 1
 	_cook()
@@ -467,6 +489,7 @@ func test_expression_chop_ref_triggers_recook() -> void:
 	var p := GNParameter.create_float("val", 0.0)
 	reader.add_parameter(p)
 	p.set_expression('chop("src", "out", 0)')
+	_sink(["reader"])
 
 	_cook()
 	# reader's "val" param should have resolved to 3.0
@@ -492,6 +515,7 @@ func test_par_cross_node_updates_on_change() -> void:
 	var p := GNParameter.create_float("x", 0.0)
 	reader.add_parameter(p)
 	p.set_expression('par("other", "value0")')
+	_sink(["reader"])
 
 	_cook()
 	GNTestAssert.assert_approx(reader.get_param_value("x"), 1.0, 0.1,
@@ -516,6 +540,7 @@ func test_frame_state_injected() -> void:
 	_engine.elapsed_time = 5.5
 	_engine.current_delta = 1.0 / 30.0
 	_engine.frame_count = 100
+	_sink(["a"])
 
 	_cook()
 
@@ -531,11 +556,13 @@ func test_frame_state_injected() -> void:
 func test_add_node_between_cooks() -> void:
 	## Adding a node between cook frames should work and the new node should cook.
 	var a := _make_constant("a", "ch", 1.0)
+	_sink(["a"])
 	_cook()
 
 	var b := _make_null("b")
 	_network.connect_nodes("a", 0, "b", 0)
 	b.mark_dirty()
+	_sink(["b"])
 
 	_engine.elapsed_time += _engine.current_delta
 	_cook()
@@ -551,6 +578,7 @@ func test_remove_node_between_cooks() -> void:
 	var c := _make_null("c")
 	_network.connect_nodes("a", 0, "b", 0)
 	_network.connect_nodes("b", 0, "c", 0)
+	_sink(["c"])
 
 	_cook()
 	GNTestAssert.assert_approx(_output(c).get_value("ch"), 1.0, 0.001)

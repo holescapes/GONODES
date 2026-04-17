@@ -250,8 +250,8 @@ func _try_init_mrt() -> void:
 		_use_mrt = true
 		return
 	var ctx := GNGpuContext.get_context()
-	if ctx.rd != null:
-		_rd = ctx.rd
+	if ctx.main_rd != null:
+		_rd = ctx.main_rd
 		_use_mrt = true
 		_cached_tex_data = GNTextureData.new()
 		var ss := RDSamplerState.new()

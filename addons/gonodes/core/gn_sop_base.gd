@@ -25,7 +25,8 @@ func _init() -> void:
 
 ## Ensures family is set even when subclass _init() doesn't call super().
 func initialize(p_id: String) -> void:
-	family = GNFamily.Type.SOP
+	if family != GNFamily.Type.NET:
+		family = GNFamily.Type.SOP
 	super.initialize(p_id)
 
 
@@ -70,18 +71,6 @@ func _require_input_geo(inputs: Array[GNData]) -> GNGeoData:
 	if geo == null or not geo.has_geometry():
 		return null
 	return geo
-
-
-func update_preview_control(control: Control) -> void:
-	if control is Label:
-		(control as Label).text = cached_output.get_preview_text() if cached_output != null else ""
-
-
-func render_for_preview(host) -> void:
-	if cached_output != null:
-		host.set_text(cached_output.get_preview_text())
-	else:
-		host.set_text("")
 
 
 

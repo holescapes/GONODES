@@ -2,11 +2,18 @@ class_name PointCloudRenderTOP
 extends GNTopBase
 ## Renders POP particle data or SOP point positions as a 2D point-cloud image.
 ##
-## GPU path: dispatches a compute shader that reads the particle SSBO and
-## splats circular discs with perspective projection and depth testing.
+## GPU path: copies the particle SSBO to main_rd, dispatches a compute shader
+## that splats circular discs with perspective projection and depth testing,
+## and wraps the output as Texture2DRD for zero-copy display.
 ## CPU fallback: reads positions, projects, and draws to an Image.
 
 var _out_tex: GNTextureData = null
+
+# ─── main_rd state (persisted across cooks) ──────────────────────────────────
+var _output_tex_rid: RID = RID()
+var _depth_tex_rid: RID = RID()
+var _output_tex2d_rd: Texture2DRD = null
+var _prev_res: Vector2i = Vector2i.ZERO
 
 
 func _init() -> void:
@@ -54,11 +61,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var ctx := GNGpuContext.get_context()
-	if ctx == null or ctx.rd == null:
+	if ctx == null or ctx.main_rd == null:
 		return _cook_cpu(inputs)
 
 	var w: int = get_param_value("width")
 	var h: int = get_param_value("height")
+	var res := Vector2i(w, h)
 	var pt_size: float = get_param_value("point_size")
 	var sz_atten: float = get_param_value("size_attenuation")
 	var alpha_val: float = get_param_value("alpha")
@@ -84,25 +92,35 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		right = Vector3.RIGHT
 	var up := right.cross(fwd).normalized()
 
-	# Create output color texture (initialize with bg color)
+	var mrd := ctx.main_rd
+
+	# ── Reallocate output/depth textures on main_rd if resolution changed ──
+	if res != _prev_res:
+		_free_main_rd_textures(mrd)
+		_output_tex_rid = ctx.create_texture_2d_on_main(w, h)
+		_depth_tex_rid = ctx.create_texture_2d_on_main(w, h,
+			RenderingDevice.DATA_FORMAT_R32_SFLOAT)
+		_prev_res = res
+
+	# Clear output with bg color, depth with 1.0
 	var bg_img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	bg_img.fill(bg)
-	var out_tex_rid: RID = ctx.upload_image(bg_img)
-
-	# Create depth buffer (R32F, initialized to 1.0 = far)
+	mrd.texture_update(_output_tex_rid, 0, bg_img.get_data())
 	var depth_img := Image.create(w, h, false, Image.FORMAT_RF)
 	depth_img.fill(Color(1.0, 0.0, 0.0))
-	var depth_rid: RID = ctx.upload_image(depth_img)
+	mrd.texture_update(_depth_tex_rid, 0, depth_img.get_data())
 
-	var shader: RID = ctx.get_shader("res://addons/gonodes/shaders/top/point_cloud_render.glsl")
+	# ── POP buffer is on the same device — zero-copy, no bulk memcpy needed ──
+
+	# ── Compile / cache shader ──
+	var shader: RID = ctx.get_shader(
+		"res://addons/gonodes/shaders/top/point_cloud_render.glsl")
 	if not shader.is_valid():
-		ctx.rd.free_rid(out_tex_rid)
-		ctx.rd.free_rid(depth_rid)
 		return null
 
-	# Push constants: 80 bytes
+	# ── Push constants ──
 	var pc := PackedByteArray()
-	pc.resize(80)
+	pc.resize(112)
 	pc.encode_s32(0, w)
 	pc.encode_s32(4, h)
 	pc.encode_s32(8, pd.particle_count)
@@ -112,9 +130,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	pc.encode_float(40, right.x); pc.encode_float(44, right.y); pc.encode_float(48, right.z)
 	pc.encode_float(52, up.x); pc.encode_float(56, up.y); pc.encode_float(60, up.z)
 	pc.encode_float(64, fov_rad)
-	# Repack to fit: near, far, size_atten, alpha, use_pcol, col_rgb
-	# Need more space — extend to 112 bytes (multiple of 16)
-	pc.resize(112)
 	pc.encode_float(68, near_c)
 	pc.encode_float(72, far_c)
 	pc.encode_float(76, sz_atten)
@@ -123,32 +138,50 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	pc.encode_float(88, col.r)
 	pc.encode_float(92, col.g)
 	pc.encode_float(96, col.b)
-	# Pad to 112
 	pc.encode_float(100, 0.0)
 	pc.encode_float(104, 0.0)
 	pc.encode_float(108, 0.0)
 
-	var us: RID = ctx.rd.uniform_set_create([
-		ctx.uniform_buffer(0, pd.rd_buffer),
-		ctx.uniform_image(1, out_tex_rid),
-		ctx.uniform_image(2, depth_rid),
+	# ── Dispatch (fire-and-forget, no submit/sync) ──
+	var us: RID = mrd.uniform_set_create([
+		ctx.uniform_buffer_main(0, pd.rd_buffer),
+		ctx.uniform_image_main(1, _output_tex_rid),
+		ctx.uniform_image_main(2, _depth_tex_rid),
 	], shader, 0)
 
 	var wg_x: int = ceili(float(pd.particle_count) / 64.0)
-	ctx.dispatch(shader, us, wg_x, 1, 1, pc)
-	ctx.rd.free_rid(us)
-	ctx.rd.free_rid(depth_rid)
+	ctx.dispatch_on_main(shader, us, wg_x, 1, 1, pc)
+	mrd.free_rid(us)
 
-	var result_img: Image = ctx.download_image(out_tex_rid, w, h)
-	ctx.rd.free_rid(out_tex_rid)
+	# ── Wrap as Texture2DRD — zero-copy display ──
+	if _output_tex2d_rd == null:
+		_output_tex2d_rd = Texture2DRD.new()
+	_output_tex2d_rd.texture_rd_rid = _output_tex_rid
 
-	var itex := ImageTexture.create_from_image(result_img)
 	if _out_tex == null:
 		_out_tex = GNTextureData.new()
-	_out_tex.texture = itex
-	_out_tex.resolution = Vector2i(w, h)
+	_out_tex.texture = _output_tex2d_rd
+	_out_tex.resolution = res
 	_out_tex.format = Image.FORMAT_RGBA8
 	return _out_tex
+
+
+func _free_main_rd_textures(mrd: RenderingDevice) -> void:
+	if _output_tex2d_rd != null:
+		_output_tex2d_rd.texture_rd_rid = RID()
+	if _output_tex_rid.is_valid() and mrd != null:
+		mrd.free_rid(_output_tex_rid)
+	_output_tex_rid = RID()
+	if _depth_tex_rid.is_valid() and mrd != null:
+		mrd.free_rid(_depth_tex_rid)
+	_depth_tex_rid = RID()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		var ctx := GNGpuContext.get_context()
+		if ctx != null and ctx.main_rd != null:
+			_free_main_rd_textures(ctx.main_rd)
 
 
 func _cook_cpu(inputs: Array[GNData]) -> GNData:

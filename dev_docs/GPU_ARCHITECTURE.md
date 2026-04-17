@@ -1,75 +1,69 @@
-# GPU Architecture — Shared RenderingDevice
+# GPU Architecture — Unified Single-Device Model
 
 > **Audience:** Core developers, GPU operator authors.  
-> **Status:** Architecture decision — implementation in progress.
+> **Status:** Implemented — unified single device (June 2026).
+> Previously used a two-device split (April–June 2026); see git history.
 
 
 ## Decision
 
-**One RenderingDevice for all of GONODES**, shared across all operators,
-all families, and all patches within the process. This is the **main RD**
-obtained via `RenderingServer.get_rendering_device()`.
+**One RenderingDevice in GNGpuContext:**
+
+- **`rd`** — the renderer's own device from
+  `RenderingServer.get_rendering_device()`. All operators (TOP, POP, VOL)
+  dispatch compute shaders and create textures on this single device.
+  `main_rd` is kept as an alias for backward compatibility.
 
 
 ## Rationale
 
-### Why not local RDs?
+### Why a single device?
 
-The original implementation used `RenderingServer.create_local_rendering_device()`
-in `GNGpuContext` and individual operators (GLSLMultiTOP, ComputeShaderTOP).
-This created isolated GPU contexts that **cannot share resources** with the
-scene renderer, forcing a costly readback path:
+POP and VOL operators never call `submit()`/`sync()` — they dispatch
+compute shaders and pass GPU RIDs (buffers, 3D textures) downstream.
+The only synchronization points are GPU-side pipeline barriers, which the
+renderer's own device handles automatically.
 
-```
-Local RD (render/compute) → texture_get_data() → CPU RAM → ImageTexture.update() → Main RD (display)
-```
+With all data on the renderer's device:
 
-This added 3–6 ms per cook per operator (GPU→CPU stall + readback + re-upload).
+- **Zero-copy** between all families: TOP→VOL, POP→TOP, VOL→SOP bridges
+  pass RIDs directly — no CPU roundtrip.
+- **Texture2DRD** works everywhere: any GPU texture can be wrapped for
+  display (viewer, TextureRect, Sprite2D) with no readback.
+- **Host I/O native handles** (`buffer_get_native_handle()`,
+  `texture_get_native_handle()`) resolve to the same Vulkan device the
+  host application sees, enabling NDI GPU, Spout, Direct3D interop.
 
-### Why the main RD?
+### CPU readback points (unavoidable)
 
-`RenderingServer.get_rendering_device()` returns the renderer's own
-RenderingDevice. Resources created on it **are directly usable** by the
-scene renderer:
+| Readback | Why it exists |
+|----------|--------------|
+| Disk export (SnapshotTOP save, VOL export) | Writing to file requires CPU data — one-shot, not per-frame |
+| Non-GPU host fallback | When host app lacks GPU interop, fall back to `buffer_get_data()` / `texture_get_data()` |
 
-- `Texture2DRD` wraps an RD texture RID as a scene-usable `Texture2D`
-  with **zero readback** — the GPU texture IS the display texture.
-- Compute buffers written by POPs can be read by TOPs in the same frame.
-- One GPU context = less driver overhead, no memory duplication.
-
-### "But sync() stalls the renderer!"
-
-The cook engine runs in `_process()` on the main thread. The frame cannot
-finish rendering until `cook_frame()` returns. Whether we stall a local RD
-or the main RD, the frame is blocked either way — there is no parallelism
-to lose.
-
-### Isolation trade-off
-
-A rogue shader on the main RD could theoretically corrupt the scene renderer.
-This is a debugging concern, not a production one. The benefit of zero-copy
-GPU output vastly outweighs this risk.
+All viewer rendering (POP, VOL) now uses compute→Texture2DRD — zero-copy.
 
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│           RenderingServer.get_rendering_device()     │
-│                    (Main RD — singleton)             │
-│                                                     │
-│  ┌─────────────┐  ┌─────────────┐  ┌────────────┐  │
-│  │ GNGpuContext │  │ Scene       │  │ Compositor │  │
-│  │ (singleton)  │  │ Renderer    │  │ Effects    │  │
-│  │             │  │             │  │            │  │
-│  │  POPs ──────┤  │  SubViewport│  │  PostFX    │  │
-│  │  VOLs ──────┤  │  TOPs ─────┤  │            │  │
-│  │  Compute ───┤  │             │  │            │  │
-│  │  GLSLMulti ─┤  │             │  │            │  │
-│  └─────────────┘  └─────────────┘  └────────────┘  │
-│                                                     │
-│  All RIDs visible to all operators — zero-copy      │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    GNGpuContext (singleton)              │
+│                                                         │
+│  ┌────────────────────────────────────────────────────┐ │
+│  │ rd = main_rd (renderer device)                     │ │
+│  │ NO submit/sync (engine-owned)                      │ │
+│  │                                                    │ │
+│  │  TOPs  → compute dispatch → Texture2DRD output     │ │
+│  │  POPs  → compute dispatch → SSBO (RID passthrough) │ │
+│  │  VOLs  → compute dispatch → 3D texture (RID)       │ │
+│  │  POP viewer → compute → Texture2DRD (zero-copy)    │ │
+│  │  VOL viewer → compute → Texture2DRD (zero-copy)    │ │
+│  └────────────────────────────────────────────────────┘ │
+│                                                         │
+│  CompositorEffectTOP: uses main device directly         │
+│  (runs inside renderer's own submission pipeline)       │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ### GNGpuContext
@@ -130,12 +124,14 @@ Some operators legitimately need CPU-side data:
 
 | Operator | Why readback is needed |
 |----------|----------------------|
-| POP → SOP bridge | Particle positions feed CPU-side geometry |
-| VOL → viewer | Volume slicing for the 3D viewer reads voxels |
-| Export/save | Writing textures to disk |
+| VOL → SOP (marching cubes) | Vertex extraction from GPU volume — CPU geometry output |
+| Export/save (disk write) | Writing textures/volumes to file — one-shot, not per-frame |
+| Non-GPU host fallback | When host app lacks GPU interop (native handles unavailable) |
 
 These operators call `rd.texture_get_data()` / `rd.buffer_get_data()`
 explicitly. This is fine — it's on-demand, not every frame.
+
+POP and VOL viewers now use compute→Texture2DRD (zero-copy) — no readback.
 
 
 ## GPU-Side Frame Buffering (Blit SubViewport Pattern)
@@ -190,24 +186,27 @@ and not yet implemented.
 
 ## Migration Checklist
 
-- [x] **GNGpuContext**: Changed `_init_rd()` to use `RenderingServer.get_rendering_device()`. Removed `rd.free()` from `shutdown()`.
-- [x] **is_compute_available()**: Now probes `get_rendering_device() != null` instead of creating/freeing a local RD.
-- [x] **GLSLMultiTOP**: Uses `GNGpuContext.get_context().rd`. Output textures use `Texture2DRD` (zero readback). Added `SAMPLING_BIT`. Removed `submit()`/`sync()`/`texture_get_data()` readback loop. Removed `_rd.free()`.
-- [x] **ComputeShaderTOP**: Same as GLSLMultiTOP — uses shared context, `Texture2DRD` output, no readback.
+- [x] **GNGpuContext**: Unified single device — `rd = main_rd = RenderingServer.get_rendering_device()`. No local device created. `shutdown()` does not call `rd.free()` (engine-owned).
+- [x] **dispatch()**: Fire-and-forget — no `submit()`/`sync()`. GPU pipeline barriers are handled by the renderer.
+- [x] **`*_on_main()` helpers**: `dispatch_on_main()`, `get_shader_on_main()`, etc. delegate to their base equivalents. Kept for backward API compatibility.
+- [x] **is_compute_available()**: Probes `get_rendering_device() != null` (does not submit/sync).
+- [x] **GLSLMultiTOP**: Uses `ctx.rd`. Output textures use `Texture2DRD` (zero readback). No `submit()`/`sync()`.
+- [x] **ComputeShaderTOP**: Same as GLSLMultiTOP — `ctx.rd`, `Texture2DRD` output, no readback.
+- [x] **POP/VOL operators**: Use `ctx.rd` (same device). `dispatch()` is fire-and-forget.
+- [x] **PointCloudRenderTOP**: Binds POP particle SSBO directly — no bulk copy. Dispatches compute, wraps output as `Texture2DRD`. Zero-copy.
+- [x] **POP viewer**: `render_pop_gpu()` → compute→Texture2DRD (zero-copy). No MultiMesh/SubViewport.
+- [x] **VOL viewer**: `render_vol_gpu()` → compute→Texture2DRD (zero-copy). No CPU `texture_get_data()`.
+- [x] **SnapshotTOP**: POP/VOL modes use `render_pop_gpu()`/`render_vol_gpu()` — no viewport needed.
+- [x] **CompositorEffectTOP**: Uses `RenderingServer.get_rendering_device()` directly (runs inside renderer pipeline).
 - [x] **Output texture usage bits**: MRT and compute output textures include `TEXTURE_USAGE_SAMPLING_BIT`.
 - [x] **Cleanup**: Operators no longer call `_rd.free()`. Individual RIDs still freed via `free_rid()`.
 - [ ] **Compatibility fallback**: If `get_rendering_device()` returns `null` (Compatibility renderer), fall back to SubViewport path (existing fallback code in GLSLMultiTOP).
-- [ ] **Viewer panel**: Remove readback path in `gn_viewer_panel.gd` for VOL display if output is already a `Texture2DRD`.
 
-### submit() / sync() policy
+### dispatch() policy
 
-| Operator | submit/sync needed? | Why |
-|----------|-------------------|-----|
-| GLSLMultiTOP | **No** | Output is `Texture2DRD` — scene renderer uses it directly |
-| ComputeShaderTOP | **No** | Same — `Texture2DRD` wraps the compute output |
-| POP operators | **Yes** | `read_buffer()` after dispatch needs data on CPU (particle positions for physics) |
-| VOL operators | **Yes** | `texture_get_data()` after dispatch for volume slicing / marching cubes |
-| GNGpuContext.dispatch() | **Yes** | Generic helper used by POPs/VOLs that need immediate readback |
+All operators use fire-and-forget `dispatch()`. No operator calls
+`submit()` or `sync()`. The renderer's device handles GPU synchronization
+via internal pipeline barriers.
 
 
 ## Risks & Mitigations

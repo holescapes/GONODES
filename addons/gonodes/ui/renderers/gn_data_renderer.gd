@@ -32,8 +32,10 @@ func render_for_viewer(_data: GNData, _viewer) -> void:
 ## Renders a compact inline preview (node thumbnail).
 ## [param host] exposes set_texture(), set_text(), set_control().
 func render_for_preview(_data: GNData, _host) -> void:
-	if _host.has_method("set_text"):
+	if _data != null and _host.has_method("set_text"):
 		_host.set_text(_data.get_preview_text())
+	elif _host.has_method("set_text"):
+		_host.set_text("")
 
 
 ## Whether this family supports wireframe display in the viewer.

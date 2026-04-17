@@ -50,7 +50,7 @@ func _ensure_color_rect() -> void:
 	_color_rect.name = id + "_colorrect"
 	_color_rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_color_rect.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_color_rect.gui_input.connect(_on_input)
+	_register_signal(_color_rect.gui_input, _on_input)
 	_control_node = _color_rect
 
 
@@ -64,7 +64,5 @@ func _on_input(event: InputEvent) -> void:
 
 
 func destroy_control_node() -> void:
-	if _color_rect != null and _color_rect.gui_input.is_connected(_on_input):
-		_color_rect.gui_input.disconnect(_on_input)
 	_color_rect = null
 	super.destroy_control_node()

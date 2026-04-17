@@ -482,9 +482,13 @@ func _suggest_op_params(node_id: String) -> void:
 	if node == null:
 		return
 	for param_name in node.parameters:
+		var param: GNParameter = node.parameters[param_name]
+		if not param.visible:
+			continue
+		var desc: String = param.description if not param.description.is_empty() else param.label
 		_code_edit.add_code_completion_option(
 			CodeEdit.KIND_MEMBER, param_name, param_name,
-			Color(0.85, 0.85, 0.75), null, null)
+			Color(0.85, 0.85, 0.75), null, desc)
 	_code_edit.update_code_completion_options(true)
 
 

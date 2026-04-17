@@ -445,9 +445,41 @@ Each extension has one test file (e.g., `test_<ext>_operators.gd`) that follows 
 | **gn_ext_gpu_encode** | `test_gpu_encode_operators.gd` | 1 | MovieFileOutTOP |
 | **gn_ext_video_capture** | `test_video_capture_operators.gd` | 1 | VideoDeviceInIMG |
 
+### Auto-generated contract tests
+
+The script `scripts/generate_operator_tests.py` reads `scripts/operator_registry.json`, finds operators that lack test coverage, and generates **contract tests** — the minimum every operator must pass:
+
+1. Instantiation succeeds (`ClassName.new()` returns a `GNNode`)
+2. `node_type` is the expected string
+3. `family` matches the expected `GNFamily.Type` value
+4. `cook(null-inputs)` does not crash
+
+```bash
+# See what would be generated (no file writes)
+python scripts/generate_operator_tests.py --dry-run
+
+# Generate all missing coverage
+python scripts/generate_operator_tests.py
+
+# Only one family
+python scripts/generate_operator_tests.py --family top
+
+# Only one extension
+python scripts/generate_operator_tests.py --extension gn_ext_serial
+
+# Regenerate even if file already exists
+python scripts/generate_operator_tests.py --force
+```
+
+Generated files:
+- Core operators → `tests/unit/operators/<family>/test_<family>_coverage.gd`
+- Extension operators → `addons/gn_ext_<name>/tests/test_<family>_coverage.gd`
+
+The generator is **idempotent** — re-running after adding operators only creates tests for newly added, untested operators. Hand-written test files are never overwritten. Re-run the generator after adding new operators to the registry.
+
 ### Adding tests for a new extension operator
 
-Place tests in `addons/gn_ext_<name>/tests/test_<name>_operators.gd`. The runner picks them up automatically — no registration needed.
+Place tests in `addons/gn_ext_<name>/tests/test_<name>_operators.gd`. The runner picks them up automatically — no registration needed. Or run `generate_operator_tests.py` to auto-generate boilerplate contract tests.
 
 ---
 

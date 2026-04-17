@@ -58,7 +58,7 @@ func _ensure_tabs() -> void:
 	_tabs.name = id + "_tabcontainer"
 	_tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_tabs.tab_changed.connect(_on_tab_changed)
+	_register_signal(_tabs.tab_changed, _on_tab_changed)
 	_control_node = _tabs
 
 
@@ -95,7 +95,5 @@ func _remove_stale_children() -> void:
 
 
 func destroy_control_node() -> void:
-	if _tabs != null and _tabs.tab_changed.is_connected(_on_tab_changed):
-		_tabs.tab_changed.disconnect(_on_tab_changed)
 	_tabs = null
 	super.destroy_control_node()

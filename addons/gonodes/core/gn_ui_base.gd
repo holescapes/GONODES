@@ -45,6 +45,11 @@ var _cached_ui_data: GNUIData = null
 ## Lower values sort earlier. Set via parameter or left at default (0).
 var sort_order: int = 0
 
+## Registered signal connections for automatic cleanup.
+## Each entry is {"signal": Signal, "callback": Callable}.
+## Populated via _register_signal(), cleaned up automatically in destroy_control_node().
+var _registered_signals: Array = []
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Lifecycle
@@ -147,7 +152,9 @@ func _build_state_chop() -> void:
 
 
 ## Destroys the control node and resets this widget to pre-first-cook state.
+## Automatically disconnects all signals registered via _register_signal().
 func destroy_control_node() -> void:
+	_cleanup_registered_signals()
 	if _control_node != null:
 		if _control_node.get_parent() != null:
 			_control_node.get_parent().remove_child(_control_node)
@@ -171,6 +178,29 @@ func from_dict(d: Dictionary) -> void:
 	super.from_dict(d)
 	if d.has("widget_state"):
 		widget_state = d["widget_state"].duplicate()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Signal Management
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+## Connects a signal and records it for automatic cleanup on destroy.
+## Use this instead of manual .connect() in _ensure_*() methods.
+func _register_signal(sig: Signal, callback: Callable) -> void:
+	sig.connect(callback)
+	_registered_signals.append({"signal": sig, "callback": callback})
+
+
+## Disconnects all signals registered via _register_signal().
+## Called automatically by destroy_control_node().
+func _cleanup_registered_signals() -> void:
+	for entry in _registered_signals:
+		var sig: Signal = entry["signal"]
+		var cb: Callable = entry["callback"]
+		if sig.is_connected(cb):
+			sig.disconnect(cb)
+	_registered_signals.clear()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

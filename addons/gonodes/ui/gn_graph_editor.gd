@@ -140,6 +140,9 @@ var _bookmarks: Dictionary = {}
 ## Wire curvature mode: 0=curved, 1=straight, 2=right-angle.
 var _wire_style: int = 0
 
+## When true, show a confirmation dialog before deleting nodes.
+var confirm_on_delete: bool = false
+
 ## Pending connection info when user drops a wire on empty space.
 ## Stores { "from_node": String, "from_port": int, "family": GNFamily.Type, "direction": String }
 ## direction is "output" (dragged from output) or "input" (dragged from input backwards).
@@ -292,6 +295,9 @@ signal import_patch_requested(graph_pos: Vector2)
 ## Signal emitted when the user clicks the eye (viewer pin) button on a node.
 signal viewer_pin_requested(node_id: String)
 
+## Signal emitted when the user cycles wire style via keyboard shortcut.
+signal wire_style_changed(idx: int)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Lifecycle
@@ -412,77 +418,73 @@ func _ready() -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_A and event.alt_pressed and not event.ctrl_pressed:
-			# Open node palette at mouse position (Alt+A)
-			_spawn_position = (get_local_mouse_position() + scroll_offset) / zoom
-			_palette.popup_at(get_global_mouse_position())
+		if _handle_key_input(event):
 			get_viewport().set_input_as_handled()
-		elif event.ctrl_pressed:
-			match event.keycode:
-				KEY_F:
-					_open_search()
-					get_viewport().set_input_as_handled()
-				KEY_Z:
-					if event.shift_pressed:
-						redo_action()
-					else:
-						undo_action()
-					get_viewport().set_input_as_handled()
-				KEY_Y:
+
+
+## Routes a key press to the appropriate action.
+## Returns true if the key was handled, false if not consumed.
+func _handle_key_input(event: InputEventKey) -> bool:
+	if event.keycode == KEY_A and event.alt_pressed and not event.ctrl_pressed:
+		# Open node palette at mouse position (Alt+A)
+		_spawn_position = (get_local_mouse_position() + scroll_offset) / zoom
+		_palette.popup_at(get_global_mouse_position())
+		return true
+	if event.ctrl_pressed:
+		match event.keycode:
+			KEY_F:
+				_open_search()
+			KEY_Z:
+				if event.shift_pressed:
 					redo_action()
-					get_viewport().set_input_as_handled()
-				KEY_L:
-					auto_layout()
-					get_viewport().set_input_as_handled()
-				KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
-					set_bookmark(event.keycode - KEY_0)
-					get_viewport().set_input_as_handled()
-		elif not event.ctrl_pressed and not event.alt_pressed:
-			match event.keycode:
-				KEY_ENTER, KEY_KP_ENTER:
-					_try_dive_into_selected()
-					get_viewport().set_input_as_handled()
-				KEY_BACKSPACE:
-					# Dive out is handled by the editor via breadcrumb —
-					# but we emit a signal so it can be routed there too.
-					pass
-				KEY_B:
-					_toggle_selected_bypass()
-					get_viewport().set_input_as_handled()
-				KEY_L:
-					_toggle_selected_lock()
-					get_viewport().set_input_as_handled()
-				KEY_F:
-					_fit_view_to_selection()
-					get_viewport().set_input_as_handled()
-				KEY_H:
-					_align_selected_horizontal()
-					get_viewport().set_input_as_handled()
-				KEY_V:
-					_align_selected_vertical()
-					get_viewport().set_input_as_handled()
-				KEY_M:
-					minimap_enabled = not minimap_enabled
-					GNLogger.info("GraphEditor", "Minimap %s" % ("ON" if minimap_enabled else "OFF"))
-					get_viewport().set_input_as_handled()
-				KEY_W:
-					cycle_wire_style()
-					get_viewport().set_input_as_handled()
-				KEY_SLASH:
-					if event.shift_pressed:
-						toggle_shortcut_overlay()
-						get_viewport().set_input_as_handled()
-				KEY_ESCAPE:
-					if _search_bar != null and _search_bar.visible:
-						_close_search()
-						get_viewport().set_input_as_handled()
-					elif _shortcut_overlay != null:
-						_shortcut_overlay.queue_free()
-						_shortcut_overlay = null
-						get_viewport().set_input_as_handled()
-				KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
-					jump_to_bookmark(event.keycode - KEY_0)
-					get_viewport().set_input_as_handled()
+				else:
+					undo_action()
+			KEY_Y:
+				redo_action()
+			KEY_L:
+				auto_layout()
+			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
+				set_bookmark(event.keycode - KEY_0)
+			_:
+				return false
+		return true
+	if not event.alt_pressed:
+		match event.keycode:
+			KEY_ENTER, KEY_KP_ENTER:
+				_try_dive_into_selected()
+			KEY_B:
+				_toggle_selected_bypass()
+			KEY_L:
+				_toggle_selected_lock()
+			KEY_F:
+				_fit_view_to_selection()
+			KEY_H:
+				_align_selected_horizontal()
+			KEY_V:
+				_align_selected_vertical()
+			KEY_M:
+				minimap_enabled = not minimap_enabled
+				GNLogger.info("GraphEditor", "Minimap %s" % ("ON" if minimap_enabled else "OFF"))
+			KEY_W:
+				cycle_wire_style()
+			KEY_SLASH:
+				if not event.shift_pressed:
+					return false
+				toggle_shortcut_overlay()
+			KEY_ESCAPE:
+				if _search_bar != null and _search_bar.visible:
+					_close_search()
+				elif _shortcut_overlay != null:
+					_shortcut_overlay.queue_free()
+					_shortcut_overlay = null
+				else:
+					return false
+			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
+				jump_to_bookmark(event.keycode - KEY_0)
+			_:
+				return false
+		return true
+	return false
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -929,6 +931,23 @@ func _on_delete_nodes_request(node_names: Array[StringName]) -> void:
 	if node_names.is_empty():
 		return
 
+	if confirm_on_delete:
+		var dlg := ConfirmationDialog.new()
+		dlg.title = "Delete Nodes"
+		dlg.dialog_text = "Delete %d node(s)?" % node_names.size()
+		dlg.confirmed.connect(func():
+			_do_delete_nodes(node_names)
+			dlg.queue_free())
+		dlg.canceled.connect(dlg.queue_free)
+		add_child(dlg)
+		dlg.popup_centered()
+		return
+
+	_do_delete_nodes(node_names)
+
+
+## Actually removes nodes and records undo. Called directly or after confirmation.
+func _do_delete_nodes(node_names: Array[StringName]) -> void:
 	# Snapshot nodes and connections for undo BEFORE deleting
 	var nodes_snapshot: Array = []   # [[node_id, node_dict], ...]
 	var conns_snapshot: Array = []   # [[from, from_port, to, to_port], ...]
@@ -2392,11 +2411,12 @@ const _WIRE_CURVATURES: Array[float] = [0.5, 0.0, 1.5]
 const _WIRE_STYLE_NAMES: Array[String] = ["Curved", "Straight", "Right-Angle"]
 
 ## Cycles through wire styles: curved → straight → right-angle.
-func cycle_wire_style() -> void:
-	_wire_style = (_wire_style + 1) % _WIRE_CURVATURES.size()
-	connection_lines_curvature = _WIRE_CURVATURES[_wire_style]
-	queue_redraw()
-	GNLogger.info("GraphEditor", "Wire style: %s" % _WIRE_STYLE_NAMES[_wire_style])
+## Emits wire_style_changed so the editor can persist.
+func cycle_wire_style() -> int:
+	var idx := (_wire_style + 1) % _WIRE_CURVATURES.size()
+	set_wire_style(idx)
+	wire_style_changed.emit(idx)
+	return idx
 
 ## Sets the wire style by index (0=curved, 1=straight, 2=right-angle).
 func set_wire_style(idx: int) -> void:
@@ -3411,6 +3431,13 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	_context_menu.popup()
 
 
+## Emits a signal with the selected node ID, if exactly one node is selected.
+func _ctx_emit_selection(sig: Signal) -> void:
+	var sel := _get_selected_node_ids()
+	if sel.size() == 1:
+		sig.emit(sel[0])
+
+
 ## Handles a context menu item being pressed.
 func _on_context_menu_id_pressed(id: int) -> void:
 	match id:
@@ -3447,9 +3474,7 @@ func _on_context_menu_id_pressed(id: int) -> void:
 		_CtxID.REDO:
 			redo_action()
 		_CtxID.OPEN_VIEWER:
-			var selected := _get_selected_node_ids()
-			if selected.size() == 1:
-				open_viewer_requested.emit(selected[0])
+			_ctx_emit_selection(open_viewer_requested)
 		_CtxID.TOGGLE_PREVIEW:
 			_toggle_selected_previews()
 		_CtxID.TOGGLE_BYPASS:
@@ -3463,9 +3488,7 @@ func _on_context_menu_id_pressed(id: int) -> void:
 		_CtxID.AUTO_LAYOUT:
 			auto_layout()
 		_CtxID.NODE_HELP:
-			var selected := _get_selected_node_ids()
-			if selected.size() == 1:
-				help_requested.emit(selected[0])
+			_ctx_emit_selection(help_requested)
 		_CtxID.EXPORT_OUTPUT:
 			_begin_export_output()
 		_CtxID.GROUP_SELECTED:
@@ -3491,23 +3514,15 @@ func _on_context_menu_id_pressed(id: int) -> void:
 		_CtxID.PROMOTE_TO_ASSET:
 			_show_promote_to_asset_dialog()
 		_CtxID.EDIT_ASSET:
-			var sel := _get_selected_node_ids()
-			if sel.size() == 1:
-				edit_asset_requested.emit(sel[0])
+			_ctx_emit_selection(edit_asset_requested)
 		_CtxID.MAKE_EDITABLE:
-			var sel2 := _get_selected_node_ids()
-			if sel2.size() == 1:
-				make_editable_requested.emit(sel2[0])
+			_ctx_emit_selection(make_editable_requested)
 		_CtxID.REPROMOTE_ASSET:
-			var sel3 := _get_selected_node_ids()
-			if sel3.size() == 1:
-				repromote_asset_requested.emit(sel3[0])
+			_ctx_emit_selection(repromote_asset_requested)
 		_CtxID.ADD_SPARE_PARAM:
 			_show_add_spare_param_dialog()
 		_CtxID.EXPORT_SUBNET_PATCH:
-			var sel_exp := _get_selected_node_ids()
-			if sel_exp.size() == 1:
-				export_subnet_requested.emit(sel_exp[0])
+			_ctx_emit_selection(export_subnet_requested)
 		_CtxID.IMPORT_SUBNET_PATCH:
 			import_patch_requested.emit(_context_graph_pos)
 		_CtxID.COPY_AS_JSON:

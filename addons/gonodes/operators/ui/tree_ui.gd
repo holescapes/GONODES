@@ -75,7 +75,7 @@ func _ensure_tree() -> void:
 	_tree.name = id + "_tree"
 	_tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tree.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_tree.item_selected.connect(_on_item_selected)
+	_register_signal(_tree.item_selected, _on_item_selected)
 	_control_node = _tree
 
 
@@ -87,8 +87,6 @@ func _on_item_selected() -> void:
 
 
 func destroy_control_node() -> void:
-	if _tree != null and _tree.item_selected.is_connected(_on_item_selected):
-		_tree.item_selected.disconnect(_on_item_selected)
 	_tree = null
 	_items.clear()
 	super.destroy_control_node()

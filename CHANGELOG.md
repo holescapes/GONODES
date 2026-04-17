@@ -9,6 +9,38 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-06-12 — Unified GPU Architecture, NET Family, Viewer Readback Elimination
+
+### Architecture
+- **Unified single-device GPU model:** GNGpuContext now uses one
+  RenderingDevice (`rd = main_rd = RenderingServer.get_rendering_device()`).
+  Removed local device creation. `dispatch()` is fire-and-forget (no
+  `submit()`/`sync()`). All `*_on_main()` helpers delegate to base
+  equivalents for backward compatibility.
+- **NET family:** New family for network infrastructure operators. 15
+  operators moved from COMP/OUT/TOP/CHOP/DAT/VOL/POP/SOP to NET:
+  SubNetworkNode, InTunnel, OutTunnel, HostIn{TOP,CHOP,DAT,VOL,POP,SOP},
+  HostOut{TOP,CHOP,DAT,VOL,POP,SOP}. All now live in `operators/net/`.
+- **POP viewer zero-copy:** `render_pop_gpu()` replaces MultiMesh/SubViewport
+  with compute shader → Texture2DRD (uses `point_cloud_render.glsl`).
+  GNParticleRenderer rewritten to ~20 lines.
+- **VOL viewer zero-copy:** New `vol_viewer_composite.glsl` compute shader
+  and `render_vol_gpu()` helper. 2×2 slice composite + MIP rendered entirely
+  on GPU → Texture2DRD. GNVolumeRenderer simplified.
+- **PointCloudRenderTOP simplified:** Removed SSBO bulk copy (POP buffer now
+  on same device). Binds `pd.rd_buffer` directly — true zero-copy.
+- **SnapshotTOP updated:** POP/VOL modes now use GPU paths
+  (`render_pop_gpu()`, `render_vol_gpu()`). POP viewport infrastructure
+  removed.
+- **Host I/O manifest:** `gn_network.gd generate_host_io()` now covers all
+  6 data families (was missing VOL, POP, SOP).
+
+### New Files
+- `shaders/vol/vol_viewer_composite.glsl` — GPU compute shader for volume
+  viewer 2×2 slice/MIP composite.
+
+---
+
 ## 2026-04-10 — Pattern Matching, Paste from JSON, Bug Fixes
 
 ### New Features

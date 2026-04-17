@@ -71,6 +71,7 @@ func test_custom_asset_registry_has_mapper_section() -> void:
 
 func _create_asset_instance(asset_name: String) -> GNCustomOperator:
 	var reg := GNExtensionRegistry.instance()
+	reg.scan_extensions()
 	reg.scan_custom_assets()
 	var entry = reg._operators.get(asset_name, null)
 	if entry == null:
@@ -262,14 +263,20 @@ func test_bezier_map_expressions_cover_all_16_points() -> void:
 	var map_node: GNNode = node.inner_network.nodes.get("map1", null)
 	GNTestAssert.assert_true(map_node != null, "map1 should exist")
 	if map_node:
+		# BezierMapTOP uses human-readable names (top_left, top_cleft, etc.)
+		var cp_names: Array[String] = [
+			"top_left", "top_cleft", "top_cright", "top_right",
+			"umid_left", "umid_cleft", "umid_cright", "umid_right",
+			"lmid_left", "lmid_cleft", "lmid_cright", "lmid_right",
+			"bot_left", "bot_cleft", "bot_cright", "bot_right",
+		]
 		var expr_count := 0
-		for col in range(4):
-			for row in range(4):
-				for axis in ["x", "y"]:
-					var pname := "cp%d%d_%s" % [col, row, axis]
-					var param: GNParameter = map_node.parameters.get(pname, null)
-					if param and param.mode == GNParameter.Mode.EXPRESSION:
-						expr_count += 1
+		for cp_name in cp_names:
+			for axis in ["x", "y"]:
+				var pname := "%s_%s" % [cp_name, axis]
+				var param: GNParameter = map_node.parameters.get(pname, null)
+				if param and param.mode == GNParameter.Mode.EXPRESSION:
+					expr_count += 1
 		GNTestAssert.assert_eq(expr_count, 32,
 			"BezierMapTOP should have 32 expression-driven params (16 points × 2 axes)")
 	node.free()
@@ -307,8 +314,8 @@ func test_asset_to_dict_is_compact() -> void:
 		return
 	node.id = "quad_asset_1"
 	var d: Dictionary = node.to_dict()
-	GNTestAssert.assert_eq(d.get("type", ""), "GNCustomOperator",
-		"to_dict type should be GNCustomOperator")
+	GNTestAssert.assert_eq(d.get("type", ""), node.node_type,
+		"to_dict type should match node_type (asset name)")
 	GNTestAssert.assert_true(d.has("asset_path"),
 		"to_dict should include asset_path")
 	# Inner network should NOT be serialized (compact reference)

@@ -48,7 +48,7 @@ func _ensure_spinbox() -> void:
 	_spinbox.max_value = get_param_value("max_val")
 	_spinbox.step = get_param_value("step")
 	_spinbox.value = widget_state.get("value", get_param_value("default_val"))
-	_spinbox.value_changed.connect(_on_value_changed)
+	_register_signal(_spinbox.value_changed, _on_value_changed)
 	_control_node = _spinbox
 
 
@@ -75,7 +75,5 @@ func _dispatch_panel_input(event: InputEvent) -> void:
 
 
 func destroy_control_node() -> void:
-	if _spinbox != null and _spinbox.value_changed.is_connected(_on_value_changed):
-		_spinbox.value_changed.disconnect(_on_value_changed)
 	_spinbox = null
 	super.destroy_control_node()

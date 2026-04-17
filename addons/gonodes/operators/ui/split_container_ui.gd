@@ -64,7 +64,7 @@ func _build_split(is_vertical: bool) -> void:
 	_split.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_split.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_split.split_offset = int(widget_state.get("offset", float(get_param_value("offset"))))
-	_split.dragged.connect(_on_dragged)
+	_register_signal(_split.dragged, _on_dragged)
 	_control_node = _split
 
 
@@ -73,8 +73,7 @@ func _rebuild_split(is_vertical: bool) -> void:
 	for child in _split.get_children():
 		children.append(child as Control)
 		_split.remove_child(child)
-	if _split.dragged.is_connected(_on_dragged):
-		_split.dragged.disconnect(_on_dragged)
+	_cleanup_registered_signals()
 	_split.queue_free()
 	_build_split(is_vertical)
 	for child in children:
@@ -107,7 +106,5 @@ func _remove_stale_children() -> void:
 
 
 func destroy_control_node() -> void:
-	if _split != null and _split.dragged.is_connected(_on_dragged):
-		_split.dragged.disconnect(_on_dragged)
 	_split = null
 	super.destroy_control_node()

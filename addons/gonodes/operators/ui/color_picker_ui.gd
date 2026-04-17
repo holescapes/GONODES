@@ -42,7 +42,7 @@ func _ensure_picker() -> void:
 		widget_state.get("b", def.b),
 		widget_state.get("a", def.a))
 	_picker.edit_alpha = get_param_value("edit_alpha")
-	_picker.color_changed.connect(_on_color_changed)
+	_register_signal(_picker.color_changed, _on_color_changed)
 	_control_node = _picker
 
 
@@ -127,7 +127,5 @@ func _on_overlay_dismissed() -> void:
 
 
 func destroy_control_node() -> void:
-	if _picker != null and _picker.color_changed.is_connected(_on_color_changed):
-		_picker.color_changed.disconnect(_on_color_changed)
 	_picker = null
 	super.destroy_control_node()

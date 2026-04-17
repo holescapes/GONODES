@@ -257,6 +257,7 @@ func test_rename_channel() -> void:
 	var input := _make_chop_data({"old_name": PackedFloat32Array([1.0, 2.0])})
 	var node := _make_node(RenameCHOP.new(), "ren1")
 	# RenameCHOP uses indexed slot params: renames, from0/to0, from1/to1...
+	node.set_param_value("mode", 1)  # Manual Rows mode
 	node.set_param_value("renames", 1)
 	node.set_param_value("from0", "old_name")
 	node.set_param_value("to0", "new_name")
