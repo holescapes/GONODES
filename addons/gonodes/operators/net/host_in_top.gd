@@ -16,6 +16,11 @@ var _host_height: int = 0
 var _host_format: int = 0
 var _host_dirty: bool = false
 
+## GPU zero-copy state: external texture wrapped as a Godot RID + Texture2DRD.
+var _ext_rd_rid: RID = RID()
+var _ext_texture_2d: Texture2DRD = null
+var _prev_handle: int = 0
+
 
 func _init() -> void:
 	node_type = "host_in"
@@ -43,25 +48,61 @@ func _set_host_texture(handle: int, width: int, height: int, format: int) -> voi
 
 func _cook(_inputs: Array[GNData]) -> GNData:
 	if _host_handle == 0:
+		_free_ext_texture()
 		return null
 
 	var res := Vector2i(_host_width, _host_height)
-	_ensure_viewport(res, true)
 
+	# GPU zero-copy path: wrap the host's native texture handle directly
+	# via RenderingDevice.texture_create_from_extension().
+	# Works for both shared-context (handle on same device) and non-shared
+	# (GNEmbeddedHost already uploaded to a local texture on this device).
+	var ctx := GNGpuContext.get_context()
+	if ctx != null and ctx.rd != null:
+		# Recreate the view when the native handle changes.
+		if _host_handle != _prev_handle or not _ext_rd_rid.is_valid():
+			_free_ext_texture()
+			var fmt: int = _host_format if _host_format != 0 \
+				else RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
+			_ext_rd_rid = ctx.create_texture_2d_from_native(
+				_host_handle, _host_width, _host_height, fmt)
+			_prev_handle = _host_handle
+
+		if _ext_rd_rid.is_valid():
+			if _ext_texture_2d == null:
+				_ext_texture_2d = Texture2DRD.new()
+			_ext_texture_2d.texture_rd_rid = _ext_rd_rid
+
+			if _cached_tex_data == null:
+				_cached_tex_data = GNTextureData.new()
+			_cached_tex_data.texture = _ext_texture_2d
+			_cached_tex_data.resolution = res
+			_cached_tex_data.valid = true
+			_host_dirty = false
+			return _cached_tex_data
+
+	# CPU fallback (Compatibility renderer — no RenderingDevice).
+	_ensure_viewport(res, true)
 	if _viewport.size != res:
 		_viewport.size = res
-
-	# In a shared GPU context, the host handle IS the texture on the same
-	# device.  We wrap it in a GNTextureData for downstream consumption.
-	#
-	# For non-shared contexts, GNEmbeddedHost would have done CPU readback
-	# and uploaded to a local texture — _host_handle then points to the
-	# local copy.
-	#
-	# TODO: Implement RenderingDevice.create_texture_from_external()
-	# when Godot 4.6 stabilizes the external texture import API.
-
 	_cached_tex_data.resolution = res
 	_cached_tex_data.valid = true
 	_host_dirty = false
 	return _cached_tex_data
+
+
+## Frees the RD view wrapping the external texture.
+## Does NOT free the underlying native handle — the host owns it.
+func _free_ext_texture() -> void:
+	if _ext_rd_rid.is_valid():
+		var ctx := GNGpuContext.get_context()
+		if ctx != null and ctx.rd != null:
+			ctx.rd.free_rid(_ext_rd_rid)
+		_ext_rd_rid = RID()
+	_ext_texture_2d = null
+	_prev_handle = 0
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_free_ext_texture()

@@ -1,0 +1,133 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES_extension_smoke_test",
+	"nodes": {
+		"noise_src": {
+			"type": "NoiseTOP",
+			"position": [0, 0]
+		},
+		"styletransfer1": {
+			"type": "StyleTransferTOP",
+			"position": [300, 0]
+		},
+		"segmentation1": {
+			"type": "SegmentationTOP",
+			"position": [600, 0]
+		},
+		"depthestimate1": {
+			"type": "DepthEstimateTOP",
+			"position": [900, 0]
+		},
+		"ffmpegin1": {
+			"type": "FFmpegInTOP",
+			"position": [0, 200]
+		},
+		"blackmagicout1": {
+			"type": "BlackmagicOutTOP",
+			"position": [300, 200]
+		},
+		"blackmagicin1": {
+			"type": "BlackmagicInTOP",
+			"position": [600, 200]
+		},
+		"depthsensor1": {
+			"type": "DepthSensorTOP",
+			"position": [900, 200]
+		},
+		"moviefileout1": {
+			"type": "MovieFileOutTOP",
+			"position": [0, 400]
+		},
+		"hapintop1": {
+			"type": "HapInTOP",
+			"position": [300, 400]
+		},
+		"stoner1": {
+			"type": "StonerTOP",
+			"position": [600, 400]
+		},
+		"quadmap1": {
+			"type": "QuadMapTOP",
+			"position": [900, 400]
+		},
+		"projectorblend1": {
+			"type": "ProjectorBlendTOP",
+			"position": [0, 600]
+		},
+		"projectionmask1": {
+			"type": "ProjectionMaskTOP",
+			"position": [300, 600]
+		},
+		"gridwarp1": {
+			"type": "GridWarpTOP",
+			"position": [600, 600]
+		},
+		"edgeblend1": {
+			"type": "EdgeBlendTOP",
+			"position": [900, 600]
+		},
+		"beziermap1": {
+			"type": "BezierMapTOP",
+			"position": [0, 800]
+		},
+		"isf1": {
+			"type": "ISFTOP",
+			"position": [300, 800]
+		},
+		"syphonout1": {
+			"type": "SyphonOutTOP",
+			"position": [600, 800]
+		},
+		"syphonin1": {
+			"type": "SyphonInTOP",
+			"position": [900, 800]
+		},
+		"ndiout1": {
+			"type": "NDIOutTOP",
+			"position": [0, 1000]
+		},
+		"shadertoy1": {
+			"type": "ShadertoyTOP",
+			"position": [300, 1000]
+		},
+		"webrender1": {
+			"type": "WebRenderTOP",
+			"position": [600, 1000]
+		},
+		"ndiin1": {
+			"type": "NDIInTOP",
+			"position": [900, 1000]
+		},
+		"spoutout1": {
+			"type": "SpoutOutTOP",
+			"position": [0, 1200]
+		},
+		"spoutin1": {
+			"type": "SpoutInTOP",
+			"position": [300, 1200]
+		},
+		"particlestate1": {
+			"type": "ParticleStateTOPNative",
+			"position": [600, 1200]
+		},
+		"opticalflow1": {
+			"type": "OpticalFlowTOPNative",
+			"position": [900, 1200]
+		},
+		"choptotop1": {
+			"type": "CHOPtoTOPNative",
+			"position": [0, 1400]
+		},
+		"analyze1": {
+			"type": "AnalyzeTOPNative",
+			"position": [300, 1400]
+		},
+		"null_sink": {
+			"type": "NullTOP",
+			"position": [600, 1400]
+		}
+	},
+	"connections": [
+		{"from": "noise_src", "from_port": 0, "to": "null_sink", "to_port": 0}
+	]
+}

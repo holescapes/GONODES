@@ -362,6 +362,52 @@ func download_image(tex_rid: RID, width: int, height: int) -> Image:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# External Handle Wrapping (Host I/O Zero-Copy)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Wraps an external native 2D texture handle (VkImage / GLuint / MTLTexture*)
+## into a Godot RID via RenderingDevice.texture_create_from_extension().
+## The caller retains ownership of the underlying GPU resource — Godot only
+## creates a lightweight view that is freed when the RID is freed.
+func create_texture_2d_from_native(handle: int, width: int, height: int,
+		data_format: int = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM) -> RID:
+	if rd == null or handle == 0:
+		return RID()
+	return rd.texture_create_from_extension(
+		RenderingDevice.TEXTURE_TYPE_2D,
+		data_format,
+		RenderingDevice.TEXTURE_SAMPLES_1,
+		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT,
+		handle,
+		width, height, 1, 1, 1)
+
+
+## Wraps an external native 3D texture handle into a Godot RID.
+## Used by HostInVOL for GPU zero-copy volume import.
+func create_texture_3d_from_native(handle: int, resolution: Vector3i,
+		data_format: int = RenderingDevice.DATA_FORMAT_R32_SFLOAT) -> RID:
+	if rd == null or handle == 0:
+		return RID()
+	return rd.texture_create_from_extension(
+		RenderingDevice.TEXTURE_TYPE_3D,
+		data_format,
+		RenderingDevice.TEXTURE_SAMPLES_1,
+		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT,
+		handle,
+		resolution.x, resolution.y, resolution.z, 1, 1)
+
+
+## Wraps an external native SSBO handle into a Godot RID.
+## Used by HostInPOP for GPU zero-copy particle buffer import.
+## NOTE: Godot 4.6 does not expose storage_buffer_create_from_extension().
+## Returns an invalid RID until Godot adds the API — POP falls back to CPU.
+func create_buffer_from_native(_handle: int, _byte_size: int) -> RID:
+	push_warning("GNGpuContext: create_buffer_from_native() not yet supported " +
+		"— Godot lacks storage_buffer_create_from_extension(). POP uses CPU fallback.")
+	return RID()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Dispatch Helper
 # ═══════════════════════════════════════════════════════════════════════════════
 

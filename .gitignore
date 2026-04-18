@@ -80,6 +80,8 @@ build_output*.txt
 build_native.log
 test_results*.txt
 test_run_output*.txt
+test_run_errors*.txt
+test_errors*.txt
 test_stdout*.txt
 test_stderr*.txt
 failures.txt

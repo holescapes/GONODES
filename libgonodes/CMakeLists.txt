@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(GONODES_BUILD_EXAMPLES  "Build example host applications" ON)
 option(GONODES_BUILD_SHARED    "Build as shared library (DLL)"   ON)
+option(GONODES_BUILD_TESTS     "Build API test suite"            ON)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Library
@@ -89,4 +90,16 @@ if(GONODES_BUILD_EXAMPLES)
 
     # v1.1.0: MIDI/OSC Host Example
     add_subdirectory(examples/midi_osc_host EXCLUDE_FROM_ALL)
+endif()
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+if(GONODES_BUILD_TESTS)
+    add_executable(gonodes_tests tests/test_api.cpp)
+    target_link_libraries(gonodes_tests PRIVATE gonodes)
+    target_include_directories(gonodes_tests PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
 endif()

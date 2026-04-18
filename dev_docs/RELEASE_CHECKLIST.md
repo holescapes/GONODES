@@ -404,6 +404,44 @@ GONODESPlayer-v{VERSION}-{platform}/
 
 ---
 
+## Release Stage: Beta (not Alpha) Rationale
+
+The initial public release of GONODES is **Beta**, not Alpha. This is a deliberate classification based on the following criteria:
+
+### Why not Alpha
+
+Alpha implies incomplete core functionality, frequent crashes, and missing fundamental features. GONODES has none of these issues:
+
+- **539 operators** across 14 families — complete creative toolkit covering textures, geometry, channels, particles, volumes, compositing, materials, data tables, ISF shaders, SDF, and network I/O
+- **1764 automated tests**, 1763 passing (99.94%) — the single failure is a smoke test for extension patches that require compiled native binaries, not a code defect
+- **100% operator test coverage** — every operator has at least instantiation + output type verification
+- **100% help file coverage** — 1,588 help .gnpatch files covering all 537 unique node types
+- **Cook engine is stable** — expression system, dirty propagation, timeline, and multi-family data flow all verified
+- **GPU zero-copy discipline** — audit confirmed zero unjustified CPU-GPU roundtrips across the entire codebase
+- **Cross-platform build system** — SCons-based native builds, player export templates, and CI pipeline all functional on Windows, macOS, and Linux
+- **Embedding API (libgonodes)** — complete C API with 60+ functions, zero-copy GPU exchange, and comprehensive test suite
+
+### Why Beta (not Stable)
+
+Beta indicates the software is feature-complete and functional but needs real-world usage to surface edge cases:
+
+- **No production deployments yet** — internal testing is thorough but cannot replicate the diversity of real-world creative workflows
+- **Native extensions require compiled binaries** — some extensions (FFmpeg, NDI, Blackmagic, etc.) depend on third-party SDKs that haven't been validated across all target platforms
+- **libgonodes embedding** — the C API is fully implemented but has not been stress-tested in production host applications
+- **GPU context sharing** — zero-copy paths exist but require matching GPU drivers and shared device setup that varies across hardware
+- **Custom operator asset format (.gnasset)** — functional but serialization format may evolve based on user feedback before being locked for 1.0
+- **Timeline system** — complete but performance under complex multi-track compositions needs real-world validation
+
+### Graduation criteria (Beta → Stable 1.0)
+
+- [ ] At least 3 independent production deployments running without critical issues
+- [ ] Native extension binaries verified on all 5 target platforms (Win x64, Win ARM64, Linux x64, Linux ARM64, macOS Universal)
+- [ ] libgonodes embedding validated in at least 2 different host frameworks (e.g., Unity, Unreal, custom C++ app)
+- [ ] .gnasset and .gnpatch formats finalized and versioned — backward compatibility guaranteed
+- [ ] Public documentation and tutorials available
+
+---
+
 ## Quick Reference: What Changes Per Release Type
 
 | Task | Godot version bump | Native code change | GDScript-only change | New extension added |

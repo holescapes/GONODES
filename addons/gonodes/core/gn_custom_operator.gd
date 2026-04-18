@@ -371,7 +371,7 @@ func begin_asset_edit() -> void:
 
 ## Saves the current inner network state back to the .gnasset file.
 ## Preserves identity and custom_parameters; refreshes promoted parameter
-## mappings (drops broken ones, keeps valid ones).
+## mappings (drops stale ones, keeps valid ones).
 ## Returns true on success.
 func save_asset_from_inner() -> bool:
 	if asset_path.is_empty():

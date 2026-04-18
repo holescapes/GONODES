@@ -18,5 +18,7 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
-	# TODO: Unregister everything added in _enter_tree
+	# Nothing to undo: the ProjectSettings change is intentionally persistent
+	# and GNExtensionRegistry.sync_native_extensions() only toggles .gdextension
+	# files on disk (takes effect on next Godot restart, not at runtime).
 	print("GONODES plugin unloaded")
