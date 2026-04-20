@@ -1,0 +1,115 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_noise": {
+            "type": "NoiseCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "amplitude": {
+                    "value": 1.0
+                }
+            }
+        },
+        "audiorender1": {
+            "type": "AudioRenderCHOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "record": {
+                    "value": true
+                },
+                "clear": {
+                    "value": true
+                },
+                "export_now": {
+                    "value": true
+                },
+                "max_seconds": {
+                    "value": 150.0
+                }
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_noise",
+            "from_port": 0,
+            "to": "audiorender1",
+            "to_port": 0
+        },
+        {
+            "from": "audiorender1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AudioRenderCHOP \u2014 Parameters\n\nShowcases: record, clear, export_path.\nRequires gn_ext_audio extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

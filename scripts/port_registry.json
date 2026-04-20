@@ -946,6 +946,20 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/physics_chop.gd"
   },
+  "PulseCHOP": {
+    "class_name": "PulseCHOP",
+    "family": "CHOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/chop/pulse_chop.gd"
+  },
   "RampCHOP": {
     "class_name": "RampCHOP",
     "family": "CHOP",
@@ -959,6 +973,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/ramp_chop.gd"
+  },
+  "RecordCHOP": {
+    "class_name": "RecordCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/chop/record_chop.gd"
   },
   "RenameCHOP": {
     "class_name": "RenameCHOP",
@@ -2052,6 +2086,26 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/dat/delete_dat.gd"
   },
+  "DMXDAT": {
+    "class_name": "DMXDAT",
+    "family": "DAT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "values",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/dat/dmx_dat.gd"
+  },
   "ErrorDAT": {
     "class_name": "ErrorDAT",
     "family": "DAT",
@@ -2388,6 +2442,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/dat/select_dat.gd"
+  },
+  "SerialDAT": {
+    "class_name": "SerialDAT",
+    "family": "DAT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "DAT"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/dat/serial_dat.gd"
   },
   "SOPtoDAT": {
     "class_name": "SOPtoDAT",
@@ -4757,6 +4831,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/remesh_sop.gd"
+  },
+  "ResampleSOP": {
+    "class_name": "ResampleSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/resample_sop.gd"
   },
   "ReverseSOP": {
     "class_name": "ReverseSOP",
@@ -7294,6 +7388,26 @@
     "dynamic_inputs": "TOP",
     "file": "addons/gonodes/operators/top/switch_top.gd"
   },
+  "TemporalDenoiseTOP": {
+    "class_name": "TemporalDenoiseTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/temporal_denoise_top.gd"
+  },
   "TestCardTOP": {
     "class_name": "TestCardTOP",
     "family": "TOP",
@@ -8671,6 +8785,264 @@
     ],
     "dynamic_inputs": "VOL",
     "file": "addons/gonodes/operators/vol/switch_vol.gd"
+  },
+  "AudioDelayCHOP": {
+    "class_name": "AudioDelayCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_delay_chop.gd"
+  },
+  "AudioEnvelopeCHOP": {
+    "class_name": "AudioEnvelopeCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_envelope_chop.gd"
+  },
+  "AudioFilterCHOP": {
+    "class_name": "AudioFilterCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_filter_chop.gd"
+  },
+  "AudioGateCHOP": {
+    "class_name": "AudioGateCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "sidechain",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_gate_chop.gd"
+  },
+  "AudioMixCHOP": {
+    "class_name": "AudioMixCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_mix_chop.gd"
+  },
+  "AudioMovieCHOP": {
+    "class_name": "AudioMovieCHOP",
+    "family": "CHOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_movie_chop.gd"
+  },
+  "AudioOscillatorCHOP": {
+    "class_name": "AudioOscillatorCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "fm",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "am",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_oscillator_chop.gd"
+  },
+  "AudioParaEQCHOP": {
+    "class_name": "AudioParaEQCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_para_eq_chop.gd"
+  },
+  "AudioPitchCHOP": {
+    "class_name": "AudioPitchCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_pitch_chop.gd"
+  },
+  "AudioRenderCHOP": {
+    "class_name": "AudioRenderCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_render_chop.gd"
+  },
+  "AudioReverbCHOP": {
+    "class_name": "AudioReverbCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_reverb_chop.gd"
+  },
+  "AudioStreamInCHOP": {
+    "class_name": "AudioStreamInCHOP",
+    "family": "CHOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_stream_in_chop.gd"
+  },
+  "AudioStreamOutCHOP": {
+    "class_name": "AudioStreamOutCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_audio/operators/chop/audio_stream_out_chop.gd"
   },
   "BlackmagicDAT": {
     "class_name": "BlackmagicDAT",

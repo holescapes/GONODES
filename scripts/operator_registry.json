@@ -68,6 +68,45 @@
     ]
   },
   {
+    "class_name": "AudioDelayCHOP",
+    "node_type": "audiodelay",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_delay_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "delay_ms",
+        "type": "float",
+        "default": 250.0
+      },
+      {
+        "name": "feedback",
+        "type": "float",
+        "default": 0.4
+      },
+      {
+        "name": "wet",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "dry",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "ping_pong",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "clear",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "AudioDynamicsCHOP",
     "node_type": "audio_dynamics",
     "family": "chop",
@@ -108,6 +147,35 @@
         "name": "reset",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "AudioEnvelopeCHOP",
+    "node_type": "audioenvelope",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_envelope_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "attack_ms",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "release_ms",
+        "type": "float",
+        "default": 100.0
+      },
+      {
+        "name": "gain",
+        "type": "float",
+        "default": 1.0
       }
     ]
   },
@@ -161,6 +229,74 @@
     ]
   },
   {
+    "class_name": "AudioFilterCHOP",
+    "node_type": "audiofilter",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_filter_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "type",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "cutoff",
+        "type": "float",
+        "default": 1000.0
+      },
+      {
+        "name": "q",
+        "type": "float",
+        "default": 0.707
+      },
+      {
+        "name": "gain_db",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "AudioGateCHOP",
+    "node_type": "audiogate",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_gate_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "threshold_db",
+        "type": "float",
+        "default": -40.0
+      },
+      {
+        "name": "hysteresis_db",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "attack_ms",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "hold_ms",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "release_ms",
+        "type": "float",
+        "default": 50.0
+      },
+      {
+        "name": "range_db",
+        "type": "float",
+        "default": -80.0
+      }
+    ]
+  },
+  {
     "class_name": "AudioInCHOP",
     "node_type": "audio_in",
     "family": "chop",
@@ -184,6 +320,214 @@
       },
       {
         "name": "gain",
+        "type": "float",
+        "default": 1.0
+      }
+    ]
+  },
+  {
+    "class_name": "AudioMixCHOP",
+    "node_type": "audiomix",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_mix_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "master_gain",
+        "type": "float",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "AudioMovieCHOP",
+    "node_type": "audiomovie",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_movie_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "play",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "loop",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "volume",
+        "type": "float",
+        "default": 1.0
+      }
+    ]
+  },
+  {
+    "class_name": "AudioOscillatorCHOP",
+    "node_type": "audiooscillator",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_oscillator_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "waveform",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "frequency",
+        "type": "float",
+        "default": 440.0
+      },
+      {
+        "name": "amplitude",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "pulse_width",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "fm_depth",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "stereo_phase",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "buffer_size",
+        "type": "int",
+        "default": 512
+      }
+    ]
+  },
+  {
+    "class_name": "AudioParaEQCHOP",
+    "node_type": "audioparaeq",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_para_eq_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "bands",
+        "type": "int",
+        "default": 4
+      },
+      {
+        "name": "low_shelf",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "high_shelf",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "AudioPitchCHOP",
+    "node_type": "audiopitch",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_pitch_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "semitones",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "grain_size",
+        "type": "float",
+        "default": 0.05
+      },
+      {
+        "name": "wet",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "dry",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "AudioRenderCHOP",
+    "node_type": "audiorender",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_render_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "record",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "clear",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "export_path",
+        "type": "string",
+        "default": "user://render.wav"
+      },
+      {
+        "name": "export_now",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "max_seconds",
+        "type": "float",
+        "default": 300.0
+      }
+    ]
+  },
+  {
+    "class_name": "AudioReverbCHOP",
+    "node_type": "audioreverb",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_reverb_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "room_size",
+        "type": "float",
+        "default": 0.7
+      },
+      {
+        "name": "damping",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "wet",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "dry",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "width",
         "type": "float",
         "default": 1.0
       }
@@ -230,6 +574,49 @@
         "name": "fft_size",
         "type": "menu",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "AudioStreamInCHOP",
+    "node_type": "audiostreamin",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_stream_in_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "port",
+        "type": "int",
+        "default": 9100
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "AudioStreamOutCHOP",
+    "node_type": "audiostreamout",
+    "family": "chop",
+    "file": "addons/gn_ext_audio/operators/chop/audio_stream_out_chop.gd",
+    "extension": "gn_ext_audio",
+    "params": [
+      {
+        "name": "host",
+        "type": "string",
+        "default": "127.0.0.1"
+      },
+      {
+        "name": "port",
+        "type": "int",
+        "default": 9100
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -1621,6 +2008,50 @@
     ]
   },
   {
+    "class_name": "PulseCHOP",
+    "node_type": "pulse",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/pulse_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "frequency",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "duty_cycle",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "amplitude",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "offset",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "jitter",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "reset",
+        "type": "pulse",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "RampCHOP",
     "node_type": "ramp",
     "family": "chop",
@@ -1636,6 +2067,40 @@
         "name": "count",
         "type": "int",
         "default": 2
+      }
+    ]
+  },
+  {
+    "class_name": "RecordCHOP",
+    "node_type": "record",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/record_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "record",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "clear",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "max_length",
+        "type": "int",
+        "default": 3600
+      },
+      {
+        "name": "loop",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "sample_rate",
+        "type": "float",
+        "default": 60.0
       }
     ]
   },
@@ -4468,6 +4933,45 @@
     ]
   },
   {
+    "class_name": "DMXDAT",
+    "node_type": "dmx",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/dmx_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "universe",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "ip",
+        "type": "string",
+        "default": "255.255.255.255"
+      },
+      {
+        "name": "port",
+        "type": "int",
+        "default": 6454
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "channels",
+        "type": "int",
+        "default": 512
+      }
+    ]
+  },
+  {
     "class_name": "DeleteDAT",
     "node_type": "delete",
     "family": "dat",
@@ -5077,6 +5581,45 @@
         "name": "include_header",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "SerialDAT",
+    "node_type": "serial",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/serial_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "port",
+        "type": "string",
+        "default": "COM3"
+      },
+      {
+        "name": "baud_rate",
+        "type": "int",
+        "default": 9600
+      },
+      {
+        "name": "delimiter",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "max_rows",
+        "type": "int",
+        "default": 100
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "clear",
+        "type": "pulse",
+        "default": null
       }
     ]
   },
@@ -10896,6 +11439,35 @@
     ]
   },
   {
+    "class_name": "ResampleSOP",
+    "node_type": "resample",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/resample_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "count",
+        "type": "int",
+        "default": 32
+      },
+      {
+        "name": "segment_length",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "close",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "ReverseSOP",
     "node_type": "reverse",
     "family": "sop",
@@ -15409,6 +15981,30 @@
         "name": "active",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "TemporalDenoiseTOP",
+    "node_type": "temporaldenoise",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/temporal_denoise_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 0.8
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
       }
     ]
   },

@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **537 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 22 extension addons.
+> **556 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 23 extension addons.
 
 ---
 
@@ -1431,6 +1431,22 @@ Accumulates input frames over time with configurable decay, creating motion-trai
 **Input:** `in` (TOP). **Time-dependent.** **Shader:** `trail.gdshader`.
 
 **How it works:** Maintains two textures in a ping-pong loop. Each cook blends the current input over the previous frame, scaled by `decay`. A deferred ImageTexture capture feeds the previous frame back as a shader uniform. `reset` reinitialises the buffer.
+
+---
+
+#### TemporalDenoiseTOP
+
+Multi-frame temporal denoising with motion-aware per-pixel rejection. Blends the current frame with the accumulated previous output using per-pixel difference detection to prevent ghosting.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| strength | Float | 0.8 | 0.0–1.0 | Temporal blend strength (higher = smoother) |
+| threshold | Float | 0.1 | 0.0–1.0 | Motion rejection threshold (higher = more tolerant) |
+| reset | Bool | false | — | Clear the accumulation buffer |
+
+**Input:** `in` (TOP). **Time-dependent.** **Shader:** `temporal_denoise.gdshader`.
+
+**How it works:** Uses the same blit-viewport double-buffer pattern as TrailTOP. Per-pixel difference between frames is computed, and a smoothstep rejection function prevents ghosting on areas with motion while maintaining strong denoising on static areas.
 
 ---
 
@@ -3061,6 +3077,38 @@ Scrolling buffer that records input channel values over time (oscilloscope trace
 
 ---
 
+#### RecordCHOP
+
+Record input CHOP channels over time into a ring buffer with record/stop/clear. Useful for gesture capture, motion recording, and sample-accurate logging.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| record | Bool | false | — | Start/stop recording |
+| clear | Bool | false | — | Clear the buffer |
+| max_length | Int | 3600 | 1–216000 | Maximum frames in buffer |
+| loop | Bool | true | — | Start overwriting oldest on full |
+
+**Input:** `in` (CHOP). **Time-dependent.** Outputs multi-sample channels with recorded history.
+
+---
+
+#### PulseCHOP
+
+Periodic pulse train generator with configurable frequency, duty cycle, and jitter. Self-running generator — no input required.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| frequency | Float | 1.0 | 0.001–100 | Pulses per second |
+| duty_cycle | Float | 0.5 | 0.01–0.99 | Fraction of cycle that is "on" |
+| amplitude | Float | 1.0 | 0–10 | Pulse amplitude |
+| jitter | Float | 0.0 | 0–1 | Randomize pulse timing |
+| active | Bool | true | — | Enable generator |
+| reset | Bool | false | — | Reset phase and count |
+
+**Outputs:** `pulse` (0/1), `phase` (0–1 ramp), `count` (total pulses). **Time-dependent.**
+
+---
+
 #### SOPtoCHOP
 
 Extracts SOP vertex data as CHOP channels.
@@ -4538,6 +4586,21 @@ Records the centroid of input geometry over time as a line strip trail.
 | active | Bool | true | — | Enable recording |
 
 **Input:** `in` (SOP). **Time-dependent.** Computes centroid of input and appends to ring buffer.
+
+---
+
+#### ResampleSOP
+
+Resample polylines at uniform arc-length spacing by point count or segment length. Essential for curve-based workflows and generative art.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| mode | Enum | Even | Even, Length | Resampling method |
+| count | Int | 32 | 2–10000 | Target point count per polyline (Even mode) |
+| segment_length | Float | 0.1 | 0.001–100 | Distance between points (Length mode) |
+| close | Bool | false | — | Treat polylines as closed loops |
+
+**Input:** `in` (SOP). Operates on line strip surfaces. Non-line geometry passes through unchanged.
 
 ---
 
@@ -6177,7 +6240,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
 | **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **375** | *Core operators only. With extensions (95), SDF (29), SCRIPT (3), and native variants, total reaches 537.* |
+| **Total** | **375** | *Core operators only. With extensions (95), SDF (29), SCRIPT (3), and native variants, total reaches 556.* |
 
 ### Extension Operators (not included in count above)
 
@@ -6196,6 +6259,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **gn_ext_ndi** | NDIInTOP, NDIOutTOP, NDIAudioInCHOP, NDIAudioOutCHOP | NDI video & audio I/O over the network via NewTek/Vizrt NDI SDK (cross-platform) |
 | **gn_ext_blackmagic** | BlackmagicInIMG, BlackmagicOutIMG, BlackmagicDAT | Professional SDI/HDMI video I/O via DeckLink SDK. Capture and output with timecode, device enum. Windows COM-based |
 | **gn_ext_depth_sensor** | DepthSensorIMG, DepthSensorDAT | Unified depth sensor: image + skeleton + hands + point cloud. Azure Kinect, RealSense, Ultraleap backends |
+| **gn_ext_audio** | AudioOscillatorCHOP, AudioFilterCHOP, AudioParaEQCHOP, AudioMixCHOP, AudioMovieCHOP, AudioRenderCHOP, AudioStreamInCHOP, AudioStreamOutCHOP, AudioReverbCHOP, AudioDelayCHOP, AudioPitchCHOP, AudioEnvelopeCHOP, AudioGateCHOP | Audio synthesis, effects, and processing — 13 pure-GDScript operators covering waveform generation, biquad filtering, parametric EQ, mixing, reverb, delay, pitch shift, envelope following |
 
 > **Note:** SDF operators (26 total — 10 primitives, 5 booleans, 8 domain modifiers, 2 materials, 1 renderer) were promoted from `gn_ext_sdf` to **core** as the 12th family type. See the SDF section above.
 

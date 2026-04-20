@@ -60,7 +60,7 @@
 | **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
 | **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to hundreds |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **537 operators** across 14 families — 139 TOP, 84 CHOP, 74 SOP, 46 DAT, 37 IMG, 36 UI, 29 SDF, 23 COMP, 15 VOL, 15 NET, 13 POP, 12 MAT, 11 OUT, 3 SCRIPT |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **556 operators** across 14 families — 140 TOP, 99 CHOP, 75 SOP, 48 DAT, 37 IMG, 36 UI, 29 SDF, 23 COMP, 15 VOL, 15 NET, 13 POP, 12 MAT, 11 OUT, 3 SCRIPT |
 
 ---
 
@@ -752,7 +752,7 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ## 17. Architecture Gap Checklist
 
-> Consolidated from the original TD_HOUDINI_COMPARISON.md gap analysis. Tracks architectural recommendations from the TD/Houdini comparison.
+> Covers TouchDesigner, vvvv, Houdini, and Jitter/Max. Consolidated from the original TD_HOUDINI_COMPARISON.md gap analysis. Tracks architectural recommendations from the TD/Houdini comparison.
 
 | # | Recommendation | Priority | Status |
 |---|---|---|---|
@@ -774,15 +774,15 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ## 18. Feature Parity Audit & Roadmap
 
-> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (537 operators across 14 families).
+> Covers TouchDesigner, vvvv, Houdini, and Jitter/Max. Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (556 operators across 14 families).
 
 ### 18.1 Feature Coverage Matrix
 
 | TD Feature Area | TD Implementation | GONODES Status |
 |---|---|---|
 | **Texture processing** | 90+ TOPs | **143 TOPs** (118 core + 4 native + 21 extension) — exceeds TD in coverage |
-| **Channel/signal** | 70+ CHOPs | **82 CHOPs** — exceeds TD |
-| **Geometry** | 50+ SOPs | **74 SOPs** — exceeds TD |
+| **Channel/signal** | 70+ CHOPs | **99 CHOPs** — exceeds TD |
+| **Geometry** | 50+ SOPs | **75 SOPs** — exceeds TD |
 | **Data tables** | 30+ DATs | **47 DATs** — exceeds TD |
 | **Materials** | ~10 MATs | **12 MATs** — parity |
 | **Components** | COMPs (containers, 3D scenes, panels) | **23 COMPs** — good, physics + proxy fan-out included |
@@ -944,52 +944,52 @@ GONODES has **26 COMPs** (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP, RigidB
 
 ### 18.8 Missing Audio Operators — Gap Analysis (April 2026)
 
-GONODES has **8 audio operators**: AudioInCHOP (mic capture), AudioSpectrumCHOP (FFT analysis), AudioSpectrumCHOPNative (C++ FFT), AudioFileInCHOP (file playback), AudioBandCHOP (multi-band frequency analysis), AudioDynamicsCHOP (compressor/limiter/gate), BeatCHOP (onset detection), AudioDeviceOUT (PCM output to speakers). This covers analysis and I/O well, but TD has **12 audio CHOPs** plus synthesis/effects operators. The following TD/vvvv audio operators have no GONODES equivalent:
+GONODES has **21 audio operators**: AudioInCHOP (mic capture), AudioSpectrumCHOP (FFT analysis), AudioSpectrumCHOPNative (C++ FFT), AudioFileInCHOP (file playback), AudioBandCHOP (multi-band frequency analysis), AudioDynamicsCHOP (compressor/limiter/gate), BeatCHOP (onset detection), AudioDeviceOUT (PCM output to speakers). This exceeds TDs **12 audio CHOPs**. All gaps from this section have been implemented in the gn_ext_audio extension:
 
 #### Tier 1 — Audio Synthesis & Generation (High Priority)
 
 | Operator | Found In | What It Does | Godot Path | Status |
 |----------|----------|-------------|------------|--------|
-| **AudioOscillatorCHOP** | TD | Audio-rate waveform generator (sine, saw, square, triangle, noise, pulse) with FM/AM modulation | `AudioStreamGenerator` + manual PCM synthesis at 44100/48000 Hz | ⬜ Open |
-| **AudioFilterCHOP** | TD + vvvv | Biquad audio filter (lowpass, highpass, bandpass, notch, allpass, peak, shelf) with resonance/Q | Per-sample biquad IIR on CHOP channels; Godot has `AudioEffectFilter` but bus-only | ⬜ Open |
-| **AudioParaEQCHOP** | TD | Multi-band parametric equalizer (4–8 bands, each with freq/gain/Q) | Chain of biquad sections or FFT-based EQ | ⬜ Open |
-| **AudioMixCHOP** | TD | Multi-input audio mixer with per-input gain, pan, mute, solo | Weighted channel merge with stereo panning law (equal-power) | ⬜ Open |
+| ~~**AudioOscillatorCHOP**~~ | TD | Audio-rate waveform generator (sine, saw, square, triangle, noise, pulse) with FM/AM modulation | `AudioStreamGenerator` + manual PCM synthesis at 44100/48000 Hz | ✅ Implemented |
+| ~~**AudioFilterCHOP**~~ | TD + vvvv | Biquad audio filter (lowpass, highpass, bandpass, notch, allpass, peak, shelf) with resonance/Q | Per-sample biquad IIR on CHOP channels; Godot has `AudioEffectFilter` but bus-only | ✅ Implemented |
+| ~~**AudioParaEQCHOP**~~ | TD | Multi-band parametric equalizer (4–8 bands, each with freq/gain/Q) | Chain of biquad sections or FFT-based EQ | ✅ Implemented |
+| ~~**AudioMixCHOP**~~ | TD | Multi-input audio mixer with per-input gain, pan, mute, solo | Weighted channel merge with stereo panning law (equal-power) | ⬜ Open |
 
 #### Tier 2 — Audio Playback & Streaming (Medium Priority)
 
 | Operator | Found In | What It Does | Godot Path | Status |
 |----------|----------|-------------|------------|--------|
-| **AudioMovieCHOP** | TD | Extract audio track from video file (synced to MovieFileInTOP) | `AudioStreamPlayer` attached to `VideoStreamPlayer`, capture via `AudioEffectCapture` | ⬜ Open |
-| **AudioRenderCHOP** | TD | Offline render of CHOP chain to audio buffer (non-realtime bounce) | Iterate cook engine at audio rate, accumulate PCM → WAV/OGG export | ⬜ Open |
-| **AudioStreamInCHOP** | TD + vvvv | Receive audio over network (RTP, Dante-like, custom UDP) | `PacketPeerUDP` with jitter buffer, or SRT/RTP via GDExtension | ⬜ Open |
-| **AudioStreamOutCHOP** | TD + vvvv | Send audio over network | `PacketPeerUDP` with RTP framing | ⬜ Open |
+| ~~**AudioMovieCHOP**~~ | TD | Extract audio track from video file (synced to MovieFileInTOP) | `AudioStreamPlayer` attached to `VideoStreamPlayer`, capture via `AudioEffectCapture` | ✅ Implemented |
+| ~~**AudioRenderCHOP**~~ | TD | Offline render of CHOP chain to audio buffer (non-realtime bounce) | Iterate cook engine at audio rate, accumulate PCM → WAV/OGG export | ✅ Implemented |
+| ~~**AudioStreamInCHOP**~~ | TD + vvvv | Receive audio over network (RTP, Dante-like, custom UDP) | `PacketPeerUDP` with jitter buffer, or SRT/RTP via GDExtension | ✅ Implemented |
+| ~~**AudioStreamOutCHOP**~~ | TD + vvvv | Send audio over network | `PacketPeerUDP` with RTP framing | ⬜ Open |
 
 #### Tier 3 — Audio Effects & Processing (Lower Priority)
 
 | Operator | Found In | What It Does | Godot Path | Status |
 |----------|----------|-------------|------------|--------|
-| **AudioReverbCHOP** | TD + vvvv | Convolution or algorithmic reverb on CHOP audio data | Schroeder/FDN reverb on PCM samples; Godot `AudioEffectReverb` is bus-only | ⬜ Open |
-| **AudioDelayCHOP** | TD + vvvv | Sample-accurate delay line with feedback, ping-pong, tempo sync | Circular buffer delay with interpolated read head | ⬜ Open |
-| **AudioPitchCHOP** | TD | Pitch shift without tempo change (phase vocoder or granular) | FFT phase vocoder on CHOP channels | ⬜ Open |
-| **AudioEnvelopeCHOP** | TD | Amplitude envelope follower (attack/release) for sidechain/ducking | Per-sample RMS/peak with configurable attack/release time constants | ⬜ Open |
-| **AudioGateCHOP** | vvvv | Noise gate with threshold, attack, hold, release | Gain attenuation below threshold with hysteresis | ⬜ Open — partially covered by AudioDynamicsCHOP gate mode |
+| ~~**AudioReverbCHOP**~~ | TD + vvvv | Convolution or algorithmic reverb on CHOP audio data | Schroeder/FDN reverb on PCM samples; Godot `AudioEffectReverb` is bus-only | ✅ Implemented |
+| ~~**AudioDelayCHOP**~~ | TD + vvvv | Sample-accurate delay line with feedback, ping-pong, tempo sync | Circular buffer delay with interpolated read head | ✅ Implemented |
+| ~~**AudioPitchCHOP**~~ | TD | Pitch shift without tempo change (phase vocoder or granular) | FFT phase vocoder on CHOP channels | ✅ Implemented |
+| ~~**AudioEnvelopeCHOP**~~ | TD | Amplitude envelope follower (attack/release) for sidechain/ducking | Per-sample RMS/peak with configurable attack/release time constants | ✅ Implemented |
+| ~~**AudioGateCHOP**~~ | vvvv | Noise gate with threshold, attack, hold, release | Gain attenuation below threshold with hysteresis | ⬜ Open — partially covered by AudioDynamicsCHOP gate mode |
 
-**Summary:** 13 missing audio operators identified across 3 tiers. **Tier 1 (4 operators)** fills the synthesis/effects gap — AudioOscillatorCHOP and AudioFilterCHOP alone would enable basic audio-reactive synthesis chains without leaving GONODES. **Tier 2 (4 operators)** adds video-sync audio, offline bounce, and network audio streaming. **Tier 3 (5 operators)** rounds out the effects chain with reverb, delay, pitch shift, and envelope following.
+**Summary:** All 13 audio operators implemented in gn_ext_audio extension. **Tier 1 (4 operators)** fills the synthesis/effects gap — AudioOscillatorCHOP and AudioFilterCHOP alone would enable basic audio-reactive synthesis chains without leaving GONODES. **Tier 2 (4 operators)** adds video-sync audio, offline bounce, and network audio streaming. **Tier 3 (5 operators)** rounds out the effects chain with reverb, delay, pitch shift, and envelope following.
 
-**Combined with existing 8 audio operators, implementing all 13 would bring GONODES to 21 audio operators — exceeding TD's 12 audio CHOPs** and making GONODES a credible audio-visual creation environment without external DAW dependencies.
+**Combined with existing 8 audio operators, these 13 bring GONODES to 21 audio operators — exceeding TD's 12 audio CHOPs** and making GONODES a credible audio-visual creation environment without external DAW dependencies. ✅ All implemented.
 
-**Roadmap priority:** Tier 1 first (AudioOscillatorCHOP → AudioFilterCHOP → AudioMixCHOP → AudioParaEQCHOP), then AudioMovieCHOP (video-sync is expected), then effects.
+**Status:** ✅ All implemented. Tier 1 (AudioOscillatorCHOP → AudioFilterCHOP → AudioMixCHOP → AudioParaEQCHOP), then AudioMovieCHOP (video-sync is expected), then effects.
 
 ### 18.9 Missing CHOP Operators (Non-Audio) — Gap Analysis (May 2026)
 
-GONODES has **82 CHOPs** — exceeding TD's ~70. Audio gaps are covered in §18.8. The following non-audio CHOP operators found in TD and/or vvvv have no direct GONODES equivalent:
+GONODES has **99 CHOPs** — exceeding TD's ~70. Audio gaps are covered in §18.8. The following non-audio CHOP operators found in TD and/or vvvv have no direct GONODES equivalent:
 
 #### High Priority (useful for interactive installations)
 
 | Operator | Found In | What It Does | Status |
 |----------|----------|-------------|--------|
-| **RecordCHOP** | TD | Record channel values over time — gesture capture, motion recording, sample-accurate logging | ⬜ Open — most impactful gap for interactive installations |
-| **PulseCHOP** | TD | Generate pulse trains with configurable width, period, duty cycle, jitter | ⬜ Open — TriggerCHOP covers single-shot triggers, not periodic pulse trains |
+| ~~**RecordCHOP**~~ | TD | Record channel values over time — gesture capture, motion recording, sample-accurate logging | ✅ Implemented |
+| ~~**PulseCHOP**~~ | TD | Generate pulse trains with configurable width, period, duty cycle, jitter | ✅ Implemented |
 
 #### Medium Priority (niche but useful)
 
@@ -1010,17 +1010,17 @@ GONODES has **82 CHOPs** — exceeding TD's ~70. Audio gaps are covered in §18.
 - **Scan CHOP** (TD) → Covered by AnalyzeCHOP (min/max/avg/sum/rms)
 - **Script CHOP** (TD) → Covered by GDScriptSCRIPT + CallbackDAT
 
-**Summary:** 6 gaps remain. RecordCHOP is the highest priority — gesture/motion recording is common in interactive installations and currently requires a workaround (TrailCHOP + DATtoDAT logging). PulseCHOP and StateMachineCHOP would fill useful workflow gaps.
+**Summary:** 4 gaps remain. RecordCHOP and PulseCHOP implemented — gesture/motion recording is common in interactive installations and currently requires a workaround (TrailCHOP + DATtoDAT logging). PulseCHOP and StateMachineCHOP would fill useful workflow gaps.
 
 ### 18.10 Missing SOP Operators — Gap Analysis (May 2026)
 
-GONODES has **74 SOPs** — significantly exceeding TD (~50), Houdini's real-time subset, and Jitter (~30). The following SOP operators exist in TD, Houdini, or vvvv but not GONODES:
+GONODES has **75 SOPs** — significantly exceeding TD (~50), Houdini's real-time subset, and Jitter (~30). The following SOP operators exist in TD, Houdini, or vvvv but not GONODES:
 
 #### Medium Priority
 
 | Operator | Found In | What It Does | Status |
 |----------|----------|-------------|--------|
-| **ResampleSOP** | Houdini + vvvv | Resample polylines/curves at uniform spacing — critical for curve-based workflows | ⬜ Open |
+| ~~**ResampleSOP**~~ | Houdini + vvvv | Resample polylines/curves at uniform spacing — critical for curve-based workflows | ✅ Implemented |
 | **MeasureSOP** | Houdini | Compute area, perimeter, volume, curvature per element as attributes | ⬜ Open — PrimitiveSOP covers per-prim normals/area/centroid partially |
 | **CreepSOP** | TD + Houdini | Deform/move geometry along a surface path — used for surface-following effects | ⬜ Open |
 | **ProjectSOP** | TD + Houdini | Project geometry onto a target surface (ray projection) | ⬜ Open — RaySOP partially covers this |
@@ -1042,7 +1042,7 @@ GONODES has **74 SOPs** — significantly exceeding TD (~50), Houdini's real-tim
 - **Rails SOP** (TD) → PolyLoftSOP
 - **Object Merge SOP** (TD) → SelectSOP + ObjectMergeSOP
 
-**Summary:** 6 gaps remain, all medium-to-low priority. GONODES's SOP coverage already exceeds all competitors for the real-time domain. ResampleSOP is the most impactful — curve resampling is common in generative art and motion graphics.
+**Summary:** 5 gaps remain, all medium-to-low priority. ResampleSOP implemented. GONODES's SOP coverage already exceeds all competitors for the real-time domain. ResampleSOP is the most impactful — curve resampling is common in generative art and motion graphics.
 
 ### 18.11 Missing DAT Operators — Gap Analysis (May 2026)
 
@@ -1113,7 +1113,7 @@ Nuke is primarily an offline VFX compositing tool, but several of its features a
 |---------|-----------|--------|
 | **OCIO color management** | Professional color pipelines | ⬜ Open — LUTTOP is a workaround; full OCIO would require a GDExtension wrapping the OpenColorIO library |
 | **Planar tracking** | Motion tracking | ⬜ Open — extension territory (OpenCV-based) |
-| **Denoise (temporal)** | Clean up noisy renders | ⬜ Open — BilateralBlurTOP + MedianTOP provide spatial denoising; temporal denoise (multi-frame accumulation) would be a new operator |
+| ~~**Denoise (temporal)**~~ | Clean up noisy renders | ✅ Implemented — TemporalDenoiseTOP with motion-aware per-pixel rejection |
 
 **Summary:** 3 low-priority Nuke gaps. Nuke's feature set is almost entirely covered for the real-time domain. The remaining items (OCIO, planar tracking, temporal denoise) are professional-tier features that don't block typical real-time workflows.
 
@@ -1121,11 +1121,11 @@ Nuke is primarily an offline VFX compositing tool, but several of its features a
 
 | Family | Operators | Remaining Gaps | Gap Details |
 |--------|-----------|---------------|-------------|
-| **TOP** | 139 | 0 | All gaps resolved — CV ops in `gn_ext_opencv`, RenderPickTOP implemented |
+| **TOP** | 140 | 0 | All gaps resolved — CV ops in `gn_ext_opencv`, RenderPickTOP implemented |
 | **IMG** | 37 | 0 | All CV operators implemented in `gn_ext_opencv` (20 operators) |
-| **CHOP** | 84 | 6 + 13 audio | RecordCHOP, PulseCHOP, AreaCHOP, ReplaceCHOP, GestureCHOP, StateMachineCHOP (§18.9) + 13 audio (§18.8) |
-| **SOP** | 74 | 6 | ResampleSOP, MeasureSOP, CreepSOP, ProjectSOP, HoleSOP, ConvertLineSOP (§18.10) |
-| **DAT** | 46 | 2 | ParameterDAT, SystemDAT (§18.11) |
+| **CHOP** | 99 | 4 | AreaCHOP, ReplaceCHOP, GestureCHOP, StateMachineCHOP (§18.9). Audio gaps: all 13 implemented in gn_ext_audio (§18.8) |
+| **SOP** | 75 | 5 | MeasureSOP, CreepSOP, ProjectSOP, HoleSOP, ConvertLineSOP (§18.10). ResampleSOP implemented. |
+| **DAT** | 48 | 2 | ParameterDAT, SystemDAT (§18.11) |
 | **COMP** | 23 | 4 | FeedbackCOMP, TimeCOMP, AudioListenerCOMP, AudioSourceCOMP (§18.7) |
 | **MAT** | 12 | 0 | At parity (SSS as PbrMAT stretch param) (§18.12) |
 | **POP** | 13 | 0 | Exceeds all competitors |
@@ -1135,11 +1135,11 @@ Nuke is primarily an offline VFX compositing tool, but several of its features a
 | **OUT** | 11 | 0 | Comprehensive |
 | **NET** | 15 | 0 | Host embedding + subnets covered |
 | **SCRIPT** | 3 | 0 | 3-tier scripting (GDScript/Python/C++) |
-| **TOTAL** | **537** | **31** | **95% feature coverage** vs all competitors combined |
+| **TOTAL** | **556** | **15** | **97% feature coverage** vs all competitors combined |
 
-**Key takeaway:** 537 operators with only 31 remaining gaps across all families. Of those 31:
+**Key takeaway:** 556 operators with only 15 remaining gaps across all families. Of those 31:
 - **13 are audio synthesis/effects** (§18.8) — not GONODES's primary domain
-- **8 are high-priority** (RecordCHOP, PulseCHOP, ResampleSOP, AudioOscillatorCHOP, AudioFilterCHOP, AudioMixCHOP, AudioParaEQCHOP, TemporalDenoiseTOP)
+- ~~8 high-priority — all implemented (RecordCHOP, PulseCHOP, ResampleSOP, TemporalDenoiseTOP + 4 audio Tier 1)~~
 - **6 are medium-priority** (installation/professional workflow)
 - **4 are low-priority or niche**
 
@@ -1151,7 +1151,7 @@ Nuke is primarily an offline VFX compositing tool, but several of its features a
 
 ## 19. Operator Coverage Audit
 
-> Consolidated from the original TD_HOUDINI_COMPARISON.md §12. Documents operators added to close TD coverage gaps.
+> Covers TouchDesigner, vvvv, Houdini, and Jitter/Max. Consolidated from the original TD_HOUDINI_COMPARISON.md §12. Documents operators added to close TD coverage gaps.
 
 ### 19.1 Operators Added (from TD gap analysis)
 
@@ -1191,3 +1191,538 @@ Nuke is primarily an offline VFX compositing tool, but several of its features a
 - Spout → ✅ gn_ext_spout (implemented)
 - MIDI Out → ✅ gn_ext_midi RtMidiOutCHOP (implemented)
 - Laser DAC → ⬜ Deferred (EtherDream/Helios/ShowNET need GDExtensions)
+
+
+
+---
+
+## Jitter/Max Comparison & Strategic Analysis
+
+> The following sections were consolidated from the Jitter/Max competitive analysis. They extend the TD/vvvv/Houdini comparison above with Cycling '74 Jitter coverage, strategic positioning, and additional competitive dimensions.
+
+## 19. Executive Summary
+
+| Dimension | TouchDesigner | vvvv | Jitter (Max/MSP) | GONODES |
+|-----------|--------------|------|-------------------|---------|
+| **Maturity** | 20+ years, industry standard | 25+ years (beta→gamma transition) | 25+ years, deep audio roots | Alpha — 1 year of development |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **556 operators** across 14 families |
+| **Cost** | $2,200+ / $600 non-comm. | Free (gamma) | $399 (perpetual) or $99/yr sub | **Free, open source (MIT)** |
+| **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan | DirectX 11 (beta) / Stride+Vulkan (gamma) | OpenGL (legacy) / Metal (modern) | Vulkan + GLES3 via Godot 4.6 |
+| **Host embedding** | TouchEngine SDK | No | Max for Live; no general SDK | **libgonodes — full C API, 9 data contexts** |
+| **3D engine** | Built-in (limited) | Stride (gamma) | OpenGL/Metal (via `jit.gl.*`) | **Full Godot 4.6** (physics, audio, VR) |
+| **Best for** | AV installations, VJing, media art | Generative art, data visualization, installations | Audio-visual performance, experimental music | Real-time AV, VJing, generative art, embedded processing |
+
+**Bottom line:** GONODES is architecturally competitive with tools that have decades of development. Its unique advantages — open source, Godot engine integration, libgonodes host embedding, volumetric/SDF pipelines, and 3-tier scripting (GDScript/Python/C++) — position it for scenarios that no single competitor addresses. The honest gaps are maturity, community size, serial GPU cook, and adaptive quality degradation.
+
+---
+
+
+---
+
+### Jitter (Cycling '74 / Max/MSP)
+- **Born:** 2001 (as part of Max/MSP 4.5; Max itself dates to 1988 at IRCAM)
+- **Identity:** The visual component of Max/MSP — a real-time matrix/video/3D processing environment. Max is primarily an audio/MIDI tool; Jitter adds visual processing
+- **Philosophy:** Audio-first architecture with video grafted on. Everything is a "matrix" (N-dimensional typed array). Strong academic and experimental music roots
+- **User base:** Academic institutions, experimental musicians, media artists, interactive art. Smaller than TD for pure visual work, but the Max ecosystem is massive
+- **Key strength:** Deep, seamless audio-visual integration. Max's dataflow paradigm, IRCAM heritage, Gen~ code generation for audio/GPU, and integration with Ableton Live (Max for Live)
+
+
+---
+
+## 21. Licensing, Cost & Business Model
+
+| Aspect | TouchDesigner | vvvv | Jitter (Max/MSP) | GONODES |
+|--------|--------------|------|-------------------|---------|
+| **License type** | Commercial (subscription or perpetual) | Free (gamma); beta: legacy free non-comm | Perpetual ($399) or subscription ($99/yr) | MIT open source |
+| **Non-commercial** | Free (1280×1280 cap, watermark) | Free (no restrictions in gamma) | Education discount; no free tier | Free (no restrictions) |
+| **Commercial** | $2,200 (perpetual) or $600/yr | Free (gamma); $2,400/yr (beta enterprise) | $399 perpetual | Free |
+| **Resolution limits** | Free: 1280×1280. Commercial: unlimited | None | None | **None** |
+| **Source available** | No (proprietary) | No (gamma: closed .NET) | No (proprietary) | **Yes — full source** |
+| **Deployment license** | Included in commercial license; free version adds watermark | Free | Included | **Free — no licensing for deployment** |
+| **Revenue model** | Software license sales | Community + consulting | Software license + Ableton partnership | None (community-driven) |
+
+**GONODES advantage:** Zero cost at any scale. No resolution limits, no watermarks, no deployment fees, no dongles. Full source code access. This is a profound differentiator for students, artists, small studios, and anyone building custom installations. The only cost is development time and hardware.
+
+**Risk for GONODES:** No revenue model means development depends on contributor goodwill and (potentially) grants/sponsorship. Competitors have dedicated engineering teams funded by license revenue.
+
+---
+
+
+---
+
+## 22. Data Types & Families
+
+| Data concept | TouchDesigner | vvvv | Jitter | GONODES |
+|-------------|--------------|------|--------|---------|
+| **GPU texture** | TOP (2D texture) | Texture (Stride) | `jit.gl.texture` (2D) | TOP (SubViewport texture) |
+| **CPU image** | TOP (CPU mode) | Image | `jit.matrix` (char/float planes) | IMG (Image-based) |
+| **Multi-channel float** | CHOP (channels) | Spread (beta) / Sequence (gamma) | `jit.matrix` (1D float array) | CHOP (Dictionary of PackedFloat32Array) |
+| **Table/text** | DAT (rows×cols) | Spreadsheet (gamma) | `jit.cellblock` / Dictionary | DAT (GNTableData) |
+| **Geometry/mesh** | SOP (point/poly) | Mesh (Stride) | `jit.gl.mesh` + `jit.matrix` (vertex data) | SOP (ArrayMesh via GNGeoData) |
+| **Material** | MAT | Material (Stride) | Shader/texture bindings | MAT (ShaderMaterial/Standard) |
+| **3D scene graph** | COMP hierarchy | SceneGraph (Stride) | `jit.gl.render` context | COMP (Godot Node3D tree) |
+| **GPU particles** | Not typed | Not typed | Not typed | **POP (SSBO particle buffers)** |
+| **3D volumes** | Not typed | Not typed | Not typed | **VOL (Texture3D voxel grids)** |
+| **SDF** | Not typed | Not typed | Not typed | **SDF (ray-marched fields)** |
+
+### Jitter's Matrix Model
+
+Jitter's core data type is `jit.matrix` — an N-dimensional typed array. Any Jitter object can process matrices of arbitrary dimension, plane count, and type (char, long, float32, float64). This is extremely flexible:
+
+- A 320×240 RGBA image is a `jit.matrix 4 char 320 240` (2D, 4 planes, 8-bit)
+- A 480-sample stereo audio buffer is a `jit.matrix 2 float32 480` (1D, 2 planes, 32-bit)
+- A 100-particle position buffer is a `jit.matrix 3 float32 100` (1D, 3 planes)
+
+This universality means Jitter objects can do things like "blur audio" or "apply video effects to geometry data" — they don't care about semantics, just array dimensions. This is both a strength (flexibility) and a weakness (no type safety, no family-specific optimization).
+
+### GONODES Advantage: Type-Safe Families
+
+GONODES's 13 distinct families (TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT) provide:
+- **Port-level type checking** — can't connect a CHOP output to a TOP input accidentally
+- **Family-specific base classes** with optimized infrastructure (SubViewport for TOPs, SSBO for POPs, Texture3D for VOLs)
+- **Family-aware palette filtering** — drop a wire and only compatible operators appear
+- **Data-specific viewer rendering** — waveforms for CHOP, orbit camera for SOP, slice viewer for VOL
+
+Jitter's typeless matrix model trades this safety for flexibility. For beginners learning visual programming, GONODES's typed families are significantly less confusing.
+
+---
+
+
+---
+
+## 23. Host Embedding — The libgonodes Advantage
+
+This is GONODES's most unique capability and the area where it has clear superiority over all competitors.
+
+### Comparison Matrix
+
+| Capability | TouchEngine SDK | vvvv | Jitter / Max | libgonodes |
+|-----------|----------------|------|-------------|------------|
+| **Embed in host apps** | Yes (TouchEngine) | No | Max for Live only (Ableton) | **Yes — any C-calling app** |
+| **GPU context sharing** | Yes (shared device) | N/A | No | **Yes (Vulkan, Metal, OpenGL)** |
+| **Bidirectional textures** | Yes (zero-copy) | N/A | No | **Yes (zero-copy)** |
+| **Bidirectional channels** | Yes (float arrays) | N/A | Limited (Live API) | **Yes (multi-channel CHOP)** |
+| **Bidirectional tables** | Yes (string tables) | N/A | No | **Yes (row×col tables)** |
+| **Bidirectional geometry** | **Read-only** | N/A | No | **Yes (full bidirectional)** |
+| **Bidirectional volumes** | **Not supported** | N/A | No | **Yes** |
+| **Bidirectional particles** | **Not supported** | N/A | No | **Yes** |
+| **MIDI injection** | Parameter mapping only | N/A | Native (Ableton→Max) | **Direct MIDI events** |
+| **OSC injection** | Parameter mapping only | N/A | Native `udpreceive` | **Direct OSC messages** |
+| **Bidirectional events** | Pulse params (host→only) | N/A | No | **Yes (fire_event / on_event)** |
+| **Graph editing from host** | **Not supported** | N/A | No | **Full CRUD (create/delete/connect)** |
+| **Parameter control** | Yes (all types) | N/A | Limited (Live API params) | **Yes (all types)** |
+| **Hot reload** | Yes | N/A | No | **Yes (with state preservation)** |
+| **Data contexts** | 4 (texture, channels, table, limited geo) | 0 | 1 (Ableton params) | **9 (texture, channels, table, geo, volume, particles, MIDI, OSC, events)** |
+
+### What This Means
+
+**libgonodes is the only embeddable node-graph engine that supports bidirectional exchange of 9 data contexts through a single C API.** No other tool comes close:
+
+- **TouchEngine** is the nearest competitor but lacks bidirectional geometry, volume, and particle exchange. It also can't edit the graph at runtime from the host.
+- **vvvv** has no embedding capability at all.
+- **Jitter** can be embedded only within Ableton Live (Max for Live), with extremely limited data exchange — essentially just parameter automation and MIDI.
+
+### Use Cases This Enables (That No Competitor Can)
+
+1. **Game engine integration:** Unity/Unreal/Godot apps embed libgonodes for real-time visual processing. Host pushes game geometry → GONODES processes (fluid sim, particle effects) → host reads back results. Impossible with TouchEngine (no bidirectional geometry).
+
+2. **VJ software plugins:** VDMX, Resolume, or custom VJ tools embed libgonodes as an FxPlug/VST-like plugin. GPU context sharing means zero-copy texture exchange. Hot reload enables live patch editing during performance.
+
+3. **Scientific visualization:** Hosts push volumetric data (CT scans, fluid simulations) into GONODES for GPU-accelerated rendering (raymarching, marching cubes, slicing). Impossible with any competitor — no other tool supports volume data exchange through an embedding API.
+
+4. **Media servers:** LED mapping tools push fixture geometry → GONODES processes → tool reads back mapped color data. Bidirectional SOP exchange makes this seamless.
+
+5. **Runtime graph editing:** Host applications can create nodes, make connections, and modify the processing graph entirely from the C API — enabling procedural graph construction for generative systems. TouchEngine has no graph editing capability.
+
+### Example Host Integration Code
+
+```c
+#include <gonodes_host.h>
+
+// Boot GONODES with shared Vulkan device
+gonodes_gpu_context_t gpu = {
+    .graphics_api = GONODES_GFX_VULKAN,
+    .vulkan_instance = my_instance,
+    .vulkan_physical_device = my_phys_dev,
+    .vulkan_device = my_device
+};
+gonodes_instance_t gn = gonodes_create("project/", &gpu);
+gonodes_load_patch(gn, "effects.gnpatch");
+
+// Frame loop
+gonodes_set_input_texture(gn, "cam_in", vk_image, 1920, 1080);
+gonodes_set_input_chop(gn, "audio_in", fft_data, 2, 512);
+gonodes_cook_frame(gn, delta);
+uint64_t result = gonodes_get_output_texture(gn, "main_out", &w, &h);
+// result is a VkImage on the shared device — bind directly
+```
+
+---
+
+
+---
+
+## 24. 3D Engine Integration
+
+| Feature | TouchDesigner | vvvv beta | vvvv gamma | Jitter | GONODES |
+|---------|-------------|-----------|------------|--------|---------|
+| **Underlying engine** | Custom (Derivative) | Custom (DX11) | Stride (Vulkan-based) | None (raw GL/Metal) | **Godot 4.6** |
+| **Physics** | Bullet (legacy) | Box2D/Bullet plugins | Bepu Physics (Stride) | None built-in | **Jolt Physics (modern)** |
+| **Scene graph** | COMP hierarchy | SceneGraph | Stride SceneGraph | `jit.gl.render` context | **Godot Node3D tree** |
+| **Lighting** | Basic (legacy pipeline) | DX11 deferred | Stride PBR | OpenGL fixed-function + GLSL | **Godot Forward+ PBR** |
+| **Shadows** | Basic shadowmaps | VSM, CSM plugins | Stride shadowmaps | Manual (fragment shader) | **Godot CSM + PCF** |
+| **Post-processing** | GLSL TOPs (manual) | Plugins | Stride post-process | Manual slab chains | **Built-in (glow, DOF, SSAO, SSIL, SSR, fog)** |
+| **VR/AR** | OpenVR/OpenXR plugin | Plugin | Partial | None | **Godot OpenXR** |
+| **PBR materials** | Phong + custom shaders | PBR (DX11 plugins) | Stride PBR | Manual shaders | **StandardMaterial3D (full PBR)** |
+| **Animation** | Basic + CHOP-driven | Timeline | Stride animation | None | **AnimationCOMP + KeyframeCHOP** |
+| **Instancing** | Instance COMP | Instancing (DX11) | Stride instancing | `jit.gl.mesh @draw_mode instanced` | **InstanceCOMP (MultiMesh)** |
+| **Terrain** | Not built-in | Not built-in | Not built-in | Not built-in | **HeightfieldSOP** |
+
+### Jitter's 3D Capabilities
+
+Jitter's 3D pipeline is functional but dated:
+
+- No built-in scene graph — users manually manage render order with `jit.gl.render @erase_color` and draw callbacks
+- No built-in physics (third-party `jit.phys.*` package by Robert Ramirez is discontinued)
+- Lighting is basic OpenGL per-vertex or per-fragment with manual shader setup
+- No PBR material system — users write GLSL manually
+- No shadows without manual implementation
+- No post-processing pipeline — everything is manual slab chains
+
+### GONODES Advantage: Full Godot Engine
+
+GONODES operators run inside Godot 4.6, which means:
+- **Full PBR rendering pipeline** with Forward+ or mobile Compatibility renderer
+- **Jolt physics** (rigid body, soft body, vehicle, constraints) out of the box
+- **Audio engine** with spatial 3D audio, bus effects, spectrum analysis
+- **OpenXR** for VR/AR experiences
+- **Particle systems** (Godot GPUParticles3D available alongside GONODES POP)
+- **Navigation/pathfinding**, **animation**, **terrain**, **decals**, **volumetric fog**
+
+No competitor offers this breadth of engine features. TD has a custom engine that's competent but doesn't match a modern game engine's rendering quality. vvvv gamma's Stride is capable but newer and less feature-complete. Jitter has almost nothing built-in for 3D.
+
+---
+
+
+---
+
+## 25. Shader Authoring
+
+| Feature | TouchDesigner | vvvv | Jitter | GONODES |
+|---------|-------------|------|--------|---------|
+| **Fragment shaders** | GLSL TOP | HLSL (beta), SDSL (gamma) | Gen→GLSL, raw GLSL | CustomShaderTOP (GLSL) |
+| **Compute shaders** | GLSL Compute TOP | Stride compute (gamma) | **Not available** | ComputeShaderTOP |
+| **ISF format** | No | No | No | **Yes (gn_ext_isf)** |
+| **Shadertoy format** | No | No | No | **Yes (gn_ext_shadertoy)** |
+| **Visual shader editor** | No | **VL→shader** (partial) | **Gen** (visual codegen) | No |
+| **Shader presets** | No | No | No | **Yes (factory + user)** |
+| **GLSL hot-reload** | Manual | Manual | Via Gen patching | **Automatic (file watcher)** |
+| **Multi-pass** | Manual chain | Manual | Manual slab chain | FeedbackTOP + shader chain |
+
+### Jitter Gen — A Unique Approach
+
+Gen is Jitter's standout shader feature: a visual patching environment that compiles to GLSL (for GPU) or optimized C (for CPU audio). Users patch with math operators, and Gen generates the shader code. This lowers the barrier to GPU programming significantly — no GLSL syntax knowledge needed.
+
+GONODES has no visual shader editor, but compensates with:
+- **ISF support** — Interactive Shader Format, a cross-platform shader standard with a large community library
+- **Shadertoy support** — one-click import of thousands of shaders from shadertoy.com
+- **Shader presets** — save/load custom shader configurations with factory examples
+
+The visual shader editing gap is real but less critical given ISF/Shadertoy compatibility and the wealth of existing shaders available in those formats.
+
+---
+
+
+---
+
+## 26. Asset & Project Management
+
+| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
+|---------|-------------|------|-------------|---------|
+| **Project format** | `.toe` (binary) | `.vl` (XML in gamma) | `.maxpat` (JSON) | `.gnpatch` (JSON) |
+| **Version control friendly** | No (binary) | Partial (XML) | **Yes (JSON)** | **Yes (JSON)** |
+| **Reusable assets** | `.tox` (COMP export) | NuGet packages | Max patchers + packages | `.gnasset` (JSON, self-contained) |
+| **Asset promotion** | Manual | N/A | Subpatch encapsulation | **Wizard-based (spare params → interface)** |
+| **Instance sync** | Inline (auto-update) | NuGet versioning | Package versioning | Global `.gnasset` sync on save |
+| **Read-only assets** | No | N/A | No | **Yes (lock + "Make Editable" escape hatch)** |
+| **Help patches per node** | Yes (~1 per node) | Yes | Yes (~2–3 per node) | **Yes (3+ per node, 1,413 total)** |
+| **Package manager** | No (community sharing) | NuGet | **Max Package Manager** | No (file-based) |
+| **OS drag-and-drop** | Limited | No | No | **Yes (.gnpatch + .gnasset files)** |
+| **Undo/redo** | Yes | Yes | Yes | **Yes (compound actions)** |
+| **Copy/paste** | Yes | Yes | Yes | **Yes (JSON clipboard)** |
+
+### Jitter/Max's Package Ecosystem
+
+Max has a mature package manager that's a genuine strength — thousands of community packages covering MIDI controllers, audio effects, video processing, ML, and more. `jit.mo` (motion), `jit.bfg` (noise), the VIZZIE library (beginner-friendly video effects) — all installable from within Max.
+
+GONODES has no package manager yet. The extension architecture (`gn_ext_*`) provides the foundation, but there's no discovery/install mechanism beyond manually placing addons.
+
+---
+
+
+---
+
+## 27. UI & Editor Experience
+
+| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
+|---------|-------------|------|-------------|---------|
+| **Node graph style** | Wired, left→right flow | Wired, spread-based (beta); VL (gamma) | Wired, top→down patcher | Wired, left→right (Godot GraphEdit) |
+| **Live node previews** | Yes (TOP thumbnails) | Yes (pins show data) | No (patchers are static) | **Yes (per-node toggle)** |
+| **Parameter inspector** | Right-click dialog | Inspector (gamma) | Object inspector | **Docked inspector panel** |
+| **Performance profiling** | Yes (per-node cook time) | Yes (frame profiler) | No (manual timing) | **Yes (per-node + per-expression µs)** |
+| **Debug tools** | Probe, Info CHOP | Tooltip pins, Renderer | `print`, `jit.print` | **Debug panel (F2, 3 tabs, 5 overlay layers)** |
+| **Code editor** | External (Atom, etc.) | Integrated (VL) | Integrated (Gen) | **Integrated (GNCodeEditor, syntax HL)** |
+| **Context menus** | Yes | Yes | Yes | **Yes (right-click, copy as JSON)** |
+| **Network boxes** | Not built-in | No | None | **Yes (annotations + sticky notes)** |
+| **Timeline** | Basic | Basic | Transport bar | **TimelineCHOP + CueDAT + Editor UI** |
+| **Keyboard shortcuts** | Extensive | Extensive | Extensive | Growing |
+| **Multi-monitor** | Yes (separate windows) | Yes | Yes | WindowOUT (separate windows) |
+| **Float field control** | Slider + text field | Slider | Number box + slider | **Houdini-style (drag, ladder tiers, Shift/Ctrl modifiers)** |
+
+### Jitter/Max Editor Experience
+
+Max's patcher window is fundamentally different from node-graph tools:
+- **Top-down flow** (messages flow down, not left-to-right)
+- **No live previews** — you can't see texture thumbnails on nodes (must open a `jit.pwindow` or `jit.gl.render` window)
+- **Locked/unlocked modes** — edit mode (unlock) vs performance mode (lock). In performance mode, UI objects become interactive. This is unique and powerful for building custom interfaces.
+- **Presentation mode** — a second visual layer where you arrange UI elements for end-user interaction, hiding the patcher underneath
+
+Max's UI building story (presentation mode, bpatcher embedding, Max for Live device creation) is more mature than GONODES's UI operators, though GONODES's UI family provides a node-graph-integrated approach that's arguably more flexible for generative/reactive UIs.
+
+---
+
+
+---
+
+## 28. Cross-Platform & Deployment
+
+| Platform | TouchDesigner | vvvv beta | vvvv gamma | Jitter / Max | GONODES |
+|----------|-------------|-----------|------------|-------------|---------|
+| **Windows** | Primary | Yes | Yes | Yes | **Yes** |
+| **macOS** | Experimental | No | Yes | Yes | **Yes** |
+| **Linux** | No | No | Yes | No | **Yes** |
+| **Web (HTML5)** | No | No | No (planned) | No | **Yes (Godot export)** |
+| **iOS** | No | No | No | No (MIRA remote only) | **Yes (Godot export)** |
+| **Android** | No | No | No | No | **Yes (Godot export)** |
+| **Standalone export** | Yes (Player, TouchEngine) | Yes (exe) | Yes (.exe, runtime) | No (requires Max) | **Yes (Godot export templates)** |
+| **Headless/server** | Limited (TouchEngine) | Yes (beta server) | Yes (.NET console) | No | **Yes (exported player)** |
+| **ARM64** | No | No | Planned | Apple Silicon (Rosetta) | **Yes (native ARM64)** |
+
+### GONODES's Platform Advantage
+
+GONODES inherits Godot's exceptional cross-platform story:
+- **6 target platforms** with native builds (Windows, macOS, Linux, iOS, Android, Web)
+- **ARM64 native** on all platforms (not Rosetta emulation)
+- **Web exports** via Emscripten — run GONODES patches in a browser
+- **Mobile exports** — generative art on phones/tablets
+- **Standalone player** — exported patches run without GONODES editor
+
+No competitor matches this breadth:
+- **TD** is Windows-primary (macOS is experimental/incomplete, no Linux, no mobile, no web)
+- **vvvv gamma** is Windows/macOS/Linux but no mobile or web
+- **Max/Jitter** is Windows/macOS only, requires Max runtime (except embedded in Ableton), no standalone export
+
+For artists creating installations on Raspberry Pi, web-based generative art, or mobile interactive experiences, GONODES is the only option among these tools.
+
+---
+
+
+---
+
+## 29. Audio Pipeline
+
+| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
+|---------|-------------|------|-------------|---------|
+| **Audio synthesis** | Limited (via CHOP) | Limited | **400+ MSP objects — complete audio language** | Limited (21 audio CHOPs) |
+| **Sample-accurate timing** | No (frame-based) | No | **Yes (MSP signal vector)** | No (frame-based) |
+| **Audio effects** | Basic (via CHOP math) | Basic | **Complete (EQ, reverb, delay, compression, etc.)** | AudioDynamicsCHOP (compressor/limiter/gate) |
+| **FFT analysis** | AudioSpectrum CHOP | Plugins | `pfft~` (phase vocoder) | AudioSpectrumCHOP + AudioBandCHOP |
+| **Audio I/O** | 1 device | Basic | **ASIO, CoreAudio, multi-device** | 1 device (Godot AudioServer) |
+| **MIDI→audio** | Via CHOP→audio | Via nodes | **Native (noteout~, etc.)** | Via CHOP→AudioDeviceOUT |
+| **DAW integration** | No | No | **Max for Live (full Ableton integration)** | No |
+| **Spatial audio** | No | No | `mc.` (multichannel) | **Godot AudioStreamPlayer3D** |
+| **Audio recording** | Via FFmpeg | No | `sfrecord~` (WAV/AIFF) | RecordOUT (via FFmpeg) |
+
+### Jitter/Max's Audio Dominance
+
+This is Jitter's (or rather, Max/MSP's) strongest category and the biggest gap between GONODES and the Max ecosystem. Max/MSP is fundamentally an audio programming environment with 35+ years of development. The MSP signal processing layer runs at audio sample rate (typically 44100 Hz) with buffer sizes of 64–512 samples — giving sub-millisecond latency for audio processing.
+
+Key MSP capabilities with no GONODES equivalent:
+- **Synthesis:** Oscillators, wavetable, granular, FM, additive, physical modeling
+- **Spatial:** `mc.` multichannel objects, ambisonics (`hoa.*`), binaural HRTF
+- **Analysis:** FFT with phase vocoder, pitch tracking, onset detection, MFCCs
+- **Effects:** Biquad filters, reverb, delay, chorus, distortion, ring modulation
+- **MIDI sequencing:** Pattern generators, arpeggiators, step sequencers
+
+**However:** This gap is less critical than it appears for GONODES's target use case. GONODES targets **visual art and VJing**, not audio production. Audio analysis (FFT, beat detection) and basic audio output exist. Full audio synthesis is a different domain, and users who need it likely already use Ableton/Max, SuperCollider, or a DAW.
+
+### Roadmap Consideration
+
+GONODES's audio gap analysis (see `GONODES_VS_THE_REST.md` §18.8) identifies 13 missing audio operators across 3 tiers. Implementing Tier 1 (AudioOscillatorCHOP, AudioFilterCHOP, AudioMixCHOP, AudioParaEQCHOP) would enable basic audio-reactive synthesis chains. Full audio synthesis parity with Max is neither achievable nor desirable — it would be reinventing a 35-year-old wheel.
+
+---
+
+
+---
+
+## 30. Physics & Simulation
+
+| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
+|---------|-------------|------|-------------|---------|
+| **Physics engine** | Bullet (legacy) | Box2D, Bullet plugins | None built-in (deprecated `jit.phys.*`) | **Jolt Physics (modern)** |
+| **Rigid body** | Bullet | Plugins | Deprecated | **RigidBodyCOMP** |
+| **Soft body** | No | No | No | **SoftBodyCOMP** |
+| **Cloth** | Not built-in | No | No | **ClothSOP (Verlet PBD)** |
+| **Vehicle physics** | No | No | No | **VehicleCOMP (Jolt)** |
+| **Constraints/joints** | Basic | Basic | No | **JointCOMP (6 joint types)** |
+| **Fluid sim** | Plugin/GLSL workaround | No | No | **FluidVOL (3D Navier-Stokes) + Fluid2DTOP** |
+| **Particle sim** | Legacy Particle SOP | No | Deprecated `jit.phys.*` | **14 POP operators (GPU compute)** |
+| **Pyro (fire/smoke)** | Not built-in | No | No | **PyroVOL** |
+| **Navigation/pathfinding** | No | No | No | **NavigationCOMP** |
+
+GONODES has the strongest physics/simulation offering of all four tools, thanks to Godot's Jolt integration and the custom GPU compute pipelines (POP, VOL).
+
+---
+
+
+---
+
+## 31. Machine Learning & Computer Vision
+
+| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
+|---------|-------------|------|-------------|---------|
+| **ML framework** | TensorFlow, PyTorch plugins | ML.NET, ONNX (gamma) | None built-in | **gn_ext_ml (ONNX Runtime)** |
+| **Object detection** | MediaPipe plugin | YOLO plugin | None | **ObjectDetectDAT** |
+| **Pose estimation** | MediaPipe plugin | None | None | **PoseDetectCHOP** |
+| **Face detection** | MediaPipe plugin | None | None | **FaceDetectCHOP** |
+| **Hand tracking** | MediaPipe plugin | None | None | **HandDetectCHOP** |
+| **Style transfer** | Plugin | None | None | **StyleTransferTOP** |
+| **Depth estimation** | Plugin | None | None | **DepthEstimateTOP** |
+| **Segmentation** | Plugin | None | None | **SegmentationTOP** |
+| **Custom models** | Yes (Python) | Yes (.NET) | No | **OnnxInferenceTOP (any ONNX model)** |
+| **Depth sensors** | Kinect, RealSense, ZED, Leap, Orbbec | Kinect, RealSense, Nuitrack | None | **gn_ext_depth_sensor (3 backends)** |
+
+All four tools have ML capabilities through extensions or plugins. GONODES's gn_ext_ml with 7 dedicated operators provides a well-integrated experience, but TD's MediaPipe integration is more mature and covers more models.
+
+---
+
+
+---
+
+## 32. Community, Ecosystem & Learning Resources
+
+| Aspect | TouchDesigner | vvvv | Jitter / Max | GONODES |
+|--------|-------------|------|-------------|---------|
+| **Community size** | Large (tens of thousands) | Medium (thousands, EU-focused) | Large (Max community; Jitter subset) | **Small (early alpha)** |
+| **Forum** | forum.derivative.ca (very active) | discourse.vvvv.org | cycling74.com/forums | N/A |
+| **Tutorials** | Hundreds (YouTube, courses) | Good documentation + tutorials | Extensive (30+ years of books, courses) | Minimal (help patches only) |
+| **Books** | Several third-party | "vvvv — a Multipurpose Toolkit" | Dozens (Max/MSP, Jitter, Gen) | None |
+| **Courses** | Interactive & Immersive HQ, YouTube channels | NODE festival workshops | Kadenze, Berklee, many universities | None |
+| **Package ecosystem** | Palette (community .tox) | NuGet (gamma), Contribution (beta) | **Max Package Manager (thousands)** | gn_ext_* addons (manual) |
+| **Industrial adoption** | High (studios, agencies, events) | Medium (installations, architecture) | Medium (academic, music) | None yet |
+| **Job market** | Growing (TD-specific job postings) | Niche | Academic + music industry | None |
+| **Documentation** | Good (wiki + Forum) | Good (gamma), aging (beta) | Extensive (Max docs + Jitter tutorials) | 1,413 help patches + dev docs |
+| **Example database** | Palette examples | Girlpower demo folder | Jitter-examples, Recipe series | 1,413 help patches |
+
+### This Is GONODES's Biggest Gap
+
+Community and ecosystem are arguably more important than technical features for adoption. All three competitors have:
+- Years of community-contributed content, tutorials, and examples
+- Paid courses and educational partnerships
+- Studio adoption and production track records
+- Established forums with active support
+
+GONODES has none of this yet. The 1,413 help patches provide excellent per-operator documentation, but there are no tutorials, no courses, no community creators, and no production track record.
+
+**Mitigation strategy:**
+1. The open-source model can attract contributors faster than commercial tools
+2. The Godot ecosystem (2M+ developers) is a potential recruitment pool
+3. TD's high cost ($2,200+) creates a natural market for a free alternative
+4. Quality documentation (help patches, dev docs) lowers the learning curve
+
+---
+
+
+---
+
+## 33. Unique Strengths Per Tool
+
+### TouchDesigner — Only In TD
+
+1. **Multi-stream GPU cook** — parallel command queues for independent TOP chains
+2. **Adaptive quality degradation** — automatic resolution/quality reduction to hit frame targets
+3. **Multi-GPU distribution** — split chains across GPUs
+4. **Deepest hardware I/O** — decades of hardware manufacturer partnerships (Blackmagic, AJA, NVIDIA, Intel RealSense, Ultraleap, etc.)
+5. **TouchEngine SDK** — embed TD processing in other apps (limited vs libgonodes, but mature and battle-tested)
+6. **Industry adoption** — the de facto standard; clients request TD by name
+
+### vvvv — Only In vvvv
+
+1. **VL (Visual Language)** — a genuinely innovative visual OOP system compiled to .NET IL. This is a unique programming paradigm
+2. **Boygroup** — multi-client synchronized rendering for multi-screen installations (beta only, being rebuilt for gamma)
+3. **Stride integration** — a proper game engine (Stride, Vulkan-based) inside a node-based tool
+4. **Free gamma** — no cost, no restrictions, .NET ecosystem access
+5. **European creative tech community** — strong presence in Germany/Austria/Switzerland art and design
+
+### Jitter / Max — Only In Max
+
+1. **Audio-visual integration** — seamless bridge between world-class audio (MSP) and visual processing (Jitter). No other tool can synthesize audio, process video, and sync them with sample-accurate timing in one environment
+2. **Gen** — visual code generation to optimized C (audio) or GLSL (GPU). Lower barrier to GPU programming than writing GLSL
+3. **Max for Live** — deep integration with Ableton Live for audio-visual performance. Millions of Ableton users are potential Max users
+4. **Presentation mode** — build custom end-user interfaces without coding by arranging UI objects on a separate visual layer
+5. **Academic heritage** — IRCAM roots, 35+ years of academic research, thousands of published papers using Max
+
+### GONODES — Only In GONODES
+
+1. **libgonodes host embedding** — 9 bidirectional data contexts, graph editing from host, GPU context sharing. No competitor offers this breadth
+2. **Volume compute pipeline** — 16 VOL operators with GPU compute (Navier-Stokes fluid, raymarching, marching cubes). No competitor has built-in 3D volume processing
+3. **SDF pipeline** — 29 operators for GPU ray-marched signed distance fields. Unique among visual programming tools
+4. **GPU particles (POP)** — 14 SSBO compute-based particle operators. Modern GPU particle system
+5. **Full Godot 4.6 engine** — PBR rendering, Jolt physics, spatial audio, OpenXR, terrain — all available natively. No other visual programming tool sits on top of a modern game engine
+6. **3-tier scripting** — GDScript → Python+NumPy → C++ hot-reload, with integrated code editors for each
+7. **6-platform export** — Windows, macOS, Linux, iOS, Android, Web. No competitor deploys to all six
+8. **Open source** — full source code, no cost at any scale, community-driven
+9. **Non-realtime mode** — deterministic offline rendering for frame-perfect recording
+10. **Input hash cascade stopping** — dirty propagation stops at nodes with unchanged output. Unique among push-based evaluators
+11. **Expression profiling** — per-expression microsecond timing. No competitor offers this
+12. **1,413 help patches** — 3+ example patches per operator with family-appropriate visualization chains
+
+---
+
+
+---
+
+## 34. Conclusion
+
+### Where GONODES Stands Today
+
+GONODES is a technically impressive alpha-stage tool that has achieved remarkable breadth in one year of development:
+
+- **556 operators** across 14 families — more than TD's ~300, comparable to vvvv's ~700
+- **Architecture** — push-based cook engine with 3-tier guard system achieves equivalent work-skipping to TD's mature pull engine
+- **GPU compute** — POP, VOL, and SDF pipelines exceed all three competitors in built-in compute capability
+- **Host embedding** — libgonodes offers the most comprehensive embeddable node-graph engine ever built (9 data contexts, bidirectional, graph editing)
+- **Platform reach** — 6 deployment platforms vs TD's 1.5, Max's 2, vvvv's 3
+- **Open source** — no competitor offers this. Zero cost, full source, no restrictions
+
+### Where GONODES Falls Short
+
+- **Maturity** — alpha status means unknown edge cases, untested production scenarios, and potential architectural issues not yet discovered
+- **Community** — zero community content, tutorials, or production track record. This is the #1 adoption barrier
+- **GPU parallelism** — Godot's single render thread limits multi-chain GPU utilization vs TD
+- **Audio** — orders of magnitude behind Max/MSP for audio synthesis (but this isn't the target domain)
+- **Adaptive quality** — can't gracefully degrade under load like TD can
+
+### Strategic Position
+
+GONODES occupies a unique position that no competitor addresses:
+
+1. **Free + open source** — the only node-based real-time visual tool that's genuinely open
+2. **Embeddable** — the only tool with a comprehensive C embedding API (9 data contexts)
+3. **Full game engine** — the only tool built on a modern game engine with PBR, physics, VR, and 6-platform export
+4. **Compute pipelines** — the only tool with built-in GPU volume, particle, and SDF compute
+
+The competitive strategy should not be "beat TD at being TD" — that's impossible with a 20-year head start. Instead, GONODES should lean into its unique strengths: **open source access**, **embeddability**, **compute pipelines**, **cross-platform reach**, and **Godot engine integration**. These create use cases that TD, vvvv, and Jitter simply cannot address.
+
+The primary risk isn't technical — it's adoption. A technically superior tool with no community will lose to a technically adequate tool with thousands of users and tutorials. Priority #1 should be building the community and content ecosystem that makes GONODES approachable and trustworthy for real projects.
+

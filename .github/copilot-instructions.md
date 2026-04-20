@@ -1,7 +1,7 @@
 # GONODES — Copilot Instructions
 
 > Node-based visual programming framework on Godot 4.6 for real-time visual art.
-> 537 operators, 14 families, GDScript + GDExtension C++.
+> 556 operators, 14 families, GDScript + GDExtension C++.
 
 ## Architecture
 
@@ -161,7 +161,7 @@ Signature: `func get_device_menu() -> PackedStringArray`. Used by: BlackmagicInI
 2. Run `python scripts/scan_operators.py` and `python scripts/build_port_registry.py`
 3. Run `python scripts/generate_help_patches.py --operator <node_type>`
 4. Add entry in `docs/OPERATORS.md`
-5. Update operator counts in: README.md, docs/OPERATORS.md, dev_docs/TESTING.md, dev_docs/GONODES_VS_OTHERS_ALPHA.md
+5. Update operator counts in: README.md, docs/OPERATORS.md, dev_docs/TESTING.md, dev_docs/GONODES_VS_THE_REST.md
 6. Run `python scripts/verify_new_operator.py <ClassName>`
 
 ## Key File Locations
