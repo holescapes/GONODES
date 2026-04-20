@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "dmxin1": {
+            "type": "DmxInCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "universe": {"value": 0},
+                "port": {"value": 6454},
+                "active": {"value": false},
+                "channels": {"value": 16}
+            }
+        },
+        "choptoTop1": {
+            "type": "CHOPtoTOP",
+            "position": [450, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [750, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "dmxin1", "from_port": 0, "to": "choptoTop1", "to_port": 0},
+        {"from": "choptoTop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DMX In CHOP — Basic\n\nReceives DMX-512 values via Art-Net as CHOP channels.\nSet active=true to start listening. Outputs dmx1-dmx16 channels.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

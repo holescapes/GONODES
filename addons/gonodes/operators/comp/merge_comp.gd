@@ -13,8 +13,13 @@ extends GNCompBase
 
 var _group_node: Node3D = null
 
-## Track which child nodes we've adopted so we can clean up properly.
+## Track which child nodes we've adopted (originals or proxies).
 var _managed_children: Array[Node3D] = []
+
+## Proxy tree for fan-out — when an upstream COMP scene node is already
+## claimed by another consumer, we create a visual proxy instead of
+## stealing the original.
+var _proxy_tree: GNProxyTree = GNProxyTree.new()
 
 
 func _init() -> void:
@@ -68,6 +73,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 ## destroys the group node so the next cook rebuilds the merge tree.
 func destroy_scene_node() -> void:
 	_release_children()
+	_proxy_tree.release_all()
 	super.destroy_scene_node()
 	_group_node = null
 	_managed_children.clear()
@@ -128,34 +134,78 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 
 
 ## Populates the group node with children from upstream COMP connections.
-## Uses a stable diff so nodes that haven't changed stay parented — critical
-## for physics bodies that must remain in the scene tree to keep simulating.
+## Uses proxy-or-adopt: if a scene node is orphaned we parent it directly;
+## if it's already claimed by another consumer, we create a visual proxy.
+## Stable diff keeps unchanged nodes parented for physics stability.
 func _sync_children_from_network() -> void:
 	if _group_node == null:
 		return
 
-	# Build the expected child list from current connections (sorted by port)
-	var expected: Array[Node3D] = []
+	# Build the expected source list from current connections (sorted by port)
+	var expected_sources: Array[Node3D] = []
 	for upstream in get_input_nodes_sorted():
 		var comp_data := upstream.cached_output as GNCompData
 		var scene_nd: Node3D = comp_data.scene_node if comp_data != null else null
 		if scene_nd != null:
-			expected.append(scene_nd)
+			expected_sources.append(scene_nd)
 
 	# Remove managed children that are no longer in the expected set
 	for old_child in _managed_children:
-		if old_child != null and is_instance_valid(old_child) and not expected.has(old_child):
-			if old_child.get_parent() == _group_node:
+		if old_child != null and is_instance_valid(old_child) and old_child.get_parent() == _group_node:
+			# Check if this child's source is still expected
+			var still_needed: bool = false
+			for src in expected_sources:
+				if old_child == src:
+					still_needed = true
+					break
+				if _proxy_tree.has_proxy_for(src):
+					var proxy: Node3D = _proxy_tree.get_or_create_proxy(src)
+					if old_child == proxy:
+						still_needed = true
+						break
+			if not still_needed:
 				_group_node.remove_child(old_child)
 
-	# Adopt expected children that aren't already in the group
+	# Clean up proxies for sources no longer connected
+	var stale_proxies: Array[Node3D] = _proxy_tree.cleanup_stale(expected_sources)
+	for proxy: Node3D in stale_proxies:
+		if proxy.get_parent() == _group_node:
+			_group_node.remove_child(proxy)
+
+	# Adopt or proxy each expected source
 	_managed_children.clear()
-	for child in expected:
-		if child.get_parent() != _group_node:
-			if child.get_parent() != null:
-				child.get_parent().remove_child(child)
-			_group_node.add_child(child)
+	for source in expected_sources:
+		var child: Node3D = _adopt_or_proxy_child(source)
 		_managed_children.append(child)
+
+	# Sync all proxies from their sources
+	_proxy_tree.sync_all()
+
+
+## Adopts a source node directly if orphaned, or creates a proxy if the
+## source is already claimed by another consumer.
+func _adopt_or_proxy_child(source: Node3D) -> Node3D:
+	# Already in our group
+	if source.get_parent() == _group_node:
+		return source
+
+	# We already have a proxy for this source — reuse it
+	if _proxy_tree.has_proxy_for(source):
+		var proxy: Node3D = _proxy_tree.get_or_create_proxy(source)
+		if proxy.get_parent() != _group_node:
+			_group_node.add_child(proxy)
+		return proxy
+
+	# Source is orphaned — adopt directly
+	if source.get_parent() == null:
+		_group_node.add_child(source)
+		return source
+
+	# Source is claimed elsewhere (fan-out) — create proxy
+	var proxy: Node3D = _proxy_tree.get_or_create_proxy(source)
+	if proxy.get_parent() != _group_node:
+		_group_node.add_child(proxy)
+	return proxy
 
 
 ## Releases all children back out of the group (detach without freeing).
@@ -164,3 +214,4 @@ func _release_children() -> void:
 		if child != null and is_instance_valid(child) and child.get_parent() == _group_node:
 			_group_node.remove_child(child)
 	_managed_children.clear()
+	_proxy_tree.release_all()

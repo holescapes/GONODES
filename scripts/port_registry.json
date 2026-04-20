@@ -351,6 +351,40 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/delete_chop.gd"
   },
+  "DmxInCHOP": {
+    "class_name": "DmxInCHOP",
+    "family": "CHOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/chop/dmx_in_chop.gd"
+  },
+  "DmxOutCHOP": {
+    "class_name": "DmxOutCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "values",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/chop/dmx_out_chop.gd"
+  },
   "EnvelopeCHOP": {
     "class_name": "EnvelopeCHOP",
     "family": "CHOP",
@@ -1889,6 +1923,20 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/vehicle_comp.gd"
+  },
+  "ArtnetDAT": {
+    "class_name": "ArtnetDAT",
+    "family": "DAT",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/dat/artnet_dat.gd"
   },
   "CallbackDAT": {
     "class_name": "CallbackDAT",

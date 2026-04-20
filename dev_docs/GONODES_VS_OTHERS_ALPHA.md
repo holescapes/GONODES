@@ -44,7 +44,7 @@
 | Dimension | TouchDesigner | vvvv | Jitter (Max/MSP) | GONODES |
 |-----------|--------------|------|-------------------|---------|
 | **Maturity** | 20+ years, industry standard | 25+ years (beta→gamma transition) | 25+ years, deep audio roots | Alpha — 1 year of development |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **536 operators** across 13 families |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **536 operators** across 14 families |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) | $399 (perpetual) or $99/yr sub | **Free, open source (MIT)** |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan | DirectX 11 (beta) / Stride+Vulkan (gamma) | OpenGL (legacy) / Metal (modern) | Vulkan + GLES3 via Godot 4.6 |
 | **Host embedding** | TouchEngine SDK | No | Max for Live; no general SDK | **libgonodes — full C API, 9 data contexts** |
@@ -234,17 +234,18 @@ GONODES GDScript (interpreted)
 
 | Family / Category | TouchDesigner | vvvv gamma | Jitter / Max | GONODES |
 |-------------------|--------------|-----------|-------------|---------|
-| **Texture/image processing** | ~90 TOPs | ~100+ nodes | ~60 `jit.gl.*` + `jit.*` | **143 TOPs + 34 IMGs** |
-| **Signal/channel processing** | ~70 CHOPs | ~80+ nodes | ~200+ MSP objects†† | **85 CHOPs** |
-| **Geometry/mesh** | ~50 SOPs | ~40+ nodes | ~30 `jit.gl.*` mesh ops | **76 SOPs** |
-| **Data tables/text** | ~30 DATs | ~20+ nodes | ~10 `jit.cellblock` etc. | **48 DATs** |
+| **Texture/image processing** | ~90 TOPs | ~100+ nodes | ~60 `jit.gl.*` + `jit.*` | **139 TOPs + 37 IMGs** |
+| **Signal/channel processing** | ~70 CHOPs | ~80+ nodes | ~200+ MSP objects†† | **82 CHOPs** |
+| **Geometry/mesh** | ~50 SOPs | ~40+ nodes | ~30 `jit.gl.*` mesh ops | **74 SOPs** |
+| **Data tables/text** | ~30 DATs | ~20+ nodes | ~10 `jit.cellblock` etc. | **47 DATs** |
 | **Materials** | ~10 MATs | ~15+ (Stride materials) | ~5 shader objects | **12 MATs** |
-| **Scene composition** | ~25 COMPs | ~30+ nodes | ~15 `jit.gl.*` scene | **26 COMPs** |
-| **GPU particles** | Particle SOP (legacy) | None built-in | None | **14 POP operators** |
-| **3D Volumes** | Not native | Not native | None | **16 VOL operators** |
+| **Scene composition** | ~25 COMPs | ~30+ nodes | ~15 `jit.gl.*` scene | **23 COMPs** |
+| **GPU particles** | Particle SOP (legacy) | None built-in | None | **13 POP operators** |
+| **3D Volumes** | Not native | Not native | None | **15 VOL operators** |
 | **SDF rendering** | Not native | None | None | **29 SDF operators** |
 | **UI widgets** | Panel COMP widgets | ~30+ UI nodes | Max UI objects (separate) | **36 UI operators** |
-| **Output/export** | Built-in (Record, etc.) | Built-in | `jit.record`, `jit.movie` | **17 OUT operators** |
+| **Output/export** | Built-in (Record, etc.) | Built-in | `jit.record`, `jit.movie` | **11 OUT operators** |
+| **Networking/subnets** | — | — | — | **15 NET operators** |
 | **Script operators** | Python DAT/callbacks | VL (visual code) | Gen, JavaScript | **3 SCRIPT operators** |
 | **Total** | **~300+ built-in** | **~700+ nodes** | **~200+ Jitter + 400+ Max** | **536 operators** |
 
@@ -252,11 +253,11 @@ GONODES GDScript (interpreted)
 
 ### Where GONODES Leads in Operator Coverage
 
-1. **GPU Volume pipeline:** 16 VOL operators (Navier-Stokes fluid, raymarching, marching cubes, pyro). No competitor has this built-in.
+1. **GPU Volume pipeline:** 15 VOL operators (Navier-Stokes fluid, raymarching, marching cubes, pyro). No competitor has this built-in.
 2. **SDF rendering:** 29 operators (ray-marched signed distance fields). No competitor offers this natively.
-3. **GPU Particles:** 14 POP operators (SSBO compute). TD has legacy Particle SOP; vvvv and Jitter have nothing built-in.
-4. **Texture operators:** 143 TOPs + 34 IMGs = 177 texture/image operators — exceeds all competitors.
-5. **Geometry operators:** 76 SOPs — exceeds TD (~50) and Jitter (~30), comparable to vvvv.
+3. **GPU Particles:** 13 POP operators (SSBO compute). TD has legacy Particle SOP; vvvv and Jitter have nothing built-in.
+4. **Texture operators:** 139 TOPs + 37 IMGs = 176 texture/image operators — exceeds all competitors.
+5. **Geometry operators:** 74 SOPs — exceeds TD (~50) and Jitter (~30), comparable to vvvv.
 
 ### Where GONODES Trails
 
@@ -872,7 +873,7 @@ Based on the competitive landscape, here are the recommended priorities for GONO
 
 GONODES is a technically impressive alpha-stage tool that has achieved remarkable breadth in one year of development:
 
-- **536 operators** across 13 families — more than TD's ~300, comparable to vvvv's ~700
+- **536 operators** across 14 families — more than TD's ~300, comparable to vvvv's ~700
 - **Architecture** — push-based cook engine with 3-tier guard system achieves equivalent work-skipping to TD's mature pull engine
 - **GPU compute** — POP, VOL, and SDF pipelines exceed all three competitors in built-in compute capability
 - **Host embedding** — libgonodes offers the most comprehensive embeddable node-graph engine ever built (9 data contexts, bidirectional, graph editing)

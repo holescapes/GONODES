@@ -15,6 +15,10 @@ var _body: CharacterBody3D = null
 var _mesh_instance: MeshInstance3D = null
 var _last_floor_mesh: Mesh = null
 
+## Proxy tree for fan-out — when upstream COMP mesh is already
+## claimed by another consumer.
+var _proxy_tree: GNProxyTree = GNProxyTree.new()
+
 
 func _init() -> void:
 	node_type = "navigation"
@@ -109,14 +113,26 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			if look_dir.length_squared() > 0.001:
 				_body.look_at(_body.global_position + look_dir, Vector3.UP)
 
-	# Adopt upstream mesh for visual representation
+	# Adopt or proxy upstream mesh for visual representation
 	var upstream_node: Node3D = _get_upstream_scene_node(0)
 	if upstream_node != null and upstream_node is MeshInstance3D:
-		if upstream_node.get_parent() != _body:
-			if upstream_node.get_parent() != null:
-				upstream_node.get_parent().remove_child(upstream_node)
-			_body.add_child(upstream_node)
-		upstream_node.position = Vector3.ZERO
+		var source: MeshInstance3D = upstream_node as MeshInstance3D
+		var child: Node3D
+		if source.get_parent() == _body:
+			child = source
+		elif _proxy_tree.has_proxy_for(source):
+			child = _proxy_tree.get_or_create_proxy(source)
+			if child.get_parent() != _body:
+				_body.add_child(child)
+		elif source.get_parent() == null:
+			_body.add_child(source)
+			child = source
+		else:
+			child = _proxy_tree.get_or_create_proxy(source)
+			if child.get_parent() != _body:
+				_body.add_child(child)
+		child.position = Vector3.ZERO
+		_proxy_tree.sync_all()
 
 	node_warning = ""
 	if _agent.is_navigation_finished():

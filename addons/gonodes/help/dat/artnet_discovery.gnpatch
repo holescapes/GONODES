@@ -1,0 +1,46 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "artnet1": {
+            "type": "ArtnetDAT",
+            "position": [100, 100],
+            "parameters": {
+                "active": {"value": false},
+                "port": {"value": 6454},
+                "poll_interval": {"value": 10.0},
+                "auto_poll": {"value": true},
+                "timeout": {"value": 30.0}
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [450, 100],
+            "parameters": {
+                "text": {"value": "Art-Net Discovery"},
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [750, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "texttop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "Art-Net DAT — Discovery\n\nListens for ArtPollReply packets to discover Art-Net nodes.\nOutputs table: IP, name, firmware, universes, port count.\nSet active=true to start discovery.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

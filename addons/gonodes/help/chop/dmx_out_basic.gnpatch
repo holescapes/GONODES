@@ -1,0 +1,60 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "channel1": {
+            "type": "ChannelCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "count": {"value": 4},
+                "name0": {"value": "ch1"},
+                "value0": {"value": 255.0},
+                "name1": {"value": "ch2"},
+                "value1": {"value": 128.0},
+                "name2": {"value": "ch3"},
+                "value2": {"value": 64.0},
+                "name3": {"value": "ch4"},
+                "value3": {"value": 0.0}
+            }
+        },
+        "dmxout1": {
+            "type": "DmxOutCHOP",
+            "position": [450, 100],
+            "parameters": {
+                "universe": {"value": 0},
+                "ip": {"value": "255.255.255.255"},
+                "port": {"value": 6454},
+                "active": {"value": false},
+                "channels": {"value": 512}
+            }
+        },
+        "choptoTop1": {
+            "type": "CHOPtoTOP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "channel1", "from_port": 0, "to": "dmxout1", "to_port": 0},
+        {"from": "dmxout1", "from_port": 0, "to": "choptoTop1", "to_port": 0},
+        {"from": "choptoTop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DMX Out CHOP — Basic\n\nSends CHOP channel values as DMX-512 via Art-Net.\nSet active=true to broadcast. Passes input through to output.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

@@ -12,6 +12,14 @@ extends GNCompBase
 var _container: Node3D = null
 var _last_active_lod: int = -1
 
+## Proxy tree for fan-out — when upstream LOD scene nodes are already
+## claimed by another consumer.
+var _proxy_tree: GNProxyTree = GNProxyTree.new()
+
+## Maps LOD index to the Node3D actually parented under _container
+## (either the original or a proxy).
+var _managed_lod_nodes: Array = [null, null, null, null]
+
 
 func _init() -> void:
 	node_type = "lod"
@@ -61,13 +69,29 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		node_warning = "LOD 0 (highest detail) not connected"
 		return null
 
-	# Reparent all LOD nodes under our container
+	# Adopt or proxy all LOD nodes under our container
+	var active_sources: Array[Node3D] = []
 	for i in range(4):
 		var node := lod_nodes[i]
-		if node != null and node.get_parent() != _container:
-			if node.get_parent() != null:
-				node.get_parent().remove_child(node)
-			_container.add_child(node)
+		if node == null:
+			# Remove stale managed node if the LOD was disconnected
+			if _managed_lod_nodes[i] != null and is_instance_valid(_managed_lod_nodes[i]):
+				if _managed_lod_nodes[i].get_parent() == _container:
+					_container.remove_child(_managed_lod_nodes[i])
+			_managed_lod_nodes[i] = null
+			continue
+		active_sources.append(node)
+		var child: Node3D = _adopt_or_proxy_lod(node)
+		_managed_lod_nodes[i] = child
+
+	# Clean up proxies for sources no longer connected
+	var stale: Array[Node3D] = _proxy_tree.cleanup_stale(active_sources)
+	for proxy: Node3D in stale:
+		if proxy.get_parent() == _container:
+			_container.remove_child(proxy)
+
+	# Sync all proxies from their sources
+	_proxy_tree.sync_all()
 
 	# Determine active LOD
 	var active_lod: int = 0
@@ -82,8 +106,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# Show only active LOD, hide others
 	for i in range(4):
-		if lod_nodes[i] != null:
-			lod_nodes[i].visible = (i == active_lod)
+		if _managed_lod_nodes[i] != null and is_instance_valid(_managed_lod_nodes[i]):
+			_managed_lod_nodes[i].visible = (i == active_lod)
 
 	_last_active_lod = active_lod
 
@@ -137,7 +161,28 @@ func _ensure_container() -> void:
 	_scene_node = _container
 
 
+## Adopts a source node directly if orphaned, or creates a proxy if the
+## source is already claimed by another consumer.
+func _adopt_or_proxy_lod(source: Node3D) -> Node3D:
+	if source.get_parent() == _container:
+		return source
+	if _proxy_tree.has_proxy_for(source):
+		var proxy: Node3D = _proxy_tree.get_or_create_proxy(source)
+		if proxy.get_parent() != _container:
+			_container.add_child(proxy)
+		return proxy
+	if source.get_parent() == null:
+		_container.add_child(source)
+		return source
+	var proxy: Node3D = _proxy_tree.get_or_create_proxy(source)
+	if proxy.get_parent() != _container:
+		_container.add_child(proxy)
+	return proxy
+
+
 func _on_node_removed() -> void:
+	_proxy_tree.release_all()
+	_managed_lod_nodes = [null, null, null, null]
 	if _container != null and is_instance_valid(_container):
 		if _container.get_parent() != null:
 			_container.get_parent().remove_child(_container)

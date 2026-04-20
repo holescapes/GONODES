@@ -1,0 +1,72 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "lfo1": {
+            "type": "LFO_CHOP",
+            "position": [100, 100],
+            "parameters": {
+                "frequency": {"value": 0.5},
+                "amplitude": {"value": 127.0},
+                "offset": {"value": 128.0}
+            }
+        },
+        "merge1": {
+            "type": "MergeCHOP",
+            "position": [350, 200],
+            "parameters": {}
+        },
+        "constant1": {
+            "type": "ConstantCHOP",
+            "position": [100, 300],
+            "parameters": {
+                "count": {"value": 3},
+                "name0": {"value": "r"},
+                "value0": {"value": 200.0},
+                "name1": {"value": "g"},
+                "value1": {"value": 100.0},
+                "name2": {"value": "b"},
+                "value2": {"value": 50.0}
+            }
+        },
+        "dmxout1": {
+            "type": "DmxOutCHOP",
+            "position": [650, 200],
+            "parameters": {
+                "universe": {"value": 0},
+                "active": {"value": false},
+                "channels": {"value": 4}
+            }
+        },
+        "choptoTop1": {
+            "type": "CHOPtoTOP",
+            "position": [950, 200],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1250, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "lfo1", "from_port": 0, "to": "merge1", "to_port": 0},
+        {"from": "constant1", "from_port": 0, "to": "merge1", "to_port": 1},
+        {"from": "merge1", "from_port": 0, "to": "dmxout1", "to_port": 0},
+        {"from": "dmxout1", "from_port": 0, "to": "choptoTop1", "to_port": 0},
+        {"from": "choptoTop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DMX Out CHOP — Chase\n\nAnimated DMX channels via LFO + constants merged together.\nPasses through to CHOPtoTOP for visualization.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

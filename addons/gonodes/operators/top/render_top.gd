@@ -19,7 +19,8 @@ var _world_env: WorldEnvironment = null
 ## External environment from upstream GNCompData (set by EnvironmentCOMP).
 var _upstream_environment: Environment = null
 
-## Track which scene nodes are currently in the viewport
+## Track which scene nodes are currently in the viewport.
+## These may be original scene nodes OR proxies — managed uniformly.
 var _managed_children: Array[Node3D] = []
 
 ## Previous frame's managed children — used for stable diff so physics
@@ -30,6 +31,12 @@ var _prev_managed: Array[Node3D] = []
 ## Used to gate the physics-body registration walk so it costs zero on
 ## steady-state frames where the scene composition hasn't changed.
 var _new_nodes_adopted: bool = false
+
+## Proxy tree manager — creates and caches visual proxies for COMP scene
+## nodes that are already claimed by another consumer (fan-out).  Proxies
+## share GPU resources (Mesh, Material) so fan-out costs only the Node3D
+## wrapper overhead.
+var _proxy_tree: GNProxyTree = GNProxyTree.new()
 
 
 ## Override execute_cook: for 3D viewports the render mode must stay at
@@ -239,6 +246,9 @@ func _setup_viewport() -> void:
 
 ## Populates the 3D viewport with scene nodes from connected COMPs.
 ## Iterates connections sorted by input port index for deterministic ordering.
+## Uses proxy-or-adopt: if a scene node is orphaned, adopts it directly
+## (zero overhead for single-consumer case); if it's already claimed by
+## another consumer, creates a lightweight visual proxy.
 func _populate_scene_from_network() -> void:
 	if _viewport == null:
 		return
@@ -246,6 +256,7 @@ func _populate_scene_from_network() -> void:
 	var cook_engine: GNCookEngine = get_parent() as GNCookEngine if get_parent() is GNCookEngine else null
 	var net: GNNetwork = cook_engine.network if cook_engine != null else null
 	var has_camera: bool = false
+	var active_sources: Array[Node3D] = []
 
 	for upstream_node in get_input_nodes_sorted():
 		# Check data type — works for any node (GNCompBase, NullCOMP,
@@ -265,16 +276,22 @@ func _populate_scene_from_network() -> void:
 		if scene_nd == null:
 			continue
 
-		_adopt_scene_node(scene_nd)
+		active_sources.append(scene_nd)
+		var viewport_node: Node3D = _adopt_or_proxy(scene_nd)
 
 		# Camera bookkeeping — activate any camera found.
-		# Check the scene node itself and its subtree (cameras may be nested
-		# under MergeCOMP, NullCOMP, SubNetworkNode, etc.).
-		if scene_nd is Camera3D:
-			(scene_nd as Camera3D).current = true
+		# Uses the viewport node (may be a proxy) so .current works.
+		if viewport_node is Camera3D:
+			(viewport_node as Camera3D).current = true
 			has_camera = true
-		elif not has_camera and scene_nd.get_child_count() > 0:
-			has_camera = _activate_camera_in_subtree(scene_nd)
+		elif not has_camera and viewport_node.get_child_count() > 0:
+			has_camera = _activate_camera_in_subtree(viewport_node)
+
+	# Clean up proxies for sources no longer connected
+	var stale_proxies: Array[Node3D] = _proxy_tree.cleanup_stale(active_sources)
+	for proxy: Node3D in stale_proxies:
+		if proxy.get_parent() == _viewport:
+			_viewport.remove_child(proxy)
 
 	# If no camera COMP is connected, create a default camera
 	if not has_camera:
@@ -298,15 +315,43 @@ func _activate_camera_in_subtree(root: Node3D) -> bool:
 	return false
 
 
-## Adds a 3D node to the viewport if not already there.
-## Always tracks the node in _managed_children for stable diff.
-func _adopt_scene_node(node_3d: Node3D) -> void:
-	if node_3d.get_parent() != _viewport:
-		if node_3d.get_parent() != null:
-			node_3d.get_parent().remove_child(node_3d)
-		_viewport.add_child(node_3d)
+## Adds a 3D node (or its proxy) to the viewport.
+## If the source is orphaned, adopts it directly (zero cost for single
+## consumer).  If the source is already parented elsewhere (fan-out),
+## creates a visual proxy that shares GPU resources with the original.
+## Returns the node actually placed in the viewport (original or proxy).
+func _adopt_or_proxy(source: Node3D) -> Node3D:
+	# Already in our viewport from a previous frame — just re-track.
+	if source.get_parent() == _viewport:
+		_managed_children.append(source)
+		# Sync proxied properties even when not newly adopted
+		if _proxy_tree.has_proxy_for(source):
+			_proxy_tree.sync_all()
+		return source
+
+	# Check if we already have a proxy for this source
+	if _proxy_tree.has_proxy_for(source):
+		var proxy: Node3D = _proxy_tree.get_or_create_proxy(source)
+		if proxy.get_parent() != _viewport:
+			_viewport.add_child(proxy)
+			_new_nodes_adopted = true
+		_managed_children.append(proxy)
+		return proxy
+
+	# Source is orphaned — adopt directly (most common path).
+	if source.get_parent() == null:
+		_viewport.add_child(source)
 		_new_nodes_adopted = true
-	_managed_children.append(node_3d)
+		_managed_children.append(source)
+		return source
+
+	# Source is claimed by another consumer (fan-out) — create proxy.
+	var proxy: Node3D = _proxy_tree.get_or_create_proxy(source)
+	if proxy.get_parent() != _viewport:
+		_viewport.add_child(proxy)
+		_new_nodes_adopted = true
+	_managed_children.append(proxy)
+	return proxy
 
 
 ## Force-register any physics bodies not yet in the viewport's physics space.
@@ -365,6 +410,7 @@ func _clear_managed_children() -> void:
 ## nodes fresh.  Called by the editor Stop button after all COMPs have
 ## destroyed their scene nodes.
 func reset_viewport() -> void:
+	_proxy_tree.release_all()
 	_clear_managed_children()
 	_prev_managed.clear()
 	_new_nodes_adopted = false

@@ -12,6 +12,11 @@ extends GNCompBase
 var _attachment: BoneAttachment3D = null
 var _last_bone_name: String = ""
 
+## Proxy tree for fan-out — when upstream attach COMP scene node is already
+## claimed by another consumer.
+var _proxy_tree: GNProxyTree = GNProxyTree.new()
+var _managed_attach: Node3D = null
+
 
 func _init() -> void:
 	node_type = "bone"
@@ -78,13 +83,26 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_attachment.position = offset_pos
 	_attachment.rotation_degrees = offset_rot
 
-	# If attach input is provided, reparent its scene node under the attachment
+	# If attach input is provided, adopt or proxy its scene node under the attachment
 	if attach_data != null:
 		var attach_node: Node3D = _get_upstream_scene_node(1)
-		if attach_node != null and attach_node.get_parent() != _attachment:
-			if attach_node.get_parent() != null:
-				attach_node.get_parent().remove_child(attach_node)
-			_attachment.add_child(attach_node)
+		if attach_node != null:
+			var child: Node3D
+			if attach_node.get_parent() == _attachment:
+				child = attach_node
+			elif _proxy_tree.has_proxy_for(attach_node):
+				child = _proxy_tree.get_or_create_proxy(attach_node)
+				if child.get_parent() != _attachment:
+					_attachment.add_child(child)
+			elif attach_node.get_parent() == null:
+				_attachment.add_child(attach_node)
+				child = attach_node
+			else:
+				child = _proxy_tree.get_or_create_proxy(attach_node)
+				if child.get_parent() != _attachment:
+					_attachment.add_child(child)
+			_managed_attach = child
+			_proxy_tree.sync_all()
 
 	# Override pose if requested
 	if get_param_value("override_pose"):
@@ -125,6 +143,8 @@ func _list_bones(skeleton: Skeleton3D) -> String:
 
 
 func _cleanup_attachment() -> void:
+	_proxy_tree.release_all()
+	_managed_attach = null
 	if _attachment != null and is_instance_valid(_attachment):
 		if _attachment.get_parent() != null:
 			_attachment.get_parent().remove_child(_attachment)

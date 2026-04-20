@@ -17,6 +17,10 @@ var _wheels: Array[VehicleWheel3D] = []
 var _mesh_instance: MeshInstance3D = null
 var _current_shape_type: int = -1
 
+## Proxy tree for fan-out — when upstream COMP mesh is already
+## claimed by another consumer.
+var _proxy_tree: GNProxyTree = GNProxyTree.new()
+
 
 func _init() -> void:
 	node_type = "vehicle"
@@ -199,17 +203,31 @@ func _update_wheel_params() -> void:
 
 func _adopt_mesh_from_upstream(upstream_node: Node3D) -> void:
 	if upstream_node is MeshInstance3D:
-		if _mesh_instance != upstream_node:
-			if _mesh_instance != null and is_instance_valid(_mesh_instance):
+		var source: MeshInstance3D = upstream_node as MeshInstance3D
+		# Use proxy-or-adopt pattern for fan-out safety
+		var child: Node3D
+		if source.get_parent() == _vehicle:
+			child = source
+		elif _proxy_tree.has_proxy_for(source):
+			child = _proxy_tree.get_or_create_proxy(source)
+			if child.get_parent() != _vehicle:
+				_vehicle.add_child(child)
+		elif source.get_parent() == null:
+			_vehicle.add_child(source)
+			child = source
+		else:
+			child = _proxy_tree.get_or_create_proxy(source)
+			if child.get_parent() != _vehicle:
+				_vehicle.add_child(child)
+		if _mesh_instance != child:
+			if _mesh_instance != null and is_instance_valid(_mesh_instance) and _mesh_instance != source:
 				_mesh_instance.queue_free()
-			_mesh_instance = upstream_node as MeshInstance3D
-			if _mesh_instance.get_parent() != _vehicle:
-				if _mesh_instance.get_parent() != null:
-					_mesh_instance.get_parent().remove_child(_mesh_instance)
-				_vehicle.add_child(_mesh_instance)
+			_mesh_instance = child as MeshInstance3D if child is MeshInstance3D else null
+		_proxy_tree.sync_all()
 
 
 func _on_node_removed() -> void:
+	_proxy_tree.release_all()
 	_wheels.clear()
 	if _vehicle != null and is_instance_valid(_vehicle):
 		if _vehicle.get_parent() != null:

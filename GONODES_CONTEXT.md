@@ -1020,6 +1020,7 @@ GONODES/
 │       │   ├── gn_dat_base.gd      # GNDatBase — DAT family base (table cache, label preview)
 │       │   ├── gn_sop_base.gd      # GNSopBase — SOP family base (geo cache, label preview)
 │       │   ├── gn_comp_base.gd     # GNCompBase — COMP family base (scene node, auto-cleanup)
+│       │   ├── gn_proxy_tree.gd    # GNProxyTree — visual proxy creation/sync for COMP fan-out
 │       │   ├── gn_port.gd          # GNPort definition (RefCounted)
 │       │   ├── gn_connection.gd    # GNConnection (RefCounted)
 │       │   ├── gn_network.gd       # GNNetwork (Resource — serialization boundary)
@@ -3844,15 +3845,17 @@ These are non-negotiable constraints discovered during development. **Never viol
 - **Cook engine path:** `_gather_inputs()` uses a single code path — port-indexed array with possible null entries for disconnected ports. Operators must handle null inputs.
 - Supersedes the old `port.multi_input` flag and the `num_inputs` parameter pattern. `GNPort.multi_input` still exists but is unused (deprecated).
 
-### 25.11 COMP Nodes: Scene-Node Ownership, Not Data Flow
+### 25.11 COMP Nodes: Scene-Node Ownership, Proxy Fan-Out
 
 - COMPs return `GNCompData` (via `_build_comp_data()`) wrapping a **reference** to their singleton `_scene_node` (MeshInstance3D, Camera3D, Light3D, etc.)
-- `GNCompData` is a pointer in a box — Node3D objects can only have one scene-tree parent and can’t be meaningfully duplicated, so the normal GNData copy-on-write model doesn’t apply
+- `GNCompData` is a pointer in a box — Node3D objects can only have one scene-tree parent, so the normal GNData copy-on-write model doesn’t apply
 - `GNCompData.environment` — optional `Environment` resource field, set by EnvironmentCOMP. RenderTOP checks `comp_data.environment != null` to apply it. Routes through NullCOMP and SubNetworkNode correctly.
 - **Unified data-type access:** All scene-node resolution uses `cached_output as GNCompData` — no node-type checks (`is GNCompBase`). This works for any upstream node (GNCompBase, SubNetworkNode, GNCustomOperator, etc.)
 - **Static graph walker:** `GNCompBase.resolve_scene_node_upstream(node, net)` walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP) to find the actual scene node. Uses data-type checking only.
 - **Base-class helpers:** `GNCompBase._get_upstream_scene_node(port)` and `_resolve_upstream_mesh()` are inherited by all COMP subclasses — no per-operator duplication needed
-- **RenderTOP:** Calls `resolve_scene_node_upstream()` for each upstream COMP input, then reparents the scene node into its SubViewport
+- **Fan-out via GNProxyTree:** When a COMP scene node fans out to multiple consumers (two RenderTOPs, or two MergeCOMPs), the first consumer adopts the original (zero overhead), subsequent consumers get lightweight visual proxies via `GNProxyTree`. Proxies share GPU resources (Mesh, Material, MultiMesh, Texture) — only the Node3D wrapper is duplicated. Physics bodies become plain Node3D placeholders in proxies (collision/simulation is NOT duplicated). `GNProxyTree.sync_all()` updates proxy transforms/properties from sources each frame.
+- **RenderTOP:** Calls `resolve_scene_node_upstream()` for each upstream COMP input, then adopts or proxies the scene node into its SubViewport via `_adopt_or_proxy()`
+- **MergeCOMP:** Calls `_adopt_or_proxy_child()` for each upstream scene node. If the node is orphaned, adopts directly; if already claimed, creates a proxy.
 - Typed accessors: `GeometryCOMP.get_mesh_instance()`, `CameraCOMP.get_camera()`, `LightCOMP.get_light()`
 
 ### 25.12 SubViewport World3D for Isolated 3D Scenes
@@ -4053,6 +4056,28 @@ func get_output_data(port_index: int) -> GNData:
 - Data-type checks work uniformly for `GNCompBase`, `SubNetworkNode`, `GNCustomOperator`, and any future node type that outputs the same data class.
 - Node-family checks silently reject valid data from nodes with a different family. Example: a `SubNetworkNode` outputting `GNChannelData` has `family == NET`, not `CHOP` — a family guard would wrongly reject it even though the data is perfectly valid `GNChannelData`.
 - No exceptions — every COMP operator, including EnvironmentCOMP, returns proper `GNCompData`.
+
+
+### 25.27 COMP Proxy Bookkeeping for New Node Types
+
+- **When adding a new COMP operator** that creates a _scene_node, check whether it needs proxy support in GNProxyTree.
+- GNProxyTree._create_proxy_node() matches source types: MeshInstance3D, MultiMeshInstance3D, Camera3D, DirectionalLight3D, OmniLight3D, SpotLight3D. Any unrecognized type falls through to a plain Node3D placeholder.
+- **If the new COMP creates a visual node type not in that list** (e.g., GPUParticles3D, CSGShape3D, Decal), add a typed proxy factory to GNProxyTree that shares the relevant GPU resource and syncs the relevant properties.
+- **If the new COMP creates a physics body** (PhysicsBody3D subclass), the proxy system creates a plain Node3D placeholder and proxies the body's visual children only. Collision/simulation is NOT duplicated. Document this in the operator's class comment.
+- **Property sync:** _sync_visual_properties() must cover any properties that change per-frame (transform, visibility, mesh/material assignment, light color/energy, camera FOV/projection). Static properties set once at creation time don't need per-frame sync.
+- **Test requirement:** When adding a new proxyable type, add a 	est_proxy_<type> test in 	ests/unit/core/test_proxy_tree.gd.
+
+### 25.28 Family-Output Coherence (No Hidden Conversions)
+
+- **Every operator MUST output data matching its declared family.** A CHOP outputs `GNChannelData`, a DAT outputs `GNTableData`, a TOP outputs `GNTextureData`, an IMG outputs `GNImageData`, a SOP outputs `GNGeoData`, a VOL outputs `GNVolumeData`, a POP outputs `GNParticleData`, a COMP outputs `GNCompData`, a MAT outputs `GNMaterialData`, an SDF outputs `GNSDFData`.
+- **No hidden cross-family conversions.** If an operator conceptually works with float arrays / channel data, it belongs in the CHOP family — not DAT (which is for tables/text). If it processes CPU pixel buffers, it belongs in IMG — not TOP (which is for GPU textures). If it generates geometry, it belongs in SOP — not CHOP.
+- **Users convert between families explicitly** using bridge operators: `CHOPtoTOP`, `ImgToTOP`, `TOPtoIMG`, `SOPtoDAT`, `DATtoCHOP`, `CHOPtoSOP`, `TOPtoSOP`, `SOPtoCHOP`, `TOPtoCHOP`, `TOPtoDAT`, `CHOPtoVOL`, `SOPtoVOL`.
+- **Exceptions (must be named or documented):**
+  1. **Named bridge operators** — their name explicitly declares the conversion (e.g., `CHOPtoTOP`, `ImgToTOP`, `RaymarchSDF`).
+  2. **Multi-output operators (rule 25.24)** — secondary output ports may emit a different family (e.g., `MovieFileInTOP` port 1 emits CHOP audio). These MUST be demand-gated via `is_output_demanded(N)`.
+  3. **NET host-bridge operators** — `HostInTOP`, `HostInCHOP`, etc. output typed data matching their bridge target. Their family is NET but output type matches the target family.
+- **Why this matters:** Implicit conversions waste CPU/GPU cycles (e.g., converting floats to strings in a table only to parse them back downstream), break the type-safe port system, and confuse users about what data is flowing through the graph. Explicit bridges make the conversion visible and let the user choose the optimal pipeline.
+
 
 ---
 

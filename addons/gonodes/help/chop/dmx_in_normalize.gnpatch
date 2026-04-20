@@ -1,0 +1,51 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "dmxin1": {
+            "type": "DmxInCHOP",
+            "position": [100, 100],
+            "parameters": {
+                "universe": {"value": 0},
+                "port": {"value": 6454},
+                "active": {"value": false},
+                "channels": {"value": 512}
+            }
+        },
+        "math1": {
+            "type": "MathCHOP",
+            "position": [450, 100],
+            "parameters": {
+                "multiply": {"value": 0.00392156862}
+            }
+        },
+        "choptoTop1": {
+            "type": "CHOPtoTOP",
+            "position": [800, 100],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [1100, 100],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open": {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "dmxin1", "from_port": 0, "to": "math1", "to_port": 0},
+        {"from": "math1", "from_port": 0, "to": "choptoTop1", "to_port": 0},
+        {"from": "choptoTop1", "from_port": 0, "to": "window1", "to_port": 0}
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DMX In CHOP — Normalized\n\nReceives DMX (0-255), normalizes to 0.0-1.0 via MathCHOP multiply.\n(1/255 = 0.00392156862) Ready for use as control signals.",
+            "position": [-100.0, -120.0],
+            "size": [500.0, 120.0],
+            "color": [1.0, 1.0, 1.0, 0.8]
+        }
+    ]
+}

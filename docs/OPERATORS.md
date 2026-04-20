@@ -3338,11 +3338,52 @@ Multi-band frequency analysis with per-band envelope followers. Takes an AudioSp
 
 ---
 
+### DMX / Lighting
+
+---
+
+#### DmxOutCHOP
+
+Sends input CHOP channel values as DMX-512 via Art-Net UDP broadcast. Channels are mapped to DMX slots in order (first channel → DMX 1, second → DMX 2, etc.). Values are clamped to 0–255. Passes the input through to the output unchanged.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| universe | Int | 0 | 0–32767 | DMX universe number |
+| ip | String | 255.255.255.255 | — | Art-Net destination IP |
+| port | Int | 6454 | 1–65535 | Art-Net UDP port |
+| active | Bool | false | — | Enable Art-Net sending |
+| channels | Int | 512 | 1–512 | Number of active DMX channels to send |
+
+**Input:** `values` (CHOP — channel values to send as DMX).
+**Output:** `out` (CHOP — pass-through of input channels).
+
+**How it works:** Each cook, reads all input channels and packs them into an Art-Net OpDmx packet (protocol version 14, DMX-512 format). The packet is broadcast via `PacketPeerUDP`. The input data is passed through to the output, allowing downstream CHOP processing to continue. A new UDP socket is created per send (stateless — no persistent connection needed for broadcast).
+
+---
+
+#### DmxInCHOP
+
+Receives DMX-512 values via Art-Net UDP as CHOP channels. Outputs float channels named `dmx1`–`dmx512` with values 0.0–255.0, directly usable by MathCHOP, LookupCHOP, or any downstream CHOP.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| universe | Int | 0 | 0–32767 | DMX universe to listen for |
+| port | Int | 6454 | 1–65535 | Art-Net UDP port to bind |
+| active | Bool | false | — | Enable Art-Net listening |
+| channels | Int | 512 | 1–512 | Number of DMX channels to output |
+
+**No inputs** — receives DMX data from the network.
+**Output:** `out` (CHOP — dmx1 through dmxN channels at 0.0–255.0).
+
+**How it works:** Binds a `PacketPeerUDP` to the Art-Net port and polls for incoming OpDmx packets each cook. Only packets matching the configured universe are accepted. Received byte values are stored as floats and output as named CHOP channels. Rebinds automatically if the port parameter changes. Use `MathCHOP(multiply=0.00392)` (1/255) to normalize to 0.0–1.0 range.
+
+---
+
 ## DAT — Data Operators
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
 
-**Total: 33 operators** — 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges, 4 protocol/event, 5 networking.
+**Total: 34 operators** — 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges, 4 protocol/event, 5 networking, 1 discovery (Artnet).
 
 ### Generators
 
@@ -3837,12 +3878,15 @@ Serial port (COM) communication. Outputs received data as table rows with timest
 
 ---
 
-#### DMX DAT
+#### DMX DAT (Deprecated)
 
-DMX lighting protocol controller via Art-Net UDP. Takes CHOP channel values and outputs as DMX universe table. Sends Art-Net packets when active.
+> **Deprecated** — Use `DmxOutCHOP` for sending and `DmxInCHOP` for receiving DMX data. Use `ArtnetDAT` for network discovery. This operator remains for backward compatibility but will be removed in a future version.
+
+Legacy DMX lighting protocol controller via Art-Net UDP. Takes CHOP channel values and outputs as DMX universe table. Sends Art-Net packets when active.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `mode` | Enum | Send | Send / Receive / Both |
 | `universe` | Int | 0 | DMX universe number |
 | `ip` | String | 255.255.255.255 | Art-Net destination IP |
 | `port` | Int | 6454 | UDP port |
@@ -3851,6 +3895,25 @@ DMX lighting protocol controller via Art-Net UDP. Takes CHOP channel values and 
 
 **Inputs:** `values` (CHOP, channel values 0–255).
 **Output:** DAT table (channel, value).
+
+---
+
+#### ArtnetDAT
+
+Art-Net network discovery and status. Listens for ArtPollReply packets and optionally broadcasts ArtPoll to discover Art-Net nodes on the local network. Outputs a table of detected nodes with IP, name, firmware, universe configuration, and port count.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| active | Bool | false | — | Enable Art-Net discovery |
+| port | Int | 6454 | 1–65535 | Art-Net UDP port to bind |
+| poll_interval | Float | 10.0 | 1–120 | Seconds between ArtPoll broadcasts |
+| auto_poll | Bool | true | — | Periodically broadcast ArtPoll |
+| timeout | Float | 30.0 | 5–300 | Remove nodes not seen for this many seconds |
+
+**No inputs** — listens on the network.
+**Output:** DAT table (ip, short_name, long_name, firmware, universe_lo, universe_hi, port_count, last_seen).
+
+**How it works:** Binds a `PacketPeerUDP` to the Art-Net port and polls for ArtPollReply (opcode 0x2100) packets. Parses the Art-Net 4 reply format to extract node identity, firmware version, and universe configuration. Stale nodes (not seen within the timeout window) are automatically removed. When auto_poll is enabled, broadcasts ArtPoll (opcode 0x2000) at the configured interval to trigger replies from all Art-Net nodes on the subnet.
 
 ---
 
@@ -6103,8 +6166,8 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 |--------|-------|-----------|
 | **TOP** | 74 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, GLSLMulti, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Select, Limit, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion, PointCloudRender |
 *(Note: 17 additional TOPs via extensions — see Extension Operators below)* |
-| **CHOP** | 74 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn |
-| **DAT** | 37 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX, RenderPick, PanelExecute |
+| **CHOP** | 76 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn, DmxOut, DmxIn |
+| **DAT** | 38 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX (deprecated), Artnet, RenderPick, PanelExecute |
 | **SOP** | 74 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, TrailRibbon, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch, VoronoiShatter |
 | **COMP** | 21 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Select, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
 | **MAT** | 11 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, FluidSurface, Null, Select |
@@ -6114,7 +6177,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
 | **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **372** | *Core operators only. With extensions (95), SDF (27), SCRIPT (3), and native variants, total reaches 536.* |
+| **Total** | **375** | *Core operators only. With extensions (95), SDF (29), SCRIPT (3), and native variants, total reaches 539.* |
 
 ### Extension Operators (not included in count above)
 

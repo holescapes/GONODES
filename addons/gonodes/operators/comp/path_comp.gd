@@ -12,6 +12,11 @@ var _path: Path3D = null
 var _follower: PathFollow3D = null
 var _curve: Curve3D = null
 
+## Proxy tree for fan-out — when upstream COMP scene node is already
+## claimed by another consumer.
+var _proxy_tree: GNProxyTree = GNProxyTree.new()
+var _managed_child: Node3D = null
+
 
 func _init() -> void:
 	node_type = "path"
@@ -86,15 +91,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var offset := Vector3(get_param_value("ox"), get_param_value("oy"), get_param_value("oz"))
 	_follower.position += offset
 
-	# If comp input is provided, reparent its scene node under the follower
+	# If comp input is provided, adopt or proxy its scene node under the follower
 	if comp_data != null:
 		var comp_node: Node3D = _get_upstream_scene_node(0)
 		if comp_node != null:
-			if comp_node.get_parent() != _follower:
-				if comp_node.get_parent() != null:
-					comp_node.get_parent().remove_child(comp_node)
-				_follower.add_child(comp_node)
-			comp_node.position = Vector3.ZERO  # follower handles positioning
+			var child: Node3D = _adopt_or_proxy_follower(comp_node)
+			child.position = Vector3.ZERO  # follower handles positioning
+			_managed_child = child
+			_proxy_tree.sync_all()
 
 	node_warning = ""
 	_scene_node = _path
@@ -133,6 +137,8 @@ func _build_curve_from_sop(geo: GNGeoData) -> void:
 
 
 func _on_node_removed() -> void:
+	_proxy_tree.release_all()
+	_managed_child = null
 	if _follower != null and is_instance_valid(_follower):
 		_follower.queue_free()
 		_follower = null
@@ -141,3 +147,22 @@ func _on_node_removed() -> void:
 			_path.get_parent().remove_child(_path)
 		_path.queue_free()
 		_path = null
+
+
+## Adopts a source node directly if orphaned, or creates a proxy if the
+## source is already claimed by another consumer.
+func _adopt_or_proxy_follower(source: Node3D) -> Node3D:
+	if source.get_parent() == _follower:
+		return source
+	if _proxy_tree.has_proxy_for(source):
+		var proxy: Node3D = _proxy_tree.get_or_create_proxy(source)
+		if proxy.get_parent() != _follower:
+			_follower.add_child(proxy)
+		return proxy
+	if source.get_parent() == null:
+		_follower.add_child(source)
+		return source
+	var proxy: Node3D = _proxy_tree.get_or_create_proxy(source)
+	if proxy.get_parent() != _follower:
+		_follower.add_child(proxy)
+	return proxy

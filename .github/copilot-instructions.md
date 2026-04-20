@@ -52,8 +52,8 @@ NEVER call `_update_mode_display()` per-cook — clobbers edits 60×/sec. Use li
 ### 25.10 — Dynamic Input Ports (Auto-Grow)
 Variable-input operators use `_enable_dynamic_inputs()` in `_init_ports()`. Ports auto-grow on connect (trailing empty slot) and auto-shrink on disconnect. Used by: MergeSOP, MergeCOMP, RenderTOP, MergeCHOP, SwitchTOP, SwitchCHOP, SwitchSOP, SwitchDAT. Operators must handle null inputs for disconnected ports. Supersedes the old `num_inputs` parameter pattern.
 
-### 25.11 — COMP Nodes: Scene-Node Ownership, Not Data Flow
-COMPs return `GNCompData` (via `_build_comp_data()`) wrapping a **reference** to their singleton `_scene_node` (MeshInstance3D, Camera3D, Light3D, etc.). This is a pointer, not a copy — Node3D objects can only have one parent and can't be meaningfully duplicated. All scene-node resolution uses `cached_output as GNCompData` (data-type check, not node-type check) — works uniformly for GNCompBase, SubNetworkNode, GNCustomOperator, etc. Base-class helpers `_get_upstream_scene_node(port)` and `_resolve_upstream_mesh()` are inherited by all COMP subclasses. EnvironmentCOMP returns GNCompData with the `environment` field set (no scene node); RenderTOP checks `comp_data.environment != null`.
+### 25.11 — COMP Nodes: Scene-Node Ownership, Proxy Fan-Out
+COMPs return `GNCompData` (via `_build_comp_data()`) wrapping a **reference** to their singleton `_scene_node` (MeshInstance3D, Camera3D, Light3D, etc.). All scene-node resolution uses `cached_output as GNCompData` (data-type check, not node-type check). When a COMP scene node fans out to multiple consumers (two RenderTOPs, or two MergeCOMPs), the first consumer adopts the original (zero overhead), subsequent consumers get visual proxies via `GNProxyTree`. Proxies share GPU resources (Mesh, Material, MultiMesh). Physics bodies become plain Node3D placeholders in proxies. Both RenderTOP and MergeCOMP use `_adopt_or_proxy()` / `_adopt_or_proxy_child()` respectively. EnvironmentCOMP returns GNCompData with the `environment` field set (no scene node); RenderTOP checks `comp_data.environment != null`.
 
 ### 25.12 — SubViewport World3D Isolation
 RenderTOP assigns `SubViewport.world_3d = World3D.new()` before tree entry. Without this, 3D content bleeds into the editor viewport. Do NOT use `own_world_3d = true` (causes duplicate World3D bug with Jolt).
@@ -99,6 +99,12 @@ When 2+ operators share the same helper logic, move it to the family base class 
 
 ### 25.26 — Check Data Types, Not Node Families
 When consuming upstream output, check the **data type** (`cached_output as GNTextureData`, `data is GNChannelData`), NOT the node's family (`node.family == GNFamily.Type.TOP`, `node is GNTopBase`). Data-type checks work uniformly for `GNCompBase`, `SubNetworkNode`, `GNCustomOperator`, and any future node type. Node-family checks silently reject valid data from nodes with a different family (e.g., a SubNetworkNode outputting `GNChannelData` has family NET, not CHOP).
+
+### 25.27 — COMP Proxy Bookkeeping for New Node Types
+When adding a new COMP that creates a `_scene_node`, check `GNProxyTree._create_proxy_node()` for its type. Currently proxied: MeshInstance3D, MultiMeshInstance3D, Camera3D, DirectionalLight3D, OmniLight3D, SpotLight3D. Unknown types become plain Node3D placeholders. If the new COMP creates a NEW visual node type (e.g., GPUParticles3D, Decal), add a typed proxy factory + sync method to GNProxyTree and a test in `tests/unit/core/test_proxy_tree.gd`.
+
+### 25.28 — Family-Output Coherence (No Hidden Conversions)
+Every operator MUST output data matching its declared family. A CHOP outputs `GNChannelData`, a DAT outputs `GNTableData`, a TOP outputs `GNTextureData`, an IMG outputs `GNImageData`, a SOP outputs `GNGeoData`, etc. **Never embed a silent cross-family conversion inside a non-bridge operator.** If a node works with float/channel data, it belongs in CHOP — not DAT. If it processes CPU images, it belongs in IMG — not TOP. Users convert between families explicitly via bridge operators (`CHOPtoTOP`, `ImgToTOP`, `SOPtoDAT`, etc.). The only exceptions are: (1) explicit bridge operators whose name declares the conversion, (2) multi-output operators that emit secondary ports of a different family (rule 25.24 demand-gated), and (3) NET family host-bridge operators that output typed data matching their specific bridge target.
 
 ### File Encoding
 All text files are UTF-8 without BOM. NEVER use PowerShell `Get-Content`/`Set-Content` without `-Encoding UTF8` on BOTH calls. Prefer Python for non-ASCII text manipulation.

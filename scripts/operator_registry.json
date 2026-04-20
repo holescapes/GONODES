@@ -571,6 +571,69 @@
     ]
   },
   {
+    "class_name": "DmxInCHOP",
+    "node_type": "dmx_in",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/dmx_in_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "universe",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "port",
+        "type": "int",
+        "default": 6454
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "channels",
+        "type": "int",
+        "default": 512
+      }
+    ]
+  },
+  {
+    "class_name": "DmxOutCHOP",
+    "node_type": "dmx_out",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/dmx_out_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "universe",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "ip",
+        "type": "string",
+        "default": "255.255.255.255"
+      },
+      {
+        "name": "port",
+        "type": "int",
+        "default": 6454
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "channels",
+        "type": "int",
+        "default": 512
+      }
+    ]
+  },
+  {
     "class_name": "EnvelopeCHOP",
     "node_type": "envelope",
     "family": "chop",
@@ -4160,6 +4223,40 @@
         "name": "drive_type",
         "type": "menu",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "ArtnetDAT",
+    "node_type": "artnet",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/artnet_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "port",
+        "type": "int",
+        "default": 6454
+      },
+      {
+        "name": "poll_interval",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "auto_poll",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "timeout",
+        "type": "float",
+        "default": 30.0
       }
     ]
   },
