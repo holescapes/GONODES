@@ -379,7 +379,7 @@ button_ui, check_box_ui, color_picker_ui, color_rect_ui, container_ui, dropdown_
 
 All remaining DATs are: text storage, table assembly, network I/O, file I/O, event handlers, pass-through, or small-data converters.
 
-callback_dat, chop_to_dat, constant_dat, dat_to_chop, delete_dat, dmx_dat, error_dat, fifo_dat, file_in_dat, folder_dat, host_in_dat, info_dat, insert_dat, json_dat, merge_dat, midi_in_dat, multi_touch_in_dat, network_dat, null_dat, op_find_dat, osc_in_dat, panel_execute_dat, render_pick_dat, script_dat, select_dat, serial_dat, switch_dat, table_dat, text_dat, top_to_dat, transpose_dat, web_dat, web_server_dat, web_socket_dat, xml_dat
+callback_dat, chop_to_dat, constant_dat, dat_to_chop, delete_dat, error_dat, fifo_dat, file_in_dat, folder_dat, host_in_dat, info_dat, insert_dat, json_dat, merge_dat, midi_in_dat, multi_touch_in_dat, network_dat, null_dat, op_find_dat, osc_in_dat, panel_execute_dat, render_pick_dat, script_dat, select_dat, switch_dat, table_dat, text_dat, top_to_dat, transpose_dat, web_dat, web_server_dat, web_socket_dat, xml_dat
 
 ---
 

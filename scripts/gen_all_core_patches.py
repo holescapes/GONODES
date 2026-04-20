@@ -751,7 +751,6 @@ def build_dat_patch():
 
     # Chain 8: Serial I/O
     b.add_dat_vis_chain([
-        ("SerialDAT", None),
         ("SerialReceiveDAT", None),
         ("SerialSendDAT", None),
     ])
@@ -767,7 +766,7 @@ def build_dat_patch():
     # Chain 10: Cue + DMX + MIDI + MultiTouch
     b.add_dat_vis_chain([
         ("CueDAT", None),
-        ("DMXDAT", None),
+        ("ArtnetDAT", None),
         ("MidiInDAT", None),
         ("MultiTouchInDAT", None),
     ])

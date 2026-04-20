@@ -4107,13 +4107,12 @@ func get_output_data(port_index: int) -> GNData:
 - **Root cause:** Input events in a child `Window` node stay in that window's viewport tree. `Input.is_action_just_pressed()` polled from the parent node's `_process()` never sees them.
 - **Fix applied:** Connected `Window.window_input` signal to `_on_window_input()` handler that listens for `KEY_ESCAPE`. On ESC press while in Fullscreen or Borderless mode, sets `window_mode` parameter back to Windowed and marks window params dirty. The inspector reflects the change immediately via `set_param_value()`.
 
-### 26.3 COMP Fan-Out: Single-Ownership Scene Node Limitation
+### 26.3 COMP Fan-Out: Single-Ownership Scene Node Limitation — FIXED
 
 - **Issue:** COMP operators own a singleton Godot `Node3D` scene node (MeshInstance3D, Camera3D, Light3D). When a consumer (RenderTOP, MergeCOMP) needs to render it, it **reparents** the Node3D into its own SubViewport. Since Godot enforces single-parent ownership on scene nodes, only one consumer gets the node — the last one to cook wins; all others render an empty scene.
-- **Affected:** Any fan-out from a COMP to multiple reparenting consumers — primarily RenderTOP and MergeCOMP. COMP→COMP wiring where the downstream creates its own node (e.g., RigidBodyCOMP) is not affected. All non-COMP families support unlimited fan-out via ref-counted GNData.
-- **Workaround:** Each COMP should feed exactly one reparenting consumer. For multi-camera setups, duplicate the COMP chain.
-- **Planned fix:** Visual proxy architecture — consumers create lightweight proxy Node3D instances sharing the same GPU resources (Mesh, Material, Texture) instead of reparenting. See [ROADMAP.md § COMP Scene-Node Proxy Architecture](../dev_docs/ROADMAP.md).
-- **Root cause:** Godot's scene tree model requires a Node3D to have exactly one parent. This is fundamental to the engine and cannot be changed from GDScript.
+- **Fix:** GNProxyTree proxy architecture — the first consumer adopts the original scene node (zero overhead); subsequent consumers get lightweight visual proxies via `GNProxyTree` that share GPU resources (Mesh, Material, MultiMesh). Both RenderTOP and MergeCOMP use `_adopt_or_proxy()` / `_adopt_or_proxy_child()` respectively. Proxies sync from source each frame. Physics bodies become plain Node3D placeholders. See Hard Rule 25.11.
+- **Affected operators using GNProxyTree:** RenderTOP, MergeCOMP, BoneCOMP, LODCOMP, PathCOMP, VehicleCOMP, NavigationCOMP.
+- **Tests:** `tests/unit/core/test_proxy_tree.gd` — 19 test functions covering all proxied node types, caching/reuse, sync, stale cleanup, and release.
 
 ---
 
@@ -5524,8 +5523,6 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 | PolyPatchSOP | SOP | Bilinear Coons patch surface from boundary |
 | PolySplineSOP | SOP | Catmull-Rom spline curve/tube/ribbon |
 | PolyStitchSOP | SOP | Stitch boundaries by nearest vertex pairs |
-| SerialDAT | DAT | Serial port (COM) communication |
-| DMXDAT | DAT | DMX/Art-Net lighting protocol controller |
 | RenderPickDAT | DAT | Ray-cast object picking from 3D render |
 | PanelExecuteDAT | DAT | Log panel/UI events as table rows |
 
@@ -5582,8 +5579,6 @@ Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VO
 | PolyBevelSOP | ✅ Implemented | Vertex-pull bevel with divisions |
 | SmoothSOP | ✅ Implemented | Iterative Laplacian smoothing |
 | RemeshSOP | ✅ Implemented | Midpoint subdivision remeshing |
-| SerialDAT | ✅ Implemented | Framework ready (native transport pluggable) |
-| DMXDAT | ✅ Implemented | Art-Net UDP protocol |
 | RenderPickDAT | ✅ Implemented | Physics ray-cast picking |
 | DeformTOP | ✅ Implemented | Shader-based displacement |
 | ReorderTOP | ✅ Implemented | Channel swizzle shader |

@@ -13,7 +13,8 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "sop"
+	node_type = "objectmerge"
+	deprecated = true
 
 
 func _init_ports() -> void:

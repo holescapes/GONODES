@@ -147,64 +147,55 @@ Reference: `chop("osc_in1", "fader1")` in any expression.
 GONODES has built-in DMX support via the Art-Net protocol (UDP). No
 external libraries needed.
 
-### DMXDAT
+### DmxOutCHOP
 
-Sends and receives DMX-512 lighting data using Art-Net.
+Sends CHOP channel values as DMX-512 via Art-Net broadcast.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `mode` | Enum | Send | **Send** / **Receive** / **Both** |
 | `universe` | Int | 0 | DMX universe number (0–32767) |
 | `ip` | String | `255.255.255.255` | Destination IP (broadcast default) |
 | `port` | Int | 6454 | Art-Net UDP port |
-| `active` | Bool | Off | Enable Art-Net communication |
+| `active` | Bool | Off | Enable Art-Net transmission |
 | `channels` | Int | 512 | Number of active DMX channels (1–512) |
 
-**Input:** Connect a CHOP with channels `ch1`–`ch512` (values 0–255).
+**Input:** Connect a CHOP with channels named `dmx1`–`dmx512` (values 0–255).
 
-**Output table columns:**
+**Output:** Passes input CHOP through unchanged.
 
-| Mode | Columns |
-|------|---------|
-| Send | `channel`, `value` |
-| Receive | `channel`, `value`, `source` |
+### DmxInCHOP
+
+Receives Art-Net DMX-512 data as CHOP channels (`dmx1`–`dmx512`, 0.0–255.0).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `universe` | Int | 0 | DMX universe to listen on |
+| `port` | Int | 6454 | Art-Net UDP port |
+| `active` | Bool | Off | Enable Art-Net listening |
+
+### ArtnetDAT
+
+Art-Net network discovery — broadcasts ArtPoll, collects ArtPollReply,
+outputs a table of detected nodes with IP, name, firmware, universes.
 
 ### DMX Workflow Example
 
 ```
-ConstantCHOP "dmx_vals"  →  DMXDAT "dmx1"
-  ch1=255, ch2=128            mode=Send, universe=0, active=On
+ConstantCHOP "dmx_vals"  →  DmxOutCHOP "dmx_out1"
+  dmx1=255, dmx2=128          universe=0, active=On
 ```
 
-1. Add a **ConstantCHOP** with channels named `ch1`, `ch2`, etc.
+1. Add a **ConstantCHOP** with channels named `dmx1`, `dmx2`, etc.
 2. Set values 0–255 for each DMX channel
-3. Connect to **DMXDAT** in Send mode
+3. Connect to **DmxOutCHOP**
 4. Set `active = On` to start broadcasting
-5. For receiving, set `mode = Receive` and read the output table
-
----
-
-## Common Patterns
-
-### MIDI → Visual Parameter Control
-
-```
-RtMidiInCHOP "midi1"  →  (expression in NoiseTOP)
-  normalize=On             scale = chop("midi1", "cc1") * 10.0
-```
-
-### OSC Bidirectional (Two GONODES instances)
-
-```
-Instance A:  OscOUT → port 9001
-Instance B:  OscInCHOP ← port 9001
-```
+5. For receiving, use **DmxInCHOP** and read the output channels
 
 ### DMX Scene Automation with Cues
 
 ```
-CueDAT → CueCHOP → (expressions drive ConstantCHOP) → DMXDAT
-  Cue data: {"dmx_vals/ch1": 255, "dmx_vals/ch2": 0}
+CueDAT → CueCHOP → (expressions drive ConstantCHOP) → DmxOutCHOP
+  Cue data: {"dmx_vals/dmx1": 255, "dmx_vals/dmx2": 0}
 ```
 
 ---

@@ -53,7 +53,8 @@
             ],
             "parameters": {
                 "text": {
-                    "value": "DAT Output"
+                    "value": "",
+                    "expression": "dat('serial_rx1', 0, 'message')"
                 },
                 "resolution": {
                     "value": {

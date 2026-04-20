@@ -2052,26 +2052,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/dat/delete_dat.gd"
   },
-  "DMXDAT": {
-    "class_name": "DMXDAT",
-    "family": "DAT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "values",
-        "type": "CHOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "DAT"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/dat/dmx_dat.gd"
-  },
   "ErrorDAT": {
     "class_name": "ErrorDAT",
     "family": "DAT",
@@ -2408,26 +2388,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/dat/select_dat.gd"
-  },
-  "SerialDAT": {
-    "class_name": "SerialDAT",
-    "family": "DAT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "DAT"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "DAT"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/dat/serial_dat.gd"
   },
   "SOPtoDAT": {
     "class_name": "SOPtoDAT",

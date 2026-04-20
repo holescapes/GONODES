@@ -31,7 +31,7 @@ GONODES uses a **four-layer testing strategy** designed around the constraints o
 | Layer | Runs | Verifies | Requires GPU? |
 |-------|------|----------|--------------|
 | **Unit tests** | Headless CLI | Individual classes (GNParameter, GNNetwork, GNCookEngine, GNChannelData, GNParamPresetManager) in isolation | No |
-| **Operator tests** | Headless CLI | All 536 operators — instantiation, parameter defaults, cook-without-crash, output type correctness | No |
+| **Operator tests** | Headless CLI | All 537 operators — instantiation, parameter defaults, cook-without-crash, output type correctness | No |
 | **Functional tests** | Headless CLI | Output **correctness** — vertex positions, channel values, table contents, bounding boxes, topology changes | No |
 | **Integration tests** | Headless CLI | Full `cook_frame()` pipeline through multi-node networks with real operator instances | No |
 | **Manual test patches** | Editor (visual) | GPU rendering, shader compilation, visual output, particle systems, volumetrics, materials | Yes |

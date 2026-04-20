@@ -581,19 +581,6 @@ func test_cue_dat_node_type() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# DMXDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_dmx_dat_instantiate() -> void:
-	var node := _make_node(DMXDAT.new(), "dmx1")
-	GNTestAssert.assert_not_null(node, "DMXDAT created")
-
-func test_dmx_dat_node_type() -> void:
-	var node := _make_node(DMXDAT.new(), "dmx1")
-	GNTestAssert.assert_eq(node.node_type, "dmx", "node_type")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # HostInDAT
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -640,15 +627,6 @@ func test_render_pick_dat_instantiate() -> void:
 func test_render_pick_dat_node_type() -> void:
 	var node := _make_node(RenderPickDAT.new(), "pick1")
 	GNTestAssert.assert_eq(node.node_type, "render_pick", "node_type")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SerialDAT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_serial_dat_instantiate() -> void:
-	var node := _make_node(SerialDAT.new(), "serial1")
-	GNTestAssert.assert_not_null(node, "SerialDAT created")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

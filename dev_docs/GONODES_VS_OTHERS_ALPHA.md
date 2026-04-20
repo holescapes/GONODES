@@ -44,7 +44,7 @@
 | Dimension | TouchDesigner | vvvv | Jitter (Max/MSP) | GONODES |
 |-----------|--------------|------|-------------------|---------|
 | **Maturity** | 20+ years, industry standard | 25+ years (beta→gamma transition) | 25+ years, deep audio roots | Alpha — 1 year of development |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **536 operators** across 14 families |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **537 operators** across 14 families |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) | $399 (perpetual) or $99/yr sub | **Free, open source (MIT)** |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan | DirectX 11 (beta) / Stride+Vulkan (gamma) | OpenGL (legacy) / Metal (modern) | Vulkan + GLES3 via Godot 4.6 |
 | **Host embedding** | TouchEngine SDK | No | Max for Live; no general SDK | **libgonodes — full C API, 9 data contexts** |
@@ -247,7 +247,7 @@ GONODES GDScript (interpreted)
 | **Output/export** | Built-in (Record, etc.) | Built-in | `jit.record`, `jit.movie` | **11 OUT operators** |
 | **Networking/subnets** | — | — | — | **15 NET operators** |
 | **Script operators** | Python DAT/callbacks | VL (visual code) | Gen, JavaScript | **3 SCRIPT operators** |
-| **Total** | **~300+ built-in** | **~700+ nodes** | **~200+ Jitter + 400+ Max** | **536 operators** |
+| **Total** | **~300+ built-in** | **~700+ nodes** | **~200+ Jitter + 400+ Max** | **537 operators** |
 
 †† Max/MSP's ~400+ audio objects (MSP `~` objects) are a separate domain from Jitter's visual objects. Counting them together inflates Max's numbers but misrepresents the visual processing capability. Jitter alone has ~200 objects.
 
@@ -491,7 +491,7 @@ The visual shader editing gap is real but less critical given ISF/Shadertoy comp
 | **Syphon** | Built-in | No | Syphon plugin | gn_ext_syphon |
 | **Video capture** | Built-in (extensive) | Built-in | `jit.grab` (basic) | gn_ext_video_capture |
 | **Serial** | Built-in | Built-in | Built-in (`serial`) | gn_ext_serial |
-| **DMX/Art-Net** | Built-in (extensive) | Plugins | `dmxusbpro` (limited) | DMXDAT |
+| **DMX/Art-Net** | Built-in (extensive) | Plugins | `dmxusbpro` (limited) | DmxOutCHOP + DmxInCHOP + ArtnetDAT |
 | **MQTT/IoT** | Python plugin | Plugin | None | **MqttDAT (built-in)** |
 | **WebSocket** | Built-in | Plugin | Node for Max | WebSocketDAT |
 | **HTTP server** | Built-in | Plugin | Node for Max | WebServerDAT |
@@ -854,7 +854,7 @@ Based on the competitive landscape, here are the recommended priorities for GONO
 | # | Priority | Why | Effort |
 |---|----------|-----|--------|
 | 8 | **Audio Tier 1** (Oscillator, Filter, Mix, ParaEQ) | Enables basic audio synthesis without leaving GONODES. Don't try to compete with Max — just cover basics. | Medium |
-| 9 | **OpenCV extension** (gn_ext_cv) | 5 missing CV operators (Morph, BlobTrack, BackgroundSubtract, Contour, ColorTrack) | Medium |
+| 9 | ~~**OpenCV extension**~~ | ✅ Done — `gn_ext_opencv` ships 20 CV operators including Morph, BlobTrack, BackgroundSubtract, Contour, ColorTrack, Hough, Aruco | — |
 | 10 | **GPU batch parallelism** | Submit independent TOP chains as a batch. Partially closes the gap with TD's multi-stream. | Medium-High |
 
 ### Tier 4 — Strategic Bets (Long-Term)
@@ -873,7 +873,7 @@ Based on the competitive landscape, here are the recommended priorities for GONO
 
 GONODES is a technically impressive alpha-stage tool that has achieved remarkable breadth in one year of development:
 
-- **536 operators** across 14 families — more than TD's ~300, comparable to vvvv's ~700
+- **537 operators** across 14 families — more than TD's ~300, comparable to vvvv's ~700
 - **Architecture** — push-based cook engine with 3-tier guard system achieves equivalent work-skipping to TD's mature pull engine
 - **GPU compute** — POP, VOL, and SDF pipelines exceed all three competitors in built-in compute capability
 - **Host embedding** — libgonodes offers the most comprehensive embeddable node-graph engine ever built (9 data contexts, bidirectional, graph editing)

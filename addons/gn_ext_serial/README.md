@@ -4,7 +4,7 @@ Provides bidirectional serial port (COM / tty) communication via two DAT operato
 
 | Operator | Direction | Description |
 |----------|-----------|-------------|
-| **SerialSendDAT** | Out | Sends DAT rows or CHOP values as serial messages |
+| **SerialSendDAT** | Out | Sends DAT rows as serial messages |
 | **SerialReceiveDAT** | In | Receives serial data into a rolling DAT table |
 
 ## Native Backend

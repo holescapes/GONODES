@@ -1,7 +1,7 @@
 # GONODES — Copilot Instructions
 
 > Node-based visual programming framework on Godot 4.6 for real-time visual art.
-> 536 operators, 14 families, GDScript + GDExtension C++.
+> 537 operators, 14 families, GDScript + GDExtension C++.
 
 ## Architecture
 

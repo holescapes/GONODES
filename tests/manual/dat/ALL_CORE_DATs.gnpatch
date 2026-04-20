@@ -431,31 +431,24 @@
 				1400
 			]
 		},
-		"serial1": {
-			"type": "SerialDAT",
-			"position": [
-				0,
-				1600
-			]
-		},
 		"serialreceive1": {
 			"type": "SerialReceiveDAT",
 			"position": [
-				300,
+				0,
 				1600
 			]
 		},
 		"serialsend1": {
 			"type": "SerialSendDAT",
 			"position": [
-				600,
+				300,
 				1600
 			]
 		},
 		"texttop8": {
 			"type": "TextTOP",
 			"position": [
-				900,
+				600,
 				1600
 			],
 			"parameters": {
@@ -527,8 +520,8 @@
 				2000
 			]
 		},
-		"dmx1": {
-			"type": "DMXDAT",
+		"artnet1": {
+			"type": "ArtnetDAT",
 			"position": [
 				300,
 				2000
@@ -946,12 +939,6 @@
 			"to_port": 0
 		},
 		{
-			"from": "serial1",
-			"from_port": 0,
-			"to": "serialreceive1",
-			"to_port": 0
-		},
-		{
 			"from": "serialreceive1",
 			"from_port": 0,
 			"to": "serialsend1",
@@ -990,11 +977,11 @@
 		{
 			"from": "cue1",
 			"from_port": 0,
-			"to": "dmx1",
+			"to": "artnet1",
 			"to_port": 0
 		},
 		{
-			"from": "dmx1",
+			"from": "artnet1",
 			"from_port": 0,
 			"to": "midiin1",
 			"to_port": 0

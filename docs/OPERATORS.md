@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **536 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 22 extension addons.
+> **537 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 22 extension addons.
 
 ---
 
@@ -681,7 +681,7 @@ Renders a 3D scene from COMPs into a 2D texture with integrated post-processing.
 
 **How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks network input connections to discover GeometryCOMP, CameraCOMP, LightCOMP, and MergeCOMP nodes and adopts their 3D nodes into the viewport's scene tree. Creates a `WorldEnvironment` with configurable ambient lighting and post-processing via Godot's `Environment` resource. If no CameraCOMP is connected, a default perspective camera is placed at (0, 1.5, 3). DOF is applied to the active camera (from CameraCOMP or default). Time-dependent — re-populates the scene each frame.
 
-**Limitation:** Each upstream COMP should feed only one RenderTOP. Godot scene nodes can only have one parent — if two RenderTOPs wire to the same COMP, only the last to cook gets the scene node. For multi-camera setups, duplicate the COMP chain. A visual proxy architecture is planned for a future release.
+**Limitation:** COMP fan-out is fully supported via the GNProxyTree proxy architecture. When multiple RenderTOPs wire to the same COMP, the first consumer adopts the original scene node and subsequent consumers receive lightweight proxies that share GPU resources (Mesh, Material, MultiMesh).
 
 **Performance:** When all post-processing toggles are off and tonemap is at defaults, the post-processing path early-exits with a single boolean check — zero overhead for vanilla 3D renders.
 
@@ -5100,7 +5100,7 @@ COMPs are 3D scene components. They return `GNCompData` wrapping a reference to 
 
 COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Godot's 3D rendering engine.
 
-**Limitation:** Each COMP should feed only one reparenting consumer (RenderTOP or MergeCOMP). Godot scene nodes can only have one parent — fan-out to multiple consumers causes the last cook to win. A visual proxy architecture is planned post-beta.
+COMP fan-out is fully supported via the GNProxyTree proxy architecture — when a COMP fans out to multiple consumers (RenderTOP, MergeCOMP), the first consumer adopts the original scene node and subsequent consumers receive lightweight proxies sharing GPU resources.
 
 **Total: 12 operators.**
 
@@ -6177,7 +6177,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
 | **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **375** | *Core operators only. With extensions (95), SDF (29), SCRIPT (3), and native variants, total reaches 539.* |
+| **Total** | **375** | *Core operators only. With extensions (95), SDF (29), SCRIPT (3), and native variants, total reaches 537.* |
 
 ### Extension Operators (not included in count above)
 

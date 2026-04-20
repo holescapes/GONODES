@@ -60,7 +60,7 @@
 | **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
 | **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to hundreds |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **536 operators** across 14 families — 139 TOP, 82 CHOP, 74 SOP, 47 DAT, 37 IMG, 36 UI, 29 SDF, 23 COMP, 15 VOL, 15 NET, 13 POP, 12 MAT, 11 OUT, 3 SCRIPT |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **537 operators** across 14 families — 139 TOP, 84 CHOP, 74 SOP, 46 DAT, 37 IMG, 36 UI, 29 SDF, 23 COMP, 15 VOL, 15 NET, 13 POP, 12 MAT, 11 OUT, 3 SCRIPT |
 
 ---
 
@@ -370,7 +370,7 @@ Both Python and C++ paths include integrated code editors with syntax highlighti
 | Audio | Built-in | Built-in | No | AudioIn, Spectrum, Band, Dynamics, Beat, AudioDeviceOUT |
 | Video capture | Built-in (webcam, capture card) | Built-in | No | WebcamIMG, gn_ext_video_capture, gn_ext_blackmagic |
 | Serial | Built-in | Built-in | No | gn_ext_serial |
-| DMX/Art-Net | Built-in | Plugin | No | DMXDAT (bidirectional Art-Net) |
+| DMX/Art-Net | Built-in | Plugin | No | DmxOutCHOP + DmxInCHOP + ArtnetDAT |
 | MQTT/IoT | Python plugin | Plugin | No | MqttDAT (built-in) |
 | Depth sensors | Kinect, RealSense, Leap, ZED | Kinect, RealSense | No | gn_ext_depth_sensor (Azure Kinect + RealSense + Ultraleap) |
 | ML inference | TensorFlow, MediaPipe plugins | ML.NET, ONNX | No | gn_ext_ml (ONNX Runtime, 7 operators) |
@@ -774,7 +774,7 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ## 18. Feature Parity Audit & Roadmap
 
-> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (536 operators across 14 families).
+> Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (537 operators across 14 families).
 
 ### 18.1 Feature Coverage Matrix
 
@@ -881,9 +881,9 @@ Despite having 143 TOP operators (exceeding TD's ~90), the following operators f
 |----------|----------|-------------|--------|
 | ~~HistogramTOP~~ → **HistogramIMG** | TD + Nuke | Visual RGB/Luma histogram rendering | ✅ Implemented as IMG family (CPU readback) |
 | **LUTTOP** | Nuke + TD | Load & apply 3D .cube/.3dl LUT files | ✅ Implemented — parses .cube/.3dl, applies via sampler3D |
-| **MorphIMG** | vvvv + TD | Morphological open/close/skeleton/dilate-erode combos | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
-| **BlobTrackIMG** | TD | Detect + track connected regions (centroid, area, bounding box) | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
-| **BackgroundSubtractIMG** | TD + vvvv | Adaptive background model subtraction | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
+| **MorphIMG** | vvvv + TD | Morphological open/close/skeleton/dilate-erode combos | ✅ Implemented — `gn_ext_opencv` (erode/dilate/open/close/gradient/top-hat/black-hat) |
+| **BlobTrackIMG** | TD | Detect + track connected regions (centroid, area, bounding box) | ✅ Implemented — `gn_ext_opencv` (persistent ID tracking, overlay + CHOP output) |
+| **BackgroundSubtractIMG** | TD + vvvv | Adaptive background model subtraction | ✅ Implemented — `gn_ext_opencv` (MOG2/KNN adaptive model, foreground mask) |
 
 #### Medium Priority (useful for professional workflows)
 
@@ -896,9 +896,9 @@ Despite having 143 TOP operators (exceeding TD's ~90), the following operators f
 | **KeyMixTOP** | Nuke | Blend two inputs using a matte/mask input | ✅ Implemented — 3 inputs (A, B, matte) with channel select + invert |
 | ~~InvertTOP~~ | TD | Per-channel inversion | ✅ Covered — LevelTOP `invert` bool param |
 | ~~MathTOP~~ | TD | Per-pixel math (add/sub/mul/pow/abs/min/max between inputs) | ✅ Partially covered — CompositeTOP upgraded with Power/Abs/Min/Max blend modes |
-| **ContourIMG** | vvvv + Nuke | Isoline/contour extraction from value maps | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
+| **ContourIMG** | vvvv + Nuke | Isoline/contour extraction from value maps | ✅ Implemented — `gn_ext_opencv` (contour detection + DAT table output) |
 | ~~AudioSpectrumTOP~~ | TD | Dedicated FFT spectrogram with mel scale, waterfall modes | ✅ Covered — CHOPtoTOP Spectrogram mode (mel scale, color schemes, waterfall via CacheTOP) |
-| **ColorTrackIMG** | TD | Track a color region → centroid/area output | ⬜ Open — CPU-bound (IMG family), `gn_ext_cv` candidate |
+| **ColorTrackIMG** | TD | Track a color region → centroid/area output | ✅ Implemented — `gn_ext_opencv` (HSV range tracking, mask + CHOP output) |
 | ~~GradeTOP~~ | Nuke | Lift/gain/multiply/offset with black/white point | ✅ Covered — ColorBalanceTOP (Lift/Gamma/Gain) + LimitTOP (black/white point) |
 
 #### Low Priority (niche or partially covered)
@@ -906,10 +906,10 @@ Despite having 143 TOP operators (exceeding TD's ~90), the following operators f
 | Operator | Found In | What It Does | Notes |
 |----------|----------|-------------|-------|
 | **RenderPickTOP** | TD | Mouse pick → object ID from rendered scene | Interactive 3D selection |
-| **HoughIMG** | vvvv | Line/circle detection (Hough transform) | Niche CV — ML extensions cover most detection. CPU-bound (IMG family). |
-| **FiducialIMG** | vvvv | ARTag/fiducial marker detection | Extension territory. CPU-bound (IMG family). |
+| **HoughIMG** | vvvv | Line/circle detection (Hough transform) | ✅ Implemented — `gn_ext_opencv` (split into HoughLinesIMG + HoughCirclesIMG) |
+| **FiducialIMG** | vvvv | ARTag/fiducial marker detection | ✅ Implemented — `gn_ext_opencv` (ArucoDetectIMG + ArucoPoseDAT, 20 dictionary presets) |
 
-**Summary:** Of the original 18 gap items, **11 are now resolved** (7 new operators built, 4 covered by existing operators). **7 gaps remain open** — 3 high-priority CV operators (MorphIMG, BlobTrackIMG, BackgroundSubtractIMG), 2 medium-priority CV operators (ContourIMG, ColorTrackIMG), and 3 low-priority niche items. The 5 remaining CV operators are natural candidates for a future `gn_ext_cv` extension wrapping OpenCV. DATtoTOP excluded — SnapshotTOP (mode=DAT) already covers it. TimeWarpTOP excluded — TimeMachineTOP Ramp mode provides curve-based time remapping.
+**Summary:** Of the original 18 gap items, **18 are now resolved** (7 new operators built, 4 covered by existing operators, 7 implemented in `gn_ext_opencv`). **0 TOP/IMG gaps remain.** DATtoTOP excluded — SnapshotTOP (mode=DAT) already covers it. TimeWarpTOP excluded — TimeMachineTOP Ramp mode provides curve-based time remapping.
 
 ### 18.7 Missing COMP Operators — Gap Analysis (April 2026)
 
@@ -1121,11 +1121,11 @@ Nuke is primarily an offline VFX compositing tool, but several of its features a
 
 | Family | Operators | Remaining Gaps | Gap Details |
 |--------|-----------|---------------|-------------|
-| **TOP** | 139 | 7 | 5 CV ops (MorphIMG, BlobTrackIMG†, BackgroundSubtractIMG†, ContourIMG, ColorTrackIMG), RenderPickTOP, HoughIMG (§18.6) |
-| **IMG** | 37 | 0 | CV operators listed under TOP gaps above (IMG family) |
-| **CHOP** | 82 | 6 + 13 audio | RecordCHOP, PulseCHOP, AreaCHOP, ReplaceCHOP, GestureCHOP, StateMachineCHOP (§18.9) + 13 audio (§18.8) |
+| **TOP** | 139 | 0 | All gaps resolved — CV ops in `gn_ext_opencv`, RenderPickTOP implemented |
+| **IMG** | 37 | 0 | All CV operators implemented in `gn_ext_opencv` (20 operators) |
+| **CHOP** | 84 | 6 + 13 audio | RecordCHOP, PulseCHOP, AreaCHOP, ReplaceCHOP, GestureCHOP, StateMachineCHOP (§18.9) + 13 audio (§18.8) |
 | **SOP** | 74 | 6 | ResampleSOP, MeasureSOP, CreepSOP, ProjectSOP, HoleSOP, ConvertLineSOP (§18.10) |
-| **DAT** | 47 | 2 | ParameterDAT, SystemDAT (§18.11) |
+| **DAT** | 46 | 2 | ParameterDAT, SystemDAT (§18.11) |
 | **COMP** | 23 | 4 | FeedbackCOMP, TimeCOMP, AudioListenerCOMP, AudioSourceCOMP (§18.7) |
 | **MAT** | 12 | 0 | At parity (SSS as PbrMAT stretch param) (§18.12) |
 | **POP** | 13 | 0 | Exceeds all competitors |
@@ -1135,18 +1135,15 @@ Nuke is primarily an offline VFX compositing tool, but several of its features a
 | **OUT** | 11 | 0 | Comprehensive |
 | **NET** | 15 | 0 | Host embedding + subnets covered |
 | **SCRIPT** | 3 | 0 | 3-tier scripting (GDScript/Python/C++) |
-| **TOTAL** | **536** | **38** | **93% feature coverage** vs all competitors combined |
+| **TOTAL** | **537** | **31** | **95% feature coverage** vs all competitors combined |
 
-† BlobTrackIMG, BackgroundSubtractIMG are already implemented in gn_ext_cv but listed here as they were in the original gap list.
-
-**Key takeaway:** 536 operators with only 38 remaining gaps across all families. Of those 38:
+**Key takeaway:** 537 operators with only 31 remaining gaps across all families. Of those 31:
 - **13 are audio synthesis/effects** (§18.8) — not GONODES's primary domain
-- **5 are CV operators** — natural `gn_ext_cv` candidates
 - **8 are high-priority** (RecordCHOP, PulseCHOP, ResampleSOP, AudioOscillatorCHOP, AudioFilterCHOP, AudioMixCHOP, AudioParaEQCHOP, TemporalDenoiseTOP)
-- **12 are medium-priority** (installation/professional workflow)
-- **5 are low-priority or niche**
+- **6 are medium-priority** (installation/professional workflow)
+- **4 are low-priority or niche**
 
-**GONODES exceeds competitor coverage in:** TOP (139 vs TD's 90), SOP (74 vs TD's 50), DAT (47 vs TD's 30), POP (13 vs 0), VOL (15 vs 0), SDF (29 vs 0), UI (36 vs TD's ~25).
+**GONODES exceeds competitor coverage in:** TOP (139 vs TD's 90), SOP (74 vs TD's 50), DAT (46 vs TD's 30), POP (13 vs 0), VOL (15 vs 0), SDF (29 vs 0), UI (36 vs TD's ~25).
 
 **GONODES trails in:** Audio synthesis (8 vs Max's 400+, but that's a different domain), hardware I/O breadth (TD has 20+ years of hardware partnerships).
 

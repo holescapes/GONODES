@@ -4468,45 +4468,6 @@
     ]
   },
   {
-    "class_name": "DMXDAT",
-    "node_type": "dmx",
-    "family": "dat",
-    "file": "addons/gonodes/operators/dat/dmx_dat.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "mode",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "universe",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "ip",
-        "type": "string",
-        "default": "255.255.255.255"
-      },
-      {
-        "name": "port",
-        "type": "int",
-        "default": 6454
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "channels",
-        "type": "int",
-        "default": 512
-      }
-    ]
-  },
-  {
     "class_name": "DeleteDAT",
     "node_type": "delete",
     "family": "dat",
@@ -5116,45 +5077,6 @@
         "name": "include_header",
         "type": "bool",
         "default": true
-      }
-    ]
-  },
-  {
-    "class_name": "SerialDAT",
-    "node_type": "serial",
-    "family": "dat",
-    "file": "addons/gonodes/operators/dat/serial_dat.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "port",
-        "type": "string",
-        "default": "COM3"
-      },
-      {
-        "name": "baud_rate",
-        "type": "int",
-        "default": 9600
-      },
-      {
-        "name": "delimiter",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "max_rows",
-        "type": "int",
-        "default": 100
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "clear",
-        "type": "pulse",
-        "default": null
       }
     ]
   },
@@ -10574,7 +10496,7 @@
   },
   {
     "class_name": "ObjectMergeSOP",
-    "node_type": "sop",
+    "node_type": "objectmerge",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/objectmerge_sop.gd",
     "extension": null,

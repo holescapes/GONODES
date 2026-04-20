@@ -111,7 +111,7 @@ def audit_patch(path, registry):
         "AudioInCHOP", "AudioFileInCHOP", "AudioSpectrumCHOP", "MidiInCHOP",
         "OSCInCHOP", "OscInCHOP", "TabletInCHOP", "CueListCHOP", "CueCHOP",
         "KeyboardInCHOP", "MouseInCHOP",
-        "SerialDAT", "MidiInDAT", "OSCInDAT", "OscInDAT",
+        "MidiInDAT", "OSCInDAT", "OscInDAT",
         "MultiTouchInDAT", "PanelExecuteDAT", "RenderPickDAT",
         "HostInCHOP", "HostInDAT", "HostInTOP", "HostInSOP", "HostInVOL", "HostInPOP",
         "SubNetworkCOMP", "SubNetworkNode", "ObjectMergeSOP", "MovieFileInTOP",

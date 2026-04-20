@@ -3,8 +3,7 @@ extends GNDatBase
 ## Serial port sender DAT.
 ##
 ## Sends text or binary data to a serial port.  Accepts an optional DAT
-## input (each row is sent as a message) or CHOP input (channel values
-## formatted per *format* parameter).
+## input (each row is sent as a message).
 ##
 ## **Requires a serial GDExtension** (e.g. GDSerialPort) that exposes
 ## `SerialPort.open()`, `.write()`, `.close()`.  Without it the operator

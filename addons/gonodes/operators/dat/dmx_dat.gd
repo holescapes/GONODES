@@ -30,6 +30,7 @@ var _rx_sequence: int = 0
 func _init() -> void:
 	node_type = "dmx"
 	time_dependent = true
+	deprecated = true
 
 
 func _init_ports() -> void:

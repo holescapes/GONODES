@@ -291,7 +291,7 @@ all currently registered operators:
 python scripts/gen_all_core_patches.py
 ```
 
-This creates 13 `.gnpatch` files covering **all 536 operators** across every family,
+This creates 13 `.gnpatch` files covering **all 537 operators** across every family,
 organized into logical chains with a SwitchTOP → WindowOUT for visual inspection.
 Use the chain slider to step through each operator group.
 
@@ -371,7 +371,7 @@ nodes cook without errors, and visual output looks correct.
 - [ ] **MIDI:** Connect controller → MidiInCHOP receives notes/CC
 - [ ] **Webcam:** VideoCaptureTOP shows live camera feed
 - [ ] **Spout/Syphon:** Send/receive texture with another app (Resolume, OBS)
-- [ ] **Serial:** Arduino connected → SerialDAT receives data
+- [ ] **Serial:** Arduino connected → SerialReceiveDAT (gn_ext_serial) receives data
 - [ ] **NDI:** Send/receive over network
 - [ ] **Audio:** AudioInCHOP captures microphone, AudioDeviceOUT plays to speakers
 
@@ -448,7 +448,7 @@ The initial public release of GONODES is **Beta**, not Alpha. This is a delibera
 
 Alpha implies incomplete core functionality, frequent crashes, and missing fundamental features. GONODES has none of these issues:
 
-- **536 operators** across 14 families — complete creative toolkit covering textures, geometry, channels, particles, volumes, compositing, materials, data tables, ISF shaders, SDF, and network I/O
+- **537 operators** across 14 families — complete creative toolkit covering textures, geometry, channels, particles, volumes, compositing, materials, data tables, ISF shaders, SDF, and network I/O
 - **1764 automated tests**, 1763 passing (99.94%) — the single failure is a smoke test for extension patches that require compiled native binaries, not a code defect
 - **100% operator test coverage** — every operator has at least instantiation + output type verification
 - **100% help file coverage** — 1,588 help .gnpatch files covering all 537 unique node types
