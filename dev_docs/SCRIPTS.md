@@ -15,6 +15,9 @@ All helper scripts live in `scripts/`.  They require **Python 3.10+** and no ext
 | `validate_all_patches.py` | Validate all `.gnpatch` files for structural errors | Editing patches or operator ports |
 | `check_coverage.py` | Report operators with fewer than 3 help patches | Before release |
 | `check_versions.py` | Verify CI workflows agree with `versions.env` | Bumping Godot or extension versions |
+| `check_env.py` | Pre-flight build environment check (tools, SDKs) | Before first build or release |
+| `check_builds.py` | Verify native extension build outputs exist | After building native extensions |
+| `bundle_toolchain.py` | Bundle godot-cpp into user_native toolchain | Before packaging a release |
 
 ---
 
@@ -216,6 +219,37 @@ Validates that all CI workflows, `setup_deps.py`, and `project.godot` agree on v
 
 ```
 python scripts/check_versions.py
+```
+
+### `check_env.py`
+
+Pre-flight check for the entire build environment. Verifies required tools (Python, SCons, C++ compiler, Godot editor), godot-cpp clone and built libraries, and all extension SDK dependencies.
+
+SDK requirements are discovered **programmatically** from each extension's `native/build.cfg` — no hardcoded SDK list.
+
+```
+python scripts/check_env.py           # full report
+python scripts/check_env.py --strict   # treat warnings as errors (CI)
+```
+
+### `check_builds.py`
+
+Verifies that all native extensions have the expected shared libraries (`.dll`, `.so`, `.dylib`) in their `bin/` directories. Extensions are discovered programmatically from `build.cfg` files.
+
+```
+python scripts/check_builds.py              # current platform
+python scripts/check_builds.py --all        # all platforms
+python scripts/check_builds.py --platform linux   # specific platform
+```
+
+### `bundle_toolchain.py`
+
+Copies built godot-cpp headers and release static libraries into `addons/gn_ext_user_native/toolchain/godot-cpp/` so end-users can compile custom C++ operators without installing Godot or cloning repos.
+
+```
+python scripts/bundle_toolchain.py              # current platform
+python scripts/bundle_toolchain.py --all        # all shipping platforms
+python scripts/bundle_toolchain.py --verify     # check without copying
 ```
 
 ### `gen_manual_test_patches.py`

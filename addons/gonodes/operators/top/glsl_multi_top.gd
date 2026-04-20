@@ -607,6 +607,10 @@ func _ensure_mrt_framebuffer(size: Vector2i) -> void:
 
 
 
+# MULTI-OUTPUT EXCEPTION: GPU MRT rendering (§25.24).
+# Multiple Render Targets are written in a single draw call — the GPU computes
+# all outputs simultaneously.  Per-output skipping is not possible in MRT.
+# The fallback path (_cook_fallback) guards per-output renders individually.
 func _cook_mrt(inputs: Array[GNData], res: Vector2i) -> GNData:
 	_ensure_mrt_framebuffer(res)
 	if not _framebuffer_rid.is_valid() or not _pipeline_rid.is_valid():
@@ -901,6 +905,9 @@ func _cook_fallback(inputs: Array[GNData], res: Vector2i) -> GNData:
 	_ensure_fallback_viewports(_output_count, res)
 
 	for idx in range(_output_count):
+		# §25.24: Skip per-output render if this port has no consumers
+		if not is_output_demanded(idx):
+			continue
 		var vp := _fb_viewports[idx]
 		if vp.size != res:
 			vp.size = res

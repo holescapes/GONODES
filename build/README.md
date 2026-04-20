@@ -44,7 +44,7 @@ scons platform=windows arch=x86_64 -j4
 |------|--------|---------|-------------|
 | `platform` | `windows`, `linux`, `macos` | Host OS | Target operating system |
 | `arch` | `x86_64`, `arm64` | Host CPU | Target architecture |
-| `target` | `template_release`, `template_debug` | `template_release` | Release = optimized. Debug = symbols |
+| `target` | `template_release` | `template_release` | Release-optimized (debug builds not supported) |
 | `ext` | `gn_ext_<name>` | *(all)* | Build only this extension |
 | `-j N` | integer | 1 | Parallel jobs |
 

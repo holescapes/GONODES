@@ -4008,6 +4008,34 @@ These are non-negotiable constraints discovered during development. **Never viol
 - **Prefer Python** for any text manipulation involving non-ASCII: `open(fp, 'r', encoding='utf-8')` is reliable.
 - **Corruption signature:** `Ã¢â‚¬â€` instead of `—`, `Ã¶` instead of `ö`, `Ã©` instead of `é`. If you see these, STOP — the file has been re-encoded through Win-1252 and needs byte-level repair (see `scripts/fix_encoding.py`).
 
+### 25.24 Multi-Output Nodes — Demand-Gated Per-Port Work
+
+When an operator has 2+ output ports, structure `_cook()` into **shared core** (runs unconditionally) and **per-port work** (runs only if that port has downstream consumers). The cook engine stamps `is_output_demanded(port_index)` based on wire connections, wireless Selects, and expression references — no port is auto-demanded.
+
+**Rule:** Every per-port code path that does **non-trivial work** (CPU extraction, GPU readback, mesh construction, data marshaling) MUST be guarded by `is_output_demanded(N)`. Unguarded per-port work wastes cycles when that output has no consumers.
+
+**Required implementation pattern:**
+```gdscript
+func _cook(inputs: Array[GNData]) -> GNData:
+    var out := _prepare_output()
+    _shared_work(inputs)                  # Always runs (needed by all ports)
+    if is_output_demanded(0):
+        _build_port_0_output(out)          # Only if port 0 has consumers
+    if is_output_demanded(1):
+        _extract_port_1_data()             # Only if port 1 has consumers
+    return out
+
+func get_output_data(port_index: int) -> GNData:
+    if port_index == 1:
+        return _cached_secondary_data
+    return cached_output
+```
+
+**Exceptions (must be commented in-code with `# MULTI-OUTPUT EXCEPTION:`):**
+1. **Coupled simulations** (FluidVOL, PyroVOL): All fields participate in a single physics step — velocity, pressure, density are mutually dependent. Removing one field breaks physical correctness. Exception: simulation always runs fully; outputs are just views into the shared state.
+2. **GPU MRT rendering** (GLSLMultiTOP MRT path): Multiple Render Targets are computed in a single draw call — the GPU writes all outputs simultaneously. No per-output skipping is possible in MRT. Exception: MRT dispatch always renders all outputs. The fallback (per-viewport) path MUST guard per-output renders.
+3. **SubNetworkNode**: The inner cook engine does not yet support demand-aware scheduling. The inner graph runs fully regardless of which OutTunnels are demanded. This is a known limitation to be addressed in a future architecture pass.
+
 ---
 
 ## 26. Known Bugs

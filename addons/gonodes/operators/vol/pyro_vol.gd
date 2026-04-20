@@ -319,6 +319,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 ## Multi-output: port 0 = density (smoke), port 1 = temperature, port 2 = velocity
+## MULTI-OUTPUT EXCEPTION: Coupled pyro simulation (§25.24).
+## Combustion couples fuel → temperature → density; buoyancy couples
+## temperature → velocity; advection couples velocity → density.
+## All three fields must compute every frame for physical correctness.
 func get_output_data(port_index: int) -> GNData:
 	match port_index:
 		1: return _temperature

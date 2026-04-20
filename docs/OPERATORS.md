@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **532 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 22 extension addons.
+> **536 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 22 extension addons.
 
 ---
 
@@ -6110,7 +6110,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
 | **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **372** | *Core operators only. With extensions (95), SDF (27), SCRIPT (3), and native variants, total reaches 532.* |
+| **Total** | **372** | *Core operators only. With extensions (95), SDF (27), SCRIPT (3), and native variants, total reaches 536.* |
 
 ### Extension Operators (not included in count above)
 
@@ -6127,6 +6127,8 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **gn_ext_mapper** | QuadMapTOP, BezierMapTOP, GridWarpTOP, EdgeBlendTOP, ProjectionMaskTOP, StonerTOP, ProjectorBlendTOP | GPU projection mapping — bezier/quad/grid warp, edge blend, masking |
 | **gn_ext_hap** | HapInTOP, HapOUT | GPU-direct HAP video codec — DXT-compressed frames upload to GPU with zero CPU decode. Supports HAP, HAP Alpha, HAP Q variants in QuickTime MOV containers |
 | **gn_ext_ndi** | NDIInTOP, NDIOutTOP, NDIAudioInCHOP, NDIAudioOutCHOP | NDI video & audio I/O over the network via NewTek/Vizrt NDI SDK (cross-platform) |
+| **gn_ext_blackmagic** | BlackmagicInIMG, BlackmagicOutIMG, BlackmagicDAT | Professional SDI/HDMI video I/O via DeckLink SDK. Capture and output with timecode, device enum. Windows COM-based |
+| **gn_ext_depth_sensor** | DepthSensorIMG, DepthSensorDAT | Unified depth sensor: image + skeleton + hands + point cloud. Azure Kinect, RealSense, Ultraleap backends |
 
 > **Note:** SDF operators (26 total — 10 primitives, 5 booleans, 8 domain modifiers, 2 materials, 1 renderer) were promoted from `gn_ext_sdf` to **core** as the 12th family type. See the SDF section above.
 

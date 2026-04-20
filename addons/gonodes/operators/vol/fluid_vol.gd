@@ -210,6 +210,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 ## Multi-output support: port 0 = density, port 1 = velocity
+## MULTI-OUTPUT EXCEPTION: Coupled Navier-Stokes simulation (§25.24).
+## Velocity and density are mutually dependent — density advection reads
+## velocity, pressure projection writes velocity from divergence of both
+## fields.  Cannot skip computing one field without breaking physics.
 func get_output_data(port_index: int) -> GNData:
 	if port_index == 1:
 		return _velocity

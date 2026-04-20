@@ -1512,11 +1512,12 @@ func _remove_network_nodes_from_tree() -> void:
 ## Updates the window title to show the current file name.
 func _update_title() -> void:
 	var mod := "*" if _is_modified() else ""
+	var ver: String = ProjectSettings.get_setting("application/config/version", "dev")
 	if _current_file_path.is_empty():
-		get_window().title = "GONODES Editor — Untitled%s" % mod
+		get_window().title = "GONODES v%s — Untitled%s" % [ver, mod]
 	else:
 		var file_name := _current_file_path.get_file()
-		get_window().title = "GONODES Editor — %s%s" % [file_name, mod]
+		get_window().title = "GONODES v%s — %s%s" % [ver, file_name, mod]
 
 
 ## Returns true if the patch has unsaved changes.

@@ -972,6 +972,19 @@ Every new operator must ship with at least one `.gnpatch` example file in `addon
 
 All text files (`.md`, `.gd`, `.cfg`, `.tscn`, `.gnpatch`) are UTF-8 without BOM. **NEVER** use PowerShell `Get-Content` / `Set-Content` on files with non-ASCII characters without `-Encoding UTF8` on **both** calls. PowerShell defaults to Windows-1252, causing compounding corruption. **Prefer Python** for text manipulation involving non-ASCII. Corruption signature: `Ã¢â‚¬â€` instead of `—`. See `GONODES_CONTEXT.md` §25.23 and `BUILD.md` → UTF-8 Encoding Safeguards for full details.
 
+### Hard Rule 25.24: Multi-Output Nodes — Demand-Gated Per-Port Work
+
+When an operator has 2+ output ports, its `_cook()` must split into **shared core** (unconditional) and **per-port work** (guarded by `is_output_demanded(N)`). Every non-trivial per-port code path — CPU data extraction, GPU readback, mesh building, data marshaling — MUST be inside an `is_output_demanded()` guard. Override `get_output_data(port_index)` to route each port to its cached data.
+
+Demand is detected from three sources: wire connections, wireless Select operators, and expression references. No port is auto-demanded.
+
+**Exceptions** (must be commented in code with `# MULTI-OUTPUT EXCEPTION:`):
+- **Coupled simulations** (FluidVOL, PyroVOL) — mutually dependent physics fields; outputs are views into shared state that must compute fully.
+- **GPU MRT rendering** (GLSLMultiTOP MRT path) — single draw call writes all outputs simultaneously. The fallback path must still guard per-output renders.
+- **SubNetworkNode** — inner cook engine does not yet support demand-aware scheduling.
+
+See `GONODES_CONTEXT.md` §25.24 for full details and code examples.
+
 ---
 
 ## 11. Pull Request Checklist

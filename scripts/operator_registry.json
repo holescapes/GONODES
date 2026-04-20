@@ -571,89 +571,6 @@
     ]
   },
   {
-    "class_name": "DepthHandCHOP",
-    "node_type": "depthhand",
-    "family": "chop",
-    "file": "addons/gn_ext_depth_sensor/operators/chop/depth_hand_chop.gd",
-    "extension": "gn_ext_depth_sensor",
-    "params": [
-      {
-        "name": "device",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "min_confidence",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "finger_filter",
-        "type": "string",
-        "default": "*"
-      },
-      {
-        "name": "timeout_ms",
-        "type": "int",
-        "default": 33
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "rescan",
-        "type": "pulse",
-        "default": null
-      }
-    ]
-  },
-  {
-    "class_name": "DepthSkeletonCHOP",
-    "node_type": "depthskeleton",
-    "family": "chop",
-    "file": "addons/gn_ext_depth_sensor/operators/chop/depth_skeleton_chop.gd",
-    "extension": "gn_ext_depth_sensor",
-    "params": [
-      {
-        "name": "device",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "max_bodies",
-        "type": "int",
-        "default": 6
-      },
-      {
-        "name": "min_confidence",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "joint_filter",
-        "type": "string",
-        "default": "*"
-      },
-      {
-        "name": "timeout_ms",
-        "type": "int",
-        "default": 33
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "rescan",
-        "type": "pulse",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "EnvelopeCHOP",
     "node_type": "envelope",
     "family": "chop",
@@ -915,25 +832,6 @@
         "name": "reset",
         "type": "bool",
         "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "HostInCHOP",
-    "node_type": "host_in",
-    "family": "chop",
-    "file": "addons/gonodes/operators/chop/host_in_chop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
-      },
-      {
-        "name": "sample_rate",
-        "type": "float",
-        "default": 60.0
       }
     ]
   },
@@ -3164,30 +3062,6 @@
     ]
   },
   {
-    "class_name": "InTunnel",
-    "node_type": "in_tunnel",
-    "family": "comp",
-    "file": "addons/gonodes/operators/comp/in_tunnel.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": null
-      },
-      {
-        "name": "family",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "label",
-        "type": "string",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "InstanceCOMP",
     "node_type": "instance",
     "family": "comp",
@@ -3755,30 +3629,6 @@
     "params": []
   },
   {
-    "class_name": "OutTunnel",
-    "node_type": "out_tunnel",
-    "family": "comp",
-    "file": "addons/gonodes/operators/comp/out_tunnel.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "index",
-        "type": "int",
-        "default": null
-      },
-      {
-        "name": "family",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "label",
-        "type": "string",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "PathCOMP",
     "node_type": "path",
     "family": "comp",
@@ -4198,20 +4048,6 @@
         "name": "collision_shape",
         "type": "menu",
         "default": null
-      }
-    ]
-  },
-  {
-    "class_name": "SubNetworkNode",
-    "node_type": "sub_network",
-    "family": "comp",
-    "file": "addons/gonodes/operators/comp/sub_network_node.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": "Subnet"
       }
     ]
   },
@@ -4717,25 +4553,6 @@
         "name": "include_dirs",
         "type": "bool",
         "default": true
-      }
-    ]
-  },
-  {
-    "class_name": "HostInDAT",
-    "node_type": "host_in",
-    "family": "dat",
-    "file": "addons/gonodes/operators/dat/host_in_dat.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
-      },
-      {
-        "name": "mode",
-        "type": "menu",
-        "default": null
       }
     ]
   },
@@ -5688,6 +5505,64 @@
     ]
   },
   {
+    "class_name": "BlackmagicInIMG",
+    "node_type": "blackmagicin",
+    "family": "img",
+    "file": "addons/gn_ext_blackmagic/operators/img/blackmagic_in_img.gd",
+    "extension": "gn_ext_blackmagic",
+    "params": [
+      {
+        "name": "device",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "fps",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "BlackmagicOutIMG",
+    "node_type": "blackmagicout",
+    "family": "img",
+    "file": "addons/gn_ext_blackmagic/operators/img/blackmagic_out_img.gd",
+    "extension": "gn_ext_blackmagic",
+    "params": [
+      {
+        "name": "device",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "fps",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "BlobTrackIMG",
     "node_type": "blob_track",
     "family": "img",
@@ -5967,6 +5842,75 @@
         "name": "normalize",
         "type": "bool",
         "default": true
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "DepthSensorIMG",
+    "node_type": "depthsensor",
+    "family": "img",
+    "file": "addons/gn_ext_depth_sensor/operators/img/depth_sensor_img.gd",
+    "extension": "gn_ext_depth_sensor",
+    "params": [
+      {
+        "name": "device",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "stream",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "max_depth_mm",
+        "type": "int",
+        "default": 5000
+      },
+      {
+        "name": "max_bodies",
+        "type": "int",
+        "default": 6
+      },
+      {
+        "name": "min_confidence",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "joint_filter",
+        "type": "string",
+        "default": "*"
+      },
+      {
+        "name": "finger_filter",
+        "type": "string",
+        "default": "*"
+      },
+      {
+        "name": "point_color",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "point_skip",
+        "type": "int",
+        "default": 1
+      },
+      {
+        "name": "point_max_depth",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "timeout_ms",
+        "type": "int",
+        "default": 33
       },
       {
         "name": "active",
@@ -7291,6 +7235,256 @@
     ]
   },
   {
+    "class_name": "HostInCHOP",
+    "node_type": "host_in_chop",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_in_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "sample_rate",
+        "type": "float",
+        "default": 60.0
+      }
+    ]
+  },
+  {
+    "class_name": "HostInDAT",
+    "node_type": "host_in_dat",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_in_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "HostInPOP",
+    "node_type": "host_in_pop",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_in_pop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "max_particles",
+        "type": "int",
+        "default": 100000
+      }
+    ]
+  },
+  {
+    "class_name": "HostInSOP",
+    "node_type": "host_in_sop",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_in_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostInTOP",
+    "node_type": "host_in",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_in_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostInVOL",
+    "node_type": "host_in_vol",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_in_vol.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "field_name",
+        "type": "string",
+        "default": "density"
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutCHOP",
+    "node_type": "host_out_chop",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_out_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutDAT",
+    "node_type": "host_out_dat",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_out_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutPOP",
+    "node_type": "host_out_pop",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_out_pop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutSOP",
+    "node_type": "host_out_sop",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_out_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutTOP",
+    "node_type": "host_out",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_out_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "HostOutVOL",
+    "node_type": "host_out_vol",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/host_out_vol.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "class_name": "InTunnel",
+    "node_type": "in_tunnel",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/in_tunnel.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "index",
+        "type": "int",
+        "default": null
+      },
+      {
+        "name": "family",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "OutTunnel",
+    "node_type": "out_tunnel",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/out_tunnel.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "index",
+        "type": "int",
+        "default": null
+      },
+      {
+        "name": "family",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "SubNetworkNode",
+    "node_type": "sub_network",
+    "family": "net",
+    "file": "addons/gonodes/operators/net/sub_network_node.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "label",
+        "type": "string",
+        "default": "Subnet"
+      }
+    ]
+  },
+  {
     "class_name": "AudioDeviceOUT",
     "node_type": "audio_device",
     "family": "output",
@@ -7379,90 +7573,6 @@
         "name": "record",
         "type": "bool",
         "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "HostOutCHOP",
-    "node_type": "host_out_chop",
-    "family": "output",
-    "file": "addons/gonodes/operators/output/host_out_chop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
-    "class_name": "HostOutDAT",
-    "node_type": "host_out_dat",
-    "family": "output",
-    "file": "addons/gonodes/operators/output/host_out_dat.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
-    "class_name": "HostOutPOP",
-    "node_type": "host_out_pop",
-    "family": "output",
-    "file": "addons/gonodes/operators/output/host_out_pop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
-    "class_name": "HostOutSOP",
-    "node_type": "host_out_sop",
-    "family": "output",
-    "file": "addons/gonodes/operators/output/host_out_sop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
-    "class_name": "HostOutTOP",
-    "node_type": "host_out",
-    "family": "output",
-    "file": "addons/gonodes/operators/output/host_out_top.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
-      }
-    ]
-  },
-  {
-    "class_name": "HostOutVOL",
-    "node_type": "host_out_vol",
-    "family": "output",
-    "file": "addons/gonodes/operators/output/host_out_vol.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
       }
     ]
   },
@@ -7930,25 +8040,6 @@
         "name": "drag",
         "type": "float",
         "default": 0.01
-      }
-    ]
-  },
-  {
-    "class_name": "HostInPOP",
-    "node_type": "host_in_pop",
-    "family": "pop",
-    "file": "addons/gonodes/operators/pop/host_in_pop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
-      },
-      {
-        "name": "max_particles",
-        "type": "int",
-        "default": 100000
       }
     ]
   },
@@ -9494,50 +9585,6 @@
     ]
   },
   {
-    "class_name": "DepthPointCloudSOP",
-    "node_type": "depthpointcloud",
-    "family": "sop",
-    "file": "addons/gn_ext_depth_sensor/operators/sop/depth_point_cloud_sop.gd",
-    "extension": "gn_ext_depth_sensor",
-    "params": [
-      {
-        "name": "device",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "use_color",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "skip",
-        "type": "int",
-        "default": 1
-      },
-      {
-        "name": "max_depth",
-        "type": "float",
-        "default": 5.0
-      },
-      {
-        "name": "timeout_ms",
-        "type": "int",
-        "default": 33
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "rescan",
-        "type": "pulse",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "DivideSOP",
     "node_type": "divide",
     "family": "sop",
@@ -9894,20 +9941,6 @@
         "name": "talus_angle",
         "type": "float",
         "default": 0.6
-      }
-    ]
-  },
-  {
-    "class_name": "HostInSOP",
-    "node_type": "host_in_sop",
-    "family": "sop",
-    "file": "addons/gonodes/operators/sop/host_in_sop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
       }
     ]
   },
@@ -11653,64 +11686,6 @@
     ]
   },
   {
-    "class_name": "BlackmagicInTOP",
-    "node_type": "blackmagicin",
-    "family": "top",
-    "file": "addons/gn_ext_blackmagic/operators/top/blackmagic_in_top.gd",
-    "extension": "gn_ext_blackmagic",
-    "params": [
-      {
-        "name": "device",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "resolution",
-        "type": "vector2i",
-        "default": null
-      },
-      {
-        "name": "fps",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "BlackmagicOutTOP",
-    "node_type": "blackmagicout",
-    "family": "top",
-    "file": "addons/gn_ext_blackmagic/operators/top/blackmagic_out_top.gd",
-    "extension": "gn_ext_blackmagic",
-    "params": [
-      {
-        "name": "device",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "resolution",
-        "type": "vector2i",
-        "default": null
-      },
-      {
-        "name": "fps",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": false
-      }
-    ]
-  },
-  {
     "class_name": "BloomTOP",
     "node_type": "bloom",
     "family": "top",
@@ -12479,45 +12454,6 @@
       {
         "name": "quality",
         "type": "menu",
-        "default": null
-      }
-    ]
-  },
-  {
-    "class_name": "DepthSensorTOP",
-    "node_type": "depthsensor",
-    "family": "top",
-    "file": "addons/gn_ext_depth_sensor/operators/top/depth_sensor_top.gd",
-    "extension": "gn_ext_depth_sensor",
-    "params": [
-      {
-        "name": "device",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "stream",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "max_depth_mm",
-        "type": "int",
-        "default": 5000
-      },
-      {
-        "name": "timeout_ms",
-        "type": "int",
-        "default": 33
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "rescan",
-        "type": "pulse",
         "default": null
       }
     ]
@@ -13391,20 +13327,6 @@
         "name": "offset",
         "type": "float",
         "default": 0.5
-      }
-    ]
-  },
-  {
-    "class_name": "HostInTOP",
-    "node_type": "host_in",
-    "family": "top",
-    "file": "addons/gonodes/operators/top/host_in_top.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
       }
     ]
   },
@@ -16049,6 +15971,11 @@
         "default": 200
       },
       {
+        "name": "fill_parent",
+        "type": "bool",
+        "default": false
+      },
+      {
         "name": "bg_color",
         "type": "color",
         "default": null
@@ -16208,6 +16135,11 @@
         "default": 200
       },
       {
+        "name": "fill_parent",
+        "type": "bool",
+        "default": false
+      },
+      {
         "name": "bg_color",
         "type": "color",
         "default": null
@@ -16279,6 +16211,11 @@
         "name": "grid_rows",
         "type": "int",
         "default": 4
+      },
+      {
+        "name": "fill_parent",
+        "type": "bool",
+        "default": false
       },
       {
         "name": "bg_color",
@@ -17263,25 +17200,6 @@
         "name": "max_triangles",
         "type": "int",
         "default": 500000
-      }
-    ]
-  },
-  {
-    "class_name": "HostInVOL",
-    "node_type": "host_in_vol",
-    "family": "vol",
-    "file": "addons/gonodes/operators/vol/host_in_vol.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": ""
-      },
-      {
-        "name": "field_name",
-        "type": "string",
-        "default": "density"
       }
     ]
   },

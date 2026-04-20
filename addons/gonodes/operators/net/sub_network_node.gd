@@ -199,6 +199,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 ## Override base class multi-output routing.  The cook engine calls this
 ## instead of reading cached_output directly, allowing each output port
 ## to carry data from a different OutTunnel.
+## MULTI-OUTPUT EXCEPTION: Inner cook engine limitation (§25.24).
+## The inner graph runs fully regardless of which OutTunnels are demanded.
+## Demand-aware inner scheduling is a future architecture improvement.
 func get_output_data(port_index: int) -> GNData:
 	if port_index < 0 or port_index >= _out_tunnels.size():
 		return cached_output  # Fallback to primary

@@ -651,7 +651,39 @@ func _create_enum_control() -> Control:
 	option.selected = int(param.value)
 	option.size_flags_horizontal = SIZE_EXPAND_FILL
 	option.item_selected.connect(_on_enum_changed)
+	# Dynamic enum: refresh options every time the dropdown is about to open
+	if param.dynamic_enum_callback.is_valid():
+		option.get_popup().about_to_popup.connect(
+			_on_dynamic_enum_refresh.bind(option))
 	return option
+
+
+## Called just before the OptionButton popup opens.  Queries the dynamic
+## callback for a fresh set of options and rebuilds the dropdown in-place,
+## preserving the current selection when possible.
+func _on_dynamic_enum_refresh(option: OptionButton) -> void:
+	if param == null or not param.dynamic_enum_callback.is_valid():
+		return
+	var fresh: PackedStringArray = param.dynamic_enum_callback.call()
+	if fresh == param.enum_options:
+		return
+	var prev_idx: int = option.selected
+	var prev_text: String = option.get_item_text(prev_idx) if prev_idx >= 0 and prev_idx < option.item_count else ""
+	param.enum_options = fresh
+	option.clear()
+	for i in range(fresh.size()):
+		option.add_item(fresh[i], i)
+	# Try to preserve selection by matching text, fall back to clamping index
+	var new_idx: int = -1
+	if not prev_text.is_empty():
+		for i in range(fresh.size()):
+			if fresh[i] == prev_text:
+				new_idx = i
+				break
+	if new_idx < 0:
+		new_idx = mini(prev_idx, fresh.size() - 1)
+	if new_idx >= 0:
+		option.selected = new_idx
 
 
 func _create_color_control() -> Control:

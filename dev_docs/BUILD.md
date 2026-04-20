@@ -567,7 +567,7 @@ Build targets:
 |------|-------|---------|
 | `platform` | `windows`, `linux`, `macos` | Target OS |
 | `arch` | `x86_64`, `arm64` | Target architecture |
-| `target` | `template_debug`, `template_release` | Debug has symbols; release is optimized + stripped |
+| `target` | `template_release` | Release-optimized (debug builds not used) |
 
 Output lands in `bin/<platform>/`.  The `.gdextension` manifest already
 has entries for all 5 platform/arch combinations — Godot loads the correct
@@ -880,7 +880,7 @@ This produces identical output to the unified build. Both paths work.
 |------|--------|---------|-------------|
 | `platform` | `windows`, `linux`, `macos` | Auto-detected from host OS | Target operating system |
 | `arch` | `x86_64`, `arm64` | Auto-detected from host CPU | Target architecture |
-| `target` | `template_release`, `template_debug` | `template_release` | Release = optimized, stripped. Debug = symbols + assertions |
+| `target` | `template_release` | `template_release` | Release-optimized (debug builds not used) |
 | `ext` | `gn_ext_<name>` | *(all)* | Build only this extension (unified build only) |
 | `-j N` | integer | 1 | Parallel compilation jobs |
 | `--list-extensions` | flag | off | Print discovered extensions and exit |

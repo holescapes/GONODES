@@ -9,7 +9,7 @@ Requirements:
 
 Usage:
   cd addons/gn_ext_native/native
-  scons platform=<windows|linux|macos> target=<template_debug|template_release>
+  scons platform=<windows|linux|macos> target=template_release
 """
 
 import os

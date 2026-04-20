@@ -909,8 +909,10 @@ var host_io: Dictionary = {}
 
 
 func to_dict() -> Dictionary:
+	var app_ver: String = ProjectSettings.get_setting("application/config/version", "dev")
 	var d: Dictionary = {
 		"version": "1.0.0",
+		"app_version": app_ver,
 		"generator": "GONODES",
 	}
 
@@ -982,6 +984,11 @@ func from_dict(d: Dictionary) -> bool:
 	if not d.has("nodes") or not d.has("connections"):
 		GNLogger.error("Network", "Patch file missing 'nodes' or 'connections' key")
 		return false
+
+	var patch_ver: String = d.get("app_version", "unknown")
+	var current_ver: String = ProjectSettings.get_setting("application/config/version", "dev")
+	if patch_ver != "unknown" and patch_ver != current_ver:
+		GNLogger.info("Network", "Patch created with GONODES v%s (current: v%s)" % [patch_ver, current_ver])
 
 	# Clear current state (without emitting signals for each removal)
 	_clear_all()

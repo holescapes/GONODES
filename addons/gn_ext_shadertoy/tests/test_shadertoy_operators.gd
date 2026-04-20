@@ -29,6 +29,12 @@ func _make_node(node: GNNode, id: String) -> GNNode:
 	return node
 
 
+func _cook_no_input(node: GNNode) -> GNData:
+	var inputs: Array[GNData] = []
+	node.execute_cook(inputs, _engine.frame_count)
+	return node.cached_output
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # ShadertoyTOP
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -36,10 +42,29 @@ func _make_node(node: GNNode, id: String) -> GNNode:
 func test_shadertoy_top_instantiate() -> void:
 	var node := _make_node(ShadertoyTOP.new(), "shadertoy1")
 	GNTestAssert.assert_not_null(node, "ShadertoyTOP created")
+	GNTestAssert.assert_eq(node.node_type, "shadertoy", "node_type")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.TOP, "family is TOP")
 
+func test_shadertoy_top_ports() -> void:
+	var node := _make_node(ShadertoyTOP.new(), "shadertoy2")
+	GNTestAssert.assert_eq(node.output_ports.size(), 1, "1 output")
+	GNTestAssert.assert_eq(node.output_ports[0].family, GNFamily.Type.TOP, "output is TOP")
+
+func test_shadertoy_top_parameters() -> void:
+	var node := _make_node(ShadertoyTOP.new(), "shadertoy3")
+	GNTestAssert.assert_true(node.parameters.has("shader_code"), "has shader_code")
 
 func test_shadertoy_top_set_shader_code() -> void:
-	var node := _make_node(ShadertoyTOP.new(), "shadertoy2")
+	var node := _make_node(ShadertoyTOP.new(), "shadertoy4")
 	var code := "void mainImage(out vec4 fragColor, in vec2 fragCoord) { fragColor = vec4(1.0); }"
 	node.set_parameter("shader_code", code)
 	GNTestAssert.assert_eq(node.get_parameter("shader_code"), code, "shader_code parameter set")
+
+func test_shadertoy_top_cook_null() -> void:
+	var node := _make_node(ShadertoyTOP.new(), "shadertoy5")
+	_cook_no_input(node)
+	GNTestAssert.assert_true(true, "ShadertoyTOP cook-null no crash")
+
+func test_shadertoy_top_description() -> void:
+	var node := _make_node(ShadertoyTOP.new(), "shadertoy6")
+	GNTestAssert.assert_true(not node.node_description.is_empty(), "has description")

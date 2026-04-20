@@ -73,6 +73,12 @@ var fallback_value: Variant = 0.0
 ## For ENUM type: array of option labels, e.g., ["Sine", "Triangle", "Square"].
 @export var enum_options: PackedStringArray = PackedStringArray()
 
+## For ENUM type: optional Callable that returns a fresh PackedStringArray.
+## When set, the inspector calls this before opening the dropdown, so the
+## option list always reflects current hardware/state (e.g., connected sensors).
+## Signature: func() -> PackedStringArray
+var dynamic_enum_callback: Callable = Callable()
+
 ## For FILE type: array of file extension filters for the picker dialog.
 ## Each entry is a wildcard pattern, e.g., "*.ttf", "*.otf", "*.png".
 @export var file_filters: PackedStringArray = PackedStringArray()

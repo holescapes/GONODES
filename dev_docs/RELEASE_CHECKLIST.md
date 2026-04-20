@@ -16,12 +16,29 @@ Step-by-step guide for every release build. Do not skip steps — platform-speci
 
 ## Phase 1: Ensure Dependencies Are Present
 
+Run the environment pre-flight check:
+
+```bash
+python scripts/check_env.py
+```
+
+This scans your machine for required tools (Python, SCons, C++ compiler, Godot),
+verifies `godot-cpp` is cloned and built, and programmatically discovers SDK
+requirements from each extension's `build.cfg`. The report shows PASS/WARN/FAIL
+for every dependency.
+
+For CI, use `--strict` to treat warnings as errors:
+
+```bash
+python scripts/check_env.py --strict
+```
+
 ### Required on every build machine
 
 | Dependency | How to verify | Install |
 |------------|---------------|---------|
-| **Godot 4.6.1 editor** | `godot --version` | Download from godotengine.org |
-| **Godot 4.6.1 export templates** | Editor → Export → Manage Export Templates | Download in-editor or from godotengine.org |
+| **Godot editor** (version from `versions.env` → `GODOT_VERSION`) | `godot --version` | Download from godotengine.org |
+| **Godot export templates** (same version) | Editor → Export → Manage Export Templates | Download in-editor or from godotengine.org |
 | **Python 3.8+** | `python --version` | python.org |
 | **SCons** | `scons --version` | `pip install scons` |
 | **C++ compiler** (see per-platform below) | — | — |
@@ -46,7 +63,7 @@ It is **not tracked in git** — it's cloned by `setup_deps.py` and by CI workfl
   ```bash
   python setup_deps.py --core
   # or manually (branch read from versions.env → GODOTCPP_BRANCH):
-  git clone --depth 1 --branch 4.5 https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
+  git clone --depth 1 --branch $GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
   ```
 - [ ] Build for each target platform (once per Godot version bump):
   ```bash
@@ -101,7 +118,17 @@ scons platform=macos arch=x86_64 target=template_release -j8
 
 ### Verify build outputs
 
-- [ ] Check that each extension's `native/bin/` directory has the expected `.dll` / `.so` / `.dylib`:
+Run the automated build output checker:
+
+```bash
+python scripts/check_builds.py          # current platform
+python scripts/check_builds.py --all    # all platforms
+```
+
+This programmatically scans every extension's `build.cfg` and verifies the
+expected `.dll` / `.so` / `.dylib` files exist in the correct `bin/` directories.
+
+For reference, the full expected matrix:
 
 | Extension | Windows x86_64 | Windows ARM64 | Linux x86_64 | Linux ARM64 | macOS |
 |-----------|----------------|---------------|--------------|-------------|-------|
@@ -137,15 +164,24 @@ The `gn_ext_user_native` extension lets users write custom C++ nodes **at runtim
 
 **Why this matters:** Creative coders click "Edit C++" → write code → press Ctrl+B → it compiles and hot-reloads in 2–8 seconds. If godot-cpp headers/libs aren't present, that build fails. We must ship them.
 
-- [ ] Copy `addons/gn_ext_native/native/godot-cpp/` into `addons/gn_ext_user_native/toolchain/godot-cpp/`
-  - Include: headers (`include/`, `gen/include/`), pre-built static libs (`bin/`)
-  - Exclude: `.git/`, `test/`, `doc/`, object files (`*.o`, `*.obj`)
-- [ ] Verify the bundled godot-cpp was built from the **same branch** as the Godot editor version (e.g., `godot-4.6-stable` for Godot 4.6.x)
-- [ ] Verify static libs exist for **all shipping platforms** (at minimum: Windows x86_64, Linux x86_64, macOS arm64)
-- [ ] Verify `toolchain/README.md` matches the shipped layout
+Run the automated bundler:
+
+```bash
+python scripts/bundle_toolchain.py          # current platform
+python scripts/bundle_toolchain.py --all    # all shipping platforms
+```
+
+Then verify the result:
+
+```bash
+python scripts/bundle_toolchain.py --verify
+```
+
+- [ ] Run `bundle_toolchain.py` for all shipping platforms
+- [ ] Run `bundle_toolchain.py --verify` — all checks pass
 - [ ] Test: Drop a UserNativeSOP → Edit C++ → Ctrl+B → confirm it finds headers and compiles
 
-> **Version coupling:** The bundled godot-cpp **must** match the Godot editor version. If the editor is 4.6.1 but toolchain godot-cpp is from 4.5, user-compiled nodes will crash on load due to ABI mismatch.
+> **Version coupling:** The bundled godot-cpp **must** match the Godot editor version. If the editor and toolchain godot-cpp are from different branches, user-compiled nodes will crash on load due to ABI mismatch.
 
 ---
 
@@ -175,7 +211,7 @@ The Player is a standalone runtime (no editor UI) for deployed installations.
 
 ### Windows / PowerShell
 ```powershell
-.\scripts\build_templates.ps1 -Platforms all -GodotPath "C:\path\to\Godot_v4.6.1-stable_win64.exe"
+.\scripts\build_templates.ps1 -Platforms all -GodotPath "C:\path\to\Godot.exe"
 ```
 
 ### macOS / Linux
@@ -255,7 +291,7 @@ all currently registered operators:
 python scripts/gen_all_core_patches.py
 ```
 
-This creates 13 `.gnpatch` files covering **all 539 operators** across every family,
+This creates 13 `.gnpatch` files covering **all 536 operators** across every family,
 organized into logical chains with a SwitchTOP → WindowOUT for visual inspection.
 Use the chain slider to step through each operator group.
 
@@ -412,7 +448,7 @@ The initial public release of GONODES is **Beta**, not Alpha. This is a delibera
 
 Alpha implies incomplete core functionality, frequent crashes, and missing fundamental features. GONODES has none of these issues:
 
-- **539 operators** across 14 families — complete creative toolkit covering textures, geometry, channels, particles, volumes, compositing, materials, data tables, ISF shaders, SDF, and network I/O
+- **536 operators** across 14 families — complete creative toolkit covering textures, geometry, channels, particles, volumes, compositing, materials, data tables, ISF shaders, SDF, and network I/O
 - **1764 automated tests**, 1763 passing (99.94%) — the single failure is a smoke test for extension patches that require compiled native binaries, not a code defect
 - **100% operator test coverage** — every operator has at least instantiation + output type verification
 - **100% help file coverage** — 1,588 help .gnpatch files covering all 537 unique node types

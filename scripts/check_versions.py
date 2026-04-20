@@ -54,6 +54,17 @@ def check_workflows(versions: dict) -> list:
     return errors
 
 
+def get_app_version() -> str:
+    """Reads the GONODES app version from project.godot (single source of truth)."""
+    project_godot = os.path.join(ROOT, "project.godot")
+    with open(project_godot, encoding="utf-8") as f:
+        content = f.read()
+    m = re.search(r'config/version\s*=\s*"([^"]+)"', content)
+    if not m:
+        raise ValueError("project.godot missing config/version setting")
+    return m.group(1)
+
+
 def main():
     if not os.path.isfile(VERSIONS_FILE):
         print("ERROR: versions.env not found at project root")
@@ -61,6 +72,9 @@ def main():
 
     versions = load_versions_env()
     print(f"versions.env: {versions}")
+
+    app_ver = get_app_version()
+    print(f"GONODES app version (from project.godot): {app_ver}")
 
     errors = check_workflows(versions)
 

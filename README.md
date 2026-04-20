@@ -19,27 +19,28 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**528 operators** across **13 families**, plus **93 native C++ accelerated variants** and **21 extensions**.  
+**536 operators** across **14 families**, plus **93 native C++ accelerated variants** and **22 extensions**.  
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
 
 | Family | What It Processes | Examples |
 |--------|-------------------|----------|
-| **TOP** (143) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
-| **CHOP** (85) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
-| **SOP** (76) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
-| **DAT** (48) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
-| **COMP** (26) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
-| **POP** (13) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
+| **TOP** (139) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
+| **CHOP** (82) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
+| **SOP** (74) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
+| **DAT** (47) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
+| **IMG** (37) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab, DepthSensor, Blackmagic |
+| **UI** (36) | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer |
+| **SDF** (29) | Signed distance fields | Box, Sphere, Torus, Boolean ops, Bend, Twist, Raymarch |
+| **COMP** (23) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
+| **NET** (15) | Network I/O | OSC, WebSocket, HTTP, Spout, Syphon, NDI |
 | **VOL** (15) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
-| **MAT** (11) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
-| **IMG** (33) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab, Histogram |
+| **POP** (13) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
+| **MAT** (12) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
 
 > **GPU/CPU boundary rule:** Operators that require GPU→CPU texture readback (histogram, blob detection, pixel sorting) are always IMG family — never TOP. This makes the performance cost visible in your graph. Use `TOPtoIMG` / `ImgToTOP` bridges to cross the boundary explicitly.
-| **OUT** (17) | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
-| **UI** (31) | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer |
-| **SDF** (27) | Signed distance fields | Box, Sphere, Torus, Boolean ops, Bend, Twist, Raymarch |
+| **OUT** (11) | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
 | **SCRIPT** (3) | User scripting | GDScript, Python, C++ — template-based multi-family output |
 
 ### Live Expression System

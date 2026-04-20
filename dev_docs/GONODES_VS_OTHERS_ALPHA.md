@@ -44,7 +44,7 @@
 | Dimension | TouchDesigner | vvvv | Jitter (Max/MSP) | GONODES |
 |-----------|--------------|------|-------------------|---------|
 | **Maturity** | 20+ years, industry standard | 25+ years (beta→gamma transition) | 25+ years, deep audio roots | Alpha — 1 year of development |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **539 operators** across 13 families |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **536 operators** across 13 families |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) | $399 (perpetual) or $99/yr sub | **Free, open source (MIT)** |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan | DirectX 11 (beta) / Stride+Vulkan (gamma) | OpenGL (legacy) / Metal (modern) | Vulkan + GLES3 via Godot 4.6 |
 | **Host embedding** | TouchEngine SDK | No | Max for Live; no general SDK | **libgonodes — full C API, 9 data contexts** |
@@ -246,7 +246,7 @@ GONODES GDScript (interpreted)
 | **UI widgets** | Panel COMP widgets | ~30+ UI nodes | Max UI objects (separate) | **36 UI operators** |
 | **Output/export** | Built-in (Record, etc.) | Built-in | `jit.record`, `jit.movie` | **17 OUT operators** |
 | **Script operators** | Python DAT/callbacks | VL (visual code) | Gen, JavaScript | **3 SCRIPT operators** |
-| **Total** | **~300+ built-in** | **~700+ nodes** | **~200+ Jitter + 400+ Max** | **539 operators** |
+| **Total** | **~300+ built-in** | **~700+ nodes** | **~200+ Jitter + 400+ Max** | **536 operators** |
 
 †† Max/MSP's ~400+ audio objects (MSP `~` objects) are a separate domain from Jitter's visual objects. Counting them together inflates Max's numbers but misrepresents the visual processing capability. Jitter alone has ~200 objects.
 
@@ -872,7 +872,7 @@ Based on the competitive landscape, here are the recommended priorities for GONO
 
 GONODES is a technically impressive alpha-stage tool that has achieved remarkable breadth in one year of development:
 
-- **539 operators** across 13 families — more than TD's ~300, comparable to vvvv's ~700
+- **536 operators** across 13 families — more than TD's ~300, comparable to vvvv's ~700
 - **Architecture** — push-based cook engine with 3-tier guard system achieves equivalent work-skipping to TD's mature pull engine
 - **GPU compute** — POP, VOL, and SDF pipelines exceed all three competitors in built-in compute capability
 - **Host embedding** — libgonodes offers the most comprehensive embeddable node-graph engine ever built (9 data contexts, bidirectional, graph editing)

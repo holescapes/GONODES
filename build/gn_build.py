@@ -349,6 +349,9 @@ def build_extension(native_dir=None, plat=None, target=None, arch=None):
         plat = ARGUMENTS.get("platform", "") or detect_host_platform()
     if target is None:
         target = ARGUMENTS.get("target", "template_release")
+    if target != "template_release":
+        print(f"WARNING: GONODES only ships release builds. "
+              f"target='{target}' may fail if godot-cpp debug lib is not built.")
     if arch is None:
         arch = ARGUMENTS.get("arch", "") or detect_host_arch()
 

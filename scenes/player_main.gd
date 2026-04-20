@@ -237,11 +237,12 @@ func _load_and_run() -> void:
 	# auto-detected by the cook engine via GNNode.is_sink.  No UI sinks needed.
 	cook_engine.set_active_sinks([])
 
-	_update_info("Running: %s (%d nodes)" % [
-		_patch_path.get_file(), network.get_node_count()])
+	var ver: String = ProjectSettings.get_setting("application/config/version", "dev")
+	_update_info("GONODES v%s | %s (%d nodes)" % [
+		ver, _patch_path.get_file(), network.get_node_count()])
 
-	print("[GONODES Player] Loaded: %s (%d nodes, %d connections)" % [
-		_patch_path, network.get_node_count(), network.get_connection_count()])
+	print("[GONODES Player v%s] Loaded: %s (%d nodes, %d connections)" % [
+		ver, _patch_path, network.get_node_count(), network.get_connection_count()])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -251,8 +252,9 @@ func _load_and_run() -> void:
 func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	# Light status update every 60 frames
 	if frame % 60 == 0:
-		_update_info("Frame %d | Cook %.1fms | %s" % [
-			frame, cook_time_ms, _patch_path.get_file()])
+		var ver: String = ProjectSettings.get_setting("application/config/version", "dev")
+		_update_info("GONODES v%s | Frame %d | Cook %.1fms | %s" % [
+			ver, frame, cook_time_ms, _patch_path.get_file()])
 
 
 func _on_cook_error(node_id: String, error_message: String) -> void:
@@ -388,11 +390,12 @@ func _on_patch_url_fetched(result: int, response_code: int, _headers: PackedStri
 	cook_engine.set_active_sinks([])
 
 	var patch_name: String = _patch_url.get_file()
-	_update_info("Running: %s (%d nodes)" % [patch_name, network.get_node_count()])
+	var ver2: String = ProjectSettings.get_setting("application/config/version", "dev")
+	_update_info("GONODES v%s | %s (%d nodes)" % [ver2, patch_name, network.get_node_count()])
 	patch_loaded.emit(patch_name)
 
-	print("[GONODES Player] Loaded from URL: %s (%d nodes)" % [
-		_patch_url, network.get_node_count()])
+	print("[GONODES Player v%s] Loaded from URL: %s (%d nodes)" % [
+		ver2, _patch_url, network.get_node_count()])
 
 
 ## Reads a query parameter from the browser URL (web only).

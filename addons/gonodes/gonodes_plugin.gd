@@ -14,7 +14,8 @@ func _enter_tree() -> void:
 	# Changes take effect on the next Godot restart (GDExtensions load before plugins).
 	GNExtensionRegistry.sync_native_extensions()
 
-	print("GONODES plugin loaded (v0.1.0)")
+	var ver: String = ProjectSettings.get_setting("application/config/version", "dev")
+	print("GONODES plugin loaded (v%s)" % ver)
 
 
 func _exit_tree() -> void:

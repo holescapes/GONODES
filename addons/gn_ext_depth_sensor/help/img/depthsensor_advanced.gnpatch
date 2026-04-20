@@ -1,0 +1,121 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noiseimg1": {
+            "type": "NoiseIMG",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "depthsensor1": {
+            "type": "DepthSensorIMG",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "device": {
+                    "value": 2
+                },
+                "stream": {
+                    "value": 2
+                },
+                "max_depth_mm": {
+                    "value": 5002
+                },
+                "max_bodies": {
+                    "value": 8
+                },
+                "min_confidence": {
+                    "value": 1.0
+                },
+                "point_color": {
+                    "value": false
+                },
+                "point_skip": {
+                    "value": 3
+                },
+                "point_max_depth": {
+                    "value": 10.0
+                },
+                "timeout_ms": {
+                    "value": 35
+                },
+                "active": {
+                    "value": false
+                }
+            }
+        },
+        "imgtotop1": {
+            "type": "ImgToTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noiseimg1",
+            "from_port": 0,
+            "to": "depthsensor1",
+            "to_port": 0
+        },
+        {
+            "from": "depthsensor1",
+            "from_port": 0,
+            "to": "imgtotop1",
+            "to_port": 0
+        },
+        {
+            "from": "imgtotop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "DepthSensorIMG \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_depth_sensor extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

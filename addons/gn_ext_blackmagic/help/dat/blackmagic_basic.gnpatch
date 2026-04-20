@@ -2,22 +2,26 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "bm1": {
-            "type": "BlackmagicDAT",
+        "src_constant": {
+            "type": "ConstantDAT",
             "position": [
-                200,
+                100,
                 100
             ],
-            "parameters": {
-                "rescan": {
-                    "value": false
-                }
-            }
+            "parameters": {}
         },
-        "dattotop1": {
-            "type": "DATtoTOP",
+        "blackmagic1": {
+            "type": "BlackmagicDAT",
             "position": [
-                600,
+                450,
+                100
+            ],
+            "parameters": {}
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                1150,
                 100
             ],
             "parameters": {
@@ -25,15 +29,18 @@
                     "value": {
                         "_type": "Vector2i",
                         "x": 512,
-                        "y": 256
+                        "y": 512
                     }
+                },
+                "font_size": {
+                    "value": 14
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1000,
+                1550,
                 100
             ],
             "parameters": {
@@ -41,7 +48,7 @@
                     "value": {
                         "_type": "Vector2i",
                         "x": 512,
-                        "y": 256
+                        "y": 512
                     }
                 },
                 "open": {
@@ -52,13 +59,19 @@
     },
     "connections": [
         {
-            "from": "bm1",
+            "from": "src_constant",
             "from_port": 0,
-            "to": "dattotop1",
+            "to": "blackmagic1",
             "to_port": 0
         },
         {
-            "from": "dattotop1",
+            "from": "blackmagic1",
+            "from_port": 0,
+            "to": "texttop1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -68,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Blackmagic DAT \u2014 Basic\n\nLists detected Blackmagic DeckLink devices.\nOutputs a table of device names, modes, and status.\nToggle Rescan to refresh connected hardware.",
+            "text": "BlackmagicDAT \u2014 Basic\n\nDefault settings.\nRequires gn_ext_blackmagic extension.",
             "position": [
-                -100,
-                -100
+                -100.0,
+                -100.0
             ],
             "size": [
-                500,
-                120
+                400.0,
+                100.0
             ],
             "color": [
                 1.0,

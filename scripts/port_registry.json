@@ -510,20 +510,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/hold_chop.gd"
   },
-  "HostInCHOP": {
-    "class_name": "HostInCHOP",
-    "family": "CHOP",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/chop/host_in_chop.gd"
-  },
   "IKCHOP": {
     "class_name": "IKCHOP",
     "family": "CHOP",
@@ -1568,14 +1554,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/geometry_comp.gd"
   },
-  "InTunnel": {
-    "class_name": "InTunnel",
-    "family": "COMP",
-    "inputs": [],
-    "outputs": [],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/comp/in_tunnel.gd"
-  },
   "InstanceCOMP": {
     "class_name": "InstanceCOMP",
     "family": "COMP",
@@ -1744,14 +1722,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/null_comp.gd"
   },
-  "OutTunnel": {
-    "class_name": "OutTunnel",
-    "family": "COMP",
-    "inputs": [],
-    "outputs": [],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/comp/out_tunnel.gd"
-  },
   "PathCOMP": {
     "class_name": "PathCOMP",
     "family": "COMP",
@@ -1880,14 +1850,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/static_body_comp.gd"
-  },
-  "SubNetworkNode": {
-    "class_name": "SubNetworkNode",
-    "family": "COMP",
-    "inputs": [],
-    "outputs": [],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/comp/sub_network_node.gd"
   },
   "SwitchCOMP": {
     "class_name": "SwitchCOMP",
@@ -2143,20 +2105,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/dat/folder_dat.gd"
-  },
-  "HostInDAT": {
-    "class_name": "HostInDAT",
-    "family": "DAT",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "DAT"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/dat/host_in_dat.gd"
   },
   "InfoDAT": {
     "class_name": "InfoDAT",
@@ -3183,6 +3131,198 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/mat/wireframe_mat.gd"
   },
+  "HostInCHOP": {
+    "class_name": "HostInCHOP",
+    "family": "NET",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_in_chop.gd"
+  },
+  "HostInDAT": {
+    "class_name": "HostInDAT",
+    "family": "NET",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_in_dat.gd"
+  },
+  "HostInPOP": {
+    "class_name": "HostInPOP",
+    "family": "NET",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "POP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_in_pop.gd"
+  },
+  "HostInSOP": {
+    "class_name": "HostInSOP",
+    "family": "NET",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_in_sop.gd"
+  },
+  "HostInTOP": {
+    "class_name": "HostInTOP",
+    "family": "NET",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_in_top.gd"
+  },
+  "HostInVOL": {
+    "class_name": "HostInVOL",
+    "family": "NET",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "VOL"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_in_vol.gd"
+  },
+  "HostOutCHOP": {
+    "class_name": "HostOutCHOP",
+    "family": "NET",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_out_chop.gd"
+  },
+  "HostOutDAT": {
+    "class_name": "HostOutDAT",
+    "family": "NET",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "DAT"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_out_dat.gd"
+  },
+  "HostOutPOP": {
+    "class_name": "HostOutPOP",
+    "family": "NET",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "POP"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_out_pop.gd"
+  },
+  "HostOutSOP": {
+    "class_name": "HostOutSOP",
+    "family": "NET",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_out_sop.gd"
+  },
+  "HostOutTOP": {
+    "class_name": "HostOutTOP",
+    "family": "NET",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_out_top.gd"
+  },
+  "HostOutVOL": {
+    "class_name": "HostOutVOL",
+    "family": "NET",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "VOL"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/host_out_vol.gd"
+  },
+  "InTunnel": {
+    "class_name": "InTunnel",
+    "family": "NET",
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/in_tunnel.gd"
+  },
+  "OutTunnel": {
+    "class_name": "OutTunnel",
+    "family": "NET",
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/out_tunnel.gd"
+  },
+  "SubNetworkNode": {
+    "class_name": "SubNetworkNode",
+    "family": "NET",
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/net/sub_network_node.gd"
+  },
   "AudioDeviceOUT": {
     "class_name": "AudioDeviceOUT",
     "family": "OUT",
@@ -3210,90 +3350,6 @@
     "outputs": [],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/output/ffmpeg_out.gd"
-  },
-  "HostOutCHOP": {
-    "class_name": "HostOutCHOP",
-    "family": "OUT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "CHOP"
-      }
-    ],
-    "outputs": [],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/output/host_out_chop.gd"
-  },
-  "HostOutDAT": {
-    "class_name": "HostOutDAT",
-    "family": "OUT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "DAT"
-      }
-    ],
-    "outputs": [],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/output/host_out_dat.gd"
-  },
-  "HostOutPOP": {
-    "class_name": "HostOutPOP",
-    "family": "OUT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "POP"
-      }
-    ],
-    "outputs": [],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/output/host_out_pop.gd"
-  },
-  "HostOutSOP": {
-    "class_name": "HostOutSOP",
-    "family": "OUT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "SOP"
-      }
-    ],
-    "outputs": [],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/output/host_out_sop.gd"
-  },
-  "HostOutTOP": {
-    "class_name": "HostOutTOP",
-    "family": "OUT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/output/host_out_top.gd"
-  },
-  "HostOutVOL": {
-    "class_name": "HostOutVOL",
-    "family": "OUT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "VOL"
-      }
-    ],
-    "outputs": [],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/output/host_out_vol.gd"
   },
   "ImageSaveOUT": {
     "class_name": "ImageSaveOUT",
@@ -3516,20 +3572,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/pop/force_pop.gd"
-  },
-  "HostInPOP": {
-    "class_name": "HostInPOP",
-    "family": "POP",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "POP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/pop/host_in_pop.gd"
   },
   "InstancePOP": {
     "class_name": "InstancePOP",
@@ -4187,20 +4229,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/heightfield_sop.gd"
-  },
-  "HostInSOP": {
-    "class_name": "HostInSOP",
-    "family": "SOP",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "SOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/sop/host_in_sop.gd"
   },
   "IsoSurfaceSOP": {
     "class_name": "IsoSurfaceSOP",
@@ -6268,20 +6296,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/high_pass_top.gd"
-  },
-  "HostInTOP": {
-    "class_name": "HostInTOP",
-    "family": "TOP",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/top/host_in_top.gd"
   },
   "HSVAdjustTOP": {
     "class_name": "HSVAdjustTOP",
@@ -8482,20 +8496,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/vol/gpu_marching_cubes_vol.gd"
   },
-  "HostInVOL": {
-    "class_name": "HostInVOL",
-    "family": "VOL",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "VOL"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/vol/host_in_vol.gd"
-  },
   "MarchingCubesVOL": {
     "class_name": "MarchingCubesVOL",
     "family": "VOL",
@@ -8678,67 +8678,44 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_blackmagic/operators/dat/blackmagic_dat.gd"
   },
-  "BlackmagicInTOP": {
-    "class_name": "BlackmagicInTOP",
-    "family": "TOP",
+  "BlackmagicInIMG": {
+    "class_name": "BlackmagicInIMG",
+    "family": "IMG",
     "inputs": [],
     "outputs": [
       {
         "port": 0,
-        "name": "out",
-        "type": "TOP"
+        "name": "image",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "status",
+        "type": "CHOP"
       }
     ],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_blackmagic/operators/top/blackmagic_in_top.gd"
+    "file": "addons/gn_ext_blackmagic/operators/img/blackmagic_in_img.gd"
   },
-  "BlackmagicOutTOP": {
-    "class_name": "BlackmagicOutTOP",
-    "family": "TOP",
+  "BlackmagicOutIMG": {
+    "class_name": "BlackmagicOutIMG",
+    "family": "IMG",
     "inputs": [
       {
         "port": 0,
-        "name": "in",
-        "type": "TOP"
+        "name": "image",
+        "type": "IMG"
       }
     ],
     "outputs": [
       {
         "port": 0,
-        "name": "out",
-        "type": "TOP"
+        "name": "thru",
+        "type": "IMG"
       }
     ],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_blackmagic/operators/top/blackmagic_out_top.gd"
-  },
-  "DepthHandCHOP": {
-    "class_name": "DepthHandCHOP",
-    "family": "CHOP",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_depth_sensor/operators/chop/depth_hand_chop.gd"
-  },
-  "DepthSkeletonCHOP": {
-    "class_name": "DepthSkeletonCHOP",
-    "family": "CHOP",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_depth_sensor/operators/chop/depth_skeleton_chop.gd"
+    "file": "addons/gn_ext_blackmagic/operators/img/blackmagic_out_img.gd"
   },
   "DepthSensorDAT": {
     "class_name": "DepthSensorDAT",
@@ -8754,33 +8731,34 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_depth_sensor/operators/dat/depth_sensor_dat.gd"
   },
-  "DepthPointCloudSOP": {
-    "class_name": "DepthPointCloudSOP",
-    "family": "SOP",
+  "DepthSensorIMG": {
+    "class_name": "DepthSensorIMG",
+    "family": "IMG",
     "inputs": [],
     "outputs": [
       {
         "port": 0,
-        "name": "out",
+        "name": "image",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "skeleton",
+        "type": "CHOP"
+      },
+      {
+        "port": 2,
+        "name": "hands",
+        "type": "CHOP"
+      },
+      {
+        "port": 3,
+        "name": "points",
         "type": "SOP"
       }
     ],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_depth_sensor/operators/sop/depth_point_cloud_sop.gd"
-  },
-  "DepthSensorTOP": {
-    "class_name": "DepthSensorTOP",
-    "family": "TOP",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_depth_sensor/operators/top/depth_sensor_top.gd"
+    "file": "addons/gn_ext_depth_sensor/operators/img/depth_sensor_img.gd"
   },
   "FFmpegInTOP": {
     "class_name": "FFmpegInTOP",
