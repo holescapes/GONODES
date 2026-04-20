@@ -100,14 +100,33 @@ def parse_build_cfg(cfg_path):
     }
 
     # Per-platform sections: [windows], [macos], [linux]
+    # Also detects optional SDK entries via suffixed keys (e.g. libs_ultraleap).
+    BASE_KEYS = {"libs", "lib_dirs", "frameworks", "defines", "objcxx_sources",
+                 "include_dirs"}
+
     for plat in ALL_PLATFORMS:
         cfg[plat] = {
             "libs":       get_list(plat, "libs") if cp.has_section(plat) else [],
             "lib_dirs":   get_list(plat, "lib_dirs") if cp.has_section(plat) else [],
+            "include_dirs": get_list(plat, "include_dirs") if cp.has_section(plat) else [],
             "frameworks": get_list(plat, "frameworks") if cp.has_section(plat) else [],
             "defines":    get_list(plat, "defines") if cp.has_section(plat) else [],
             "objcxx_sources": get_list(plat, "objcxx_sources") if cp.has_section(plat) else [],
+            "optional_sdks": {},  # suffix → {key: [values]}
         }
+
+        if not cp.has_section(plat):
+            continue
+
+        # Scan for suffixed keys like libs_ultraleap, defines_azure, etc.
+        for key, _raw in cp.items(plat):
+            for base in BASE_KEYS:
+                prefix = base + "_"
+                if key.startswith(prefix) and key != base:
+                    suffix = key[len(prefix):]
+                    sdk = cfg[plat]["optional_sdks"].setdefault(suffix, {})
+                    sdk[base] = get_list(plat, key)
+                    break
 
     return cfg
 
@@ -255,6 +274,40 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
             env.Append(LIBPATH=[os.path.join(native_dir, d)])
         for d in cfg["linux"]["defines"]:
             env.Append(CPPDEFINES=[d])
+
+    # ── Inject optional SDK paths (probe for presence) ──
+    for sdk_name, sdk_cfg in cfg[plat].get("optional_sdks", {}).items():
+        # Probe: an optional SDK is available when at least one of its
+        # include_dirs or lib_dirs actually exists on disk.
+        inc_dirs = sdk_cfg.get("include_dirs", [])
+        lib_dirs = sdk_cfg.get("lib_dirs", [])
+
+        # Resolve relative paths against native_dir; absolute paths used as-is.
+        def _resolve(d):
+            return d if os.path.isabs(d) else os.path.join(native_dir, d)
+
+        found = any(os.path.isdir(_resolve(d)) for d in inc_dirs + lib_dirs)
+        if not found:
+            print(f"  Optional SDK '{sdk_name}': NOT FOUND — skipping")
+            continue
+
+        print(f"  Optional SDK '{sdk_name}': FOUND — enabling")
+        for d in inc_dirs:
+            env.Append(CPPPATH=[_resolve(d)])
+        for d in lib_dirs:
+            env.Append(LIBPATH=[_resolve(d)])
+        for lib in sdk_cfg.get("libs", []):
+            env.Append(LIBS=[lib])
+        for define in sdk_cfg.get("defines", []):
+            env.Append(CPPDEFINES=[define])
+
+        # On Windows, delay-load optional SDK DLLs so the extension loads
+        # even when only some vendor runtimes are installed.  The DLL is
+        # loaded on first API call — if missing, only that backend fails.
+        if plat == "windows":
+            env.Append(LIBS=["delayimp"])
+            for lib in sdk_cfg.get("libs", []):
+                env.Append(LINKFLAGS=[f"/DELAYLOAD:{lib}.dll"])
 
     # ── Inject Python SDK paths (discovered above) ──
     if python_cfg:

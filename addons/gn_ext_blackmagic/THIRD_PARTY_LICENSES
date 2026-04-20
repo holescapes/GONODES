@@ -1,0 +1,18 @@
+THIRD-PARTY LICENSE NOTICES — gn_ext_blackmagic
+================================================
+
+This extension does NOT bundle any third-party code.
+Users must obtain the following SDK separately.
+
+
+1. Blackmagic DeckLink SDK
+──────────────────────────
+License: Proprietary (Blackmagic Design Pty Ltd)
+Download: https://www.blackmagicdesign.com/support/
+Hardware: Requires a Blackmagic DeckLink capture/output card
+
+The DeckLink SDK is free to download but governed by the Blackmagic Design
+SDK License Agreement. The SDK headers and libraries are NOT included in
+GONODES and must be obtained directly from Blackmagic Design.
+
+See README.md for setup instructions.

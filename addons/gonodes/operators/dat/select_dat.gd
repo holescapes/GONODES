@@ -99,6 +99,6 @@ func _resolve_remote_dat(target_id: String) -> GNTableData:
 	if _network_cache == null:
 		return null
 	var target: GNNode = _network_cache.get_node_by_id(target_id)
-	if target == null or target.family != GNFamily.Type.DAT:
+	if target == null:
 		return null
 	return target.cached_output as GNTableData if target.cached_output is GNTableData else null

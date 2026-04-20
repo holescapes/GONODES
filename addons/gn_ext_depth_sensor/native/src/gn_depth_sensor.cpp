@@ -6,6 +6,48 @@
 #include <algorithm>
 #include <cstring>
 
+// Delay-load support: on Windows, optional SDK DLLs are delay-loaded so the
+// extension can load even when not all vendor runtimes are installed.  When a
+// backend DLL is missing, the first API call raises a structured exception
+// which we catch and return nullptr (backend unavailable).
+#ifdef _WIN32
+#include <windows.h>
+
+// Trampoline defined in a separate .c TU wouldn't help since we need the
+// factory signature.  Instead, we split into a tiny extern "C" helper that
+// MSVC will happily compile with __try because it has no C++ destructors.
+
+// Declared extern so the compiler sees it as a separate function scope.
+// The raw pointer is released from the unique_ptr OUTSIDE the __try block
+// by the caller, which wraps it back into a unique_ptr.
+typedef void* (*RawFactoryFn)();
+
+extern "C" inline void* _seh_try_call(RawFactoryFn fn) {
+    __try {
+        return fn();
+    } __except (GetExceptionCode() == 0xC06D007E
+             || GetExceptionCode() == 0xC06D007F
+                ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+        return nullptr;
+    }
+}
+
+// Thin C++ wrapper per factory — releases unique_ptr to raw pointer for SEH,
+// then wraps result back into unique_ptr.
+template <std::unique_ptr<DepthSensorBackend> (*Factory)()>
+static std::unique_ptr<DepthSensorBackend> _try_create() {
+    // Lambda that calls the factory and leaks the raw pointer for SEH safety.
+    static auto raw_fn = []() -> void* { return Factory().release(); };
+    void* p = _seh_try_call(reinterpret_cast<RawFactoryFn>(+raw_fn));
+    return std::unique_ptr<DepthSensorBackend>(static_cast<DepthSensorBackend*>(p));
+}
+#else
+template <std::unique_ptr<DepthSensorBackend> (*Factory)()>
+static std::unique_ptr<DepthSensorBackend> _try_create() {
+    return Factory();
+}
+#endif
+
 using namespace godot;
 
 // Forward-declare backend factories (defined in their own .cpp files).
@@ -35,13 +77,13 @@ std::vector<std::string> GNDepthSensor::_get_compiled_backends() {
 
 std::unique_ptr<DepthSensorBackend> GNDepthSensor::_create_backend(const std::string &name) {
 #ifdef GN_DEPTH_HAS_AZURE_KINECT
-    if (name == "azure_kinect") return create_azure_kinect_backend();
+    if (name == "azure_kinect") return _try_create(create_azure_kinect_backend);
 #endif
 #ifdef GN_DEPTH_HAS_REALSENSE
-    if (name == "realsense") return create_realsense_backend();
+    if (name == "realsense") return _try_create(create_realsense_backend);
 #endif
 #ifdef GN_DEPTH_HAS_ULTRALEAP
-    if (name == "ultraleap") return create_ultraleap_backend();
+    if (name == "ultraleap") return _try_create(create_ultraleap_backend);
 #endif
     return nullptr;
 }

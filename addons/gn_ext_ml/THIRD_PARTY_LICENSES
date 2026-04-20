@@ -1,0 +1,64 @@
+THIRD-PARTY LICENSE NOTICES — gn_ext_ml
+========================================
+
+This extension does NOT bundle any third-party code or models.
+Users must obtain the following SDK and models separately
+(automated via setup_ml.py or manually).
+
+
+1. ONNX Runtime (Microsoft)
+────────────────────────────
+License: MIT
+Copyright (c) Microsoft Corporation
+Repository: https://github.com/microsoft/onnxruntime
+Download: https://github.com/microsoft/onnxruntime/releases
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+2. Pre-Trained ONNX Models
+───────────────────────────
+The following models are downloaded by setup_ml.py. Each has its own license:
+
+  a) MediaPipe models (BlazePose, Hands, Face Mesh, Selfie Segmentation)
+     License: Apache License 2.0
+     Copyright (c) Google LLC
+     Source: https://github.com/google-ai-edge/mediapipe
+
+  b) MiDaS v2.1 (Monocular Depth Estimation)
+     License: MIT
+     Copyright (c) Intel ISL
+     Source: https://github.com/isl-org/MiDaS
+
+  c) Fast Neural Style Transfer models (mosaic, candy, udnie)
+     License: Apache License 2.0 (ONNX Model Zoo)
+     Source: https://github.com/onnx/models
+
+  d) YOLOv8n (Object Detection)
+     License: AGPL-3.0 (Ultralytics pre-trained weights)
+     Copyright (c) Ultralytics
+     Source: https://github.com/ultralytics/ultralytics
+
+     NOTE: YOLOv8 pre-trained weights are AGPL-3.0 licensed. If you
+     distribute an application using this model commercially, review
+     the Ultralytics license terms or obtain an enterprise license.
+     This license applies to the model weights only, not to GONODES code.
+
+
+See README.md for setup instructions.

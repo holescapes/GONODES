@@ -29,10 +29,11 @@ var _family_ids: Array[int] = []
 
 func _init() -> void:
 	node_type = "out_tunnel"
-	family = GNFamily.Type.NET  # Network infrastructure — sub-network data bridgetructural — live in COMP family
+	family = GNFamily.Type.NET  # Network infrastructure — sub-network data bridge
 	time_dependent = false
-	# OutTunnels are structural sinks inside the inner graph — they must always
-	# be in the active cooking chain so inner graph data reaches the parent.
+	# OutTunnels default to structural sinks so the inner cook engine activates
+	# their upstream chains.  SubNetworkNode._cook() toggles is_sink per-tunnel
+	# based on external demand (is_output_demanded) for efficient pruning.
 	is_sink = true
 
 

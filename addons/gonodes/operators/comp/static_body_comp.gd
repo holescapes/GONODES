@@ -172,21 +172,3 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 		get_param_value("friction"), get_param_value("bounce")], "StaticBodyCOMP")
 
 
-
-## Resolves the MeshInstance3D from the upstream COMP.
-func _resolve_upstream_mesh() -> MeshInstance3D:
-	var upstream := get_input_node(0)
-	if upstream == null:
-		return null
-	if upstream is GeometryCOMP:
-		return (upstream as GeometryCOMP).get_mesh_instance()
-	var comp_data := upstream.cached_output as GNCompData
-	if comp_data == null or comp_data.scene_node == null:
-		return null
-	var sn: Node3D = comp_data.scene_node
-	if sn is MeshInstance3D:
-		return sn as MeshInstance3D
-	for child in sn.get_children():
-		if child is MeshInstance3D:
-			return child as MeshInstance3D
-	return null

@@ -97,6 +97,132 @@ All Phase 9 SOP operators have been migrated to native C++, including `boolean_s
 
 ---
 
+## COMP Scene-Node Proxy Architecture (Multi-Consumer Fan-Out)
+
+### Current Limitation
+
+COMP operators (GeometryCOMP, CameraCOMP, LightCOMP, etc.) own a singleton Godot `Node3D` scene node. When a consumer (RenderTOP, MergeCOMP) needs that node, it **reparents** it into its own SubViewport/group. Since a Node3D can only have one parent, only one consumer gets the node — the last one to cook wins; all others render an empty scene.
+
+**Affected operators:**
+- **RenderTOP** — reparents upstream COMP scene nodes into its SubViewport for 3D rendering
+- **MergeCOMP** — reparents upstream COMP scene nodes into its `_group_node`
+
+**Not affected:**
+- COMP→COMP wiring where the downstream creates its *own* node (e.g., RigidBodyCOMP reads upstream mesh data to build its own RigidBody3D — no reparenting)
+- All non-COMP families (TOP, CHOP, SOP, DAT, IMG, MAT, etc.) — these use GNData with ref-counted copy-on-write semantics and support unlimited fan-out
+
+**Workaround:** Each COMP should feed exactly one reparenting consumer. For multi-camera setups, duplicate the COMP chain.
+
+### Proposed Solution: Visual Proxy Nodes
+
+Replace the reparenting model with a proxy model. COMPs keep their scene nodes in place. Consumers create lightweight **proxy** Node3D instances in their own SubViewport, sharing the same GPU resources (Mesh, Material, Texture — all Godot `Resource` objects, ref-counted, zero-copy).
+
+**Architecture:**
+
+```
+Current:  GeometryCOMP._mesh_instance ──[reparent]──► RenderTOP.SubViewport
+                                        (exclusive)
+
+Proposed: GeometryCOMP._mesh_instance  (stays put, source of truth)
+              │
+              ├── .mesh ──────────────► RenderTOP_A creates proxy MeshInstance3D
+              │   .material_override     sharing same Mesh + Material resources
+              │   .transform
+              │
+              └── .mesh ──────────────► RenderTOP_B creates its own proxy
+                  .material_override     sharing same Mesh + Material resources
+                  .transform
+```
+
+**What's shared (zero cost):** Mesh vertex buffers (GPU memory), materials, textures — all Godot Resources, ref-counted, one GPU copy regardless of how many proxies reference them.
+
+**What's per-consumer (cheap):** A proxy Node3D in each SubViewport — just a transform matrix + resource pointers. Trivial memory (~200 bytes).
+
+**No cook ordering risk:** The cook engine is demand-driven DAG — COMPs always cook before their downstream RenderTOPs. Proxy sync runs inside RenderTOP's `_cook()`, before the SubViewport renders (`UPDATE_ONCE`). No stale frames.
+
+### Implementation: CompVisualState Struct
+
+A base-class struct in `GNCompBase` captures all visual properties needed for proxy creation:
+
+```gdscript
+# In gn_comp_base.gd
+
+## Snapshot of all visual properties needed to create/sync a proxy.
+## Stored as a lightweight value object — no Node3D references.
+class CompVisualState:
+    var node_type: StringName       # "MeshInstance3D", "Camera3D", "Light3D", etc.
+    var transform: Transform3D
+    var visible: bool
+    var layers: int
+    var cast_shadow: int
+    # Mesh
+    var mesh: Mesh
+    var material_override: Material
+    var surface_material_count: int
+    var surface_materials: Array[Material]
+    # Camera
+    var fov: float
+    var near: float
+    var far: float
+    var projection: int
+    # Light
+    var light_color: Color
+    var light_energy: float
+    var shadow_enabled: bool
+    var light_type: int             # directional, omni, spot
+    # Skeleton (bone transforms as flat array)
+    var bone_count: int
+    var bone_transforms: Array[Transform3D]
+
+## Called by COMP subclasses at end of _cook() to snapshot visual state.
+func _capture_visual_state() -> CompVisualState:
+    # read from _scene_node, populate struct
+    ...
+
+## Called by RenderTOP to create or sync a proxy from a visual state.
+static func sync_proxy(state: CompVisualState, proxy: Node3D) -> Node3D:
+    # if proxy is null or wrong type, create new one
+    # copy all fields from state to proxy
+    # return proxy
+    ...
+```
+
+**Why this design:**
+1. **Single source of truth** — adding a new visual property means updating `CompVisualState` + `_capture_visual_state()` + `sync_proxy()`. Three places, all in one file, all in the base class (rule 25.25).
+2. **Decoupled from Node3D** — the state struct is a plain value object. RenderTOP never touches the source node.
+3. **Testable** — capture + sync can be unit tested without a real scene tree.
+4. **Extensible** — subclasses can extend `CompVisualState` or add `custom_data: Dictionary` for COMP-specific state.
+
+### Real Drawbacks
+
+1. **Proxy lifecycle management.** RenderTOP must create proxies when COMPs connect, destroy them on disconnect, handle COMP type changes (MeshInstance3D → Camera3D on same port), and survive undo/redo. Bookkeeping code — not hard, but edge-case-prone.
+
+2. **Non-visual Node3D properties don't proxy:**
+   - **Collision shapes** — a proxy MeshInstance3D renders but doesn't collide. Second viewport can't do raycasts against proxied bodies.
+   - **Skeleton3D / BoneAttachment3D** — proxying a skinned mesh requires recreating the bone hierarchy. For a 60-bone character at 60fps, that's 3,600 transform writes per proxy per frame. Cheap individually, adds up with multiple skeletons × viewports.
+   - **GPUParticles3D** — particle state is per-instance. A proxy would simulate independently (different random seeds, different positions). Not visual copies.
+
+3. **Godot shader uniforms set via code** — if a COMP modifies `material.set_shader_parameter()` per-frame, the proxy shares the same material and gets the same uniforms automatically. But per-viewport uniforms (e.g., per-camera effects) would require material duplication, breaking zero-copy.
+
+4. **MergeCOMP subtree proxying** — a MergeCOMP with 10 children means recursively proxying 10+ nodes per consumer viewport, each individually synced.
+
+5. **Environment/VoxelGI/ReflectionProbe** — these are per-World3D, not per-node. EnvironmentCOMP would need special proxy handling (apply Environment to the proxy viewport's world, not create a proxy node).
+
+### Phased Rollout
+
+| Phase | Scope | Covers |
+|-------|-------|--------|
+| Phase 1 | MeshInstance3D proxies only | GeometryCOMP, RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP — vast majority of use cases |
+| Phase 2 | Camera3D + Light3D proxies | Multi-camera renders, picture-in-picture |
+| Phase 3 | Skeleton3D bone sync | Animated character multi-view |
+| Phase 4 | MergeCOMP recursive proxying | Complex scene fan-out |
+
+**Priority:** Post-beta. The current single-ownership model covers 95% of real use cases. Multi-camera is the primary unblocked use case.
+
+**Files affected:** `gn_comp_base.gd` (CompVisualState + capture/sync), `render_top.gd` (proxy creation instead of reparenting), `merge_comp.gd` (proxy instead of reparenting). COMP subclasses unchanged — they keep returning `_build_comp_data()`.
+
+---
+
 ## Items Confirmed Done (Removed from Roadmap)
 
 These were listed as pending in various docs but are actually implemented:

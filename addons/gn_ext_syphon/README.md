@@ -8,8 +8,22 @@ MadMapper, CoGe, Processing, etc.).
 
 - **macOS only** — Syphon uses IOSurface for zero-copy GPU texture sharing.
 - **godot-cpp** — shared via symlink from `gn_ext_native/native/godot-cpp/`.
-- **Syphon framework** — cloned automatically by SConstruct or placed at
-  `native/Syphon-Framework/`.
+- **Syphon Framework** — see setup below.
+
+## Syphon Framework Setup
+
+The Syphon Framework is **BSD-licensed** and is **not** bundled in the
+repository. You must clone it yourself.
+
+```bash
+cd addons/gn_ext_syphon/native
+git clone https://github.com/Syphon/Syphon-Framework.git
+```
+
+Or from the repo root:
+```bash
+python setup_deps.py
+```
 
 ## Building
 
@@ -28,6 +42,10 @@ scons platform=macos target=template_release -j4
 | SyphonInTOP | TOP | Receive a shared texture from a Syphon server |
 | SyphonOutTOP | TOP | Share a texture via Syphon to other applications |
 
-## License
+## Third-Party Licenses
 
-Syphon Framework is BSD-licensed. This extension wrapper is part of GONODES.
+This extension uses the [Syphon Framework](https://github.com/Syphon/Syphon-Framework)
+(BSD 3-Clause, (c) Syphon Project contributors). The framework source is cloned
+by the user and compiled with the extension.
+
+Full license text is in `THIRD_PARTY_LICENSES` in this directory.

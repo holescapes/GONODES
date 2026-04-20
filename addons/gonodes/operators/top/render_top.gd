@@ -16,8 +16,8 @@ extends GNTopBase
 var _environment: Environment = null
 var _world_env: WorldEnvironment = null
 
-## External EnvironmentCOMP (when connected) — overrides the fallback env.
-var _env_comp: EnvironmentCOMP = null
+## External environment from upstream GNCompData (set by EnvironmentCOMP).
+var _upstream_environment: Environment = null
 
 ## Track which scene nodes are currently in the viewport
 var _managed_children: Array[Node3D] = []
@@ -143,7 +143,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		1: _viewport.positional_shadow_atlas_16_bits = true
 
 	# ── Environment: EnvironmentCOMP or fallback ───────────────────────────
-	_env_comp = null  # Reset each cook; _populate_scene_from_network sets it
+	_upstream_environment = null  # Reset each cook; _populate_scene_from_network sets it
 
 	# Stable scene population — nodes that haven't changed stay in the
 	# viewport so physics bodies keep simulating between frames.
@@ -248,29 +248,32 @@ func _populate_scene_from_network() -> void:
 	var has_camera: bool = false
 
 	for upstream_node in get_input_nodes_sorted():
-		if upstream_node is EnvironmentCOMP:
-			_env_comp = upstream_node as EnvironmentCOMP
+		# Check data type — works for any node (GNCompBase, NullCOMP,
+		# SubNetworkNode, GNCustomOperator, etc.)
+		var comp_data: GNCompData = upstream_node.cached_output as GNCompData \
+			if upstream_node.cached_output is GNCompData else null
+
+		# Environment data — no scene node, just an Environment resource
+		if comp_data != null and comp_data.environment != null:
+			_upstream_environment = comp_data.environment
 			continue
 
-		# Resolve the scene node — walks through pass-through COMPs and
-		# data-path fallback for SubNetworkNode/GNCustomOperator.
+		# Resolve the scene node — walks through pass-through COMPs via
+		# cached_output data-type checking (works for any node type).
 		var scene_nd: Node3D = GNCompBase.resolve_scene_node_upstream(
 			upstream_node, net) if net != null else null
-		if scene_nd == null:
-			# Direct fallback when no network context
-			var comp_data := upstream_node.cached_output as GNCompData
-			if comp_data != null:
-				scene_nd = comp_data.scene_node
 		if scene_nd == null:
 			continue
 
 		_adopt_scene_node(scene_nd)
 
-		# Camera bookkeeping — activate any camera found
+		# Camera bookkeeping — activate any camera found.
+		# Check the scene node itself and its subtree (cameras may be nested
+		# under MergeCOMP, NullCOMP, SubNetworkNode, etc.).
 		if scene_nd is Camera3D:
 			(scene_nd as Camera3D).current = true
 			has_camera = true
-		elif upstream_node is MergeCOMP and not has_camera:
+		elif not has_camera and scene_nd.get_child_count() > 0:
 			has_camera = _activate_camera_in_subtree(scene_nd)
 
 	# If no camera COMP is connected, create a default camera
@@ -389,15 +392,15 @@ func _ensure_default_camera() -> void:
 # Environment
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Applies the connected EnvironmentCOMP or the lightweight fallback env.
-## Called after _populate_scene_from_network so _env_comp is resolved.
+## Applies the upstream environment (from GNCompData.environment) or the lightweight fallback.
+## Called after _populate_scene_from_network so _upstream_environment is resolved.
 func _apply_environment(bg_color: Color, use_env: bool) -> void:
-	if _env_comp != null:
-		# Use the EnvironmentCOMP's fully configured Environment resource
-		var ext_env: Environment = _env_comp.get_environment()
-		if ext_env != null and _world_env != null:
-			_world_env.environment = ext_env
-			_environment = ext_env
+	if _upstream_environment != null:
+		# Use the upstream Environment resource (from EnvironmentCOMP or any
+		# node outputting GNCompData with an environment field)
+		if _world_env != null:
+			_world_env.environment = _upstream_environment
+			_environment = _upstream_environment
 		return
 
 	# Fallback: apply bg/ambient from RenderTOP's own params

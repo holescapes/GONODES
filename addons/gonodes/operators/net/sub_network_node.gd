@@ -175,10 +175,23 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		if parent_ce:
 			_inner_cook_engine.parent_engine = parent_ce
 
-	# Step 4: Cook the inner graph (one cycle)
+	# Step 4: Demand-aware inner cook — only activate OutTunnels whose
+	# corresponding external output port has downstream consumers.
+	# The inner engine's _compute_active_set() uses is_sink to seed its
+	# BFS.  By toggling is_sink per-tunnel, we prune unused branches.
+	var demand_changed := false
+	for i in range(_out_tunnels.size()):
+		var demanded: bool = is_output_demanded(i)
+		if _out_tunnels[i].is_sink != demanded:
+			_out_tunnels[i].is_sink = demanded
+			demand_changed = true
+	if demand_changed:
+		_inner_cook_engine._active_set_dirty = true
+
+	# Step 5: Cook the inner graph (one cycle)
 	_inner_cook_engine.cook_frame(current_delta)
 
-	# Step 5: Read results from OutTunnels
+	# Step 6: Read results from OutTunnels
 	#   If there's exactly one OutTunnel, return its data directly.
 	#   If there are multiple, return the first OutTunnel's data.
 	#   (Multi-output sub-networks are handled by the gather_inputs override
@@ -199,9 +212,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 ## Override base class multi-output routing.  The cook engine calls this
 ## instead of reading cached_output directly, allowing each output port
 ## to carry data from a different OutTunnel.
-## MULTI-OUTPUT EXCEPTION: Inner cook engine limitation (§25.24).
-## The inner graph runs fully regardless of which OutTunnels are demanded.
-## Demand-aware inner scheduling is a future architecture improvement.
 func get_output_data(port_index: int) -> GNData:
 	if port_index < 0 or port_index >= _out_tunnels.size():
 		return cached_output  # Fallback to primary

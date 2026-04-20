@@ -8,8 +8,22 @@ supporting H.264, H.265, VP9, AV1, and many more codecs.
 This extension requires the **EIRTeam.FFmpeg** GDExtension:
 <https://github.com/EIRTeam/EIRTeam.FFmpeg>
 
-Install the GDExtension into your project's `addons/` folder.  GONODES will
-detect it automatically via `ClassDB.class_exists("FFmpegVideoStream")`.
+### Setup
+
+1. Download or build the EIRTeam.FFmpeg GDExtension from the repository above.
+2. Place it in your project's `addons/` folder as `addons/EIRTeam.FFmpeg/`.
+3. Restart Godot / GONODES.
+
+GONODES detects it automatically via `ClassDB.class_exists("FFmpegVideoStream")`.
+If EIRTeam.FFmpeg is **not** installed, this extension is silently skipped and
+`FFmpegInTOP` does not appear in the palette.
+
+### Licensing Note
+
+EIRTeam.FFmpeg is **MIT** licensed. However, it links against FFmpeg libraries
+which are **LGPL 2.1+** (or GPL if built with certain optional features).
+If you distribute an application using this extension, review the FFmpeg
+license terms. See `THIRD_PARTY_LICENSES` in this directory for details.
 
 ## How it works
 

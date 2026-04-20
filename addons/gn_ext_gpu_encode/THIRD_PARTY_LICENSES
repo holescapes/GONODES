@@ -1,0 +1,27 @@
+THIRD-PARTY LICENSE NOTICES — gn_ext_gpu_encode
+=================================================
+
+This extension does NOT bundle or require any third-party code.
+It uses platform-provided OS APIs exclusively.
+
+
+1. Windows Media Foundation (Microsoft)
+───────────────────────────────────────
+License: Proprietary (Microsoft Corporation)
+Part of the Windows SDK — no separate download required.
+System libraries used: mfplat, mf, mfreadwrite, mfuuid, ole32, propsys
+
+GPU encoders selected automatically at runtime:
+  - Intel Quick Sync Video (QSV)
+  - AMD Advanced Media Framework (AMF)
+  - NVIDIA NVENC
+
+
+2. Apple VideoToolbox (Apple)
+─────────────────────────────
+License: Proprietary (Apple Inc.)
+Part of macOS — no separate download required.
+Frameworks used: VideoToolbox, CoreMedia, CoreVideo, CoreFoundation,
+                 AVFoundation
+
+Hardware encoder: Apple Silicon Media Engine

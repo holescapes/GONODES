@@ -99,16 +99,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return skeleton_data
 
 
-func _get_upstream_scene_node(port: int) -> Node3D:
-	var upstream := get_input_node(port)
-	if upstream == null:
-		return null
-	var comp_data := upstream.cached_output as GNCompData
-	if comp_data != null:
-		return comp_data.scene_node
-	return null
-
-
 func _find_skeleton(node: Node3D) -> Skeleton3D:
 	if node == null:
 		return null

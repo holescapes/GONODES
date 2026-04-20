@@ -26,6 +26,10 @@ Requires godot-cpp shared via junction/symlink from `gn_ext_native/native/godot-
 | RtMidiInCHOP | CHOP | Receive MIDI messages — notes, CC, pitch bend, etc. |
 | RtMidiOutCHOP | CHOP | Send MIDI messages to external devices or DAWs |
 
-## License
+## Third-Party Licenses
 
-RtMidi is MIT-licensed. This extension wrapper is part of GONODES.
+This extension bundles [RtMidi](https://github.com/thestk/rtmidi) (MIT,
+(c) 2003-2023 Gary P. Scavone). No external SDKs are required — RtMidi
+uses OS-provided MIDI APIs (WinMM / CoreMIDI / ALSA).
+
+Full license text is in `THIRD_PARTY_LICENSES` in this directory.

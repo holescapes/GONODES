@@ -25,8 +25,80 @@ Every operator needs: (1) `description=` in its `.cfg` entry, (2) description on
 ### 25.20 — Editor/Engine Separation
 `core/` and `operators/` must NEVER import `ui/`. All operators must run headless.
 
+### 25.2 — Expression base_instance Architecture
+Functions called inside an `Expression` are method lookups on `base_instance`, not input variables. Passing Callables as input variables silently fails. Always make expression-callable functions real methods on the base_instance object.
+
+### 25.3 — GNFamily.get_name → get_family_name
+Never shadow `Object.get_name()`. Use unique names like `get_family_name(family)` instead.
+
+### 25.4 — WindowOUT Cook-Dirty vs Param-Dirty
+Do NOT use `if dirty:` for window config — dirty is true every frame when upstream is time-dependent. Use a dedicated `_window_params_dirty` flag set only by `_on_parameter_changed()`.
+
+### 25.5 — Anchors: set_anchors_and_offsets_preset
+`Control.anchors_preset = PRESET_FULL_RECT` only sets anchors, NOT offsets → 0×0 size. Always use `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` AFTER the control is in the tree.
+
+### 25.6 — embed_subwindows
+`project.godot` must have `window/subwindows/embed_subwindows=false` for WindowOUT to create real OS-level windows.
+
+### 25.7 — DisplayServer API
+Use `DisplayServer.screen_get_size()` / `screen_get_position()` (not `get_screen_size`). Use `window_set_vsync_mode(mode, window_id)` for per-window vsync.
+
+### 25.8 — GraphEdit Signal Naming
+`GraphEdit` has built-in `node_selected`/`selection_cleared`. Custom signals must use different names (e.g., `operator_selected`/`operator_deselected`).
+
+### 25.9 — Inspector Per-Cook Updates
+NEVER call `_update_mode_display()` per-cook — clobbers edits 60×/sec. Use lightweight `update_expression_status()` per-cook. Check `_expr_edit.has_focus()` before setting text.
+
+### 25.10 — Dynamic Input Ports (Auto-Grow)
+Variable-input operators use `_enable_dynamic_inputs()` in `_init_ports()`. Ports auto-grow on connect (trailing empty slot) and auto-shrink on disconnect. Used by: MergeSOP, MergeCOMP, RenderTOP, MergeCHOP, SwitchTOP, SwitchCHOP, SwitchSOP, SwitchDAT. Operators must handle null inputs for disconnected ports. Supersedes the old `num_inputs` parameter pattern.
+
+### 25.11 — COMP Nodes: Scene-Node Ownership, Not Data Flow
+COMPs return `GNCompData` (via `_build_comp_data()`) wrapping a **reference** to their singleton `_scene_node` (MeshInstance3D, Camera3D, Light3D, etc.). This is a pointer, not a copy — Node3D objects can only have one parent and can't be meaningfully duplicated. All scene-node resolution uses `cached_output as GNCompData` (data-type check, not node-type check) — works uniformly for GNCompBase, SubNetworkNode, GNCustomOperator, etc. Base-class helpers `_get_upstream_scene_node(port)` and `_resolve_upstream_mesh()` are inherited by all COMP subclasses. EnvironmentCOMP returns GNCompData with the `environment` field set (no scene node); RenderTOP checks `comp_data.environment != null`.
+
+### 25.12 — SubViewport World3D Isolation
+RenderTOP assigns `SubViewport.world_3d = World3D.new()` before tree entry. Without this, 3D content bleeds into the editor viewport. Do NOT use `own_world_3d = true` (causes duplicate World3D bug with Jolt).
+
+### 25.15 — Dynamic Port Counts
+`set_input_count(count, family, prefix, desc)` / `set_output_count(...)` rebuild port arrays and emit `ports_changed(node_id)`. Graph editor prunes stale wires automatically. For Switch/Merge ops, prefer `_enable_dynamic_inputs()` (auto-grow) over parameter-driven counts.
+
+### 25.16 — Canvas Anchoring in TOP SubViewports
+Use `_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` AFTER `add_child(_canvas)`. In `_cook()`, only set `_viewport.size = res` — the canvas follows via anchors. Applies to all 21 SubViewport-based TOPs.
+
+### 25.17 — Viewer Panel Sizing
+Use `TextureRect.expand_mode = EXPAND_IGNORE_SIZE` (value 1) + `stretch_mode = KEEP_ASPECT_CENTERED` (value 5). Set `clip_contents = true` and small `custom_minimum_size.y`.
+
+### 25.18 — Node Renaming Full Chain
+On rename: update `nodes` dict key → `GNNode.id` + `.name` → all `GNConnection` refs → expression strings (regex path-segment replacement in params, component_expressions, scripts, CallbackDAT slots) → emit `node_renamed`. IDs must match `^[a-zA-Z_][a-zA-Z0-9_]*$`.
+
+### 25.19 — GNNode Lifecycle
+- `.new()` / `_init()` — sets `node_type`, `family`, `node_description`. **No ports, no parameters.**
+- `initialize(id)` — calls `_init_ports()` + `_init_parameters()`, wires param signals. Full lifecycle for network nodes.
+- For introspection only (palette cache): call `node._init_ports()` explicitly after `.new()`. Do NOT call `initialize()`.
+
+### 25.21 — Help Example Patches Required
+Every operator MUST ship with at least one `.gnpatch` in `help/<family>/`. Naming: `<node_type>_<label>.gnpatch`. Must use `class_name` in the `type` field. Keep patches to 1–4 nodes. Max ~3 patches per operator.
+
+### 25.22 — Help Patch Sink Rule (WindowOUT Chain by Family)
+Every help `.gnpatch` must terminate at `WindowOUT` (512×512, `open: true`) via a family-appropriate chain:
+| Family | Chain to WindowOUT |
+|--------|-------------------|
+| TOP | direct |
+| IMG | → ImgToTOP → WindowOUT |
+| CHOP | → CHOPtoTOP → WindowOUT |
+| SOP | → GeometryCOMP + CameraCOMP → RenderTOP → WindowOUT |
+| COMP (scene) | + CameraCOMP → RenderTOP → WindowOUT |
+| COMP (pass-through) | route data *through* it (never bypass) → RenderTOP → WindowOUT |
+| DAT | → TextTOP → WindowOUT |
+| MAT | → GeometryCOMP (MAT port 1, SOP port 0) + CameraCOMP → RenderTOP → WindowOUT |
+
 ### 25.24 — Multi-Output Demand Gating
-Multi-output nodes: shared core runs unconditionally; per-port work MUST be guarded by `is_output_demanded(N)`. Override `get_output_data(port_index)` for routing. Exceptions (must comment `# MULTI-OUTPUT EXCEPTION:` in code): coupled physics sims, GPU MRT, SubNetworkNode.
+Multi-output nodes: shared core runs unconditionally; per-port work MUST be guarded by `is_output_demanded(N)`. Override `get_output_data(port_index)` for routing. Exceptions (must comment `# MULTI-OUTPUT EXCEPTION:` in code): coupled physics sims, GPU MRT.
+
+### 25.25 — Shared Logic in Base Classes, Not Subclasses
+When 2+ operators share the same helper logic, move it to the family base class (`GNCompBase`, `GNTopBase`, etc.) or to `GNNode`. Never duplicate utility methods across subclasses. Check the base class before writing a helper — it may already exist.
+
+### 25.26 — Check Data Types, Not Node Families
+When consuming upstream output, check the **data type** (`cached_output as GNTextureData`, `data is GNChannelData`), NOT the node's family (`node.family == GNFamily.Type.TOP`, `node is GNTopBase`). Data-type checks work uniformly for `GNCompBase`, `SubNetworkNode`, `GNCustomOperator`, and any future node type. Node-family checks silently reject valid data from nodes with a different family (e.g., a SubNetworkNode outputting `GNChannelData` has family NET, not CHOP).
 
 ### File Encoding
 All text files are UTF-8 without BOM. NEVER use PowerShell `Get-Content`/`Set-Content` without `-Encoding UTF8` on BOTH calls. Prefer Python for non-ASCII text manipulation.
@@ -56,6 +128,20 @@ func _cook(inputs: Array[GNData]) -> GNData:
     # Implementation
     return _cached_tex_data
 ```
+
+## dynamic_enum_callback — Live Hardware Enum Parameters
+
+For ENUM parameters whose options depend on runtime state (connected devices, available modes), set `dynamic_enum_callback` on the parameter to a `Callable` returning `PackedStringArray`. The inspector calls this before opening the dropdown, so the list always reflects current hardware.
+
+```gdscript
+func _init_parameters() -> void:
+    var device_param := GNParameter.create_enum("device", 0, ["None"],
+        "Device", "Select capture device")
+    device_param.dynamic_enum_callback = Callable(MyHelper, "get_device_menu")
+    add_parameter(device_param)
+```
+
+Signature: `func get_device_menu() -> PackedStringArray`. Used by: BlackmagicInIMG, BlackmagicOutIMG, DepthSensorIMG.
 
 ## .gnpatch Connection Format
 

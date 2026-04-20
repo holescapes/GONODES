@@ -9,6 +9,10 @@ extends GNData
 ## May be null for COMPs that only compose children without owning a node.
 var scene_node: Node3D = null
 
+## Optional Environment resource (set by EnvironmentCOMP).
+## When non-null, RenderTOP uses this instead of its built-in fallback.
+var environment: Environment = null
+
 ## Human-readable label for UI preview (e.g., "MeshInstance3D", "Camera3D").
 var scene_label: String = ""
 
@@ -33,6 +37,7 @@ func get_data_summary() -> String:
 func invalidate() -> void:
 	super.invalidate()
 	scene_node = null
+	environment = null
 	scene_label = ""
 
 
@@ -41,6 +46,7 @@ func duplicate_data() -> GNData:
 	copy.valid = valid
 	copy.timestamp = timestamp
 	copy.scene_label = scene_label
+	copy.environment = environment
 	# Scene nodes are not duplicated — they're shared references managed by the operator.
 	copy.scene_node = scene_node
 	return copy

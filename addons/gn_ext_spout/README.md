@@ -35,3 +35,11 @@ scons platform=windows target=template_release -j4
 |----------|-------------|
 | SpoutInTOP | Receive shared texture from a named Spout sender |
 | SpoutOutTOP | Share input texture as a named Spout sender |
+
+## Third-Party Licenses
+
+This extension bundles [Spout2](https://github.com/leadedge/Spout2) (BSD
+2-Clause, (c) 2020-2024 Lynn Jarvis). The SDK is cloned automatically by
+`setup_deps.py` or can be cloned manually.
+
+Full license text is in `THIRD_PARTY_LICENSES` in this directory.

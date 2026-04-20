@@ -346,6 +346,14 @@ See [libgonodes/README.md](libgonodes/README.md) and [dev_docs/INTEGRATION.md](d
 
 ---
 
+## Known Limitations
+
+- **COMP fan-out (single ownership):** COMP operators (GeometryCOMP, CameraCOMP, LightCOMP, etc.) own a singleton Godot Node3D scene node that can only have one parent. If two RenderTOPs or MergeCOMPs wire to the same COMP, only the last one to cook gets the scene node — the others render empty. **Workaround:** each COMP should feed exactly one reparenting consumer; duplicate the COMP chain for multi-camera setups. A visual proxy architecture is planned for a future release — see [dev_docs/ROADMAP.md](dev_docs/ROADMAP.md).
+- **Shadertoy multi-pass:** The ShadertoyTOP translator only supports single-pass Shadertoy shaders (the “Image” tab). Multi-pass shaders using Buffer A/B/C/D are not converted. **Workaround:** manually split buffer passes into separate CustomShaderTOP nodes wired together.
+- **GLSLMultiTOP MRT transpiler:** SCREEN_TEXTURE and custom varyings are not supported in MRT mode. **Workaround:** use CustomShaderTOP + SelectTOP for shaders that need these features.
+
+---
+
 ## Contributing
 
 Start by reading [GONODES_CONTEXT.md](GONODES_CONTEXT.md) for the architecture overview and [dev_docs/CONTRIBUTING.md](dev_docs/CONTRIBUTING.md) for guidelines, then open an issue to discuss what you'd like to work on.

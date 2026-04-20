@@ -55,16 +55,11 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		GNLogger.warn("SelectTOP", "'%s' — target '%s' not found" % [id, target_id])
 		return null
 
-	if target.family != GNFamily.Type.TOP:
-		node_warning = "Target '%s' is not a TOP" % target_id
-		GNLogger.warn("SelectTOP", "'%s' — target '%s' is %s, not TOP" % [id, target_id, GNFamily.FAMILY_NAMES.get(target.family, "UNKNOWN")])
+	# Check data type, not node family — SubNetworkNode/GNCustomOperator can output valid TOP data
+	var tex_data: GNTextureData = target.cached_output as GNTextureData if target.cached_output is GNTextureData else null
+	if tex_data == null or tex_data.texture == null:
+		node_warning = "Target '%s' does not output texture data" % target_id
 		return null
 
 	node_warning = ""
-
-	# Return the target's cached output directly — zero copy
-	var tex_data: GNTextureData = target.cached_output as GNTextureData if target.cached_output is GNTextureData else null
-	if tex_data == null or tex_data.texture == null:
-		return null
-
 	return tex_data

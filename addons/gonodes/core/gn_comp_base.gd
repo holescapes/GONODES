@@ -93,24 +93,17 @@ func destroy_scene_node() -> void:
 
 ## Walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP,
 ## AnimationCOMP, etc.) to find the actual scene node.  Cycle-safe.
-## Accepts any GNNode — reads from GNCompData when the node isn't a GNCompBase
-## (e.g. SubNetworkNode emitting COMP data).
+## Uses data-type checking (cached_output as GNCompData) — works for any
+## node type (GNCompBase, SubNetworkNode, GNCustomOperator, etc.).
 static func resolve_scene_node_upstream(node: GNNode, net: GNNetwork) -> Node3D:
 	return _resolve_scene_node_r(node, net, {})
 
 
 static func _resolve_scene_node_r(node: GNNode, net: GNNetwork,
 		visited: Dictionary) -> Node3D:
-	# Try direct scene node accessor (GNCompBase subclasses)
-	if node is GNCompBase:
-		var scene_nd: Node3D = (node as GNCompBase).get_scene_node()
-		if scene_nd != null:
-			return scene_nd
-	else:
-		# Non-GNCompBase (SubNetworkNode, etc.) — read from data
-		var comp_data := node.cached_output as GNCompData
-		if comp_data != null and comp_data.scene_node != null:
-			return comp_data.scene_node
+	var comp_data := node.cached_output as GNCompData
+	if comp_data != null and comp_data.scene_node != null:
+		return comp_data.scene_node
 	if visited.has(node.id):
 		return null
 	visited[node.id] = true
@@ -120,6 +113,46 @@ static func _resolve_scene_node_r(node: GNNode, net: GNNetwork,
 			var resolved: Node3D = _resolve_scene_node_r(upstream, net, visited)
 			if resolved != null:
 				return resolved
+	return null
+
+
+## Resolves the upstream scene node and extracts its MeshInstance3D.
+## Searches the node itself and its direct children.
+static func resolve_mesh_upstream(node: GNNode, net: GNNetwork) -> MeshInstance3D:
+	var scene_nd: Node3D = resolve_scene_node_upstream(node, net)
+	if scene_nd == null:
+		return null
+	if scene_nd is MeshInstance3D:
+		return scene_nd as MeshInstance3D
+	for child in scene_nd.get_children():
+		if child is MeshInstance3D:
+			return child as MeshInstance3D
+	return null
+
+
+## Instance convenience: resolves the scene node from an upstream input port.
+## Reads cached_output as GNCompData — works for any upstream node type.
+func _get_upstream_scene_node(port: int) -> Node3D:
+	var upstream := get_input_node(port)
+	if upstream == null:
+		return null
+	var comp_data := upstream.cached_output as GNCompData
+	if comp_data != null:
+		return comp_data.scene_node
+	return null
+
+
+## Instance convenience: resolves the MeshInstance3D from an upstream input port.
+## Searches the scene node itself and its direct children.
+func _resolve_upstream_mesh() -> MeshInstance3D:
+	var scene_nd: Node3D = _get_upstream_scene_node(0)
+	if scene_nd == null:
+		return null
+	if scene_nd is MeshInstance3D:
+		return scene_nd as MeshInstance3D
+	for child in scene_nd.get_children():
+		if child is MeshInstance3D:
+			return child as MeshInstance3D
 	return null
 
 

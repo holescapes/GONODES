@@ -140,9 +140,11 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_apply_adjustments()
 	_apply_fog()
 
-	# COMPs return null — RenderTOP discovers EnvironmentCOMP by typed check
-	# on the upstream node object, not via cook output data.
-	return null
+	# Return GNCompData with environment field set — RenderTOP checks the
+	# data type (comp_data.environment != null), not the node type.
+	var data := _build_comp_data()
+	data.environment = _environment
+	return data
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

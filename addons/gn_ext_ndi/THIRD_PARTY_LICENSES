@@ -1,0 +1,27 @@
+THIRD-PARTY LICENSE NOTICES — gn_ext_ndi
+=========================================
+
+This extension does NOT bundle any third-party code.
+Users must obtain the following SDK separately.
+
+
+1. NDI SDK (Vizrt NDI AB)
+─────────────────────────
+License: Proprietary (free to download, not open-source)
+Copyright (c) Vizrt NDI AB
+Download: https://ndi.video/download-ndi-sdk/
+
+The NDI SDK is free to download (requires a free account) but is governed
+by the NDI SDK License Agreement. The SDK headers, import libraries, and
+runtime shared libraries are NOT included in GONODES and must be obtained
+directly from Vizrt.
+
+NDI(R) is a registered trademark of Vizrt NDI AB.
+
+At runtime the NDI shared library must be loadable:
+  - Windows: Processing.NDI.Lib.x64.dll (via NDI Runtime installer or SDK)
+  - Linux: libndi.so (from SDK)
+  - macOS: libndi.dylib (from SDK)
+
+
+See README.md for detailed setup instructions.

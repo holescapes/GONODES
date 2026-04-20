@@ -147,10 +147,8 @@ func _connect_bodies() -> void:
 	if _joint == null:
 		return
 
-	var body_a_data := get_input_node(0).cached_output as GNCompData if get_input_node(0) else null
-	var body_b_data := get_input_node(1).cached_output as GNCompData if get_input_node(1) else null
-	var body_a_node: Node3D = body_a_data.scene_node if body_a_data else null
-	var body_b_node: Node3D = body_b_data.scene_node if body_b_data else null
+	var body_a_node: Node3D = _get_upstream_scene_node(0)
+	var body_b_node: Node3D = _get_upstream_scene_node(1)
 
 	# Set node paths relative to the joint
 	if body_a_node != null and _joint.is_inside_tree() and body_a_node.is_inside_tree():

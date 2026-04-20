@@ -78,3 +78,62 @@ Requires the `GNOpenCV` GDExtension (`native/` directory).
 
 - **GNOpenCV GDExtension**: Native C++ library wrapping OpenCV 4.x functions
 - **Platforms**: Windows, macOS, Linux
+
+## OpenCV SDK Setup
+
+The OpenCV library is licensed under **Apache 2.0** and is **not** bundled in
+GONODES. You must obtain it separately.
+
+### Windows
+
+1. Download **OpenCV 4.10.0** (or compatible 4.x) from
+   <https://opencv.org/releases/>
+2. Run the self-extracting archive — it creates an `opencv/` folder.
+3. Copy the SDK files into this extension:
+   ```
+   addons/gn_ext_opencv/native/
+   └── opencv_sdk/
+       └── opencv/
+           └── build/
+               ├── include/
+               │   └── opencv2/  (headers)
+               └── x64/
+                   └── vc16/
+                       └── lib/
+                           └── opencv_world4100.lib
+   ```
+4. Copy the runtime DLL to the bin directory:
+   ```
+   addons/gn_ext_opencv/native/bin/win64/
+   └── opencv_world4100.dll
+   ```
+
+### Linux
+
+Install the development packages via your package manager:
+
+```bash
+# Ubuntu / Debian
+sudo apt install libopencv-dev
+
+# Fedora
+sudo dnf install opencv-devel
+```
+
+No SDK files need to be placed manually — the system libraries are linked
+directly.
+
+### macOS
+
+Install via Homebrew:
+
+```bash
+brew install opencv
+```
+
+### Build
+
+```bash
+cd addons/gn_ext_opencv/native
+scons platform=windows   # or linux / macos
+```

@@ -291,6 +291,6 @@ func _resolve_remote_sop(target_id: String) -> GNGeoData:
 	if _network_cache == null:
 		return null
 	var target: GNNode = _network_cache.get_node_by_id(target_id)
-	if target == null or target.family != GNFamily.Type.SOP:
+	if target == null:
 		return null
 	return target.cached_output as GNGeoData if target.cached_output is GNGeoData else null

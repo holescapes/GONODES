@@ -76,3 +76,15 @@ ImageTexture (GPU upload — DXT native)
 - **Windows**: x86_64 (DLL)
 - **macOS**: universal (Framework)
 - **Linux**: x86_64 (SO)
+
+## Third-Party Licenses
+
+This extension bundles three open-source libraries (all MIT/BSD-compatible):
+
+| Library | License | Copyright |
+|---------|---------|-----------|
+| [HAP](https://github.com/Vidvox/hap) | BSD 2-Clause | (c) 2011-2013 Tom Butterworth, Vidvox LLC |
+| [Snappy](https://github.com/google/snappy) | BSD 3-Clause | (c) 2005 Google Inc. |
+| [Squish](https://sjbrown.co.uk/squish/) | MIT | (c) 2006 Simon Brown |
+
+Full license texts are in `THIRD_PARTY_LICENSES` in this directory.

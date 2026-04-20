@@ -981,7 +981,6 @@ Demand is detected from three sources: wire connections, wireless Select operato
 **Exceptions** (must be commented in code with `# MULTI-OUTPUT EXCEPTION:`):
 - **Coupled simulations** (FluidVOL, PyroVOL) — mutually dependent physics fields; outputs are views into shared state that must compute fully.
 - **GPU MRT rendering** (GLSLMultiTOP MRT path) — single draw call writes all outputs simultaneously. The fallback path must still guard per-output renders.
-- **SubNetworkNode** — inner cook engine does not yet support demand-aware scheduling.
 
 See `GONODES_CONTEXT.md` §25.24 for full details and code examples.
 

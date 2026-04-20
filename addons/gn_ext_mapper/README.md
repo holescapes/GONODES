@@ -70,10 +70,7 @@ composited together before the final WindowOUT.
 
 ## Known Issues
 
-- **GridWarpTOP** — The displacement texture input (2nd input) reads the texture
-  on the CPU via `get_image()`, which introduces a GPU→CPU readback stall.
-  For real-time use, prefer the per-point offset parameters or keep displacement
-  textures small (≤256×256). Grid size is capped at 8×8 (64 control points).
+- **GridWarpTOP** — Grid size is capped at 8×8 (64 control points).
 
 ## License
 

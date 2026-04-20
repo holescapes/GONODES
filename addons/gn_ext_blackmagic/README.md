@@ -6,7 +6,48 @@ Professional SDI/HDMI video capture and output via the Blackmagic DeckLink SDK.
 
 - **Hardware**: Any Blackmagic DeckLink capture/output card (DeckLink Mini Recorder, DeckLink 4K Extreme, UltraStudio, Intensity Pro, etc.)
 - **Drivers**: [Blackmagic Desktop Video](https://www.blackmagicdesign.com/support/) drivers installed
-- **SDK**: DeckLink SDK (C++ headers — bundled at build time)
+- **SDK**: DeckLink SDK (C++ headers — see below)
+
+## DeckLink SDK Setup
+
+The DeckLink SDK is **proprietary** (free to download) and **cannot** be
+bundled in GONODES. You must obtain it yourself.
+
+### 1  Download the SDK
+
+Go to <https://www.blackmagicdesign.com/support/> → **Developer SDK** section
+→ download the **Blackmagic DeckLink SDK** for your platform.
+
+### 2  Copy SDK Files
+
+After extracting the SDK archive, copy the required files into:
+
+```
+addons/gn_ext_blackmagic/native/
+└── decklink_sdk/
+    └── include/
+        ├── DeckLinkAPI.h
+        ├── DeckLinkAPI_i.c
+        └── (other DeckLink headers)
+```
+
+**Windows** — The SDK typically extracts to a folder like
+`Blackmagic DeckLink SDK 14.x/Win/include/`.
+
+**Linux** — The SDK has a `Linux/include/` folder.
+
+### 3  Build
+
+```bash
+cd addons/gn_ext_blackmagic/native
+scons platform=windows   # or linux
+```
+
+### 4  Runtime Requirements
+
+At runtime you need:
+- Blackmagic Desktop Video drivers installed
+- A DeckLink card physically installed or a UltraStudio device connected
 
 ## Architecture
 

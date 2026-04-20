@@ -3430,7 +3430,7 @@ Ownership Rule:
 | SOP    | GNGeoData         | CPU/GPU | Reference to ArrayMesh. Transform ops create new output. Mesh data on GPU after upload. |
 | POP    | (future)          | GPU     | GPU buffer handle. Zero-copy. Downstream compute shaders bind the buffer. |
 | DAT    | GNTableData       | CPU     | Reference to table/text data. Read-only. Lightweight string arrays. |
-| COMP   | null (scene nodes) | N/A    | COMPs return null from cook. Access via API: get_mesh_instance(), get_camera(), get_light(). |
+| COMP   | GNCompData         | CPU    | Wraps reference to Node3D scene node. Optional `environment` field for EnvironmentCOMP. |
 
 ### GNTextureData Reuse
 
@@ -3844,13 +3844,16 @@ These are non-negotiable constraints discovered during development. **Never viol
 - **Cook engine path:** `_gather_inputs()` uses a single code path — port-indexed array with possible null entries for disconnected ports. Operators must handle null inputs.
 - Supersedes the old `port.multi_input` flag and the `num_inputs` parameter pattern. `GNPort.multi_input` still exists but is unused (deprecated).
 
-### 25.11 COMP Nodes Return Null Output
+### 25.11 COMP Nodes: Scene-Node Ownership, Not Data Flow
 
-- COMPs (GeometryCOMP, CameraCOMP, LightCOMP) intentionally return `null` from `_cook()`
-- Their "output" is a Godot Node3D (MeshInstance3D, Camera3D, Light3D), not a GNData subclass
-- Downstream access is via API methods: `get_mesh_instance()`, `get_camera()`, `get_light()`
-- The cook engine must suppress null-output warnings for `GNFamily.COMP` nodes
-- RenderTOP accesses COMP nodes by walking the network graph, not by reading cook output
+- COMPs return `GNCompData` (via `_build_comp_data()`) wrapping a **reference** to their singleton `_scene_node` (MeshInstance3D, Camera3D, Light3D, etc.)
+- `GNCompData` is a pointer in a box — Node3D objects can only have one scene-tree parent and can’t be meaningfully duplicated, so the normal GNData copy-on-write model doesn’t apply
+- `GNCompData.environment` — optional `Environment` resource field, set by EnvironmentCOMP. RenderTOP checks `comp_data.environment != null` to apply it. Routes through NullCOMP and SubNetworkNode correctly.
+- **Unified data-type access:** All scene-node resolution uses `cached_output as GNCompData` — no node-type checks (`is GNCompBase`). This works for any upstream node (GNCompBase, SubNetworkNode, GNCustomOperator, etc.)
+- **Static graph walker:** `GNCompBase.resolve_scene_node_upstream(node, net)` walks upstream through pass-through COMPs (NullCOMP, SwitchCOMP) to find the actual scene node. Uses data-type checking only.
+- **Base-class helpers:** `GNCompBase._get_upstream_scene_node(port)` and `_resolve_upstream_mesh()` are inherited by all COMP subclasses — no per-operator duplication needed
+- **RenderTOP:** Calls `resolve_scene_node_upstream()` for each upstream COMP input, then reparents the scene node into its SubViewport
+- Typed accessors: `GeometryCOMP.get_mesh_instance()`, `CameraCOMP.get_camera()`, `LightCOMP.get_light()`
 
 ### 25.12 SubViewport World3D for Isolated 3D Scenes
 
@@ -4034,7 +4037,22 @@ func get_output_data(port_index: int) -> GNData:
 **Exceptions (must be commented in-code with `# MULTI-OUTPUT EXCEPTION:`):**
 1. **Coupled simulations** (FluidVOL, PyroVOL): All fields participate in a single physics step — velocity, pressure, density are mutually dependent. Removing one field breaks physical correctness. Exception: simulation always runs fully; outputs are just views into the shared state.
 2. **GPU MRT rendering** (GLSLMultiTOP MRT path): Multiple Render Targets are computed in a single draw call — the GPU writes all outputs simultaneously. No per-output skipping is possible in MRT. Exception: MRT dispatch always renders all outputs. The fallback (per-viewport) path MUST guard per-output renders.
-3. **SubNetworkNode**: The inner cook engine does not yet support demand-aware scheduling. The inner graph runs fully regardless of which OutTunnels are demanded. This is a known limitation to be addressed in a future architecture pass.
+
+**Note:** SubNetworkNode is demand-aware — it toggles `OutTunnel.is_sink` based on `is_output_demanded()`, so the inner cook engine's `_compute_active_set()` naturally prunes branches feeding un-demanded tunnels. No exception needed.
+
+### 25.25 Shared Logic in Base Classes, Not Subclasses
+
+- When 2+ operators share the same helper logic (upstream resolution, viewport setup, parameter patterns), **move it to the family base class** (`GNCompBase`, `GNTopBase`, `GNChopBase`, etc.) or to `GNNode` if it applies across families.
+- Never duplicate utility methods across subclasses. Before writing a helper in an operator, check the base class — it may already exist.
+- Examples: `GNCompBase._get_upstream_scene_node()`, `GNCompBase._resolve_upstream_mesh()`, `GNTopBase._ensure_viewport()`, `GNNode.get_input_node()`.
+- If a helper is only used by one operator today but is generic enough, still put it in the base class — the next operator of that family will need it.
+
+### 25.26 Check Data Types, Not Node Families
+
+- When consuming upstream output, check the **data type** (`cached_output as GNTextureData`, `data is GNChannelData`), NOT the node's family (`node.family == GNFamily.Type.TOP`, `node is GNTopBase`).
+- Data-type checks work uniformly for `GNCompBase`, `SubNetworkNode`, `GNCustomOperator`, and any future node type that outputs the same data class.
+- Node-family checks silently reject valid data from nodes with a different family. Example: a `SubNetworkNode` outputting `GNChannelData` has `family == NET`, not `CHOP` — a family guard would wrongly reject it even though the data is perfectly valid `GNChannelData`.
+- No exceptions — every COMP operator, including EnvironmentCOMP, returns proper `GNCompData`.
 
 ---
 
@@ -4064,11 +4082,17 @@ func get_output_data(port_index: int) -> GNData:
 - **Root cause:** Input events in a child `Window` node stay in that window's viewport tree. `Input.is_action_just_pressed()` polled from the parent node's `_process()` never sees them.
 - **Fix applied:** Connected `Window.window_input` signal to `_on_window_input()` handler that listens for `KEY_ESCAPE`. On ESC press while in Fullscreen or Borderless mode, sets `window_mode` parameter back to Windowed and marks window params dirty. The inspector reflects the change immediately via `set_param_value()`.
 
+### 26.3 COMP Fan-Out: Single-Ownership Scene Node Limitation
+
+- **Issue:** COMP operators own a singleton Godot `Node3D` scene node (MeshInstance3D, Camera3D, Light3D). When a consumer (RenderTOP, MergeCOMP) needs to render it, it **reparents** the Node3D into its own SubViewport. Since Godot enforces single-parent ownership on scene nodes, only one consumer gets the node — the last one to cook wins; all others render an empty scene.
+- **Affected:** Any fan-out from a COMP to multiple reparenting consumers — primarily RenderTOP and MergeCOMP. COMP→COMP wiring where the downstream creates its own node (e.g., RigidBodyCOMP) is not affected. All non-COMP families support unlimited fan-out via ref-counted GNData.
+- **Workaround:** Each COMP should feed exactly one reparenting consumer. For multi-camera setups, duplicate the COMP chain.
+- **Planned fix:** Visual proxy architecture — consumers create lightweight proxy Node3D instances sharing the same GPU resources (Mesh, Material, Texture) instead of reparenting. See [ROADMAP.md § COMP Scene-Node Proxy Architecture](../dev_docs/ROADMAP.md).
+- **Root cause:** Godot's scene tree model requires a Node3D to have exactly one parent. This is fundamental to the engine and cannot be changed from GDScript.
+
 ---
 
 ## 27. Code-Based / Scriptable Operators — Architecture
-
-This section documents the scripting operator system: operators where the user writes executable GDScript code that runs every cook. These are the GONODES equivalents of TouchDesigner's Script CHOP, Script SOP, Script DAT, and GLSL TOP.
 
 ### 27.1 Design Philosophy
 

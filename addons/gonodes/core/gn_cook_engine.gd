@@ -2175,7 +2175,7 @@ func _cook_single_node(node: GNNode) -> int:
 	if result != null:
 		result._shared = _consumer_counts.get(node.id, 0) > 1
 
-	if result == null and node.output_ports.size() > 0 and node.family != GNFamily.Type.COMP:
+	if result == null and node.output_ports.size() > 0:
 		# Null is expected when a filter node has no connected input — don't flag
 		# it as an error.  Only warn if the node actually received data on at
 		# least one input port (meaning the cook itself failed).

@@ -1,0 +1,44 @@
+THIRD-PARTY LICENSE NOTICES — gn_ext_depth_sensor
+==================================================
+
+This extension does NOT bundle any third-party code.
+Users must obtain one or more of the following SDKs separately.
+Only the backends whose SDKs are present will be compiled.
+
+
+1. Azure Kinect SDK (Microsoft)
+───────────────────────────────
+Components: Azure Kinect Sensor SDK v1.4+ / Body Tracking SDK v1.1+
+License: Proprietary (Microsoft Corporation)
+Download: https://learn.microsoft.com/en-us/azure/kinect-dk/sensor-sdk-download
+Hardware: Azure Kinect DK device
+
+The Azure Kinect SDK is free to download but governed by the Microsoft
+Software License Terms. The SDK headers and libraries are NOT included
+in GONODES and must be obtained directly from Microsoft.
+
+
+2. Intel RealSense SDK 2.0 (Intel)
+──────────────────────────────────
+License: Apache License 2.0
+Repository: https://github.com/IntelRealSense/librealsense
+Download: https://www.intelrealsense.com/sdk-2/
+Hardware: Intel RealSense D400 series or similar
+
+Licensed under the Apache License, Version 2.0. You may obtain a copy
+of the License at: http://www.apache.org/licenses/LICENSE-2.0
+
+
+3. Ultraleap Gemini Tracking SDK (Ultraleap)
+─────────────────────────────────────────────
+License: Proprietary (Ultraleap Limited)
+Download: https://developer.leapmotion.com/tracking-software-download
+Hardware: Ultraleap Leap Motion Controller or Stereo IR 170
+
+The Ultraleap tracking software and LeapC SDK are free to download but
+governed by the Ultraleap Software License Agreement. The SDK headers
+and libraries are NOT included in GONODES and must be obtained directly
+from Ultraleap.
+
+
+See README.md for detailed setup instructions for each backend.

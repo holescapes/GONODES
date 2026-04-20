@@ -203,16 +203,6 @@ func _build_default_nav_mesh() -> void:
 	_region.navigation_mesh = _nav_mesh
 
 
-func _get_upstream_scene_node(port: int) -> Node3D:
-	var upstream := get_input_node(port)
-	if upstream == null:
-		return null
-	var comp_data := upstream.cached_output as GNCompData
-	if comp_data != null:
-		return comp_data.scene_node
-	return null
-
-
 func _on_node_removed() -> void:
 	if _body != null and is_instance_valid(_body):
 		if _body.get_parent() != null:

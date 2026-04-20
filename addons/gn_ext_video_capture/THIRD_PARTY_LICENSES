@@ -1,0 +1,30 @@
+THIRD-PARTY LICENSE NOTICES — gn_ext_video_capture
+====================================================
+
+This extension does NOT bundle or require any third-party code.
+It uses platform-provided OS APIs exclusively.
+
+
+1. Windows Media Foundation (Microsoft)
+───────────────────────────────────────
+License: Proprietary (Microsoft Corporation)
+Part of the Windows SDK — no separate download required.
+System libraries used: mfplat, mf, mfreadwrite, mfuuid, ole32, user32
+
+
+2. Apple AVFoundation (Apple)
+─────────────────────────────
+License: Proprietary (Apple Inc.)
+Part of macOS — no separate download required.
+Frameworks used: AVFoundation, CoreMedia, CoreVideo, Foundation
+
+
+3. Video4Linux2 (Linux kernel)
+──────────────────────────────
+License: GPL-2.0 (kernel interface)
+Part of the Linux kernel — no separate download required.
+User-space API headers provided by system libc.
+
+Note: V4L2 is accessed via the kernel ioctl interface. GONODES links
+against no GPL code; it uses the standard system call boundary which
+the Linux kernel explicitly permits for user-space applications.

@@ -218,7 +218,7 @@ Plays a video file as a live texture stream. Similar to TouchDesigner's Movie Fi
 **Codec notes:**
 - **Theora (.ogv):** Built-in. CPU-decoded. No alpha channel support in Godot's decoder.
 - **H.264/VP8/VP9:** Available via community `godot-videodecoder` GDExtension (FFmpeg-based). No alpha.
-- **HAP / HAP Alpha / HAP Q:** Not yet supported. HAP is a VJ-standard codec that stores S3TC/DXT-compressed frames, uploaded directly to the GPU with no CPU decode — ideal for real-time performance. Requires a custom GDExtension wrapping the [HAP library](https://github.com/Vidvox/hap). See roadmap.
+- **HAP / HAP Alpha / HAP Q:** Supported via `gn_ext_hap` extension (HapInTOP for GPU-direct DXT playback, HapOUT for encoding). See the HAP extension section.
 - **Image sequences:** For alpha-channel video content, use numbered PNG/WebP frame sequences with the ImageSequenceTOP operator.
 
 ---
@@ -680,6 +680,8 @@ Renders a 3D scene from COMPs into a 2D texture with integrated post-processing.
 **Inputs:** `comp_in` — accepts multiple COMP connections (multi-input port).
 
 **How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks network input connections to discover GeometryCOMP, CameraCOMP, LightCOMP, and MergeCOMP nodes and adopts their 3D nodes into the viewport's scene tree. Creates a `WorldEnvironment` with configurable ambient lighting and post-processing via Godot's `Environment` resource. If no CameraCOMP is connected, a default perspective camera is placed at (0, 1.5, 3). DOF is applied to the active camera (from CameraCOMP or default). Time-dependent — re-populates the scene each frame.
+
+**Limitation:** Each upstream COMP should feed only one RenderTOP. Godot scene nodes can only have one parent — if two RenderTOPs wire to the same COMP, only the last to cook gets the scene node. For multi-camera setups, duplicate the COMP chain. A visual proxy architecture is planned for a future release.
 
 **Performance:** When all post-processing toggles are off and tonemap is at defaults, the post-processing path early-exits with a single boolean check — zero overhead for vanilla 3D renders.
 
@@ -5031,9 +5033,11 @@ Receive geometry data from a host application via the C API (`libgonodes`). Supp
 
 ## COMP — Component Operators
 
-COMPs are 3D scene components. Unlike other families, COMPs don't produce `GNData` output — instead, they create and manage Godot `Node3D` instances (MeshInstance3D, Camera3D, Light3D) that are adopted into a RenderTOP's isolated 3D SubViewport for rendering.
+COMPs are 3D scene components. They return `GNCompData` wrapping a reference to a singleton Godot `Node3D` (MeshInstance3D, Camera3D, Light3D) that is adopted into a RenderTOP's isolated 3D SubViewport for rendering.
 
 COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Godot's 3D rendering engine.
+
+**Limitation:** Each COMP should feed only one reparenting consumer (RenderTOP or MergeCOMP). Godot scene nodes can only have one parent — fan-out to multiple consumers causes the last cook to win. A visual proxy architecture is planned post-beta.
 
 **Total: 12 operators.**
 
