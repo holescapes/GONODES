@@ -1,0 +1,12 @@
+[configuration]
+entry_symbol = "gn_depth_realsense_init"
+compatibility_minimum = 4.1
+
+# Vendor runtime DLL (realsense2.dll) is installed system-wide by the Intel
+# RealSense SDK installer and found via the OS library search path.
+
+[libraries]
+windows.debug.x86_64 = "res://addons/gn_ext_depth_sensor/native/realsense/bin/win64/libgn_depth_realsense.windows.template_release.x86_64.dll"
+windows.release.x86_64 = "res://addons/gn_ext_depth_sensor/native/realsense/bin/win64/libgn_depth_realsense.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/gn_ext_depth_sensor/native/realsense/bin/linux64/libgn_depth_realsense.linux.template_release.x86_64.so"
+linux.release.x86_64 = "res://addons/gn_ext_depth_sensor/native/realsense/bin/linux64/libgn_depth_realsense.linux.template_release.x86_64.so"

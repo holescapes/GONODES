@@ -575,6 +575,18 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 			print("[ExtRegistry] Extension '%s' skipped — missing dependency '%s'" % [ext_name, dep_class])
 			return
 
+	# ── Any-of dependency check (loads if ANY of the listed classes exist) ──
+	var any_deps: Array = cfg.get_value("extension", "dependencies_any", [])
+	if any_deps.size() > 0:
+		var any_found := false
+		for dep_class in any_deps:
+			if ClassDB.class_exists(dep_class):
+				any_found = true
+				break
+		if not any_found:
+			print("[ExtRegistry] Extension '%s' skipped — none of %s found" % [ext_name, str(any_deps)])
+			return
+
 	# ── Register extension families ──
 	# Sections named "family.<NAME>" declare custom port types.
 	# GNFamily resolves core names to their enum IDs automatically;

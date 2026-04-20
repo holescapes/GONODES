@@ -1,14 +1,19 @@
 THIRD-PARTY LICENSE NOTICES — gn_ext_ffmpeg
 ============================================
 
-This extension does NOT bundle any third-party code.
-It requires a separate GDExtension plugin at runtime.
+This extension bundles pre-built shared libraries from two projects:
+  - EIRTeam.FFmpeg (MIT) — Godot GDExtension wrapper
+  - FFmpeg (LGPL 2.1+) — the underlying multimedia framework
 
 
 1. EIRTeam.FFmpeg — FFmpeg GDExtension for Godot
 ─────────────────────────────────────────────────
 License: MIT
 Repository: https://github.com/EIRTeam/EIRTeam.FFmpeg
+
+Bundled files:
+  native/win64/libgdffmpeg.windows.*.dll
+  native/linux64/libgdffmpeg.linux.*.so
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +34,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-Note: EIRTeam.FFmpeg itself links against FFmpeg libraries which are licensed
-under LGPL 2.1+ (or GPL if built with certain options). See the EIRTeam.FFmpeg
-repository for details on FFmpeg licensing.
+2. FFmpeg — Multimedia Framework
+─────────────────────────────────
+License: LGPL 2.1+ (GNU Lesser General Public License)
+Website: https://ffmpeg.org/
+Source:  https://ffmpeg.org/download.html
+
+Bundled files (built as shared/dynamic libraries for LGPL compliance):
+  native/win64/avcodec-60.dll, avfilter-9.dll, avformat-60.dll,
+               avutil-58.dll, swresample-4.dll, swscale-7.dll
+  native/linux64/libavcodec.so.60, libavfilter.so.9, libavformat.so.60,
+                 libavutil.so.58, libswresample.so.4, libswscale.so.7
+
+These libraries were compiled WITHOUT --enable-gpl, ensuring LGPL 2.1+
+licensing (not full GPL). They are linked dynamically by EIRTeam.FFmpeg
+as required by the LGPL.
+
+LGPL 2.1+ compliance: the FFmpeg shared libraries are distributed in
+unmodified pre-built form. The complete corresponding source code for
+the version used can be obtained from https://ffmpeg.org/download.html.
+Users may replace these shared libraries with their own FFmpeg build
+(same major version) to exercise their LGPL rights.
 
 
 See README.md for setup instructions.

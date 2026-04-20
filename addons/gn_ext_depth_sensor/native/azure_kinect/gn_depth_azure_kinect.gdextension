@@ -1,0 +1,12 @@
+[configuration]
+entry_symbol = "gn_depth_azure_kinect_init"
+compatibility_minimum = 4.1
+
+# Vendor runtime DLLs (k4a.dll, k4abt.dll) are installed system-wide by the
+# Azure Kinect SDK installer and found via the OS library search path.
+
+[libraries]
+windows.debug.x86_64 = "res://addons/gn_ext_depth_sensor/native/azure_kinect/bin/win64/libgn_depth_azure_kinect.windows.template_release.x86_64.dll"
+windows.release.x86_64 = "res://addons/gn_ext_depth_sensor/native/azure_kinect/bin/win64/libgn_depth_azure_kinect.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/gn_ext_depth_sensor/native/azure_kinect/bin/linux64/libgn_depth_azure_kinect.linux.template_release.x86_64.so"
+linux.release.x86_64 = "res://addons/gn_ext_depth_sensor/native/azure_kinect/bin/linux64/libgn_depth_azure_kinect.linux.template_release.x86_64.so"

@@ -19,9 +19,19 @@ extensions = []
 for entry in sorted(os.listdir(addons_dir)):
     if not entry.startswith("gn_ext_") or entry == "gn_ext_native":
         continue
-    cfg_path = os.path.join(addons_dir, entry, "native", "build.cfg")
+    native_dir = os.path.join(addons_dir, entry, "native")
+    # Top-level build.cfg
+    cfg_path = os.path.join(native_dir, "build.cfg")
     if os.path.isfile(cfg_path):
         extensions.append(entry)
+        continue
+    # Sub-directory build configs (e.g. native/azure_kinect/build.cfg)
+    if os.path.isdir(native_dir):
+        for sub in sorted(os.listdir(native_dir)):
+            sub_cfg = os.path.join(native_dir, sub, "build.cfg")
+            if os.path.isfile(sub_cfg):
+                extensions.append(f"{entry}/{sub}")
+
 
 print(f"matrix={json.dumps(extensions)}")
 

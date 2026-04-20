@@ -16,7 +16,8 @@ extends GNImgBase
 ## target a different device by serial.  The device dropdown auto-refreshes
 ## when opened.
 ##
-## Requires the gn_ext_depth_sensor GDExtension (GNDepthSensor class).
+## Requires at least one gn_ext_depth_sensor backend DLL (GNDepthAzureKinect,
+## GNDepthRealSense, or GNDepthUltraleap).
 
 var _sensor: RefCounted = null
 var _last_serial: String = ""
@@ -103,10 +104,6 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	if not get_param_value("active"):
 		return out
 
-	_ensure_sensor()
-	if _sensor == null:
-		return out
-
 	# ── Device selection ──────────────────────────────────────────────
 	var dev := GNDepthSensorHelper.get_device_at(get_param_value("device"))
 	var serial: String = dev.get("serial", "")
@@ -115,9 +112,13 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	if backend.is_empty():
 		var backends := GNDepthSensorHelper.get_backends()
 		if backends.is_empty():
-			GNLogger.warn("DepthSensorIMG", "'%s': no sensor backends compiled" % id)
+			GNLogger.warn("DepthSensorIMG", "'%s': no sensor backends loaded" % id)
 			return out
 		backend = backends[0]
+
+	_ensure_sensor(backend)
+	if _sensor == null:
+		return out
 
 	if serial != _last_serial or backend != _last_backend:
 		_sensor.close_device()
@@ -349,12 +350,16 @@ func _write_joint(out: GNChannelData, prefix: String, joint: Dictionary) -> void
 	out.set_single_value("%s:rz" % prefix, rad_to_deg(euler.z))
 
 
-func _ensure_sensor() -> void:
-	if _sensor != null:
+func _ensure_sensor(backend: String) -> void:
+	# Each backend is a separate class — recreate if backend changed.
+	if _sensor != null and backend == _last_backend:
 		return
-	_sensor = ClassDB.instantiate(&"GNDepthSensor")
+	if _sensor != null:
+		_sensor.close_device()
+		_sensor = null
+	_sensor = GNDepthSensorHelper.create_sensor(backend)
 	if _sensor == null:
-		GNLogger.error("DepthSensorIMG", "'%s': failed to instantiate GNDepthSensor" % id)
+		GNLogger.error("DepthSensorIMG", "'%s': failed to instantiate sensor for '%s'" % [id, backend])
 
 
 func _matches_filter(name: String, pattern: String) -> bool:

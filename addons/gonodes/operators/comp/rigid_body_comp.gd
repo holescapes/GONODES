@@ -280,5 +280,3 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	var mode: int = get_param_value("mode")
 	var mode_name: String = mode_names[mode] if mode >= 0 and mode < 3 else "Unknown"
 	viewer.set_info("RigidBody (%s)\nMass: %.2f" % [mode_name, get_param_value("mass")], "RigidBodyCOMP")
-
-

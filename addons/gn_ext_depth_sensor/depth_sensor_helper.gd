@@ -1,10 +1,19 @@
 class_name GNDepthSensorHelper
 ## Shared utilities for all depth sensor operators.
 ##
-## Caches the compiled backend list and discovered device list so multiple
-## operators avoid repeated GNDepthSensor instantiation and hardware probing.
-## Call rescan() to force a fresh device enumeration (e.g. after plugging
-## in a new sensor).
+## Each sensor backend is a separate GDExtension DLL registering its own class:
+##   GNDepthAzureKinect, GNDepthRealSense, GNDepthUltraleap.
+## All three expose an identical API.  This helper discovers which backends
+## loaded, caches device scans, and creates the correct class by backend name.
+## Call rescan() to force a fresh device enumeration.
+
+# ── Backend → ClassDB class mapping ─────────────────────────────────────────
+
+const BACKEND_CLASSES := {
+	"azure_kinect": &"GNDepthAzureKinect",
+	"realsense":    &"GNDepthRealSense",
+	"ultraleap":    &"GNDepthUltraleap",
+}
 
 # ── Cached state (shared across all operators) ───────────────────────────────
 
@@ -15,43 +24,50 @@ static var _devices: Array = []  # Array[Dictionary] — {serial, name, backend}
 static var _devices_scanned: bool = false
 
 
-# ── Backend discovery (fast — no I/O, compile-time list) ─────────────────────
+# ── Backend discovery (fast — ClassDB check, no I/O) ─────────────────────────
 
-## Returns true if the GNDepthSensor native class is loaded.
+## Returns true if at least one depth sensor backend DLL is loaded.
 static func is_available() -> bool:
-	return ClassDB.class_exists(&"GNDepthSensor")
+	for cls: StringName in BACKEND_CLASSES.values():
+		if ClassDB.class_exists(cls):
+			return true
+	return false
 
 
-## Returns the list of compiled sensor backends (e.g. ["azure_kinect", "realsense"]).
-## Queries the C++ layer once and caches the result.  If the GDExtension is
-## not loaded, returns an empty array.
+## Returns the list of loaded sensor backends (e.g. ["azure_kinect", "ultraleap"]).
 static func get_backends() -> PackedStringArray:
 	if _backends_queried:
 		return _backends
 	_backends_queried = true
-	if not is_available():
-		return _backends
-	var sensor: RefCounted = ClassDB.instantiate(&"GNDepthSensor")
-	if sensor != null:
-		_backends = sensor.get_available_backends()
+	for backend_name: String in BACKEND_CLASSES:
+		if ClassDB.class_exists(BACKEND_CLASSES[backend_name]):
+			_backends.append(backend_name)
 	return _backends
+
+
+## Instantiate a sensor object for the given backend name.
+## Returns null if that backend's DLL is not loaded.
+static func create_sensor(backend: String) -> RefCounted:
+	var cls: StringName = BACKEND_CLASSES.get(backend, &"")
+	if cls.is_empty() or not ClassDB.class_exists(cls):
+		return null
+	return ClassDB.instantiate(cls)
 
 
 # ── Device discovery (cached — scans hardware once on first use) ─────────────
 
-## Scans all compiled backends for physically connected sensors.
+## Scans all loaded backends for physically connected sensors.
 ## Results are cached — call rescan() to refresh.
 static func _scan_devices() -> void:
 	_devices_scanned = true
 	_devices.clear()
-	if not is_available():
-		return
-	var sensor: RefCounted = ClassDB.instantiate(&"GNDepthSensor")
-	if sensor == null:
-		return
-	var raw: Array = sensor.enumerate_devices()
-	for dev in raw:
-		_devices.append(dev)
+	for backend_name: String in get_backends():
+		var sensor := create_sensor(backend_name)
+		if sensor == null:
+			continue
+		var raw: Array = sensor.enumerate_devices()
+		for dev: Dictionary in raw:
+			_devices.append(dev)
 
 
 ## Returns PackedStringArray for a "Device" enum parameter.

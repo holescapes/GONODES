@@ -6,9 +6,8 @@ extends GNDatBase
 ## Output columns: name, serial, backend, depth, color, ir, skeleton,
 ## point_cloud, player_index, floor_plane, hand_track.
 ##
-## Requires the gn_ext_depth_sensor GDExtension (GNDepthSensor class).
-
-var _sensor: RefCounted = null
+## Requires at least one gn_ext_depth_sensor backend DLL (GNDepthAzureKinect,
+## GNDepthRealSense, or GNDepthUltraleap).
 
 # Capability flag constants (must match C++ enum)
 const CAP_DEPTH := 1
@@ -53,12 +52,15 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	if not get_param_value("active"):
 		return cached_output
 
-	_ensure_sensor()
-	if _sensor == null:
-		return null
-
-	# Enumerate all devices
-	var devices: Array = _sensor.enumerate_devices()
+	# Enumerate all devices across all loaded backends
+	var all_devices: Array = []
+	for backend_name: String in GNDepthSensorHelper.get_backends():
+		var sensor := GNDepthSensorHelper.create_sensor(backend_name)
+		if sensor == null:
+			continue
+		var devs: Array = sensor.enumerate_devices()
+		for dev: Dictionary in devs:
+			all_devices.append(dev)
 
 	# Build header
 	var columns: PackedStringArray = [
@@ -70,14 +72,15 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var rows: Array[PackedStringArray] = []
 	rows.append(columns)  # Header row
 
-	for dev: Dictionary in devices:
+	for dev: Dictionary in all_devices:
 		var backend_name: String = dev.get("backend", "")
 
 		# Open device briefly to read capabilities
 		var caps: int = 0
-		if _sensor.open_device(dev.get("serial", ""), backend_name):
-			caps = _sensor.get_capabilities()
-			_sensor.close_device()
+		var sensor := GNDepthSensorHelper.create_sensor(backend_name)
+		if sensor != null and sensor.open_device(dev.get("serial", ""), backend_name):
+			caps = sensor.get_capabilities()
+			sensor.close_device()
 
 		var row: PackedStringArray = [
 			dev.get("name", "unknown"),
@@ -100,13 +103,3 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	for r: PackedStringArray in rows:
 		out.table.append(r)
 	return out
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-func _ensure_sensor() -> void:
-	if _sensor != null:
-		return
-	_sensor = ClassDB.instantiate(&"GNDepthSensor")
-	if _sensor == null:
-		GNLogger.error("DepthSensorDAT", "'%s': failed to instantiate GNDepthSensor" % id)

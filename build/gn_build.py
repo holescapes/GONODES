@@ -301,14 +301,6 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
         for define in sdk_cfg.get("defines", []):
             env.Append(CPPDEFINES=[define])
 
-        # On Windows, delay-load optional SDK DLLs so the extension loads
-        # even when only some vendor runtimes are installed.  The DLL is
-        # loaded on first API call — if missing, only that backend fails.
-        if plat == "windows":
-            env.Append(LIBS=["delayimp"])
-            for lib in sdk_cfg.get("libs", []):
-                env.Append(LINKFLAGS=[f"/DELAYLOAD:{lib}.dll"])
-
     # ── Inject Python SDK paths (discovered above) ──
     if python_cfg:
         inc = python_cfg.get("include_dir", "")
@@ -374,9 +366,18 @@ def discover_extensions(addons_dir="addons"):
         if not entry.startswith("gn_ext_") or entry == "gn_ext_native":
             continue
         native_dir = os.path.join(addons_dir, entry, "native")
+        # Top-level build.cfg
         cfg_path = os.path.join(native_dir, "build.cfg")
         if os.path.isfile(cfg_path):
             extensions.append((entry, native_dir, cfg_path))
+            continue
+        # Sub-directory build configs (e.g. native/azure_kinect/build.cfg)
+        if os.path.isdir(native_dir):
+            for sub in sorted(os.listdir(native_dir)):
+                sub_native = os.path.join(native_dir, sub)
+                sub_cfg = os.path.join(sub_native, "build.cfg")
+                if os.path.isfile(sub_cfg):
+                    extensions.append((f"{entry}/{sub}", sub_native, sub_cfg))
 
     return extensions
 
@@ -410,9 +411,23 @@ def build_extension(native_dir=None, plat=None, target=None, arch=None):
 
     print(f"Building {cfg['lib_name']}: platform={plat}  target={target}  arch={arch}")
 
-    godotcpp_root = os.path.abspath(
-        os.path.join(native_dir, "..", "..", "gn_ext_native", "native", "godot-cpp")
-    )
+    # Locate godot-cpp by searching upward from native_dir for the
+    # gn_ext_native sibling directory.  Handles standard layout
+    # (native_dir = addons/ext/native/) and nested builds
+    # (native_dir = addons/ext/native/subdir/).
+    godotcpp_root = None
+    _search = native_dir
+    for _ in range(6):
+        _search = os.path.dirname(_search)
+        _candidate = os.path.join(_search, "gn_ext_native", "native", "godot-cpp")
+        if os.path.isdir(_candidate):
+            godotcpp_root = os.path.abspath(_candidate)
+            break
+    if godotcpp_root is None:
+        # Fallback to the original two-level-up path
+        godotcpp_root = os.path.abspath(
+            os.path.join(native_dir, "..", "..", "gn_ext_native", "native", "godot-cpp")
+        )
 
     result = make_env(plat, target, arch, godotcpp_root, cfg, native_dir)
     if result is None:
