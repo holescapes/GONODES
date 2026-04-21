@@ -145,8 +145,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int err = gonodes_load_patch(gn, patch_file);
-    if (err != GONODES_OK) {
+    gonodes_patch_t p = gonodes_load_patch(gn, patch_file);
+    if (!p) {
         fprintf(stderr, "[GL Host] Load failed: %s\n", gonodes_get_last_error(gn));
         gonodes_destroy(gn);
         glfwDestroyWindow(window);
@@ -154,11 +154,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    gonodes_set_auto_reload(gn, 1, 0.5);
+    gonodes_set_auto_reload(gn, p, 1, 0.5);
 
     /* ── Query Host I/O Manifest ────────────────────────────────────── */
 
-    const char* host_io = gonodes_get_host_io(gn);
+    const char* host_io = gonodes_get_host_io(gn, p);
     if (host_io && host_io[0] != '\0') {
         printf("[GL Host] Host I/O Manifest:\n%s\n", host_io);
     } else {
@@ -184,14 +184,14 @@ int main(int argc, char* argv[]) {
 
         /* Inject an animated value. */
         float wave = (float)(sin(now * 3.0) * 0.5 + 0.5);
-        gonodes_set_input_chop(gn, "host_lfo", "wave", &wave, 1);
+        gonodes_set_input_chop(gn, p, "host_lfo", "wave", &wave, 1);
 
         /* Cook. */
         gonodes_cook_frame(gn, delta);
 
         /* Read output. */
         int tw = 0, th = 0;
-        uint64_t tex = gonodes_get_output_texture(gn, "host_out", &tw, &th);
+        uint64_t tex = gonodes_get_output_texture(gn, p, "host_out", &tw, &th);
 
         /* Render fullscreen quad with output texture. */
         int fw, fh;

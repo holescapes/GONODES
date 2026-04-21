@@ -341,15 +341,20 @@ func _find_player_binary_legacy() -> String:
 ## Writes the config.json file for the Player.
 ## For web builds, uses "patch_url" key so the Player fetches via HTTP.
 ## For desktop/mobile, uses "patch" key for local file path.
-## Always includes "renderer" so the Player selects the right backend.
+## Includes all available options with defaults so users can see and tweak them.
 func _write_config(config_path: String, patch_filename: String) -> Error:
-	var config: Dictionary
-	if target_platform == "web":
-		config = { "patch_url": patch_filename, "renderer": target_renderer }
-	else:
-		config = { "patch": patch_filename, "renderer": target_renderer }
+	var config: Dictionary = {}
 
-	# Bake runtime-relevant preferences so the Player inherits them.
+	# ── Patch path ──────────────────────────────────────────────────────
+	if target_platform == "web":
+		config["patch_url"] = patch_filename
+	else:
+		config["patch"] = patch_filename
+
+	# ── Renderer ────────────────────────────────────────────────────────
+	config["renderer"] = target_renderer
+
+	# ── Runtime settings ────────────────────────────────────────────────
 	config["settings"] = {
 		"log_level": GNSettings.get_value("log_level", 1),
 		"log_to_file": GNSettings.get_value("log_to_file", false),
@@ -363,7 +368,98 @@ func _write_config(config_path: String, patch_filename: String) -> Error:
 		return FileAccess.get_open_error()
 	file.store_string(json_string)
 	file.close()
+
+	# Write companion documentation alongside config.json.
+	var doc_path := config_path.get_base_dir().path_join("CONFIG_OPTIONS.txt")
+	_write_config_docs(doc_path)
+
 	return OK
+
+
+## Writes CONFIG_OPTIONS.txt alongside config.json documenting all fields.
+func _write_config_docs(doc_path: String) -> void:
+	var doc := """GONODES Player — config.json Reference
+=======================================
+
+Place config.json next to the Player executable.
+All fields are optional except "patch" (or "patch_url" for web).
+CLI arguments override config.json values.
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  TOP-LEVEL FIELDS                                                   │
+├──────────────────┬──────────────┬────────────────────────────────────┤
+│ Field            │ Type         │ Description                        │
+├──────────────────┼──────────────┼────────────────────────────────────┤
+│ patch            │ string       │ Path to .gnpatch file (relative    │
+│                  │              │ to exe directory or absolute).     │
+│                  │              │ Required for desktop/mobile.       │
+├──────────────────┼──────────────┼────────────────────────────────────┤
+│ patch_url        │ string       │ URL or relative path for web       │
+│                  │              │ builds. Player fetches via HTTP.   │
+│                  │              │ Required for web, ignored on       │
+│                  │              │ desktop.                           │
+├──────────────────┼──────────────┼────────────────────────────────────┤
+│ renderer         │ string       │ Rendering backend. If the running  │
+│                  │              │ renderer doesn't match, the Player │
+│                  │              │ re-launches with the correct one.  │
+│                  │              │                                    │
+│                  │              │ Values:                            │
+│                  │              │   "forward_plus"      (Vulkan/D3D) │
+│                  │              │   "mobile"            (Vulkan mob) │
+│                  │              │   "gl_compatibility"  (OpenGL/Web) │
+│                  │              │                                    │
+│                  │              │ Default: forward_plus              │
+└──────────────────┴──────────────┴────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  SETTINGS (nested under "settings")                                 │
+├──────────────────────┬─────────┬─────────┬──────────────────────────┤
+│ Field                │ Type    │ Default │ Description              │
+├──────────────────────┼─────────┼─────────┼──────────────────────────┤
+│ log_level            │ int     │ 1       │ 0=Debug 1=Info 2=Warn    │
+│                      │         │         │ 3=Error                  │
+├──────────────────────┼─────────┼─────────┼──────────────────────────┤
+│ log_to_file          │ bool    │ false   │ Write log to             │
+│                      │         │         │ gonodes.log next to exe  │
+├──────────────────────┼─────────┼─────────┼──────────────────────────┤
+│ parallel_cook_enabled│ bool    │ false   │ Cook independent nodes   │
+│                      │         │         │ on worker threads.       │
+│                      │         │         │ Experimental.            │
+├──────────────────────┼─────────┼─────────┼──────────────────────────┤
+│ max_cooks_per_frame  │ int     │ 0       │ Throttle node cooks per  │
+│                      │         │         │ frame. 0 = unlimited.    │
+└──────────────────────┴─────────┴─────────┴──────────────────────────┘
+
+CLI OVERRIDES (take priority over config.json):
+
+  --patch <path>              Override patch path
+  --rendering-method <name>   Override renderer (forward_plus|mobile|gl_compatibility)
+  --log-level <0-3>           Override log level
+  --log-file [path]           Enable file logging (default: gonodes.log)
+  --parallel-cook             Enable parallel cooking
+  --max-cooks <N>             Override max cooks per frame
+
+EXAMPLE config.json:
+
+{
+    "patch": "MyShow.gnpatch",
+    "renderer": "forward_plus",
+    "settings": {
+        "log_level": 1,
+        "log_to_file": false,
+        "parallel_cook_enabled": false,
+        "max_cooks_per_frame": 0
+    }
+}
+
+NOTE: VSync and window settings are controlled per-WindowOUT in the
+patch, not in config.json. A single patch can have multiple WindowOUTs
+with independent VSync settings.
+"""
+	var file := FileAccess.open(doc_path, FileAccess.WRITE)
+	if file != null:
+		file.store_string(doc)
+		file.close()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

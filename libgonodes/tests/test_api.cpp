@@ -106,6 +106,41 @@ TEST(version_macros_are_consistent) {
     PASS();
 }
 
+TEST(version_matches_cmake) {
+    /* CMake passes EXPECTED_VERSION_{MAJOR,MINOR,PATCH} from versions.env.
+     * This test verifies the header macros match the single source of truth. */
+#ifdef EXPECTED_VERSION_MAJOR
+    ASSERT_EQ(GONODES_API_VERSION_MAJOR, EXPECTED_VERSION_MAJOR);
+    ASSERT_EQ(GONODES_API_VERSION_MINOR, EXPECTED_VERSION_MINOR);
+    ASSERT_EQ(GONODES_API_VERSION_PATCH, EXPECTED_VERSION_PATCH);
+#endif
+    PASS();
+}
+
+TEST(version_runtime_matches_cmake) {
+    /* Verify gonodes_get_version() returns values consistent with versions.env. */
+    int major = -1, minor = -1, patch = -1;
+    gonodes_get_version(&major, &minor, &patch);
+#ifdef EXPECTED_VERSION_MAJOR
+    ASSERT_EQ(major, EXPECTED_VERSION_MAJOR);
+    ASSERT_EQ(minor, EXPECTED_VERSION_MINOR);
+    ASSERT_EQ(patch, EXPECTED_VERSION_PATCH);
+#endif
+    PASS();
+}
+
+TEST(get_patch_count_null_handle) {
+    int count = gonodes_get_patch_count(nullptr);
+    ASSERT_EQ(count, 0);
+    PASS();
+}
+
+TEST(get_patch_path_null_handle) {
+    const char* path = gonodes_get_patch_path(nullptr, nullptr);
+    ASSERT_NULL(path);
+    PASS();
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /*  NULL handle safety — every function should return a clean error           */
@@ -123,32 +158,32 @@ TEST(destroy_null_does_not_crash) {
 }
 
 TEST(load_patch_null_handle) {
-    int err = gonodes_load_patch(nullptr, "test.gnpatch");
-    ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
+    gonodes_patch_t p = gonodes_load_patch(nullptr, "test.gnpatch");
+    ASSERT_NULL(p);
     PASS();
 }
 
 TEST(load_patch_null_path) {
     /* We can't create a real instance without LibGodot, so pass NULL handle.
      * The NULL handle check comes first, which is what we verify. */
-    int err = gonodes_load_patch(nullptr, nullptr);
-    ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
+    gonodes_patch_t p = gonodes_load_patch(nullptr, nullptr);
+    ASSERT_NULL(p);
     PASS();
 }
 
 TEST(unload_patch_null_handle) {
-    gonodes_unload_patch(nullptr);  /* Should be a no-op. */
+    gonodes_unload_patch(nullptr, nullptr);  /* Should be a no-op. */
     PASS();
 }
 
 TEST(reload_patch_null_handle) {
-    int err = gonodes_reload_patch(nullptr);
+    int err = gonodes_reload_patch(nullptr, nullptr);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_auto_reload_null_handle) {
-    gonodes_set_auto_reload(nullptr, 1, 0.5);  /* Should be a no-op. */
+    gonodes_set_auto_reload(nullptr, nullptr, 1, 0.5);  /* Should be a no-op. */
     PASS();
 }
 
@@ -163,54 +198,54 @@ TEST(cook_frame_null_handle) {
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 TEST(set_input_texture_null_handle) {
-    int err = gonodes_set_input_texture(nullptr, "node", 123, 100, 100, 0);
+    int err = gonodes_set_input_texture(nullptr, nullptr, "node", 123, 100, 100, 0);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_input_chop_null_handle) {
     float samples[] = {1.0f};
-    int err = gonodes_set_input_chop(nullptr, "node", "ch", samples, 1);
+    int err = gonodes_set_input_chop(nullptr, nullptr, "node", "ch", samples, 1);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_input_table_null_handle) {
-    int err = gonodes_set_input_table(nullptr, "node", "[]");
+    int err = gonodes_set_input_table(nullptr, nullptr, "node", "[]");
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_parameter_null_handle) {
-    int err = gonodes_set_parameter(nullptr, "node", "param", "1.0");
+    int err = gonodes_set_parameter(nullptr, nullptr, "node", "param", "1.0");
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_input_pixels_null_handle) {
     uint8_t pixels[4] = {255, 0, 0, 255};
-    int err = gonodes_set_input_pixels(nullptr, "node", pixels, 1, 1, 0, 0);
+    int err = gonodes_set_input_pixels(nullptr, nullptr, "node", pixels, 1, 1, 0, 0);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_input_geometry_null_handle) {
     float pos[] = {0, 0, 0};
-    int err = gonodes_set_input_geometry(nullptr, "node", pos, nullptr, nullptr, 1, nullptr, 0);
+    int err = gonodes_set_input_geometry(nullptr, nullptr, "node", pos, nullptr, nullptr, 1, nullptr, 0);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_input_volume_null_handle) {
     float voxels[] = {1.0f};
-    int err = gonodes_set_input_volume(nullptr, "node", voxels, 1, 1, 1, 1, "density");
+    int err = gonodes_set_input_volume(nullptr, nullptr, "node", voxels, 1, 1, 1, 1, "density");
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_input_particles_null_handle) {
     float pos[] = {0, 0, 0};
-    int err = gonodes_set_input_particles(nullptr, "node", pos, nullptr, nullptr, nullptr, 1);
+    int err = gonodes_set_input_particles(nullptr, nullptr, "node", pos, nullptr, nullptr, nullptr, 1);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
@@ -222,44 +257,44 @@ TEST(set_input_particles_null_handle) {
 
 TEST(get_output_texture_null_handle) {
     int w, h;
-    uint64_t tex = gonodes_get_output_texture(nullptr, "node", &w, &h);
+    uint64_t tex = gonodes_get_output_texture(nullptr, nullptr, "node", &w, &h);
     ASSERT_EQ(tex, (uint64_t)0);
     PASS();
 }
 
 TEST(get_output_chop_null_handle) {
     float buf[16];
-    int n = gonodes_get_output_chop(nullptr, "node", "ch", buf, 16);
+    int n = gonodes_get_output_chop(nullptr, nullptr, "node", "ch", buf, 16);
     ASSERT_TRUE(n < 0);
     PASS();
 }
 
 TEST(get_output_table_null_handle) {
-    const char* json = gonodes_get_output_table(nullptr, "node");
+    const char* json = gonodes_get_output_table(nullptr, nullptr, "node");
     ASSERT_NULL(json);
     PASS();
 }
 
 TEST(get_parameter_null_handle) {
-    const char* val = gonodes_get_parameter(nullptr, "node", "param");
+    const char* val = gonodes_get_parameter(nullptr, nullptr, "node", "param");
     ASSERT_NULL(val);
     PASS();
 }
 
 TEST(get_output_geometry_null_handle) {
-    const gonodes_geometry_data_t* geo = gonodes_get_output_geometry(nullptr, "node");
+    const gonodes_geometry_data_t* geo = gonodes_get_output_geometry(nullptr, nullptr, "node");
     ASSERT_NULL(geo);
     PASS();
 }
 
 TEST(get_output_volume_null_handle) {
-    const gonodes_volume_data_t* vol = gonodes_get_output_volume(nullptr, "node");
+    const gonodes_volume_data_t* vol = gonodes_get_output_volume(nullptr, nullptr, "node");
     ASSERT_NULL(vol);
     PASS();
 }
 
 TEST(get_output_particles_null_handle) {
-    const gonodes_particle_data_t* pop = gonodes_get_output_particles(nullptr, "node");
+    const gonodes_particle_data_t* pop = gonodes_get_output_particles(nullptr, nullptr, "node");
     ASSERT_NULL(pop);
     PASS();
 }
@@ -267,14 +302,14 @@ TEST(get_output_particles_null_handle) {
 TEST(read_output_pixels_null_handle) {
     uint8_t buf[4];
     int w, h;
-    int err = gonodes_read_output_pixels(nullptr, "node", buf, 4, 0, &w, &h);
+    int err = gonodes_read_output_pixels(nullptr, nullptr, "node", buf, 4, 0, &w, &h);
     ASSERT_TRUE(err < 0);
     PASS();
 }
 
 TEST(get_texture_info_null_handle) {
     gonodes_texture_info_t info;
-    int err = gonodes_get_texture_info(nullptr, "node", &info);
+    int err = gonodes_get_texture_info(nullptr, nullptr, "node", &info);
     ASSERT_TRUE(err < 0);
     PASS();
 }
@@ -285,46 +320,48 @@ TEST(get_texture_info_null_handle) {
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 TEST(list_nodes_null_handle) {
-    const char* json = gonodes_list_nodes(nullptr);
+    const char* json = gonodes_list_nodes(nullptr, nullptr);
     ASSERT_NULL(json);
     PASS();
 }
 
 TEST(get_node_info_null_handle) {
-    const char* json = gonodes_get_node_info(nullptr, "node");
+    const char* json = gonodes_get_node_info(nullptr, nullptr, "node");
     ASSERT_NULL(json);
     PASS();
 }
 
 TEST(list_parameters_null_handle) {
-    const char* json = gonodes_list_parameters(nullptr, "node");
+    const char* json = gonodes_list_parameters(nullptr, nullptr, "node");
     ASSERT_NULL(json);
     PASS();
 }
 
 TEST(list_connections_null_handle) {
-    const char* json = gonodes_list_connections(nullptr);
+    const char* json = gonodes_list_connections(nullptr, nullptr);
     ASSERT_NULL(json);
     PASS();
 }
 
 TEST(get_host_io_null_handle) {
-    const char* json = gonodes_get_host_io(nullptr);
-    ASSERT_NULL(json);
+    const char* json = gonodes_get_host_io(nullptr, nullptr);
+    /* v2 returns "{}" for invalid handle. */
+    ASSERT_NOT_NULL(json);
     PASS();
 }
 
 TEST(get_stats_null_handle) {
     double cook_ms;
     int node_count, frame_number;
-    gonodes_get_stats(nullptr, &cook_ms, &node_count, &frame_number);
+    gonodes_get_stats(nullptr, nullptr, &cook_ms, &node_count, &frame_number);
     /* Should be a no-op — just shouldn't crash. */
     PASS();
 }
 
 TEST(get_last_error_null_handle) {
     const char* err = gonodes_get_last_error(nullptr);
-    ASSERT_NULL(err);
+    /* v2 returns "Invalid handle" for NULL inst. */
+    ASSERT_NOT_NULL(err);
     PASS();
 }
 
@@ -354,25 +391,25 @@ TEST(set_on_event_null_handle) {
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 TEST(set_transport_null_handle) {
-    int err = gonodes_set_transport(nullptr, GONODES_TRANSPORT_PLAY);
+    int err = gonodes_set_transport(nullptr, nullptr, GONODES_TRANSPORT_PLAY);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_transport_speed_null_handle) {
-    int err = gonodes_set_transport_speed(nullptr, 1.0);
+    int err = gonodes_set_transport_speed(nullptr, nullptr, 1.0);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(transport_seek_null_handle) {
-    int err = gonodes_transport_seek(nullptr, 5.0);
+    int err = gonodes_transport_seek(nullptr, nullptr, 5.0);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(get_transport_time_null_handle) {
-    double t = gonodes_get_transport_time(nullptr);
+    double t = gonodes_get_transport_time(nullptr, nullptr);
     ASSERT_EQ(t, 0.0);
     PASS();
 }
@@ -383,20 +420,20 @@ TEST(get_transport_time_null_handle) {
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 TEST(fire_event_null_handle) {
-    int err = gonodes_fire_event(nullptr, "beat", nullptr);
+    int err = gonodes_fire_event(nullptr, nullptr, "beat", nullptr);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(send_midi_event_null_handle) {
     gonodes_midi_event_t evt = {0x90, 60, 127, 0, 0};
-    int err = gonodes_send_midi_event(nullptr, &evt);
+    int err = gonodes_send_midi_event(nullptr, nullptr, &evt);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(send_osc_message_null_handle) {
-    int err = gonodes_send_osc_message(nullptr, "/test", "[1.0]");
+    int err = gonodes_send_osc_message(nullptr, nullptr, "/test", "[1.0]");
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
@@ -407,62 +444,62 @@ TEST(send_osc_message_null_handle) {
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 TEST(create_node_null_handle) {
-    int err = gonodes_create_node(nullptr, "node1", "NoiseTOP");
+    int err = gonodes_create_node(nullptr, nullptr, "node1", "NoiseTOP");
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(delete_node_null_handle) {
-    int err = gonodes_delete_node(nullptr, "node1");
+    int err = gonodes_delete_node(nullptr, nullptr, "node1");
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(connect_null_handle) {
-    int err = gonodes_connect(nullptr, "a", 0, "b", 0);
+    int err = gonodes_connect(nullptr, nullptr, "a", 0, "b", 0);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(disconnect_null_handle) {
-    int err = gonodes_disconnect(nullptr, "a", 0, "b", 0);
+    int err = gonodes_disconnect(nullptr, nullptr, "a", 0, "b", 0);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_output_resolution_null_handle) {
-    int err = gonodes_set_output_resolution(nullptr, "node", 1920, 1080);
+    int err = gonodes_set_output_resolution(nullptr, nullptr, "node", 1920, 1080);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
-/*  v1.2.0 zero-copy — NULL handle safety                                    */
+/*  Zero-copy — NULL handle safety                                           */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 TEST(set_input_volume_gpu_null_handle) {
-    int err = gonodes_set_input_volume_gpu(nullptr, "node", 123, 64, 64, 64, 1, "density");
+    int err = gonodes_set_input_volume_gpu(nullptr, nullptr, "node", 123, 64, 64, 64, 1, "density");
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(get_output_volume_gpu_null_handle) {
     gonodes_volume_gpu_handle_t info;
-    int err = gonodes_get_output_volume_gpu(nullptr, "node", &info);
+    int err = gonodes_get_output_volume_gpu(nullptr, nullptr, "node", &info);
     ASSERT_TRUE(err < 0);
     PASS();
 }
 
 TEST(set_input_particles_gpu_null_handle) {
-    int err = gonodes_set_input_particles_gpu(nullptr, "node", 123, 100, 64, 6400);
+    int err = gonodes_set_input_particles_gpu(nullptr, nullptr, "node", 123, 100, 64, 6400);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(get_output_particles_gpu_null_handle) {
     gonodes_particle_gpu_handle_t info;
-    int err = gonodes_get_output_particles_gpu(nullptr, "node", &info);
+    int err = gonodes_get_output_particles_gpu(nullptr, nullptr, "node", &info);
     ASSERT_TRUE(err < 0);
     PASS();
 }
@@ -472,27 +509,27 @@ TEST(set_input_chop_direct_null_handle) {
     float data[] = {1.0f};
     const float* ptrs[] = {data};
     int counts[] = {1};
-    int err = gonodes_set_input_chop_direct(nullptr, "node", names, ptrs, counts, 1);
+    int err = gonodes_set_input_chop_direct(nullptr, nullptr, "node", names, ptrs, counts, 1);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(get_output_chop_direct_null_handle) {
     gonodes_chop_data_t out;
-    int err = gonodes_get_output_chop_direct(nullptr, "node", &out);
+    int err = gonodes_get_output_chop_direct(nullptr, nullptr, "node", &out);
     ASSERT_TRUE(err < 0);
     PASS();
 }
 
 TEST(set_input_table_direct_null_handle) {
-    int err = gonodes_set_input_table_direct(nullptr, "node", "[]", 2);
+    int err = gonodes_set_input_table_direct(nullptr, nullptr, "node", "[]", 2);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
 
 TEST(set_input_geometry_direct_null_handle) {
     float pos[] = {0, 0, 0};
-    int err = gonodes_set_input_geometry_direct(nullptr, "node", pos, nullptr, nullptr, nullptr, 1, nullptr, 0);
+    int err = gonodes_set_input_geometry_direct(nullptr, nullptr, "node", pos, nullptr, nullptr, nullptr, 1, nullptr, 0);
     ASSERT_EQ(err, GONODES_ERR_INVALID_HANDLE);
     PASS();
 }
@@ -604,7 +641,7 @@ TEST(error_codes_are_distinct) {
     ASSERT_NE(GONODES_ERR_FILE_NOT_FOUND, GONODES_ERR_PARSE_ERROR);
     ASSERT_NE(GONODES_ERR_GPU_INIT_FAILED, GONODES_ERR_NODE_NOT_FOUND);
     ASSERT_NE(GONODES_ERR_PARAM_NOT_FOUND, GONODES_ERR_BUFFER_TOO_SMALL);
-    ASSERT_NE(GONODES_ERR_NOT_LOADED, GONODES_ERR_MAX_INSTANCES);
+    ASSERT_NE(GONODES_ERR_NOT_LOADED, GONODES_ERR_MAX_PATCHES);
     ASSERT_NE(GONODES_ERR_UNSUPPORTED, GONODES_ERR_TYPE_MISMATCH);
     ASSERT_NE(GONODES_ERR_INTERNAL, GONODES_OK);
     PASS();
@@ -624,6 +661,7 @@ TEST(graphics_api_enum_values) {
     ASSERT_EQ(GONODES_GFX_VULKAN, 1);
     ASSERT_EQ(GONODES_GFX_METAL, 2);
     ASSERT_EQ(GONODES_GFX_OPENGL, 3);
+    ASSERT_EQ(GONODES_GFX_MOBILE, 4);
     PASS();
 }
 
@@ -657,6 +695,8 @@ int main() {
     run_version_returns_correct_values();
     run_version_accepts_null_pointers();
     run_version_macros_are_consistent();
+    run_version_matches_cmake();
+    run_version_runtime_matches_cmake();
 
     /* NULL handle safety */
     printf("\n[null_handle_lifecycle]\n");
@@ -667,6 +707,8 @@ int main() {
     run_unload_patch_null_handle();
     run_reload_patch_null_handle();
     run_set_auto_reload_null_handle();
+    run_get_patch_count_null_handle();
+    run_get_patch_path_null_handle();
     run_cook_frame_null_handle();
 
     printf("\n[null_handle_input]\n");

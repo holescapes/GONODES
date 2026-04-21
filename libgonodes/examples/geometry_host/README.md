@@ -1,6 +1,6 @@
 # Geometry Host Example
 
-Demonstrates the v1.1.0 geometry/SOP exchange API (Gap 4 from the VDMX/VUO audit).
+Demonstrates the v2.0 geometry/SOP exchange API (Gap 4 from the VDMX/VUO audit).
 
 ## What It Shows
 

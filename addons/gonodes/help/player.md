@@ -28,8 +28,14 @@ GONODESPlayer.exe
 
 ```json
 {
-  "patch": "MyShow.gnpatch",
-  "renderer": "forward_plus"
+	"patch": "MyShow.gnpatch",
+	"renderer": "forward_plus",
+	"settings": {
+		"log_level": 1,
+		"log_to_file": false,
+		"parallel_cook_enabled": false,
+		"max_cooks_per_frame": 0
+	}
 }
 ```
 
@@ -37,20 +43,30 @@ GONODESPlayer.exe
 
 ```json
 {
-  "patch_url": "MyShow.gnpatch",
-  "renderer": "gl_compatibility"
+	"patch_url": "MyShow.gnpatch",
+	"renderer": "gl_compatibility",
+	"settings": {
+		"log_level": 1,
+		"log_to_file": false,
+		"parallel_cook_enabled": false,
+		"max_cooks_per_frame": 0
+	}
 }
 ```
 
-| Field      | Type   | Default | Description                                  |
-|------------|--------|---------|----------------------------------------------|
-| `patch`    | string | `""`    | Path to the `.gnpatch` relative to exe       |
-| `patch_url`| string | `""`    | URL or relative path for web (HTTP fetch)    |
-| `renderer` | string | `""`    | Renderer chosen at export time (informational)|
+### All Fields
 
-The `renderer` value records which rendering backend was selected in the Export Patch dialog. The rendering method is baked into the Player binary at build time; this field serves as documentation of the intended configuration.
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `patch` | string | `""` | Path to `.gnpatch` file, relative to exe directory or absolute |
+| `patch_url` | string | `""` | URL or relative path for web builds (HTTP fetch) |
+| `renderer` | string | `""` | Rendering backend --- see Rendering Backend section below |
+| `settings.log_level` | int | `1` | Minimum log severity: 0=Debug, 1=Info, 2=Warn, 3=Error |
+| `settings.log_to_file` | bool | `false` | Write all log output to `gonodes.log` next to the exe |
+| `settings.parallel_cook_enabled` | bool | `false` | Cook independent nodes on worker threads (experimental) |
+| `settings.max_cooks_per_frame` | int | `0` | Max nodes to cook per frame. 0 = unlimited |
 
-VSync and display parameters are controlled by each WindowOUT in the patch, not by config.json.
+A companion `CONFIG_OPTIONS.txt` file is generated alongside `config.json` during export with detailed documentation of all fields, values, and CLI overrides.
 
 
 ## Command-Line Arguments
@@ -78,23 +94,40 @@ The debug overlay is hidden by default. Press F1 to show it.
 
 ## Rendering Backend
 
-The rendering backend is selected at export time via the Export Patch dialog's **Renderer** dropdown. It is baked into the Player binary's `.pck`.
+The rendering backend is controlled by the `renderer` field in `config.json`. On startup, the Player checks whether the currently running renderer matches the requested one. If they differ, the Player **automatically re-launches itself** with the correct `--rendering-method` flag. This happens transparently --- you just see a brief flash as it restarts.
 
-| Renderer        | Technology       | Best for                                           |
-|-----------------|------------------|----------------------------------------------------|
-| Forward+        | Vulkan / D3D12   | Desktop, Apple Silicon, Windows ARM                |
-| Mobile          | Vulkan (mobile)  | Android (modern), iOS, Apple Silicon               |
-| Compatibility   | OpenGL ES 3.0 / WebGL2 | Web, older Android, Raspberry Pi, widest support |
+| Renderer Value      | Technology              | Best for                                           |
+|---------------------|-------------------------|----------------------------------------------------|
+| `forward_plus`      | Vulkan / D3D12          | Desktop, Apple Silicon, Windows ARM                |
+| `mobile`            | Vulkan (mobile profile) | Android (modern), iOS, Apple Silicon               |
+| `gl_compatibility`  | OpenGL ES 3.0 / WebGL2  | Web, older Android, Raspberry Pi, widest support   |
 
-If Forward+ is selected but the GPU doesn't support Vulkan, Godot automatically falls back to Compatibility (OpenGL 3.3) --- this is handled by `fallback_to_opengl3 = true` baked into the `.pck`.
+### Changing the Renderer
 
-| Machine                | What happens                       |
-|------------------------|------------------------------------|
-| Modern GPU (Vulkan)    | Forward+ is used automatically     |
-| Older GPU (no Vulkan)  | Compatibility (OpenGL 3.3) is used |
-| Laptop with integrated | Compatibility is used automatically|
+Edit `config.json` and set the `renderer` field to one of the three values above:
 
-Power-user override via command line:
+```json
+{
+	"patch": "MyShow.gnpatch",
+	"renderer": "mobile"
+}
+```
+
+The Player will restart with the new renderer on its next launch.
+
+### Node Compatibility
+
+Not all operators work on every renderer. For example, GPU compute operators (POP, VOL) require Forward+ or Mobile, and `CompositorEffectTOP` is Forward+ only. When a node's required renderer doesn't match the active one, the cook engine **automatically skips it** with a warning. Downstream nodes receive empty input --- the patch keeps running, just with those nodes disabled.
+
+Use the **Compat** panel in the GONODES editor to check which nodes in your patch are compatible with your target renderer before exporting.
+
+### Automatic Fallback
+
+If Forward+ is selected but the GPU doesn't support Vulkan, Godot automatically falls back to Compatibility (OpenGL 3.3). This is handled by `fallback_to_opengl3 = true` baked into the `.pck` at export.
+
+### Power-User Override
+
+CLI arguments override `config.json`:
 ```
 GONODESPlayer.exe --rendering-method mobile
 GONODESPlayer.exe --rendering-method gl_compatibility

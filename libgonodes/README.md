@@ -6,6 +6,16 @@ C interface.  Any application that can call C functions — game engines, VJ
 tools, media servers, creative coding frameworks — can embed GONODES as a
 real-time texture/data processing backend.
 
+**v2.5 Direct Bridge Architecture:** A single `gonodes_instance_t` boots ONE
+Godot engine, but can load **multiple patches simultaneously**.  Each patch
+gets its own cook engine, node graph, transport, and I/O registries, while
+sharing the GPU context and rendering pipeline.  All I/O functions take a
+`gonodes_patch_t` handle to address a specific patch.
+
+v2.5 eliminates the per-frame environment-variable IPC layer.  The GNHostBridge
+GDExtension reads the C command queue and writes response slots directly via
+pointer access — single memcpy per data type, zero string formatting overhead.
+
 ## Architecture
 
 ```
@@ -34,11 +44,14 @@ real-time texture/data processing backend.
 │  │                                                 │    │
 │  │  ┌─────────────────────────────────────────┐    │    │
 │  │  │  GNEmbeddedHost (GDScript singleton)    │    │    │
-│  │  │  ├─ GNCookEngine                        │    │    │
-│  │  │  ├─ GNNetwork                           │    │    │
-│  │  │  └─ Bridge Operators                    │    │    │
-│  │  │     ├─ HostIn:  TOP / CHOP / DAT / SOP / VOL / POP  │
-│  │  │     └─ HostOut: TOP / CHOP / DAT / SOP / VOL / POP  │
+│  │  │  ├─ Patch 1:                            │    │    │
+│  │  │  │  ├─ GNCookEngine                     │    │    │
+│  │  │  │  ├─ GNNetwork                        │    │    │
+│  │  │  │  └─ Bridge Operators                 │    │    │
+│  │  │  ├─ Patch 2:                            │    │    │
+│  │  │  │  ├─ GNCookEngine                     │    │    │
+│  │  │  │  └─ ...                              │    │    │
+│  │  │  └─ (up to 64 concurrent patches)       │    │    │
 │  │  └─────────────────────────────────────────┘    │    │
 │  └─────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────┘
@@ -83,13 +96,18 @@ gpu.vulkan_device         = my_vk_device;
 
 // Boot GONODES.
 gonodes_instance_t gn = gonodes_create("path/to/project", &gpu);
-gonodes_load_patch(gn, "path/to/show.gnpatch");
 
-// In your frame loop:
+// Load multiple patches — each gets its own cook engine.
+gonodes_patch_t effects = gonodes_load_patch(gn, "effects.gnpatch");
+gonodes_patch_t overlay = gonodes_load_patch(gn, "overlay.gnpatch");
+
+// In your frame loop — one call cooks ALL loaded patches:
 gonodes_cook_frame(gn, delta_seconds);
-uint64_t tex = gonodes_get_output_texture(gn, "main_out", &w, &h);
-// 'tex' is a VkImage on the shared device — bind it directly.
+uint64_t tex1 = gonodes_get_output_texture(gn, p, effects, "main_out", &w, &h);
+uint64_t tex2 = gonodes_get_output_texture(gn, p, overlay, "title", &w2, &h2);
+// tex1/tex2 are VkImages on the shared device — bind directly.
 
+gonodes_unload_patch(gn, p, overlay);
 gonodes_destroy(gn);
 ```
 
@@ -154,8 +172,8 @@ C API.
 | **Channels (CHOP)** | Bidirectional (`set_input_chop` / `get_output_chop`) | Bidirectional (float arrays) | Limited (single-value ports only) |
 | **Tables (DAT)** | Bidirectional (`set_input_table` / `get_output_table`) | Bidirectional (string tables) | No table/grid equivalent |
 | **Geometry (SOP)** | **Bidirectional** (`set_input_geometry` / `get_output_geometry`) | **Read-only** (`TEInstanceLinkGetObjectValue`) | Bidirectional via `VuoMesh` (compositor protocol only) |
-| **Volumes (VOL)** | **Bidirectional** (`set_input_volume` / `get_output_volume`) | **Not supported** | **Not supported** |
-| **Particles (POP)** | **Bidirectional** (`set_input_particles` / `get_output_particles`) | **Not supported** | **Not supported** |
+| **Volumes (VOL)** | **Bidirectional** — CPU input + GPU zero-copy I/O (CPU output planned) | **Not supported** | **Not supported** |
+| **Particles (POP)** | **Bidirectional** — CPU input + GPU zero-copy I/O (CPU output planned) | **Not supported** | **Not supported** |
 | **MIDI** | Host → engine (`send_midi_event`) | Via parameter mapping only | Native nodes (not injectable) |
 | **OSC** | Host → engine (`send_osc_message`) | Via parameter mapping only | Native nodes (not injectable) |
 | **Events/Triggers** | **Bidirectional** (`fire_event` / `set_on_event`) | Pulse params (host→engine only) | `firePublishedInputPortEvent` (host→engine only) |
@@ -170,14 +188,14 @@ reference the same VkImage / MTLTexture / GLuint.
 
 ```c
 // Write: inject host texture into patch
-gonodes_set_input_texture(gn, "cam_in", my_vk_image, 1920, 1080);
+gonodes_set_input_texture(gn, p, "cam_in", my_vk_image, 1920, 1080);
 
 // Read: get processed texture out
-uint64_t tex = gonodes_get_output_texture(gn, "host_out", &w, &h);
+uint64_t tex = gonodes_get_output_texture(gn, p, "host_out", &w, &h);
 
 // Query format/channels/API:
 gonodes_texture_info_t info;
-gonodes_get_texture_info(gn, "host_out", &info);
+gonodes_get_texture_info(gn, p, "host_out", &info);
 // info.format, info.channels, info.native_handle, info.graphics_api
 ```
 
@@ -186,12 +204,12 @@ camera capture, video decode, recording, streaming.
 
 ```c
 // Write: push raw pixels into patch
-gonodes_set_input_pixels(gn, "cam_in", rgba_data, 1920, 1080,
+gonodes_set_input_pixels(gn, p, "cam_in", rgba_data, 1920, 1080,
                          GONODES_FORMAT_RGBA8, 0);
 
 // Read: pull rendered pixels to CPU
 uint8_t* buf = malloc(w * h * 4);
-gonodes_read_output_pixels(gn, "host_out", buf, w*h*4,
+gonodes_read_output_pixels(gn, p, "host_out", buf, w*h*4,
                            GONODES_FORMAT_RGBA8, &w, &h);
 ```
 
@@ -206,11 +224,11 @@ curves, analysis data.
 ```c
 // Write: 2 channels × 480 samples
 float audio[2][480];
-gonodes_set_input_chop(gn, "audio_in", (float*)audio, 2, 480);
+gonodes_set_input_chop(gn, p, "audio_in", (float*)audio, 2, 480);
 
 // Read: retrieve processed channels
 int channels, samples;
-const float* data = gonodes_get_output_chop(gn, "fft_out", &channels, &samples);
+const float* data = gonodes_get_output_chop(gn, p, "fft_out", &channels, &samples);
 // data[ch * samples + s] for channel ch, sample s
 ```
 
@@ -221,11 +239,11 @@ String-based row × column grids — CSV data, OSC address maps, metadata.
 ```c
 // Write: 3 columns × 2 rows (row-major, NULL-terminated strings)
 const char* cells[] = {"x","y","z", "1.0","2.0","3.0"};
-gonodes_set_input_table(gn, "data_in", cells, 3, 2);
+gonodes_set_input_table(gn, p, "data_in", cells, 3, 2);
 
 // Read: retrieve table
 int cols, rows;
-const char** table = gonodes_get_output_table(gn, "data_out", &cols, &rows);
+const char** table = gonodes_get_output_table(gn, p, "data_out", &cols, &rows);
 // table[row * cols + col]
 ```
 
@@ -242,13 +260,13 @@ float normals[]   = { /* xyz × vertex_count, or NULL */ };
 float uvs[]       = { /* uv  × vertex_count, or NULL */ };
 uint32_t indices[] = { /* triangle indices, or NULL for non-indexed */ };
 
-gonodes_set_input_geometry(gn, "host_geo",
+gonodes_set_input_geometry(gn, p, "host_geo",
     positions, normals, uvs, vertex_count,
     indices, index_count);
 
 // Read: get processed geometry back
 const gonodes_geometry_data_t* geo =
-    gonodes_get_output_geometry(gn, "mesh_out");
+    gonodes_get_output_geometry(gn, p, "mesh_out");
 
 // geo->positions      — float* (xyz interleaved)
 // geo->normals        — float* (xyz interleaved, may be NULL)
@@ -275,15 +293,19 @@ embedding APIs.  GONODES is the only engine offering this.
 // Write: push a 128³ density field into the engine
 float density[128*128*128];
 // ... fill with voxel data ...
-gonodes_set_input_volume(gn, "ct_scan_in", density, 128, 128, 128, 1, "density");
+gonodes_set_input_volume(gn, p, "ct_scan_in", density, 128, 128, 128, 1, "density");
 
-// Read: get processed volume back (e.g. after fluid sim)
-const gonodes_volume_data_t* vol = gonodes_get_output_volume(gn, "fluid_out");
-// vol->voxels   — float* (width * height * depth * channels)
-// vol->width, vol->height, vol->depth
-// vol->channels — 1 for scalar, 4 for RGBA
-// vol->field_name — "density", "velocity", etc.
+// GPU zero-copy path: share a native 3D texture handle
+gonodes_set_input_volume_gpu(gn, p, "ct_scan_in", tex_handle, 128, 128, 128, 1, "density");
+
+// Read: GPU output handle (preferred)
+gonodes_volume_gpu_handle_t vol_gpu;
+gonodes_get_output_volume_gpu(gn, p, "fluid_out", &vol_gpu);
+// vol_gpu.native_handle, vol_gpu.width, vol_gpu.height, vol_gpu.depth
 ```
+
+> **Note:** `gonodes_get_output_volume()` (CPU readback) is not yet
+> implemented — use `gonodes_get_output_volume_gpu()` instead.
 
 **Use cases:** Medical imaging hosts push CT/MRI volumes for processing,
 simulation hosts push fluid fields for visualization, game engines read
@@ -301,17 +323,20 @@ float positions[10000 * 3];  // xyz per particle
 float velocities[10000 * 3]; // xyz per particle
 float colors[10000 * 4];     // rgba per particle
 // ... fill with particle data ...
-gonodes_set_input_particles(gn, "physics_in",
+gonodes_set_input_particles(gn, p, "physics_in",
     positions, velocities, colors, NULL, 10000);
 
-// Read: get processed particles back
-const gonodes_particle_data_t* pop = gonodes_get_output_particles(gn, "sim_out");
-// pop->positions    — float* (xyz interleaved)
-// pop->velocities   — float* (xyz interleaved, or NULL)
-// pop->colors       — float* (rgba interleaved, or NULL)
-// pop->ages         — float* (per-particle, or NULL)
-// pop->particle_count
+// GPU zero-copy path: share a native GPU buffer handle
+gonodes_set_input_particles_gpu(gn, p, "physics_in", buffer_handle, 10000, stride, size);
+
+// Read: GPU output handle (preferred)
+gonodes_particle_gpu_handle_t pop_gpu;
+gonodes_get_output_particles_gpu(gn, p, "sim_out", &pop_gpu);
+// pop_gpu.native_handle, pop_gpu.particle_count
 ```
+
+> **Note:** `gonodes_get_output_particles()` (CPU readback) is not yet
+> implemented — use `gonodes_get_output_particles_gpu()` instead.
 
 **Use cases:** Game engines feed physics particle positions into GONODES
 for visual processing (turbulence, color aging), then read back results.
@@ -330,7 +355,7 @@ gonodes_midi_event_t ev = {
     .channel = 0,
     .port    = 0
 };
-gonodes_send_midi_event(gn, &ev);
+gonodes_send_midi_event(gn, p, &ev);
 ```
 
 ### 8. OSC Messages
@@ -338,8 +363,8 @@ gonodes_send_midi_event(gn, &ev);
 Direct injection into `OscInCHOP` / `OscInDAT` operators.
 
 ```c
-gonodes_send_osc_message(gn, "/control/fader1", "[0.75]");
-gonodes_send_osc_message(gn, "/cue/fire", "[\"scene_2\", 1.0]");
+gonodes_send_osc_message(gn, p, "/control/fader1", "[0.75]");
+gonodes_send_osc_message(gn, p, "/cue/fire", "[\"scene_2\", 1.0]");
 ```
 
 ### 9. Events/Triggers
@@ -348,7 +373,7 @@ Bidirectional one-shot events — beat triggers, scene changes, cues.
 
 ```c
 // Host → engine:
-gonodes_fire_event(gn, "beat", "{\"bpm\": 128}");
+gonodes_fire_event(gn, p, "beat", "{\"bpm\": 128}");
 
 // Engine → host:
 void my_handler(const char* name, const char* payload, void* ud) {
@@ -363,37 +388,37 @@ Every parameter on every node can be controlled from the host:
 
 ```c
 // Float
-gonodes_set_parameter(gn, "noise1", "scale", "8.0");
+gonodes_set_parameter(gn, p, "noise1", "scale", "8.0");
 
 // Integer
-gonodes_set_parameter(gn, "noise1", "seed", "42");
+gonodes_set_parameter(gn, p, "noise1", "seed", "42");
 
 // Boolean
-gonodes_set_parameter(gn, "noise1", "monochrome", "false");
+gonodes_set_parameter(gn, p, "noise1", "monochrome", "false");
 
 // String
-gonodes_set_parameter(gn, "text1", "text", "\"Hello\"");
+gonodes_set_parameter(gn, p, "text1", "text", "\"Hello\"");
 
 // Color (RGBA array)
-gonodes_set_parameter(gn, "const1", "color", "[1.0, 0.3, 0.0, 1.0]");
+gonodes_set_parameter(gn, p, "const1", "color", "[1.0, 0.3, 0.0, 1.0]");
 
 // Vector2i (requires _type wrapper)
-gonodes_set_parameter(gn, "noise1", "resolution",
+gonodes_set_parameter(gn, p, "noise1", "resolution",
     "{\"_type\": \"Vector2i\", \"x\": 1920, \"y\": 1080}");
 ```
 
 Read parameters back:
 ```c
-const char* val = gonodes_get_parameter(gn, "noise1", "scale");
+const char* val = gonodes_get_parameter(gn, p, "noise1", "scale");
 // val = "8.0"
 ```
 
 ## Hot Reload
 
-Enable file-watching for live iteration:
+Enable file-watching for live iteration (per-patch):
 
 ```c
-gonodes_set_auto_reload(gn, 1, 0.5);  // Poll every 0.5 seconds
+gonodes_set_auto_reload(gn, p, 1, 0.5);  // Poll every 0.5 seconds
 ```
 
 GONODES preserves CHOP channel values, timer positions, and feedback
@@ -401,7 +426,7 @@ textures across reloads — only graph topology is reconstituted.
 
 Manual reload:
 ```c
-gonodes_reload_patch(gn);
+gonodes_reload_patch(gn, p);
 ```
 
 ## Introspection
@@ -409,16 +434,16 @@ gonodes_reload_patch(gn);
 Query the patch structure at runtime:
 
 ```c
-const char* nodes = gonodes_list_nodes(gn);
+const char* nodes = gonodes_list_nodes(gn, p);
 // [{"id":"noise1","type":"noise","family":"TOP"}, ...]
 
-const char* info = gonodes_get_node_info(gn, "noise1");
+const char* info = gonodes_get_node_info(gn, p, "noise1");
 // {"id":"noise1","type":"noise","family":"TOP","inputs":[...],"outputs":[...],...}
 
-const char* params = gonodes_list_parameters(gn, "noise1");
+const char* params = gonodes_list_parameters(gn, p, "noise1");
 // [{"name":"scale","type":"float","value":8.0,"min":0.1,"max":100}, ...]
 
-const char* conns = gonodes_list_connections(gn);
+const char* conns = gonodes_list_connections(gn, p);
 // [{"from":"noise1","from_port":0,"to":"comp1","to_port":0}, ...]
 ```
 
@@ -429,7 +454,7 @@ The host queries it after loading to discover inputs, outputs, and exposed
 parameters without hardcoding node IDs:
 
 ```c
-const char* io = gonodes_get_host_io(gn);
+const char* io = gonodes_get_host_io(gn, p);
 // {
 //   "inputs":  [{"label":"Camera A", "family":"TOP", "node":"cam_a", "required":true}, ...],
 //   "outputs": [{"label":"Mixed output", "family":"TOP", "node":"main_out"}],
@@ -441,15 +466,61 @@ If the patch author didn't write a manifest, one is auto-generated from any
 HostIn/HostOut bridge operators found in the network.  See
 [INTEGRATION.md](../dev_docs/INTEGRATION.md) for the full format spec.
 
-## v1.1.0 — New Capabilities
+## v2.0.0 — Multi-Patch Architecture
 
-API version 1.1.0 adds 10 new capability areas closing all gaps with TouchEngine SDK and VUO/FxPlug integration.  See [VDMX_VUO_AUDIT.md](../dev_docs/VDMX_VUO_AUDIT.md) for the full audit.
+API version 2.0.0 is a **breaking change** that enables multiple concurrent
+patches per instance.  One `gonodes_instance_t` boots a single Godot engine,
+but can host up to 64 patches simultaneously.  All patches share the GPU
+context and rendering pipeline, but each has its own cook engine, node graph,
+transport, and I/O registries.
+
+### Key Changes
+
+| v1.x | v2.0 |
+|------|------|
+| `gonodes_load_patch(gn, path)` returns `int` | Returns `gonodes_patch_t` (opaque handle) |
+| `gonodes_unload_patch(gn)` | `gonodes_unload_patch(gn, patch)` |
+| All I/O: `func(gn, node_id, ...)` | `func(gn, patch, node_id, ...)` |
+| `GONODES_ERR_MAX_INSTANCES` | `GONODES_ERR_MAX_PATCHES` |
+| Single patch per instance | Up to 64 concurrent patches |
+| Env-var IPC internally | Command queue + response slots (no env-var IPC) |
+
+### Multi-Patch Usage
+
+```c
+gonodes_instance_t gn = gonodes_create("project/", &gpu);
+
+// Load two patches.
+gonodes_patch_t effects = gonodes_load_patch(gn, "effects.gnpatch");
+gonodes_patch_t hud     = gonodes_load_patch(gn, "hud.gnpatch");
+
+// Each patch has independent inputs/outputs.
+gonodes_set_input_chop(gn, effects, "audio", "bass", &bass, 1);
+gonodes_set_parameter(gn, hud, "text1", "text", "\"Score: 42\"");
+
+// One cook call processes ALL patches.
+gonodes_cook_frame(gn, delta);
+
+// Read outputs from each patch independently.
+uint64_t fx_tex  = gonodes_get_output_texture(gn, effects, "out", &w, &h);
+uint64_t hud_tex = gonodes_get_output_texture(gn, hud, "overlay", &w2, &h2);
+
+// Unload individually.
+gonodes_unload_patch(gn, hud);
+printf("Remaining patches: %d\n", gonodes_get_patch_count(gn));  // 1
+
+gonodes_destroy(gn);  // Frees all remaining patches.
+```
+
+## Advanced Capabilities
+
+The v2.0 API provides comprehensive I/O for all six GONODES data families, MIDI/OSC bridges, transport control, dynamic graph editing, and event triggers.
 
 ### Texture Format Query
 
 ```c
 gonodes_texture_info_t info;
-gonodes_get_texture_info(gn, "host_out", &info);
+gonodes_get_texture_info(gn, p, "host_out", &info);
 // info.format = GONODES_FORMAT_RGBA8, info.channels = 4, etc.
 ```
 
@@ -457,56 +528,56 @@ gonodes_get_texture_info(gn, "host_out", &info);
 
 ```c
 // Push CPU pixels into the engine (no GPU handle needed):
-gonodes_set_input_pixels(gn, "cam_in", rgba_data, 1920, 1080, GONODES_FORMAT_RGBA8, 0);
+gonodes_set_input_pixels(gn, p, "cam_in", rgba_data, 1920, 1080, GONODES_FORMAT_RGBA8, 0);
 
 // Read output pixels to CPU (GPU→CPU readback):
 uint8_t* buf = malloc(1920 * 1080 * 4);
-gonodes_read_output_pixels(gn, "host_out", buf, 1920*1080*4, GONODES_FORMAT_RGBA8, &w, &h);
+gonodes_read_output_pixels(gn, p, "host_out", buf, 1920*1080*4, GONODES_FORMAT_RGBA8, &w, &h);
 ```
 
 ### Geometry/SOP Exchange
 
 ```c
 // Read geometry from SOP nodes:
-const gonodes_geometry_data_t* geo = gonodes_get_output_geometry(gn, "sphere1");
+const gonodes_geometry_data_t* geo = gonodes_get_output_geometry(gn, p, "sphere1");
 // geo->positions, geo->normals, geo->uvs, geo->vertex_count, etc.
 
 // Push geometry into the engine:
-gonodes_set_input_geometry(gn, "host_geo", positions, normals, uvs, 1024, indices, 3072);
+gonodes_set_input_geometry(gn, p, "host_geo", positions, normals, uvs, 1024, indices, 3072);
 ```
 
 ### MIDI & OSC Bridge
 
 ```c
 gonodes_midi_event_t ev = {0x90, 60, 127, 0, 0};  // Note On, C4, vel 127
-gonodes_send_midi_event(gn, &ev);
+gonodes_send_midi_event(gn, p, &ev);
 
-gonodes_send_osc_message(gn, "/control/fader1", "[0.75]");
+gonodes_send_osc_message(gn, p, "/control/fader1", "[0.75]");
 ```
 
 ### Timeline/Transport Control
 
 ```c
-gonodes_set_transport(gn, GONODES_TRANSPORT_PAUSE);
-gonodes_set_transport_speed(gn, 0.5);   // half speed
-gonodes_transport_seek(gn, 30.0);       // jump to 30s
-double t = gonodes_get_transport_time(gn);
+gonodes_set_transport(gn, p, GONODES_TRANSPORT_PAUSE);
+gonodes_set_transport_speed(gn, p, 0.5);   // half speed
+gonodes_transport_seek(gn, p, 30.0);       // jump to 30s
+double t = gonodes_get_transport_time(gn, p);
 ```
 
 ### Dynamic Graph Editing
 
 ```c
-gonodes_create_node(gn, "my_blur", "BlurTOP");
-gonodes_connect(gn, "noise1", 0, "my_blur", 0);
-gonodes_connect(gn, "my_blur", 0, "host_out", 0);
-gonodes_delete_node(gn, "my_blur");  // auto-removes connections
+gonodes_create_node(gn, p, "my_blur", "BlurTOP");
+gonodes_connect(gn, p, "noise1", 0, "my_blur", 0);
+gonodes_connect(gn, p, "my_blur", 0, "host_out", 0);
+gonodes_delete_node(gn, p, "my_blur");  // auto-removes connections
 ```
 
 ### Event/Trigger System
 
 ```c
 // Fire one-shot event into the patch:
-gonodes_fire_event(gn, "beat", "{\"bpm\": 128}");
+gonodes_fire_event(gn, p, "beat", "{\"bpm\": 128}");
 
 // Receive events from the patch:
 gonodes_set_on_event(gn, my_event_handler, nullptr);
@@ -515,13 +586,13 @@ gonodes_set_on_event(gn, my_event_handler, nullptr);
 ### Output Resolution Override
 
 ```c
-gonodes_set_output_resolution(gn, "host_out", 3840, 2160);  // 4K
-gonodes_set_output_resolution(gn, "host_out", 0, 0);        // revert to patch default
+gonodes_set_output_resolution(gn, p, "host_out", 3840, 2160);  // 4K
+gonodes_set_output_resolution(gn, p, "host_out", 0, 0);        // revert to patch default
 ```
 
-## v1.2.0 — Zero-Copy Data Exchange
+## Zero-Copy Data Exchange
 
-API version 1.2.0 adds true zero-copy paths for all six data families.
+True zero-copy paths for all six data families.
 GPU data (VOL, POP) uses native texture/buffer handle exchange on a shared
 device.  CPU data (CHOP, DAT, SOP) uses pointer lending with frame-scoped
 lifetime — pointers passed to `set_input_*_direct()` must remain valid
@@ -534,7 +605,7 @@ upload.  Requires shared GPU context.
 
 ```c
 // Push a 3D texture handle (VkImage3D / MTLTexture / GLuint).
-gonodes_set_input_volume_gpu(gn, "host_vol_in",
+gonodes_set_input_volume_gpu(gn, p, "host_vol_in",
     my_3d_texture,      // native handle
     64, 64, 64,         // width, height, depth
     1,                  // channels (1=scalar, 4=RGBA)
@@ -544,7 +615,7 @@ gonodes_cook_frame(gn, delta);
 
 // Read output 3D texture handle.
 gonodes_volume_gpu_handle_t vol;
-gonodes_get_output_volume_gpu(gn, "host_vol_out", &vol);
+gonodes_get_output_volume_gpu(gn, p, "host_vol_out", &vol);
 // vol.native_handle — directly usable on the shared device
 // vol.width/height/depth, vol.channels, vol.format
 ```
@@ -556,7 +627,7 @@ buffer in-place.
 
 ```c
 // Push a particle SSBO (VkBuffer / MTLBuffer / GL buffer object).
-gonodes_set_input_particles_gpu(gn, "host_pop_in",
+gonodes_set_input_particles_gpu(gn, p, "host_pop_in",
     my_ssbo,    // native buffer handle
     10000,      // particle count
     64,         // stride (bytes per particle)
@@ -566,7 +637,7 @@ gonodes_cook_frame(gn, delta);
 
 // Read output SSBO handle.
 gonodes_particle_gpu_handle_t pop;
-gonodes_get_output_particles_gpu(gn, "host_pop_out", &pop);
+gonodes_get_output_particles_gpu(gn, p, "host_pop_out", &pop);
 // pop.native_handle, pop.particle_count, pop.stride, pop.buffer_size
 ```
 
@@ -581,14 +652,14 @@ const char*  names[]  = {"lfo", "rms"};
 const float* data[]   = {lfo, rms};
 const int    counts[] = {480, 480};
 
-gonodes_set_input_chop_direct(gn, "host_audio",
+gonodes_set_input_chop_direct(gn, p, "host_audio",
     names, data, counts, 2);
 
 gonodes_cook_frame(gn, delta);
 
 // Read output channels (pointer lending — valid until next cook).
 gonodes_chop_data_t chop;
-gonodes_get_output_chop_direct(gn, "host_chop_out", &chop);
+gonodes_get_output_chop_direct(gn, p, "host_chop_out", &chop);
 for (int i = 0; i < chop.channel_count; ++i) {
     printf("  %s: %d samples\n",
            chop.channels[i].name, chop.channels[i].num_samples);
@@ -601,7 +672,7 @@ Push JSON table data via string pointer — no temp files.
 
 ```c
 const char* json = "[[\"x\",\"y\"],[\"1.0\",\"2.0\"]]";
-gonodes_set_input_table_direct(gn, "host_data",
+gonodes_set_input_table_direct(gn, p, "host_data",
     json, (int)strlen(json));
 ```
 
@@ -610,7 +681,7 @@ gonodes_set_input_table_direct(gn, "host_data",
 Push vertex attribute arrays via pointer lending — no temp files.
 
 ```c
-gonodes_set_input_geometry_direct(gn, "host_geo",
+gonodes_set_input_geometry_direct(gn, p, "host_geo",
     positions,   // float* xyz × vertex_count
     normals,     // float* xyz × vertex_count (or NULL)
     uvs,         // float* uv  × vertex_count (or NULL)
@@ -620,15 +691,15 @@ gonodes_set_input_geometry_direct(gn, "host_geo",
     index_count);
 ```
 
-### Data Exchange Summary (v1.2.0)
+### Data Exchange Summary
 
-| Family | Legacy Path | v1.2.0 Zero-Copy Path | Copy Count |
+| Family | Legacy Path | Zero-Copy Path | Copy Count |
 |--------|-------------|----------------------|------------|
 | TOP | `set_input_texture` / `get_output_texture` | Same (already zero-copy) | 0 |
 | VOL | `set_input_volume` (CPU upload) | `set_input_volume_gpu` / `get_output_volume_gpu` | 0 |
 | POP | `set_input_particles` (CPU upload) | `set_input_particles_gpu` / `get_output_particles_gpu` | 0 |
-| CHOP | `set_input_chop` (env-var encoding) | `set_input_chop_direct` / `get_output_chop_direct` | 0 |
-| DAT | `set_input_table` (env-var encoding) | `set_input_table_direct` | 0 |
+| CHOP | `set_input_chop` (serialized) | `set_input_chop_direct` / `get_output_chop_direct` | 0 |
+| DAT | `set_input_table` (serialized) | `set_input_table_direct` | 0 |
 | SOP | `set_input_geometry` (temp file) | `set_input_geometry_direct` | 0 |
 
 ## Examples
@@ -674,7 +745,7 @@ negative error code:
 | -6 | `GONODES_ERR_PARAM_NOT_FOUND` | Parameter name not on node |
 | -7 | `GONODES_ERR_BUFFER_TOO_SMALL` | Output buffer too small |
 | -8 | `GONODES_ERR_NOT_LOADED` | No patch loaded |
-| -9 | `GONODES_ERR_MAX_INSTANCES` | Instance limit reached |
+| -9 | `GONODES_ERR_MAX_PATCHES` | Patch limit reached (64 per instance) |
 | -10 | `GONODES_ERR_UNSUPPORTED` | Feature not available on this platform |
 | -11 | `GONODES_ERR_TYPE_MISMATCH` | Node family doesn't match operation |
 | -99 | `GONODES_ERR_INTERNAL` | Internal engine error |

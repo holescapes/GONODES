@@ -2,7 +2,7 @@
 
 > **Audience:** Developers embedding GONODES as a real-time texture/data processing backend inside their own applications — VJ tools, media servers, game engines, creative coding frameworks, broadcast graphics systems, installation controllers.
 
-This document covers the LibGONODES C API, GPU context sharing, bridge operators, hot-reload, and the build pipeline.  For the C header reference and example code, see [`libgonodes/README.md`](../libgonodes/README.md).
+This document covers the LibGONODES C API, GPU context sharing, bridge operators, hot-reload, and the build pipeline.  For the C header reference and example code, see [`libgonodes/README.md`](../libgonodes/README.md).  For detailed memory layouts and array formats for each data type, see [`HOST_DATA_GUIDE.md`](HOST_DATA_GUIDE.md).
 
 ---
 
@@ -30,23 +30,32 @@ The host application owns the render loop and the GPU device.  GONODES runs head
 │  │  set_parameter / get_parameter            │  │
 │  │  introspection / callbacks / stats        │  │
 │  └──────────────────┬────────────────────────┘  │
-│                     │                           │
+│          writes ↓ cmd queue │ reads ↑ response slots│
 │  ┌──────────────────▼────────────────────────┐  │
 │  │  libgonodes.dll / .so / .dylib            │  │
-│  │  (C++ — dynamic LibGodot loading)         │  │
+│  │  (C++ — command queue + response slots)   │  │
+│  │  gn_bootstrap_iteration()                 │  │
+│  │  gn_set_active_instance()                 │  │
 │  └──────────────────┬────────────────────────┘  │
-│                     │                           │
+│                     │ direct pointer access     │
 │  ┌──────────────────▼────────────────────────┐  │
 │  │  libgodot.dll / .so / .dylib              │  │
 │  │  (Godot 4.6 engine as shared library)     │  │
 │  │                                           │  │
 │  │  ┌──────────────────────────────────────┐ │  │
+│  │  │  GNHostBridge (GDExtension class)    │ │  │
+│  │  │  ├─ drain_commands() → Array         │ │  │
+│  │  │  ├─ set_*_output() → C struct       │ │  │
+│  │  │  └─ read_*() → Godot types          │ │  │
+│  │  ├──────────────────────────────────────┤ │  │
 │  │  │  GNEmbeddedHost (GDScript singleton) │ │  │
-│  │  │  ├─ GNCookEngine                     │ │  │
-│  │  │  ├─ GNNetwork + all operators        │ │  │
-│  │  │  └─ Bridge Operators                 │ │  │
-│  │  │     ├ HostIn:  TOP / CHOP / DAT / VOL / POP│
-│  │  │     └ HostOut: TOP / CHOP / DAT / VOL / POP│
+│  │  │  ├─ Per-patch PatchState (up to 64)  │ │  │
+│  │  │  │  ├─ GNCookEngine                  │ │  │
+│  │  │  │  ├─ GNNetwork + all operators     │ │  │
+│  │  │  │  └─ Bridge Operators              │ │  │
+│  │  │  │     ├ HostIn:  TOP/CHOP/DAT/SOP/VOL/POP│
+│  │  │  │     └ HostOut: TOP/CHOP/DAT/SOP/VOL/POP│
+│  │  │  └─ _drain_and_dispatch / _publish_to_bridge│
 │  │  └──────────────────────────────────────┘ │  │
 │  └───────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────┘
@@ -59,8 +68,9 @@ The host application owns the render loop and the GPU device.  GONODES runs head
 3. LibGodot boots with `--headless` mode, pointing at the GONODES project directory
 4. The `GNEmbeddedHost` autoload singleton registers itself via `Engine.register_singleton()`
 5. A few warmup frames are cooked so autoloads are fully initialized
-6. Host calls `gonodes_load_patch()` → `GNEmbeddedHost.load_patch()` builds the network and boots the cook engine
-7. Each frame, the host calls `gonodes_cook_frame(delta)` → one full Godot iteration runs
+6. Host calls `gonodes_load_patch()` → returns a `gonodes_patch_t` handle; `GNEmbeddedHost.load_patch()` builds the network and boots a cook engine for that patch
+7. Multiple patches can be loaded simultaneously (up to 64), each with its own cook engine and transport
+8. Each frame, the host calls `gonodes_cook_frame(delta)` → one full Godot iteration runs, cooking all loaded patches
 
 ---
 
@@ -94,7 +104,7 @@ typedef struct gonodes_gpu_context {
     /* OpenGL */
     void* gl_context;                // HGLRC / NSOpenGLContext* / EGLContext
 
-    int graphics_api;                // GONODES_GFX_VULKAN / METAL / OPENGL / AUTO
+    int graphics_api;                // GONODES_GFX_VULKAN / METAL / OPENGL / MOBILE / AUTO
 } gonodes_gpu_context_t;
 ```
 
@@ -102,8 +112,7 @@ typedef struct gonodes_gpu_context {
 |-----|-------------------|-----------------|
 | Vulkan | Forward+ | VkImage |
 | Metal | Forward+ | MTLTexture |
-| OpenGL | Compatibility (gl_compatibility) | GLuint |
-| NULL (no context) | Auto (LibGodot creates its own device) | CPU readback path |
+| OpenGL | Compatibility (gl_compatibility) | GLuint || Mobile | Mobile (mobile) | VkImage / MTLTexture || NULL (no context) | Auto (LibGodot creates its own device) | CPU readback path |
 
 ### Non-Shared Fallback
 
@@ -130,17 +139,19 @@ void gonodes_get_version(int* major, int* minor, int* patch);
 ### Patch Management
 
 ```c
-// Load a .gnpatch file.  Unloads any previous patch.
-int gonodes_load_patch(gonodes_instance_t inst, const char* path);
+// Load a .gnpatch file.  Returns an opaque patch handle.
+// Multiple patches can be loaded simultaneously (up to 64).
+gonodes_patch_t gonodes_load_patch(gonodes_instance_t inst, const char* path);
 
-// Unload the current patch.
-void gonodes_unload_patch(gonodes_instance_t inst);
+// Unload a specific patch.
+void gonodes_unload_patch(gonodes_instance_t inst, gonodes_patch_t patch);
 
 // Reload from disk — preserves CHOP values, timers, feedback textures.
-int gonodes_reload_patch(gonodes_instance_t inst);
+int gonodes_reload_patch(gonodes_instance_t inst, gonodes_patch_t patch);
 
 // File-watch auto-reload (polls file mtime).
-void gonodes_set_auto_reload(gonodes_instance_t inst, int enable, double interval);
+void gonodes_set_auto_reload(gonodes_instance_t inst, gonodes_patch_t patch,
+                             int enable, double interval);
 ```
 
 ### Frame Loop
@@ -155,64 +166,87 @@ void gonodes_cook_frame(gonodes_instance_t inst, double delta_seconds);
 
 ```c
 // Push texture into a HostInTOP node.
-int gonodes_set_input_texture(inst, node_id, texture_handle, w, h, format);
+int gonodes_set_input_texture(inst, patch, node_id, texture_handle, w, h, format);
 
 // Push float samples into a HostInCHOP node.
-int gonodes_set_input_chop(inst, node_id, channel_name, samples, num_samples);
+int gonodes_set_input_chop(inst, patch, node_id, channel_name, samples, num_samples);
 
 // Push JSON table/text into a HostInDAT node.
-int gonodes_set_input_table(inst, node_id, json_data);
+int gonodes_set_input_table(inst, patch, node_id, json_data);
 
 // Set any parameter on any node.
-int gonodes_set_parameter(inst, node_id, param_name, value_json);
+int gonodes_set_parameter(inst, patch, node_id, param_name, value_json);
 
-// v1.2.0: Zero-copy direct injection (pointer lending, frame-scoped).
-int gonodes_set_input_volume_gpu(inst, node_id, tex_handle, w, h, d, ch, field);
-int gonodes_set_input_particles_gpu(inst, node_id, buf_handle, count, stride, size);
-int gonodes_set_input_chop_direct(inst, node_id, names, data, counts, num_ch);
-int gonodes_set_input_table_direct(inst, node_id, json_data, length);
-int gonodes_set_input_geometry_direct(inst, node_id, pos, nrm, uv, col, vc, idx, ic);
+// Zero-copy direct injection (multi-channel CHOP, explicit-length DAT, colors in SOP).
+int gonodes_set_input_volume_gpu(inst, patch, node_id, tex_handle, w, h, d, ch, field);
+int gonodes_set_input_particles_gpu(inst, patch, node_id, buf_handle, count, stride, size);
+int gonodes_set_input_chop_direct(inst, patch, node_id, names, data, counts, num_ch);
+int gonodes_set_input_table_direct(inst, patch, node_id, json_data, length);
+int gonodes_set_input_geometry_direct(inst, patch, node_id, pos, nrm, uv, col, vc, idx, ic);
 ```
 
 ### Output Reading (GONODES → Host)
 
 ```c
 // Get texture handle from a HostOutTOP node (or any TOP).
-uint64_t gonodes_get_output_texture(inst, node_id, &out_w, &out_h);
+uint64_t gonodes_get_output_texture(inst, patch, node_id, &out_w, &out_h);
 
 // Read float samples from a HostOutCHOP node.
-int gonodes_get_output_chop(inst, node_id, channel_name, out_buf, buf_size);
+int gonodes_get_output_chop(inst, patch, node_id, channel_name, out_buf, buf_size);
 
 // Read JSON table from a HostOutDAT node.
-const char* gonodes_get_output_table(inst, node_id);
+const char* gonodes_get_output_table(inst, patch, node_id);
 
 // Read any parameter's current value.
-const char* gonodes_get_parameter(inst, node_id, param_name);
+const char* gonodes_get_parameter(inst, patch, node_id, param_name);
 
-// v1.2.0: Zero-copy GPU output (native handles, no CPU readback).
-int gonodes_get_output_volume_gpu(inst, node_id, &vol_handle);
-int gonodes_get_output_particles_gpu(inst, node_id, &pop_handle);
-int gonodes_get_output_chop_direct(inst, node_id, &chop_data);
+// Zero-copy GPU output (native handles, no CPU readback).
+int gonodes_get_output_volume_gpu(inst, patch, node_id, &vol_handle);
+int gonodes_get_output_particles_gpu(inst, patch, node_id, &pop_handle);
+int gonodes_get_output_chop_direct(inst, patch, node_id, &chop_data);
 ```
+
+> **Note:** `gonodes_get_output_volume()` and `gonodes_get_output_particles()`
+> (CPU readback) are not yet implemented — use the GPU variants above.
 
 ### Introspection
 
 ```c
-const char* gonodes_list_nodes(inst);              // JSON array of all nodes
-const char* gonodes_get_node_info(inst, node_id);  // Detailed node info
-const char* gonodes_list_parameters(inst, node_id);// Parameters on a node
-const char* gonodes_list_connections(inst);         // All wire connections
-const char* gonodes_get_host_io(inst);             // Host I/O manifest (see below)
+const char* gonodes_list_nodes(inst, patch);              // JSON array of all nodes
+const char* gonodes_get_node_info(inst, patch, node_id);  // Detailed node info
+const char* gonodes_list_parameters(inst, patch, node_id);// Parameters on a node
+const char* gonodes_list_connections(inst, patch);         // All wire connections
+const char* gonodes_get_host_io(inst, patch);             // Host I/O manifest (see below)
 ```
+
+> All `const char*` returns are valid only until the next `gonodes_cook_frame()`.
+> Copy data you need to retain across frames.
 
 ### Callbacks
 
 ```c
-// Parameter change notification.
+// Parameter change notification (fires for all patches).
 void gonodes_set_on_param_changed(inst, callback_fn, user_data);
 
 // Log/error routing.
 void gonodes_set_log_callback(inst, log_fn, user_data);
+
+// Event callback (fires when patches emit events).
+void gonodes_set_on_event(inst, event_fn, user_data);
+```
+
+Callback signatures include a `gonodes_patch_t` parameter so hosts can
+identify which patch triggered the callback:
+
+```c
+typedef void (*gonodes_param_changed_fn)(
+    gonodes_instance_t inst, gonodes_patch_t patch,
+    const char* node_id, const char* param_name,
+    const char* value_json, void* user_data);
+
+typedef void (*gonodes_event_fn)(
+    gonodes_instance_t inst, gonodes_patch_t patch,
+    const char* event_name, const char* payload, void* user_data);
 ```
 
 ### Utilities
@@ -222,12 +256,11 @@ const char* gonodes_get_last_error(inst);                    // Human-readable e
 void gonodes_get_stats(inst, &cook_ms, &node_count, &frame); // Performance stats
 ```
 
-### Texture Info & Format Negotiation (v1.1.0)
+### Texture Info & Format Negotiation
 
 ```c
 // Query full metadata about an output texture — format, channels, API, handle.
-// Comparable to TouchEngine's TEInstanceGetTextureDescription().
-int gonodes_get_texture_info(inst, node_id, &out_info);
+int gonodes_get_texture_info(inst, patch, node_id, &out_info);
 ```
 
 `gonodes_texture_info_t` fields:
@@ -241,12 +274,11 @@ int gonodes_get_texture_info(inst, node_id, &out_info);
 | `native_handle` | uint64_t | VkImage / GLuint / MTLTexture* |
 | `graphics_api` | int | Which API the handle belongs to |
 
-### CPU Pixel Input (v1.1.0)
+### CPU Pixel Input
 
 ```c
 // Push raw CPU pixel data into a HostInTOP — no GPU handle needed.
-// Comparable to VuoImage_makeFromBuffer() and TouchEngine's CPU path.
-int gonodes_set_input_pixels(inst, node_id, pixels, width, height, format, row_stride);
+int gonodes_set_input_pixels(inst, patch, node_id, pixels, width, height, format, row_stride);
 ```
 
 | Parameter | Description |
@@ -255,25 +287,24 @@ int gonodes_set_input_pixels(inst, node_id, pixels, width, height, format, row_s
 | `format` | `gonodes_texture_format` — determines bytes per pixel |
 | `row_stride` | Bytes per row (0 = tightly packed) |
 
-### CPU Pixel Readback (v1.1.0)
+### CPU Pixel Readback
 
 ```c
 // Read output texture pixels into a CPU buffer (GPU→CPU readback).
-// Comparable to VuoImage_copyBuffer() and TouchEngine's CPU readback.
-int gonodes_read_output_pixels(inst, node_id, out_pixels, buffer_size, format,
+int gonodes_read_output_pixels(inst, patch, node_id, out_pixels, buffer_size, format,
                                 &out_width, &out_height);
 ```
 
 Returns number of bytes written, or a negative error code.  The host pre-allocates `out_pixels`.
 
-### Geometry/SOP Exchange (v1.1.0)
+### Geometry/SOP Exchange
 
 ```c
 // Read geometry data from any SOP or COMP node.
-const gonodes_geometry_data_t* gonodes_get_output_geometry(inst, node_id);
+const gonodes_geometry_data_t* gonodes_get_output_geometry(inst, patch, node_id);
 
 // Push geometry into a HostInSOP node.
-int gonodes_set_input_geometry(inst, node_id, positions, normals, uvs,
+int gonodes_set_input_geometry(inst, patch, node_id, positions, normals, uvs,
                                 vertex_count, indices, index_count);
 ```
 
@@ -290,119 +321,119 @@ int gonodes_set_input_geometry(inst, node_id, positions, normals, uvs,
 | `index_count` | int | Number of indices (0 if non-indexed) |
 | `primitive_type` | int | 0=triangles, 1=lines, 2=points |
 
-### MIDI & OSC Bridge (v1.1.0)
+### MIDI & OSC Bridge
 
 ```c
 // Send a MIDI event into the engine — routed to MidiInCHOP operators.
-int gonodes_send_midi_event(inst, &midi_event);
+int gonodes_send_midi_event(inst, patch, &midi_event);
 
 // Send an OSC message — routed to OscInCHOP / OscInDAT operators.
-int gonodes_send_osc_message(inst, "/address/pattern", "[0.75, 1.0]");
+int gonodes_send_osc_message(inst, patch, "/address/pattern", "[0.75, 1.0]");
 ```
 
 `gonodes_midi_event_t` fields: `status` (0x80–0xFF), `data1` (0–127), `data2` (0–127), `channel` (0–15), `port` (virtual port index, 0 = default).
 
-### Timeline / Transport Control (v1.1.0)
+### Timeline / Transport Control
 
 ```c
-int    gonodes_set_transport(inst, GONODES_TRANSPORT_PAUSE);  // play/pause/stop
-int    gonodes_set_transport_speed(inst, 0.5);                // half speed
-int    gonodes_transport_seek(inst, 60.0);                    // jump to 60 seconds
-double gonodes_get_transport_time(inst);                      // query current time
+int    gonodes_set_transport(inst, patch, GONODES_TRANSPORT_PAUSE);  // play/pause/stop
+int    gonodes_set_transport_speed(inst, patch, 0.5);                // half speed
+int    gonodes_transport_seek(inst, patch, 60.0);                    // jump to 60 seconds
+double gonodes_get_transport_time(inst, patch);                      // query current time
 ```
 
 Transport states: `GONODES_TRANSPORT_PLAY` (0), `GONODES_TRANSPORT_PAUSE` (1), `GONODES_TRANSPORT_STOP` (2).
 
-### Dynamic Graph Editing (v1.1.0)
+### Dynamic Graph Editing
 
 ```c
 // Create a node at runtime — surpasses TouchEngine (read-only graphs).
-int gonodes_create_node(inst, "my_blur", "BlurTOP");
+int gonodes_create_node(inst, patch, "my_blur", "BlurTOP");
 
 // Delete a node — connections are removed automatically.
-int gonodes_delete_node(inst, "my_blur");
+int gonodes_delete_node(inst, patch, "my_blur");
 
 // Wire two nodes together.
-int gonodes_connect(inst, "noise1", 0, "my_blur", 0);
+int gonodes_connect(inst, patch, "noise1", 0, "my_blur", 0);
 
 // Remove a wire.
-int gonodes_disconnect(inst, "noise1", 0, "my_blur", 0);
+int gonodes_disconnect(inst, patch, "noise1", 0, "my_blur", 0);
 ```
 
-### Event / Trigger System (v1.1.0)
+### Event / Trigger System
 
 ```c
 // Fire a named one-shot event into the patch.
-// Comparable to VUO's firePublishedInputPortEvent().
-int gonodes_fire_event(inst, "beat_trigger", "{\"bpm\": 120}");
+int gonodes_fire_event(inst, patch, "beat_trigger", "{\"bpm\": 120}");
 
-// Register callback for events FROM the patch.
+// Register callback for events FROM the patch (covers all patches).
 void gonodes_set_on_event(inst, my_callback, user_data);
 ```
 
-Callback signature: `void (*gonodes_event_fn)(inst, event_name, payload_json, user_data)`.
+Callback signature includes a `gonodes_patch_t`:
+`void (*gonodes_event_fn)(inst, patch, event_name, payload_json, user_data)`.
 
-### Output Resolution Override (v1.1.0)
+### Output Resolution Override
 
 ```c
-// Override output texture resolution — like VUO's renderOutput:atSize:.
-int gonodes_set_output_resolution(inst, "host_out", 3840, 2160);
+// Override output texture resolution.
+int gonodes_set_output_resolution(inst, patch, "host_out", 3840, 2160);
 
 // Revert to patch default:
-int gonodes_set_output_resolution(inst, "host_out", 0, 0);
+int gonodes_set_output_resolution(inst, patch, "host_out", 0, 0);
 ```
 
-### Zero-Copy GPU: Volumes (v1.2.0)
+### Zero-Copy GPU: Volumes
 
 ```c
 // Push native 3D texture (VkImage3D / MTLTexture / GLuint) into HostInVOL.
-int gonodes_set_input_volume_gpu(inst, node_id, texture_handle,
+int gonodes_set_input_volume_gpu(inst, patch, node_id, texture_handle,
     width, height, depth, channels, field_name);
 
 // Read native 3D texture handle from HostOutVOL.
 gonodes_volume_gpu_handle_t vol;
-int gonodes_get_output_volume_gpu(inst, node_id, &vol);
+int gonodes_get_output_volume_gpu(inst, patch, node_id, &vol);
 // vol.native_handle, vol.width/height/depth, vol.channels, vol.format
 ```
 
-### Zero-Copy GPU: Particles (v1.2.0)
+### Zero-Copy GPU: Particles
 
 ```c
 // Push native SSBO (VkBuffer / MTLBuffer / GL buffer) into HostInPOP.
-int gonodes_set_input_particles_gpu(inst, node_id, buffer_handle,
+int gonodes_set_input_particles_gpu(inst, patch, node_id, buffer_handle,
     particle_count, stride, buffer_size);
 
 // Read native SSBO handle from HostOutPOP.
 gonodes_particle_gpu_handle_t pop;
-int gonodes_get_output_particles_gpu(inst, node_id, &pop);
+int gonodes_get_output_particles_gpu(inst, patch, node_id, &pop);
 // pop.native_handle, pop.particle_count, pop.stride, pop.buffer_size
 ```
 
-### Zero-Copy CPU: Channels (v1.2.0)
+### Zero-Copy CPU: Channels
 
 ```c
-// Push multi-channel float data via pointer lending (no env-var encoding).
-int gonodes_set_input_chop_direct(inst, node_id,
+// Push multi-channel float data via pointer lending (zero-copy).
+int gonodes_set_input_chop_direct(inst, patch, node_id,
     channel_names, channel_data, sample_counts, num_channels);
 
 // Read channel data via pointer lending (frame-scoped lifetime).
 gonodes_chop_data_t chop;
-int gonodes_get_output_chop_direct(inst, node_id, &chop);
+int gonodes_get_output_chop_direct(inst, patch, node_id, &chop);
 // chop.channels[i].name, chop.channels[i].samples, chop.channels[i].num_samples
 ```
 
-### Zero-Copy CPU: Tables (v1.2.0)
+### Zero-Copy CPU: Tables
 
 ```c
-// Push JSON table data via string pointer (no temp file).
-int gonodes_set_input_table_direct(inst, node_id, json_data, length);
+// Push JSON table data with explicit length (no truncation).
+int gonodes_set_input_table_direct(inst, patch, node_id, json_data, length);
 ```
 
-### Zero-Copy CPU: Geometry (v1.2.0)
+### Zero-Copy CPU: Geometry
 
 ```c
-// Push vertex attribute arrays via pointer lending (no temp file).
-int gonodes_set_input_geometry_direct(inst, node_id,
+// Push vertex attribute arrays including per-vertex colors.
+int gonodes_set_input_geometry_direct(inst, patch, node_id,
     positions, normals, uvs, colors, vertex_count,
     indices, index_count);
 ```
@@ -518,7 +549,10 @@ Without `is_sink = true` on HostOut* nodes, the host would always read stale or 
 
 **HostInVOL** receives a 3D voxel grid from the host via `gonodes_set_input_volume()`.  The data is a flat `PackedFloat32Array` (or `float*` in C) with dimensions `width × height × depth × channels`.  If the GPU compute backend is available, the data is uploaded to a 3D texture for GPU-accelerated VOL processing; otherwise it falls back to CPU-side arrays.
 
-**HostOutVOL** is a sink that accepts any VOL input and performs a GPU→CPU readback via `RenderingDevice.texture_get_data()` on the 3D texture.  The host then reads the voxel data via `gonodes_get_output_volume()`, which returns a `gonodes_volume_data_t` struct containing the flattened voxels, resolution, channel count, and field name.
+**HostOutVOL** is a sink that accepts any VOL input and exposes the GPU 3D texture handle to the host.  The host reads via `gonodes_get_output_volume_gpu()`, which returns a `gonodes_volume_gpu_handle_t` containing the native handle, resolution, channel count, and format.
+
+> **Note:** CPU readback via `gonodes_get_output_volume()` is not yet implemented.
+> Use the GPU variant.
 
 **C API struct:**
 ```c
@@ -544,7 +578,10 @@ typedef struct {
 
 **HostInPOP** receives per-particle data from the host via `gonodes_set_input_particles()`.  The data includes position, velocity, color, and age arrays for each particle.  If the GPU compute backend is available, particles are packed into the standard 64-byte SSBO stride layout (`vec3 pos + float age + vec3 vel + float life + vec4 color + vec4 custom`) for GPU-accelerated POP processing; otherwise it falls back to CPU-side arrays.
 
-**HostOutPOP** is a sink that accepts any POP input and performs an SSBO readback — unpacking the standard 64-byte stride back into per-attribute arrays.  The host reads via `gonodes_get_output_particles()`, which returns a `gonodes_particle_data_t`.
+**HostOutPOP** is a sink that accepts any POP input and exposes the GPU SSBO handle to the host.  The host reads via `gonodes_get_output_particles_gpu()`, which returns a `gonodes_particle_gpu_handle_t`.
+
+> **Note:** CPU readback via `gonodes_get_output_particles()` is not yet implemented.
+> Use the GPU variant.
 
 **C API struct:**
 ```c
@@ -661,7 +698,7 @@ The auto-generated manifest does not include the `parameters` array — that mus
 // Returns the host_io manifest as a JSON string.
 // Auto-generates from bridge operators if not authored.
 // Returns "{}" if no patch loaded or no bridge operators found.
-const char* gonodes_get_host_io(gonodes_instance_t inst);
+const char* gonodes_get_host_io(gonodes_instance_t inst, gonodes_patch_t patch);
 ```
 
 ### Editor Workflow
@@ -680,16 +717,26 @@ A patch can have both WindowOUTs (for standalone Player mode) and HostOutTOPs (f
 
 ## GNEmbeddedHost Singleton
 
-The GDScript singleton `GNEmbeddedHost` (`addons/gonodes/core/gn_embedded_host.gd`) replaces `player_main.gd` for embedded operation.  It:
+The GDScript singleton `GNEmbeddedHost` (`addons/gonodes/core/gn_embedded_host.gd`) replaces `player_main.gd` for embedded operation.  It supports v2.5 multi-patch mode (up to 64 concurrent patches).
 
-1. Registers itself as an Engine singleton on `_ready()`
-2. Polls for commands from the C API (patch load/unload/reload)
-3. Flushes host input data into bridge operators before each cook
-4. Collects output data from bridge operators after each cook
-5. Publishes introspection JSON (node list, parameters, connections, host I/O manifest)
-6. Manages stateful hot-reload (saves/restores CHOP values and timer positions)
+**Architecture flow:**
+1. C API pushes commands to an in-process ring buffer (`gn_command_queue`)
+2. `gn_bootstrap_iteration()` runs one Godot frame
+3. `GNEmbeddedHost._drain_and_dispatch()` calls `GNHostBridge.drain_commands()`
+   which reads the C ring buffer directly (no env vars) and returns an Array
+4. For CPU data types (pixels, geometry, volume, particles, CHOP, DAT), the
+   command carries a **pointer address** (uint64).  `GNHostBridge` (GDExtension)
+   reads the data via `memcpy` from the host's memory — no temp files, no serialization.
+5. Data flows to bridge operators via `_flush_inputs()`
+6. Cook engine runs all active patches
+7. `_collect_outputs()` gathers results from bridge operators
+8. `_publish_to_bridge()` calls `GNHostBridge.set_*_output()` which writes
+   directly to per-patch response slots in the C struct
+9. C API reads directly from response slots (zero overhead)
 
-The C API communicates with GNEmbeddedHost via environment variables during the LibGodot iteration loop.  This is a pragmatic bridge that works with Godot 4.6's current embedding surface; a future version may use direct ClassDB singleton calls when Godot stabilizes its external scripting interface.
+**Per-patch state:** Each loaded patch has its own `PatchState` with independent cook engine, network, transport, and I/O registries.
+
+The GNHostBridge GDExtension (`addons/gn_ext_host_bridge/`) provides direct pointer-based access to the C command queue and response slots.  Only one env var remains: `GONODES_BRIDGE_INSTANCE_PTR` (set once during `gonodes_create()` for initial pointer registration).  CPU data transfer uses exactly one `memcpy` per data type, with pointer safety guaranteed by the synchronous `gn_bootstrap_iteration()` call (Godot and the C API never run concurrently).
 
 ---
 
@@ -717,7 +764,7 @@ The `_type` wrapper for `Vector2i` follows the same convention used in `.gnpatch
 ### Auto-Reload
 
 ```c
-gonodes_set_auto_reload(gn, 1, 0.5);  // Enable, poll every 0.5s
+gonodes_set_auto_reload(gn, p, 1, 0.5);  // Enable, poll every 0.5s
 ```
 
 The C API polls the `.gnpatch` file's modification time.  When a change is detected, `gonodes_reload_patch()` is called automatically.
@@ -749,7 +796,7 @@ All functions that can fail return `GONODES_OK` (0) or a negative error code:
 | -6 | `GONODES_ERR_PARAM_NOT_FOUND` | Parameter name not on node |
 | -7 | `GONODES_ERR_BUFFER_TOO_SMALL` | Read buffer too small |
 | -8 | `GONODES_ERR_NOT_LOADED` | No patch loaded |
-| -9 | `GONODES_ERR_MAX_INSTANCES` | Instance limit reached (multi-instance) |
+| -9 | `GONODES_ERR_MAX_PATCHES` | Maximum concurrent patches reached |
 | -10 | `GONODES_ERR_UNSUPPORTED` | Feature not available on this platform/build |
 | -11 | `GONODES_ERR_TYPE_MISMATCH` | Node family doesn't match the operation |
 | -99 | `GONODES_ERR_INTERNAL` | Internal engine error |

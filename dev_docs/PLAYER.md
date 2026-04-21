@@ -30,16 +30,32 @@ GONODESPlayer.exe
 ## config.json
 
 > Full user-facing config docs are in `help/player.md`.
+> A companion `CONFIG_OPTIONS.txt` is generated alongside config.json during export.
 
 ```json
 {
-  "patch": "MyShow.gnpatch"
+  "patch": "MyShow.gnpatch",
+  "renderer": "forward_plus",
+  "settings": {
+    "log_level": 1,
+    "log_to_file": false,
+    "parallel_cook_enabled": false,
+    "max_cooks_per_frame": 0
+  }
 }
 ```
 
-Parsed by `player_main.gd::_load_config()` via `JSON.parse_string()`.
-Only the `patch` field is currently used. Additional fields are silently
-ignored — future-proof for adding e.g. `log_level`, `headless` flags.
+Parsed by `player_main.gd::_parse_config()` via `JSON.parse()`.
+
+| Field | Read by | Effect |
+|-------|---------|--------|
+| `patch` | `_parse_config()` | Resolved relative to exe dir |
+| `patch_url` | `_parse_config()` | Web builds — fetched via HTTP |
+| `renderer` | `_check_renderer_mismatch()` | If active renderer doesn't match, Player re-launches with `--rendering-method` |
+| `settings.log_level` | `_apply_runtime_settings()` | Sets `GNLogger.level` |
+| `settings.log_to_file` | `_apply_runtime_settings()` | Enables file logging |
+| `settings.parallel_cook_enabled` | `_apply_runtime_settings()` | Sets `cook_engine.parallel_cook_enabled` |
+| `settings.max_cooks_per_frame` | `_apply_runtime_settings()` | Sets `cook_engine.max_cooks_per_frame` |
 
 VSync and FPS are intentionally absent — they're per-window settings
 controlled by each WindowOUT node. A global override would conflict with
@@ -52,9 +68,13 @@ multi-window setups.
 |---------------------------------|-------------------------------------|
 | `--patch <path>`                | Override config.json patch path     |
 | `--rendering-method <method>`   | Force a specific Godot renderer     |
+| `--log-level <0-3>`            | Override log level                  |
+| `--log-file [path]`            | Enable file logging                 |
+| `--parallel-cook`              | Enable parallel cooking             |
+| `--max-cooks <N>`              | Override max cooks per frame        |
 
-CLI parsing is in `_ready()` via `OS.get_cmdline_args()`. `--patch` is
-custom; `--rendering-method` is a standard Godot argument passed through.
+CLI parsing is in `_parse_config()` via `OS.get_cmdline_args()`. All CLI
+args override config.json values.
 
 
 ## Hotkeys (Implementation)
@@ -70,25 +90,36 @@ Handled in `player_main.gd::_unhandled_key_input()`:
 
 ## Rendering Backend — Internals
 
-The Player uses automatic renderer selection (same as the editor):
-Forward+ (Vulkan/D3D12) → Compatibility (OpenGL 3.3) fallback.
+### Renderer selection flow
 
-**Why the fallback works:** The `fallback_to_opengl3 = true` project setting
-is baked into the `.pck` at export time. Godot's runtime checks GPU
-capabilities at startup and selects the appropriate renderer before any
-scene loads. This is a Godot engine feature — no GONODES code involved.
+1. The renderer is chosen in the GONODES editor (Preferences > Renderer or
+   Export Patch dialog). Both write the value to persistent storage.
+2. The exporter writes `"renderer": "<value>"` into `config.json`.
+3. On Player startup, `_check_renderer_mismatch()` compares `config.json`'s
+   `renderer` against `GNGpuContext.get_current_renderer()`.
+4. If they differ, the Player spawns a new process with
+   `--rendering-method <desired>` and quits. A `--renderer-set` sentinel
+   flag prevents infinite relaunch loops.
+5. `GNCookEngine` reads the active renderer via `GNGpuContext` and skips
+   nodes whose `supported_renderers()` doesn't include it.
 
-**D3D12 on Windows:** The project uses `rendering_device/driver.windows="d3d12"`
-in project.godot. The D3D12 Agility SDK is bundled in the export via
-`export_d3d12=1`. This ensures the D3D12 runtime works on any Windows 10/11
-machine regardless of system D3D12 version.
+### Renderer values
 
-### No renderer in config.json — Design Decision
+| Value | Godot renderer | GPU API |
+|-------|---------------|---------|
+| `forward_plus` | Forward+ | Vulkan / D3D12 |
+| `mobile` | Mobile | Vulkan (mobile profile) |
+| `gl_compatibility` | Compatibility | OpenGL ES 3.0 / WebGL2 |
 
-A global renderer override is intentionally omitted:
-- Forward+ fallback covers all practical scenarios automatically
-- A user-facing config option would risk crashes (e.g. requesting Vulkan on a machine without it)
-- Power users can still override via `--rendering-method` CLI
+### Automatic fallback
+
+`fallback_to_opengl3 = true` is baked into the `.pck` at export time.
+If Vulkan isn't available, Godot falls back to Compatibility automatically.
+
+### D3D12 on Windows
+
+`rendering_device/driver.windows="d3d12"` in project.godot. The D3D12
+Agility SDK is bundled via `export_d3d12=1`.
 
 ### No VSync/FPS in config.json — Design Decision
 

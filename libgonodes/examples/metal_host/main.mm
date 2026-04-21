@@ -31,6 +31,7 @@
 
 @interface GonodesRenderer : NSObject <MTKViewDelegate> {
     gonodes_instance_t _gn;
+    gonodes_patch_t _p;
     id<MTLDevice> _device;
     id<MTLCommandQueue> _cmdQueue;
     double _prevTime;
@@ -51,6 +52,7 @@
         _device = device;
         _cmdQueue = queue;
         _gn = gn;
+        _p = p;
         _prevTime = CFAbsoluteTimeGetCurrent();
     }
     return self;
@@ -67,14 +69,14 @@
 
     /* Inject an animated value. */
     float lfo = (float)(sin(now * 2.0) * 0.5 + 0.5);
-    gonodes_set_input_chop(_gn, "host_lfo", "lfo", &lfo, 1);
+    gonodes_set_input_chop(_gn, _p, "host_lfo", "lfo", &lfo, 1);
 
     /* Cook one frame. */
     gonodes_cook_frame(_gn, delta);
 
     /* Read the output texture — this is an id<MTLTexture> on the shared device. */
     int tw = 0, th = 0;
-    uint64_t tex_handle = gonodes_get_output_texture(_gn, "host_out", &tw, &th);
+    uint64_t tex_handle = gonodes_get_output_texture(_gn, _p, "host_out", &tw, &th);
 
     /* Render to the drawable. */
     id<CAMetalDrawable> drawable = [view currentDrawable];
@@ -161,18 +163,18 @@ int main(int argc, char* argv[]) {
         }
 
         printf("[Metal Host] Loading patch: %s\n", patch_file);
-        int err = gonodes_load_patch(gn, patch_file);
-        if (err != GONODES_OK) {
+        gonodes_patch_t p = gonodes_load_patch(gn, patch_file);
+        if (!p) {
             fprintf(stderr, "[Metal Host] Load failed: %s\n", gonodes_get_last_error(gn));
             gonodes_destroy(gn);
             return 1;
         }
 
-        gonodes_set_auto_reload(gn, 1, 0.5);
+        gonodes_set_auto_reload(gn, p, 1, 0.5);
 
         /* ── Query Host I/O Manifest ────────────────────────────────── */
 
-        const char* host_io = gonodes_get_host_io(gn);
+        const char* host_io = gonodes_get_host_io(gn, p);
         if (host_io && host_io[0] != '\0') {
             printf("[Metal Host] Host I/O Manifest:\n%s\n", host_io);
         } else {

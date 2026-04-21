@@ -36,9 +36,11 @@ extends Control
 ##   --parallel-cook          (enable parallel cooking)
 ##   --max-cooks <N>          (0=unlimited)
 ##
-## Rendering backend is automatic — Forward+ with fallback to Compatibility
-## (OpenGL 3.3) via the fallback_to_opengl3 project setting baked into the .pck.
-## Power users can override with --rendering-method on the command line.
+## Rendering backend is driven by the "renderer" field in config.json
+## (written by the export dialog).  On startup the Player compares the
+## requested renderer against the active one; if they differ, it
+## re-launches itself with --rendering-method <renderer>.  Power users
+## can also pass --rendering-method directly on the command line.
 ## VSync and window settings are controlled by each WindowOUT in the patch.
 
 const _CONFIG_FILE := "config.json"
@@ -79,6 +81,13 @@ func _ready() -> void:
 	GNExtensionRegistry.instance().scan_custom_assets()
 
 	_parse_config()
+
+	# Check if config.json requests a different renderer than what's running.
+	# Godot's renderer is set at process startup and cannot change at runtime,
+	# so we must re-launch if they don't match.
+	if _check_renderer_mismatch():
+		return  # Re-launching — don't proceed
+
 	_apply_window_settings()
 
 	if _patch_path.is_empty() and _patch_url.is_empty():
@@ -165,6 +174,32 @@ func _config_settings() -> Dictionary:
 	if not _config.has("settings"):
 		_config["settings"] = {}
 	return _config["settings"]
+
+
+## Checks if config.json requests a renderer different from the current one.
+## If so, re-launches the process with --rendering-method and returns true.
+## Prevents infinite relaunch loops via the --renderer-set sentinel flag.
+const _VALID_RENDERERS := ["forward_plus", "mobile", "gl_compatibility"]
+const _RELAUNCH_SENTINEL := "--renderer-set"
+
+func _check_renderer_mismatch() -> bool:
+	var desired: String = _config.get("renderer", "")
+	if desired.is_empty() or desired not in _VALID_RENDERERS:
+		return false
+	# If we already re-launched with this flag, don't loop.
+	if _RELAUNCH_SENTINEL in OS.get_cmdline_args():
+		return false
+	var current := GNGpuContext.get_current_renderer()
+	if current == desired:
+		return false
+	# Re-launch with the requested renderer.
+	var exe := OS.get_executable_path()
+	var args := OS.get_cmdline_args()
+	args.append_array(["--rendering-method", desired, _RELAUNCH_SENTINEL])
+	GNLogger.info("Player", "Renderer mismatch: running '%s', config wants '%s'. Re-launching." % [current, desired])
+	OS.create_process(exe, args)
+	get_tree().quit(0)
+	return true
 
 
 ## Applies runtime settings from config.json to the cook engine and logger.

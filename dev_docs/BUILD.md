@@ -428,7 +428,13 @@ the patch path.
 ```json
 {
   "patch": "MyShow.gnpatch",
-  "renderer": "forward_plus"
+  "renderer": "forward_plus",
+  "settings": {
+    "log_level": 1,
+    "log_to_file": false,
+    "parallel_cook_enabled": false,
+    "max_cooks_per_frame": 0
+  }
 }
 ```
 
@@ -436,14 +442,20 @@ the patch path.
 ```json
 {
   "patch_url": "MyShow.gnpatch",
-  "renderer": "gl_compatibility"
+  "renderer": "gl_compatibility",
+  "settings": {
+    "log_level": 1,
+    "log_to_file": false,
+    "parallel_cook_enabled": false,
+    "max_cooks_per_frame": 0
+  }
 }
 ```
 
-The rendering method is baked into the Player binary at build time (via the
-export preset).  The `renderer` field in config.json is informational ---
-it records what the exporter intended, and can be consumed by future Player
-enhancements.
+The `renderer` field is **active** --- on startup the Player compares it
+against the running renderer and re-launches with `--rendering-method` if
+they differ.  A `CONFIG_OPTIONS.txt` file is also generated alongside
+config.json by the exporter, documenting all available fields and values.
 
 
 ## Export Presets
@@ -503,6 +515,7 @@ See the existing extensions for reference:
 | `gn_ext_ml` | `addons/gn_ext_ml/` | ML inference via ONNX Runtime (7 ops — requires ONNX Runtime) |
 | `gn_ext_depth_sensor` | `addons/gn_ext_depth_sensor/` | Depth sensors — Azure Kinect, RealSense, Ultraleap (5 ops) |
 | `gn_ext_blackmagic` | `addons/gn_ext_blackmagic/` | Blackmagic DeckLink I/O (3 ops — requires DeckLink SDK) |
+| `gn_ext_host_bridge` | `addons/gn_ext_host_bridge/` | Internal bridge between libgonodes C API and GNEmbeddedHost (GDExtension, no operators) |
 
 Full details on the required directory layout and the discovery mechanism
 are in [CONTRIBUTING.md → Extension Self-Containment Rule](CONTRIBUTING.md#extension-self-containment-rule).

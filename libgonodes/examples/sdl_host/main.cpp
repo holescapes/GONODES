@@ -140,10 +140,10 @@ int main(int argc, char* argv[]) {
     }
 
     printf("[SDL Host] Loading patch: %s\n", patch_file);
-    int err = gonodes_load_patch(gn, patch_file);
-    if (err != GONODES_OK) {
-        fprintf(stderr, "[SDL Host] gonodes_load_patch failed: %d — %s\n",
-                err, gonodes_get_last_error(gn));
+    gonodes_patch_t p = gonodes_load_patch(gn, patch_file);
+    if (!p) {
+        fprintf(stderr, "[SDL Host] gonodes_load_patch failed: %s\n",
+                gonodes_get_last_error(gn));
         gonodes_destroy(gn);
         SDL_GL_DeleteContext(gl_ctx);
         SDL_DestroyWindow(window);
@@ -152,21 +152,21 @@ int main(int argc, char* argv[]) {
     }
 
     /* Enable auto-reload for live iteration. */
-    gonodes_set_auto_reload(gn, 1, 0.5);
+    gonodes_set_auto_reload(gn, p, 1, 0.5);
 
-    /* ── v1.1.0: Query Texture Info ─────────────────────────────────── */
+    /* ── v2.0: Query Texture Info ─────────────────────────────────── */
 
     gonodes_cook_frame(gn, 0.0);  /* Initial cook for introspection. */
     gonodes_texture_info_t tex_info;
     memset(&tex_info, 0, sizeof(tex_info));
-    if (gonodes_get_texture_info(gn, "host_out", &tex_info) == GONODES_OK) {
+    if (gonodes_get_texture_info(gn, p, "host_out", &tex_info) == GONODES_OK) {
         printf("[SDL Host] Output texture: %dx%d, format=%d, channels=%d\n",
                tex_info.width, tex_info.height, tex_info.format, tex_info.channels);
     }
 
     /* ── Query Host I/O Manifest ────────────────────────────────────── */
 
-    const char* host_io = gonodes_get_host_io(gn);
+    const char* host_io = gonodes_get_host_io(gn, p);
     if (host_io && host_io[0] != '\0') {
         printf("[SDL Host] Host I/O Manifest:\n%s\n", host_io);
     } else {
@@ -201,13 +201,13 @@ int main(int argc, char* argv[]) {
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE) running = 0;
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_r) {
                 printf("[SDL Host] Manual reload triggered\n");
-                gonodes_reload_patch(gn);
+                gonodes_reload_patch(gn, p);
             }
-            /* v1.1.0: Press P for pixel readback test. */
+            /* v2.0: Press P for pixel readback test. */
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_p) {
                 int rw = 0, rh = 0;
                 uint8_t buf[64];  /* Read just a tiny sample. */
-                int bytes = gonodes_read_output_pixels(gn, "host_out", buf, sizeof(buf),
+                int bytes = gonodes_read_output_pixels(gn, p, "host_out", buf, sizeof(buf),
                                                         GONODES_FORMAT_RGBA8, &rw, &rh);
                 if (bytes > 0) {
                     printf("[SDL Host] Pixel readback: %dx%d, first pixel RGBA=(%d,%d,%d,%d)\n",
@@ -216,18 +216,18 @@ int main(int argc, char* argv[]) {
                     printf("[SDL Host] Pixel readback failed: %d\n", bytes);
                 }
             }
-            /* v1.1.0: Press 1/2/3 to cycle resolutions. */
+            /* v2.0: Press 1/2/3 to cycle resolutions. */
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_1) {
                 printf("[SDL Host] Resolution override: 1920x1080\n");
-                gonodes_set_output_resolution(gn, "host_out", 1920, 1080);
+                gonodes_set_output_resolution(gn, p, "host_out", 1920, 1080);
             }
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_2) {
                 printf("[SDL Host] Resolution override: 3840x2160\n");
-                gonodes_set_output_resolution(gn, "host_out", 3840, 2160);
+                gonodes_set_output_resolution(gn, p, "host_out", 3840, 2160);
             }
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_3) {
                 printf("[SDL Host] Resolution: revert to patch default\n");
-                gonodes_set_output_resolution(gn, "host_out", 0, 0);
+                gonodes_set_output_resolution(gn, p, "host_out", 0, 0);
             }
         }
 
@@ -240,9 +240,9 @@ int main(int argc, char* argv[]) {
 
         /* Push an LFO value into a HostInCHOP named "host_lfo". */
         float lfo_val = sinf(time * 2.0f) * 0.5f + 0.5f;
-        gonodes_set_input_chop(gn, "host_lfo", "lfo", &lfo_val, 1);
+        gonodes_set_input_chop(gn, p, "host_lfo", "lfo", &lfo_val, 1);
 
-        /* v1.2.0: Zero-copy CHOP direct — push multi-channel data via
+        /* v2.0: Zero-copy CHOP direct — push multi-channel data via
          * pointer lending.  The arrays stay valid for the frame duration. */
         {
             static float ch_x[1], ch_y[1];
@@ -252,15 +252,15 @@ int main(int argc, char* argv[]) {
             const char*  names[]   = {"x", "y"};
             const float* data[]    = {ch_x, ch_y};
             const int    counts[]  = {1, 1};
-            gonodes_set_input_chop_direct(gn, "host_xy", names, data, counts, 2);
+            gonodes_set_input_chop_direct(gn, p, "host_xy", names, data, counts, 2);
         }
 
-        /* v1.2.0: Zero-copy DAT direct — push JSON table via pointer. */
+        /* v2.0: Zero-copy DAT direct — push JSON table via pointer. */
         {
             static char json_buf[256];
             snprintf(json_buf, sizeof(json_buf),
                      "[[\"time\",\"lfo\"],[\"%.3f\",\"%.3f\"]]", time, lfo_val);
-            gonodes_set_input_table_direct(gn, "host_table",
+            gonodes_set_input_table_direct(gn, p, "host_table",
                                             json_buf, (int)strlen(json_buf));
         }
 
@@ -271,7 +271,7 @@ int main(int argc, char* argv[]) {
         /* ── Read Output ────────────────────────────────────────────── */
 
         int tex_w = 0, tex_h = 0;
-        uint64_t tex_handle = gonodes_get_output_texture(gn, "host_out", &tex_w, &tex_h);
+        uint64_t tex_handle = gonodes_get_output_texture(gn, p, "host_out", &tex_w, &tex_h);
 
         /* ── Render ─────────────────────────────────────────────────── */
 

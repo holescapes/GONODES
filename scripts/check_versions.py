@@ -65,6 +65,59 @@ def get_app_version() -> str:
     return m.group(1)
 
 
+def check_libgonodes_version(expected: str) -> list:
+    """Validates that gonodes_host.h and CMakeLists.txt agree with versions.env."""
+    errors = []
+    parts = expected.split(".")
+    if len(parts) != 3:
+        errors.append(f"versions.env: LIBGONODES_VERSION '{expected}' is not MAJOR.MINOR.PATCH")
+        return errors
+    exp_major, exp_minor, exp_patch = parts
+
+    # Check gonodes_host.h macros
+    header = os.path.join(ROOT, "libgonodes", "include", "gonodes_host.h")
+    if os.path.isfile(header):
+        with open(header, encoding="utf-8") as f:
+            hdr_content = f.read()
+
+        for macro, exp_val in [("MAJOR", exp_major), ("MINOR", exp_minor), ("PATCH", exp_patch)]:
+            m = re.search(
+                rf'#define\s+GONODES_API_VERSION_{macro}\s+(\d+)',
+                hdr_content,
+            )
+            if not m:
+                errors.append(f"gonodes_host.h: GONODES_API_VERSION_{macro} not found")
+            elif m.group(1) != exp_val:
+                errors.append(
+                    f"gonodes_host.h: GONODES_API_VERSION_{macro} is {m.group(1)}, "
+                    f"expected {exp_val} (from versions.env)"
+                )
+    else:
+        errors.append("gonodes_host.h not found")
+
+    # Check CMakeLists.txt — look for file(STRINGS) or hardcoded project(VERSION)
+    cmake = os.path.join(ROOT, "libgonodes", "CMakeLists.txt")
+    if os.path.isfile(cmake):
+        with open(cmake, encoding="utf-8") as f:
+            cmake_content = f.read()
+
+        # If CMakeLists reads from versions.env dynamically, that's fine.
+        # But if there's a hardcoded project(... VERSION X.Y.Z), flag drift.
+        m = re.search(r'project\s*\(\s*libgonodes\s+VERSION\s+([\d.]+)', cmake_content)
+        if m:
+            cmake_ver = m.group(1)
+            if cmake_ver != expected:
+                errors.append(
+                    f"CMakeLists.txt: project VERSION is {cmake_ver}, "
+                    f"expected {expected} (from versions.env)"
+                )
+        # else: version comes from versions.env dynamically — OK
+    else:
+        errors.append("libgonodes/CMakeLists.txt not found")
+
+    return errors
+
+
 def main():
     if not os.path.isfile(VERSIONS_FILE):
         print("ERROR: versions.env not found at project root")
@@ -78,14 +131,22 @@ def main():
 
     errors = check_workflows(versions)
 
+    # libgonodes version consistency
+    lib_ver = versions.get("LIBGONODES_VERSION")
+    if lib_ver:
+        print(f"libgonodes API version (from versions.env): {lib_ver}")
+        errors.extend(check_libgonodes_version(lib_ver))
+    else:
+        errors.append("versions.env missing LIBGONODES_VERSION")
+
     if errors:
         print(f"\n{len(errors)} version mismatch(es) found:")
         for e in errors:
             print(f"  ✗ {e}")
-        print(f"\nUpdate the workflow env: blocks to match versions.env")
+        print(f"\nUpdate the affected files to match versions.env")
         sys.exit(1)
     else:
-        print("All CI workflows match versions.env ✓")
+        print("All versions consistent ✓")
 
 
 if __name__ == "__main__":

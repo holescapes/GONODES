@@ -565,10 +565,11 @@ no boot script execution.
 
 ---
 
-## 9. Dependency Guards
+## 9. Dependency Guards (Hard Rule 25.29)
 
 The `dependencies` field is an array of ClassDB class names. This is
-primarily used by native extensions that require GDExtension binaries:
+primarily used by native extensions that require GDExtension binaries.
+**This is mandatory for all native extensions — see hard rule 25.29.**
 
 ```ini
 [extension]
@@ -578,6 +579,32 @@ dependencies = ["FFmpegFrameDecoder", "FFmpegStreamPlayer"]
 If `ClassDB.class_exists("FFmpegFrameDecoder")` returns false (binary not
 loaded), the extension is skipped. This prevents script errors from
 operators referencing unavailable native classes.
+
+### GDScript Pattern for Native Classes
+
+Operator scripts MUST NOT reference native class names directly — this
+causes parse errors when the `.gdextension` is disabled. Instead:
+
+```gdscript
+var _native: Object = null   # NOT: var _native: MyNativeClass
+
+func _init() -> void:
+    if ClassDB.class_exists(&"MyNativeClass"):
+        _native = ClassDB.instantiate(&"MyNativeClass")
+
+func _cook(inputs: Array[GNData]) -> GNData:
+    if _native == null:
+        node_warning = "Requires gn_ext_myext native library."
+        return null
+    var result = _native.call(&"process", input_data)
+    # ...
+```
+
+**Rules:**
+- Declare natives as `Object`, `RefCounted`, or `Node` — never the native type
+- Guard instantiation with `ClassDB.class_exists()`
+- Call methods via `.call(&"method_name", args)`
+- Show `node_warning` when native is unavailable
 
 ---
 

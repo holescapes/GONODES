@@ -1,6 +1,6 @@
 # Graph Edit Demo
 
-Demonstrates the v1.1.0 dynamic graph editing API (Gap 7 from the VDMX/VUO audit).
+Demonstrates the v2.0 dynamic graph editing API (Gap 7 from the VDMX/VUO audit).
 
 This capability is **unique vs TouchEngine** — TouchEngine's SDK only provides read-only graph access.  LibGONODES matches and exceeds VUO's dynamic composition modification.
 

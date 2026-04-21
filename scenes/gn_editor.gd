@@ -152,6 +152,10 @@ func _ready() -> void:
 	GNExtensionRegistry.instance().scan_custom_assets()
 	GNExtensionRegistry.instance().scan_deprecation()
 
+	# Check if user selected a different renderer in Preferences — relaunch if needed.
+	if _check_renderer_relaunch():
+		return
+
 	_setup_network()
 	_setup_cook_engine()
 	_setup_file_dialogs()
@@ -1550,6 +1554,28 @@ func _notification(what: int) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Preferences
 # ═══════════════════════════════════════════════════════════════════════════════
+
+const _VALID_RENDERERS := ["forward_plus", "mobile", "gl_compatibility"]
+const _RELAUNCH_SENTINEL := "--renderer-set"
+
+## If GNSettings has a saved renderer that doesn't match the current one,
+## re-launch the editor with --rendering-method.  Returns true if re-launching.
+func _check_renderer_relaunch() -> bool:
+	var desired: String = GNSettings.get_value("renderer", "")
+	if desired.is_empty() or desired not in _VALID_RENDERERS:
+		return false
+	if _RELAUNCH_SENTINEL in OS.get_cmdline_args():
+		return false
+	var current := GNGpuContext.get_current_renderer()
+	if current == desired:
+		return false
+	GNLogger.info("Editor", "Renderer mismatch: running '%s', settings want '%s'. Re-launching." % [current, desired])
+	var exe := OS.get_executable_path()
+	var args := OS.get_cmdline_args()
+	args.append_array(["--rendering-method", desired, _RELAUNCH_SENTINEL])
+	OS.create_process(exe, args)
+	get_tree().quit(0)
+	return true
 
 func _open_preferences() -> void:
 	if _preferences_dialog == null:

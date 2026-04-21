@@ -9,6 +9,39 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-06-XX — libgonodes v2.5: Direct Bridge Architecture
+
+### Architecture
+- **Eliminated per-frame env-var IPC layer** (~490 lines removed from
+  `gonodes_bootstrap.cpp`). The `gn_dispatch_queue_to_env()` and
+  `gn_collect_responses_from_env()` functions are deleted entirely.
+- **GNHostBridge GDExtension** moved to dedicated `addons/gn_ext_host_bridge/`
+  extension. Extended with `drain_commands()` (reads C command queue directly)
+  and `set_*_output()` methods (writes to C response slots directly).
+- **Single inbound/outbound path:** Commands flow C → ring buffer →
+  `GNHostBridge.drain_commands()` → GDScript. Responses flow GDScript →
+  `GNHostBridge.set_*_output()` → C struct fields. No string formatting,
+  no getenv/setenv per frame.
+- **One remaining env var:** `GONODES_BRIDGE_INSTANCE_PTR` set once during
+  `gonodes_create()` for initial pointer registration. GPU context env vars
+  in `gn_bootstrap_init()` remain for one-time Vulkan/GL/Metal device
+  injection.
+
+### GNEmbeddedHost (GDScript)
+- `_poll_commands()` (230 lines, env var iteration) replaced by
+  `_drain_and_dispatch()` (150 lines, direct command dispatch from Array).
+- `_publish_introspection()` (100 lines, env var writes) replaced by
+  `_publish_to_bridge()` (90 lines, direct `GNHostBridge.set_*()` calls).
+- `_get_possible_chop_channels()` helper removed (commands carry exact
+  channel names now).
+- Pixel/geometry/volume/particle input handlers rewritten to accept
+  command fields directly instead of parsing CSV from env vars.
+
+### Version
+- libgonodes bumped from 2.0.0 to 2.5.0.
+
+---
+
 ## 2026-06-12 — Unified GPU Architecture, NET Family, Viewer Readback Elimination
 
 ### Architecture

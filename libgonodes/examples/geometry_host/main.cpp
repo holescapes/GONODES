@@ -1,7 +1,7 @@
 /*
  * GONODES Geometry Host Example
  *
- * Demonstrates the v1.1.0 geometry/SOP exchange API:
+ * Demonstrates the v2.0 geometry/SOP exchange API:
  *   • Pushing vertex data into a HostInSOP node
  *   • Reading cooked geometry from SOP/COMP output nodes
  *   • Texture info query for output TOPs
@@ -56,7 +56,7 @@ static void print_geometry(const char* label, const gonodes_geometry_data_t* geo
 /*  Demo: Generate a procedural grid and push it                             */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static void demo_push_geometry(gonodes_instance_t gn) {
+static void demo_push_geometry(gonodes_instance_t gn, gonodes_patch_t p) {
     printf("\n═══ Push Geometry into HostInSOP ═══\n");
 
     /* Generate a 4×4 grid. */
@@ -111,10 +111,10 @@ static void demo_push_geometry(gonodes_instance_t gn) {
     printf("  Generated %dx%d grid: %d vertices, %d indices\n",
            GRID, GRID, VERTS, TRIS * 3);
 
-    /* v1.2.0: Use gonodes_set_input_geometry_direct() for zero-copy
+    /* v2.0: Use gonodes_set_input_geometry_direct() for zero-copy
      * pointer lending instead of the temp-file path.  The arrays stay
      * valid for the frame's lifetime (until next gonodes_cook_frame). */
-    int err = gonodes_set_input_geometry_direct(gn, "host_geo_in",
+    int err = gonodes_set_input_geometry_direct(gn, p, "host_geo_in",
                                           positions, normals, uvs, nullptr,
                                           VERTS, indices, TRIS * 3);
     if (err == GONODES_OK)
@@ -131,14 +131,14 @@ static void demo_push_geometry(gonodes_instance_t gn) {
 /*  Demo: Read geometry output                                               */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static void demo_read_geometry(gonodes_instance_t gn) {
+static void demo_read_geometry(gonodes_instance_t gn, gonodes_patch_t p) {
     printf("\n═══ Read Geometry from SOP Output ═══\n");
 
-    const gonodes_geometry_data_t* geo = gonodes_get_output_geometry(gn, "sop_out");
+    const gonodes_geometry_data_t* geo = gonodes_get_output_geometry(gn, p, "sop_out");
     print_geometry("sop_out", geo);
 
     /* Also try reading from a second output if it exists. */
-    geo = gonodes_get_output_geometry(gn, "host_geo_out");
+    geo = gonodes_get_output_geometry(gn, p, "host_geo_out");
     print_geometry("host_geo_out", geo);
 }
 
@@ -147,13 +147,13 @@ static void demo_read_geometry(gonodes_instance_t gn) {
 /*  Demo: Texture info query                                                 */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static void demo_texture_info(gonodes_instance_t gn) {
+static void demo_texture_info(gonodes_instance_t gn, gonodes_patch_t p) {
     printf("\n═══ Texture Info Query ═══\n");
 
     gonodes_texture_info_t info;
     memset(&info, 0, sizeof(info));
 
-    int err = gonodes_get_texture_info(gn, "vis_out", &info);
+    int err = gonodes_get_texture_info(gn, p, "vis_out", &info);
     if (err == GONODES_OK) {
         const char* fmt_names[] = {
             "RGBA8", "RGBA16F", "RGBA32F", "R8", "RG8", "BGRA8", "R16F", "RG16F"
@@ -173,7 +173,7 @@ static void demo_texture_info(gonodes_instance_t gn) {
 /*  Demo: Animated geometry (morph the grid over time)                       */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static void demo_animated_geometry(gonodes_instance_t gn) {
+static void demo_animated_geometry(gonodes_instance_t gn, gonodes_patch_t p) {
     printf("\n═══ Animated Geometry (20 frames) ═══\n");
 
     const int GRID = 8;
@@ -226,20 +226,20 @@ static void demo_animated_geometry(gonodes_instance_t gn) {
             }
         }
 
-        gonodes_set_input_geometry_direct(gn, "host_geo_in",
+        gonodes_set_input_geometry_direct(gn, p, "host_geo_in",
                                     positions, normals, uvs, nullptr,
                                     VERTS, indices, TRIS * 3);
         gonodes_cook_frame(gn, 1.0 / 60.0);
 
         if (frame % 5 == 0) {
             const gonodes_geometry_data_t* geo =
-                gonodes_get_output_geometry(gn, "sop_out");
+                gonodes_get_output_geometry(gn, p, "sop_out");
             if (geo) {
                 printf("  Frame %d: output has %d vertices\n", frame, geo->vertex_count);
             } else {
                 double cook_ms = 0;
                 int nodes = 0, fn = 0;
-                gonodes_get_stats(gn, &cook_ms, &nodes, &fn);
+                gonodes_get_stats(gn, p, &cook_ms, &nodes, &fn);
                 printf("  Frame %d: cook=%.2fms, nodes=%d\n", frame, cook_ms, nodes);
             }
         }
@@ -278,9 +278,9 @@ int main(int argc, char* argv[]) {
     /* ── Load Patch ─────────────────────────────────────────────────── */
 
     printf("Loading patch: %s\n", patch_file);
-    int err = gonodes_load_patch(gn, patch_file);
-    if (err != GONODES_OK) {
-        fprintf(stderr, "Load failed (%d): %s\n", err, gonodes_get_last_error(gn));
+    gonodes_patch_t p = gonodes_load_patch(gn, patch_file);
+    if (!p) {
+        fprintf(stderr, "Load failed: %s\n", gonodes_get_last_error(gn));
         gonodes_destroy(gn);
         return 1;
     }
@@ -290,10 +290,10 @@ int main(int argc, char* argv[]) {
 
     /* ── Run Demos ──────────────────────────────────────────────────── */
 
-    demo_push_geometry(gn);
-    demo_read_geometry(gn);
-    demo_texture_info(gn);
-    demo_animated_geometry(gn);
+    demo_push_geometry(gn, p);
+    demo_read_geometry(gn, p);
+    demo_texture_info(gn, p);
+    demo_animated_geometry(gn, p);
 
     /* ── Cleanup ────────────────────────────────────────────────────── */
 

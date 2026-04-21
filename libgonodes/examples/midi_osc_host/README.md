@@ -1,6 +1,6 @@
 # MIDI/OSC Host Example
 
-Demonstrates the v1.1.0 protocol bridge, events, transport, and resolution APIs (Gaps 5, 6, 8, 10 from the VDMX/VUO audit).
+Demonstrates the v2.0 protocol bridge, events, transport, and resolution APIs (Gaps 5, 6, 8, 10 from the VDMX/VUO audit).
 
 ## What It Shows
 

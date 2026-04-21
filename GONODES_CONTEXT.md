@@ -4078,6 +4078,36 @@ func get_output_data(port_index: int) -> GNData:
   3. **NET host-bridge operators** — `HostInTOP`, `HostInCHOP`, etc. output typed data matching their bridge target. Their family is NET but output type matches the target family.
 - **Why this matters:** Implicit conversions waste CPU/GPU cycles (e.g., converting floats to strings in a table only to parse them back downstream), break the type-safe port system, and confuse users about what data is flowing through the graph. Explicit bridges make the conversion visible and let the user choose the optimal pipeline.
 
+### 25.29 Native Extension Graceful Degradation
+
+Extensions that depend on GDExtension native binaries MUST degrade gracefully when those binaries are not compiled. **Godot must start without parse errors or warnings regardless of which native libraries are present.** Three mandatory layers:
+
+1. **`.gdextension` auto-activation** — Ship `.gdextension` files as `.gdextension.disabled`. `GNExtensionRegistry.sync_native_extensions()` renames them based on whether the platform binary exists on disk.
+2. **`dependencies` guard in `gn_extension.cfg`** — Declare all native ClassDB class names the extension provides: `dependencies = ["MyNativeClass"]`. The registry calls `ClassDB.class_exists()` for each; if any are missing, the entire extension is silently skipped.
+3. **No static class references in GDScript** — NEVER use a native class name directly in code (e.g., `MyNativeClass.method()`). Instead:
+   - Declare the variable as `Object`, `RefCounted`, or `Node`.
+   - Guard with `ClassDB.class_exists(&"MyNativeClass")`.
+   - Instantiate with `ClassDB.instantiate(&"MyNativeClass")`.
+   - Call methods via `.call(&"method_name", args)` or duck-typed access.
+   - Early-return or show `node_warning` when the instance is null.
+
+**Example pattern:**
+```gdscript
+var _native: Object = null
+
+func _init() -> void:
+    if ClassDB.class_exists(&"MyNativeClass"):
+        _native = ClassDB.instantiate(&"MyNativeClass")
+
+func _cook(inputs: Array[GNData]) -> GNData:
+    if _native == null:
+        node_warning = "Requires gn_ext_myext native library."
+        return null
+    var result = _native.call(&"process", input_data)
+```
+
+**Why this matters:** Direct class-name references become parse errors the moment the `.gdextension` is disabled, breaking the entire script (and every script that depends on it). The dynamic pattern makes native code invisible to the parser — Godot loads cleanly, and the operator simply reports unavailability at runtime.
+
 
 ---
 

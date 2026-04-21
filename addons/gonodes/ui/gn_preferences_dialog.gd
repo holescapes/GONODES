@@ -26,6 +26,7 @@ var _parallel_cook_check: CheckButton = null
 var _max_cooks_spin: SpinBox = null
 var _recent_count_spin: SpinBox = null
 var _auto_save_spin: SpinBox = null
+var _renderer_option: OptionButton = null
 
 
 func _init() -> void:
@@ -61,6 +62,9 @@ func _ready() -> void:
 	_scroll.add_child(_content)
 
 	_first_section = true
+	_build_section_header("Renderer")
+	_build_renderer_settings()
+
 	_build_section_header("General")
 	_build_general_settings()
 
@@ -108,6 +112,63 @@ func _build_section_header(label_text: String) -> void:
 	var sep := HSeparator.new()
 	sep.modulate = Color(1, 1, 1, 0.3)
 	_content.add_child(sep)
+
+
+const _RENDERER_IDS := ["forward_plus", "mobile", "gl_compatibility"]
+const _RENDERER_LABELS := ["Forward+", "Mobile", "Compatibility (OpenGL)"]
+
+func _build_renderer_settings() -> void:
+	var current := GNGpuContext.get_current_renderer()
+	var row := _make_row("Rendering method",
+		"GPU rendering backend. Requires restart to take effect.")
+	_renderer_option = OptionButton.new()
+	for i in _RENDERER_LABELS.size():
+		_renderer_option.add_item(_RENDERER_LABELS[i], i)
+	var cur_idx := _RENDERER_IDS.find(current)
+	if cur_idx < 0:
+		cur_idx = 0
+	_renderer_option.selected = cur_idx
+	_renderer_option.custom_minimum_size.x = 180
+	_renderer_option.item_selected.connect(func(idx: int):
+		var chosen: String = _RENDERER_IDS[idx]
+		if chosen != current:
+			GNSettings.set_value("renderer", chosen)
+			_prompt_renderer_restart(chosen))
+	row.add_child(_renderer_option)
+	_content.add_child(row)
+
+	var note := Label.new()
+	note.text = "Current: %s" % _RENDERER_LABELS[cur_idx]
+	note.add_theme_font_size_override("font_size", 11)
+	note.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+	_content.add_child(note)
+
+
+func _prompt_renderer_restart(new_renderer: String) -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title = "Restart Required"
+	dialog.dialog_text = "Switching to '%s' requires a restart.\nRestart now?" % new_renderer
+	dialog.ok_button_text = "Restart"
+	dialog.add_cancel_button("Later")
+	dialog.confirmed.connect(func():
+		var exe := OS.get_executable_path()
+		var args := OS.get_cmdline_args()
+		# Remove any existing --rendering-method pair from args
+		var clean_args: PackedStringArray = []
+		var skip_next := false
+		for a in args:
+			if skip_next:
+				skip_next = false
+				continue
+			if a == "--rendering-method":
+				skip_next = true
+				continue
+			clean_args.append(a)
+		clean_args.append_array(["--rendering-method", new_renderer])
+		OS.create_process(exe, clean_args)
+		get_tree().quit(0))
+	add_child(dialog)
+	dialog.popup_centered()
 
 
 func _build_general_settings() -> void:

@@ -1,5 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
-project(libgonodes VERSION 1.1.0 LANGUAGES CXX)
+
+# ── Read LIBGONODES_VERSION from versions.env (single source of truth) ────
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/../versions.env" _ver_lines)
+foreach(_line IN LISTS _ver_lines)
+    if(_line MATCHES "^LIBGONODES_VERSION=(.+)$")
+        set(_lib_ver "${CMAKE_MATCH_1}")
+    endif()
+endforeach()
+if(NOT _lib_ver)
+    message(FATAL_ERROR "LIBGONODES_VERSION not found in versions.env")
+endif()
+
+project(libgonodes VERSION ${_lib_ver} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -33,6 +45,14 @@ else()
     add_library(gonodes STATIC ${GONODES_SOURCES} ${GONODES_HEADERS})
     target_compile_definitions(gonodes PRIVATE GONODES_BUILDING_LIBRARY)
 endif()
+
+# Pass version from CMake (sourced from versions.env) so the library
+# can static_assert consistency with the header macros.
+target_compile_definitions(gonodes PRIVATE
+    GONODES_VERSION_FROM_CMAKE_MAJOR=${PROJECT_VERSION_MAJOR}
+    GONODES_VERSION_FROM_CMAKE_MINOR=${PROJECT_VERSION_MINOR}
+    GONODES_VERSION_FROM_CMAKE_PATCH=${PROJECT_VERSION_PATCH}
+)
 
 target_include_directories(gonodes PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -82,13 +102,13 @@ if(GONODES_BUILD_EXAMPLES)
     # Params Demo Example
     add_subdirectory(examples/params_demo EXCLUDE_FROM_ALL)
 
-    # v1.1.0: Geometry Host Example
+    # Geometry Host Example
     add_subdirectory(examples/geometry_host EXCLUDE_FROM_ALL)
 
-    # v1.1.0: Graph Edit Demo Example
+    # Graph Edit Demo Example
     add_subdirectory(examples/graph_edit_demo EXCLUDE_FROM_ALL)
 
-    # v1.1.0: MIDI/OSC Host Example
+    # MIDI/OSC Host Example
     add_subdirectory(examples/midi_osc_host EXCLUDE_FROM_ALL)
 endif()
 
@@ -101,5 +121,11 @@ if(GONODES_BUILD_TESTS)
     target_link_libraries(gonodes_tests PRIVATE gonodes)
     target_include_directories(gonodes_tests PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
+    # Pass expected version so tests can verify header matches versions.env.
+    target_compile_definitions(gonodes_tests PRIVATE
+        EXPECTED_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+        EXPECTED_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+        EXPECTED_VERSION_PATCH=${PROJECT_VERSION_PATCH}
     )
 endif()

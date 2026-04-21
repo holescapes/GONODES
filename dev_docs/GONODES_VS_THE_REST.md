@@ -2,7 +2,7 @@
 
 > **Date:** 2026-03-20 (consolidated 2026-03-25 — merged TD_HOUDINI_COMPARISON.md; updated 2026-04-09 — operator counts, missing TOP gap analysis; updated 2026-04-21 — all operator gaps closed, gap sections removed)
 > **Audience:** Core developers, architecture reviewers, prospective contributors
-> **Purpose:** Comprehensive cook-flow and real-time efficiency comparison between GONODES, TouchDesigner, VVVV, and Houdini — with operator coverage summary and feature parity tracker.
+> **Purpose:** Comprehensive cook-flow and real-time efficiency comparison between GONODES, TouchDesigner, VVVV, Houdini, and Notch — with operator coverage summary and feature parity tracker.
 >
 > Many feature-audit items from the original TD/Houdini comparison have been implemented:
 > - ✅ Ramp parameter type with curve editor
@@ -27,7 +27,7 @@
 
 ## Table of Contents
 
-1. [The Four Contenders](#1-the-four-contenders)
+1. [The Five Contenders](#1-the-five-contenders)
 2. [Evaluation Strategy — Push vs Pull](#2-evaluation-strategy--push-vs-pull)
 3. [Dirty Propagation — The Critical Path](#3-dirty-propagation--the-critical-path)
 4. [GPU Pipeline — The Real Bottleneck](#4-gpu-pipeline--the-real-bottleneck)
@@ -49,18 +49,18 @@
 
 ---
 
-## 1. The Four Contenders
+## 1. The Five Contenders
 
-| | **TouchDesigner** | **VVVV** | **Houdini** | **GONODES** |
-|---|---|---|---|---|
-| **Primary domain** | Real-time AV, interactive media | Real-time patching, installations | Offline VFX, simulation, procedural modelling | Real-time AV, VJing, generative art |
-| **Cook paradigm** | Pull-based, demand-driven per frame | Push-based (beta: everything runs; gamma: hybrid with .NET JIT) | Pull-based, demand-driven on dependency change | Push-based, topo-sorted per frame with 3-tier guards |
-| **Engine language** | C++ (operators), Python (scripting) | C++ (beta) / .NET C# (gamma, VL) | C++ (HDK), VEX (LLVM JIT), Python/HScript | GDScript (operators) + 132 C++ GDExtension native ops |
-| **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan — multi-stream | DirectX 11 (beta); Stride/Vulkan (gamma) | Karma GPU (offline), OpenCL | Godot Vulkan/GLES3 SubViewport + RenderingDevice compute |
-| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
-| **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to hundreds |
-| **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **574 operators** across 14 families — 140 TOP, 106 CHOP, 80 SOP, 50 DAT, 37 IMG, 36 UI, 29 SDF, 27 COMP, 15 VOL, 15 NET, 13 POP, 12 MAT, 11 OUT, 3 SCRIPT |
+| | **TouchDesigner** | **VVVV** | **Houdini** | **Notch** | **GONODES** |
+|---|---|---|---|---|---|
+| **Primary domain** | Real-time AV, interactive media | Real-time patching, installations | Offline VFX, simulation, procedural modelling | Real-time 3D for live events, broadcast, XR | Real-time AV, VJing, generative art |
+| **Cook paradigm** | Pull-based, demand-driven per frame | Push-based (beta: everything runs; gamma: hybrid with .NET JIT) | Pull-based, demand-driven on dependency change | Full-scene push — entire graph evaluates every frame on GPU | Push-based, topo-sorted per frame with 3-tier guards |
+| **Engine language** | C++ (operators), Python (scripting) | C++ (beta) / .NET C# (gamma, VL) | C++ (HDK), VEX (LLVM JIT), Python/HScript | C++ (proprietary engine, DX11/12) | GDScript (operators) + 132 C++ GDExtension native ops |
+| **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan — multi-stream | DirectX 11 (beta); Stride/Vulkan (gamma) | Karma GPU (offline), OpenCL | **DirectX 11/12 — unified GPU-resident pipeline**, multi-GPU | Godot Vulkan/GLES3 SubViewport + RenderingDevice compute |
+| **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | Scene nodes (modifiers, generators, effects) — not family-typed | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
+| **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to low hundreds | Dozens to hundreds |
+| **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | £5,995+/yr (Builder); Playback bundled with media servers | **Free, open source** (Godot 4.6 + GDScript) |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | ~200 nodes | **574 operators** across 14 families — 140 TOP, 106 CHOP, 80 SOP, 50 DAT, 37 IMG, 36 UI, 29 SDF, 27 COMP, 15 VOL, 15 NET, 13 POP, 12 MAT, 11 OUT, 3 SCRIPT |
 
 ---
 
@@ -80,6 +80,10 @@ A viewer or output node *requests* data. The request cascades upstream recursive
 
 Nodes only cook when their output is explicitly demanded (viewport, ROP, downstream node). Non-time-dependent nodes cache indefinitely until an input or parameter changes. The dependency graph operates at the **parameter level** — changing `node.scale` invalidates only the exact downstream consumers of `scale`, not every downstream node.
 
+### Notch — Full-Scene GPU Push
+
+Notch evaluates the **entire active scene every frame** on the GPU. There is no dirty propagation, no hash guard, no demand culling. Nodes are not data-flow transforms but GPU render passes within a unified pipeline — geometry, particles, simulation, and compositing all execute as part of a single GPU frame submission. This is architecturally closer to a game engine's render loop than a node evaluator. The trade-off is deliberate: Notch targets live event visuals where every frame is a full render anyway, making skip-detection overhead unnecessary. Disabled/muted nodes are bypassed, but there's no equivalent to GONODES's input hash guard or TD's pull model for partially-static graphs.
+
 ### GONODES — Push, Triple-Guarded
 
 Every frame, `cook_frame(delta)` walks the topo-sorted DAG. Three guard layers prevent wasted work:
@@ -92,12 +96,12 @@ Every frame, `cook_frame(delta)` walks the topo-sorted DAG. Three guard layers p
 
 ### Comparison Verdict
 
-| Behaviour | TouchDesigner | VVVV beta | VVVV gamma | Houdini | GONODES |
-|---|---|---|---|---|---|
-| Visits unrequested nodes | Never | Always | Reduced (mutation tracking) | Never | Yes — but O(1) skip per clean node |
-| Per-frame overhead for static graph | Zero | Full eval cost | Low | Zero | Microseconds (dirty-check scan) |
-| Steady-state (nothing changes) | 0 cooks | All nodes cook | Reduced | 0 cooks | 0 cooks (hash guard + dirty flags) |
-| Disconnected subgraph cost | Zero | Full | Reduced | Zero | Zero (active set culling) |
+| Behaviour | TouchDesigner | VVVV beta | VVVV gamma | Houdini | Notch | GONODES |
+|---|---|---|---|---|---|---|
+| Visits unrequested nodes | Never | Always | Reduced (mutation tracking) | Never | **Always (full-scene every frame)** | Yes — but O(1) skip per clean node |
+| Per-frame overhead for static graph | Zero | Full eval cost | Low | Zero | Full eval cost (GPU-bound) | Microseconds (dirty-check scan) |
+| Steady-state (nothing changes) | 0 cooks | All nodes cook | Reduced | 0 cooks | All nodes evaluate (GPU stays hot) | 0 cooks (hash guard + dirty flags) |
+| Disconnected subgraph cost | Zero | Full | Reduced | Zero | Near-zero (disabled nodes skip) | Zero (active set culling) |
 
 **For typical real-time networks (30–200 nodes), the per-frame topo scan overhead is negligible.** GONODES's push model with guards achieves functionally equivalent work-skipping to TD's pull model. The theoretical gap only appears at 500+ nodes where TD's pull model wins by never visiting unrequested branches.
 
@@ -155,11 +159,11 @@ This applies to all 15 multi-output operators in GONODES. Concrete savings:
 
 ## 3. Dirty Propagation — The Critical Path
 
-| | **TouchDesigner** | **VVVV beta** | **VVVV gamma** | **Houdini** | **GONODES** |
-|---|---|---|---|---|---|
-| Dirty granularity | Node-level | None (always evaluates) | Object mutation | **Parameter-level** | Expression-level dep map + input hash |
-| Propagation strategy | Full subtree cascade | N/A | .NET ref tracking | Exact parameter consumers | Incremental — direct successors only, hash stops cascade |
-| False positive cooks | Low (but entire subtree cascades) | Maximum (everything runs) | Medium | Very low | Low (hash guard catches most) |
+| | **TouchDesigner** | **VVVV beta** | **VVVV gamma** | **Houdini** | **Notch** | **GONODES** |
+|---|---|---|---|---|---|---|
+| Dirty granularity | Node-level | None (always evaluates) | Object mutation | **Parameter-level** | None (always evaluates) | Expression-level dep map + input hash |
+| Propagation strategy | Full subtree cascade | N/A | .NET ref tracking | Exact parameter consumers | N/A — full scene re-render | Incremental — direct successors only, hash stops cascade |
+| False positive cooks | Low (but entire subtree cascades) | Maximum (everything runs) | Medium | Very low | Maximum (GPU handles it) | Low (hash guard catches most) |
 
 ### Where GONODES Is Smarter Than TD
 
@@ -187,17 +191,21 @@ No dirty system at all. *Everything* evaluates *every frame*. A 100-node network
 
 ## 4. GPU Pipeline — The Real Bottleneck for Real-Time
 
-| | **TouchDesigner** | **VVVV beta** | **VVVV gamma** | **GONODES** |
-|---|---|---|---|---|
-| GPU texture ops | **Multi-stream command queues** — independent TOP chains submit in parallel | DirectX 11 immediate context | Stride engine (Vulkan) | **Single Godot render thread** — sequential SubViewport renders |
-| GPU↔CPU sync | Explicit fence management, async readback | DX11 pipeline | Stride pipeline | Implicit via Godot renderer + scene-tree ordering |
-| Compute shaders | Full GLSL/HLSL compute | Limited (beta), Stride compute (gamma) | N/A (offline) | RenderingDevice compute (POP/VOL) + ComputeShaderTOP |
-| Texture pooling | **Yes** — GPU memory pool with resolution-matched recycling | DX11 resource management | Stride pools | **No** — per-node SubViewport, created once |
-| Multi-GPU | **Yes** — distribute chains across GPUs | No | No | No (Godot limitation) |
+| | **TouchDesigner** | **VVVV beta** | **VVVV gamma** | **Notch** | **GONODES** |
+|---|---|---|---|---|---|
+| GPU texture ops | **Multi-stream command queues** — independent TOP chains submit in parallel | DirectX 11 immediate context | Stride engine (Vulkan) | **Unified DX11/12 GPU pipeline** — entire scene rendered as a single GPU submission | **Single Godot render thread** — sequential SubViewport renders |
+| GPU↔CPU sync | Explicit fence management, async readback | DX11 pipeline | Stride pipeline | Minimal — almost everything stays on GPU | Implicit via Godot renderer + scene-tree ordering |
+| Compute shaders | Full GLSL/HLSL compute | Limited (beta), Stride compute (gamma) | N/A (offline) | **Extensive** — particles, fluids, cloth, hair all GPU compute | RenderingDevice compute (POP/VOL) + ComputeShaderTOP |
+| Texture pooling | **Yes** — GPU memory pool with resolution-matched recycling | DX11 resource management | Stride pools | Yes — GPU resource management | **No** — per-node SubViewport, created once |
+| Multi-GPU | **Yes** — distribute chains across GPUs | No | No | **Yes** — workload distribution across GPUs | No (Godot limitation) |
 
 ### This Is GONODES's Most Significant Gap
 
-TD can cook multiple independent TOP chains in parallel across GPU command queues. GONODES serialises all TOP cooks through Godot's single render thread.
+TD and Notch can cook multiple independent TOP/render chains in parallel across GPU command queues. GONODES serialises all TOP cooks through Godot's single render thread.
+
+### Where Notch Leads: Unified GPU Pipeline
+
+Notch doesn't separate "texture operations" from "3D rendering" from "particle simulation" — everything is a pass within a single DirectX pipeline. This eliminates the overhead of per-node SubViewport setup (GONODES) or per-TOP texture read/write cycles (TD). For dense 3D scenes with particles, fluid sim, and post-processing, Notch achieves higher GPU utilisation because there's no cook-engine overhead between GPU operations — the entire frame is a single GPU submission. The trade-off: you can't wire arbitrary data between nodes the way TD or GONODES can. Notch's model is a render pipeline, not a general-purpose data-flow graph.
 
 **How much does this actually matter?**
 
@@ -218,12 +226,12 @@ No explicit GPU fences, barriers, or synchronisation code — Godot's renderer h
 
 ## 5. CPU Operator Performance
 
-| | **TouchDesigner** | **VVVV beta** | **VVVV gamma** | **Houdini** | **GONODES** |
-|---|---|---|---|---|---|
-| Operator core | C++ | C++ | .NET (RyuJIT) | C++ + VEX (LLVM JIT) | GDScript + 132 C++ GDExtension |
-| Expression eval | Python (interpreted) | N/A (pin-based) | .NET IL (JIT) | **VEX (LLVM JIT — near native C++)** | GDScript Expression (interpreted) |
-| Per-op parallelism | Thread CHOP only | Some (beta) | .NET Task parallelism | Many SOPs internally threaded | WorkerThreadPool batch per topo level |
-| Data throughput | ~1M pts @ 60fps (C++ SOPs) | Comparable (C++) | ~500K pts @ 60fps (.NET) | 10M+ pts (VEX wrangles) | ~100K–500K pts (native), ~10K–50K (GDScript) |
+| | **TouchDesigner** | **VVVV beta** | **VVVV gamma** | **Houdini** | **Notch** | **GONODES** |
+|---|---|---|---|---|---|---|
+| Operator core | C++ | C++ | .NET (RyuJIT) | C++ + VEX (LLVM JIT) | C++ (proprietary, GPU-centric) | GDScript + 132 C++ GDExtension |
+| Expression eval | Python (interpreted) | N/A (pin-based) | .NET IL (JIT) | **VEX (LLVM JIT — near native C++)** | N/A (no user expressions) | GDScript Expression (interpreted) |
+| Per-op parallelism | Thread CHOP only | Some (beta) | .NET Task parallelism | Many SOPs internally threaded | GPU parallelism (not CPU) | WorkerThreadPool batch per topo level |
+| Data throughput | ~1M pts @ 60fps (C++ SOPs) | Comparable (C++) | ~500K pts @ 60fps (.NET) | 10M+ pts (VEX wrangles) | Millions (GPU-resident) | ~100K–500K pts (native), ~10K–50K (GDScript) |
 
 ### The GDScript Tax
 
@@ -250,12 +258,12 @@ Not a fair comparison for our use case — VEX compiles via LLVM to native machi
 
 ## 6. Memory & Data Flow Efficiency
 
-| | **TouchDesigner** | **VVVV** | **Houdini** | **GONODES** |
-|---|---|---|---|---|
-| Copy-on-write | GPU textures (FBO handles), CPU (ref-counted) | Spread COW (beta); .NET ref semantics (gamma) | GU_Detail COW with ref counting | `_shared` flag + `_mutable_input()` COW |
-| GPU texture management | **Pool** — resolution-matched recycling | DX resource management | N/A (offline) | Per-node SubViewport (no pool) |
-| Allocation per frame | Near-zero (pooled) | Low (.NET GC) | Near-zero (COW) | Near-zero (cached output reuse) |
-| Cross-family data | Bridge operators + CHOP Export | Typeless pins (auto-convert) | Bridge operators + attribute promotion | Bridge operators + expressions |
+| | **TouchDesigner** | **VVVV** | **Houdini** | **Notch** | **GONODES** |
+|---|---|---|---|---|---|
+| Copy-on-write | GPU textures (FBO handles), CPU (ref-counted) | Spread COW (beta); .NET ref semantics (gamma) | GU_Detail COW with ref counting | N/A — GPU-resident, no CPU data copies | `_shared` flag + `_mutable_input()` COW |
+| GPU texture management | **Pool** — resolution-matched recycling | DX resource management | N/A (offline) | Unified GPU memory management | Per-node SubViewport (no pool) |
+| Allocation per frame | Near-zero (pooled) | Low (.NET GC) | Near-zero (COW) | Near-zero (GPU-resident) | Near-zero (cached output reuse) |
+| Cross-family data | Bridge operators + CHOP Export | Typeless pins (auto-convert) | Bridge operators + attribute promotion | Implicit (unified pipeline) | Bridge operators + expressions |
 
 ### GONODES's COW Is Smart
 
@@ -277,12 +285,12 @@ Practical impact: minor. SubViewport creation is a one-time cost, and resolution
 
 ## 7. Frame Timing & Determinism
 
-| | **TouchDesigner** | **VVVV** | **Houdini** | **GONODES** |
-|---|---|---|---|---|
-| Frame budget system | Yes — drops frames / reduces quality to hit target FPS | Fixed frame loop (drops at OS level) | N/A (not real-time) | `max_cooks_per_frame` (sequential path only) |
-| Adaptive quality | Yes — resolution reduction, node skipping | No | N/A | **No** |
-| Non-realtime mode | **No** (always real-time) | No | Default (not real-time) | **Yes** — fixed timestep for deterministic recording |
-| Variable framerate | Adaptive time-slicing | System clock | N/A | `current_delta` from Godot's `_process()` |
+| | **TouchDesigner** | **VVVV** | **Houdini** | **Notch** | **GONODES** |
+|---|---|---|---|---|---|
+| Frame budget system | Yes — drops frames / reduces quality to hit target FPS | Fixed frame loop (drops at OS level) | N/A (not real-time) | **Yes** — adaptive quality, resolution scaling | `max_cooks_per_frame` (sequential path only) |
+| Adaptive quality | Yes — resolution reduction, node skipping | No | N/A | **Yes** — dynamic resolution scaling, LOD | **No** |
+| Non-realtime mode | **No** (always real-time) | No | Default (not real-time) | **No** (always real-time) | **Yes** — fixed timestep for deterministic recording |
+| Variable framerate | Adaptive time-slicing | System clock | N/A | Engine-managed vsync / target FPS | `current_delta` from Godot's `_process()` |
 
 ### GONODES's Non-Realtime Mode Is a Strength
 
@@ -293,40 +301,40 @@ When `non_realtime = true`, the engine advances by a fixed `1.0 / non_realtime_f
 
 Neither TD nor VVVV has this. For content creation and pre-rendering generative pieces, this is a genuine advantage.
 
-### TD's Adaptive Quality Is a Strength We Lack
+### TD's and Notch's Adaptive Quality Is a Strength We Lack
 
-TD can automatically reduce texture resolution, skip low-priority branches, or drop interleaved frames to maintain target FPS. GONODES either cooks full quality or drops the whole frame. This matters for installations and performances where maintaining framerate is critical even when the network spikes.
+TD can automatically reduce texture resolution, skip low-priority branches, or drop interleaved frames to maintain target FPS. Notch has similar dynamic resolution scaling and LOD management. GONODES either cooks full quality or drops the whole frame. This matters for installations and performances where maintaining framerate is critical even when the network spikes.
 
 ---
 
 ## 8. Parameter & Expression Systems
 
-| Feature | TouchDesigner | VVVV | Houdini | GONODES |
-|---|---|---|---|---|
-| Expression language | Python (interpreted) | VL (.NET JIT) | HScript + VEX (LLVM JIT) | GDScript Expression (interpreted) |
-| Param-level deps | Partial (CHOP Export) | Pin connections | **Full dependency DAG** | Expression dep map + value-compare gate + input hash |
-| Ramp/curve parameter | No (LookupTOP workaround) | SplineEditor (gamma) | **Yes** (first-class `chramp()`) | **Yes** (GNRampEditor, `ramp()`) |
-| Per-component expressions | Yes | N/A (pin-based) | Yes | Yes (Vector2/3/4, Color) |
-| Expression profiling | No | No | No | **Yes** (µs per expression) |
-| Auto-complete | Yes (Python) | Yes (VL) | Yes (HScript/VEX) | Yes (CodeEdit) |
-| Keyframe animation | Yes (basic timeline) | Yes (timeline) | Yes (full animation editor) | Yes (KeyframeCHOP + ramp curves) |
-| Takes/parameter layers | No | No | **Yes** | **Yes** (GNTakeManager) |
+| Feature | TouchDesigner | VVVV | Houdini | Notch | GONODES |
+|---|---|---|---|---|---|
+| Expression language | Python (interpreted) | VL (.NET JIT) | HScript + VEX (LLVM JIT) | N/A (no user expressions) | GDScript Expression (interpreted) |
+| Param-level deps | Partial (CHOP Export) | Pin connections | **Full dependency DAG** | None (static params) | Expression dep map + value-compare gate + input hash |
+| Ramp/curve parameter | No (LookupTOP workaround) | SplineEditor (gamma) | **Yes** (first-class `chramp()`) | Limited (keyframe curves) | **Yes** (GNRampEditor, `ramp()`) |
+| Per-component expressions | Yes | N/A (pin-based) | Yes | No | Yes (Vector2/3/4, Color) |
+| Expression profiling | No | No | No | No | **Yes** (µs per expression) |
+| Auto-complete | Yes (Python) | Yes (VL) | Yes (HScript/VEX) | N/A | Yes (CodeEdit) |
+| Keyframe animation | Yes (basic timeline) | Yes (timeline) | Yes (full animation editor) | **Yes** (timeline-centric, deep keyframe support) | Yes (KeyframeCHOP + ramp curves) |
+| Takes/parameter layers | No | No | **Yes** | No | **Yes** (GNTakeManager) |
 
-GONODES's expression profiling (microsecond timing per expression) is unique among all four tools. This lets users identify expensive cross-references and optimise accordingly.
+GONODES's expression profiling (microsecond timing per expression) is unique among all five tools. This lets users identify expensive cross-references and optimise accordingly. Notch has no user-accessible expression/scripting layer — parameter values are set manually or driven by external control (MIDI, OSC, timeline keyframes).
 
 ---
 
 ## 9. Graph Topology & Evaluation Order
 
-| Feature | TouchDesigner | VVVV | Houdini | GONODES |
-|---|---|---|---|---|
-| Sort algorithm | Implicit (pull recursion) | Implicit (spread flow) | Implicit (pull) + compiled blocks | **Explicit** (Kahn's BFS, cached) |
-| Compiled blocks | No | No | **Yes** (SOP compile — fuses chains) | No |
-| Hierarchy depth | Infinite (COMP nesting) | Infinite (subpatch nesting) | Infinite (subnet/HDA nesting) | Infinite (SubNetworkNode) |
-| Feedback | FeedbackTOP (prev frame) | FrameDelay (prev frame) | Time Shift, `chf(-1)` | FeedbackTOP (prev frame) |
-| Cross-network refs | `op('/path/to/node')` | Send/Receive nodes | `ch("../relative/path")` | `op("subnet/node")`, `op("../node")`, `op("/root")` |
-| Implicit dep tracking | Partial (CHOP Export) | None | Full (param DAG) | Expression dep map + selective re-eval |
-| Parallel cook | Multi-stream GPU, Thread CHOP | Some (.NET tasks) | Multi-threaded SOPs, PDG farm | Level-based WorkerThreadPool (CPU); sequential GPU |
+| Feature | TouchDesigner | VVVV | Houdini | Notch | GONODES |
+|---|---|---|---|---|---|
+| Sort algorithm | Implicit (pull recursion) | Implicit (spread flow) | Implicit (pull) + compiled blocks | Implicit (scene-graph traversal) | **Explicit** (Kahn's BFS, cached) |
+| Compiled blocks | No | No | **Yes** (SOP compile — fuses chains) | N/A (unified GPU pipeline) | No |
+| Hierarchy depth | Infinite (COMP nesting) | Infinite (subpatch nesting) | Infinite (subnet/HDA nesting) | Limited (layer stacks) | Infinite (SubNetworkNode) |
+| Feedback | FeedbackTOP (prev frame) | FrameDelay (prev frame) | Time Shift, `chf(-1)` | Built-in (feedback loops natural in render pipeline) | FeedbackTOP (prev frame) |
+| Cross-network refs | `op('/path/to/node')` | Send/Receive nodes | `ch("../relative/path")` | N/A (no cross-references) | `op("subnet/node")`, `op("../node")`, `op("/root")` |
+| Implicit dep tracking | Partial (CHOP Export) | None | Full (param DAG) | None | Expression dep map + selective re-eval |
+| Parallel cook | Multi-stream GPU, Thread CHOP | Some (.NET tasks) | Multi-threaded SOPs, PDG farm | Full GPU parallelism within frame | Level-based WorkerThreadPool (CPU); sequential GPU |
 
 ### Houdini's Compiled Blocks
 
@@ -338,18 +346,18 @@ GONODES doesn't have this, and it's not obviously needed for real-time workflows
 
 ## 10. Scripting & Extensibility
 
-| Feature | TouchDesigner | VVVV | Houdini | GONODES |
-|---|---|---|---|---|
-| User scripting | Python | VL (visual .NET), C# | VEX + Python | GDScript (Script ops) + **Python** (`gn_ext_user_python` — NumPy, hot-reload) + **C++** (`gn_ext_user_native` — hot-reload, 2–8s compile) |
-| Shader authoring | GLSL (frag/vert/compute) | HLSL/Stride shaders | VEX, GLSL, OSL, MaterialX | GLSL (canvas_item + compute) + ISF + Shadertoy |
-| C++ plugin SDK | **No** | Yes (vvvv SDK) | Yes (HDK) | GDExtension (92 native ops) + **UserNative** hot-reload C++ (in-editor compile) |
-| Asset packaging | `.tox` (COMP export) | Nuget packages (gamma) | **HDA** (gold standard) | `.gnasset` (JSON, self-contained) |
-| Event-driven scripting | Parameter Execute DAT | Reactive (VL) | Spare param callbacks | CallbackDAT (on_cook, on_value_change, etc.) |
-| Runtime compilation | Python (always available) | .NET JIT | VEX JIT | GDScript runtime + **Python** hot-reload + **C++** hot-reload (GDExtension, 2–8s) |
+| Feature | TouchDesigner | VVVV | Houdini | Notch | GONODES |
+|---|---|---|---|---|---|
+| User scripting | Python | VL (visual .NET), C# | VEX + Python | **None** — no scripting, no user-authored nodes | GDScript (Script ops) + **Python** (`gn_ext_user_python` — NumPy, hot-reload) + **C++** (`gn_ext_user_native` — hot-reload, 2–8s compile) |
+| Shader authoring | GLSL (frag/vert/compute) | HLSL/Stride shaders | VEX, GLSL, OSL, MaterialX | Limited (material overrides) | GLSL (canvas_item + compute) + ISF + Shadertoy |
+| C++ plugin SDK | **No** | Yes (vvvv SDK) | Yes (HDK) | **No** | GDExtension (92 native ops) + **UserNative** hot-reload C++ (in-editor compile) |
+| Asset packaging | `.tox` (COMP export) | Nuget packages (gamma) | **HDA** (gold standard) | Notch Blocks (reusable presets) | `.gnasset` (JSON, self-contained) |
+| Event-driven scripting | Parameter Execute DAT | Reactive (VL) | Spare param callbacks | N/A | CallbackDAT (on_cook, on_value_change, etc.) |
+| Runtime compilation | Python (always available) | .NET JIT | VEX JIT | N/A | GDScript runtime + **Python** hot-reload + **C++** hot-reload (GDExtension, 2–8s) |
 
 ### Key Insight
 
-TD doesn't let you write C++ operators at all — Python is the only extension path. Houdini has the HDK (full C++ API) but it's complex. **GONODES now offers three tiers of user scripting** — a unique advantage:
+TD doesn't let you write C++ operators at all — Python is the only extension path. Houdini has the HDK (full C++ API) but it's complex. **Notch offers no user scripting or extensibility at all** — you get exactly the nodes Notch ships, period. **GONODES now offers three tiers of user scripting** — a unique advantage:
 
 1. **GDScript** (Script operators) — zero setup, instant feedback, adequate for typical patches
 2. **Python** (`gn_ext_user_python`) — NumPy vectorised, TD-familiar, no compilation, full Python ecosystem
@@ -361,23 +369,24 @@ Both Python and C++ paths include integrated code editors with syntax highlighti
 
 ## 11. I/O & External Integration
 
-| Protocol | TouchDesigner | VVVV | Houdini | GONODES |
-|---|---|---|---|---|
-| OSC | Built-in | Built-in | Basic (Python) | Built-in (OscInCHOP, OscInDAT, OscOutOUT) |
-| MIDI | Built-in (In/Out) | Built-in | No | gn_ext_midi (RtMidi) |
-| NDI | Built-in | Plugin | No | gn_ext_ndi (4 operators) |
-| Spout/Syphon | Built-in | Built-in (Spout) | No | gn_ext_spout + gn_ext_syphon |
-| Audio | Built-in | Built-in | No | AudioIn, Spectrum, Band, Dynamics, Beat, AudioDeviceOUT |
-| Video capture | Built-in (webcam, capture card) | Built-in | No | WebcamIMG, gn_ext_video_capture, gn_ext_blackmagic |
-| Serial | Built-in | Built-in | No | gn_ext_serial |
-| DMX/Art-Net | Built-in | Plugin | No | DmxOutCHOP + DmxInCHOP + ArtnetDAT |
-| MQTT/IoT | Python plugin | Plugin | No | MqttDAT (built-in) |
-| Depth sensors | Kinect, RealSense, Leap, ZED | Kinect, RealSense | No | gn_ext_depth_sensor (Azure Kinect + RealSense + Ultraleap) |
-| ML inference | TensorFlow, MediaPipe plugins | ML.NET, ONNX | No | gn_ext_ml (ONNX Runtime, 7 operators) |
-| Embed in host apps | TouchEngine SDK | No | Houdini Engine | **libgonodes** (LibGodot C API) |
-| Projection mapping | Stoner, Kantan Mapper (plugins) | Badmapper (plugin) | No | gn_ext_mapper (built-in) |
+| Protocol | TouchDesigner | VVVV | Houdini | Notch | GONODES |
+|---|---|---|---|---|---|
+| OSC | Built-in | Built-in | Basic (Python) | **Yes** (OSC input) | Built-in (OscInCHOP, OscInDAT, OscOutOUT) |
+| MIDI | Built-in (In/Out) | Built-in | No | **Yes** (MIDI/MIDI2 input) | gn_ext_midi (RtMidi) |
+| NDI | Built-in | Plugin | No | **Yes** (NDI input/output) | gn_ext_ndi (4 operators) |
+| Spout/Syphon | Built-in | Built-in (Spout) | No | **Spout** (input/output) | gn_ext_spout + gn_ext_syphon |
+| Audio | Built-in | Built-in | No | **Yes** (audio-reactive) | AudioIn, Spectrum, Band, Dynamics, Beat, AudioDeviceOUT |
+| Video capture | Built-in (webcam, capture card) | Built-in | No | **Yes** (Blackmagic, webcam) | WebcamIMG, gn_ext_video_capture, gn_ext_blackmagic |
+| Serial | Built-in | Built-in | No | No | gn_ext_serial |
+| DMX/Art-Net | Built-in | Plugin | No | **Yes** (Art-Net) | DmxOutCHOP + DmxInCHOP + ArtnetDAT |
+| MQTT/IoT | Python plugin | Plugin | No | No | MqttDAT (built-in) |
+| Depth sensors | Kinect, RealSense, Leap, ZED | Kinect, RealSense | No | No | gn_ext_depth_sensor (Azure Kinect + RealSense + Ultraleap) |
+| ML inference | TensorFlow, MediaPipe plugins | ML.NET, ONNX | No | No | gn_ext_ml (ONNX Runtime, 7 operators) |
+| Embed in host apps | TouchEngine SDK | No | Houdini Engine | **Notch Playback** (disguise, Unreal, Unity) | **libgonodes** (LibGodot C API) |
+| Projection mapping | Stoner, Kantan Mapper (plugins) | Badmapper (plugin) | No | No | gn_ext_mapper (built-in) |
+| Media server integration | Via TouchEngine/Spout | No | No | **Deep** (disguise d3, Barco, Green Hippo) | No |
 
-GONODES has surprisingly strong I/O coverage for an open-source project — particularly with the GDExtension addon architecture that makes adding new protocols straightforward.
+GONODES has surprisingly strong I/O coverage for an open-source project — particularly with the GDExtension addon architecture that makes adding new protocols straightforward. Notch has excellent media server integration (the deepest of any tool) via its tight relationship with disguise/d3, but lacks user-extensible I/O — you get what Notch ships.
 
 ---
 
@@ -429,9 +438,9 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 
 **Mitigation:** 132 C++ native operators cover built-in hot paths. GPU work (TOP/POP/VOL) is unaffected.
 
-### 13.3 No Adaptive Quality Degradation (vs TD)
+### 13.3 No Adaptive Quality Degradation (vs TD and Notch)
 
-**Gap:** TD can automatically reduce TOP resolution or skip low-priority branches to hit frame targets. GONODES either cooks full quality or drops the frame.
+**Gap:** TD and Notch can automatically reduce TOP resolution or skip low-priority branches to hit frame targets. GONODES either cooks full quality or drops the frame.
 
 **Impact:** Matters for installations and live performances where maintaining framerate is critical even during spikes.
 
@@ -441,13 +450,25 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 
 **Impact:** Minimal for our use case (real-time networks with short SOP chains). Would matter for deep procedural geometry pipelines.
 
-### 13.5 No Multi-GPU (vs TD)
+### 13.5 No Multi-GPU (vs TD and Notch)
 
-**Gap:** TD can distribute TOP chains across multiple GPUs. GONODES is single-GPU.
+**Gap:** TD and Notch can distribute TOP/render chains across multiple GPUs. GONODES is single-GPU.
 
 **Impact:** Niche — multi-GPU setups are rare outside dedicated media servers.
 
-### 13.6 Expression Eval Cost Scales Linearly
+### 13.6 No Unified GPU Pipeline (vs Notch)
+
+**Gap:** Notch treats the entire scene as a single GPU render pipeline — geometry, particles, simulation, compositing all execute in one GPU submission with no per-node overhead. GONODES has per-node SubViewport setup and teardown overhead.
+
+**Impact:** For dense 3D scenes with heavy GPU sim (particles, fluids, cloth), Notch achieves higher GPU utilisation. Less relevant for 2D texture-chain workflows where per-node overhead is negligible.
+
+### 13.7 No Media Server Integration (vs Notch)
+
+**Gap:** Notch has deep, production-proven integration with disguise (d3), Barco, and Green Hippo media servers — the standard pipeline for large-scale live events, concerts, and broadcast. GONODES has no media server integration.
+
+**Impact:** For the live events/broadcast market, this is a significant gap. Notch's value proposition is built on its media server ecosystem. For VJ/generative art/installation use cases, this matters less.
+
+### 13.8 Expression Eval Cost Scales Linearly
 
 **Gap:** Each expression is evaluated via Godot's `Expression` class (parse + execute). TD uses compiled Python bytecode; Houdini uses LLVM-JIT'd VEX. Both amortise the compilation cost.
 
@@ -465,6 +486,7 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 | **Is the push model wasteful?** | **No.** The 3-tier guard system makes push functionally equivalent to pull for real-world graphs. The per-frame topo scan is microseconds. |
 | **How does it compare to VVVV?** | **Better dirty/skip optimisation** than vvvv beta (which has none). Comparable to vvvv gamma, with the trade-off of GDScript vs .NET JIT for user scripts. |
 | **How does it compare to Houdini?** | **Not a fair comparison** — Houdini targets offline VFX with 10M+ points. GONODES targets real-time with 10K–100K. Different domains, both well-optimised for their target. |
+| **How does it compare to Notch?** | **Different architectures for different trade-offs.** Notch has a superior unified GPU pipeline for dense 3D scenes and unmatched media server integration. GONODES has smarter cook-skipping (hash guard, demand culling), 3× more operators, cross-platform, open source, full scripting, and embeddability. Notch wins on raw GPU throughput; GONODES wins on flexibility, extensibility, and platform reach. |
 | **What would break the architecture?** | Networks with 500+ nodes, 10+ independent HD TOP chains needing parallel GPU cook, or per-vertex GDScript on 100K+ point meshes. |
 
 ---
@@ -752,7 +774,7 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ## 17. Architecture Gap Checklist
 
-> Covers TouchDesigner, vvvv, Houdini, and Jitter/Max. Consolidated from the original TD_HOUDINI_COMPARISON.md gap analysis. Tracks architectural recommendations from the TD/Houdini comparison.
+> Covers TouchDesigner, vvvv, Houdini, Jitter/Max, and Notch. Consolidated from the original TD_HOUDINI_COMPARISON.md gap analysis. Tracks architectural recommendations from the TD/Houdini comparison.
 
 | # | Recommendation | Priority | Status |
 |---|---|---|---|
@@ -774,7 +796,7 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ## 18. Feature Parity — Coverage Complete
 
-> Covers TouchDesigner, vvvv, Houdini, and Jitter/Max. All operator gaps identified in the original audit have been resolved. 574 operators across 14 families — 100% coverage vs all competitors combined.
+> Covers TouchDesigner, vvvv, Houdini, Jitter/Max, and Notch. All operator gaps identified in the original audit have been resolved. 574 operators across 14 families — 100% coverage vs all competitors combined.
 
 ### 18.1 Feature Coverage Matrix
 
@@ -872,7 +894,7 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 
 ## 19. Operator Coverage Audit
 
-> Covers TouchDesigner, vvvv, Houdini, and Jitter/Max. Consolidated from the original TD_HOUDINI_COMPARISON.md §12. Documents operators added to close TD coverage gaps.
+> Covers TouchDesigner, vvvv, Houdini, Jitter/Max, and Notch. Consolidated from the original TD_HOUDINI_COMPARISON.md §12. Documents operators added to close TD coverage gaps.
 
 ### 19.1 Operators Added (from TD gap analysis)
 
@@ -917,23 +939,23 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 
 ---
 
-## Jitter/Max Comparison & Strategic Analysis
+## Jitter/Max & Notch Comparison & Strategic Analysis
 
-> The following sections were consolidated from the Jitter/Max competitive analysis. They extend the TD/vvvv/Houdini comparison above with Cycling '74 Jitter coverage, strategic positioning, and additional competitive dimensions.
+> The following sections were consolidated from the Jitter/Max competitive analysis and extended with Notch coverage. They extend the TD/vvvv/Houdini comparison above with Cycling '74 Jitter coverage, Notch (live events), strategic positioning, and additional competitive dimensions.
 
 ## 19. Executive Summary
 
-| Dimension | TouchDesigner | vvvv | Jitter (Max/MSP) | GONODES |
-|-----------|--------------|------|-------------------|---------|
-| **Maturity** | 20+ years, industry standard | 25+ years (beta→gamma transition) | 25+ years, deep audio roots | Alpha — 1 year of development |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **574 operators** across 14 families |
-| **Cost** | $2,200+ / $600 non-comm. | Free (gamma) | $399 (perpetual) or $99/yr sub | **Free, open source (MIT)** |
-| **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan | DirectX 11 (beta) / Stride+Vulkan (gamma) | OpenGL (legacy) / Metal (modern) | Vulkan + GLES3 via Godot 4.6 |
-| **Host embedding** | TouchEngine SDK | No | Max for Live; no general SDK | **libgonodes — full C API, 9 data contexts** |
-| **3D engine** | Built-in (limited) | Stride (gamma) | OpenGL/Metal (via `jit.gl.*`) | **Full Godot 4.6** (physics, audio, VR) |
-| **Best for** | AV installations, VJing, media art | Generative art, data visualization, installations | Audio-visual performance, experimental music | Real-time AV, VJing, generative art, embedded processing |
+| Dimension | TouchDesigner | vvvv | Jitter (Max/MSP) | Notch | GONODES |
+|-----------|--------------|------|-------------------|-------|---------|
+| **Maturity** | 20+ years, industry standard | 25+ years (beta→gamma transition) | 25+ years, deep audio roots | ~10 years, dominant in live events | Alpha — 1 year of development |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | ~200 nodes | **574 operators** across 14 families |
+| **Cost** | $2,200+ / $600 non-comm. | Free (gamma) | $399 (perpetual) or $99/yr sub | £5,995+/yr (Builder) | **Free, open source (MIT)** |
+| **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan | DirectX 11 (beta) / Stride+Vulkan (gamma) | OpenGL (legacy) / Metal (modern) | **DirectX 11/12 — unified GPU-resident pipeline** | Vulkan + GLES3 via Godot 4.6 |
+| **Host embedding** | TouchEngine SDK | No | Max for Live; no general SDK | Notch Playback (disguise, Unreal, Unity) | **libgonodes — full C API, 9 data contexts** |
+| **3D engine** | Built-in (limited) | Stride (gamma) | OpenGL/Metal (via `jit.gl.*`) | Built-in (GPU-optimised, DX11/12) | **Full Godot 4.6** (physics, audio, VR) |
+| **Best for** | AV installations, VJing, media art | Generative art, data visualization, installations | Audio-visual performance, experimental music | Live events, broadcast, XR | Real-time AV, VJing, generative art, embedded processing |
 
-**Bottom line:** GONODES is architecturally competitive with tools that have decades of development. Its unique advantages — open source, Godot engine integration, libgonodes host embedding, volumetric/SDF pipelines, and 3-tier scripting (GDScript/Python/C++) — position it for scenarios that no single competitor addresses. The honest gaps are maturity, community size, serial GPU cook, and adaptive quality degradation.
+**Bottom line:** GONODES is architecturally competitive with tools that have decades of development. Its unique advantages — open source, Godot engine integration, libgonodes host embedding, volumetric/SDF pipelines, and 3-tier scripting (GDScript/Python/C++) — position it for scenarios that no single competitor addresses. The honest gaps are maturity, community size, serial GPU cook, adaptive quality degradation, and lack of media server integration (vs Notch).
 
 ---
 
@@ -947,22 +969,29 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 - **User base:** Academic institutions, experimental musicians, media artists, interactive art. Smaller than TD for pure visual work, but the Max ecosystem is massive
 - **Key strength:** Deep, seamless audio-visual integration. Max's dataflow paradigm, IRCAM heritage, Gen~ code generation for audio/GPU, and integration with Ableton Live (Max for Live)
 
+### Notch (Notch.one)
+- **Born:** ~2015 (public release; developed by Notch.one, formerly 10bit FX, in London)
+- **Identity:** GPU-first, real-time 3D creation engine for live events, broadcast, and XR. Purpose-built for the live entertainment industry
+- **Philosophy:** Everything on the GPU, every frame. The entire scene is a single GPU render pipeline — not a data-flow graph. Nodes are render passes/modifiers, not independent data transforms. Timeline-centric workflow designed for cue-based shows
+- **User base:** Live event production companies, broadcast graphics, XR studios. Tight ecosystem with disguise (d3) media servers. Smaller than TD overall but dominant in high-end live events
+- **Key strength:** Unmatched GPU throughput for dense 3D scenes. GPU particles (millions), fluid sim, cloth, hair — all GPU-native at 60fps. Deep media server integration (disguise, Barco, Green Hippo). Multi-GPU support. Adaptive quality scaling for guaranteed frame delivery
+
 
 ---
 
 ## 21. Licensing, Cost & Business Model
 
-| Aspect | TouchDesigner | vvvv | Jitter (Max/MSP) | GONODES |
-|--------|--------------|------|-------------------|---------|
-| **License type** | Commercial (subscription or perpetual) | Free (gamma); beta: legacy free non-comm | Perpetual ($399) or subscription ($99/yr) | MIT open source |
-| **Non-commercial** | Free (1280×1280 cap, watermark) | Free (no restrictions in gamma) | Education discount; no free tier | Free (no restrictions) |
-| **Commercial** | $2,200 (perpetual) or $600/yr | Free (gamma); $2,400/yr (beta enterprise) | $399 perpetual | Free |
-| **Resolution limits** | Free: 1280×1280. Commercial: unlimited | None | None | **None** |
-| **Source available** | No (proprietary) | No (gamma: closed .NET) | No (proprietary) | **Yes — full source** |
-| **Deployment license** | Included in commercial license; free version adds watermark | Free | Included | **Free — no licensing for deployment** |
-| **Revenue model** | Software license sales | Community + consulting | Software license + Ableton partnership | None (community-driven) |
+| Aspect | TouchDesigner | vvvv | Jitter (Max/MSP) | Notch | GONODES |
+|--------|--------------|------|-------------------|-------|---------|
+| **License type** | Commercial (subscription or perpetual) | Free (gamma); beta: legacy free non-comm | Perpetual ($399) or subscription ($99/yr) | Subscription (£5,995+/yr Builder) | MIT open source |
+| **Non-commercial** | Free (1280×1280 cap, watermark) | Free (no restrictions in gamma) | Education discount; no free tier | No free tier | Free (no restrictions) |
+| **Commercial** | $2,200 (perpetual) or $600/yr | Free (gamma); $2,400/yr (beta enterprise) | $399 perpetual | £5,995/yr (Builder), £11,995/yr (Pro) | Free |
+| **Resolution limits** | Free: 1280×1280. Commercial: unlimited | None | None | None | **None** |
+| **Source available** | No (proprietary) | No (gamma: closed .NET) | No (proprietary) | No (proprietary) | **Yes — full source** |
+| **Deployment license** | Included in commercial license; free version adds watermark | Free | Included | Playback bundled with media servers | **Free — no licensing for deployment** |
+| **Revenue model** | Software license sales | Community + consulting | Software license + Ableton partnership | Software license + media server partnerships | None (community-driven) |
 
-**GONODES advantage:** Zero cost at any scale. No resolution limits, no watermarks, no deployment fees, no dongles. Full source code access. This is a profound differentiator for students, artists, small studios, and anyone building custom installations. The only cost is development time and hardware.
+**GONODES advantage:** Zero cost at any scale. No resolution limits, no watermarks, no deployment fees, no dongles. Full source code access. This is a profound differentiator for students, artists, small studios, and anyone building custom installations. The only cost is development time and hardware. Notch is the most expensive tool in this comparison (£5,995+/yr for the Builder edition) and has no free tier — making GONODES the polar opposite in terms of accessibility.
 
 **Risk for GONODES:** No revenue model means development depends on contributor goodwill and (potentially) grants/sponsorship. Competitors have dedicated engineering teams funded by license revenue.
 
@@ -973,18 +1002,18 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 
 ## 22. Data Types & Families
 
-| Data concept | TouchDesigner | vvvv | Jitter | GONODES |
-|-------------|--------------|------|--------|---------|
-| **GPU texture** | TOP (2D texture) | Texture (Stride) | `jit.gl.texture` (2D) | TOP (SubViewport texture) |
-| **CPU image** | TOP (CPU mode) | Image | `jit.matrix` (char/float planes) | IMG (Image-based) |
-| **Multi-channel float** | CHOP (channels) | Spread (beta) / Sequence (gamma) | `jit.matrix` (1D float array) | CHOP (Dictionary of PackedFloat32Array) |
-| **Table/text** | DAT (rows×cols) | Spreadsheet (gamma) | `jit.cellblock` / Dictionary | DAT (GNTableData) |
-| **Geometry/mesh** | SOP (point/poly) | Mesh (Stride) | `jit.gl.mesh` + `jit.matrix` (vertex data) | SOP (ArrayMesh via GNGeoData) |
-| **Material** | MAT | Material (Stride) | Shader/texture bindings | MAT (ShaderMaterial/Standard) |
-| **3D scene graph** | COMP hierarchy | SceneGraph (Stride) | `jit.gl.render` context | COMP (Godot Node3D tree) |
-| **GPU particles** | Not typed | Not typed | Not typed | **POP (SSBO particle buffers)** |
-| **3D volumes** | Not typed | Not typed | Not typed | **VOL (Texture3D voxel grids)** |
-| **SDF** | Not typed | Not typed | Not typed | **SDF (ray-marched fields)** |
+| Data concept | TouchDesigner | vvvv | Jitter | Notch | GONODES |
+|-------------|--------------|------|--------|-------|---------|
+| **GPU texture** | TOP (2D texture) | Texture (Stride) | `jit.gl.texture` (2D) | Implicit (render pipeline textures) | TOP (SubViewport texture) |
+| **CPU image** | TOP (CPU mode) | Image | `jit.matrix` (char/float planes) | N/A (everything GPU) | IMG (Image-based) |
+| **Multi-channel float** | CHOP (channels) | Spread (beta) / Sequence (gamma) | `jit.matrix` (1D float array) | N/A (params/timeline only) | CHOP (Dictionary of PackedFloat32Array) |
+| **Table/text** | DAT (rows×cols) | Spreadsheet (gamma) | `jit.cellblock` / Dictionary | N/A | DAT (GNTableData) |
+| **Geometry/mesh** | SOP (point/poly) | Mesh (Stride) | `jit.gl.mesh` + `jit.matrix` (vertex data) | Built-in (GPU-resident meshes) | SOP (ArrayMesh via GNGeoData) |
+| **Material** | MAT | Material (Stride) | Shader/texture bindings | Built-in materials | MAT (ShaderMaterial/Standard) |
+| **3D scene graph** | COMP hierarchy | SceneGraph (Stride) | `jit.gl.render` context | Scene graph (modifier stacks) | COMP (Godot Node3D tree) |
+| **GPU particles** | Not typed | Not typed | Not typed | Built-in (GPU-native, millions) | **POP (SSBO particle buffers)** |
+| **3D volumes** | Not typed | Not typed | Not typed | Not typed | **VOL (Texture3D voxel grids)** |
+| **SDF** | Not typed | Not typed | Not typed | Not typed | **SDF (ray-marched fields)** |
 
 ### Jitter's Matrix Model
 
@@ -1017,29 +1046,30 @@ This is GONODES's most unique capability and the area where it has clear superio
 
 ### Comparison Matrix
 
-| Capability | TouchEngine SDK | vvvv | Jitter / Max | libgonodes |
-|-----------|----------------|------|-------------|------------|
-| **Embed in host apps** | Yes (TouchEngine) | No | Max for Live only (Ableton) | **Yes — any C-calling app** |
-| **GPU context sharing** | Yes (shared device) | N/A | No | **Yes (Vulkan, Metal, OpenGL)** |
-| **Bidirectional textures** | Yes (zero-copy) | N/A | No | **Yes (zero-copy)** |
-| **Bidirectional channels** | Yes (float arrays) | N/A | Limited (Live API) | **Yes (multi-channel CHOP)** |
-| **Bidirectional tables** | Yes (string tables) | N/A | No | **Yes (row×col tables)** |
-| **Bidirectional geometry** | **Read-only** | N/A | No | **Yes (full bidirectional)** |
-| **Bidirectional volumes** | **Not supported** | N/A | No | **Yes** |
-| **Bidirectional particles** | **Not supported** | N/A | No | **Yes** |
-| **MIDI injection** | Parameter mapping only | N/A | Native (Ableton→Max) | **Direct MIDI events** |
-| **OSC injection** | Parameter mapping only | N/A | Native `udpreceive` | **Direct OSC messages** |
-| **Bidirectional events** | Pulse params (host→only) | N/A | No | **Yes (fire_event / on_event)** |
-| **Graph editing from host** | **Not supported** | N/A | No | **Full CRUD (create/delete/connect)** |
-| **Parameter control** | Yes (all types) | N/A | Limited (Live API params) | **Yes (all types)** |
-| **Hot reload** | Yes | N/A | No | **Yes (with state preservation)** |
-| **Data contexts** | 4 (texture, channels, table, limited geo) | 0 | 1 (Ableton params) | **9 (texture, channels, table, geo, volume, particles, MIDI, OSC, events)** |
+| Capability | TouchEngine SDK | vvvv | Jitter / Max | Notch Playback | libgonodes |
+|-----------|----------------|------|-------------|----------------|------------|
+| **Embed in host apps** | Yes (TouchEngine) | No | Max for Live only (Ableton) | **Yes** (disguise, Unreal, Unity) | **Yes — any C-calling app** |
+| **GPU context sharing** | Yes (shared device) | N/A | No | Yes (DX11/12 shared device) | **Yes (Vulkan, Metal, OpenGL)** |
+| **Bidirectional textures** | Yes (zero-copy) | N/A | No | Yes (texture output) | **Yes (zero-copy)** |
+| **Bidirectional channels** | Yes (float arrays) | N/A | Limited (Live API) | Limited (parameter values) | **Yes (multi-channel CHOP)** |
+| **Bidirectional tables** | Yes (string tables) | N/A | No | No | **Yes (row×col tables)** |
+| **Bidirectional geometry** | **Read-only** | N/A | No | No | **Yes (full bidirectional)** |
+| **Bidirectional volumes** | **Not supported** | N/A | No | No | **Yes** |
+| **Bidirectional particles** | **Not supported** | N/A | No | No | **Yes** |
+| **MIDI injection** | Parameter mapping only | N/A | Native (Ableton→Max) | MIDI input in scene | **Direct MIDI events** |
+| **OSC injection** | Parameter mapping only | N/A | Native `udpreceive` | OSC input in scene | **Direct OSC messages** |
+| **Bidirectional events** | Pulse params (host→only) | N/A | No | No | **Yes (fire_event / on_event)** |
+| **Graph editing from host** | **Not supported** | N/A | No | **Not supported** | **Full CRUD (create/delete/connect)** |
+| **Parameter control** | Yes (all types) | N/A | Limited (Live API params) | Yes (exposed parameters) | **Yes (all types)** |
+| **Hot reload** | Yes | N/A | No | Yes | **Yes (with state preservation)** |
+| **Data contexts** | 4 (texture, channels, table, limited geo) | 0 | 1 (Ableton params) | 2 (texture, parameters) | **9 (texture, channels, table, geo, volume, particles, MIDI, OSC, events)** |
 
 ### What This Means
 
 **libgonodes is the only embeddable node-graph engine that supports bidirectional exchange of 9 data contexts through a single C API.** No other tool comes close:
 
 - **TouchEngine** is the nearest competitor but lacks bidirectional geometry, volume, and particle exchange. It also can't edit the graph at runtime from the host.
+- **Notch Playback** embeds in disguise/Unreal/Unity with GPU texture output and parameter control, but offers only 2 data contexts (texture + parameters). No bidirectional data exchange, no graph editing, no geometry/volume/particle contexts.
 - **vvvv** has no embedding capability at all.
 - **Jitter** can be embedded only within Ableton Live (Max for Live), with extremely limited data exchange — essentially just parameter automation and MIDI.
 
@@ -1085,19 +1115,19 @@ uint64_t result = gonodes_get_output_texture(gn, "main_out", &w, &h);
 
 ## 24. 3D Engine Integration
 
-| Feature | TouchDesigner | vvvv beta | vvvv gamma | Jitter | GONODES |
-|---------|-------------|-----------|------------|--------|---------|
-| **Underlying engine** | Custom (Derivative) | Custom (DX11) | Stride (Vulkan-based) | None (raw GL/Metal) | **Godot 4.6** |
-| **Physics** | Bullet (legacy) | Box2D/Bullet plugins | Bepu Physics (Stride) | None built-in | **Jolt Physics (modern)** |
-| **Scene graph** | COMP hierarchy | SceneGraph | Stride SceneGraph | `jit.gl.render` context | **Godot Node3D tree** |
-| **Lighting** | Basic (legacy pipeline) | DX11 deferred | Stride PBR | OpenGL fixed-function + GLSL | **Godot Forward+ PBR** |
-| **Shadows** | Basic shadowmaps | VSM, CSM plugins | Stride shadowmaps | Manual (fragment shader) | **Godot CSM + PCF** |
-| **Post-processing** | GLSL TOPs (manual) | Plugins | Stride post-process | Manual slab chains | **Built-in (glow, DOF, SSAO, SSIL, SSR, fog)** |
-| **VR/AR** | OpenVR/OpenXR plugin | Plugin | Partial | None | **Godot OpenXR** |
-| **PBR materials** | Phong + custom shaders | PBR (DX11 plugins) | Stride PBR | Manual shaders | **StandardMaterial3D (full PBR)** |
-| **Animation** | Basic + CHOP-driven | Timeline | Stride animation | None | **AnimationCOMP + KeyframeCHOP** |
-| **Instancing** | Instance COMP | Instancing (DX11) | Stride instancing | `jit.gl.mesh @draw_mode instanced` | **InstanceCOMP (MultiMesh)** |
-| **Terrain** | Not built-in | Not built-in | Not built-in | Not built-in | **HeightfieldSOP** |
+| Feature | TouchDesigner | vvvv beta | vvvv gamma | Jitter | Notch | GONODES |
+|---------|-------------|-----------|------------|--------|-------|---------|
+| **Underlying engine** | Custom (Derivative) | Custom (DX11) | Stride (Vulkan-based) | None (raw GL/Metal) | Custom (DX11/12, GPU-first) | **Godot 4.6** |
+| **Physics** | Bullet (legacy) | Box2D/Bullet plugins | Bepu Physics (Stride) | None built-in | **GPU cloth, hair, fluids** | **Jolt Physics (modern)** |
+| **Scene graph** | COMP hierarchy | SceneGraph | Stride SceneGraph | `jit.gl.render` context | Modifier stack (3ds Max-style) | **Godot Node3D tree** |
+| **Lighting** | Basic (legacy pipeline) | DX11 deferred | Stride PBR | OpenGL fixed-function + GLSL | **PBR, area lights, volumetric** | **Godot Forward+ PBR** |
+| **Shadows** | Basic shadowmaps | VSM, CSM plugins | Stride shadowmaps | Manual (fragment shader) | **Direct shadows, contact shadows** | **Godot CSM + PCF** |
+| **Post-processing** | GLSL TOPs (manual) | Plugins | Stride post-process | Manual slab chains | **Built-in (bloom, DOF, motion blur, color grading)** | **Built-in (glow, DOF, SSAO, SSIL, SSR, fog)** |
+| **VR/AR** | OpenVR/OpenXR plugin | Plugin | Partial | None | No | **Godot OpenXR** |
+| **PBR materials** | Phong + custom shaders | PBR (DX11 plugins) | Stride PBR | Manual shaders | **PBR (metallic/roughness)** | **StandardMaterial3D (full PBR)** |
+| **Animation** | Basic + CHOP-driven | Timeline | Stride animation | None | **Timeline + keyframe (deep)** | **AnimationCOMP + KeyframeCHOP** |
+| **Instancing** | Instance COMP | Instancing (DX11) | Stride instancing | `jit.gl.mesh @draw_mode instanced` | **GPU instancing (millions)** | **InstanceCOMP (MultiMesh)** |
+| **Terrain** | Not built-in | Not built-in | Not built-in | Not built-in | Heightmap terrain | **HeightfieldSOP** |
 
 ### Jitter's 3D Capabilities
 
@@ -1129,16 +1159,16 @@ No competitor offers this breadth of engine features. TD has a custom engine tha
 
 ## 25. Shader Authoring
 
-| Feature | TouchDesigner | vvvv | Jitter | GONODES |
-|---------|-------------|------|--------|---------|
-| **Fragment shaders** | GLSL TOP | HLSL (beta), SDSL (gamma) | Gen→GLSL, raw GLSL | CustomShaderTOP (GLSL) |
-| **Compute shaders** | GLSL Compute TOP | Stride compute (gamma) | **Not available** | ComputeShaderTOP |
-| **ISF format** | No | No | No | **Yes (gn_ext_isf)** |
-| **Shadertoy format** | No | No | No | **Yes (gn_ext_shadertoy)** |
-| **Visual shader editor** | No | **VL→shader** (partial) | **Gen** (visual codegen) | No |
-| **Shader presets** | No | No | No | **Yes (factory + user)** |
-| **GLSL hot-reload** | Manual | Manual | Via Gen patching | **Automatic (file watcher)** |
-| **Multi-pass** | Manual chain | Manual | Manual slab chain | FeedbackTOP + shader chain |
+| Feature | TouchDesigner | vvvv | Jitter | Notch | GONODES |
+|---------|-------------|------|--------|-------|---------|
+| **Fragment shaders** | GLSL TOP | HLSL (beta), SDSL (gamma) | Gen→GLSL, raw GLSL | Limited (material overrides, no custom shaders) | CustomShaderTOP (GLSL) |
+| **Compute shaders** | GLSL Compute TOP | Stride compute (gamma) | **Not available** | Built-in (particles, fluids — no user access) | ComputeShaderTOP |
+| **ISF format** | No | No | No | No | **Yes (gn_ext_isf)** |
+| **Shadertoy format** | No | No | No | No | **Yes (gn_ext_shadertoy)** |
+| **Visual shader editor** | No | **VL→shader** (partial) | **Gen** (visual codegen) | No | No |
+| **Shader presets** | No | No | No | No | **Yes (factory + user)** |
+| **GLSL hot-reload** | Manual | Manual | Via Gen patching | N/A | **Automatic (file watcher)** |
+| **Multi-pass** | Manual chain | Manual | Manual slab chain | Built-in (render pipeline manages passes) | FeedbackTOP + shader chain |
 
 ### Jitter Gen — A Unique Approach
 
@@ -1158,19 +1188,19 @@ The visual shader editing gap is real but less critical given ISF/Shadertoy comp
 
 ## 26. Asset & Project Management
 
-| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
-|---------|-------------|------|-------------|---------|
-| **Project format** | `.toe` (binary) | `.vl` (XML in gamma) | `.maxpat` (JSON) | `.gnpatch` (JSON) |
-| **Version control friendly** | No (binary) | Partial (XML) | **Yes (JSON)** | **Yes (JSON)** |
-| **Reusable assets** | `.tox` (COMP export) | NuGet packages | Max patchers + packages | `.gnasset` (JSON, self-contained) |
-| **Asset promotion** | Manual | N/A | Subpatch encapsulation | **Wizard-based (spare params → interface)** |
-| **Instance sync** | Inline (auto-update) | NuGet versioning | Package versioning | Global `.gnasset` sync on save |
-| **Read-only assets** | No | N/A | No | **Yes (lock + "Make Editable" escape hatch)** |
-| **Help patches per node** | Yes (~1 per node) | Yes | Yes (~2–3 per node) | **Yes (3+ per node, 1,413 total)** |
-| **Package manager** | No (community sharing) | NuGet | **Max Package Manager** | No (file-based) |
-| **OS drag-and-drop** | Limited | No | No | **Yes (.gnpatch + .gnasset files)** |
-| **Undo/redo** | Yes | Yes | Yes | **Yes (compound actions)** |
-| **Copy/paste** | Yes | Yes | Yes | **Yes (JSON clipboard)** |
+| Feature | TouchDesigner | vvvv | Jitter / Max | Notch | GONODES |
+|---------|-------------|------|-------------|-------|---------|
+| **Project format** | `.toe` (binary) | `.vl` (XML in gamma) | `.maxpat` (JSON) | `.dfx` (proprietary binary) | `.gnpatch` (JSON) |
+| **Version control friendly** | No (binary) | Partial (XML) | **Yes (JSON)** | No (binary) | **Yes (JSON)** |
+| **Reusable assets** | `.tox` (COMP export) | NuGet packages | Max patchers + packages | Notch Blocks (presets) | `.gnasset` (JSON, self-contained) |
+| **Asset promotion** | Manual | N/A | Subpatch encapsulation | N/A | **Wizard-based (spare params → interface)** |
+| **Instance sync** | Inline (auto-update) | NuGet versioning | Package versioning | N/A | Global `.gnasset` sync on save |
+| **Read-only assets** | No | N/A | No | N/A | **Yes (lock + "Make Editable" escape hatch)** |
+| **Help patches per node** | Yes (~1 per node) | Yes | Yes (~2–3 per node) | Tutorials (not per-node) | **Yes (3+ per node, 1,413 total)** |
+| **Package manager** | No (community sharing) | NuGet | **Max Package Manager** | No | No (file-based) |
+| **OS drag-and-drop** | Limited | No | No | No | **Yes (.gnpatch + .gnasset files)** |
+| **Undo/redo** | Yes | Yes | Yes | Yes | **Yes (compound actions)** |
+| **Copy/paste** | Yes | Yes | Yes | Yes | **Yes (JSON clipboard)** |
 
 ### Jitter/Max's Package Ecosystem
 
@@ -1185,20 +1215,20 @@ GONODES has no package manager yet. The extension architecture (`gn_ext_*`) prov
 
 ## 27. UI & Editor Experience
 
-| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
-|---------|-------------|------|-------------|---------|
-| **Node graph style** | Wired, left→right flow | Wired, spread-based (beta); VL (gamma) | Wired, top→down patcher | Wired, left→right (Godot GraphEdit) |
-| **Live node previews** | Yes (TOP thumbnails) | Yes (pins show data) | No (patchers are static) | **Yes (per-node toggle)** |
-| **Parameter inspector** | Right-click dialog | Inspector (gamma) | Object inspector | **Docked inspector panel** |
-| **Performance profiling** | Yes (per-node cook time) | Yes (frame profiler) | No (manual timing) | **Yes (per-node + per-expression µs)** |
-| **Debug tools** | Probe, Info CHOP | Tooltip pins, Renderer | `print`, `jit.print` | **Debug panel (F2, 3 tabs, 5 overlay layers)** |
-| **Code editor** | External (Atom, etc.) | Integrated (VL) | Integrated (Gen) | **Integrated (GNCodeEditor, syntax HL)** |
-| **Context menus** | Yes | Yes | Yes | **Yes (right-click, copy as JSON)** |
-| **Network boxes** | Not built-in | No | None | **Yes (annotations + sticky notes)** |
-| **Timeline** | Basic | Basic | Transport bar | **TimelineCHOP + CueDAT + Editor UI** |
-| **Keyboard shortcuts** | Extensive | Extensive | Extensive | Growing |
-| **Multi-monitor** | Yes (separate windows) | Yes | Yes | WindowOUT (separate windows) |
-| **Float field control** | Slider + text field | Slider | Number box + slider | **Houdini-style (drag, ladder tiers, Shift/Ctrl modifiers)** |
+| Feature | TouchDesigner | vvvv | Jitter / Max | Notch | GONODES |
+|---------|-------------|------|-------------|-------|---------|
+| **Node graph style** | Wired, left→right flow | Wired, spread-based (beta); VL (gamma) | Wired, top→down patcher | Wired, modifier stack (3ds Max-style) | Wired, left→right (Godot GraphEdit) |
+| **Live node previews** | Yes (TOP thumbnails) | Yes (pins show data) | No (patchers are static) | **Yes** (viewport preview) | **Yes (per-node toggle)** |
+| **Parameter inspector** | Right-click dialog | Inspector (gamma) | Object inspector | Properties panel | **Docked inspector panel** |
+| **Performance profiling** | Yes (per-node cook time) | Yes (frame profiler) | No (manual timing) | Yes (GPU profiler) | **Yes (per-node + per-expression µs)** |
+| **Debug tools** | Probe, Info CHOP | Tooltip pins, Renderer | `print`, `jit.print` | Limited | **Debug panel (F2, 3 tabs, 5 overlay layers)** |
+| **Code editor** | External (Atom, etc.) | Integrated (VL) | Integrated (Gen) | N/A (no scripting) | **Integrated (GNCodeEditor, syntax HL)** |
+| **Context menus** | Yes | Yes | Yes | Yes | **Yes (right-click, copy as JSON)** |
+| **Network boxes** | Not built-in | No | None | N/A | **Yes (annotations + sticky notes)** |
+| **Timeline** | Basic | Basic | Transport bar | **Full timeline** (cue-based, keyframe-rich) | **TimelineCHOP + CueDAT + Editor UI** |
+| **Keyboard shortcuts** | Extensive | Extensive | Extensive | Moderate | Growing |
+| **Multi-monitor** | Yes (separate windows) | Yes | Yes | Yes (multi-viewport) | WindowOUT (separate windows) |
+| **Float field control** | Slider + text field | Slider | Number box + slider | Slider | **Houdini-style (drag, ladder tiers, Shift/Ctrl modifiers)** |
 
 ### Jitter/Max Editor Experience
 
@@ -1217,17 +1247,17 @@ Max's UI building story (presentation mode, bpatcher embedding, Max for Live dev
 
 ## 28. Cross-Platform & Deployment
 
-| Platform | TouchDesigner | vvvv beta | vvvv gamma | Jitter / Max | GONODES |
-|----------|-------------|-----------|------------|-------------|---------|
-| **Windows** | Primary | Yes | Yes | Yes | **Yes** |
-| **macOS** | Experimental | No | Yes | Yes | **Yes** |
-| **Linux** | No | No | Yes | No | **Yes** |
-| **Web (HTML5)** | No | No | No (planned) | No | **Yes (Godot export)** |
-| **iOS** | No | No | No | No (MIRA remote only) | **Yes (Godot export)** |
-| **Android** | No | No | No | No | **Yes (Godot export)** |
-| **Standalone export** | Yes (Player, TouchEngine) | Yes (exe) | Yes (.exe, runtime) | No (requires Max) | **Yes (Godot export templates)** |
-| **Headless/server** | Limited (TouchEngine) | Yes (beta server) | Yes (.NET console) | No | **Yes (exported player)** |
-| **ARM64** | No | No | Planned | Apple Silicon (Rosetta) | **Yes (native ARM64)** |
+| Platform | TouchDesigner | vvvv beta | vvvv gamma | Jitter / Max | Notch | GONODES |
+|----------|-------------|-----------|------------|-------------|-------|---------|
+| **Windows** | Primary | Yes | Yes | Yes | **Primary (only)** | **Yes** |
+| **macOS** | Experimental | No | Yes | Yes | No | **Yes** |
+| **Linux** | No | No | Yes | No | No | **Yes** |
+| **Web (HTML5)** | No | No | No (planned) | No | No | **Yes (Godot export)** |
+| **iOS** | No | No | No | No (MIRA remote only) | No | **Yes (Godot export)** |
+| **Android** | No | No | No | No | No | **Yes (Godot export)** |
+| **Standalone export** | Yes (Player, TouchEngine) | Yes (exe) | Yes (.exe, runtime) | No (requires Max) | Yes (Notch Playback) | **Yes (Godot export templates)** |
+| **Headless/server** | Limited (TouchEngine) | Yes (beta server) | Yes (.NET console) | No | No | **Yes (exported player)** |
+| **ARM64** | No | No | Planned | Apple Silicon (Rosetta) | No | **Yes (native ARM64)** |
 
 ### GONODES's Platform Advantage
 
@@ -1242,6 +1272,7 @@ No competitor matches this breadth:
 - **TD** is Windows-primary (macOS is experimental/incomplete, no Linux, no mobile, no web)
 - **vvvv gamma** is Windows/macOS/Linux but no mobile or web
 - **Max/Jitter** is Windows/macOS only, requires Max runtime (except embedded in Ableton), no standalone export
+- **Notch** is **Windows-only** — the most platform-restricted tool in this comparison
 
 For artists creating installations on Raspberry Pi, web-based generative art, or mobile interactive experiences, GONODES is the only option among these tools.
 
@@ -1252,17 +1283,17 @@ For artists creating installations on Raspberry Pi, web-based generative art, or
 
 ## 29. Audio Pipeline
 
-| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
-|---------|-------------|------|-------------|---------|
-| **Audio synthesis** | Limited (via CHOP) | Limited | **400+ MSP objects — complete audio language** | Limited (21 audio CHOPs) |
-| **Sample-accurate timing** | No (frame-based) | No | **Yes (MSP signal vector)** | No (frame-based) |
-| **Audio effects** | Basic (via CHOP math) | Basic | **Complete (EQ, reverb, delay, compression, etc.)** | AudioDynamicsCHOP (compressor/limiter/gate) |
-| **FFT analysis** | AudioSpectrum CHOP | Plugins | `pfft~` (phase vocoder) | AudioSpectrumCHOP + AudioBandCHOP |
-| **Audio I/O** | 1 device | Basic | **ASIO, CoreAudio, multi-device** | 1 device (Godot AudioServer) |
-| **MIDI→audio** | Via CHOP→audio | Via nodes | **Native (noteout~, etc.)** | Via CHOP→AudioDeviceOUT |
-| **DAW integration** | No | No | **Max for Live (full Ableton integration)** | No |
-| **Spatial audio** | No | No | `mc.` (multichannel) | **Godot AudioStreamPlayer3D** |
-| **Audio recording** | Via FFmpeg | No | `sfrecord~` (WAV/AIFF) | RecordOUT (via FFmpeg) |
+| Feature | TouchDesigner | vvvv | Jitter / Max | Notch | GONODES |
+|---------|-------------|------|-------------|-------|---------|
+| **Audio synthesis** | Limited (via CHOP) | Limited | **400+ MSP objects — complete audio language** | None | Limited (21 audio CHOPs) |
+| **Sample-accurate timing** | No (frame-based) | No | **Yes (MSP signal vector)** | No | No (frame-based) |
+| **Audio effects** | Basic (via CHOP math) | Basic | **Complete (EQ, reverb, delay, compression, etc.)** | None | AudioDynamicsCHOP (compressor/limiter/gate) |
+| **FFT analysis** | AudioSpectrum CHOP | Plugins | `pfft~` (phase vocoder) | **Yes** (audio-reactive input) | AudioSpectrumCHOP + AudioBandCHOP |
+| **Audio I/O** | 1 device | Basic | **ASIO, CoreAudio, multi-device** | Audio input only | 1 device (Godot AudioServer) |
+| **MIDI→audio** | Via CHOP→audio | Via nodes | **Native (noteout~, etc.)** | N/A | Via CHOP→AudioDeviceOUT |
+| **DAW integration** | No | No | **Max for Live (full Ableton integration)** | No | No |
+| **Spatial audio** | No | No | `mc.` (multichannel) | No | **Godot AudioStreamPlayer3D** |
+| **Audio recording** | Via FFmpeg | No | `sfrecord~` (WAV/AIFF) | No | RecordOUT (via FFmpeg) |
 
 ### Jitter/Max's Audio Dominance
 
@@ -1288,20 +1319,21 @@ GONODES's audio gap analysis (see `GONODES_VS_THE_REST.md` §18.8) identifies 13
 
 ## 30. Physics & Simulation
 
-| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
-|---------|-------------|------|-------------|---------|
-| **Physics engine** | Bullet (legacy) | Box2D, Bullet plugins | None built-in (deprecated `jit.phys.*`) | **Jolt Physics (modern)** |
-| **Rigid body** | Bullet | Plugins | Deprecated | **RigidBodyCOMP** |
-| **Soft body** | No | No | No | **SoftBodyCOMP** |
-| **Cloth** | Not built-in | No | No | **ClothSOP (Verlet PBD)** |
-| **Vehicle physics** | No | No | No | **VehicleCOMP (Jolt)** |
-| **Constraints/joints** | Basic | Basic | No | **JointCOMP (6 joint types)** |
-| **Fluid sim** | Plugin/GLSL workaround | No | No | **FluidVOL (3D Navier-Stokes) + Fluid2DTOP** |
-| **Particle sim** | Legacy Particle SOP | No | Deprecated `jit.phys.*` | **14 POP operators (GPU compute)** |
-| **Pyro (fire/smoke)** | Not built-in | No | No | **PyroVOL** |
-| **Navigation/pathfinding** | No | No | No | **NavigationCOMP** |
+| Feature | TouchDesigner | vvvv | Jitter / Max | Notch | GONODES |
+|---------|-------------|------|-------------|-------|---------|
+| **Physics engine** | Bullet (legacy) | Box2D, Bullet plugins | None built-in (deprecated `jit.phys.*`) | **GPU sim (proprietary)** | **Jolt Physics (modern)** |
+| **Rigid body** | Bullet | Plugins | Deprecated | Basic | **RigidBodyCOMP** |
+| **Soft body** | No | No | No | No | **SoftBodyCOMP** |
+| **Cloth** | Not built-in | No | No | **Yes (GPU cloth)** | **ClothSOP (Verlet PBD)** |
+| **Vehicle physics** | No | No | No | No | **VehicleCOMP (Jolt)** |
+| **Constraints/joints** | Basic | Basic | No | Basic | **JointCOMP (6 joint types)** |
+| **Fluid sim** | Plugin/GLSL workaround | No | No | **Yes (GPU fluids)** | **FluidVOL (3D Navier-Stokes) + Fluid2DTOP** |
+| **Particle sim** | Legacy Particle SOP | No | Deprecated `jit.phys.*` | **Yes (GPU particles — millions)** | **14 POP operators (GPU compute)** |
+| **Pyro (fire/smoke)** | Not built-in | No | No | **Yes (GPU volumetric)** | **PyroVOL** |
+| **Navigation/pathfinding** | No | No | No | No | **NavigationCOMP** |
+| **Hair** | No | No | No | **Yes (GPU hair sim)** | No |
 
-GONODES has the strongest physics/simulation offering of all four tools, thanks to Godot's Jolt integration and the custom GPU compute pipelines (POP, VOL).
+GONODES and Notch both have strong physics/simulation offerings, but with different architectures: Notch runs everything on the GPU within its unified pipeline (higher throughput for GPU-resident sim), while GONODES uses a mix of CPU (Jolt physics) and GPU compute (POP, VOL) with typed data flow between stages.
 
 ---
 
@@ -1310,20 +1342,20 @@ GONODES has the strongest physics/simulation offering of all four tools, thanks 
 
 ## 31. Machine Learning & Computer Vision
 
-| Feature | TouchDesigner | vvvv | Jitter / Max | GONODES |
-|---------|-------------|------|-------------|---------|
-| **ML framework** | TensorFlow, PyTorch plugins | ML.NET, ONNX (gamma) | None built-in | **gn_ext_ml (ONNX Runtime)** |
-| **Object detection** | MediaPipe plugin | YOLO plugin | None | **ObjectDetectDAT** |
-| **Pose estimation** | MediaPipe plugin | None | None | **PoseDetectCHOP** |
-| **Face detection** | MediaPipe plugin | None | None | **FaceDetectCHOP** |
-| **Hand tracking** | MediaPipe plugin | None | None | **HandDetectCHOP** |
-| **Style transfer** | Plugin | None | None | **StyleTransferTOP** |
-| **Depth estimation** | Plugin | None | None | **DepthEstimateTOP** |
-| **Segmentation** | Plugin | None | None | **SegmentationTOP** |
-| **Custom models** | Yes (Python) | Yes (.NET) | No | **OnnxInferenceTOP (any ONNX model)** |
-| **Depth sensors** | Kinect, RealSense, ZED, Leap, Orbbec | Kinect, RealSense, Nuitrack | None | **gn_ext_depth_sensor (3 backends)** |
+| Feature | TouchDesigner | vvvv | Jitter / Max | Notch | GONODES |
+|---------|-------------|------|-------------|-------|---------|
+| **ML framework** | TensorFlow, PyTorch plugins | ML.NET, ONNX (gamma) | None built-in | No | **gn_ext_ml (ONNX Runtime)** |
+| **Object detection** | MediaPipe plugin | YOLO plugin | None | No | **ObjectDetectDAT** |
+| **Pose estimation** | MediaPipe plugin | None | None | No | **PoseDetectCHOP** |
+| **Face detection** | MediaPipe plugin | None | None | No | **FaceDetectCHOP** |
+| **Hand tracking** | MediaPipe plugin | None | None | No | **HandDetectCHOP** |
+| **Style transfer** | Plugin | None | None | No | **StyleTransferTOP** |
+| **Depth estimation** | Plugin | None | None | No | **DepthEstimateTOP** |
+| **Segmentation** | Plugin | None | None | No | **SegmentationTOP** |
+| **Custom models** | Yes (Python) | Yes (.NET) | No | No | **OnnxInferenceTOP (any ONNX model)** |
+| **Depth sensors** | Kinect, RealSense, ZED, Leap, Orbbec | Kinect, RealSense, Nuitrack | None | No | **gn_ext_depth_sensor (3 backends)** |
 
-All four tools have ML capabilities through extensions or plugins. GONODES's gn_ext_ml with 7 dedicated operators provides a well-integrated experience, but TD's MediaPipe integration is more mature and covers more models.
+All five tools except Notch have ML capabilities through extensions or plugins. Notch focuses purely on GPU rendering and has no ML inference pipeline. GONODES's gn_ext_ml with 7 dedicated operators provides a well-integrated experience, but TD's MediaPipe integration is more mature and covers more models.
 
 ---
 
@@ -1332,22 +1364,22 @@ All four tools have ML capabilities through extensions or plugins. GONODES's gn_
 
 ## 32. Community, Ecosystem & Learning Resources
 
-| Aspect | TouchDesigner | vvvv | Jitter / Max | GONODES |
-|--------|-------------|------|-------------|---------|
-| **Community size** | Large (tens of thousands) | Medium (thousands, EU-focused) | Large (Max community; Jitter subset) | **Small (early alpha)** |
-| **Forum** | forum.derivative.ca (very active) | discourse.vvvv.org | cycling74.com/forums | N/A |
-| **Tutorials** | Hundreds (YouTube, courses) | Good documentation + tutorials | Extensive (30+ years of books, courses) | Minimal (help patches only) |
-| **Books** | Several third-party | "vvvv — a Multipurpose Toolkit" | Dozens (Max/MSP, Jitter, Gen) | None |
-| **Courses** | Interactive & Immersive HQ, YouTube channels | NODE festival workshops | Kadenze, Berklee, many universities | None |
-| **Package ecosystem** | Palette (community .tox) | NuGet (gamma), Contribution (beta) | **Max Package Manager (thousands)** | gn_ext_* addons (manual) |
-| **Industrial adoption** | High (studios, agencies, events) | Medium (installations, architecture) | Medium (academic, music) | None yet |
-| **Job market** | Growing (TD-specific job postings) | Niche | Academic + music industry | None |
-| **Documentation** | Good (wiki + Forum) | Good (gamma), aging (beta) | Extensive (Max docs + Jitter tutorials) | 1,413 help patches + dev docs |
-| **Example database** | Palette examples | Girlpower demo folder | Jitter-examples, Recipe series | 1,413 help patches |
+| Aspect | TouchDesigner | vvvv | Jitter / Max | Notch | GONODES |
+|--------|-------------|------|-------------|-------|---------|
+| **Community size** | Large (tens of thousands) | Medium (thousands, EU-focused) | Large (Max community; Jitter subset) | Medium (live events niche) | **Small (early alpha)** |
+| **Forum** | forum.derivative.ca (very active) | discourse.vvvv.org | cycling74.com/forums | notch.one/forum | N/A |
+| **Tutorials** | Hundreds (YouTube, courses) | Good documentation + tutorials | Extensive (30+ years of books, courses) | Limited (official tutorials) | Minimal (help patches only) |
+| **Books** | Several third-party | "vvvv — a Multipurpose Toolkit" | Dozens (Max/MSP, Jitter, Gen) | None | None |
+| **Courses** | Interactive & Immersive HQ, YouTube channels | NODE festival workshops | Kadenze, Berklee, many universities | None | None |
+| **Package ecosystem** | Palette (community .tox) | NuGet (gamma), Contribution (beta) | **Max Package Manager (thousands)** | None | gn_ext_* addons (manual) |
+| **Industrial adoption** | High (studios, agencies, events) | Medium (installations, architecture) | Medium (academic, music) | **High** (live events, broadcast) | None yet |
+| **Job market** | Growing (TD-specific job postings) | Niche | Academic + music industry | Niche (live events specialists) | None |
+| **Documentation** | Good (wiki + Forum) | Good (gamma), aging (beta) | Extensive (Max docs + Jitter tutorials) | Adequate (official docs) | 1,413 help patches + dev docs |
+| **Example database** | Palette examples | Girlpower demo folder | Jitter-examples, Recipe series | Official examples | 1,413 help patches |
 
 ### This Is GONODES's Biggest Gap
 
-Community and ecosystem are arguably more important than technical features for adoption. All three competitors have:
+Community and ecosystem are arguably more important than technical features for adoption. All four competitors have:
 - Years of community-contributed content, tutorials, and examples
 - Paid courses and educational partnerships
 - Studio adoption and production track records
@@ -1393,6 +1425,14 @@ GONODES has none of this yet. The 1,413 help patches provide excellent per-opera
 4. **Presentation mode** — build custom end-user interfaces without coding by arranging UI objects on a separate visual layer
 5. **Academic heritage** — IRCAM roots, 35+ years of academic research, thousands of published papers using Max
 
+### Notch — Only In Notch
+
+1. **Unified GPU pipeline** — the entire scene (geometry, particles, simulation, compositing, post-processing) is a single GPU submission. Zero per-node overhead. No other tool achieves this level of GPU pipeline unification
+2. **Media server ecosystem** — the deepest integration with disguise (d3), Barco, and Green Hippo media servers. Notch is the de facto standard for high-end live event visuals
+3. **GPU hair simulation** — real-time GPU-native hair/strand simulation. No competitor in this comparison has built-in hair sim
+4. **Adaptive quality with guaranteed frame delivery** — dynamic resolution scaling and LOD to guarantee frame targets during live shows. Critical for broadcast where dropped frames are unacceptable
+5. **Multi-GPU workload distribution** — automatic distribution of render work across multiple GPUs for maximum throughput on media server hardware
+
 ### GONODES — Only In GONODES
 
 1. **libgonodes host embedding** — 9 bidirectional data contexts, graph editing from host, GPU context sharing. No competitor offers this breadth
@@ -1419,20 +1459,22 @@ GONODES has none of this yet. The 1,413 help patches provide excellent per-opera
 
 GONODES is a technically impressive alpha-stage tool that has achieved remarkable breadth in one year of development:
 
-- **574 operators** across 14 families — more than TD's ~300, comparable to vvvv's ~700
-- **Architecture** — push-based cook engine with 3-tier guard system achieves equivalent work-skipping to TD's mature pull engine
-- **GPU compute** — POP, VOL, and SDF pipelines exceed all three competitors in built-in compute capability
-- **Host embedding** — libgonodes offers the most comprehensive embeddable node-graph engine ever built (9 data contexts, bidirectional, graph editing)
-- **Platform reach** — 6 deployment platforms vs TD's 1.5, Max's 2, vvvv's 3
+- **574 operators** across 14 families — more than TD's ~300 or Notch's ~200, comparable to vvvv's ~700
+- **Architecture** — push-based cook engine with 3-tier guard system achieves equivalent work-skipping to TD's mature pull engine. Notch's full-scene-every-frame approach trades this efficiency for unified GPU pipeline throughput
+- **GPU compute** — POP, VOL, and SDF pipelines exceed all four competitors in built-in compute capability. Notch has strong GPU sim (particles, fluids, cloth, hair) but within a closed, non-extensible pipeline
+- **Host embedding** — libgonodes offers the most comprehensive embeddable node-graph engine ever built (9 data contexts, bidirectional, graph editing). Notch Playback is limited to texture output + parameters
+- **Platform reach** — 6 deployment platforms vs TD's 1.5, Max's 2, vvvv's 3, Notch's 1
 - **Open source** — no competitor offers this. Zero cost, full source, no restrictions
 
 ### Where GONODES Falls Short
 
 - **Maturity** — alpha status means unknown edge cases, untested production scenarios, and potential architectural issues not yet discovered
 - **Community** — zero community content, tutorials, or production track record. This is the #1 adoption barrier
-- **GPU parallelism** — Godot's single render thread limits multi-chain GPU utilization vs TD
+- **GPU parallelism** — Godot's single render thread limits multi-chain GPU utilization vs TD and Notch
+- **GPU pipeline unity** — Notch's unified GPU pipeline achieves higher throughput for dense 3D scenes than GONODES's per-SubViewport model
+- **Media server integration** — Notch dominates the live event pipeline via disguise/d3 partnerships. GONODES has no media server ecosystem
 - **Audio** — orders of magnitude behind Max/MSP for audio synthesis (but this isn't the target domain)
-- **Adaptive quality** — can't gracefully degrade under load like TD can
+- **Adaptive quality** — can't gracefully degrade under load like TD and Notch can
 
 ### Strategic Position
 
@@ -1441,9 +1483,10 @@ GONODES occupies a unique position that no competitor addresses:
 1. **Free + open source** — the only node-based real-time visual tool that's genuinely open
 2. **Embeddable** — the only tool with a comprehensive C embedding API (9 data contexts)
 3. **Full game engine** — the only tool built on a modern game engine with PBR, physics, VR, and 6-platform export
-4. **Compute pipelines** — the only tool with built-in GPU volume, particle, and SDF compute
+4. **Compute pipelines** — the only tool with built-in GPU volume, particle, and SDF compute (Notch has particles and fluids but no volumes or SDFs, and they're not user-extensible)
+5. **Extensibility** — 3-tier scripting (GDScript/Python/C++) vs Notch's zero scripting, TD's Python-only, vvvv's .NET VL
 
-The competitive strategy should not be "beat TD at being TD" — that's impossible with a 20-year head start. Instead, GONODES should lean into its unique strengths: **open source access**, **embeddability**, **compute pipelines**, **cross-platform reach**, and **Godot engine integration**. These create use cases that TD, vvvv, and Jitter simply cannot address.
+The competitive strategy should not be "beat TD at being TD" or "beat Notch at live events" — those fights require decades and media server partnerships. Instead, GONODES should lean into its unique strengths: **open source access**, **embeddability**, **compute pipelines**, **cross-platform reach**, **extensibility**, and **Godot engine integration**. These create use cases that TD, vvvv, Jitter, and Notch simply cannot address.
 
 The primary risk isn't technical — it's adoption. A technically superior tool with no community will lose to a technically adequate tool with thousands of users and tutorials. Priority #1 should be building the community and content ecosystem that makes GONODES approachable and trustworthy for real projects.
 

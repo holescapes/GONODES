@@ -1,7 +1,7 @@
 /*
  * GONODES MIDI/OSC Host Example
  *
- * Demonstrates the v1.1.0 protocol bridge APIs:
+ * Demonstrates the v2.0 protocol bridge APIs:
  *   • MIDI event injection (Gap 5)
  *   • OSC message routing (Gap 5)
  *   • Event/trigger system — fire and receive (Gap 8)
@@ -28,11 +28,13 @@
 
 static void on_event(
     gonodes_instance_t inst,
+    gonodes_patch_t patch,
     const char* event_name,
     const char* payload,
     void* user_data
 ) {
     (void)inst;
+    (void)patch;
     (void)user_data;
     printf("  [EVENT RECEIVED] %s", event_name);
     if (payload) printf(" — %s", payload);
@@ -44,12 +46,12 @@ static void on_event(
 /*  Demo: MIDI Event Injection                                               */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static void demo_midi(gonodes_instance_t gn) {
+static void demo_midi(gonodes_instance_t gn, gonodes_patch_t p) {
     printf("\n═══ MIDI Event Injection ═══\n");
 
     /* Note On — C4 (MIDI note 60), velocity 100, channel 0. */
     gonodes_midi_event_t note_on = {0x90, 60, 100, 0, 0};
-    int err = gonodes_send_midi_event(gn, &note_on);
+    int err = gonodes_send_midi_event(gn, p, &note_on);
     printf("  Note On  (C4, vel=100, ch=0): %s\n",
            err == GONODES_OK ? "OK" : "failed");
 
@@ -57,7 +59,7 @@ static void demo_midi(gonodes_instance_t gn) {
 
     /* CC message — CC7 (volume), value 80. */
     gonodes_midi_event_t cc = {0xB0, 7, 80, 0, 0};
-    err = gonodes_send_midi_event(gn, &cc);
+    err = gonodes_send_midi_event(gn, p, &cc);
     printf("  CC7 (volume=80, ch=0): %s\n",
            err == GONODES_OK ? "OK" : "failed");
 
@@ -65,7 +67,7 @@ static void demo_midi(gonodes_instance_t gn) {
 
     /* Note Off. */
     gonodes_midi_event_t note_off = {0x80, 60, 0, 0, 0};
-    err = gonodes_send_midi_event(gn, &note_off);
+    err = gonodes_send_midi_event(gn, p, &note_off);
     printf("  Note Off (C4, ch=0): %s\n",
            err == GONODES_OK ? "OK" : "failed");
 
@@ -76,7 +78,7 @@ static void demo_midi(gonodes_instance_t gn) {
     int notes[] = {60, 64, 67, 72};  /* C, E, G, C5 */
     for (int i = 0; i < 4; ++i) {
         gonodes_midi_event_t ev = {0x90, notes[i], 127, i, 0};
-        gonodes_send_midi_event(gn, &ev);
+        gonodes_send_midi_event(gn, p, &ev);
     }
     gonodes_cook_frame(gn, 1.0 / 60.0);
     printf("  4-channel chord sent.\n");
@@ -87,21 +89,21 @@ static void demo_midi(gonodes_instance_t gn) {
 /*  Demo: OSC Message Routing                                                */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static void demo_osc(gonodes_instance_t gn) {
+static void demo_osc(gonodes_instance_t gn, gonodes_patch_t p) {
     printf("\n═══ OSC Message Routing ═══\n");
 
     /* Single float. */
-    int err = gonodes_send_osc_message(gn, "/control/fader1", "[0.75]");
+    int err = gonodes_send_osc_message(gn, p, "/control/fader1", "[0.75]");
     printf("  /control/fader1 [0.75]: %s\n",
            err == GONODES_OK ? "OK" : "failed");
 
     /* Multiple args. */
-    err = gonodes_send_osc_message(gn, "/effect/params", "[1, \"bloom\", 0.5, true]");
+    err = gonodes_send_osc_message(gn, p, "/effect/params", "[1, \"bloom\", 0.5, true]");
     printf("  /effect/params [1, \"bloom\", 0.5, true]: %s\n",
            err == GONODES_OK ? "OK" : "failed");
 
     /* No arguments (bang-style). */
-    err = gonodes_send_osc_message(gn, "/cue/next", nullptr);
+    err = gonodes_send_osc_message(gn, p, "/cue/next", nullptr);
     printf("  /cue/next (no args): %s\n",
            err == GONODES_OK ? "OK" : "failed");
 
@@ -112,7 +114,7 @@ static void demo_osc(gonodes_instance_t gn) {
     for (int i = 0; i < 20; ++i) {
         char args[32];
         snprintf(args, sizeof(args), "[%.3f]", (float)i / 19.0f);
-        gonodes_send_osc_message(gn, "/control/sweep", args);
+        gonodes_send_osc_message(gn, p, "/control/sweep", args);
         gonodes_cook_frame(gn, 1.0 / 60.0);
     }
     printf("  Sweep done.\n");
@@ -123,7 +125,7 @@ static void demo_osc(gonodes_instance_t gn) {
 /*  Demo: Event/Trigger System                                               */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static void demo_events(gonodes_instance_t gn) {
+static void demo_events(gonodes_instance_t gn, gonodes_patch_t p) {
     printf("\n═══ Event/Trigger System ═══\n");
 
     /* Register event callback. */
@@ -131,16 +133,16 @@ static void demo_events(gonodes_instance_t gn) {
     printf("  Event callback registered.\n");
 
     /* Fire named events. */
-    int err = gonodes_fire_event(gn, "beat", "{\"bpm\": 128, \"bar\": 1}");
+    int err = gonodes_fire_event(gn, p, "beat", "{\"bpm\": 128, \"bar\": 1}");
     printf("  Fire 'beat': %s\n", err == GONODES_OK ? "OK" : "failed");
     gonodes_cook_frame(gn, 1.0 / 60.0);
 
-    err = gonodes_fire_event(gn, "scene_change", "{\"scene\": \"intro\"}");
+    err = gonodes_fire_event(gn, p, "scene_change", "{\"scene\": \"intro\"}");
     printf("  Fire 'scene_change': %s\n", err == GONODES_OK ? "OK" : "failed");
     gonodes_cook_frame(gn, 1.0 / 60.0);
 
     /* Bare trigger (no payload). */
-    err = gonodes_fire_event(gn, "flash", nullptr);
+    err = gonodes_fire_event(gn, p, "flash", nullptr);
     printf("  Fire 'flash' (bare trigger): %s\n", err == GONODES_OK ? "OK" : "failed");
     gonodes_cook_frame(gn, 1.0 / 60.0);
 
@@ -149,7 +151,7 @@ static void demo_events(gonodes_instance_t gn) {
     for (int i = 0; i < 10; ++i) {
         char payload[64];
         snprintf(payload, sizeof(payload), "{\"bpm\": 128, \"beat\": %d}", i + 1);
-        gonodes_fire_event(gn, "beat", payload);
+        gonodes_fire_event(gn, p, "beat", payload);
         gonodes_cook_frame(gn, 1.0 / 120.0);
     }
 
@@ -163,56 +165,56 @@ static void demo_events(gonodes_instance_t gn) {
 /*  Demo: Transport Control                                                  */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static void demo_transport(gonodes_instance_t gn) {
+static void demo_transport(gonodes_instance_t gn, gonodes_patch_t p) {
     printf("\n═══ Transport Control ═══\n");
 
     /* Check initial time. */
-    double t = gonodes_get_transport_time(gn);
+    double t = gonodes_get_transport_time(gn, p);
     printf("  Initial time: %.3f s\n", t);
 
     /* Play at normal speed. */
-    gonodes_set_transport(gn, GONODES_TRANSPORT_PLAY);
-    gonodes_set_transport_speed(gn, 1.0);
+    gonodes_set_transport(gn, p, GONODES_TRANSPORT_PLAY);
+    gonodes_set_transport_speed(gn, p, 1.0);
     printf("  Transport: PLAY, speed=1.0x\n");
 
     for (int i = 0; i < 10; ++i) {
         gonodes_cook_frame(gn, 1.0 / 60.0);
     }
-    printf("  After 10 frames: %.3f s\n", gonodes_get_transport_time(gn));
+    printf("  After 10 frames: %.3f s\n", gonodes_get_transport_time(gn, p));
 
     /* Double speed. */
-    gonodes_set_transport_speed(gn, 2.0);
+    gonodes_set_transport_speed(gn, p, 2.0);
     printf("  Transport: speed=2.0x\n");
 
     for (int i = 0; i < 10; ++i) {
         gonodes_cook_frame(gn, 1.0 / 60.0);
     }
-    printf("  After 10 frames at 2x: %.3f s\n", gonodes_get_transport_time(gn));
+    printf("  After 10 frames at 2x: %.3f s\n", gonodes_get_transport_time(gn, p));
 
     /* Pause. */
-    gonodes_set_transport(gn, GONODES_TRANSPORT_PAUSE);
+    gonodes_set_transport(gn, p, GONODES_TRANSPORT_PAUSE);
     printf("  Transport: PAUSE\n");
     for (int i = 0; i < 5; ++i) {
         gonodes_cook_frame(gn, 1.0 / 60.0);
     }
     printf("  After 5 paused frames: %.3f s (should be unchanged)\n",
-           gonodes_get_transport_time(gn));
+           gonodes_get_transport_time(gn, p));
 
     /* Seek. */
-    gonodes_transport_seek(gn, 30.0);
+    gonodes_transport_seek(gn, p, 30.0);
     printf("  Seeked to 30.0 s\n");
-    printf("  Time after seek: %.3f s\n", gonodes_get_transport_time(gn));
+    printf("  Time after seek: %.3f s\n", gonodes_get_transport_time(gn, p));
 
     /* Resume play. */
-    gonodes_set_transport(gn, GONODES_TRANSPORT_PLAY);
-    gonodes_set_transport_speed(gn, 1.0);
+    gonodes_set_transport(gn, p, GONODES_TRANSPORT_PLAY);
+    gonodes_set_transport_speed(gn, p, 1.0);
     gonodes_cook_frame(gn, 1.0 / 60.0);
-    printf("  Resumed, time: %.3f s\n", gonodes_get_transport_time(gn));
+    printf("  Resumed, time: %.3f s\n", gonodes_get_transport_time(gn, p));
 
     /* Stop (resets to 0). */
-    gonodes_set_transport(gn, GONODES_TRANSPORT_STOP);
+    gonodes_set_transport(gn, p, GONODES_TRANSPORT_STOP);
     printf("  Transport: STOP\n");
-    printf("  Time after stop: %.3f s\n", gonodes_get_transport_time(gn));
+    printf("  Time after stop: %.3f s\n", gonodes_get_transport_time(gn, p));
 }
 
 
@@ -220,32 +222,32 @@ static void demo_transport(gonodes_instance_t gn) {
 /*  Demo: Output Resolution Override                                         */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static void demo_resolution_override(gonodes_instance_t gn) {
+static void demo_resolution_override(gonodes_instance_t gn, gonodes_patch_t p) {
     printf("\n═══ Output Resolution Override ═══\n");
 
     /* Read initial output size. */
     int w = 0, h = 0;
-    gonodes_get_output_texture(gn, "host_out", &w, &h);
+    gonodes_get_output_texture(gn, p, "host_out", &w, &h);
     printf("  Default resolution: %dx%d\n", w, h);
 
     /* Override to 4K. */
-    int err = gonodes_set_output_resolution(gn, "host_out", 3840, 2160);
+    int err = gonodes_set_output_resolution(gn, p, "host_out", 3840, 2160);
     printf("  Override to 3840x2160: %s\n", err == GONODES_OK ? "OK" : "failed");
     gonodes_cook_frame(gn, 1.0 / 60.0);
 
-    gonodes_get_output_texture(gn, "host_out", &w, &h);
+    gonodes_get_output_texture(gn, p, "host_out", &w, &h);
     printf("  After override: %dx%d\n", w, h);
 
     /* Override to 720p. */
-    gonodes_set_output_resolution(gn, "host_out", 1280, 720);
+    gonodes_set_output_resolution(gn, p, "host_out", 1280, 720);
     gonodes_cook_frame(gn, 1.0 / 60.0);
-    gonodes_get_output_texture(gn, "host_out", &w, &h);
+    gonodes_get_output_texture(gn, p, "host_out", &w, &h);
     printf("  After 720p override: %dx%d\n", w, h);
 
     /* Revert to patch default. */
-    gonodes_set_output_resolution(gn, "host_out", 0, 0);
+    gonodes_set_output_resolution(gn, p, "host_out", 0, 0);
     gonodes_cook_frame(gn, 1.0 / 60.0);
-    gonodes_get_output_texture(gn, "host_out", &w, &h);
+    gonodes_get_output_texture(gn, p, "host_out", &w, &h);
     printf("  After revert to default: %dx%d\n", w, h);
 }
 
@@ -281,9 +283,9 @@ int main(int argc, char* argv[]) {
     /* ── Load Patch ─────────────────────────────────────────────────── */
 
     printf("Loading patch: %s\n", patch_file);
-    int err = gonodes_load_patch(gn, patch_file);
-    if (err != GONODES_OK) {
-        fprintf(stderr, "Load failed (%d): %s\n", err, gonodes_get_last_error(gn));
+    gonodes_patch_t p = gonodes_load_patch(gn, patch_file);
+    if (!p) {
+        fprintf(stderr, "Load failed: %s\n", gonodes_get_last_error(gn));
         gonodes_destroy(gn);
         return 1;
     }
@@ -292,11 +294,11 @@ int main(int argc, char* argv[]) {
 
     /* ── Run Demos ──────────────────────────────────────────────────── */
 
-    demo_midi(gn);
-    demo_osc(gn);
-    demo_events(gn);
-    demo_transport(gn);
-    demo_resolution_override(gn);
+    demo_midi(gn, p);
+    demo_osc(gn, p);
+    demo_events(gn, p);
+    demo_transport(gn, p);
+    demo_resolution_override(gn, p);
 
     /* ── Cleanup ────────────────────────────────────────────────────── */
 

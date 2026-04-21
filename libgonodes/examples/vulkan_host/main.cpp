@@ -175,8 +175,8 @@ int main(int argc, char* argv[]) {
     }
 
     printf("[Vulkan Host] Loading patch: %s\n", patch_file);
-    int err = gonodes_load_patch(gn, patch_file);
-    if (err != GONODES_OK) {
+    gonodes_patch_t p = gonodes_load_patch(gn, patch_file);
+    if (!p) {
         fprintf(stderr, "[Vulkan Host] Load failed: %s\n", gonodes_get_last_error(gn));
         gonodes_destroy(gn);
         vkDestroyDevice(vk_device, nullptr);
@@ -184,11 +184,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    gonodes_set_auto_reload(gn, 1, 0.5);
+    gonodes_set_auto_reload(gn, p, 1, 0.5);
 
     /* ── Query Host I/O Manifest ────────────────────────────────────── */
 
-    const char* host_io = gonodes_get_host_io(gn);
+    const char* host_io = gonodes_get_host_io(gn, p);
     if (host_io && host_io[0] != '\0') {
         printf("[Vulkan Host] Host I/O Manifest:\n%s\n", host_io);
     } else {
@@ -205,25 +205,25 @@ int main(int argc, char* argv[]) {
 
         /* Inject host data. */
         float value = (float)frame / 300.0f;
-        gonodes_set_input_chop(gn, "host_lfo", "progress", &value, 1);
+        gonodes_set_input_chop(gn, p, "host_lfo", "progress", &value, 1);
 
         /* Cook. */
         gonodes_cook_frame(gn, delta);
 
         /* Read output texture — this is a VkImage on the shared device. */
         int w = 0, h = 0;
-        uint64_t tex = gonodes_get_output_texture(gn, "host_out", &w, &h);
+        uint64_t tex = gonodes_get_output_texture(gn, p, "host_out", &w, &h);
 
         if (frame % 60 == 0) {
             double cook_ms = 0;
             int cooked = 0, fn = 0;
-            gonodes_get_stats(gn, &cook_ms, &cooked, &fn);
+            gonodes_get_stats(gn, p, &cook_ms, &cooked, &fn);
             printf("  Frame %d: tex=0x%llx %dx%d, cook=%.2fms\n",
                    frame, (unsigned long long)tex, w, h, cook_ms);
         }
     }
 
-    /* ── v1.2.0: Zero-Copy VOL GPU Exchange ─────────────────────────── */
+    /* ── v2.0: Zero-Copy VOL GPU Exchange ─────────────────────────── */
     /* On a shared Vulkan device, push a 3D texture handle to a HostInVOL
      * node.  The handle is used directly by the GONODES compute pipeline
      * — no CPU readback or upload.  After cooking, read the output 3D
@@ -234,7 +234,7 @@ int main(int argc, char* argv[]) {
         /* In a real app, create a VkImage3D and fill it with voxel data.
          * Here we simulate by passing a dummy handle for demonstration. */
         uint64_t dummy_vol_handle = 0x12345678ULL;  /* real: vkGetImage... */
-        int vol_err = gonodes_set_input_volume_gpu(gn, "host_vol_in",
+        int vol_err = gonodes_set_input_volume_gpu(gn, p, "host_vol_in",
             dummy_vol_handle, 64, 64, 64, 1, "density");
         if (vol_err == GONODES_OK)
             printf("  Pushed 64^3 volume handle to host_vol_in\n");
@@ -242,7 +242,7 @@ int main(int argc, char* argv[]) {
         gonodes_cook_frame(gn, 1.0 / 60.0);
 
         gonodes_volume_gpu_handle_t vol_out = {};
-        if (gonodes_get_output_volume_gpu(gn, "host_vol_out", &vol_out) == GONODES_OK
+        if (gonodes_get_output_volume_gpu(gn, p, "host_vol_out", &vol_out) == GONODES_OK
             && vol_out.native_handle != 0) {
             printf("  VOL output: handle=0x%llx %dx%dx%d ch=%d\n",
                    (unsigned long long)vol_out.native_handle,
@@ -252,7 +252,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    /* ── v1.2.0: Zero-Copy POP GPU Exchange ─────────────────────────── */
+    /* ── v2.0: Zero-Copy POP GPU Exchange ─────────────────────────── */
     /* Push a particle SSBO handle to a HostInPOP node.  The buffer is a
      * VkBuffer on the shared device, used directly by POP compute shaders.
      * After cooking, read the output SSBO handle from a HostOutPOP node. */
@@ -260,7 +260,7 @@ int main(int argc, char* argv[]) {
     printf("[Vulkan Host] POP GPU zero-copy demo...\n");
     {
         uint64_t dummy_ssbo = 0xABCDEF00ULL;  /* real: vkCreateBuffer... */
-        int pop_err = gonodes_set_input_particles_gpu(gn, "host_pop_in",
+        int pop_err = gonodes_set_input_particles_gpu(gn, p, "host_pop_in",
             dummy_ssbo, 10000, 64, 10000 * 64);
         if (pop_err == GONODES_OK)
             printf("  Pushed 10000-particle SSBO to host_pop_in\n");
@@ -268,7 +268,7 @@ int main(int argc, char* argv[]) {
         gonodes_cook_frame(gn, 1.0 / 60.0);
 
         gonodes_particle_gpu_handle_t pop_out = {};
-        if (gonodes_get_output_particles_gpu(gn, "host_pop_out", &pop_out) == GONODES_OK
+        if (gonodes_get_output_particles_gpu(gn, p, "host_pop_out", &pop_out) == GONODES_OK
             && pop_out.native_handle != 0) {
             printf("  POP output: handle=0x%llx count=%d stride=%d\n",
                    (unsigned long long)pop_out.native_handle,

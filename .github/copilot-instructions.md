@@ -106,6 +106,9 @@ When adding a new COMP that creates a `_scene_node`, check `GNProxyTree._create_
 ### 25.28 — Family-Output Coherence (No Hidden Conversions)
 Every operator MUST output data matching its declared family. A CHOP outputs `GNChannelData`, a DAT outputs `GNTableData`, a TOP outputs `GNTextureData`, an IMG outputs `GNImageData`, a SOP outputs `GNGeoData`, etc. **Never embed a silent cross-family conversion inside a non-bridge operator.** If a node works with float/channel data, it belongs in CHOP — not DAT. If it processes CPU images, it belongs in IMG — not TOP. Users convert between families explicitly via bridge operators (`CHOPtoTOP`, `ImgToTOP`, `SOPtoDAT`, etc.). The only exceptions are: (1) explicit bridge operators whose name declares the conversion, (2) multi-output operators that emit secondary ports of a different family (rule 25.24 demand-gated), and (3) NET family host-bridge operators that output typed data matching their specific bridge target.
 
+### 25.29 — Native Extension Graceful Degradation
+Extensions with GDExtension native binaries MUST degrade gracefully when binaries are missing. Three mandatory layers: (1) Ship `.gdextension` as `.gdextension.disabled` — auto-activated by `sync_native_extensions()` when binary exists. (2) Declare `dependencies = ["MyNativeClass"]` in `gn_extension.cfg` — registry skips the extension if `ClassDB.class_exists()` fails. (3) NEVER reference native class names directly in GDScript — use `ClassDB.class_exists(&"...")` + `ClassDB.instantiate(&"...")` + `.call(&"method", args)`. Declare variables as `Object`/`RefCounted`/`Node`, not the native type. Show `node_warning` when the native instance is null.
+
 ### File Encoding
 All text files are UTF-8 without BOM. NEVER use PowerShell `Get-Content`/`Set-Content` without `-Encoding UTF8` on BOTH calls. Prefer Python for non-ASCII text manipulation.
 
@@ -189,3 +192,4 @@ Signature: `func get_device_menu() -> PackedStringArray`. Used by: BlackmagicInI
 - Contributing: `dev_docs/CONTRIBUTING.md`
 - New operator checklist: `dev_docs/NEW_OPERATOR_CHECKLIST.md`
 - Script reference: `dev_docs/SCRIPTS.md`
+- Host data formats: `dev_docs/HOST_DATA_GUIDE.md`
