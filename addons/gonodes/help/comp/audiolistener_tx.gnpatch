@@ -1,0 +1,100 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "audiolistener1": {
+            "type": "AudioListenerCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.5
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 1.5
+                },
+                "rx": {
+                    "value": 0.5
+                },
+                "ry": {
+                    "value": 0.5
+                },
+                "rz": {
+                    "value": 0.5
+                },
+                "current": {
+                    "value": true
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AudioListenerCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

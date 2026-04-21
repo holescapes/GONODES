@@ -1,0 +1,171 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "src_sphere": {
+      "type": "SphereSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "transform1": {
+      "type": "TransformSOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.5,
+          "expression": "sin(time * 0.8) * 2.0",
+          "mode": "EXPRESSION"
+        },
+        "ty": {
+          "value": 0.5,
+          "expression": "cos(time * 0.6) * 1.5",
+          "mode": "EXPRESSION"
+        },
+        "tz": {
+          "value": 0.5
+        },
+        "rx": {
+          "value": 0.5
+        },
+        "ry": {
+          "value": 0.5
+        },
+        "rz": {
+          "value": 0.5
+        },
+        "sx": {
+          "value": 0.5
+        },
+        "sy": {
+          "value": 0.5
+        },
+        "sz": {
+          "value": 0.5
+        },
+        "order": {
+          "value": 1
+        }
+      }
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "src_sphere",
+      "from_port": 0,
+      "to": "transform1",
+      "to_port": 0
+    },
+    {
+      "from": "transform1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Transform SOP — Tx (Native)\n\nTranslate, rotate, and scale geometry with 6 transform orders.\nShowcasing: tx=0.5, ty=0.5, tz=0.5, rx=0.5.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

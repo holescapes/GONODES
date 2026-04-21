@@ -1351,3 +1351,88 @@ func test_soptovol_instantiate() -> void:
 	GNTestAssert.assert_not_null(node, "SOPtoVOL created")
 	GNTestAssert.assert_eq(node.family, "vol", "SOPtoVOL family is vol")
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  MeasureSOP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_measure_sop_instantiate() -> void:
+	var node := _make_node(MeasureSOP.new(), "measure1")
+	GNTestAssert.assert_eq(node.node_type, "measure", "node_type")
+
+func test_measure_sop_with_box() -> void:
+	var node := _make_node(MeasureSOP.new(), "measure1")
+	node.set_param_value("area", true)
+	node.set_param_value("perimeter", true)
+	var geo := _make_box_geo()
+	var out: GNGeoData = _cook_with(node, [geo]) as GNGeoData
+	GNTestAssert.assert_not_null(out, "measure produces output")
+
+func test_measure_sop_no_input() -> void:
+	var node := _make_node(MeasureSOP.new(), "measure3")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(out == null, "null without input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  CreepSOP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_creep_sop_instantiate() -> void:
+	var node := _make_node(CreepSOP.new(), "creep1")
+	GNTestAssert.assert_eq(node.node_type, "creep", "node_type")
+
+func test_creep_sop_with_grid() -> void:
+	var node := _make_node(CreepSOP.new(), "creep1")
+	var geo := _make_grid_geo(5, 5)
+	var out: GNGeoData = _cook_with(node, [geo]) as GNGeoData
+	GNTestAssert.assert_not_null(out, "creep produces output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ProjectSOP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_project_sop_instantiate() -> void:
+	var node := _make_node(ProjectSOP.new(), "project1")
+	GNTestAssert.assert_eq(node.node_type, "project", "node_type")
+
+func test_project_sop_with_two_inputs() -> void:
+	var node := _make_node(ProjectSOP.new(), "project1")
+	var points := _make_grid_geo(2, 2)
+	var surface := _make_grid_geo(10, 10)
+	var out: GNGeoData = _cook_with(node, [points, surface]) as GNGeoData
+	GNTestAssert.assert_not_null(out, "project produces output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  HoleSOP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_hole_sop_instantiate() -> void:
+	var node := _make_node(HoleSOP.new(), "hole1")
+	GNTestAssert.assert_eq(node.node_type, "hole", "node_type")
+
+func test_hole_sop_with_grid() -> void:
+	var node := _make_node(HoleSOP.new(), "hole1")
+	var geo := _make_grid_geo(5, 5)
+	var out: GNGeoData = _cook_with(node, [geo]) as GNGeoData
+	GNTestAssert.assert_not_null(out, "hole produces output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ConvertLineSOP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_convert_line_sop_instantiate() -> void:
+	var node := _make_node(ConvertLineSOP.new(), "cvt1")
+	GNTestAssert.assert_eq(node.node_type, "convertline", "node_type")
+
+func test_convert_line_sop_with_line() -> void:
+	var node := _make_node(ConvertLineSOP.new(), "cvt1")
+	var line := _make_node(LineSOP.new(), "line1")
+	var geo: GNGeoData = _cook_no_input(line) as GNGeoData
+	if geo:
+		var out: GNGeoData = _cook_with(node, [geo]) as GNGeoData
+		GNTestAssert.assert_not_null(out, "convert produces output")
+

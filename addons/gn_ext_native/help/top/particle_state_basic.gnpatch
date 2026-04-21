@@ -1,0 +1,90 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "emit1": {
+      "type": "EmitterPOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "rate": {
+          "value": 500
+        }
+      }
+    },
+    "focus1": {
+      "type": "ParticleStateTOPNative",
+      "position": [
+        500,
+        100
+      ],
+      "parameters": {
+        "width": {
+          "value": 512
+        },
+        "attribute": {
+          "value": 0
+        },
+        "scale": {
+          "value": 1.0
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "emit1",
+      "from_port": 0,
+      "to": "focus1",
+      "to_port": 0
+    },
+    {
+      "from": "focus1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Particle State TOP — Basic (Native)\n\nVisualize POP particle attributes as a texture.\nwidth sets texture width. attribute selects which field to display\n(position, velocity, color, age, etc.). scale controls value mapping.",
+      "position": [
+        -100,
+        -100
+      ],
+      "size": [
+        500,
+        120
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

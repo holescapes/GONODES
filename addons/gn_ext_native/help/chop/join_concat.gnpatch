@@ -1,0 +1,146 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "pattern_ramp": {
+      "type": "PatternCHOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "type": {
+          "value": 0
+        },
+        "length": {
+          "value": 50,
+          "expression": "(50 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "pattern_sine": {
+      "type": "PatternCHOP",
+      "position": [
+        100,
+        250
+      ],
+      "parameters": {
+        "type": {
+          "value": 1
+        },
+        "length": {
+          "value": 50
+        }
+      }
+    },
+    "join1": {
+      "type": "JoinCHOPNative",
+      "position": [
+        500,
+        150
+      ],
+      "parameters": {
+        "overlap": {
+          "value": 10
+        }
+      }
+    },
+    "null1": {
+      "type": "NullCHOP",
+      "position": [
+        800,
+        150
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "position": [
+        1500,
+        150
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "y": 512,
+            "_type": "Vector2i",
+            "x": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      },
+      "type": "WindowOUT"
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        150
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "pattern_ramp",
+      "from_port": 0,
+      "to": "join1",
+      "to_port": 0
+    },
+    {
+      "from": "pattern_sine",
+      "from_port": 0,
+      "to": "join1",
+      "to_port": 1
+    },
+    {
+      "from": "join1",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "null1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Join CHOP — Concatenate Samples (Native)\n\nJoins ramp + sine end-to-end.\n10-sample crossfade overlap blends the seam.\nAccepts dynamic number of inputs.",
+      "position": [
+        -100.0,
+        -150.0
+      ],
+      "size": [
+        380.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

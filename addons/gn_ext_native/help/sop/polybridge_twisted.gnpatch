@@ -1,0 +1,217 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "circle1": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "radius": {
+          "value": 0.5,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "divisions": {
+          "value": 6,
+          "expression": "(6 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "transform1": {
+      "type": "TransformSOP",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "ty": {
+          "value": -1.0
+        },
+        "ry": {
+          "value": 0.0
+        }
+      }
+    },
+    "circle2": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        350
+      ],
+      "parameters": {
+        "radius": {
+          "value": 0.5
+        },
+        "divisions": {
+          "value": 6
+        }
+      }
+    },
+    "transform2": {
+      "type": "TransformSOP",
+      "position": [
+        450,
+        350
+      ],
+      "parameters": {
+        "ty": {
+          "value": 1.0
+        },
+        "ry": {
+          "value": 0.0
+        }
+      }
+    },
+    "polybridge1": {
+      "type": "PolyBridgeSOPNative",
+      "position": [
+        800,
+        200
+      ],
+      "parameters": {
+        "divisions": {
+          "value": 8
+        },
+        "twist": {
+          "value": 180.0
+        }
+      }
+    },
+    "geo1": {
+      "type": "GeometryCOMP",
+      "position": [
+        1150,
+        200
+      ],
+      "parameters": {}
+    },
+    "cam1": {
+      "type": "CameraCOMP",
+      "position": [
+        1150,
+        400
+      ],
+      "parameters": {
+        "tx": {
+          "value": 2.0
+        },
+        "ty": {
+          "value": 1.0
+        },
+        "tz": {
+          "value": 3.0
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        1500,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1850,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "transform1",
+      "to_port": 0
+    },
+    {
+      "from": "circle2",
+      "from_port": 0,
+      "to": "transform2",
+      "to_port": 0
+    },
+    {
+      "from": "transform1",
+      "from_port": 0,
+      "to": "polybridge1",
+      "to_port": 0
+    },
+    {
+      "from": "transform2",
+      "from_port": 0,
+      "to": "polybridge1",
+      "to_port": 1
+    },
+    {
+      "from": "polybridge1",
+      "from_port": 0,
+      "to": "geo1",
+      "to_port": 0
+    },
+    {
+      "from": "geo1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "cam1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "PolyBridge SOP — Twisted Column (Native)\n\nTwo hexagons bridged with 180° twist and 8 divisions.\nCreates a dramatic twisted column.\nAnimate twist via expression for a spinning effect.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        480.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

@@ -19,6 +19,26 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/analyze_chop.gd"
   },
+  "AreaCHOP": {
+    "class_name": "AreaCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/chop/area_chop.gd"
+  },
   "AudioBandCHOP": {
     "class_name": "AudioBandCHOP",
     "family": "CHOP",
@@ -519,6 +539,20 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/gamepad_chop.gd"
   },
+  "GestureCHOP": {
+    "class_name": "GestureCHOP",
+    "family": "CHOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/chop/gesture_chop.gd"
+  },
   "HoldCHOP": {
     "class_name": "HoldCHOP",
     "family": "CHOP",
@@ -1014,6 +1048,31 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/rename_chop.gd"
   },
+  "ReplaceCHOP": {
+    "class_name": "ReplaceCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "base",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "replace",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/chop/replace_chop.gd"
+  },
   "ResampleCHOP": {
     "class_name": "ResampleCHOP",
     "family": "CHOP",
@@ -1232,6 +1291,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/spring_chop.gd"
+  },
+  "StateMachineCHOP": {
+    "class_name": "StateMachineCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "trigger",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/chop/state_machine_chop.gd"
   },
   "StretchCHOP": {
     "class_name": "StretchCHOP",
@@ -1499,6 +1578,34 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/area_comp.gd"
   },
+  "AudioListenerCOMP": {
+    "class_name": "AudioListenerCOMP",
+    "family": "COMP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/audio_listener_comp.gd"
+  },
+  "AudioSourceCOMP": {
+    "class_name": "AudioSourceCOMP",
+    "family": "COMP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/audio_source_comp.gd"
+  },
   "BoneCOMP": {
     "class_name": "BoneCOMP",
     "family": "COMP",
@@ -1596,6 +1703,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/comp/environment_comp.gd"
+  },
+  "FeedbackCOMP": {
+    "class_name": "FeedbackCOMP",
+    "family": "COMP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "COMP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/feedback_comp.gd"
   },
   "GeometryCOMP": {
     "class_name": "GeometryCOMP",
@@ -1932,6 +2059,20 @@
     ],
     "dynamic_inputs": "COMP",
     "file": "addons/gonodes/operators/comp/switch_comp.gd"
+  },
+  "TimeCOMP": {
+    "class_name": "TimeCOMP",
+    "family": "COMP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "COMP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/comp/time_comp.gd"
   },
   "VehicleCOMP": {
     "class_name": "VehicleCOMP",
@@ -2403,6 +2544,20 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/dat/panel_execute_dat.gd"
   },
+  "ParameterDAT": {
+    "class_name": "ParameterDAT",
+    "family": "DAT",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/dat/parameter_dat.gd"
+  },
   "RenderPickDAT": {
     "class_name": "RenderPickDAT",
     "family": "DAT",
@@ -2536,6 +2691,20 @@
     ],
     "dynamic_inputs": "DAT",
     "file": "addons/gonodes/operators/dat/switch_dat.gd"
+  },
+  "SystemDAT": {
+    "class_name": "SystemDAT",
+    "family": "DAT",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/dat/system_dat.gd"
   },
   "TableDAT": {
     "class_name": "TableDAT",
@@ -4057,6 +4226,26 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/cloth_sop.gd"
   },
+  "ConvertLineSOP": {
+    "class_name": "ConvertLineSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/convert_line_sop.gd"
+  },
   "CopySOP": {
     "class_name": "CopySOP",
     "family": "SOP",
@@ -4081,6 +4270,31 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/copy_sop.gd"
+  },
+  "CreepSOP": {
+    "class_name": "CreepSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "source",
+        "type": "SOP"
+      },
+      {
+        "port": 1,
+        "name": "surface",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/creep_sop.gd"
   },
   "CylinderSOP": {
     "class_name": "CylinderSOP",
@@ -4312,6 +4526,31 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/heightfield_sop.gd"
   },
+  "HoleSOP": {
+    "class_name": "HoleSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "base",
+        "type": "SOP"
+      },
+      {
+        "port": 1,
+        "name": "hole",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/hole_sop.gd"
+  },
   "IsoSurfaceSOP": {
     "class_name": "IsoSurfaceSOP",
     "family": "SOP",
@@ -4398,6 +4637,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/magnet_sop.gd"
+  },
+  "MeasureSOP": {
+    "class_name": "MeasureSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/measure_sop.gd"
   },
   "MergeSOP": {
     "class_name": "MergeSOP",
@@ -4786,6 +5045,31 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/primitive_sop.gd"
+  },
+  "ProjectSOP": {
+    "class_name": "ProjectSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "source",
+        "type": "SOP"
+      },
+      {
+        "port": 1,
+        "name": "target",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/project_sop.gd"
   },
   "RaySOP": {
     "class_name": "RaySOP",
@@ -8888,7 +9172,7 @@
         "type": "CHOP"
       }
     ],
-    "dynamic_inputs": null,
+    "dynamic_inputs": "CHOP",
     "file": "addons/gn_ext_audio/operators/chop/audio_mix_chop.gd"
   },
   "AudioMovieCHOP": {
@@ -9215,6 +9499,60 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_isf/operators/top/isf_top.gd"
+  },
+  "PdControlCHOP": {
+    "class_name": "PdControlCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_libpd/operators/chop/pd_control_chop.gd"
+  },
+  "PdFilterCHOP": {
+    "class_name": "PdFilterCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_libpd/operators/chop/pd_filter_chop.gd"
+  },
+  "PdSynthCHOP": {
+    "class_name": "PdSynthCHOP",
+    "family": "CHOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_libpd/operators/chop/pd_synth_chop.gd"
   },
   "BezierMapTOP": {
     "class_name": "BezierMapTOP",
@@ -9597,6 +9935,86 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_ml/operators/top/style_transfer_top.gd"
   },
+  "AnalyzeCHOPNative": {
+    "class_name": "AnalyzeCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/analyze_chop_native.gd"
+  },
+  "AreaCHOPNative": {
+    "class_name": "AreaCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/area_chop_native.gd"
+  },
+  "AudioBandCHOPNative": {
+    "class_name": "AudioBandCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "spectrum",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/audio_band_chop_native.gd"
+  },
+  "AudioDelayCHOPNative": {
+    "class_name": "AudioDelayCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/audio_delay_chop_native.gd"
+  },
   "AudioDynamicsCHOPNative": {
     "class_name": "AudioDynamicsCHOPNative",
     "family": "CHOP",
@@ -9617,6 +10035,176 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/chop/audio_dynamics_chop_native.gd"
   },
+  "AudioEnvelopeCHOPNative": {
+    "class_name": "AudioEnvelopeCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/audio_envelope_chop_native.gd"
+  },
+  "AudioFilterCHOPNative": {
+    "class_name": "AudioFilterCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/audio_filter_chop_native.gd"
+  },
+  "AudioGateCHOPNative": {
+    "class_name": "AudioGateCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "sidechain",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/audio_gate_chop_native.gd"
+  },
+  "AudioMixCHOPNative": {
+    "class_name": "AudioMixCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": "CHOP",
+    "file": "addons/gn_ext_native/operators/chop/audio_mix_chop_native.gd"
+  },
+  "AudioOscillatorCHOPNative": {
+    "class_name": "AudioOscillatorCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "fm",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "am",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/audio_oscillator_chop_native.gd"
+  },
+  "AudioParaEQCHOPNative": {
+    "class_name": "AudioParaEQCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/audio_paraeq_chop_native.gd"
+  },
+  "AudioPitchCHOPNative": {
+    "class_name": "AudioPitchCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/audio_pitch_chop_native.gd"
+  },
+  "AudioReverbCHOPNative": {
+    "class_name": "AudioReverbCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/audio_reverb_chop_native.gd"
+  },
   "AudioSpectrumCHOPNative": {
     "class_name": "AudioSpectrumCHOPNative",
     "family": "CHOP",
@@ -9631,6 +10219,20 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/chop/audio_spectrum_chop_native.gd"
   },
+  "BlendCHOPNative": {
+    "class_name": "BlendCHOPNative",
+    "family": "CHOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": "CHOP",
+    "file": "addons/gn_ext_native/operators/chop/blend_chop_native.gd"
+  },
   "CompositeCHOPNative": {
     "class_name": "CompositeCHOPNative",
     "family": "CHOP",
@@ -9644,6 +10246,56 @@
     ],
     "dynamic_inputs": "CHOP",
     "file": "addons/gn_ext_native/operators/chop/composite_chop_native.gd"
+  },
+  "CopyCHOPNative": {
+    "class_name": "CopyCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "a",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "b",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/copy_chop_native.gd"
+  },
+  "CrossCHOPNative": {
+    "class_name": "CrossCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "A",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "B",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/cross_chop_native.gd"
   },
   "ExpressionCHOPNative": {
     "class_name": "ExpressionCHOPNative",
@@ -9750,6 +10402,51 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/chop/interpolate_chop_native.gd"
   },
+  "JoinCHOPNative": {
+    "class_name": "JoinCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "A",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "B",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/join_chop_native.gd"
+  },
+  "LagCHOPNative": {
+    "class_name": "LagCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/lag_chop_native.gd"
+  },
   "LaserCHOPNative": {
     "class_name": "LaserCHOPNative",
     "family": "CHOP",
@@ -9769,6 +10466,51 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/chop/laser_chop_native.gd"
+  },
+  "LimitCHOPNative": {
+    "class_name": "LimitCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/limit_chop_native.gd"
+  },
+  "LogicCHOPNative": {
+    "class_name": "LogicCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "A",
+        "type": "CHOP"
+      },
+      {
+        "port": 1,
+        "name": "B",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/logic_chop_native.gd"
   },
   "LookupCHOPNative": {
     "class_name": "LookupCHOPNative",
@@ -9867,6 +10609,20 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/chop/physics_chop_native.gd"
+  },
+  "RampCHOPNative": {
+    "class_name": "RampCHOPNative",
+    "family": "CHOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/ramp_chop_native.gd"
   },
   "ResampleCHOPNative": {
     "class_name": "ResampleCHOPNative",
@@ -10007,6 +10763,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/chop/trail_chop_native.gd"
+  },
+  "TransformCHOPNative": {
+    "class_name": "TransformCHOPNative",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/chop/transform_chop_native.gd"
   },
   "WarpCHOPNative": {
     "class_name": "WarpCHOPNative",
@@ -10475,6 +11251,46 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/clip_sop_native.gd"
   },
+  "ClothSOPNative": {
+    "class_name": "ClothSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "geo",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/cloth_sop_native.gd"
+  },
+  "ConvertLineSOPNative": {
+    "class_name": "ConvertLineSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/convert_line_sop_native.gd"
+  },
   "CopySOPNative": {
     "class_name": "CopySOPNative",
     "family": "SOP",
@@ -10499,6 +11315,31 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/copy_sop_native.gd"
+  },
+  "CreepSOPNative": {
+    "class_name": "CreepSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "source",
+        "type": "SOP"
+      },
+      {
+        "port": 1,
+        "name": "surface",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/creep_sop_native.gd"
   },
   "DeleteSOPNative": {
     "class_name": "DeleteSOPNative",
@@ -10600,6 +11441,65 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/fuse_sop_native.gd"
   },
+  "GroupSOPNative": {
+    "class_name": "GroupSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/group_sop_native.gd"
+  },
+  "HeightfieldSOPNative": {
+    "class_name": "HeightfieldSOPNative",
+    "family": "SOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/heightfield_sop_native.gd"
+  },
+  "HoleSOPNative": {
+    "class_name": "HoleSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "base",
+        "type": "SOP"
+      },
+      {
+        "port": 1,
+        "name": "hole",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/hole_sop_native.gd"
+  },
   "IsoSurfaceSOPNative": {
     "class_name": "IsoSurfaceSOPNative",
     "family": "SOP",
@@ -10672,6 +11572,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/magnet_sop_native.gd"
+  },
+  "MeasureSOPNative": {
+    "class_name": "MeasureSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/measure_sop_native.gd"
   },
   "MetaballSOPNative": {
     "class_name": "MetaballSOPNative",
@@ -10798,6 +11718,26 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/particle_sop_native.gd"
   },
+  "PeakSOPNative": {
+    "class_name": "PeakSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/peak_sop_native.gd"
+  },
   "PointSOPNative": {
     "class_name": "PointSOPNative",
     "family": "SOP",
@@ -10838,6 +11778,31 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/polybevel_sop_native.gd"
   },
+  "PolyBridgeSOPNative": {
+    "class_name": "PolyBridgeSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "loop_a",
+        "type": "SOP"
+      },
+      {
+        "port": 1,
+        "name": "loop_b",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/polybridge_sop_native.gd"
+  },
   "PolyLoftSOPNative": {
     "class_name": "PolyLoftSOPNative",
     "family": "SOP",
@@ -10863,6 +11828,20 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/polyloft_sop_native.gd"
   },
+  "PolyPatchSOPNative": {
+    "class_name": "PolyPatchSOPNative",
+    "family": "SOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/polypatch_sop_native.gd"
+  },
   "PolyReduceSOPNative": {
     "class_name": "PolyReduceSOPNative",
     "family": "SOP",
@@ -10882,6 +11861,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/polyreduce_sop_native.gd"
+  },
+  "PolySplineSOPNative": {
+    "class_name": "PolySplineSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "pts",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/polyspline_sop_native.gd"
   },
   "PolyStitchSOPNative": {
     "class_name": "PolyStitchSOPNative",
@@ -10907,6 +11906,51 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/polystitch_sop_native.gd"
+  },
+  "PrimitiveSOPNative": {
+    "class_name": "PrimitiveSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/primitive_sop_native.gd"
+  },
+  "ProjectSOPNative": {
+    "class_name": "ProjectSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "source",
+        "type": "SOP"
+      },
+      {
+        "port": 1,
+        "name": "target",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/project_sop_native.gd"
   },
   "RaySOPNative": {
     "class_name": "RaySOPNative",
@@ -10952,6 +11996,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/remesh_sop_native.gd"
+  },
+  "ResampleSOPNative": {
+    "class_name": "ResampleSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/resample_sop_native.gd"
   },
   "ScatterSOPNative": {
     "class_name": "ScatterSOPNative",
@@ -11118,6 +12182,31 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/taper_sop_native.gd"
   },
+  "TextureSOPNative": {
+    "class_name": "TextureSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "geo",
+        "type": "SOP"
+      },
+      {
+        "port": 1,
+        "name": "tex",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/texture_sop_native.gd"
+  },
   "TOPtoSOPNative": {
     "class_name": "TOPtoSOPNative",
     "family": "SOP",
@@ -11137,6 +12226,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/top_to_sop_native.gd"
+  },
+  "TrailRibbonSOPNative": {
+    "class_name": "TrailRibbonSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "pop_in",
+        "type": "POP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/trail_ribbon_sop_native.gd"
   },
   "TransformSOPNative": {
     "class_name": "TransformSOPNative",
@@ -11197,6 +12306,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/uv_project_sop_native.gd"
+  },
+  "VoronoiShatterSOPNative": {
+    "class_name": "VoronoiShatterSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/voronoi_shatter_sop_native.gd"
   },
   "WireframeSOPNative": {
     "class_name": "WireframeSOPNative",

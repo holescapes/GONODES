@@ -1,0 +1,118 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "src_lfo": {
+      "type": "LFO_CHOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "frequency": {
+          "value": 1.0
+        },
+        "amplitude": {
+          "value": 1.0
+        }
+      }
+    },
+    "audiofilter1": {
+      "type": "AudioFilterCHOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "type": {
+          "value": 0
+        },
+        "cutoff": {
+          "value": 1000.0
+        },
+        "q": {
+          "value": 0.707
+        },
+        "gain_db": {
+          "value": 0.0
+        }
+      }
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "src_lfo",
+      "from_port": 0,
+      "to": "audiofilter1",
+      "to_port": 0
+    },
+    {
+      "from": "audiofilter1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "AudioFilterCHOPNative — Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

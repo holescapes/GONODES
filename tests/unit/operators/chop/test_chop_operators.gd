@@ -1497,3 +1497,98 @@ func test_chop_to_vol_instantiate() -> void:
 	var node := _make_node(CHOPtoVOL.new(), "choptovol1")
 	GNTestAssert.assert_not_null(node, "CHOPtoVOL created")
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AreaCHOP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_area_chop_instantiate() -> void:
+	var node := _make_node(AreaCHOP.new(), "area1")
+	GNTestAssert.assert_eq(node.node_type, "area", "node_type")
+
+func test_area_chop_trapezoidal() -> void:
+	var node := _make_node(AreaCHOP.new(), "area1")
+	node.set_param_value("method", 0)  # Trapezoidal
+	var cd := _make_chop_data({"chan1": PackedFloat32Array([1.0, 2.0, 3.0, 4.0])})
+	var out: GNChannelData = _cook_with(node, [cd]) as GNChannelData
+	GNTestAssert.assert_not_null(out, "area produces output")
+	GNTestAssert.assert_true(out.channels.has("chan1"), "channel preserved")
+
+func test_area_chop_cumulative() -> void:
+	var node := _make_node(AreaCHOP.new(), "area2")
+	node.set_param_value("cumulative", true)
+	var cd := _make_chop_data({"ramp": PackedFloat32Array([0.0, 1.0, 2.0, 3.0])})
+	var out: GNChannelData = _cook_with(node, [cd]) as GNChannelData
+	GNTestAssert.assert_not_null(out, "cumulative output")
+	var arr: PackedFloat32Array = out.channels.get("ramp", PackedFloat32Array())
+	GNTestAssert.assert_eq(arr.size(), 4, "cumulative same length")
+
+func test_area_chop_no_input() -> void:
+	var node := _make_node(AreaCHOP.new(), "area3")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(out == null, "null without input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ReplaceCHOP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_replace_chop_instantiate() -> void:
+	var node := _make_node(ReplaceCHOP.new(), "replace1")
+	GNTestAssert.assert_eq(node.node_type, "replace", "node_type")
+
+func test_replace_chop_replaces_matching_channel() -> void:
+	var node := _make_node(ReplaceCHOP.new(), "replace1")
+	node.set_param_value("pattern", "*")
+	node.set_param_value("blend", 1.0)
+	var base := _make_chop_data({"chan1": PackedFloat32Array([0.0, 0.0])})
+	var repl := _make_chop_data({"chan1": PackedFloat32Array([5.0, 5.0])})
+	var out: GNChannelData = _cook_with(node, [base, repl]) as GNChannelData
+	GNTestAssert.assert_not_null(out, "replace output")
+	var arr: PackedFloat32Array = out.channels.get("chan1", PackedFloat32Array())
+	GNTestAssert.assert_approx(arr[0], 5.0, 0.01, "fully replaced")
+
+func test_replace_chop_passthrough_no_second_input() -> void:
+	var node := _make_node(ReplaceCHOP.new(), "replace2")
+	var base := _make_chop_data({"x": PackedFloat32Array([1.0, 2.0])})
+	var out: GNChannelData = _cook_with(node, [base]) as GNChannelData
+	GNTestAssert.assert_not_null(out, "passthrough from first input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  GestureCHOP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_gesture_chop_instantiate() -> void:
+	var node := _make_node(GestureCHOP.new(), "gesture1")
+	GNTestAssert.assert_eq(node.node_type, "gesture", "node_type")
+
+func test_gesture_chop_produces_output() -> void:
+	var node := _make_node(GestureCHOP.new(), "gesture1")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "gesture produces output")
+	GNTestAssert.assert_true(out.channels.has("pinch"), "has pinch channel")
+	GNTestAssert.assert_true(out.channels.has("rotate"), "has rotate channel")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  StateMachineCHOP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_state_machine_chop_instantiate() -> void:
+	var node := _make_node(StateMachineCHOP.new(), "fsm1")
+	GNTestAssert.assert_eq(node.node_type, "statemachine", "node_type")
+
+func test_state_machine_chop_produces_output() -> void:
+	var node := _make_node(StateMachineCHOP.new(), "fsm1")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_not_null(out, "fsm produces output")
+	GNTestAssert.assert_true(out.channels.has("state"), "has state channel")
+	GNTestAssert.assert_true(out.channels.has("progress"), "has progress channel")
+
+func test_state_machine_chop_default_state_zero() -> void:
+	var node := _make_node(StateMachineCHOP.new(), "fsm2")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	var state_arr: PackedFloat32Array = out.channels.get("state", PackedFloat32Array())
+	GNTestAssert.assert_approx(state_arr[0], 0.0, 0.01, "starts at state 0")
+

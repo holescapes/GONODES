@@ -1,146 +1,160 @@
 {
-    "version": "1.0.0",
-    "generator": "GONODES",
-    "nodes": {
-        "box1": {
-            "type": "BoxSOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {}
-        },
-        "bevel1": {
-            "type": "PolyBevelSOPNative",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {
-                "offset": {
-                    "value": 0.1
-                },
-                "divisions": {
-                    "value": 3
-                },
-                "roundness": {
-                    "value": 0.8
-                }
-            }
-        },
-        "geo1": {
-            "type": "GeometryCOMP",
-            "position": [
-                800,
-                100
-            ],
-            "parameters": {}
-        },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                800,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 1
-                },
-                "tz": {
-                    "value": 4
-                }
-            }
-        },
-        "render1": {
-            "type": "RenderTOP",
-            "position": [
-                1150,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1500,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
-        }
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "box1": {
+      "type": "BoxSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
     },
-    "connections": [
-        {
-            "from": "box1",
-            "from_port": 0,
-            "to": "bevel1",
-            "to_port": 0
+    "bevel1": {
+      "type": "PolyBevelSOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "offset": {
+          "value": 0.15
         },
-        {
-            "from": "bevel1",
-            "from_port": 0,
-            "to": "geo1",
-            "to_port": 0
+        "divisions": {
+          "value": 3
         },
-        {
-            "from": "geo1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
-            "from": "render1",
-            "from_port": 0,
-            "to": "window1",
-            "to_port": 0
+        "roundness": {
+          "value": 0.8
         }
-    ],
-    "annotations": [
-        {
-            "id": "ann_1",
-            "type": "note",
-            "text": "PolyBevel SOP (Native) — Rounded Edge Bevel\n\nBox edges beveled with 3 divisions and 0.8 roundness.\nCreates smooth chamfered edges on hard-surface models.\nNative C++ handles vertex-pull geometry generation.",
-            "position": [
-                -100.0,
-                -150.0
-            ],
-            "size": [
-                400.0,
-                100.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                0.8
-            ]
+      }
+    },
+    "null1": {
+      "type": "NullSOP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        1050,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        1050,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
         }
-    ]
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1350,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1650,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "box1",
+      "from_port": 0,
+      "to": "bevel1",
+      "to_port": 0
+    },
+    {
+      "from": "bevel1",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "bevel1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "PolyBevelSOPNative — Rounded Edges\n\nBevels a box with 3 divisions and high roundness.\nTry adjusting offset and roundness.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
 }

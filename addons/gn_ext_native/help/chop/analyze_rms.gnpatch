@@ -1,0 +1,113 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseCHOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "roughness": {
+          "value": 0.5,
+          "expression": "sin(time * 2.0) * 0.5 + 0.5",
+          "mode": "EXPRESSION"
+        },
+        "amplitude": {
+          "value": 1.0,
+          "expression": "abs(sin(time * 2.0))",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "analyze1": {
+      "type": "AnalyzeCHOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "function": {
+          "value": 2
+        }
+      }
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noise1",
+      "from_port": 0,
+      "to": "analyze1",
+      "to_port": 0
+    },
+    {
+      "from": "analyze1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Analyze CHOP — RMS (Native)\n\nComputes RMS of a noise signal.\nUseful for audio level detection.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

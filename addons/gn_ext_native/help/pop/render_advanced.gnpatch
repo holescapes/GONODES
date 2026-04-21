@@ -1,0 +1,130 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "source1": {
+      "type": "SourcePOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    },
+    "camera1": {
+      "type": "CameraCOMP",
+      "position": [
+        600,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 5.0
+        }
+      }
+    },
+    "rendertop1": {
+      "type": "RenderTOP",
+      "position": [
+        600,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "renderpop1": {
+      "type": "RenderPOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "source1",
+      "from_port": 0,
+      "to": "renderpop1",
+      "to_port": 0
+    },
+    {
+      "from": "renderpop1",
+      "from_port": 0,
+      "to": "rendertop1",
+      "to_port": 0
+    },
+    {
+      "from": "camera1",
+      "from_port": 0,
+      "to": "rendertop1",
+      "to_port": 1
+    },
+    {
+      "from": "rendertop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Render POP — Advanced (Native)\n\nRender particle point cloud into a COMP for 3D viewport.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

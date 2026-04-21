@@ -412,16 +412,24 @@ def verify_operator(class_name, verbose=True):
         fails += 1
 
     # 5. operator_registry.json
+    is_native = class_name.endswith("Native")
     in_op_reg = check_operator_registry(class_name)
     if in_op_reg is True:
         if verbose:
             print(f"  {PASS} In operator_registry.json")
         passes += 1
     elif in_op_reg is False:
-        if verbose:
-            print(f"  {WARN} Missing from operator_registry.json")
-            print(f"        → Run: python scripts/scan_operators.py")
-        warns += 1
+        if is_native:
+            # Native variants are intentionally excluded from operator_registry.json
+            # (scan_operators.py skips *Native to avoid duplicate node_type entries)
+            if verbose:
+                print(f"  {PASS} Excluded from operator_registry.json (Native variant — by design)")
+            passes += 1
+        else:
+            if verbose:
+                print(f"  {WARN} Missing from operator_registry.json")
+                print(f"        → Run: python scripts/scan_operators.py")
+            warns += 1
     # None = file not found, skip
 
     # 6. port_registry.json
@@ -454,6 +462,21 @@ def verify_operator(class_name, verbose=True):
         if verbose:
             print(f"  {PASS} Referenced in test: {test_file}")
         passes += 1
+    elif is_native:
+        # Native variants share tests with their GDScript originals
+        original_cn = class_name[:-6]  # strip "Native"
+        orig_test = check_test_coverage(original_cn, family)
+        if orig_test:
+            if verbose:
+                print(f"  {PASS} Original ({original_cn}) tested in: {orig_test}")
+            passes += 1
+        else:
+            if verbose:
+                fam_lower = (family or "unknown").lower()
+                fam_dir = "output" if fam_lower == "out" else fam_lower
+                print(f"  {WARN} No test for original {original_cn} either")
+                print(f"        → Add to tests/operators/{fam_dir}/test_{fam_dir}_operators.gd")
+            warns += 1
     else:
         if verbose:
             fam_lower = (family or "unknown").lower()

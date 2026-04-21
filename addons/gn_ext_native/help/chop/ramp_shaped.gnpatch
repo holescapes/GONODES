@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "math1": {
+      "type": "MathCHOP",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "operation": {
+          "value": 7
+        },
+        "operand": {
+          "value": 2.0,
+          "expression": "0.8 + 0.2 * sin(time * 3.0)",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "ramp1": {
+      "type": "RampCHOPNative",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "ramp1",
+      "from_port": 0,
+      "to": "math1",
+      "to_port": 0
+    },
+    {
+      "from": "ramp1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Ramp CHOP — Shaped (Native)\n\nRamp raised to power 2.\nCreates ease-in curve.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

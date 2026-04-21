@@ -1,0 +1,168 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "src_sphere": {
+      "type": "SphereSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "noise1": {
+      "type": "NoiseSOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "amplitude": {
+          "value": 0.1,
+          "expression": "abs(sin(time * 2.0))",
+          "mode": "EXPRESSION"
+        },
+        "frequency": {
+          "value": 1.0,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "offset_x": {
+          "value": 0.5
+        },
+        "offset_y": {
+          "value": 0.5
+        },
+        "offset_z": {
+          "value": 0.5
+        },
+        "speed": {
+          "value": 0.5
+        },
+        "noise_type": {
+          "value": 1
+        },
+        "displace_axis": {
+          "value": 1
+        },
+        "seed": {
+          "value": 0
+        }
+      }
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "src_sphere",
+      "from_port": 0,
+      "to": "noise1",
+      "to_port": 0
+    },
+    {
+      "from": "noise1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Noise SOP — Amplitude (Native)\n\nDisplace vertices with animated procedural noise.\nShowcasing: amplitude=0.1, frequency=1.0, offset_x=0.5, offset_y=0.5.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

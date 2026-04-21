@@ -1,0 +1,165 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "src_grid": {
+      "type": "GridSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "rows": {
+          "value": 10
+        },
+        "cols": {
+          "value": 10
+        }
+      }
+    },
+    "attribute1": {
+      "type": "AttributeSOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "name": {
+          "value": "pscale"
+        },
+        "source": {
+          "value": 0
+        },
+        "value": {
+          "value": 1.0
+        },
+        "expression": {
+          "value": "sin(float(i) / float(n) * 6.28)"
+        },
+        "seed": {
+          "value": 42
+        },
+        "rand_min": {
+          "value": 0.0
+        },
+        "rand_max": {
+          "value": 1.0
+        }
+      }
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "src_grid",
+      "from_port": 0,
+      "to": "attribute1",
+      "to_port": 0
+    },
+    {
+      "from": "attribute1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Attribute SOP — Basic (Native)\n\nCreate or modify per-vertex point attributes from expressions or presets.\nUsing: name=pscale, source=0, value=1.0, expression=sin(float(i) / float(n) * 6.28).",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

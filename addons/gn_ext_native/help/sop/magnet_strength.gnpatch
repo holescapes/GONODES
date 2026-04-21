@@ -1,0 +1,165 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "src_sphere": {
+      "type": "SphereSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "magnet1": {
+      "type": "MagnetSOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "strength": {
+          "value": 0.5,
+          "expression": "abs(sin(time * 2.0))",
+          "mode": "EXPRESSION"
+        },
+        "radius": {
+          "value": 1.0,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "falloff": {
+          "value": 1
+        },
+        "exponent": {
+          "value": 1.0
+        },
+        "affect_normals": {
+          "value": true
+        },
+        "att_x": {
+          "value": 0.5
+        },
+        "att_y": {
+          "value": 0.5
+        },
+        "att_z": {
+          "value": 0.5
+        }
+      }
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "src_sphere",
+      "from_port": 0,
+      "to": "magnet1",
+      "to_port": 0
+    },
+    {
+      "from": "magnet1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Magnet SOP — Strength (Native)\n\nDeform geometry by attracting/repelling vertices toward attractor points.\nShowcasing: strength=0.5, radius=1.0, falloff=1, exponent=1.0.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

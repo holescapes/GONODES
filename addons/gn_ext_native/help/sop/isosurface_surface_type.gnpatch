@@ -1,0 +1,148 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "isosurface1": {
+      "type": "IsoSurfaceSOPNative",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "surface_type": {
+          "value": 1,
+          "expression": "cos(time * 0.6) * 1.5",
+          "mode": "EXPRESSION"
+        },
+        "resolution": {
+          "value": 39
+        },
+        "bounds_size": {
+          "value": 3.14,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "threshold": {
+          "value": 0.5
+        },
+        "frequency": {
+          "value": 0.5
+        },
+        "major_radius": {
+          "value": 1.0
+        },
+        "minor_radius": {
+          "value": 0.4
+        }
+      }
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "isosurface1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Iso Surface SOP — Type (Native)\n\nAnalytic implicit surface via marching cubes (Gyroid, Schwarz-P, Torus, custom).\nShowcasing: surface_type=1, bounds_size=3.14, threshold=0.5, frequency=0.5.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

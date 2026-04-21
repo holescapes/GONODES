@@ -1,0 +1,115 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "checkerboardimg1": {
+      "type": "CheckerboardIMGNative",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1024,
+            "y": 1024
+          }
+        },
+        "cells_x": {
+          "value": 10,
+          "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        },
+        "cells_y": {
+          "value": 10,
+          "expression": "(10 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        },
+        "color_a": {
+          "value": {
+            "_type": "Color",
+            "r": 0.2,
+            "g": 0.6,
+            "b": 1.0,
+            "a": 1.0
+          }
+        },
+        "color_b": {
+          "value": {
+            "_type": "Color",
+            "r": 0.2,
+            "g": 0.6,
+            "b": 1.0,
+            "a": 1.0
+          }
+        },
+        "softness": {
+          "value": 1.0
+        }
+      }
+    },
+    "imgtotop1": {
+      "type": "ImgToTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "checkerboardimg1",
+      "from_port": 0,
+      "to": "imgtotop1",
+      "to_port": 0
+    },
+    {
+      "from": "imgtotop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Checkerboard IMG — Advanced (Native)\n\nCPU checkerboard pattern generator.\nCombined configuration: cells_x=10, cells_y=10, softness=1.0.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

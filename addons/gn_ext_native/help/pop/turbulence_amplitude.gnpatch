@@ -1,0 +1,164 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "source1": {
+      "type": "SourcePOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "turbulence1": {
+      "type": "TurbulencePOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "amplitude": {
+          "value": 1.0,
+          "expression": "abs(sin(time * 2.0))",
+          "mode": "EXPRESSION"
+        },
+        "frequency": {
+          "value": 0.5,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "roughness": {
+          "value": 0.25
+        },
+        "octaves": {
+          "value": 2
+        },
+        "speed": {
+          "value": 0.25
+        }
+      }
+    },
+    "renderpop1": {
+      "type": "RenderPOP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "camera1": {
+      "type": "CameraCOMP",
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 5.0
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "source1",
+      "from_port": 0,
+      "to": "turbulence1",
+      "to_port": 0
+    },
+    {
+      "from": "turbulence1",
+      "from_port": 0,
+      "to": "renderpop1",
+      "to_port": 0
+    },
+    {
+      "from": "renderpop1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "camera1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Turbulence POP — Amplitude (Native)\n\nCurl noise turbulence force field on particles.\nShowcasing: amplitude=1.0, frequency=0.5, roughness=0.25, octaves=2.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

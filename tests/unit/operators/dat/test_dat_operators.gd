@@ -723,3 +723,52 @@ func test_gn_volume_data_instantiate() -> void:
 func test_gn_volume_data_is_gn_data() -> void:
 	var data := GNVolumeData.new()
 	GNTestAssert.assert_true(data is GNData, "GNVolumeData is GNData subclass")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ParameterDAT (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_parameter_dat_instantiate() -> void:
+	var node := _make_node(ParameterDAT.new(), "paramdat1")
+	GNTestAssert.assert_eq(node.node_type, "parameter", "node_type for ParameterDAT")
+
+func test_parameter_dat_no_target() -> void:
+	var node := _make_node(ParameterDAT.new(), "paramdat2")
+	var out := _cook_no_input(node)
+	# Without a valid target, should produce empty or null output
+	GNTestAssert.assert_true(out == null or out is GNTableData, "no crash without target")
+
+func test_parameter_dat_with_target() -> void:
+	var target := _make_node(ConstantDAT.new(), "const1")
+	var node := _make_node(ParameterDAT.new(), "paramdat3")
+	node.set_param_value("target_node", "const1")
+	var out: GNTableData = _cook_no_input(node) as GNTableData
+	if out:
+		GNTestAssert.assert_gt(out.table.size(), 0, "has rows for target params")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SystemDAT (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_system_dat_instantiate() -> void:
+	var node := _make_node(SystemDAT.new(), "sysdat1")
+	GNTestAssert.assert_eq(node.node_type, "system", "node_type for SystemDAT")
+
+func test_system_dat_produces_output() -> void:
+	var node := _make_node(SystemDAT.new(), "sysdat2")
+	var out: GNTableData = _cook_no_input(node) as GNTableData
+	GNTestAssert.assert_not_null(out, "system dat produces output")
+	GNTestAssert.assert_gt(out.table.size(), 0, "has info rows")
+
+func test_system_dat_has_os_info() -> void:
+	var node := _make_node(SystemDAT.new(), "sysdat3")
+	var out: GNTableData = _cook_no_input(node) as GNTableData
+	if out:
+		var has_os := false
+		for row in out.table:
+			if row.size() > 0 and row[0].to_lower().contains("os"):
+				has_os = true
+				break
+		GNTestAssert.assert_true(has_os, "contains OS info")

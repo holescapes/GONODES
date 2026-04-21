@@ -1,143 +1,156 @@
 {
-    "version": "1.0.0",
-    "generator": "GONODES",
-    "nodes": {
-        "src_grid": {
-            "type": "GridSOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "rows": {
-                    "value": 10
-                },
-                "cols": {
-                    "value": 10
-                }
-            }
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "box1": {
+      "type": "BoxSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "sizex": {
+          "value": 2.0
         },
-        "focus1": {
-            "type": "RemeshSOP",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {}
+        "sizey": {
+          "value": 0.5
         },
-        "geo_view": {
-            "type": "GeometryCOMP",
-            "position": [
-                800,
-                100
-            ],
-            "parameters": {}
-        },
-        "cam_view": {
-            "type": "CameraCOMP",
-            "position": [
-                800,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 0.5
-                },
-                "tz": {
-                    "value": 3
-                }
-            }
-        },
-        "render_view": {
-            "type": "RenderTOP",
-            "position": [
-                1100,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1450,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
+        "sizez": {
+          "value": 2.0
         }
+      }
     },
-    "connections": [
-        {
-            "from": "src_grid",
-            "from_port": 0,
-            "to": "focus1",
-            "to_port": 0
+    "remesh1": {
+      "type": "RemeshSOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "target_edge": {
+          "value": 0.15
         },
-        {
-            "from": "focus1",
-            "from_port": 0,
-            "to": "geo_view",
-            "to_port": 0
+        "iterations": {
+          "value": 3
         },
-        {
-            "from": "geo_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 0
-        },
-        {
-            "from": "cam_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 1
-        },
-        {
-            "from": "render_view",
-            "from_port": 0,
-            "to": "window1",
-            "to_port": 0
+        "smooth": {
+          "value": true
         }
-    ],
-    "annotations": [
-        {
-            "id": "ann_1",
-            "type": "note",
-            "text": "Remesh SOP — Basic\n\nRetopologize mesh to uniform triangle density via midpoint subdivision.",
-            "position": [
-                -100.0,
-                -100.0
-            ],
-            "size": [
-                500.0,
-                120.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                0.8
-            ]
+      }
+    },
+    "geo1": {
+      "type": "GeometryCOMP",
+      "position": [
+        800,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam1": {
+      "type": "CameraCOMP",
+      "position": [
+        800,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 2.0
+        },
+        "ty": {
+          "value": 1.5
+        },
+        "tz": {
+          "value": 3.0
         }
-    ]
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1500,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "box1",
+      "from_port": 0,
+      "to": "remesh1",
+      "to_port": 0
+    },
+    {
+      "from": "remesh1",
+      "from_port": 0,
+      "to": "geo1",
+      "to_port": 0
+    },
+    {
+      "from": "geo1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "cam1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Remesh SOP — Basic (Native)\n\nRetopologize mesh to uniform triangle density via midpoint subdivision.\nUsing: target_edge=0.15, iterations=3, smooth=True.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
 }

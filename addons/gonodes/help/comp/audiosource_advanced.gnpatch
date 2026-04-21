@@ -1,0 +1,109 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "audiosource1": {
+            "type": "AudioSourceCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 1.0
+                },
+                "ty": {
+                    "value": 1.0
+                },
+                "tz": {
+                    "value": 1.0
+                },
+                "volume_db": {
+                    "value": 1.0
+                },
+                "max_distance": {
+                    "value": 20.0
+                },
+                "unit_size": {
+                    "value": 2.0
+                },
+                "attenuation": {
+                    "value": 2
+                },
+                "autoplay": {
+                    "value": false
+                },
+                "loop": {
+                    "value": false
+                },
+                "playing": {
+                    "value": false
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AudioSourceCOMP \u2014 Advanced\n\nMore complex configuration.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

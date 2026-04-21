@@ -1,0 +1,132 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "wave1": {
+      "type": "WaveCHOP",
+      "position": [
+        100,
+        50
+      ],
+      "parameters": {
+        "waveform": {
+          "value": 2
+        },
+        "frequency": {
+          "value": 1.0,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "wave2": {
+      "type": "WaveCHOP",
+      "position": [
+        100,
+        200
+      ],
+      "parameters": {
+        "waveform": {
+          "value": 2
+        },
+        "frequency": {
+          "value": 3.0
+        }
+      }
+    },
+    "logic1": {
+      "type": "LogicCHOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "operation": {
+          "value": 1
+        }
+      }
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "wave1",
+      "from_port": 0,
+      "to": "logic1",
+      "to_port": 0
+    },
+    {
+      "from": "wave2",
+      "from_port": 0,
+      "to": "logic1",
+      "to_port": 1
+    },
+    {
+      "from": "logic1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Logic CHOP — OR (Native)\n\nLogical OR of two square waves.\nOutput is 1 when either input > 0.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

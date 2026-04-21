@@ -1,0 +1,149 @@
+{
+	"nodes": {
+		"lfo1": {
+			"type": "LFO_CHOP",
+			"position": {
+				"_type": "Vector2i",
+				"x": 0,
+				"y": 0
+			},
+			"parameters": {
+				"frequency": {
+					"value": 0.5
+				},
+				"waveform": {
+					"value": 0
+				}
+			}
+		},
+		"noise1": {
+			"type": "NoiseCHOP",
+			"position": {
+				"_type": "Vector2i",
+				"x": 0,
+				"y": 0
+			},
+			"parameters": {
+				"seed": {
+					"value": 5
+				},
+				"channels": {
+					"value": 3
+				}
+			}
+		},
+		"merge1": {
+			"type": "MergeCHOP",
+			"position": {
+				"_type": "Vector2i",
+				"x": 0,
+				"y": 0
+			}
+		},
+		"chop_to_vol1": {
+			"type": "CHOPtoVOLNative",
+			"position": {
+				"_type": "Vector2i",
+				"x": 200,
+				"y": 0
+			},
+			"parameters": {
+				"res_x": {
+					"value": 32
+				},
+				"res_y": {
+					"value": 32
+				},
+				"res_z": {
+					"value": 32
+				},
+				"mapping": {
+					"value": 1
+				}
+			}
+		},
+		"raymarch1": {
+			"type": "RaymarchVOL",
+			"position": {
+				"_type": "Vector2i",
+				"x": 400,
+				"y": 0
+			},
+			"parameters": {
+				"width": {
+					"value": 512
+				},
+				"height": {
+					"value": 512
+				},
+				"max_steps": {
+					"value": 100
+				},
+				"step_size": {
+					"value": 0.012
+				},
+				"density_scale": {
+					"value": 4.0
+				},
+				"absorption": {
+					"value": 8.0
+				},
+				"cam_dist": {
+					"value": 2.2
+				}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": {
+				"_type": "Vector2i",
+				"x": 600,
+				"y": 0
+			},
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		}
+	},
+	"connections": [
+		{
+			"from": "lfo1",
+			"from_port": 0,
+			"to": "merge1",
+			"to_port": 0
+		},
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "merge1",
+			"to_port": 1
+		},
+		{
+			"from": "merge1",
+			"from_port": 0,
+			"to": "chop_to_vol1",
+			"to_port": 0
+		},
+		{
+			"from": "chop_to_vol1",
+			"from_port": 0,
+			"to": "raymarch1",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	]
+}

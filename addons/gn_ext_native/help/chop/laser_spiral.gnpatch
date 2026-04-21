@@ -1,0 +1,88 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "laser1": {
+      "type": "LaserCHOPNative",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "shape": {
+          "value": 2
+        },
+        "frequency": {
+          "value": 3.0,
+          "expression": "sin(time * 0.5) * 2.0 + 3.0",
+          "mode": "EXPRESSION"
+        },
+        "amplitude": {
+          "value": 0.8
+        }
+      }
+    },
+    "choptotop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "laser1",
+      "from_port": 0,
+      "to": "choptotop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptotop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "LaserCHOPNative -- Spiral\n\nAnimated spiral pattern for laser output.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

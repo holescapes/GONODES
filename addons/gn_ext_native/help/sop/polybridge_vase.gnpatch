@@ -1,0 +1,273 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "circle1": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        50
+      ],
+      "parameters": {
+        "radius": {
+          "value": 0.3,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "divisions": {
+          "value": 8,
+          "expression": "(8 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "transform1": {
+      "type": "TransformSOP",
+      "position": [
+        450,
+        50
+      ],
+      "parameters": {
+        "ty": {
+          "value": -1.5
+        }
+      }
+    },
+    "circle2": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        250
+      ],
+      "parameters": {
+        "radius": {
+          "value": 1.0
+        },
+        "divisions": {
+          "value": 8
+        }
+      }
+    },
+    "circle3": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        450
+      ],
+      "parameters": {
+        "radius": {
+          "value": 0.5
+        },
+        "divisions": {
+          "value": 8
+        }
+      }
+    },
+    "transform3": {
+      "type": "TransformSOP",
+      "position": [
+        450,
+        450
+      ],
+      "parameters": {
+        "ty": {
+          "value": 1.5
+        }
+      }
+    },
+    "polybridge1": {
+      "type": "PolyBridgeSOPNative",
+      "position": [
+        800,
+        100
+      ],
+      "parameters": {
+        "divisions": {
+          "value": 6
+        },
+        "twist": {
+          "value": 0.0
+        }
+      }
+    },
+    "polybridge2": {
+      "type": "PolyBridgeSOPNative",
+      "position": [
+        800,
+        350
+      ],
+      "parameters": {
+        "divisions": {
+          "value": 6
+        },
+        "twist": {
+          "value": 0.0
+        }
+      }
+    },
+    "merge1": {
+      "type": "MergeSOP",
+      "position": [
+        1150,
+        200
+      ],
+      "parameters": {}
+    },
+    "geo1": {
+      "type": "GeometryCOMP",
+      "position": [
+        1500,
+        200
+      ],
+      "parameters": {}
+    },
+    "cam1": {
+      "type": "CameraCOMP",
+      "position": [
+        1500,
+        400
+      ],
+      "parameters": {
+        "tx": {
+          "value": 2.0
+        },
+        "ty": {
+          "value": 2.0
+        },
+        "tz": {
+          "value": 5.0
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        1850,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        2200,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "transform1",
+      "to_port": 0
+    },
+    {
+      "from": "transform1",
+      "from_port": 0,
+      "to": "polybridge1",
+      "to_port": 0
+    },
+    {
+      "from": "circle2",
+      "from_port": 0,
+      "to": "polybridge1",
+      "to_port": 1
+    },
+    {
+      "from": "circle2",
+      "from_port": 0,
+      "to": "polybridge2",
+      "to_port": 0
+    },
+    {
+      "from": "circle3",
+      "from_port": 0,
+      "to": "transform3",
+      "to_port": 0
+    },
+    {
+      "from": "transform3",
+      "from_port": 0,
+      "to": "polybridge2",
+      "to_port": 1
+    },
+    {
+      "from": "polybridge1",
+      "from_port": 0,
+      "to": "merge1",
+      "to_port": 0
+    },
+    {
+      "from": "polybridge2",
+      "from_port": 0,
+      "to": "merge1",
+      "to_port": 1
+    },
+    {
+      "from": "merge1",
+      "from_port": 0,
+      "to": "geo1",
+      "to_port": 0
+    },
+    {
+      "from": "geo1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "cam1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "PolyBridge SOP — Vase Shape (Native)\n\nThree circles (small, large, small) bridged in pairs\nand merged. Creates a vase/hourglass shape.\n6 divisions per bridge for smooth contour.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        480.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

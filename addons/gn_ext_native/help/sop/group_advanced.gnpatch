@@ -1,0 +1,180 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "src_box": {
+      "type": "BoxSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "group1": {
+      "type": "GroupSOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "entity": {
+          "value": 2,
+          "expression": "cos(time * 0.6) * 1.5",
+          "mode": "EXPRESSION"
+        },
+        "method": {
+          "value": 2
+        },
+        "bb_min_x": {
+          "value": -1.0,
+          "expression": "sin(time * 2.0) * 0.2",
+          "mode": "EXPRESSION"
+        },
+        "bb_min_y": {
+          "value": -1.0
+        },
+        "bb_min_z": {
+          "value": -1.0
+        },
+        "bb_max_x": {
+          "value": 1.0
+        },
+        "bb_max_y": {
+          "value": 1.0
+        },
+        "bb_max_z": {
+          "value": 1.0
+        },
+        "dir_x": {
+          "value": 1.0
+        },
+        "dir_y": {
+          "value": 2.0
+        },
+        "dir_z": {
+          "value": 1.0
+        },
+        "spread_angle": {
+          "value": 90.0
+        },
+        "operation": {
+          "value": 2
+        }
+      }
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "src_box",
+      "from_port": 0,
+      "to": "group1",
+      "to_port": 0
+    },
+    {
+      "from": "group1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Group SOP — Advanced (Native)\n\nCreate and manage point/primitive groups via bounding box, normal, or range.\nCombined configuration: entity=2, method=2, bb_min_x=-1.0, bb_min_y=-1.0.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

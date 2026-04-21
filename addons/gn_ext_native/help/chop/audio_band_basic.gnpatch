@@ -1,0 +1,121 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "spectrum1": {
+      "type": "AudioSpectrumCHOP",
+      "position": [
+        500,
+        100
+      ],
+      "parameters": {
+        "bus": {
+          "value": "Master"
+        },
+        "bands": {
+          "value": 32
+        }
+      }
+    },
+    "band1": {
+      "type": "AudioBandCHOPNative",
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "num_bands": {
+          "value": 5
+        },
+        "band_names": {
+          "value": "bass,low_mid,mid,high_mid,treble"
+        },
+        "crossovers": {
+          "value": "80,250,2000,6000"
+        },
+        "attack": {
+          "value": 0.02
+        },
+        "release": {
+          "value": 0.15
+        }
+      }
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 256
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1700,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 256
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "spectrum1",
+      "from_port": 0,
+      "to": "band1",
+      "to_port": 0
+    },
+    {
+      "from": "band1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Audio Band CHOP — Basic (Native)\n\nMulti-band frequency analysis with envelope followers for VJ-reactive visuals.\nUsing: num_bands=5, band_names=bass,low_mid,mid,high_mid,treble, crossovers=80,250,2000,6000, attack=0.02.",
+      "position": [
+        -100.0,
+        -120.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

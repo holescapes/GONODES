@@ -1,0 +1,163 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "lfo1": {
+      "type": "LFO_CHOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "waveform": {
+          "value": 0
+        },
+        "frequency": {
+          "value": 0.5,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "amplitude": {
+          "value": 1.0
+        }
+      }
+    },
+    "math_abs": {
+      "type": "MathCHOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "operation": {
+          "value": 4
+        }
+      }
+    },
+    "math_mul": {
+      "type": "MathCHOPNative",
+      "position": [
+        450,
+        300
+      ],
+      "parameters": {
+        "operation": {
+          "value": 2
+        },
+        "operand": {
+          "value": 2.0
+        }
+      }
+    },
+    "null1": {
+      "type": "NullCHOP",
+      "position": [
+        800,
+        100
+      ],
+      "parameters": {}
+    },
+    "null2": {
+      "type": "NullCHOP",
+      "position": [
+        800,
+        300
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "position": [
+        1500,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "y": 512,
+            "_type": "Vector2i",
+            "x": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      },
+      "type": "WindowOUT"
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "lfo1",
+      "from_port": 0,
+      "to": "math_abs",
+      "to_port": 0
+    },
+    {
+      "from": "lfo1",
+      "from_port": 0,
+      "to": "math_mul",
+      "to_port": 0
+    },
+    {
+      "from": "math_abs",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "math_mul",
+      "from_port": 0,
+      "to": "null2",
+      "to_port": 0
+    },
+    {
+      "from": "null1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Math CHOP — Operations (Native)\n\nLFO split into two Math CHOPs:\n• Abs:  converts -1..1 to 0..1\n• Multiply by 2.0: doubles the amplitude",
+      "position": [
+        -100.0,
+        -150.0
+      ],
+      "size": [
+        400.0,
+        120.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

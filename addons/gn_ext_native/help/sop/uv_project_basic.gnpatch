@@ -1,0 +1,149 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [
+				0,
+				100
+			],
+			"parameters": {}
+		},
+		"uvp1": {
+			"type": "UVProjectSOPNative",
+			"position": [
+				300,
+				100
+			],
+			"parameters": {
+				"mode": {
+					"value": 2
+				},
+				"axis": {
+					"value": 1
+				},
+				"scale_u": {
+					"value": 1.0
+				},
+				"scale_v": {
+					"value": 1.0
+				}
+			}
+		},
+		"window1": {
+			"position": [
+				1250,
+				100
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"y": 512,
+						"_type": "Vector2i",
+						"x": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			},
+			"type": "WindowOUT"
+		},
+		"geo_view": {
+			"type": "GeometryCOMP",
+			"position": [
+				600,
+				100
+			],
+			"parameters": {}
+		},
+		"cam_view": {
+			"type": "CameraCOMP",
+			"position": [
+				600,
+				300
+			],
+			"parameters": {
+				"tx": {
+					"value": 0
+				},
+				"ty": {
+					"value": 0.5
+				},
+				"tz": {
+					"value": 3
+				}
+			}
+		},
+		"render_view": {
+			"type": "RenderTOP",
+			"position": [
+				900,
+				100
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				}
+			}
+		}
+	},
+	"connections": [
+		{
+			"from": "sphere1",
+			"from_port": 0,
+			"to": "uvp1",
+			"to_port": 0
+		},
+		{
+			"from": "uvp1",
+			"from_port": 0,
+			"to": "geo_view",
+			"to_port": 0
+		},
+		{
+			"from": "geo_view",
+			"from_port": 0,
+			"to": "render_view",
+			"to_port": 0
+		},
+		{
+			"from": "cam_view",
+			"from_port": 0,
+			"to": "render_view",
+			"to_port": 1
+		},
+		{
+			"from": "render_view",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "UV Project SOP \u2014 Spherical Mapping\n\nAssigns spherical UV projection.\nAlso supports planar and cylindrical modes.",
+			"position": [
+				-100.0,
+				-150.0
+			],
+			"size": [
+				380.0,
+				80.0
+			],
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.8
+			]
+		}
+	]
+}

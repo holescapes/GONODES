@@ -1,0 +1,122 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseCHOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "amplitude": {
+          "value": 0.5
+        },
+        "roughness": {
+          "value": 0.8
+        }
+      }
+    },
+    "dyn1": {
+      "type": "AudioDynamicsCHOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "mode": {
+          "value": 2
+        },
+        "threshold": {
+          "value": -24.0,
+          "expression": "sin(time * 2.0) * 0.5 + 0.5",
+          "mode": "EXPRESSION"
+        },
+        "attack": {
+          "value": 5.0,
+          "expression": "(5.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        },
+        "release": {
+          "value": 200.0
+        }
+      }
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noise1",
+      "from_port": 0,
+      "to": "dyn1",
+      "to_port": 0
+    },
+    {
+      "from": "dyn1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Audio Dynamics — Gate (Native)\n\nNoise gate silences signal below threshold.\nFast attack, slow release.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

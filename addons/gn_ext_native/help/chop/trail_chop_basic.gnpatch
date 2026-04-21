@@ -1,0 +1,105 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "lfo1": {
+      "type": "LFO_CHOP",
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {}
+    },
+    "trail1": {
+      "type": "TrailCHOPNative",
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "length": {
+          "value": 120
+        },
+        "active": {
+          "value": true
+        }
+      }
+    },
+    "window1": {
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "y": 512,
+            "_type": "Vector2i",
+            "x": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      },
+      "type": "WindowOUT"
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        650,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "lfo1",
+      "from_port": 0,
+      "to": "trail1",
+      "to_port": 0
+    },
+    {
+      "from": "trail1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Trail CHOP — Scrolling Buffer (Native)\n\nRecords input over 120 frames as a scrolling history.\nLike an oscilloscope trace of CHOP values.",
+      "position": [
+        -100.0,
+        -150.0
+      ],
+      "size": [
+        380.0,
+        80.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

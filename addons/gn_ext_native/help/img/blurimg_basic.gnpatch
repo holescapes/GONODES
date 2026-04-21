@@ -1,123 +1,97 @@
 {
-    "version": "1.0.0",
-    "generator": "GONODES",
-    "nodes": {
-        "noise1": {
-            "type": "NoiseIMGNative",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "type": {
-                    "value": 0
-                },
-                "scale": {
-                    "value": 6.0
-                },
-                "octaves": {
-                    "value": 4
-                },
-                "persistence": {
-                    "value": 0.5
-                },
-                "seed": {
-                    "value": 0
-                },
-                "monochrome": {
-                    "value": true
-                }
-            }
-        },
-        "blur1": {
-            "type": "BlurIMGNative",
-            "position": [
-                500,
-                100
-            ],
-            "parameters": {
-                "radius": {
-                    "value": 12
-                },
-                "passes": {
-                    "value": 2
-                }
-            }
-        },
-        "imgtotop1": {
-            "type": "ImgToTOP",
-            "position": [
-                850,
-                100
-            ],
-            "parameters": {}
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1200,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
-        }
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noiseimg1": {
+      "type": "NoiseIMG",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
     },
-    "connections": [
-        {
-            "from": "noise1",
-            "from_port": 0,
-            "to": "blur1",
-            "to_port": 0
+    "blurimg1": {
+      "type": "BlurIMGNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "radius": {
+          "value": 3
         },
-        {
-            "from": "blur1",
-            "from_port": 0,
-            "to": "imgtotop1",
-            "to_port": 0
+        "passes": {
+          "value": 1
+        }
+      }
+    },
+    "imgtotop1": {
+      "type": "ImgToTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
         },
-        {
-            "from": "imgtotop1",
-            "from_port": 0,
-            "to": "window1",
-            "to_port": 0
+        "open": {
+          "value": true
         }
-    ],
-    "annotations": [
-        {
-            "id": "ann_1",
-            "type": "note",
-            "text": "Blur IMG (Native) â€” Heavy Blur on Noise\n\nApplies a 12-pixel radius box blur (2 passes) to\nmonochrome noise. Try increasing radius/passes to\nsee the native C++ speed advantage.",
-            "position": [
-                -100.0,
-                -150.0
-            ],
-            "size": [
-                400.0,
-                100.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                0.8
-            ]
-        }
-    ]
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noiseimg1",
+      "from_port": 0,
+      "to": "blurimg1",
+      "to_port": 0
+    },
+    {
+      "from": "blurimg1",
+      "from_port": 0,
+      "to": "imgtotop1",
+      "to_port": 0
+    },
+    {
+      "from": "imgtotop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Noise IMG — Basic (Native)\n\nCPU procedural noise image (value noise, white noise).",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
 }

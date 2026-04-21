@@ -1,0 +1,154 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "sphere1": {
+      "type": "SphereSOP",
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    "facet1": {
+      "type": "FacetSOPNative",
+      "position": [
+        250,
+        0
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        }
+      }
+    },
+    "null1": {
+      "type": "NullSOP",
+      "position": [
+        500,
+        0
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "position": [
+        1450,
+        0
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "y": 512,
+            "_type": "Vector2i",
+            "x": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      },
+      "type": "WindowOUT"
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        800,
+        0
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        800,
+        200
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "sphere1",
+      "from_port": 0,
+      "to": "facet1",
+      "to_port": 0
+    },
+    {
+      "from": "facet1",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "null1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Facet SOP — Flat Shading (Native)\n\nUnshares all vertices so each triangle gets\nits own face normal (flat/faceted look).\nConsolidate mode merges nearby vertices.",
+      "position": [
+        -100.0,
+        -150.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

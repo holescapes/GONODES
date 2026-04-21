@@ -1,0 +1,124 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_wave": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 0
+                },
+                "frequency": {
+                    "value": 2.0
+                }
+            }
+        },
+        "pdsynth1": {
+            "type": "PdSynthCHOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "buffer_size": {
+                    "value": 514
+                },
+                "frequency": {
+                    "value": 880.0
+                },
+                "amplitude": {
+                    "value": 2.0
+                },
+                "note": {
+                    "value": 62
+                },
+                "velocity": {
+                    "value": 102
+                },
+                "trigger": {
+                    "value": true
+                }
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_wave",
+            "from_port": 0,
+            "to": "pdsynth1",
+            "to_port": 0
+        },
+        {
+            "from": "pdsynth1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "PdSynthCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_libpd extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

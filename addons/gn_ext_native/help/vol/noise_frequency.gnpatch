@@ -1,0 +1,125 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseVOLNative",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "res_x": {
+          "value": 63
+        },
+        "res_y": {
+          "value": 63
+        },
+        "res_z": {
+          "value": 63
+        },
+        "frequency": {
+          "value": 2.0,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "amplitude": {
+          "value": 0.5,
+          "expression": "abs(sin(time * 2.0))",
+          "mode": "EXPRESSION"
+        },
+        "octaves": {
+          "value": 3
+        },
+        "lacunarity": {
+          "value": 1.0
+        },
+        "gain": {
+          "value": 0.25
+        },
+        "offset_x": {
+          "value": 0.5
+        },
+        "offset_y": {
+          "value": 0.5
+        },
+        "offset_z": {
+          "value": 0.5
+        },
+        "speed": {
+          "value": 0.5
+        }
+      }
+    },
+    "raymarch1": {
+      "type": "RaymarchVOL",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noise1",
+      "from_port": 0,
+      "to": "raymarch1",
+      "to_port": 0
+    },
+    {
+      "from": "raymarch1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Noise VOL — Frequency (Native)\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).\nShowcasing: res_x=63, res_y=63, res_z=63, frequency=2.0.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

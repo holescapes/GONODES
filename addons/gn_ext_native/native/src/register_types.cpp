@@ -164,6 +164,40 @@
 // SOP processors — Phase 9 (boolean migration)
 #include "sop/gn_native_boolean_sop.h"
 
+// CHOP processors — Phase 10 (gap + MEDIUM priority native acceleration)
+#include "chop/gn_native_area_chop.h"
+#include "chop/gn_native_copy_chop.h"
+#include "chop/gn_native_audio_band_chop.h"
+#include "chop/gn_native_ramp_chop.h"
+#include "chop/gn_native_cross_chop.h"
+#include "chop/gn_native_limit_chop.h"
+#include "chop/gn_native_logic_chop.h"
+#include "chop/gn_native_join_chop.h"
+#include "chop/gn_native_analyze_chop.h"
+
+// CHOP processors — Phase 10 (audio HIGH priority native acceleration)
+#include "chop/gn_native_audio_oscillator_chop.h"
+#include "chop/gn_native_audio_filter_chop.h"
+#include "chop/gn_native_audio_paraeq_chop.h"
+#include "chop/gn_native_audio_mix_chop.h"
+#include "chop/gn_native_audio_reverb_chop.h"
+#include "chop/gn_native_audio_delay_chop.h"
+#include "chop/gn_native_audio_pitch_chop.h"
+#include "chop/gn_native_audio_envelope_chop.h"
+#include "chop/gn_native_audio_gate_chop.h"
+
+// SOP processors — Phase 10 (gap + HIGH/MEDIUM priority native acceleration)
+#include "sop/gn_native_measure_sop.h"
+#include "sop/gn_native_creep_sop.h"
+#include "sop/gn_native_project_sop.h"
+#include "sop/gn_native_hole_sop.h"
+#include "sop/gn_native_convert_line_sop.h"
+#include "sop/gn_native_voronoi_shatter_sop.h"
+#include "sop/gn_native_heightfield_sop.h"
+#include "sop/gn_native_trail_ribbon_sop.h"
+#include "sop/gn_native_primitive_sop.h"
+#include "sop/gn_native_resample_sop.h"
+
 using namespace godot;
 
 void initialize_gn_native_module(ModuleInitializationLevel p_level) {
@@ -330,6 +364,40 @@ void initialize_gn_native_module(ModuleInitializationLevel p_level) {
 
     // SOP processors — Phase 9 (boolean migration)
     ClassDB::register_class<GNNativeBooleanSop>();
+
+    // CHOP processors — Phase 10 (gap + MEDIUM priority native acceleration)
+    ClassDB::register_class<GNNativeAreaChop>();
+    ClassDB::register_class<GNNativeCopyChop>();
+    ClassDB::register_class<GNNativeAudioBandChop>();
+    ClassDB::register_class<GNNativeRampChop>();
+    ClassDB::register_class<GNNativeCrossChop>();
+    ClassDB::register_class<GNNativeLimitChop>();
+    ClassDB::register_class<GNNativeLogicChop>();
+    ClassDB::register_class<GNNativeJoinChop>();
+    ClassDB::register_class<GNNativeAnalyzeChop>();
+
+    // CHOP processors — Phase 10 (audio HIGH priority native acceleration)
+    ClassDB::register_class<GNNativeAudioOscillatorChop>();
+    ClassDB::register_class<GNNativeAudioFilterChop>();
+    ClassDB::register_class<GNNativeAudioParaEqChop>();
+    ClassDB::register_class<GNNativeAudioMixChop>();
+    ClassDB::register_class<GNNativeAudioReverbChop>();
+    ClassDB::register_class<GNNativeAudioDelayChop>();
+    ClassDB::register_class<GNNativeAudioPitchChop>();
+    ClassDB::register_class<GNNativeAudioEnvelopeChop>();
+    ClassDB::register_class<GNNativeAudioGateChop>();
+
+    // SOP processors — Phase 10 (gap + HIGH/MEDIUM priority native acceleration)
+    ClassDB::register_class<GNNativeMeasureSop>();
+    ClassDB::register_class<GNNativeCreepSop>();
+    ClassDB::register_class<GNNativeProjectSop>();
+    ClassDB::register_class<GNNativeHoleSop>();
+    ClassDB::register_class<GNNativeConvertLineSop>();
+    ClassDB::register_class<GNNativeVoronoiShatterSop>();
+    ClassDB::register_class<GNNativeHeightfieldSop>();
+    ClassDB::register_class<GNNativeTrailRibbonSop>();
+    ClassDB::register_class<GNNativePrimitiveSop>();
+    ClassDB::register_class<GNNativeResampleSop>();
 }
 
 void uninitialize_gn_native_module(ModuleInitializationLevel p_level) {

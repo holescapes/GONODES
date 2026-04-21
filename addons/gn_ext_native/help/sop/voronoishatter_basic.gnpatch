@@ -1,0 +1,125 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"box1": {
+			"type": "BoxSOP",
+			"position": [
+				100,
+				100
+			],
+			"parameters": {}
+		},
+		"voronoi1": {
+			"type": "VoronoiShatterSOPNative",
+			"position": [
+				500,
+				100
+			],
+			"parameters": {
+				"num_points": {
+					"value": 12
+				},
+				"seed": {
+					"value": 42
+				},
+				"offset": {
+					"value": 0.01
+				},
+				"interior_faces": {
+					"value": true
+				}
+			}
+		},
+		"render1": {
+			"type": "RenderTOP",
+			"position": [
+				900,
+				100
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": [
+				1300,
+				100
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		},
+		"geo1": {
+			"type": "GeometryCOMP",
+			"position": [
+				700,
+				100
+			],
+			"parameters": {}
+		}
+	},
+	"connections": [
+		{
+			"from": "box1",
+			"from_port": 0,
+			"to": "voronoi1",
+			"to_port": 0
+		},
+		{
+			"from": "voronoi1",
+			"from_port": 0,
+			"to": "geo1",
+			"to_port": 0
+		},
+		{
+			"from": "geo1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 0
+		},
+		{
+			"from": "render1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Box SOP \u2014 Basic\n\nBox mesh with per-axis size and subdivisions.",
+			"position": [
+				-100.0,
+				-100.0
+			],
+			"size": [
+				450.0,
+				120.0
+			],
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.8
+			]
+		}
+	]
+}

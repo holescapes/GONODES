@@ -1,0 +1,153 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "lfo1": {
+      "type": "LFO_CHOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "waveform": {
+          "value": 0
+        },
+        "frequency": {
+          "value": 0.5
+        },
+        "amplitude": {
+          "value": 1.0
+        }
+      }
+    },
+    "lfo2": {
+      "type": "LFO_CHOP",
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "waveform": {
+          "value": 0
+        },
+        "frequency": {
+          "value": 0.7
+        },
+        "amplitude": {
+          "value": 1.0
+        }
+      }
+    },
+    "logic1": {
+      "type": "LogicCHOPNative",
+      "position": [
+        450,
+        200
+      ],
+      "parameters": {
+        "operation": {
+          "value": 0
+        },
+        "threshold": {
+          "value": 0.0
+        }
+      }
+    },
+    "null1": {
+      "type": "NullCHOP",
+      "position": [
+        800,
+        200
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "position": [
+        1500,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "y": 512,
+            "_type": "Vector2i",
+            "x": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      },
+      "type": "WindowOUT"
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "lfo1",
+      "from_port": 0,
+      "to": "logic1",
+      "to_port": 0
+    },
+    {
+      "from": "lfo2",
+      "from_port": 0,
+      "to": "logic1",
+      "to_port": 1
+    },
+    {
+      "from": "logic1",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "null1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Logic CHOP — AND Gate (Native)\n\nTwo LFOs at different frequencies → Logic AND.\nOutput is 1 when both inputs are above threshold.\nChange operation for OR, XOR, NAND, etc.",
+      "position": [
+        -100.0,
+        -150.0
+      ],
+      "size": [
+        400.0,
+        110.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

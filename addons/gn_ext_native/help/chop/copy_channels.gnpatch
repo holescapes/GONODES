@@ -1,0 +1,140 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseCHOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "num_channels": {
+          "value": 3,
+          "expression": "(3 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "lfo1": {
+      "type": "LFO_CHOP",
+      "position": [
+        100,
+        250
+      ],
+      "parameters": {
+        "freq": {
+          "value": 2.0
+        }
+      }
+    },
+    "copy1": {
+      "type": "CopyCHOPNative",
+      "position": [
+        500,
+        150
+      ],
+      "parameters": {
+        "operation": {
+          "value": 0
+        }
+      }
+    },
+    "null1": {
+      "type": "NullCHOP",
+      "position": [
+        800,
+        150
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "position": [
+        1500,
+        150
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "y": 512,
+            "_type": "Vector2i",
+            "x": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      },
+      "type": "WindowOUT"
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        150
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noise1",
+      "from_port": 0,
+      "to": "copy1",
+      "to_port": 0
+    },
+    {
+      "from": "lfo1",
+      "from_port": 0,
+      "to": "copy1",
+      "to_port": 1
+    },
+    {
+      "from": "copy1",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "null1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Copy CHOP — Merge Channel Sets (Native)\n\nCopies LFO channel onto noise channels.\nOverwrite mode replaces matching names.\nAlso: add, subtract, multiply modes.",
+      "position": [
+        -100.0,
+        -150.0
+      ],
+      "size": [
+        380.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

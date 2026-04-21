@@ -1,0 +1,178 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "circle1": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        150
+      ],
+      "parameters": {
+        "radius": {
+          "value": 1.0,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "segments": {
+          "value": 16,
+          "expression": "(16 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "circle2": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        400
+      ],
+      "parameters": {
+        "radius": {
+          "value": 0.5
+        },
+        "segments": {
+          "value": 16
+        }
+      }
+    },
+    "polyloft1": {
+      "type": "PolyLoftSOPNative",
+      "position": [
+        450,
+        250
+      ],
+      "parameters": {
+        "subdivisions": {
+          "value": 8
+        },
+        "close_caps": {
+          "value": true
+        }
+      }
+    },
+    "geo1": {
+      "type": "GeometryCOMP",
+      "position": [
+        750,
+        250
+      ],
+      "parameters": {}
+    },
+    "cam1": {
+      "type": "CameraCOMP",
+      "position": [
+        750,
+        450
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 1.0
+        },
+        "tz": {
+          "value": 4.0
+        },
+        "rx": {
+          "value": -15.0
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        1050,
+        250
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1350,
+        250
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "polyloft1",
+      "to_port": 0
+    },
+    {
+      "from": "circle2",
+      "from_port": 0,
+      "to": "polyloft1",
+      "to_port": 1
+    },
+    {
+      "from": "polyloft1",
+      "from_port": 0,
+      "to": "geo1",
+      "to_port": 0
+    },
+    {
+      "from": "geo1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "cam1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "PolyLoft SOP â€” Loft Between Cross-Sections\n\nTwo circles of different radii are lofted into a tapered\ntube with 8 interpolated subdivisions. Caps close both ends.\nGreat for creating organic shapes from profile curves.",
+      "position": [
+        50.0,
+        -50.0
+      ],
+      "size": [
+        600.0,
+        110.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

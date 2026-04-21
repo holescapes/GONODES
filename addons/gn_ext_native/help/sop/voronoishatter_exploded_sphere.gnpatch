@@ -1,0 +1,129 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"sphere1": {
+			"type": "SphereSOP",
+			"position": [
+				100,
+				100
+			],
+			"parameters": {}
+		},
+		"voronoi1": {
+			"type": "VoronoiShatterSOPNative",
+			"position": [
+				550,
+				100
+			],
+			"parameters": {
+				"num_points": {
+					"value": 24,
+					"expression": "(24 * (0.5 + 0.5 * sin(time * 2.0)))",
+					"mode": "EXPRESSION"
+				},
+				"seed": {
+					"value": 7
+				},
+				"offset": {
+					"value": 0.03,
+					"expression": "sin(time * 2.0) * 0.2",
+					"mode": "EXPRESSION"
+				},
+				"interior_faces": {
+					"value": true
+				}
+			}
+		},
+		"geocomp1": {
+			"type": "GeometryCOMP",
+			"position": [
+				1000,
+				100
+			],
+			"parameters": {}
+		},
+		"render1": {
+			"type": "RenderTOP",
+			"position": [
+				1450,
+				100
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": [
+				1900,
+				100
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		}
+	},
+	"connections": [
+		{
+			"from": "sphere1",
+			"from_port": 0,
+			"to": "voronoi1",
+			"to_port": 0
+		},
+		{
+			"from": "voronoi1",
+			"from_port": 0,
+			"to": "geocomp1",
+			"to_port": 0
+		},
+		{
+			"from": "geocomp1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 0
+		},
+		{
+			"from": "render1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Voronoi Shatter \u2014 Exploded Sphere\n\nShatters a sphere into 24 Voronoi fragments\nwith a visible gap (offset = 0.03) between\npieces. Interior faces are generated.\n\nUseful for destruction / reveal effects\nin motion graphics.",
+			"position": [
+				-100.0,
+				-100.0
+			],
+			"size": [
+				450.0,
+				120.0
+			],
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.8
+			]
+		}
+	]
+}

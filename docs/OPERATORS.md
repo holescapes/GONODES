@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **556 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 23 extension addons.
+> **574 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 23 extension addons.
 
 ---
 
@@ -3427,6 +3427,116 @@ Receives DMX-512 values via Art-Net UDP as CHOP channels. Outputs float channels
 
 ---
 
+#### AreaCHOP
+
+Numerical integration of channel data over time/samples.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| method | Enum | Trapezoidal | Trapezoidal, Simpson's, Rectangle | Integration method |
+| cumulative | Bool | false | — | Output running integral per sample |
+
+**Inputs:** `in` (CHOP — channels to integrate).
+**Output:** `out` (CHOP — integrated values).
+
+---
+
+#### ReplaceCHOP
+
+Replace channels from first input with matching channels from second input.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| pattern | String | `*` | — | Glob pattern to match channel names |
+| blend | Float | 1.0 | 0.0–1.0 | Blend factor between original and replacement |
+
+**Inputs:** `base` (CHOP — original), `replace` (CHOP — replacement values).
+**Output:** `out` (CHOP — merged channels).
+
+---
+
+#### GestureCHOP
+
+Touch gesture recognition. Outputs gesture state channels from viewport input events.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| pinch | Bool | true | — | Detect pinch gestures |
+| rotate | Bool | true | — | Detect rotate gestures |
+| swipe | Bool | true | — | Detect swipe gestures |
+| min_distance | Float | 20.0 | 1.0–200.0 | Minimum movement for gesture detection |
+
+**No inputs** — reads viewport touch events.
+**Output:** `out` (CHOP — pinch, rotate, swipe_x, swipe_y, active channels).
+
+---
+
+#### StateMachineCHOP
+
+Finite state machine with configurable transition modes.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| num_states | Int | 4 | 1–64 | Number of states |
+| mode | Enum | Sequential | Sequential, Direct, Ping-Pong | Transition mode |
+| threshold | Float | 0.5 | 0.0–1.0 | Trigger threshold for input-driven transitions |
+
+**Inputs:** `trigger` (CHOP, optional — trigger channel for transitions).
+**Output:** `out` (CHOP — state, progress channels).
+
+---
+
+#### PdSynthCHOP *(Extension: gn_ext_libpd)*
+
+Run a Pure Data patch as an audio synthesizer. Uses libpd to generate stereo audio.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| patch | String | — | — | Path to .pd patch file |
+| buffer_size | Int | 512 | 64–8192 | Output buffer size in samples |
+| frequency | Float | 440.0 | 0.001–20000 | Frequency sent to `freq` receiver |
+| amplitude | Float | 1.0 | 0.0–2.0 | Amplitude sent to `amp` receiver |
+| note | Int | 60 | 0–127 | MIDI note number |
+| velocity | Int | 100 | 0–127 | MIDI velocity |
+| trigger | Bool | false | — | Send bang to `trigger` receiver |
+
+**No inputs** — generates audio from Pd patch.
+**Output:** `out` (CHOP — left, right channels).
+
+---
+
+#### PdFilterCHOP *(Extension: gn_ext_libpd)*
+
+Process audio through a Pure Data patch as an effect/filter (adc~ → dac~).
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| patch | String | — | — | Path to .pd effect patch |
+| param1/2/3 | Float | 0.0 | -1000–1000 | Sent to `param1`/`param2`/`param3` receivers |
+| wet | Float | 1.0 | 0.0–1.0 | Wet/dry mix |
+
+**Inputs:** `in` (CHOP — audio to process).
+**Output:** `out` (CHOP — processed audio, left/right channels).
+
+---
+
+#### PdControlCHOP *(Extension: gn_ext_libpd)*
+
+Send/receive control messages to/from a Pure Data patch.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| patch | String | — | Path to .pd control patch |
+| send_prefix | String | — | Prefix for Pd receiver names |
+| receive_names | String | `out1 out2 out3` | Space-separated Pd sender names to listen for |
+| send_bang | Bool | false | Send bang to `bang` receiver |
+| float_msg | Float | 0.0 | Float sent to `float_in` receiver |
+
+**Inputs:** `in` (CHOP, optional — channel values sent as floats to Pd receivers).
+**Output:** `out` (CHOP — one channel per received value).
+
+---
+
 ## DAT — Data Operators
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
@@ -3996,6 +4106,34 @@ Logs panel/UI interaction events as DAT table rows with timestamps.
 
 **Inputs:** `panel` (CHOP, UI state).
 **Output:** DAT table (timestamp, event, channel, value).
+
+---
+
+#### ParameterDAT
+
+Reads all parameters of a target node as a DAT table.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| target_node | String | — | Node ID to read parameters from |
+| show_defaults | Bool | false | Include default values column |
+
+**No inputs** — reads parameters from target node.
+**Output:** `out` (DAT — name, value, type, [default] columns).
+
+---
+
+#### SystemDAT
+
+Outputs system information (OS, CPU, GPU, memory, display) as a DAT table.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| hardware | Bool | true | Include hardware (CPU/GPU) info |
+| display | Bool | true | Include display/monitor info |
+
+**No inputs** — reads system information.
+**Output:** `out` (DAT — property, value columns).
 
 ---
 
@@ -5157,6 +5295,75 @@ Receive geometry data from a host application via the C API (`libgonodes`). Supp
 
 ---
 
+#### MeasureSOP
+
+Compute geometric measurements on input geometry.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| area | Bool | true | Compute face areas |
+| perimeter | Bool | true | Compute face perimeters |
+| curvature | Bool | false | Compute mean curvature per vertex |
+
+**Inputs:** `in` (SOP — geometry to measure).
+**Output:** `out` (SOP — geometry with measurement attributes).
+
+---
+
+#### CreepSOP
+
+Move points along a surface, keeping them attached to the nearest triangle.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| distance | Float | 0.1 | 0.0–10.0 | Distance to move per cook |
+| direction | Enum | Normal | Normal, U, V, Custom | Movement direction |
+
+**Inputs:** `in` (SOP — geometry with points on surface).
+**Output:** `out` (SOP — updated geometry).
+
+---
+
+#### ProjectSOP
+
+Project points onto a target surface along a direction axis.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| axis | Enum | Y | X, Y, Z | Projection axis |
+
+**Inputs:** `points` (SOP — points to project), `surface` (SOP — target surface).
+**Output:** `out` (SOP — projected points).
+
+---
+
+#### HoleSOP
+
+Cut holes in polygons by removing interior points (2D ray-casting).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| plane | Enum | XZ | XY, XZ, YZ | Projection plane for 2D test |
+
+**Inputs:** `surface` (SOP — geometry to cut), `hole` (SOP — hole shapes, optional).
+**Output:** `out` (SOP — geometry with holes).
+
+---
+
+#### ConvertLineSOP
+
+Convert polylines to smooth curves via subdivision or interpolation.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| target | Enum | Catmull-Rom | Catmull-Rom, Chaikin, Linear | Curve type |
+| subdivisions | Int | 4 | 1–16 | Subdivision iterations |
+
+**Inputs:** `in` (SOP — polyline geometry).
+**Output:** `out` (SOP — smoothed curves).
+
+---
+
 ## COMP — Component Operators
 
 COMPs are 3D scene components. They return `GNCompData` wrapping a reference to a singleton Godot `Node3D` (MeshInstance3D, Camera3D, Light3D) that is adopted into a RenderTOP's isolated 3D SubViewport for rendering.
@@ -5519,6 +5726,64 @@ func cook():
     outputs[1].set_headers(PackedStringArray(["key", "value"]))
     outputs[1].append_row(PackedStringArray(["time", "%.3f" % time]))
 ```
+
+---
+
+#### FeedbackCOMP
+
+Stores the previous frame's transform from an input COMP. Useful for motion trails and physics.
+
+**Inputs:** `in` (COMP — source transform).
+**Output:** `out` (COMP — previous frame's transform).
+
+---
+
+#### TimeCOMP
+
+Provides a local timeline with play/pause/speed/loop controls.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| play | Bool | true | — | Enable playback |
+| speed | Float | 1.0 | -10.0–10.0 | Playback speed multiplier |
+| loop | Bool | false | — | Loop at end time |
+| start_time | Float | 0.0 | 0.0–3600.0 | Timeline start |
+| end_time | Float | 10.0 | 0.0–3600.0 | Timeline end |
+
+**No inputs.**
+**Output:** `out` (COMP — local timeline data).
+
+---
+
+#### AudioListenerCOMP
+
+Wraps Godot's `AudioListener3D` for spatial audio reception in 3D scenes.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| tx/ty/tz | Float | 0.0 | Position |
+| rx/ry/rz | Float | 0.0 | Rotation |
+| current | Bool | true | Set as current audio listener |
+
+**No inputs.**
+**Output:** `out` (COMP — AudioListener3D scene node).
+
+---
+
+#### AudioSourceCOMP
+
+Wraps Godot's `AudioStreamPlayer3D` for positional audio playback in 3D scenes.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| tx/ty/tz | Float | 0.0 | — | Position |
+| volume_db | Float | 0.0 | -80.0–24.0 | Volume in decibels |
+| max_distance | Float | 10.0 | 0.0–100.0 | Maximum audible distance |
+| bus | String | Master | — | Audio bus name |
+
+**Inputs:** `audio` (CHOP, optional — audio source data).
+**No inputs required** — can also use built-in stream.
+**Output:** `out` (COMP — AudioStreamPlayer3D scene node).
 
 ---
 
@@ -6240,7 +6505,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
 | **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **375** | *Core operators only. With extensions (95), SDF (29), SCRIPT (3), and native variants, total reaches 556.* |
+| **Total** | **393** | *Core operators only. With extensions (109), SDF (29), SCRIPT (3), and native variants, total reaches 574.* |
 
 ### Extension Operators (not included in count above)
 
@@ -6267,21 +6532,177 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 
 ## Native Acceleration Extension (Optional)
 
-The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of 69 CPU-heavy operators across 6 build phases and 6 families. These appear as separate operators in the palette under a "Native" section when the C++ binaries are compiled. Each native operator has an identical parameter interface to its GDScript counterpart and includes a pure-GDScript fallback for when the C++ library is unavailable.
+The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of **131** CPU-heavy operators across 6 families. These appear as separate operators in the palette under a "Native" section when the C++ binaries are compiled. Each native operator has an identical parameter interface to its GDScript counterpart and includes a pure-GDScript fallback for when the C++ library is unavailable.
 
 ### Summary by Family
 
-| Family | Count | Key Algorithms |
-|--------|-------|---------------|
-| SOP | 37 | Marching cubes, L-system turtle, quadric error decimation, Möller-Trumbore raycasting, spatial-hash welding, FFD lattice, damped spring, mesh deformers (bend/twist/taper/extrude), parametric lofting/skinning |
-| CHOP | 18 | Biquad Butterworth IIR (LP/HP/BP), FFT audio spectrum, time-warp remap, physics simulation, expression evaluation, signal interpolation |
-| IMG | 5 | Gaussian/box blur, Sobel/Prewitt edge detection, pixel sorting, Perlin noise, checkerboard |
-| TOP | 4 | Horn-Schunck optical flow, statistical analysis, CHOP→texture bridge, particle state readback |
-| VOL | 3 | Marching cubes isosurface extraction, CHOP→volume bridge, volume statistics |
-| POP | 2 | GPU particle instancing, particle state rendering |
-| **Total** | **69** | |
+| Family | Count |
+|--------|-------|
+| CHOP | 44 |
+| IMG | 5 |
+| POP | 9 |
+| SOP | 60 |
+| TOP | 4 |
+| VOL | 9 |
+| **Total** | **131** |
 
 **Build status:** Windows x86_64 binary compiled and active (`bin/win64/libgn_native.windows.template_release.x86_64.dll`). Linux/macOS builds require running `scons platform=linux|macos target=template_release` on those platforms. The extension registry auto-detects the C++ classes via `ClassDB.class_exists()` and falls back to pure GDScript if the library is missing.
+
+### CHOP — Native Variants
+
+| Operator | Native Class | Description |
+|----------|-------------|-------------|
+| AnalyzeCHOP | AnalyzeCHOPNative | Statistical analysis (avg/min/max/sum/RMS) — native C++ accelerated |
+| AreaCHOP | AreaCHOPNative | Numerical integration (trapezoidal/Simpson/rectangle) — native C++ accelerated |
+| AudioBandCHOP | AudioBandCHOPNative | Multi-band frequency analysis with envelope followers — native C++ accelerated |
+| AudioDelayCHOP | AudioDelayCHOPNative | Audio delay with feedback — native C++ accelerated |
+| AudioDynamicsCHOP | AudioDynamicsCHOPNative | Compressor/limiter/expander/gate with native C++ acceleration |
+| AudioEnvelopeCHOP | AudioEnvelopeCHOPNative | Envelope follower with attack/release — native C++ accelerated |
+| AudioFilterCHOP | AudioFilterCHOPNative | Biquad audio filter (LP/HP/BP/notch/peak/shelf) — native C++ accelerated |
+| AudioGateCHOP | AudioGateCHOPNative | Noise gate with sidechain — native C++ accelerated |
+| AudioMixCHOP | AudioMixCHOPNative | Multi-input audio mixer with pan/gain/mute/solo — native C++ accelerated |
+| AudioOscillatorCHOP | AudioOscillatorCHOPNative | Audio oscillator (sine/saw/square/tri) with FM/AM — native C++ accelerated |
+| AudioParaEQCHOP | AudioParaEQCHOPNative | 8-band parametric EQ — native C++ accelerated |
+| AudioPitchCHOP | AudioPitchCHOPNative | Granular pitch shifter — native C++ accelerated |
+| AudioReverbCHOP | AudioReverbCHOPNative | Schroeder reverb with comb + allpass filters — native C++ accelerated |
+| AudioSpectrumCHOP | AudioSpectrumCHOPNative | FFT spectrum analysis with native C++ acceleration |
+| BlendCHOP | BlendCHOPNative | Weighted channel blend with easing — native C++ accelerated |
+| CompositeCHOP | CompositeCHOPNative | Multi-input channel blending — native C++ accelerated |
+| CopyCHOP | CopyCHOPNative | Copy/combine channels by name matching — native C++ accelerated |
+| CrossCHOP | CrossCHOPNative | Cross-fade between two CHOP inputs — native C++ accelerated |
+| ExpressionCHOP | ExpressionCHOPNative | Per-channel math expression evaluation with native C++ acceleration |
+| FanCHOP | FanCHOPNative | Channel fan/spread with offset — native C++ accelerated |
+| FilterCHOP | FilterCHOPNative | IIR low-pass/high-pass filter with native C++ acceleration |
+| IkCHOP | IkCHOPNative | FABRIK inverse kinematics solver — native C++ accelerated |
+| InterpolateCHOP | InterpolateCHOPNative | Channel interpolation with easing curves, native C++ acceleration |
+| JoinCHOP | JoinCHOPNative | Join (concatenate) two channel arrays — native C++ accelerated |
+| LagCHOP | LagCHOPNative | Attack/release exponential smoothing — native C++ accelerated |
+| LaserCHOP | LaserCHOPNative | ILDA laser pattern generator — native C++ accelerated |
+| LimitCHOP | LimitCHOPNative | Clamp/Loop/Zig-Zag value limiting — native C++ accelerated |
+| LogicCHOP | LogicCHOPNative | Boolean logic (AND/OR/XOR/NAND/NOR/NOT) — native C++ accelerated |
+| LookupCHOP | LookupCHOPNative | Table lookup with interpolation with native C++ acceleration |
+| MathCHOP | MathCHOPNative | Per-sample math operations with native C++ acceleration |
+| NoiseCHOP | NoiseCHOPNative | Smooth noise channel generator with native C++ acceleration |
+| PatternCHOP | PatternCHOPNative | Multi-sample pattern generator with native C++ acceleration |
+| PhysicsCHOP | PhysicsCHOPNative | Physics body readback with native C++ acceleration |
+| RampCHOP | RampCHOPNative | Ramp curve sampling with cubic Hermite interpolation — native C++ accelerated |
+| ResampleCHOP | ResampleCHOPNative | Channel resampling/interpolation with native C++ acceleration |
+| SOPtoCHOP | SOPtoCHOPNative | Extract vertex attributes as CHOP channels — native C++ accelerated |
+| SlopeCHOP | SlopeCHOPNative | Per-sample derivative with native C++ acceleration |
+| SmoothCHOP | SmoothCHOPNative | Biquad Butterworth filter (LP/HP/BP) with native C++ acceleration |
+| StretchCHOP | StretchCHOPNative | Resample channels to new length with native C++ acceleration |
+| TOPtoCHOP | TOPtoCHOPNative | Sample TOP pixels as CHOP channels with native C++ acceleration |
+| TrailCHOP | TrailCHOPNative | Ring-buffer trail recorder with native C++ acceleration |
+| TransformCHOP | TransformCHOPNative | TRS transform on xyz channel groups — native C++ accelerated |
+| WarpCHOP | WarpCHOPNative | Time-warp/retime channels with native C++ acceleration |
+| WaveCHOP | WaveCHOPNative | Multi-channel waveform generator with native C++ acceleration |
+### IMG — Native Variants
+
+| Operator | Native Class | Description |
+|----------|-------------|-------------|
+| BlurIMG | BlurIMGNative | Box blur with native C++ acceleration |
+| CheckerboardIMG | CheckerboardIMGNative | Checkerboard pattern generator with native C++ acceleration |
+| EdgeDetectIMG | EdgeDetectIMGNative | CPU edge detection (Sobel/Prewitt) with native C++ acceleration |
+| NoiseIMG | NoiseIMGNative | Procedural noise generator with native C++ acceleration |
+| PixelSortIMG | PixelSortIMGNative | Pixel-sorting glitch effect with native C++ acceleration |
+### POP — Native Variants
+
+| Operator | Native Class | Description |
+|----------|-------------|-------------|
+| AdvectPOP | AdvectPOPNative | Volume-field particle advection — native C++ accelerated |
+| AttractPOP | AttractPOPNative | Inverse-square point attractor — native C++ accelerated |
+| CollisionPOP | CollisionPOPNative | Ground plane collision with bounce/kill — native C++ accelerated |
+| ForcePOP | ForcePOPNative | Gravity/wind/drag force integration — native C++ accelerated |
+| InstancePOP | InstancePOPNative | Copy geometry onto particles with native C++ acceleration |
+| LimitPOP | LimitPOPNative | Bounding box kill + speed clamp — native C++ accelerated |
+| RenderPOP | RenderPOPNative | Render particles as point cloud/billboards with native C++ acceleration |
+| SourcePOP | SourcePOPNative | Particle emitter with age/kill — native C++ accelerated |
+| TurbulencePOP | TurbulencePOPNative | Curl noise turbulence — native C++ accelerated |
+### SOP — Native Variants
+
+| Operator | Native Class | Description |
+|----------|-------------|-------------|
+| AttributeSOP | AttributeSOPNative | Custom point attribute creation with native C++ acceleration |
+| BendSOP | BendSOPNative | Circular arc bend deformation with native C++ acceleration |
+| BlendSOP | BlendSOPNative | Geometry morph/blend with native C++ acceleration |
+| BooleanSOP | BooleanSOPNative | Boolean operations (union, intersect, subtract) via BSP-tree — native C++ accelerated |
+| CapSOP | CapSOPNative | Close open boundary holes with native C++ acceleration |
+| CarveSOP | CarveSOPNative | Trim triangles by parametric U range with native C++ acceleration |
+| ClipSOP | ClipSOPNative | Plane-based geometry clipping with native C++ acceleration |
+| ClothSOP | ClothSOPNative | Verlet cloth simulation — native C++ accelerated |
+| ConvertLineSOP | ConvertLineSOPNative | Convert polylines to bezier/subdivision — native C++ accelerated |
+| CopySOP | CopySOPNative | Copy-to-points instancing with native C++ acceleration |
+| CreepSOP | CreepSOPNative | Move points along target surface — native C++ accelerated |
+| DeleteSOP | DeleteSOPNative | Delete triangles by range/bbox/random with native C++ acceleration |
+| DivideSOP | DivideSOPNative | Polygon triangulation and cleanup with native C++ acceleration |
+| ExtrudeSOP | ExtrudeSOPNative | Face extrusion along normals with native C++ acceleration |
+| FacetSOP | FacetSOPNative | Facet unique / consolidate points with native C++ acceleration |
+| FuseSOP | FuseSOPNative | Merge coincident points within threshold with native C++ acceleration |
+| GroupSOP | GroupSOPNative | Vertex grouping by BBox/normal/all — native C++ accelerated |
+| HeightfieldSOP | HeightfieldSOPNative | Heightfield terrain mesh generation — native C++ accelerated |
+| HoleSOP | HoleSOPNative | Cut holes in polygon surfaces — native C++ accelerated |
+| IsoSurfaceSOP | IsoSurfaceSOPNative | Implicit iso-surface generator (Gyroid, Schwarz-P/D, etc.) via marching cubes with native C++ acceleration |
+| LSystemSOP | LSystemSOPNative | L-System fractal/branching geometry with native C++ acceleration |
+| LatticeSOP | LatticeSOPNative | Free-form lattice deformation with native C++ acceleration |
+| MagnetSOP | MagnetSOPNative | Magnet point attractor deformation with native C++ acceleration |
+| MeasureSOP | MeasureSOPNative | Geometry measurement (area/perimeter/curvature) — native C++ accelerated |
+| MetaballSOP | MetaballSOPNative | Metaball iso-surface via marching cubes with native C++ acceleration |
+| MirrorSOP | MirrorSOPNative | Mirror geometry across an axis with native C++ acceleration |
+| MountainSOP | MountainSOPNative | Fractal noise mountain displacement with native C++ acceleration |
+| NoiseSOP | NoiseSOPNative | 3D noise vertex displacement with native C++ acceleration |
+| NormalSOP | NormalSOPNative | Normal recomputation (smooth/flat/custom) with native C++ acceleration |
+| ParticleSOP | ParticleSOPNative | CPU particle system with native C++ acceleration |
+| PeakSOP | PeakSOPNative | Vertex displacement along normals — native C++ accelerated |
+| PointSOP | PointSOPNative | Per-vertex expression deformation with native C++ acceleration |
+| PolyBevelSOP | PolyBevelSOPNative | Vertex-pull edge bevel with rounded divisions — native C++ accelerated |
+| PolyBridgeSOP | PolyBridgeSOPNative | Bridge two edge loops with connecting geometry — native C++ accelerated |
+| PolyLoftSOP | PolyLoftSOPNative | Cross-section lofting with native C++ acceleration |
+| PolyPatchSOP | PolyPatchSOPNative | Bilinear Coons patch from 4 corners — native C++ accelerated |
+| PolyReduceSOP | PolyReduceSOPNative | QEM mesh decimation with native C++ acceleration |
+| PolySplineSOP | PolySplineSOPNative | Catmull-Rom spline with optional tube mesh — native C++ accelerated |
+| PolyStitchSOP | PolyStitchSOPNative | Nearest-pair stitching between two point sets — native C++ accelerated |
+| PrimitiveSOP | PrimitiveSOPNative | Per-primitive attribute computation — native C++ accelerated |
+| ProjectSOP | ProjectSOPNative | Orthographic projection onto surface — native C++ accelerated |
+| RaySOP | RaySOPNative | Ray-cast projection of source vertices onto target geometry with native C++ acceleration |
+| RemeshSOP | RemeshSOPNative | Adaptive edge-length remeshing with midpoint subdivision — native C++ accelerated |
+| ResampleSOP | ResampleSOPNative | Resample polylines to even spacing — native C++ accelerated |
+| ScatterSOP | ScatterSOPNative | Area-weighted point scattering with native C++ acceleration |
+| SkinSOP | SkinSOPNative | Cross-section skinning with native C++ acceleration |
+| SmoothSOP | SmoothSOPNative | Laplacian vertex smoothing with border pinning — native C++ accelerated |
+| SortSOP | SortSOPNative | Vertex reordering by axis/distance/random with native C++ acceleration |
+| SpringSOP | SpringSOPNative | Damped spring vertex deformer with native C++ acceleration |
+| SubdivideSOP | SubdivideSOPNative | Uniform triangle subdivision with native C++ acceleration |
+| SweepSOP | SweepSOPNative | Profile sweep along backbone with native C++ acceleration |
+| TOPtoSOP | TOPtoSOPNative | Convert TOP texture to heightfield mesh with native C++ acceleration |
+| TaperSOP | TaperSOPNative | Axis-aligned taper deformation with native C++ acceleration |
+| TextureSOP | TextureSOPNative | Per-vertex texture sampling (color/displace) — native C++ accelerated |
+| TrailRibbonSOP | TrailRibbonSOPNative | Trail ribbon mesh from particle paths — native C++ accelerated |
+| TransformSOP | TransformSOPNative | Transform geometry (translate/rotate/scale) with native C++ acceleration |
+| TwistSOP | TwistSOPNative | Twist deformation around axis with native C++ acceleration |
+| UVProjectSOP | UVProjectSOPNative | UV projection (planar/cylindrical/spherical) with native C++ acceleration |
+| VoronoiShatterSOP | VoronoiShatterSOPNative | Voronoi fracture geometry into pieces — native C++ accelerated |
+| WireframeSOP | WireframeSOPNative | Triangle edge extraction as line geometry — native C++ accelerated |
+### TOP — Native Variants
+
+| Operator | Native Class | Description |
+|----------|-------------|-------------|
+| AnalyzeTOP | AnalyzeTOPNative | Pixel min/max/avg/sum statistics with native C++ acceleration |
+| CHOPtoTOP | CHOPtoTOPNative | Render CHOP channels as texture with native C++ acceleration |
+| OpticalFlowTOP | OpticalFlowTOPNative | Horn-Schunck optical flow with native C++ acceleration |
+| ParticleStateTOP | ParticleStateTOPNative | Visualize particle attributes as 2D texture with native C++ acceleration |
+### VOL — Native Variants
+
+| Operator | Native Class | Description |
+|----------|-------------|-------------|
+| AnalyzeVOL | AnalyzeVOLNative | Volume density statistics with native C++ acceleration |
+| BlendVOL | BlendVOLNative | Two-volume arithmetic blend — native C++ accelerated |
+| BlurVOL | BlurVOLNative | Multi-pass 3D box blur — native C++ accelerated |
+| CHOPtoVOL | CHOPtoVOLNative | Convert CHOP channels to 3D volume with native C++ acceleration |
+| DisplaceVOL | DisplaceVOLNative | Velocity-field density displacement — native C++ accelerated |
+| FluidVOL | FluidVOLNative | Navier-Stokes fluid simulation — native C++ accelerated |
+| MarchingCubesVOL | MarchingCubesVOLNative | Marching cubes iso-surface extraction with native C++ acceleration |
+| NoiseVOL | NoiseVOLNative | FBM value noise volume generator — native C++ accelerated |
+| SOPtoVOL | SOPtoVOLNative | Point-splatting SOP to density volume — native C++ accelerated |
 
 ---
 

@@ -1,102 +1,108 @@
 {
-    "version": "1.0.0",
-    "generator": "GONODES",
-    "nodes": {
-        "noise1": {
-            "type": "NoiseIMGNative",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "type": {
-                    "value": 0
-                },
-                "scale": {
-                    "value": 8.0
-                },
-                "octaves": {
-                    "value": 6
-                },
-                "persistence": {
-                    "value": 0.45
-                },
-                "seed": {
-                    "value": 12
-                },
-                "monochrome": {
-                    "value": false
-                }
-            }
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noiseimg1": {
+      "type": "NoiseIMGNative",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
         },
-        "imgtotop1": {
-            "type": "ImgToTOP",
-            "position": [
-                500,
-                100
-            ],
-            "parameters": {}
+        "type": {
+          "value": 0
         },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                850,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
+        "scale": {
+          "value": 4.0
+        },
+        "offset_x": {
+          "value": 0.0
+        },
+        "offset_y": {
+          "value": 0.0
+        },
+        "octaves": {
+          "value": 4
+        },
+        "persistence": {
+          "value": 0.5
+        },
+        "seed": {
+          "value": 0
+        },
+        "monochrome": {
+          "value": true
         }
+      }
     },
-    "connections": [
-        {
-            "from": "noise1",
-            "from_port": 0,
-            "to": "imgtotop1",
-            "to_port": 0
+    "imgtotop1": {
+      "type": "ImgToTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
         },
-        {
-            "from": "imgtotop1",
-            "from_port": 0,
-            "to": "window1",
-            "to_port": 0
+        "open": {
+          "value": true
         }
-    ],
-    "annotations": [
-        {
-            "id": "ann_1",
-            "type": "note",
-            "text": "Noise IMG (Native) â€” Colored fBm\n\nGenerates a 512x512 color Perlin fBm noise image\nwith 6 octaves. Uses C++ acceleration when compiled,\notherwise falls back to GDScript.",
-            "position": [
-                -100.0,
-                -150.0
-            ],
-            "size": [
-                400.0,
-                100.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                0.8
-            ]
-        }
-    ]
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noiseimg1",
+      "from_port": 0,
+      "to": "imgtotop1",
+      "to_port": 0
+    },
+    {
+      "from": "imgtotop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Noise IMG — Basic (Native)\n\nCPU procedural noise image (value noise, white noise).\nUsing: type=0, scale=4.0, offset_x=0.0, offset_y=0.0.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
 }

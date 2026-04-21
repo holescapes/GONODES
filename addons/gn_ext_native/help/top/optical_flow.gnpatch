@@ -1,0 +1,111 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise1": {
+			"type": "NoiseTOP",
+			"position": [
+				100,
+				100
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"monochrome": {
+					"value": false
+				},
+				"scale": {
+					"value": 3.0
+				}
+			}
+		},
+		"optflow1": {
+			"type": "OpticalFlowTOPNative",
+			"position": [
+				800,
+				200
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"sensitivity": {
+					"value": 1.0,
+					"expression": "cos(time * 0.6) * 1.5",
+					"mode": "EXPRESSION"
+				},
+				"smoothing": {
+					"value": 0.5,
+					"expression": "sin(time * 2.0) * 0.5 + 0.5",
+					"mode": "EXPRESSION"
+				},
+				"iterations": {
+					"value": 4
+				}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": [
+				1150,
+				200
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		}
+	},
+	"connections": [
+		{
+			"from": "noise1",
+			"from_port": 0,
+			"to": "optflow1",
+			"to_port": 0
+		},
+		{
+			"from": "optflow1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "Optical Flow TOP \u00e2\u20ac\u201d Motion Vectors\n\nAnimated noise feeds the optical flow shader which estimates\nper-pixel motion vectors using Horn-Schunck method.\nR=horizontal, G=vertical (0.5=zero), B=magnitude.",
+			"position": [
+				50.0,
+				-50.0
+			],
+			"size": [
+				600.0,
+				110.0
+			],
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.8
+			]
+		}
+	]
+}

@@ -1,0 +1,97 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "src_grid": {
+      "type": "GridSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "rows": {
+          "value": 20
+        },
+        "cols": {
+          "value": 20
+        }
+      }
+    },
+    "focus1": {
+      "type": "FluidVOLNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {}
+    },
+    "raymarch1": {
+      "type": "RaymarchVOL",
+      "position": [
+        800,
+        100
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "src_grid",
+      "from_port": 0,
+      "to": "focus1",
+      "to_port": 0
+    },
+    {
+      "from": "focus1",
+      "from_port": 0,
+      "to": "raymarch1",
+      "to_port": 0
+    },
+    {
+      "from": "raymarch1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Fluid VOL — Dissipation (Native)\n\nNavier-Stokes fluid simulation (advection, pressure, projection).",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        120.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

@@ -2,49 +2,49 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "sphere1": {
-            "type": "SphereSOP",
+        "audiosource1": {
+            "type": "AudioSourceCOMP",
             "position": [
-                100,
+                400,
                 100
             ],
             "parameters": {
-                "radial_segments": {
-                    "value": 24
+                "tx": {
+                    "value": 0.5
                 },
-                "rings": {
-                    "value": 12
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 0.5
+                },
+                "volume_db": {
+                    "value": 0.5
+                },
+                "max_distance": {
+                    "value": 5.0
+                },
+                "unit_size": {
+                    "value": 0.5
+                },
+                "attenuation": {
+                    "value": 1
+                },
+                "autoplay": {
+                    "value": true
+                },
+                "loop": {
+                    "value": true
+                },
+                "playing": {
+                    "value": true
                 }
             }
         },
-        "soptovol1": {
-            "type": "SOPtoVOLNative",
+        "render1": {
+            "type": "RenderTOP",
             "position": [
-                450,
-                100
-            ],
-            "parameters": {
-                "res_x": {
-                    "value": 64
-                },
-                "res_y": {
-                    "value": 64
-                },
-                "res_z": {
-                    "value": 64
-                },
-                "radius": {
-                    "value": 0.08
-                },
-                "strength": {
-                    "value": 2.0
-                }
-            }
-        },
-        "raymarch1": {
-            "type": "RaymarchVOL",
-            "position": [
-                800,
+                1150,
                 100
             ],
             "parameters": {
@@ -60,7 +60,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1150,
+                1550,
                 100
             ],
             "parameters": {
@@ -79,19 +79,7 @@
     },
     "connections": [
         {
-            "from": "sphere1",
-            "from_port": 0,
-            "to": "soptovol1",
-            "to_port": 0
-        },
-        {
-            "from": "soptovol1",
-            "from_port": 0,
-            "to": "raymarch1",
-            "to_port": 0
-        },
-        {
-            "from": "raymarch1",
+            "from": "render1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -101,10 +89,10 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SOP to VOL (Native) — Point Splatting\n\nSphere vertices splatted into a 64³ density volume.\nEach point contributes a sphere falloff at radius 0.08.\nNative C++ computes AABB and rasterizes in one pass.",
+            "text": "AudioSourceCOMP \u2014 Parameters\n\nShowcases: tx, ty, tz.",
             "position": [
                 -100.0,
-                -150.0
+                -100.0
             ],
             "size": [
                 400.0,

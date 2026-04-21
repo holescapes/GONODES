@@ -1,102 +1,157 @@
 {
-    "version": "1.0.0",
-    "generator": "GONODES",
-    "nodes": {
-        "source1": {
-            "type": "SourcePOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "emit_rate": {
-                    "value": 100
-                }
-            }
-        },
-        "focus1": {
-            "type": "CollisionPOP",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {}
-        },
-        "pop_render": {
-            "type": "RenderPOP",
-            "position": [
-                800,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1150,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
-        }
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "source1": {
+      "type": "SourcePOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
     },
-    "connections": [
-        {
-            "from": "source1",
-            "from_port": 0,
-            "to": "focus1",
-            "to_port": 0
+    "collision1": {
+      "type": "CollisionPOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "ground_y": {
+          "value": 0.0
         },
-        {
-            "from": "focus1",
-            "from_port": 0,
-            "to": "pop_render",
-            "to_port": 0
+        "bounce": {
+          "value": 0.3
         },
-        {
-            "from": "pop_render",
-            "from_port": 0,
-            "to": "window1",
-            "to_port": 0
+        "friction": {
+          "value": 0.1
+        },
+        "kill_below": {
+          "value": -1000.0
         }
-    ],
-    "annotations": [
-        {
-            "id": "ann_1",
-            "type": "note",
-            "text": "Collision POP — Basic\n\nGround plane and bounding box collision for particles.",
-            "position": [
-                -100.0,
-                -100.0
-            ],
-            "size": [
-                500.0,
-                120.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                0.8
-            ]
+      }
+    },
+    "renderpop1": {
+      "type": "RenderPOP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
         }
-    ]
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "camera1": {
+      "type": "CameraCOMP",
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 5.0
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "source1",
+      "from_port": 0,
+      "to": "collision1",
+      "to_port": 0
+    },
+    {
+      "from": "collision1",
+      "from_port": 0,
+      "to": "renderpop1",
+      "to_port": 0
+    },
+    {
+      "from": "renderpop1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "camera1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Collision POP — Basic (Native)\n\nGround plane and bounding box collision for particles.\nUsing: ground_y=0.0, bounce=0.3, friction=0.1, kill_below=-1000.0.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
 }

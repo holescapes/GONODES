@@ -1,0 +1,186 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "grid1": {
+      "type": "GridSOP",
+      "position": [
+        100,
+        50
+      ],
+      "parameters": {
+        "rows": {
+          "value": 32
+        },
+        "cols": {
+          "value": 32
+        }
+      }
+    },
+    "noise1": {
+      "type": "NoiseTOP",
+      "position": [
+        100,
+        250
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 256,
+            "y": 256
+          }
+        }
+      }
+    },
+    "tex1": {
+      "type": "TextureSOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "mode": {
+          "value": 1
+        },
+        "displacement_scale": {
+          "value": 0.3
+        }
+      }
+    },
+    "null1": {
+      "type": "NullSOP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        1050,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        1050,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1350,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1650,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "grid1",
+      "from_port": 0,
+      "to": "tex1",
+      "to_port": 0
+    },
+    {
+      "from": "noise1",
+      "from_port": 0,
+      "to": "tex1",
+      "to_port": 1
+    },
+    {
+      "from": "tex1",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "tex1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "TextureSOPNative — Displacement\n\nDisplaces a grid along normals using a noise texture.\nSwitch mode to Vertex Color for coloring instead.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+	"nodes": {
+		"source1": {
+			"type": "SourcePOP",
+			"position": {
+				"_type": "Vector2i",
+				"x": 0,
+				"y": 0
+			},
+			"parameters": {
+				"emit_rate": {
+					"value": 200
+				}
+			}
+		},
+		"focus1": {
+			"type": "LimitPOPNative",
+			"position": {
+				"_type": "Vector2i",
+				"x": 200,
+				"y": 0
+			},
+			"parameters": {
+				"shape": {
+					"value": 1
+				},
+				"radius": {
+					"value": 2.0
+				}
+			}
+		},
+		"pop_render": {
+			"type": "RenderPOP",
+			"position": {
+				"_type": "Vector2i",
+				"x": 400,
+				"y": 0
+			},
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": {
+				"_type": "Vector2i",
+				"x": 600,
+				"y": 0
+			},
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		}
+	},
+	"connections": [
+		{
+			"from": "source1",
+			"from_port": 0,
+			"to": "focus1",
+			"to_port": 0
+		},
+		{
+			"from": "focus1",
+			"from_port": 0,
+			"to": "pop_render",
+			"to_port": 0
+		},
+		{
+			"from": "pop_render",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	]
+}

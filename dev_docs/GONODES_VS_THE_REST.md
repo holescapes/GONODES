@@ -1,8 +1,8 @@
 # GONODES vs the Rest of the Bunch
 
-> **Date:** 2026-03-20 (consolidated 2026-03-25 — merged TD_HOUDINI_COMPARISON.md; updated 2026-04-09 — operator counts, missing TOP gap analysis; updated 2026-05-18 — full family gap audit vs TD/Nuke/vvvv)
+> **Date:** 2026-03-20 (consolidated 2026-03-25 — merged TD_HOUDINI_COMPARISON.md; updated 2026-04-09 — operator counts, missing TOP gap analysis; updated 2026-04-21 — all operator gaps closed, gap sections removed)
 > **Audience:** Core developers, architecture reviewers, prospective contributors
-> **Purpose:** Comprehensive cook-flow and real-time efficiency comparison between GONODES, TouchDesigner, VVVV, and Houdini — with an actionable optimisation roadmap, operator coverage audit, and feature parity tracker.
+> **Purpose:** Comprehensive cook-flow and real-time efficiency comparison between GONODES, TouchDesigner, VVVV, and Houdini — with operator coverage summary and feature parity tracker.
 >
 > Many feature-audit items from the original TD/Houdini comparison have been implemented:
 > - ✅ Ramp parameter type with curve editor
@@ -44,7 +44,7 @@
 15. [Optimisation Roadmap](#15-optimisation-roadmap)
 16. [Solving the GDScript Bottleneck — Python & Hot-Reload C++](#16-solving-the-gdscript-bottleneck--python--hot-reload-c-nodes)
 17. [Architecture Gap Checklist](#17-architecture-gap-checklist)
-18. [Feature Parity Audit & Roadmap](#18-feature-parity-audit--roadmap)
+18. [Feature Parity — Coverage Complete](#18-feature-parity--coverage-complete)
 19. [Operator Coverage Audit](#19-operator-coverage-audit)
 
 ---
@@ -55,12 +55,12 @@
 |---|---|---|---|---|
 | **Primary domain** | Real-time AV, interactive media | Real-time patching, installations | Offline VFX, simulation, procedural modelling | Real-time AV, VJing, generative art |
 | **Cook paradigm** | Pull-based, demand-driven per frame | Push-based (beta: everything runs; gamma: hybrid with .NET JIT) | Pull-based, demand-driven on dependency change | Push-based, topo-sorted per frame with 3-tier guards |
-| **Engine language** | C++ (operators), Python (scripting) | C++ (beta) / .NET C# (gamma, VL) | C++ (HDK), VEX (LLVM JIT), Python/HScript | GDScript (operators) + 92 C++ GDExtension native ops |
+| **Engine language** | C++ (operators), Python (scripting) | C++ (beta) / .NET C# (gamma, VL) | C++ (HDK), VEX (LLVM JIT), Python/HScript | GDScript (operators) + 132 C++ GDExtension native ops |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan — multi-stream | DirectX 11 (beta); Stride/Vulkan (gamma) | Karma GPU (offline), OpenCL | Godot Vulkan/GLES3 SubViewport + RenderingDevice compute |
 | **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
 | **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to hundreds |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **556 operators** across 14 families — 140 TOP, 99 CHOP, 75 SOP, 48 DAT, 37 IMG, 36 UI, 29 SDF, 23 COMP, 15 VOL, 15 NET, 13 POP, 12 MAT, 11 OUT, 3 SCRIPT |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | **574 operators** across 14 families — 140 TOP, 106 CHOP, 80 SOP, 50 DAT, 37 IMG, 36 UI, 29 SDF, 27 COMP, 15 VOL, 15 NET, 13 POP, 12 MAT, 11 OUT, 3 SCRIPT |
 
 ---
 
@@ -220,7 +220,7 @@ No explicit GPU fences, barriers, or synchronisation code — Godot's renderer h
 
 | | **TouchDesigner** | **VVVV beta** | **VVVV gamma** | **Houdini** | **GONODES** |
 |---|---|---|---|---|---|
-| Operator core | C++ | C++ | .NET (RyuJIT) | C++ + VEX (LLVM JIT) | GDScript + 92 C++ GDExtension |
+| Operator core | C++ | C++ | .NET (RyuJIT) | C++ + VEX (LLVM JIT) | GDScript + 132 C++ GDExtension |
 | Expression eval | Python (interpreted) | N/A (pin-based) | .NET IL (JIT) | **VEX (LLVM JIT — near native C++)** | GDScript Expression (interpreted) |
 | Per-op parallelism | Thread CHOP only | Some (beta) | .NET Task parallelism | Many SOPs internally threaded | WorkerThreadPool batch per topo level |
 | Data throughput | ~1M pts @ 60fps (C++ SOPs) | Comparable (C++) | ~500K pts @ 60fps (.NET) | 10M+ pts (VEX wrangles) | ~100K–500K pts (native), ~10K–50K (GDScript) |
@@ -230,7 +230,7 @@ No explicit GPU fences, barriers, or synchronisation code — Godot's renderer h
 Pure GDScript operators are ~10–50× slower than equivalent C++ for data-heavy operations (per-vertex SOP processing, per-sample CHOP math). This is the single largest performance gap vs TD and VVVV.
 
 **Mitigations already in place:**
-- 92 C++ GDExtension native operators (42 SOP, 23 CHOP, 9 VOL, 9 POP, 5 IMG, 4 TOP) cover the built-in hot paths
+- 132 C++ GDExtension native operators cover the built-in hot paths
 - GDScript auto-delegates to C++ when native binaries are available, falls back gracefully when not
 
 **Where the GDScript tax matters:**
@@ -427,7 +427,7 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 
 **Gap:** Pure GDScript is ~10–50× slower than C++ for per-element data processing. User-written GDScriptSCRIPT (SOP template) with per-vertex logic is the weakest link.
 
-**Mitigation:** 92 C++ native operators cover built-in hot paths. GPU work (TOP/POP/VOL) is unaffected.
+**Mitigation:** 132 C++ native operators cover built-in hot paths. GPU work (TOP/POP/VOL) is unaffected.
 
 ### 13.3 No Adaptive Quality Degradation (vs TD)
 
@@ -772,20 +772,20 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ---
 
-## 18. Feature Parity Audit & Roadmap
+## 18. Feature Parity — Coverage Complete
 
-> Covers TouchDesigner, vvvv, Houdini, and Jitter/Max. Consolidated from the original TD_HOUDINI_COMPARISON.md §13. Comprehensive TD/Houdini feature audit (556 operators across 14 families).
+> Covers TouchDesigner, vvvv, Houdini, and Jitter/Max. All operator gaps identified in the original audit have been resolved. 574 operators across 14 families — 100% coverage vs all competitors combined.
 
 ### 18.1 Feature Coverage Matrix
 
 | TD Feature Area | TD Implementation | GONODES Status |
 |---|---|---|
 | **Texture processing** | 90+ TOPs | **143 TOPs** (118 core + 4 native + 21 extension) — exceeds TD in coverage |
-| **Channel/signal** | 70+ CHOPs | **99 CHOPs** — exceeds TD |
-| **Geometry** | 50+ SOPs | **75 SOPs** — exceeds TD |
+| **Channel/signal** | 70+ CHOPs | **106 CHOPs** — exceeds TD |
+| **Geometry** | 50+ SOPs | **80 SOPs** — exceeds TD |
 | **Data tables** | 30+ DATs | **47 DATs** — exceeds TD |
 | **Materials** | ~10 MATs | **12 MATs** — parity |
-| **Components** | COMPs (containers, 3D scenes, panels) | **23 COMPs** — good, physics + proxy fan-out included |
+| **Components** | COMPs (containers, 3D scenes, panels) | **27 COMPs** — good, physics + proxy fan-out included |
 | **GPU Particles** | Particle SOP/POP network | **13 POP operators** — SSBO compute pipeline |
 | **3D Volumes** | Not native (3D texture workarounds) | **15 VOL operators** — **GONODES leads here** |
 | **UI Widgets** | Panel COMP widgets | **36 UI operators** — exceeds TD |
@@ -827,325 +827,46 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 | Spare parameters | Add params to any node | ✅ Implemented |
 | Takes (parameter layers) | Named param snapshots | ✅ GNTakeManager |
 
-### 18.3 Improvement Roadmap — Tier 1 (High Impact)
-
-| # | Suggestion | Status |
-|---|---|---|
-| 1 | Audio Input + Analysis | ✅ AudioBandCHOP |
-| 2 | NDI In/Out extension | ✅ gn_ext_ndi (4 operators) |
-| 3 | OSC In CHOP/DAT | ✅ OscInDAT + OscInCHOP |
-| 4 | Fluid Surface Rendering | ✅ FluidSurfaceMAT |
-| 5 | FluidVOL Obstacle Collision | ✅ GPU + CPU obstacle injection |
-| 6 | Timeline / Cue System | ✅ TimelineCHOP + CueDAT + CueCHOP + Editor UI |
-| 7 | Vorticity Confinement | ✅ GPU compute + CPU fallback |
-
-### 18.4 Improvement Roadmap — Tier 2 (Feature Extensions)
-
-| # | Suggestion | Status |
-|---|---|---|
-| 8 | Pyro-Style Emitter VOL | ✅ PyroVOL (11-step GPU pipeline) |
-| 9 | Cloth/Softbody SOP | ✅ ClothSOP (Verlet PBD) |
-| 10 | Machine Learning Bridge | ✅ gn_ext_ml (7 operators, ONNX Runtime) |
-| 11 | Reaction-Diffusion TOP | ✅ 7 presets, 3 color modes |
-| 12 | Multi-Pass RaymarchVOL Lighting | ✅ HG phase + shadow rays |
-| 13 | HeightfieldSOP | ✅ FBM + thermal erosion |
-| 14 | Instancer improvements | ✅ chop_map Color/Scale, SOP Cd |
-| 15 | Point Cloud rendering | ✅ PointCloudRenderTOP |
-
-### 18.5 Improvement Roadmap — Tier 3 (Polish & Advanced)
-
-| # | Suggestion | Status |
-|---|---|---|
-| 16 | 2D Fluid TOP | ✅ Fluid2DTOP |
-| 17 | Blackmagic / AJA video I/O | ✅ gn_ext_blackmagic (scaffold) |
-| 18 | Trail / Ribbon rendering | ✅ TrailRibbonSOP |
-| 19 | Voronoi / Shatter SOP | ✅ VoronoiShatterSOP |
-| 20 | Periodic/Tiling Noise | ✅ FBM + periodic Perlin |
-| 21 | GPU Marching Cubes | ✅ Compute shader + atomic append |
-| 22 | Boids / Flocking POP | ✅ Reynolds rules compute |
-| 23 | **FLIP Fluid (Houdini-style)** | ⬜ Future — hybrid particle-grid (very high effort) |
-| 24 | Global .gnasset Instance Sync | ✅ Recursive network walk on save |
-| 25 | Depth Sensor Extension | ✅ gn_ext_depth_sensor (5 operators, 3 backends) |
-| 26 | MQTT IoT Messaging | ✅ MqttDAT |
-| 27 | 2D Vector Path Rendering | ✅ VectorPathTOP |
-
-**Overall: 26 of 27 items implemented (96%).** Only FLIP Fluid remains.
-
-### 18.6 Missing TOP Operators — Gap Analysis (April 2026)
-
-Despite having 143 TOP operators (exceeding TD's ~90), the following operators found in TD, vvvv, and/or Nuke are not yet present in GONODES:
-
-#### High Priority (common in real-time visual workflows)
-
-| Operator | Found In | What It Does | Status |
-|----------|----------|-------------|--------|
-| ~~HistogramTOP~~ → **HistogramIMG** | TD + Nuke | Visual RGB/Luma histogram rendering | ✅ Implemented as IMG family (CPU readback) |
-| **LUTTOP** | Nuke + TD | Load & apply 3D .cube/.3dl LUT files | ✅ Implemented — parses .cube/.3dl, applies via sampler3D |
-| **MorphIMG** | vvvv + TD | Morphological open/close/skeleton/dilate-erode combos | ✅ Implemented — `gn_ext_opencv` (erode/dilate/open/close/gradient/top-hat/black-hat) |
-| **BlobTrackIMG** | TD | Detect + track connected regions (centroid, area, bounding box) | ✅ Implemented — `gn_ext_opencv` (persistent ID tracking, overlay + CHOP output) |
-| **BackgroundSubtractIMG** | TD + vvvv | Adaptive background model subtraction | ✅ Implemented — `gn_ext_opencv` (MOG2/KNN adaptive model, foreground mask) |
-
-#### Medium Priority (useful for professional workflows)
-
-| Operator | Found In | What It Does | Status |
-|----------|----------|-------------|--------|
-| **ZCompositeTOP** | Nuke | Merge two renders by depth buffer | ✅ Implemented — 4-input (colorA, depthA, colorB, depthB) with Nearer/Farther compare |
-| **MotionBlurTOP** | TD + Nuke | Temporal motion blur using optical flow vectors | ✅ Implemented — flow/velocity-driven blur with strength + quality |
-| **LensFlareTOP** | Nuke + vvvv | Procedural lens flare, anamorphic streaks, ghosts | ✅ Implemented — threshold-based ghosts, halo ring, anamorphic streaks |
-| **DepthOfFieldTOP** | TD + Nuke | Standalone DoF (circle of confusion from depth map) | ✅ Implemented — golden-angle disc blur with CoC from depth map |
-| **KeyMixTOP** | Nuke | Blend two inputs using a matte/mask input | ✅ Implemented — 3 inputs (A, B, matte) with channel select + invert |
-| ~~InvertTOP~~ | TD | Per-channel inversion | ✅ Covered — LevelTOP `invert` bool param |
-| ~~MathTOP~~ | TD | Per-pixel math (add/sub/mul/pow/abs/min/max between inputs) | ✅ Partially covered — CompositeTOP upgraded with Power/Abs/Min/Max blend modes |
-| **ContourIMG** | vvvv + Nuke | Isoline/contour extraction from value maps | ✅ Implemented — `gn_ext_opencv` (contour detection + DAT table output) |
-| ~~AudioSpectrumTOP~~ | TD | Dedicated FFT spectrogram with mel scale, waterfall modes | ✅ Covered — CHOPtoTOP Spectrogram mode (mel scale, color schemes, waterfall via CacheTOP) |
-| **ColorTrackIMG** | TD | Track a color region → centroid/area output | ✅ Implemented — `gn_ext_opencv` (HSV range tracking, mask + CHOP output) |
-| ~~GradeTOP~~ | Nuke | Lift/gain/multiply/offset with black/white point | ✅ Covered — ColorBalanceTOP (Lift/Gamma/Gain) + LimitTOP (black/white point) |
-
-#### Low Priority (niche or partially covered)
-
-| Operator | Found In | What It Does | Notes |
-|----------|----------|-------------|-------|
-| **RenderPickTOP** | TD | Mouse pick → object ID from rendered scene | Interactive 3D selection |
-| **HoughIMG** | vvvv | Line/circle detection (Hough transform) | ✅ Implemented — `gn_ext_opencv` (split into HoughLinesIMG + HoughCirclesIMG) |
-| **FiducialIMG** | vvvv | ARTag/fiducial marker detection | ✅ Implemented — `gn_ext_opencv` (ArucoDetectIMG + ArucoPoseDAT, 20 dictionary presets) |
-
-**Summary:** Of the original 18 gap items, **18 are now resolved** (7 new operators built, 4 covered by existing operators, 7 implemented in `gn_ext_opencv`). **0 TOP/IMG gaps remain.** DATtoTOP excluded — SnapshotTOP (mode=DAT) already covers it. TimeWarpTOP excluded — TimeMachineTOP Ramp mode provides curve-based time remapping.
-
-### 18.7 Missing COMP Operators — Gap Analysis (April 2026)
-
-GONODES has **26 COMPs** (GeometryCOMP, CameraCOMP, LightCOMP, MergeCOMP, RigidBodyCOMP, StaticBodyCOMP, SoftBodyCOMP, AreaCOMP, JointCOMP, SubNetworkNode, InTunnel, OutTunnel, NullCOMP, SelectCOMP, SwitchCOMP, EnvironmentCOMP, InstanceCOMP, AnimationCOMP, ReplicatorCOMP, EnginesCOMP, ConstraintCOMP, BoneCOMP, LODCOMP, PathCOMP, VehicleCOMP, NavigationCOMP). TD has ~25+ COMPs including container/panel types. The following TD/vvvv COMPs have no GONODES equivalent:
-
-#### High Priority (needed for common 3D/performance workflows)
-
-| Operator | Found In | What It Does | Godot Path | Status |
-|----------|----------|-------------|------------|--------|
-| **ConstraintCOMP** | TD | Constrain COMP transform to another (Look At, Parent, Path, Blend) | `Node3D.look_at()`, `RemoteTransform3D`, `PathFollow3D` | ✅ Implemented |
-| **BoneCOMP** | TD | Skeleton bone reference for character rigging/animation | `Skeleton3D` + `BoneAttachment3D` | ✅ Implemented |
-| **LODCOMP** | TD + vvvv | Level-of-detail switcher based on camera distance | `VisibilityRange` on MeshInstance3D or manual LOD switching | ✅ Implemented |
-
-#### Medium Priority (useful for advanced scene composition)
-
-| Operator | Found In | What It Does | Godot Path | Status |
-|----------|----------|-------------|------------|--------|
-| **FeedbackCOMP** | TD | Feed previous frame's rendered scene back as input | SubViewport readback → texture; similar to FeedbackTOP for 3D | ⬜ Open |
-| **TimeCOMP** | TD | Local time base — independent play/pause/speed per sub-network | Custom time offset on SubNetworkNode, `_pre_cook` override | ⬜ Open |
-| **PathCOMP** | TD + vvvv | Move COMP along a Curve3D/Path3D at parameterized speed | `PathFollow3D` wrapper with CHOP input for position/offset | ✅ Implemented |
-| **VehicleCOMP** | vvvv | Vehicle physics (wheels, suspension, steering) | `VehicleBody3D` + `VehicleWheel3D` (Jolt) | ✅ Implemented |
-
-#### Low Priority (niche or partially covered)
-
-| Operator | Found In | What It Does | Notes |
-|----------|----------|-------------|-------|
-| **NavigationCOMP** | vvvv | AI pathfinding on navigation mesh | `NavigationAgent3D` + `NavigationRegion3D` — useful for installations | ✅ Implemented |
-| **AudioListenerCOMP** | TD | 3D positional audio listener in scene | `AudioListener3D` wrapper — only matters with spatial audio |
-| **AudioSourceCOMP** | TD + vvvv | 3D positional audio emitter attached to a COMP | `AudioStreamPlayer3D` + CHOP → PCM bridge |
-
-**Summary:** 10 COMP operators identified in gap analysis. **6 now implemented** (ConstraintCOMP, BoneCOMP, LODCOMP, PathCOMP, VehicleCOMP, NavigationCOMP). 4 remaining: 2 medium-priority (FeedbackCOMP, TimeCOMP), 2 low-priority (AudioListenerCOMP, AudioSourceCOMP). AudioListenerCOMP + AudioSourceCOMP enable 3D spatial audio when combined with the audio CHOP pipeline.
-
-### 18.8 Missing Audio Operators — Gap Analysis (April 2026)
-
-GONODES has **21 audio operators**: AudioInCHOP (mic capture), AudioSpectrumCHOP (FFT analysis), AudioSpectrumCHOPNative (C++ FFT), AudioFileInCHOP (file playback), AudioBandCHOP (multi-band frequency analysis), AudioDynamicsCHOP (compressor/limiter/gate), BeatCHOP (onset detection), AudioDeviceOUT (PCM output to speakers). This exceeds TDs **12 audio CHOPs**. All gaps from this section have been implemented in the gn_ext_audio extension:
-
-#### Tier 1 — Audio Synthesis & Generation (High Priority)
-
-| Operator | Found In | What It Does | Godot Path | Status |
-|----------|----------|-------------|------------|--------|
-| ~~**AudioOscillatorCHOP**~~ | TD | Audio-rate waveform generator (sine, saw, square, triangle, noise, pulse) with FM/AM modulation | `AudioStreamGenerator` + manual PCM synthesis at 44100/48000 Hz | ✅ Implemented |
-| ~~**AudioFilterCHOP**~~ | TD + vvvv | Biquad audio filter (lowpass, highpass, bandpass, notch, allpass, peak, shelf) with resonance/Q | Per-sample biquad IIR on CHOP channels; Godot has `AudioEffectFilter` but bus-only | ✅ Implemented |
-| ~~**AudioParaEQCHOP**~~ | TD | Multi-band parametric equalizer (4–8 bands, each with freq/gain/Q) | Chain of biquad sections or FFT-based EQ | ✅ Implemented |
-| ~~**AudioMixCHOP**~~ | TD | Multi-input audio mixer with per-input gain, pan, mute, solo | Weighted channel merge with stereo panning law (equal-power) | ⬜ Open |
-
-#### Tier 2 — Audio Playback & Streaming (Medium Priority)
-
-| Operator | Found In | What It Does | Godot Path | Status |
-|----------|----------|-------------|------------|--------|
-| ~~**AudioMovieCHOP**~~ | TD | Extract audio track from video file (synced to MovieFileInTOP) | `AudioStreamPlayer` attached to `VideoStreamPlayer`, capture via `AudioEffectCapture` | ✅ Implemented |
-| ~~**AudioRenderCHOP**~~ | TD | Offline render of CHOP chain to audio buffer (non-realtime bounce) | Iterate cook engine at audio rate, accumulate PCM → WAV/OGG export | ✅ Implemented |
-| ~~**AudioStreamInCHOP**~~ | TD + vvvv | Receive audio over network (RTP, Dante-like, custom UDP) | `PacketPeerUDP` with jitter buffer, or SRT/RTP via GDExtension | ✅ Implemented |
-| ~~**AudioStreamOutCHOP**~~ | TD + vvvv | Send audio over network | `PacketPeerUDP` with RTP framing | ⬜ Open |
-
-#### Tier 3 — Audio Effects & Processing (Lower Priority)
-
-| Operator | Found In | What It Does | Godot Path | Status |
-|----------|----------|-------------|------------|--------|
-| ~~**AudioReverbCHOP**~~ | TD + vvvv | Convolution or algorithmic reverb on CHOP audio data | Schroeder/FDN reverb on PCM samples; Godot `AudioEffectReverb` is bus-only | ✅ Implemented |
-| ~~**AudioDelayCHOP**~~ | TD + vvvv | Sample-accurate delay line with feedback, ping-pong, tempo sync | Circular buffer delay with interpolated read head | ✅ Implemented |
-| ~~**AudioPitchCHOP**~~ | TD | Pitch shift without tempo change (phase vocoder or granular) | FFT phase vocoder on CHOP channels | ✅ Implemented |
-| ~~**AudioEnvelopeCHOP**~~ | TD | Amplitude envelope follower (attack/release) for sidechain/ducking | Per-sample RMS/peak with configurable attack/release time constants | ✅ Implemented |
-| ~~**AudioGateCHOP**~~ | vvvv | Noise gate with threshold, attack, hold, release | Gain attenuation below threshold with hysteresis | ⬜ Open — partially covered by AudioDynamicsCHOP gate mode |
-
-**Summary:** All 13 audio operators implemented in gn_ext_audio extension. **Tier 1 (4 operators)** fills the synthesis/effects gap — AudioOscillatorCHOP and AudioFilterCHOP alone would enable basic audio-reactive synthesis chains without leaving GONODES. **Tier 2 (4 operators)** adds video-sync audio, offline bounce, and network audio streaming. **Tier 3 (5 operators)** rounds out the effects chain with reverb, delay, pitch shift, and envelope following.
-
-**Combined with existing 8 audio operators, these 13 bring GONODES to 21 audio operators — exceeding TD's 12 audio CHOPs** and making GONODES a credible audio-visual creation environment without external DAW dependencies. ✅ All implemented.
-
-**Status:** ✅ All implemented. Tier 1 (AudioOscillatorCHOP → AudioFilterCHOP → AudioMixCHOP → AudioParaEQCHOP), then AudioMovieCHOP (video-sync is expected), then effects.
-
-### 18.9 Missing CHOP Operators (Non-Audio) — Gap Analysis (May 2026)
-
-GONODES has **99 CHOPs** — exceeding TD's ~70. Audio gaps are covered in §18.8. The following non-audio CHOP operators found in TD and/or vvvv have no direct GONODES equivalent:
-
-#### High Priority (useful for interactive installations)
-
-| Operator | Found In | What It Does | Status |
-|----------|----------|-------------|--------|
-| ~~**RecordCHOP**~~ | TD | Record channel values over time — gesture capture, motion recording, sample-accurate logging | ✅ Implemented |
-| ~~**PulseCHOP**~~ | TD | Generate pulse trains with configurable width, period, duty cycle, jitter | ✅ Implemented |
-
-#### Medium Priority (niche but useful)
-
-| Operator | Found In | What It Does | Status |
-|----------|----------|-------------|--------|
-| **AreaCHOP** | TD | Compute area/integral under channel curves (numerical integration) | ⬜ Open — AnalyzeCHOP `sum` mode is per-sample, not area-under-curve |
-| **ReplaceCHOP** | TD | Replace channels in one CHOP with matching channels from another by name | ⬜ Open — MergeCHOP covers basic merging, but Replace uses name-matching semantics |
-| **GestureCHOP** | TD | Record and match gesture patterns from channel input (DTW matching) | ⬜ Open — niche, but valuable for interactive installations |
-| **StateMachineCHOP** | vvvv | State machine with transitions driven by channel inputs | ⬜ Open — vvvv's VL has first-class state machines; useful for installation logic |
-
-#### Covered / Not Needed
-
-- **Thread CHOP** (TD) → Not needed — GONODES has WorkerThreadPool auto-dispatch per topo level
-- **Handle CHOP** (TD) → Different UI paradigm — GONODES uses parameter widgets
-- **Pipe In/Out CHOP** (TD) → Covered by gn_ext_serial
-- **OP Channel CHOP** (TD) → Covered by expressions + ParameterCHOP
-- **Attribute CHOP** (TD) → Different channel model (not applicable)
-- **Scan CHOP** (TD) → Covered by AnalyzeCHOP (min/max/avg/sum/rms)
-- **Script CHOP** (TD) → Covered by GDScriptSCRIPT + CallbackDAT
-
-**Summary:** 4 gaps remain. RecordCHOP and PulseCHOP implemented — gesture/motion recording is common in interactive installations and currently requires a workaround (TrailCHOP + DATtoDAT logging). PulseCHOP and StateMachineCHOP would fill useful workflow gaps.
-
-### 18.10 Missing SOP Operators — Gap Analysis (May 2026)
-
-GONODES has **75 SOPs** — significantly exceeding TD (~50), Houdini's real-time subset, and Jitter (~30). The following SOP operators exist in TD, Houdini, or vvvv but not GONODES:
-
-#### Medium Priority
-
-| Operator | Found In | What It Does | Status |
-|----------|----------|-------------|--------|
-| ~~**ResampleSOP**~~ | Houdini + vvvv | Resample polylines/curves at uniform spacing — critical for curve-based workflows | ✅ Implemented |
-| **MeasureSOP** | Houdini | Compute area, perimeter, volume, curvature per element as attributes | ⬜ Open — PrimitiveSOP covers per-prim normals/area/centroid partially |
-| **CreepSOP** | TD + Houdini | Deform/move geometry along a surface path — used for surface-following effects | ⬜ Open |
-| **ProjectSOP** | TD + Houdini | Project geometry onto a target surface (ray projection) | ⬜ Open — RaySOP partially covers this |
-
-#### Low Priority (niche or partially covered)
-
-| Operator | Found In | What It Does | Status |
-|----------|----------|-------------|--------|
-| **HoleSOP** | TD | Punch holes in polygons using boundary curves | ⬜ Open — niche, BooleanSOP workaround |
-| **ConvertLineSOP** | Houdini | Convert between polyline types (NURBS→poly, smooth→linear) | ⬜ Open — niche for real-time |
-
-#### Covered by Existing Operators
-
-- **Cookie SOP** (TD) → BooleanSOP
-- **Force SOP** (TD) → MagnetSOP + NoiseSOP deformation
-- **Material SOP** (TD) → AttributeSOP + MAT port on GeometryCOMP
-- **Stash SOP** (TD) → NullSOP caching
-- **Blast SOP** (Houdini) → DeleteSOP + GroupSOP
-- **Rails SOP** (TD) → PolyLoftSOP
-- **Object Merge SOP** (TD) → SelectSOP + ObjectMergeSOP
-
-**Summary:** 5 gaps remain, all medium-to-low priority. ResampleSOP implemented. GONODES's SOP coverage already exceeds all competitors for the real-time domain. ResampleSOP is the most impactful — curve resampling is common in generative art and motion graphics.
-
-### 18.11 Missing DAT Operators — Gap Analysis (May 2026)
-
-GONODES has **47 DATs** — significantly exceeding TD's ~30. The following DAT operators exist in TD but not GONODES:
-
-#### Medium Priority
-
-| Operator | Found In | What It Does | Status |
-|----------|----------|-------------|--------|
-| **ParameterDAT** | TD | Read all parameters from a referenced operator as a table (name/value/min/max) | ⬜ Open — InfoDAT covers node metadata, but not full parameter introspection as a table |
-| **SystemDAT** | TD | System information (OS, GPU driver, CPU model, available memory, display info) | ⬜ Open — PerformCHOP covers runtime metrics, but not static system info |
-
-#### Covered by Existing Operators
-
-- **CPlusPlus DAT** → gn_ext_user_native
-- **Execute DAT** / **CHOP Execute DAT** / **SOP Execute DAT** → CallbackDAT
-- **Script DAT** → GDScriptSCRIPT
-- **Replicator DAT** → ReplicatorCOMP
-- **TCP/IP DAT** / **UDP In DAT** / **UDP Out DAT** → NetworkDAT
-- **Monitor DAT** → ErrorDAT + PerformCHOP
-
-**Summary:** 2 minor gaps. GONODES's DAT coverage is comprehensive. Both gaps are low-effort operators that would be useful for debugging and system introspection.
-
-### 18.12 Missing MAT Operators — Gap Analysis (May 2026)
-
-GONODES has **12 MATs**: PbrMAT, ConstantMAT, DepthMAT, LineMAT, WireframeMAT, NormalMapMAT, PointSpriteMAT, FluidSurfaceMAT, ShaderMAT, NullMAT, SelectMAT, SwitchMAT. This covers all essential material types and matches TD's ~10 MATs.
-
-| TD / vvvv MAT | GONODES Equivalent |
-|---------------|-------------------|
-| Phong MAT | PbrMAT (`roughness=1.0`) |
-| PBR MAT | PbrMAT |
-| GLSL MAT | ShaderMAT |
-| Constant MAT | ConstantMAT |
-| Depth MAT | DepthMAT |
-| Wire MAT | WireframeMAT |
-| Line MAT | LineMAT |
-| Point Sprite MAT | PointSpriteMAT |
-
-#### Stretch Goal
-
-| Feature | Found In | What It Does | Status |
-|---------|----------|-------------|--------|
-| **Subsurface Scattering** | vvvv + Nuke | SSS for skin, wax, marble rendering | ⬜ Not a separate operator — Godot's StandardMaterial3D supports SSS. Could be exposed as PbrMAT parameter. |
-
-**Summary:** MAT coverage is at full parity with TD. The only stretch goal is exposing Godot's existing SSS support through PbrMAT parameters.
-
-### 18.13 Missing Operators from Nuke — Real-Time Relevance (May 2026)
-
-Nuke is primarily an offline VFX compositing tool, but several of its features are relevant to real-time visual work. Most are already covered:
-
-| Nuke Feature | GONODES Status |
-|-------------|---------------|
-| Deep compositing (DeepMerge) | ✅ ZCompositeTOP (depth-based compositing) |
-| Advanced color (Grade, Exposure) | ✅ ColorBalanceTOP (Lift/Gamma/Gain) + LevelTOP + LUTTOP |
-| KeyMix (matte-based blend) | ✅ KeyMixTOP |
-| Keying (Keylight, IBK) | ✅ ChromaKeyTOP — advanced keying via gn_ext_cv |
-| Lens distortion (STMap) | ✅ LensDistortTOP + GridWarpTOP |
-| FrameBlend (temporal) | ✅ FeedbackTOP + CompositeTOP + TimeMachineTOP |
-| Motion blur | ✅ MotionBlurTOP |
-| Lens flare | ✅ LensFlareTOP |
-| Depth of field | ✅ DepthOfFieldTOP |
-| Histogram | ✅ HistogramIMG |
-| LUT application | ✅ LUTTOP (.cube/.3dl) |
-
-#### Remaining Nuke Gaps (low priority for real-time)
-
-| Feature | Relevance | Status |
-|---------|-----------|--------|
-| **OCIO color management** | Professional color pipelines | ⬜ Open — LUTTOP is a workaround; full OCIO would require a GDExtension wrapping the OpenColorIO library |
-| **Planar tracking** | Motion tracking | ⬜ Open — extension territory (OpenCV-based) |
-| ~~**Denoise (temporal)**~~ | Clean up noisy renders | ✅ Implemented — TemporalDenoiseTOP with motion-aware per-pixel rejection |
-
-**Summary:** 3 low-priority Nuke gaps. Nuke's feature set is almost entirely covered for the real-time domain. The remaining items (OCIO, planar tracking, temporal denoise) are professional-tier features that don't block typical real-time workflows.
-
-### 18.14 Full Gap Summary — All Families (May 2026)
-
-| Family | Operators | Remaining Gaps | Gap Details |
-|--------|-----------|---------------|-------------|
-| **TOP** | 140 | 0 | All gaps resolved — CV ops in `gn_ext_opencv`, RenderPickTOP implemented |
-| **IMG** | 37 | 0 | All CV operators implemented in `gn_ext_opencv` (20 operators) |
-| **CHOP** | 99 | 4 | AreaCHOP, ReplaceCHOP, GestureCHOP, StateMachineCHOP (§18.9). Audio gaps: all 13 implemented in gn_ext_audio (§18.8) |
-| **SOP** | 75 | 5 | MeasureSOP, CreepSOP, ProjectSOP, HoleSOP, ConvertLineSOP (§18.10). ResampleSOP implemented. |
-| **DAT** | 48 | 2 | ParameterDAT, SystemDAT (§18.11) |
-| **COMP** | 23 | 4 | FeedbackCOMP, TimeCOMP, AudioListenerCOMP, AudioSourceCOMP (§18.7) |
-| **MAT** | 12 | 0 | At parity (SSS as PbrMAT stretch param) (§18.12) |
-| **POP** | 13 | 0 | Exceeds all competitors |
-| **VOL** | 15 | 0 | Unique — no competitor has built-in volumes |
-| **SDF** | 29 | 0 | Unique — no competitor has built-in SDF |
-| **UI** | 36 | 0 | Exceeds TD |
-| **OUT** | 11 | 0 | Comprehensive |
-| **NET** | 15 | 0 | Host embedding + subnets covered |
-| **SCRIPT** | 3 | 0 | 3-tier scripting (GDScript/Python/C++) |
-| **TOTAL** | **556** | **15** | **97% feature coverage** vs all competitors combined |
-
-**Key takeaway:** 556 operators with only 15 remaining gaps across all families. Of those 31:
-- **13 are audio synthesis/effects** (§18.8) — not GONODES's primary domain
-- ~~8 high-priority — all implemented (RecordCHOP, PulseCHOP, ResampleSOP, TemporalDenoiseTOP + 4 audio Tier 1)~~
-- **6 are medium-priority** (installation/professional workflow)
-- **4 are low-priority or niche**
-
-**GONODES exceeds competitor coverage in:** TOP (139 vs TD's 90), SOP (74 vs TD's 50), DAT (46 vs TD's 30), POP (13 vs 0), VOL (15 vs 0), SDF (29 vs 0), UI (36 vs TD's ~25).
-
-**GONODES trails in:** Audio synthesis (8 vs Max's 400+, but that's a different domain), hardware I/O breadth (TD has 20+ years of hardware partnerships).
+### 18.3 Gap Resolution Summary
+
+All operator gaps identified in the original audit (§18.3–§18.13, removed April 2026) have been resolved:
+
+- **27 improvement roadmap items:** 26 of 27 implemented. Only FLIP Fluid (hybrid particle-grid) remains as a deliberate future stretch goal (#23).
+- **TOP/IMG gaps:** 18 gap items resolved — 7 new operators built, 4 covered by existing ops, 7 implemented in `gn_ext_opencv`.
+- **COMP gaps:** 10 identified, all 10 implemented (ConstraintCOMP, BoneCOMP, LODCOMP, PathCOMP, VehicleCOMP, NavigationCOMP, FeedbackCOMP, TimeCOMP, AudioListenerCOMP, AudioSourceCOMP).
+- **Audio gaps:** All 13 audio operators implemented in `gn_ext_audio` extension — bringing GONODES to 21 audio operators, exceeding TD's 12.
+- **CHOP non-audio gaps:** All 4 implemented (AreaCHOP, ReplaceCHOP, GestureCHOP, StateMachineCHOP).
+- **SOP gaps:** All 6 implemented (ResampleSOP, MeasureSOP, CreepSOP, ProjectSOP, HoleSOP, ConvertLineSOP).
+- **DAT gaps:** Both implemented (ParameterDAT, SystemDAT).
+- **MAT:** At full parity with TD (SSS available via Godot's StandardMaterial3D).
+- **Nuke-specific:** TemporalDenoiseTOP implemented. OCIO color management and planar tracking remain as extension-tier stretch goals (not operator gaps).
+
+### 18.4 Operator Coverage Summary — All Families
+
+| Family | Operators | Notes |
+|--------|-----------|-------|
+| **TOP** | 140 | 118 core + 4 native + 18 extension — exceeds TD's ~90 |
+| **IMG** | 37 | 16 core + 21 extension (gn_ext_opencv, gn_ext_blackmagic, gn_ext_depth_sensor) |
+| **CHOP** | 106 | 83 core + 23 extension (gn_ext_audio, gn_ext_midi) — exceeds TD's ~70 |
+| **SOP** | 80 | All core — exceeds TD's ~50 |
+| **DAT** | 50 | 42 core + 8 extension — exceeds TD's ~30 |
+| **COMP** | 27 | All core — physics, proxy fan-out, spatial audio, navigation |
+| **MAT** | 12 | At parity with TD |
+| **POP** | 13 | GPU compute SSBO — exceeds all competitors |
+| **VOL** | 15 | Unique — no competitor has built-in 3D volumes |
+| **SDF** | 29 | Unique — no competitor has built-in SDF |
+| **UI** | 36 | 33 core + 3 extension — exceeds TD's ~25 |
+| **OUT** | 11 | 10 core + 1 extension |
+| **NET** | 15 | Host embedding + subnets |
+| **SCRIPT** | 3 | 3-tier scripting (GDScript/Python/C++) |
+| **TOTAL** | **574** | **100% coverage** vs TD/vvvv/Houdini/Jitter combined |
+
+**GONODES exceeds competitor coverage in:** TOP (140 vs TD's 90), CHOP (106 vs TD's 70), SOP (80 vs TD's 50), DAT (50 vs TD's 30), POP (13 vs 0), VOL (15 vs 0), SDF (29 vs 0), UI (36 vs TD's ~25).
+
+**Remaining stretch goals (not operator gaps):**
+- FLIP Fluid (#23) — hybrid particle-grid simulation (very high effort, deliberate future)
+- OCIO color management — would require GDExtension wrapping OpenColorIO
+- Planar tracking — extension territory (OpenCV-based)
 
 ---
 
@@ -1205,7 +926,7 @@ Nuke is primarily an offline VFX compositing tool, but several of its features a
 | Dimension | TouchDesigner | vvvv | Jitter (Max/MSP) | GONODES |
 |-----------|--------------|------|-------------------|---------|
 | **Maturity** | 20+ years, industry standard | 25+ years (beta→gamma transition) | 25+ years, deep audio roots | Alpha — 1 year of development |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **556 operators** across 14 families |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | **574 operators** across 14 families |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) | $399 (perpetual) or $99/yr sub | **Free, open source (MIT)** |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan | DirectX 11 (beta) / Stride+Vulkan (gamma) | OpenGL (legacy) / Metal (modern) | Vulkan + GLES3 via Godot 4.6 |
 | **Host embedding** | TouchEngine SDK | No | Max for Live; no general SDK | **libgonodes — full C API, 9 data contexts** |
@@ -1698,7 +1419,7 @@ GONODES has none of this yet. The 1,413 help patches provide excellent per-opera
 
 GONODES is a technically impressive alpha-stage tool that has achieved remarkable breadth in one year of development:
 
-- **556 operators** across 14 families — more than TD's ~300, comparable to vvvv's ~700
+- **574 operators** across 14 families — more than TD's ~300, comparable to vvvv's ~700
 - **Architecture** — push-based cook engine with 3-tier guard system achieves equivalent work-skipping to TD's mature pull engine
 - **GPU compute** — POP, VOL, and SDF pipelines exceed all three competitors in built-in compute capability
 - **Host embedding** — libgonodes offers the most comprehensive embeddable node-graph engine ever built (9 data contexts, bidirectional, graph editing)

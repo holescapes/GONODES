@@ -1,0 +1,122 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "pattern1": {
+      "type": "PatternCHOP",
+      "position": [
+        100,
+        200
+      ],
+      "parameters": {
+        "type": {
+          "value": 1
+        },
+        "length": {
+          "value": 120
+        }
+      }
+    },
+    "warp1": {
+      "type": "WarpCHOPNative",
+      "position": [
+        450,
+        200
+      ],
+      "parameters": {
+        "speed": {
+          "value": 0.5,
+          "expression": "sin(time * 2.0) * 0.5 + 0.5",
+          "mode": "EXPRESSION"
+        },
+        "offset": {
+          "value": 0.0,
+          "expression": "sin(time * 2.0) * 0.2",
+          "mode": "EXPRESSION"
+        },
+        "output_length": {
+          "value": 240
+        },
+        "interpolation": {
+          "value": 0
+        }
+      }
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        800,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1150,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "pattern1",
+      "from_port": 0,
+      "to": "warp1",
+      "to_port": 0
+    },
+    {
+      "from": "warp1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Warp CHOP â€” Time Remap\n\nA sine pattern is time-warped at 0.5Ã— speed, stretching\n120 samples to 240 with linear interpolation.\nUse speed < 1 for slow-mo, > 1 for fast-forward,\nor connect a warp curve input for custom retiming.",
+      "position": [
+        50.0,
+        -50.0
+      ],
+      "size": [
+        600.0,
+        110.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

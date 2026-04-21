@@ -1,0 +1,177 @@
+{
+	"version": "1.0.0",
+	"generator": "GONODES",
+	"nodes": {
+		"noise_den": {
+			"type": "NoiseVOL",
+			"position": [
+				100,
+				100
+			],
+			"parameters": {
+				"res_x": {
+					"value": 48
+				},
+				"res_y": {
+					"value": 48
+				},
+				"res_z": {
+					"value": 48
+				},
+				"scale": {
+					"value": 8.0
+				}
+			}
+		},
+		"sop_box": {
+			"type": "BoxSOP",
+			"position": [
+				100,
+				350
+			],
+			"parameters": {
+				"size_x": {
+					"value": 0.4
+				},
+				"size_y": {
+					"value": 0.4
+				},
+				"size_z": {
+					"value": 0.4
+				}
+			}
+		},
+		"sop_to_vol": {
+			"type": "SOPtoVOLNative",
+			"position": [
+				400,
+				350
+			],
+			"parameters": {
+				"res_x": {
+					"value": 48
+				},
+				"res_y": {
+					"value": 48
+				},
+				"res_z": {
+					"value": 48
+				}
+			}
+		},
+		"fluid1": {
+			"type": "FluidVOL",
+			"position": [
+				500,
+				100
+			],
+			"parameters": {
+				"res_x": {
+					"value": 48
+				},
+				"res_y": {
+					"value": 48
+				},
+				"res_z": {
+					"value": 48
+				},
+				"dissipation": {
+					"value": 0.99,
+					"expression": "sin(time * 2.0) * 0.5 + 0.5",
+					"mode": "EXPRESSION"
+				},
+				"pressure_iters": {
+					"value": 30,
+					"expression": "(30 * (0.5 + 0.5 * sin(time * 2.0)))",
+					"mode": "EXPRESSION"
+				},
+				"density_add": {
+					"value": 5.0
+				},
+				"vorticity": {
+					"value": 2.0
+				}
+			}
+		},
+		"raymarch1": {
+			"type": "RaymarchVOL",
+			"position": [
+				900,
+				100
+			],
+			"parameters": {}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": [
+				1300,
+				100
+			],
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		}
+	},
+	"connections": [
+		{
+			"from": "noise_den",
+			"from_port": 0,
+			"to": "fluid1",
+			"to_port": 0
+		},
+		{
+			"from": "sop_box",
+			"from_port": 0,
+			"to": "sop_to_vol",
+			"to_port": 0
+		},
+		{
+			"from": "sop_to_vol",
+			"from_port": 0,
+			"to": "fluid1",
+			"to_port": 2
+		},
+		{
+			"from": "fluid1",
+			"from_port": 0,
+			"to": "raymarch1",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"text": "FluidVOL \u2014 High Vorticity + Box Obstacle\n\nAggressive vorticity (2.0) with a box obstacle creates\nK\u00e1rm\u00e1n vortex street-like shedding patterns.\nHigh dissipation (0.99) keeps structures visible.\n30 pressure iterations for clean incompressibility.",
+			"position": [
+				-100.0,
+				-120.0
+			],
+			"size": [
+				510.0,
+				100.0
+			],
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.8
+			]
+		}
+	]
+}

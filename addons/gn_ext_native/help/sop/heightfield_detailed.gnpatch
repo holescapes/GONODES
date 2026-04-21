@@ -1,0 +1,131 @@
+{
+	"nodes": {
+		"terrain1": {
+			"type": "HeightfieldSOPNative",
+			"position": {
+				"_type": "Vector2i",
+				"x": 0,
+				"y": 0
+			},
+			"parameters": {
+				"size_x": {
+					"value": 20.0
+				},
+				"size_z": {
+					"value": 20.0
+				},
+				"subdivisions": {
+					"value": 256
+				},
+				"height": {
+					"value": 3.0
+				},
+				"octaves": {
+					"value": 8
+				},
+				"frequency": {
+					"value": 0.8
+				},
+				"persistence": {
+					"value": 0.45
+				}
+			}
+		},
+		"geo1": {
+			"type": "GeometryCOMP",
+			"position": {
+				"_type": "Vector2i",
+				"x": 200,
+				"y": 0
+			}
+		},
+		"cam1": {
+			"type": "CameraCOMP",
+			"position": {
+				"_type": "Vector2i",
+				"x": 200,
+				"y": 150
+			},
+			"parameters": {
+				"tx": {
+					"value": 5.0
+				},
+				"ty": {
+					"value": 6.0
+				},
+				"tz": {
+					"value": 12.0
+				},
+				"rx": {
+					"value": -30.0
+				},
+				"ry": {
+					"value": 20.0
+				}
+			}
+		},
+		"render1": {
+			"type": "RenderTOP",
+			"position": {
+				"_type": "Vector2i",
+				"x": 400,
+				"y": 0
+			},
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": {
+				"_type": "Vector2i",
+				"x": 600,
+				"y": 0
+			},
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		}
+	},
+	"connections": [
+		{
+			"from": "terrain1",
+			"from_port": 0,
+			"to": "geo1",
+			"to_port": 0
+		},
+		{
+			"from": "geo1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 0
+		},
+		{
+			"from": "cam1",
+			"from_port": 0,
+			"to": "render1",
+			"to_port": 1
+		},
+		{
+			"from": "render1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	]
+}

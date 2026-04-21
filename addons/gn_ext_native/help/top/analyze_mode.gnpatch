@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "src_ramp": {
+      "type": "RampTOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "analyze1": {
+      "type": "AnalyzeTOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "mode": {
+          "value": 1
+        },
+        "kernel_size": {
+          "value": 7,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1200,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "src_ramp",
+      "from_port": 0,
+      "to": "analyze1",
+      "to_port": 0
+    },
+    {
+      "from": "analyze1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Analyze TOP — Mode (Native)\n\nPer-pixel statistics: min, max, average, or sum over a kernel.\nShowcasing: mode=1, kernel_size=7.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

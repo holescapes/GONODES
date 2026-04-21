@@ -1,0 +1,137 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noisevol1": {
+      "type": "NoiseVOL",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "marchingcubes1": {
+      "type": "MarchingCubesVOLNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "threshold": {
+          "value": 0.5
+        },
+        "smooth_normals": {
+          "value": true
+        }
+      }
+    },
+    "geo1": {
+      "type": "GeometryCOMP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam1": {
+      "type": "CameraCOMP",
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        1000,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1400,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noisevol1",
+      "from_port": 0,
+      "to": "marchingcubes1",
+      "to_port": 0
+    },
+    {
+      "from": "marchingcubes1",
+      "from_port": 0,
+      "to": "geo1",
+      "to_port": 0
+    },
+    {
+      "from": "geo1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "cam1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Noise VOL — Basic (Native)\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

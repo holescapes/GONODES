@@ -1,0 +1,170 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "source1": {
+      "type": "SourcePOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "force1": {
+      "type": "ForcePOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "gravity_x": {
+          "value": 0.5,
+          "expression": "cos(time * 0.6) * 1.5",
+          "mode": "EXPRESSION"
+        },
+        "gravity_y": {
+          "value": -4.905,
+          "expression": "cos(time * 0.6) * 1.5",
+          "mode": "EXPRESSION"
+        },
+        "gravity_z": {
+          "value": 0.5
+        },
+        "wind_x": {
+          "value": 0.5
+        },
+        "wind_y": {
+          "value": 0.5
+        },
+        "wind_z": {
+          "value": 0.5
+        },
+        "drag": {
+          "value": 0.005
+        }
+      }
+    },
+    "renderpop1": {
+      "type": "RenderPOP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "camera1": {
+      "type": "CameraCOMP",
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 5.0
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "source1",
+      "from_port": 0,
+      "to": "force1",
+      "to_port": 0
+    },
+    {
+      "from": "force1",
+      "from_port": 0,
+      "to": "renderpop1",
+      "to_port": 0
+    },
+    {
+      "from": "renderpop1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "camera1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Source POP — X (Native)\n\nEmit particles from SOP geometry surface or origin point.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

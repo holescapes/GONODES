@@ -1,0 +1,108 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noiseimg1": {
+      "type": "NoiseIMG",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
+    },
+    "pixelsortimg1": {
+      "type": "PixelSortIMGNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "direction": {
+          "value": 2
+        },
+        "sort_mode": {
+          "value": 2,
+          "expression": "(2 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        },
+        "threshold_low": {
+          "value": 0.2
+        },
+        "threshold_high": {
+          "value": 1.8
+        },
+        "reverse": {
+          "value": true
+        }
+      }
+    },
+    "imgtotop1": {
+      "type": "ImgToTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noiseimg1",
+      "from_port": 0,
+      "to": "pixelsortimg1",
+      "to_port": 0
+    },
+    {
+      "from": "pixelsortimg1",
+      "from_port": 0,
+      "to": "imgtotop1",
+      "to_port": 0
+    },
+    {
+      "from": "imgtotop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Noise IMG — Advanced (Native)\n\nCPU procedural noise image (value noise, white noise).",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

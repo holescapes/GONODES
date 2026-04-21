@@ -1,0 +1,100 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "time1": {
+            "type": "TimeCOMP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "play": {
+                    "value": true
+                },
+                "speed": {
+                    "value": 0.5
+                },
+                "range_start": {
+                    "value": 0.5
+                },
+                "range_end": {
+                    "value": 5.0
+                },
+                "loop": {
+                    "value": true
+                },
+                "reset": {
+                    "value": true
+                },
+                "set_time": {
+                    "value": -0.5
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TimeCOMP \u2014 Parameters\n\nShowcases: play, speed, range_start.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

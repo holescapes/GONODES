@@ -44,8 +44,9 @@ addons/gn_ext_syphon/native/.gdignore
 addons/gn_ext_*/native/bin/
 
 # ── Downloaded SDKs & vendor libraries (re-downloaded by setup scripts / CI) ──
-# gdCEF / Chromium Embedded Framework — downloaded from gdcef releases
+# gdCEF / Chromium Embedded Framework — downloaded/cloned at build time
 addons/gn_ext_webrender/cef_artifacts/
+addons/gn_ext_webrender/native/gdcef/
 
 # ONNX Runtime — downloaded by setup_ml.py
 addons/gn_ext_ml/native/onnxruntime/

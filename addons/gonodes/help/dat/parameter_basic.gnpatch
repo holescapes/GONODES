@@ -1,0 +1,108 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_constant": {
+            "type": "ConstantDAT",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "parameter1": {
+            "type": "ParameterDAT",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "show_defaults": {
+                    "value": true
+                },
+                "show_ranges": {
+                    "value": true
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "font_size": {
+                    "value": 14
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "src_constant",
+            "from_port": 0,
+            "to": "parameter1",
+            "to_port": 0
+        },
+        {
+            "from": "parameter1",
+            "from_port": 0,
+            "to": "texttop1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "ParameterDAT \u2014 Basic\n\nDefault settings.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

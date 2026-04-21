@@ -1,0 +1,182 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "sec_a": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        50
+      ],
+      "parameters": {
+        "radius": {
+          "value": 1.0
+        }
+      }
+    },
+    "sec_b": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        250
+      ],
+      "parameters": {
+        "radius": {
+          "value": 0.3
+        }
+      }
+    },
+    "loft1": {
+      "type": "PolyLoftSOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "subdivisions": {
+          "value": 8
+        },
+        "close_caps": {
+          "value": true
+        },
+        "loft_distance": {
+          "value": 2.0
+        }
+      }
+    },
+    "null1": {
+      "type": "NullSOP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {}
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        1050,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        1050,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1350,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1650,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "sec_a",
+      "from_port": 0,
+      "to": "loft1",
+      "to_port": 0
+    },
+    {
+      "from": "sec_b",
+      "from_port": 0,
+      "to": "loft1",
+      "to_port": 1
+    },
+    {
+      "from": "loft1",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "loft1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "PolyLoftSOPNative — Capped Cone\n\nLofts a circle to a smaller circle with 8 subdivisions.\nResult is a closed cone shape. Adjust loft_distance for height.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

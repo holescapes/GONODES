@@ -1,0 +1,181 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "grid1": {
+      "type": "GridSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "sizex": {
+          "value": 4.0,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "sizey": {
+          "value": 4.0,
+          "expression": "0.7 + 0.3 * sin(time * 1.5)",
+          "mode": "EXPRESSION"
+        },
+        "rows": {
+          "value": 30
+        },
+        "columns": {
+          "value": 30
+        }
+      }
+    },
+    "noise1": {
+      "type": "NoiseSOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {
+        "amplitude": {
+          "value": 0.8
+        }
+      }
+    },
+    "smooth1": {
+      "type": "SmoothSOPNative",
+      "position": [
+        800,
+        100
+      ],
+      "parameters": {
+        "iterations": {
+          "value": 3
+        },
+        "strength": {
+          "value": 0.5
+        },
+        "pin_borders": {
+          "value": true
+        }
+      }
+    },
+    "geo1": {
+      "type": "GeometryCOMP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {}
+    },
+    "cam1": {
+      "type": "CameraCOMP",
+      "position": [
+        1150,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 3.0
+        },
+        "ty": {
+          "value": 3.0
+        },
+        "tz": {
+          "value": 3.0
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        1500,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1850,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "grid1",
+      "from_port": 0,
+      "to": "noise1",
+      "to_port": 0
+    },
+    {
+      "from": "noise1",
+      "from_port": 0,
+      "to": "smooth1",
+      "to_port": 0
+    },
+    {
+      "from": "smooth1",
+      "from_port": 0,
+      "to": "geo1",
+      "to_port": 0
+    },
+    {
+      "from": "geo1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "cam1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Smooth SOP — Terrain (Native)\n\nGrid terrain deformed by noise, smoothed with pinned borders.\nEdge vertices stay flat while interior becomes rolling hills.\nGreat for terrain generation with clean boundary edges.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        480.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "line1": {
+      "type": "LineSOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "length": {
+          "value": 3.0,
+          "expression": "(3.0 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        },
+        "points": {
+          "value": 20,
+          "expression": "(20 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "circle1": {
+      "type": "CircleSOP",
+      "position": [
+        100,
+        250
+      ],
+      "parameters": {
+        "radius": {
+          "value": 0.15
+        },
+        "points": {
+          "value": 12
+        }
+      }
+    },
+    "sweep1": {
+      "type": "SweepSOPNative",
+      "position": [
+        500,
+        150
+      ],
+      "parameters": {
+        "scale": {
+          "value": 1.0
+        },
+        "end_caps": {
+          "value": true
+        }
+      }
+    },
+    "null1": {
+      "type": "NullSOP",
+      "position": [
+        800,
+        150
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "position": [
+        1750,
+        150
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "y": 512,
+            "_type": "Vector2i",
+            "x": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      },
+      "type": "WindowOUT"
+    },
+    "geo_view": {
+      "type": "GeometryCOMP",
+      "position": [
+        1100,
+        150
+      ],
+      "parameters": {}
+    },
+    "cam_view": {
+      "type": "CameraCOMP",
+      "position": [
+        1100,
+        350
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0
+        },
+        "ty": {
+          "value": 0.5
+        },
+        "tz": {
+          "value": 3
+        }
+      }
+    },
+    "render_view": {
+      "type": "RenderTOP",
+      "position": [
+        1400,
+        150
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "line1",
+      "from_port": 0,
+      "to": "sweep1",
+      "to_port": 0
+    },
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "sweep1",
+      "to_port": 1
+    },
+    {
+      "from": "sweep1",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "null1",
+      "from_port": 0,
+      "to": "geo_view",
+      "to_port": 0
+    },
+    {
+      "from": "geo_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 0
+    },
+    {
+      "from": "cam_view",
+      "from_port": 0,
+      "to": "render_view",
+      "to_port": 1
+    },
+    {
+      "from": "render_view",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Sweep SOP — Rail Extrude (Native)\n\nSweeps a circle profile along a line backbone.\nParallel transport frames prevent twisting.\nAdd noise to backbone for organic curves.",
+      "position": [
+        -100.0,
+        -150.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

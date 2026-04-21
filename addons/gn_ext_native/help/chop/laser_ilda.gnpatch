@@ -1,0 +1,102 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "laser1": {
+      "type": "LaserCHOPNative",
+      "position": [
+        300,
+        200
+      ],
+      "parameters": {
+        "pattern": {
+          "value": 4,
+          "expression": "(4 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        },
+        "points": {
+          "value": 500,
+          "expression": "(500 * (0.5 + 0.5 * sin(time * 2.0)))",
+          "mode": "EXPRESSION"
+        },
+        "scale": {
+          "value": 0.9
+        },
+        "animate": {
+          "value": true
+        },
+        "speed": {
+          "value": 15.0
+        },
+        "blank_points": {
+          "value": 10
+        },
+        "intensity": {
+          "value": 1.0
+        }
+      }
+    },
+    "choptotop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        600,
+        200
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        900,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "laser1",
+      "from_port": 0,
+      "to": "choptotop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptotop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Laser CHOP — ILDA Test Pattern (Native)\n\n500-point ILDA 12.2 style test: white outer square\n+ rainbow inner circle. 10 blank points at path start\nfor galvo settle time. Standard calibration pattern\nused in the laser show industry.",
+      "position": [
+        -50.0,
+        -50.0
+      ],
+      "size": [
+        520.0,
+        110.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "source1": {
+      "type": "SourcePOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "emit_rate": {
+          "value": 100
+        }
+      }
+    },
+    "focus1": {
+      "type": "InstancePOPNative",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {}
+    },
+    "pop_render": {
+      "type": "RenderPOP",
+      "position": [
+        800,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "source1",
+      "from_port": 0,
+      "to": "focus1",
+      "to_port": 0
+    },
+    {
+      "from": "focus1",
+      "from_port": 0,
+      "to": "pop_render",
+      "to_port": 0
+    },
+    {
+      "from": "pop_render",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Instance POP — Geometry (Native)\n\nCopy SOP geometry onto each particle position as instances.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        120.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

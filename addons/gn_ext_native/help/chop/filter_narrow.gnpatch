@@ -1,0 +1,109 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "wave1": {
+      "type": "WaveCHOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "waveform": {
+          "value": 2
+        },
+        "frequency": {
+          "value": 5.0
+        }
+      }
+    },
+    "filter1": {
+      "type": "FilterCHOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "filter_width": {
+          "value": 1.0
+        }
+      }
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "wave1",
+      "from_port": 0,
+      "to": "filter1",
+      "to_port": 0
+    },
+    {
+      "from": "filter1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Filter CHOP — Narrow (Native)\n\nMinimal filtering on square wave.\nShows slight edge rounding.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

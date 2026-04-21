@@ -1,0 +1,114 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseCHOPNative",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "num_channels": {
+          "value": 3
+        },
+        "channel_names": {
+          "value": "tx,ty,tz"
+        },
+        "roughness": {
+          "value": 0.5
+        },
+        "period": {
+          "value": 2.0
+        },
+        "seed": {
+          "value": 0
+        }
+      }
+    },
+    "null1": {
+      "type": "NullCHOP",
+      "position": [
+        450,
+        100
+      ],
+      "parameters": {}
+    },
+    "window1": {
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "y": 512,
+            "_type": "Vector2i",
+            "x": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      },
+      "type": "WindowOUT"
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        800,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noise1",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "null1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Noise CHOP — Basic (Native)\n\nSmooth procedural noise channels with roughness control.\nUsing: num_channels=3, channel_names=tx,ty,tz, roughness=0.5, period=2.0.",
+      "position": [
+        -100.0,
+        -150.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

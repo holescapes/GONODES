@@ -1,102 +1,151 @@
 {
-    "version": "1.0.0",
-    "generator": "GONODES",
-    "nodes": {
-        "source1": {
-            "type": "SourcePOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "emit_rate": {
-                    "value": 100
-                }
-            }
-        },
-        "focus1": {
-            "type": "AdvectPOP",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {}
-        },
-        "pop_render": {
-            "type": "RenderPOP",
-            "position": [
-                800,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1150,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
-        }
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "source1": {
+      "type": "SourcePOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
     },
-    "connections": [
-        {
-            "from": "source1",
-            "from_port": 0,
-            "to": "focus1",
-            "to_port": 0
+    "advect1": {
+      "type": "AdvectPOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "strength": {
+          "value": 1.0
         },
-        {
-            "from": "focus1",
-            "from_port": 0,
-            "to": "pop_render",
-            "to_port": 0
+        "add_mode": {
+          "value": true
+        }
+      }
+    },
+    "renderpop1": {
+      "type": "RenderPOP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
         },
-        {
-            "from": "pop_render",
-            "from_port": 0,
-            "to": "window1",
-            "to_port": 0
+        "open": {
+          "value": true
         }
-    ],
-    "annotations": [
-        {
-            "id": "ann_1",
-            "type": "note",
-            "text": "Advect POP — Basic\n\nAdvect particles by a VOL velocity field.",
-            "position": [
-                -100.0,
-                -100.0
-            ],
-            "size": [
-                500.0,
-                120.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                0.8
-            ]
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
         }
-    ]
+      }
+    },
+    "camera1": {
+      "type": "CameraCOMP",
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 5.0
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "source1",
+      "from_port": 0,
+      "to": "advect1",
+      "to_port": 0
+    },
+    {
+      "from": "advect1",
+      "from_port": 0,
+      "to": "renderpop1",
+      "to_port": 0
+    },
+    {
+      "from": "renderpop1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "camera1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Advect POP — Basic (Native)\n\nAdvect particles by a VOL velocity field.\nUsing: strength=1.0, add_mode=True.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
 }

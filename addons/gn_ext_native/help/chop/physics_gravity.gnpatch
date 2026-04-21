@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "trigger1": {
+      "type": "AreaCOMP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        },
+        "mass": {
+          "value": 1.0,
+          "expression": "sin(time * 2.0) * 0.5 + 0.5",
+          "mode": "EXPRESSION"
+        }
+      }
+    },
+    "phys1": {
+      "type": "PhysicsCHOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {}
+    },
+    "choptop1": {
+      "type": "CHOPtoTOP",
+      "position": [
+        1150,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1550,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "trigger1",
+      "from_port": 0,
+      "to": "phys1",
+      "to_port": 0
+    },
+    {
+      "from": "phys1",
+      "from_port": 0,
+      "to": "choptop1",
+      "to_port": 0
+    },
+    {
+      "from": "choptop1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Physics CHOP — Bounce (Native)\n\nTrigger impulse with gravity.\nSimulates bouncing ball.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        400.0,
+        100.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

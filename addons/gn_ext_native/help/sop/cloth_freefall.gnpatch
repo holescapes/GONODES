@@ -1,0 +1,158 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "grid1": {
+      "type": "GridSOP",
+      "position": [
+        100,
+        200
+      ],
+      "parameters": {
+        "size_x": {
+          "value": 2.0
+        },
+        "size_y": {
+          "value": 2.0
+        },
+        "rows": {
+          "value": 25
+        },
+        "cols": {
+          "value": 25
+        }
+      }
+    },
+    "cloth1": {
+      "type": "ClothSOPNative",
+      "position": [
+        500,
+        200
+      ],
+      "parameters": {
+        "gravity": {
+          "value": -9.8,
+          "expression": "cos(time * 0.6) * 1.5",
+          "mode": "EXPRESSION"
+        },
+        "damping": {
+          "value": 0.995,
+          "expression": "sin(time * 2.0) * 0.5 + 0.5",
+          "mode": "EXPRESSION"
+        },
+        "iterations": {
+          "value": 16
+        },
+        "stiffness": {
+          "value": 0.5
+        },
+        "pin_mode": {
+          "value": 3
+        },
+        "substeps": {
+          "value": 4.0
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        900,
+        200
+      ],
+      "parameters": {}
+    },
+    "geo1": {
+      "type": "GeometryCOMP",
+      "position": [
+        700,
+        200
+      ],
+      "parameters": {}
+    },
+    "camera1": {
+      "type": "CameraCOMP",
+      "position": [
+        900,
+        400
+      ],
+      "parameters": {
+        "tz": {
+          "value": 5.0
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1200,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "grid1",
+      "from_port": 0,
+      "to": "cloth1",
+      "to_port": 0
+    },
+    {
+      "from": "cloth1",
+      "from_port": 0,
+      "to": "geo1",
+      "to_port": 0
+    },
+    {
+      "from": "geo1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "camera1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Cloth SOP — Free Fall (Soft) (Native)\n\nNo pins (mode = None): the entire cloth falls\nfreely under gravity. Low stiffness (0.5) makes\nit jelly-like. High substeps (4) and iterations\n(16) prevent explosion. Reset pulse restarts.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        520.0,
+        110.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
+}

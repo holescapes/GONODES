@@ -1,102 +1,160 @@
 {
-    "version": "1.0.0",
-    "generator": "GONODES",
-    "nodes": {
-        "source1": {
-            "type": "SourcePOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "emit_rate": {
-                    "value": 100
-                }
-            }
-        },
-        "focus1": {
-            "type": "AttractPOP",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {}
-        },
-        "pop_render": {
-            "type": "RenderPOP",
-            "position": [
-                800,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1150,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
-        }
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "source1": {
+      "type": "SourcePOP",
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {}
     },
-    "connections": [
-        {
-            "from": "source1",
-            "from_port": 0,
-            "to": "focus1",
-            "to_port": 0
+    "attract1": {
+      "type": "AttractPOPNative",
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "target_x": {
+          "value": 0.0
         },
-        {
-            "from": "focus1",
-            "from_port": 0,
-            "to": "pop_render",
-            "to_port": 0
+        "target_y": {
+          "value": 1.0
         },
-        {
-            "from": "pop_render",
-            "from_port": 0,
-            "to": "window1",
-            "to_port": 0
+        "target_z": {
+          "value": 0.0
+        },
+        "strength": {
+          "value": 10.0
+        },
+        "radius": {
+          "value": 0.0
         }
-    ],
-    "annotations": [
-        {
-            "id": "ann_1",
-            "type": "note",
-            "text": "Attract POP — Basic\n\nPoint, line, or geometry attractor/repulsor for particles.",
-            "position": [
-                -100.0,
-                -100.0
-            ],
-            "size": [
-                500.0,
-                120.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                0.8
-            ]
+      }
+    },
+    "renderpop1": {
+      "type": "RenderPOP",
+      "position": [
+        700,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
         }
-    ]
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        900,
+        100
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        }
+      }
+    },
+    "camera1": {
+      "type": "CameraCOMP",
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 5.0
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "source1",
+      "from_port": 0,
+      "to": "attract1",
+      "to_port": 0
+    },
+    {
+      "from": "attract1",
+      "from_port": 0,
+      "to": "renderpop1",
+      "to_port": 0
+    },
+    {
+      "from": "renderpop1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "camera1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "Attract POP — Basic (Native)\n\nPoint, line, or geometry attractor/repulsor for particles.\nUsing: target_x=0.0, target_y=1.0, target_z=0.0, strength=10.0.",
+      "position": [
+        -100.0,
+        -100.0
+      ],
+      "size": [
+        500.0,
+        140.0
+      ],
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        0.8
+      ]
+    }
+  ]
 }

@@ -1,0 +1,126 @@
+{
+	"nodes": {
+		"noise_a": {
+			"type": "NoiseVOL",
+			"position": {
+				"_type": "Vector2i",
+				"x": 0,
+				"y": 0
+			},
+			"parameters": {
+				"seed": {
+					"value": 1
+				},
+				"frequency": {
+					"value": 2.0
+				}
+			}
+		},
+		"noise_b": {
+			"type": "NoiseVOL",
+			"position": {
+				"_type": "Vector2i",
+				"x": 0,
+				"y": 0
+			},
+			"parameters": {
+				"seed": {
+					"value": 99
+				},
+				"frequency": {
+					"value": 4.0
+				}
+			}
+		},
+		"blend1": {
+			"type": "BlendVOLNative",
+			"position": {
+				"_type": "Vector2i",
+				"x": 200,
+				"y": 0
+			},
+			"parameters": {
+				"weight": {
+					"value": 0.3
+				}
+			}
+		},
+		"raymarch1": {
+			"type": "RaymarchVOL",
+			"position": {
+				"_type": "Vector2i",
+				"x": 400,
+				"y": 0
+			},
+			"parameters": {
+				"width": {
+					"value": 512
+				},
+				"height": {
+					"value": 512
+				},
+				"max_steps": {
+					"value": 100
+				},
+				"step_size": {
+					"value": 0.012
+				},
+				"density_scale": {
+					"value": 4.0
+				},
+				"absorption": {
+					"value": 8.0
+				},
+				"cam_dist": {
+					"value": 2.2
+				}
+			}
+		},
+		"window1": {
+			"type": "WindowOUT",
+			"position": {
+				"_type": "Vector2i",
+				"x": 600,
+				"y": 0
+			},
+			"parameters": {
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"open": {
+					"value": true
+				}
+			}
+		}
+	},
+	"connections": [
+		{
+			"from": "noise_a",
+			"from_port": 0,
+			"to": "blend1",
+			"to_port": 0
+		},
+		{
+			"from": "noise_b",
+			"from_port": 0,
+			"to": "blend1",
+			"to_port": 1
+		},
+		{
+			"from": "blend1",
+			"from_port": 0,
+			"to": "raymarch1",
+			"to_port": 0
+		},
+		{
+			"from": "raymarch1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	]
+}

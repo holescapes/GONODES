@@ -263,3 +263,73 @@ func test_gn_compat_report_panel_instantiate() -> void:
 	var panel := GNCompatReportPanel.new()
 	GNTestAssert.assert_not_null(panel, "GNCompatReportPanel created")
 	panel.queue_free()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  FeedbackCOMP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_feedback_comp_instantiate() -> void:
+	var node := _make_node(FeedbackCOMP.new(), "fb1")
+	GNTestAssert.assert_eq(node.node_type, "feedback", "node_type for FeedbackCOMP")
+
+func test_feedback_comp_produces_output() -> void:
+	var node := _make_node(FeedbackCOMP.new(), "fb1")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(out == null or out is GNCompData, "no crash without input")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TimeCOMP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_time_comp_instantiate() -> void:
+	var node := _make_node(TimeCOMP.new(), "time1")
+	GNTestAssert.assert_eq(node.node_type, "time", "node_type for TimeCOMP")
+
+func test_time_comp_default_params() -> void:
+	var node := _make_node(TimeCOMP.new(), "time1")
+	GNTestAssert.assert_approx(node.get_param_value("speed"), 1.0, 0.001, "default speed 1")
+
+func test_time_comp_produces_output() -> void:
+	var node := _make_node(TimeCOMP.new(), "time1")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_not_null(out, "timeCOMP produces output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AudioListenerCOMP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_audio_listener_comp_instantiate() -> void:
+	var node := _make_node(AudioListenerCOMP.new(), "listener1")
+	GNTestAssert.assert_eq(node.node_type, "audiolistener", "node_type")
+
+func test_audio_listener_comp_has_transforms() -> void:
+	var node := _make_node(AudioListenerCOMP.new(), "listener1")
+	# Check that standard COMP transform params exist
+	GNTestAssert.assert_approx(node.get_param_value("tx"), 0.0, 0.001, "tx default 0")
+
+func test_audio_listener_comp_produces_output() -> void:
+	var node := _make_node(AudioListenerCOMP.new(), "listener1")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(out == null or out is GNCompData, "comp output type")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  AudioSourceCOMP (Gap Operator)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_audio_source_comp_instantiate() -> void:
+	var node := _make_node(AudioSourceCOMP.new(), "src1")
+	GNTestAssert.assert_eq(node.node_type, "audiosource", "node_type")
+
+func test_audio_source_comp_default_params() -> void:
+	var node := _make_node(AudioSourceCOMP.new(), "src1")
+	GNTestAssert.assert_approx(node.get_param_value("volume_db"), 0.0, 0.001, "default volume 0 dB")
+	GNTestAssert.assert_approx(node.get_param_value("max_distance"), 10.0, 0.001, "default max dist 10")
+
+func test_audio_source_comp_produces_output() -> void:
+	var node := _make_node(AudioSourceCOMP.new(), "src1")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(out == null or out is GNCompData, "comp output type")

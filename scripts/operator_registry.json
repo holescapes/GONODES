@@ -14,6 +14,25 @@
     ]
   },
   {
+    "class_name": "AreaCHOP",
+    "node_type": "area",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/area_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "method",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "cumulative",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "AudioBandCHOP",
     "node_type": "audio_band",
     "family": "chop",
@@ -1228,6 +1247,40 @@
     ]
   },
   {
+    "class_name": "GestureCHOP",
+    "node_type": "gesture",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/gesture_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "pinch",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "swipe",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "rotate",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "decay",
+        "type": "float",
+        "default": 0.85
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "HandDetectCHOP",
     "node_type": "handdetect",
     "family": "chop",
@@ -1901,6 +1954,118 @@
     ]
   },
   {
+    "class_name": "PdControlCHOP",
+    "node_type": "pdcontrol",
+    "family": "chop",
+    "file": "addons/gn_ext_libpd/operators/chop/pd_control_chop.gd",
+    "extension": "gn_ext_libpd",
+    "params": [
+      {
+        "name": "patch",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "send_prefix",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "receive_names",
+        "type": "string",
+        "default": "out1 out2 out3"
+      },
+      {
+        "name": "send_bang",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "float_msg",
+        "type": "float",
+        "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "PdFilterCHOP",
+    "node_type": "pdfilter",
+    "family": "chop",
+    "file": "addons/gn_ext_libpd/operators/chop/pd_filter_chop.gd",
+    "extension": "gn_ext_libpd",
+    "params": [
+      {
+        "name": "patch",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "param1",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "param2",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "param3",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "wet",
+        "type": "float",
+        "default": 1.0
+      }
+    ]
+  },
+  {
+    "class_name": "PdSynthCHOP",
+    "node_type": "pdsynth",
+    "family": "chop",
+    "file": "addons/gn_ext_libpd/operators/chop/pd_synth_chop.gd",
+    "extension": "gn_ext_libpd",
+    "params": [
+      {
+        "name": "patch",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "buffer_size",
+        "type": "int",
+        "default": 512
+      },
+      {
+        "name": "frequency",
+        "type": "float",
+        "default": 440.0
+      },
+      {
+        "name": "amplitude",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "note",
+        "type": "int",
+        "default": 60
+      },
+      {
+        "name": "velocity",
+        "type": "int",
+        "default": 100
+      },
+      {
+        "name": "trigger",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "PerformCHOP",
     "node_type": "perform",
     "family": "chop",
@@ -2130,6 +2295,25 @@
         "name": "renames",
         "type": "int",
         "default": 1
+      }
+    ]
+  },
+  {
+    "class_name": "ReplaceCHOP",
+    "node_type": "replace",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/replace_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "pattern",
+        "type": "string",
+        "default": "*"
+      },
+      {
+        "name": "blend",
+        "type": "float",
+        "default": 1.0
       }
     ]
   },
@@ -2467,6 +2651,50 @@
         "name": "mass",
         "type": "float",
         "default": 1.0
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "StateMachineCHOP",
+    "node_type": "statemachine",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/state_machine_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "num_states",
+        "type": "int",
+        "default": 4
+      },
+      {
+        "name": "init_state",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "transition_time",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "loop",
+        "type": "bool",
+        "default": true
       },
       {
         "name": "reset",
@@ -3101,6 +3329,114 @@
     ]
   },
   {
+    "class_name": "AudioListenerCOMP",
+    "node_type": "audiolistener",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/audio_listener_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "tx",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "ty",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "tz",
+        "type": "float",
+        "default": 3.0
+      },
+      {
+        "name": "rx",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "ry",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "rz",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "current",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "AudioSourceCOMP",
+    "node_type": "audiosource",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/audio_source_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "tx",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "ty",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "tz",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "volume_db",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "max_distance",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "unit_size",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "attenuation",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "autoplay",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "loop",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "playing",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "BoneCOMP",
     "node_type": "bone",
     "family": "comp",
@@ -3522,6 +3858,25 @@
         "name": "fog_length",
         "type": "float",
         "default": 64.0
+      }
+    ]
+  },
+  {
+    "class_name": "FeedbackCOMP",
+    "node_type": "feedback",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/feedback_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "blend",
+        "type": "float",
+        "default": 1.0
       }
     ]
   },
@@ -4588,6 +4943,50 @@
     "params": []
   },
   {
+    "class_name": "TimeCOMP",
+    "node_type": "time",
+    "family": "comp",
+    "file": "addons/gonodes/operators/comp/time_comp.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "play",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "speed",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "range_start",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "range_end",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "loop",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "reset",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "set_time",
+        "type": "float",
+        "default": -1.0
+      }
+    ]
+  },
+  {
     "class_name": "VehicleCOMP",
     "node_type": "vehicle",
     "family": "comp",
@@ -5489,6 +5888,30 @@
     ]
   },
   {
+    "class_name": "ParameterDAT",
+    "node_type": "parameter",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/parameter_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "node_id",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "show_defaults",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "show_ranges",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "QRCodeDAT",
     "node_type": "qrcode",
     "family": "dat",
@@ -5776,6 +6199,30 @@
     "file": "addons/gonodes/operators/dat/switch_dat.gd",
     "extension": null,
     "params": []
+  },
+  {
+    "class_name": "SystemDAT",
+    "node_type": "system",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/system_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "hardware",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "memory",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "display",
+        "type": "bool",
+        "default": true
+      }
+    ]
   },
   {
     "class_name": "TOPtoDAT",
@@ -9986,6 +10433,35 @@
     ]
   },
   {
+    "class_name": "ConvertLineSOP",
+    "node_type": "convertline",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/convert_line_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "target",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "segments",
+        "type": "int",
+        "default": 16
+      },
+      {
+        "name": "tension",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "closed",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "CopySOP",
     "node_type": "copy",
     "family": "sop",
@@ -10006,6 +10482,30 @@
         "name": "use_point_scale",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "CreepSOP",
+    "node_type": "creep",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/creep_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "distance",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "direction",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "seed",
+        "type": "int",
+        "default": 0
       }
     ]
   },
@@ -10507,6 +11007,30 @@
     ]
   },
   {
+    "class_name": "HoleSOP",
+    "node_type": "hole",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/hole_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "plane",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "tolerance",
+        "type": "float",
+        "default": 0.001
+      },
+      {
+        "name": "invert",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "IsoSurfaceSOP",
     "node_type": "isosurface",
     "family": "sop",
@@ -10743,6 +11267,30 @@
         "name": "att_z",
         "type": "float",
         "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "MeasureSOP",
+    "node_type": "measure",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/measure_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "area",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "perimeter",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "curvature",
+        "type": "bool",
+        "default": false
       }
     ]
   },
@@ -11380,6 +11928,30 @@
       },
       {
         "name": "face_id",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "ProjectSOP",
+    "node_type": "project",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/project_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "axis",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "offset",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "recompute_normals",
         "type": "bool",
         "default": true
       }
