@@ -11,20 +11,20 @@ func cook():
 	outputs[1].set_headers(PackedStringArray(["channel", "min", "max", "avg", "rms"]))
 
 	for ch_name in src.get_channel_names():
-		var samples := src.get_channel(ch_name)
+		var samples = src.get_channel(ch_name)
 		if samples.is_empty():
 			continue
-		var mn := INF
-		var mx := -INF
-		var sum := 0.0
-		var sq_sum := 0.0
+		var mn = INF
+		var mx = -INF
+		var sum = 0.0
+		var sq_sum = 0.0
 		for s in samples:
 			mn = minf(mn, s)
 			mx = maxf(mx, s)
 			sum += s
 			sq_sum += s * s
-		var avg := sum / samples.size()
-		var rms := sqrt(sq_sum / samples.size())
+		var avg = sum / samples.size()
+		var rms = sqrt(sq_sum / samples.size())
 
 		outputs[0].set_single_value(ch_name + "_min", mn)
 		outputs[0].set_single_value(ch_name + "_max", mx)

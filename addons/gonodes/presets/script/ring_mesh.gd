@@ -4,28 +4,28 @@
 # @param float twist 0.0 Twist amount (radians)
 
 func cook():
-	var st := SurfaceTool.new()
+	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 
-	var segs := par("segments")
-	var r_inner := par("inner_radius")
-	var r_outer := par("outer_radius")
-	var tw := par("twist")
+	var segs = par("segments")
+	var r_inner = par("inner_radius")
+	var r_outer = par("outer_radius")
+	var tw = par("twist")
 
 	for i in range(segs):
-		var t0 := float(i) / float(segs) * TAU
-		var t1 := float(i + 1) / float(segs) * TAU
+		var t0 = float(i) / float(segs) * TAU
+		var t1 = float(i + 1) / float(segs) * TAU
 
-		var twist0 := float(i) / float(segs) * tw
-		var twist1 := float(i + 1) / float(segs) * tw
+		var twist0 = float(i) / float(segs) * tw
+		var twist1 = float(i + 1) / float(segs) * tw
 
 		# Inner and outer vertices for two consecutive segments
-		var vi0 := Vector3(cos(t0) * r_inner, sin(twist0) * 0.1, sin(t0) * r_inner)
-		var vo0 := Vector3(cos(t0) * r_outer, 0.0, sin(t0) * r_outer)
-		var vi1 := Vector3(cos(t1) * r_inner, sin(twist1) * 0.1, sin(t1) * r_inner)
-		var vo1 := Vector3(cos(t1) * r_outer, 0.0, sin(t1) * r_outer)
+		var vi0 = Vector3(cos(t0) * r_inner, sin(twist0) * 0.1, sin(t0) * r_inner)
+		var vo0 = Vector3(cos(t0) * r_outer, 0.0, sin(t0) * r_outer)
+		var vi1 = Vector3(cos(t1) * r_inner, sin(twist1) * 0.1, sin(t1) * r_inner)
+		var vo1 = Vector3(cos(t1) * r_outer, 0.0, sin(t1) * r_outer)
 
-		var normal := Vector3.UP
+		var normal = Vector3.UP
 		st.set_normal(normal)
 
 		# Triangle 1

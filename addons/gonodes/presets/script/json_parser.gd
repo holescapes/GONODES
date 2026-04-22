@@ -2,8 +2,8 @@
 # @param bool flatten true Flatten nested keys with dot notation
 
 func cook():
-	var json := JSON.new()
-	var err := json.parse(par("json_text"))
+	var json = JSON.new()
+	var err = json.parse(par("json_text"))
 	if err != OK:
 		op.set_headers(PackedStringArray(["error"]))
 		op.append_row(PackedStringArray(["Parse error: " + json.get_error_message()]))

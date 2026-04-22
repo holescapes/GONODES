@@ -15,13 +15,13 @@ func cook():
 	if par("transpose"):
 		# Each row is a channel: [name, val0, val1, ...]
 		if par("headers"):
-			var hdr := PackedStringArray(["channel"])
+			var hdr = PackedStringArray(["channel"])
 			for s in range(chop_in.length):
 				hdr.append("s%d" % s)
 			op.set_headers(hdr)
 		for ch_name in ch_names:
 			var samples = chop_in.get_channel(ch_name)
-			var row := PackedStringArray([ch_name])
+			var row = PackedStringArray([ch_name])
 			for s in range(samples.size()):
 				row.append("%.4f" % samples[s])
 			op.append_row(row)
@@ -30,7 +30,7 @@ func cook():
 		if par("headers"):
 			op.set_headers(ch_names)
 		for s in range(chop_in.length):
-			var row := PackedStringArray()
+			var row = PackedStringArray()
 			for ch_name in ch_names:
 				var samples = chop_in.get_channel(ch_name)
 				if s < samples.size():

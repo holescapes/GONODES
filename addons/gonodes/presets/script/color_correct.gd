@@ -7,17 +7,17 @@ func cook():
 	var src = inputs[0] if inputs.size() > 0 else null
 	if src == null or not (src is GNImageData):
 		return
-	var img := src.image.duplicate() as Image
+	var img = src.image.duplicate() as Image
 	if img == null:
 		return
 
-	var contrast := par("contrast")
-	var bright := par("brightness")
-	var sat := par("saturation")
+	var contrast = par("contrast")
+	var bright = par("brightness")
+	var sat = par("saturation")
 
 	for y in range(img.get_height()):
 		for x in range(img.get_width()):
-			var c := img.get_pixel(x, y)
+			var c = img.get_pixel(x, y)
 			# Brightness
 			c.r = clampf(c.r + bright, 0.0, 1.0)
 			c.g = clampf(c.g + bright, 0.0, 1.0)
@@ -27,7 +27,7 @@ func cook():
 			c.g = clampf((c.g - 0.5) * contrast + 0.5, 0.0, 1.0)
 			c.b = clampf((c.b - 0.5) * contrast + 0.5, 0.0, 1.0)
 			# Saturation
-			var gray := c.r * 0.299 + c.g * 0.587 + c.b * 0.114
+			var gray = c.r * 0.299 + c.g * 0.587 + c.b * 0.114
 			c.r = clampf(lerpf(gray, c.r, sat), 0.0, 1.0)
 			c.g = clampf(lerpf(gray, c.g, sat), 0.0, 1.0)
 			c.b = clampf(lerpf(gray, c.b, sat), 0.0, 1.0)

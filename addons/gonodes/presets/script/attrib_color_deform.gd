@@ -21,10 +21,10 @@ func cook():
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 	# Accumulate attrib arrays across all surfaces
-	var all_cd_r := PackedFloat32Array()
-	var all_cd_g := PackedFloat32Array()
-	var all_cd_b := PackedFloat32Array()
-	var all_mask := PackedFloat32Array()
+	var all_cd_r = PackedFloat32Array()
+	var all_cd_g = PackedFloat32Array()
+	var all_cd_b = PackedFloat32Array()
+	var all_mask = PackedFloat32Array()
 
 	for surf_idx in range(geo.get_surface_count()):
 		var arrays = geo.get_surface_arrays(surf_idx)

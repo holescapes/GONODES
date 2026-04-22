@@ -1,7 +1,7 @@
 # @param string format %H:%M:%S Time format string
 
 func cook():
-	var dict := Time.get_datetime_dict_from_system()
+	var dict = Time.get_datetime_dict_from_system()
 	op.set_headers(PackedStringArray(["key", "value"]))
 	op.append_row(PackedStringArray(["year", str(dict.year)]))
 	op.append_row(PackedStringArray(["month", str(dict.month)]))

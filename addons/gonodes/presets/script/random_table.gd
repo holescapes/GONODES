@@ -4,16 +4,16 @@
 # @param bool integer_mode false Output integers instead of floats
 
 func cook():
-	var rng := RandomNumberGenerator.new()
+	var rng = RandomNumberGenerator.new()
 	rng.seed = hash(par("seed"))
 
-	var headers := PackedStringArray()
+	var headers = PackedStringArray()
 	for c in range(par("cols")):
 		headers.append("col_%d" % c)
 	op.set_headers(headers)
 
 	for r in range(par("rows")):
-		var row := PackedStringArray()
+		var row = PackedStringArray()
 		for c in range(par("cols")):
 			if par("integer_mode"):
 				row.append(str(rng.randi_range(0, 100)))
