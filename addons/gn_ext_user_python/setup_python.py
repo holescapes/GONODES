@@ -12,6 +12,7 @@ Usage:
   python addons/gn_ext_user_python/setup_python.py
   python addons/gn_ext_user_python/setup_python.py --python-version 3.12.8
   python addons/gn_ext_user_python/setup_python.py --skip-numpy
+  python addons/gn_ext_user_python/setup_python.py --verify
 
 Requirements: Python 3.8+ (for running this script), internet connection.
 """
@@ -326,13 +327,118 @@ def enable_gdextension():
     enabled = os.path.join(NATIVE_DIR, "gn_python.gdextension")
     if os.path.isfile(enabled):
         log("gn_python.gdextension already enabled.")
-        return True
-    if os.path.isfile(disabled):
+    elif os.path.isfile(disabled):
         os.rename(disabled, enabled)
         log("Enabled gn_python.gdextension")
-        return True
-    log("WARNING: Neither .gdextension nor .gdextension.disabled found")
-    return False
+    else:
+        log("WARNING: Neither .gdextension nor .gdextension.disabled found")
+        return False
+    # Always ensure Python DLLs are linked
+    link_python_dlls()
+    return True
+
+
+def link_python_dlls():
+    """Copy Python DLLs next to the extension binary so Windows can find them.
+
+    Godot loads the .gdextension DLL at engine startup, before any GDScript
+    runs. The DLL is linked against python312.lib, so Windows needs python312.dll
+    in the DLL's own directory (or on PATH). We copy from toolchain/python/.
+    """
+    if platform.system() != "Windows":
+        return  # Linux/macOS use rpath or system library paths
+
+    bin_dir = os.path.join(NATIVE_DIR, "bin", "win64")
+    if not os.path.isdir(bin_dir):
+        return  # Extension not built yet
+
+    for dll_name in ["python3.dll", "python312.dll"]:
+        src = os.path.join(TOOLCHAIN_DIR, dll_name)
+        dst = os.path.join(bin_dir, dll_name)
+        if os.path.isfile(src) and not os.path.isfile(dst):
+            shutil.copy2(src, dst)
+            log(f"Copied {dll_name} \u2192 native/bin/win64/")
+        elif os.path.isfile(dst):
+            # Check if toolchain version is newer
+            if os.path.isfile(src) and os.path.getmtime(src) > os.path.getmtime(dst):
+                shutil.copy2(src, dst)
+                log(f"Updated {dll_name} \u2192 native/bin/win64/")
+
+
+# ── Verify ────────────────────────────────────────────────────────────────────
+
+def verify_toolchain() -> int:
+    """Check that the bundled Python toolchain is present and functional."""
+    ok = True
+
+    if not os.path.isdir(TOOLCHAIN_DIR):
+        log(f"[X] toolchain/python/ — MISSING")
+        log(f"    Run without --verify to download.")
+        return 1
+
+    # Check python executable
+    if platform.system() == "Windows":
+        python_exe = os.path.join(TOOLCHAIN_DIR, "python.exe")
+    else:
+        python_exe = os.path.join(TOOLCHAIN_DIR, "bin", "python3")
+
+    if os.path.isfile(python_exe):
+        result = subprocess.run(
+            [python_exe, "--version"],
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            log(f"[+] Python: {result.stdout.strip()}")
+        else:
+            log(f"[X] Python executable found but failed to run")
+            ok = False
+    else:
+        log(f"[X] Python executable not found at {python_exe}")
+        ok = False
+
+    # Check NumPy
+    if os.path.isfile(python_exe):
+        result = subprocess.run(
+            [python_exe, "-c", "import numpy; print(numpy.__version__)"],
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            log(f"[+] NumPy: {result.stdout.strip()}")
+        else:
+            log(f"[X] NumPy — NOT INSTALLED")
+            ok = False
+
+    # Check .gdextension
+    gdext = os.path.join(EXT_DIR, "native", "gn_python.gdextension")
+    if os.path.isfile(gdext):
+        log(f"[+] gn_python.gdextension enabled")
+    else:
+        disabled = gdext + ".disabled"
+        if os.path.isfile(disabled):
+            log(f"[!] gn_python.gdextension.disabled — not enabled")
+        else:
+            log(f"[X] gn_python.gdextension — MISSING")
+            ok = False
+
+    # Check Python DLLs next to extension binary (Windows only)
+    if platform.system() == "Windows":
+        bin_dir = os.path.join(NATIVE_DIR, "bin", "win64")
+        for dll_name in ["python3.dll", "python312.dll"]:
+            dll_path = os.path.join(bin_dir, dll_name)
+            if os.path.isfile(dll_path):
+                size_mb = os.path.getsize(dll_path) / (1024 * 1024)
+                log(f"[+] native/bin/win64/{dll_name} ({size_mb:.1f} MB)")
+            else:
+                log(f"[X] native/bin/win64/{dll_name} — MISSING (Godot can't load the extension)")
+                log(f"    Run: python setup_python.py  (copies from toolchain/)")
+                ok = False
+
+    print("-" * 50)
+    if ok:
+        log("Toolchain ready!")
+    else:
+        log("Toolchain incomplete — run without --verify to install.")
+    return 0 if ok else 1
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -346,11 +452,16 @@ def main():
                         help="Skip NumPy installation")
     parser.add_argument("--no-enable", action="store_true",
                         help="Don't rename .gdextension.disabled")
+    parser.add_argument("--verify", action="store_true",
+                        help="Check existing toolchain only, don't install")
     args = parser.parse_args()
 
     print("=" * 60)
     print("GONODES gn_ext_user_python — Automated Setup")
     print("=" * 60)
+
+    if args.verify:
+        return verify_toolchain()
 
     system = platform.system()
     ok = False
@@ -379,6 +490,10 @@ def main():
         print()
         log("Enabling GDExtension...")
         enable_gdextension()
+
+    # Copy Python DLLs next to extension binary (even if already enabled)
+    if ok:
+        link_python_dlls()
 
     # Set GONODES_PYTHON_HOME for Windows embeddable
     if system == "Windows" and ok and os.path.isdir(TOOLCHAIN_DIR):

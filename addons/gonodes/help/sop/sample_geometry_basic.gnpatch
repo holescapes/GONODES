@@ -1,0 +1,126 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "sample_geometry1": {
+            "type": "SampleGeometrySOP",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "sample": {
+                    "value": 0
+                }
+            }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
+            "type": "CameraCOMP",
+            "position": [
+                500,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "sample_geometry1",
+            "from_port": 0,
+            "to": "geo1",
+            "to_port": 0
+        },
+        {
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SampleGeometrySOP \u2014 Basic\n\nSuzanne (Blender monkey head) \u2014 UV-mapped and textured.\nChange the 'sample' parameter to try other meshes:\n  \u2022 Fox \u2014 rigged skeleton with walk/run animations, textured\n  \u2022 Duck \u2014 classic rubber duck, textured\n  \u2022 Teapot \u2014 Utah Teapot, geometry only (no UVs/textures)\n  \u2022 Damaged Helmet \u2014 full PBR (normal, emissive, metallic-roughness)",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                520.0,
+                180.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

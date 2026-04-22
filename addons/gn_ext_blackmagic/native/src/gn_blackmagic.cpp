@@ -105,8 +105,14 @@ HRESULT STDMETHODCALLTYPE DeckLinkCaptureCallback::VideoInputFrameArrived(
         return S_OK;
     }
 
+    // DeckLink SDK 14+: GetBytes moved to IDeckLinkVideoBuffer interface
+    IDeckLinkVideoBuffer *vbuf = nullptr;
+    if (FAILED(video->QueryInterface(IID_IDeckLinkVideoBuffer, reinterpret_cast<void **>(&vbuf))) || !vbuf)
+        return S_OK;
     void *raw = nullptr;
-    if (FAILED(video->GetBytes(&raw)) || !raw) return S_OK;
+    HRESULT gbhr = vbuf->GetBytes(&raw);
+    vbuf->Release();
+    if (FAILED(gbhr) || !raw) return S_OK;
 
     int fw = static_cast<int>(video->GetWidth());
     int fh = static_cast<int>(video->GetHeight());
@@ -200,6 +206,11 @@ HRESULT STDMETHODCALLTYPE DeckLinkOutputFrame::QueryInterface(REFIID iid, LPVOID
         AddRef();
         return S_OK;
     }
+    if (iid == IID_IDeckLinkVideoBuffer) {
+        *ppv = static_cast<IDeckLinkVideoBuffer *>(this);
+        AddRef();
+        return S_OK;
+    }
     *ppv = nullptr;
     return E_NOINTERFACE;
 }
@@ -217,6 +228,12 @@ ULONG STDMETHODCALLTYPE DeckLinkOutputFrame::Release() {
 HRESULT STDMETHODCALLTYPE DeckLinkOutputFrame::GetBytes(void **buffer) {
     if (!buffer) return E_POINTER;
     *buffer = _frame_data.data();
+    return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE DeckLinkOutputFrame::GetSize(ULONGLONG *size) {
+    if (!size) return E_POINTER;
+    *size = static_cast<ULONGLONG>(_frame_data.size());
     return S_OK;
 }
 
@@ -461,50 +478,50 @@ bool GNBlackmagic::open_input(int device_index, int width, int height, float fps
         return false;
     }
 
-    HRESULT hr = entry.device->QueryInterface(IID_IDeckLinkInput, reinterpret_cast<void **>(&_input));
-    if (FAILED(hr) || !_input) {
+    HRESULT hr = entry.device->QueryInterface(IID_IDeckLinkInput, reinterpret_cast<void **>(&_dk_input));
+    if (FAILED(hr) || !_dk_input) {
         UtilityFunctions::printerr("GNBlackmagic: Failed to get IDeckLinkInput interface.");
         return false;
     }
 
-    BMDDisplayMode display_mode = _find_display_mode(_input, width, height, fps);
+    BMDDisplayMode display_mode = _find_display_mode(_dk_input, width, height, fps);
 
-    BMDDisplayModeSupport support = bmdDisplayModeNotSupported;
-    hr = _input->DoesSupportVideoMode(
+    BOOL mode_supported = FALSE;
+    hr = _dk_input->DoesSupportVideoMode(
         bmdVideoConnectionUnspecified, display_mode,
         bmdFormat8BitYUV, bmdNoVideoInputConversion,
-        bmdSupportedVideoModeDefault, nullptr, &support);
+        bmdSupportedVideoModeDefault, nullptr, &mode_supported);
 
-    if (FAILED(hr) || support == bmdDisplayModeNotSupported) {
+    if (FAILED(hr) || !mode_supported) {
         UtilityFunctions::printerr("GNBlackmagic: Requested video mode not supported.");
-        _input->Release();
-        _input = nullptr;
+        _dk_input->Release();
+        _dk_input = nullptr;
         return false;
     }
 
     _capture_cb = new DeckLinkCaptureCallback(width, height);
-    _input->SetCallback(_capture_cb);
+    _dk_input->SetCallback(_capture_cb);
 
-    hr = _input->EnableVideoInput(display_mode, bmdFormat8BitYUV, bmdVideoInputFlagDefault);
+    hr = _dk_input->EnableVideoInput(display_mode, bmdFormat8BitYUV, bmdVideoInputFlagDefault);
     if (FAILED(hr)) {
         UtilityFunctions::printerr("GNBlackmagic: EnableVideoInput failed.");
-        _input->SetCallback(nullptr);
+        _dk_input->SetCallback(nullptr);
         _capture_cb->Release();
         _capture_cb = nullptr;
-        _input->Release();
-        _input = nullptr;
+        _dk_input->Release();
+        _dk_input = nullptr;
         return false;
     }
 
-    hr = _input->StartStreams();
+    hr = _dk_input->StartStreams();
     if (FAILED(hr)) {
         UtilityFunctions::printerr("GNBlackmagic: StartStreams failed.");
-        _input->DisableVideoInput();
-        _input->SetCallback(nullptr);
+        _dk_input->DisableVideoInput();
+        _dk_input->SetCallback(nullptr);
         _capture_cb->Release();
         _capture_cb = nullptr;
-        _input->Release();
-        _input = nullptr;
+        _dk_input->Release();
+        _dk_input = nullptr;
         return false;
     }
 
@@ -519,12 +536,12 @@ bool GNBlackmagic::open_input(int device_index, int width, int height, float fps
 
 void GNBlackmagic::close_input() {
 #ifdef GN_BLACKMAGIC_HAS_DECKLINK
-    if (_input) {
-        _input->StopStreams();
-        _input->DisableVideoInput();
-        _input->SetCallback(nullptr);
-        _input->Release();
-        _input = nullptr;
+    if (_dk_input) {
+        _dk_input->StopStreams();
+        _dk_input->DisableVideoInput();
+        _dk_input->SetCallback(nullptr);
+        _dk_input->Release();
+        _dk_input = nullptr;
     }
     if (_capture_cb) {
         _capture_cb->Release();

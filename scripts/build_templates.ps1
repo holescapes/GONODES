@@ -191,6 +191,11 @@ function Write-Fail([string]$msg)  { Write-Host "  [XX] $msg"   -ForegroundColor
 function Find-Godot {
     if ($GodotPath -and (Test-Path $GodotPath)) { return (Resolve-Path $GodotPath).Path }
 
+    # Check GONODES_GODOT environment variable
+    if ($env:GONODES_GODOT -and (Test-Path $env:GONODES_GODOT)) {
+        return (Resolve-Path $env:GONODES_GODOT).Path
+    }
+
     # Search PATH
     foreach ($name in @("godot", "godot.exe", "godot4", "Godot")) {
         $cmd = Get-Command $name -ErrorAction SilentlyContinue
@@ -605,7 +610,8 @@ if ($RestoreOnly) {
 $godot = Find-Godot
 if (-not $godot) {
     Write-Fail "Godot editor binary not found."
-    Write-Fail 'Use -GodotPath, e.g.:  .\build_templates.ps1 -GodotPath "C:\path\to\godot.exe"'
+    Write-Fail 'Set $env:GONODES_GODOT = "C:\path\to\godot.exe"'
+    Write-Fail 'Or use -GodotPath:  .\build_templates.ps1 -GodotPath "C:\path\to\godot.exe"'
     exit 1
 }
 Write-Ok "Godot:   $godot"

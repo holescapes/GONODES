@@ -1,6 +1,7 @@
 #include "gn_native_hole_sop.h"
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/vector3.hpp>
+#include <vector>
 namespace godot {
 void GNNativeHoleSop::_bind_methods() {
     ClassDB::bind_method(D_METHOD("process", "mesh_verts", "mesh_indices", "hole_points",

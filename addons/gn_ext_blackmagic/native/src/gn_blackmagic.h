@@ -76,7 +76,7 @@ private:
 // ── Output Frame ─────────────────────────────────────────────────────────────
 // Custom video frame for scheduled playback output.
 
-class DeckLinkOutputFrame : public IDeckLinkMutableVideoFrame {
+class DeckLinkOutputFrame : public IDeckLinkMutableVideoFrame, public IDeckLinkVideoBuffer {
 public:
     DeckLinkOutputFrame(int width, int height, BMDPixelFormat format);
     virtual ~DeckLinkOutputFrame();
@@ -92,7 +92,6 @@ public:
     long    STDMETHODCALLTYPE GetRowBytes() override { return _row_bytes; }
     BMDPixelFormat STDMETHODCALLTYPE GetPixelFormat() override { return _format; }
     BMDFrameFlags  STDMETHODCALLTYPE GetFlags() override { return bmdFrameFlagDefault; }
-    HRESULT STDMETHODCALLTYPE GetBytes(void **buffer) override;
     HRESULT STDMETHODCALLTYPE GetTimecode(BMDTimecodeFormat, IDeckLinkTimecode **) override { return S_FALSE; }
     HRESULT STDMETHODCALLTYPE GetAncillaryData(IDeckLinkVideoFrameAncillary **) override { return S_FALSE; }
 
@@ -102,6 +101,13 @@ public:
     HRESULT STDMETHODCALLTYPE SetTimecodeFromComponents(BMDTimecodeFormat, uint8_t, uint8_t, uint8_t, uint8_t, BMDTimecodeFlags) override { return S_OK; }
     HRESULT STDMETHODCALLTYPE SetAncillaryData(IDeckLinkVideoFrameAncillary *) override { return S_OK; }
     HRESULT STDMETHODCALLTYPE SetTimecodeUserBits(BMDTimecodeFormat, BMDTimecodeUserBits) override { return S_OK; }
+    HRESULT STDMETHODCALLTYPE SetInterfaceProvider(REFIID, IUnknown *) override { return S_OK; }
+
+    // IDeckLinkVideoBuffer
+    HRESULT STDMETHODCALLTYPE GetBytes(void **buffer) override;
+    HRESULT STDMETHODCALLTYPE GetSize(ULONGLONG *size) override;
+    HRESULT STDMETHODCALLTYPE StartAccess(BMDBufferAccessFlags) override { return S_OK; }
+    HRESULT STDMETHODCALLTYPE EndAccess(BMDBufferAccessFlags) override { return S_OK; }
 
     void write_uyvy_from_rgba(const uint8_t *rgba_data, int rgba_width, int rgba_height);
 
@@ -169,7 +175,7 @@ private:
     BMDDisplayMode _find_output_display_mode(IDeckLinkOutput *output, int width, int height, float fps) const;
 
     // Input state
-    IDeckLinkInput *_input = nullptr;
+    IDeckLinkInput *_dk_input = nullptr;
     DeckLinkCaptureCallback *_capture_cb = nullptr;
     int _input_width = 0, _input_height = 0;
 

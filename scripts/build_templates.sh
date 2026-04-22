@@ -172,9 +172,15 @@ done
 # ─── Godot Discovery ──────────────────────────────────────────────────────────
 
 find_godot() {
-    # Explicit path
+    # Explicit path (--godot flag)
     if [[ -n "$GODOT_PATH" && -x "$GODOT_PATH" ]]; then
         echo "$GODOT_PATH"
+        return
+    fi
+
+    # GONODES_GODOT environment variable
+    if [[ -n "${GONODES_GODOT:-}" && -x "$GONODES_GODOT" ]]; then
+        echo "$GONODES_GODOT"
         return
     fi
 
@@ -562,7 +568,8 @@ fi
 GODOT="$(find_godot)"
 if [[ -z "$GODOT" ]]; then
     fail "Godot editor binary not found."
-    fail "Use --godot /path/to/godot"
+    fail "Set GONODES_GODOT=/path/to/godot in your environment"
+    fail "Or use: --godot /path/to/godot"
     exit 1
 fi
 ok "Godot:   $GODOT"

@@ -91,9 +91,19 @@ for ext_name, ext_native_dir, cfg_path in extensions:
     print(f"Building {ext_name} ({cfg['lib_name']})")
     print(f"{'='*60}")
 
-    godotcpp_root = os.path.abspath(
-        os.path.join(ext_native_dir, "..", "..", "gn_ext_native", "native", "godot-cpp")
-    )
+    # Walk upward from ext_native_dir to find the addons/ dir containing gn_ext_native.
+    # Handles both top-level (native/) and nested (native/azure_kinect/) layouts.
+    godotcpp_root = None
+    _search = ext_native_dir
+    for _ in range(6):
+        _search = os.path.dirname(_search)
+        _candidate = os.path.join(_search, "gn_ext_native", "native", "godot-cpp")
+        if os.path.isdir(_candidate):
+            godotcpp_root = os.path.abspath(_candidate)
+            break
+    if godotcpp_root is None:
+        skipped.append((ext_name, "could not locate godot-cpp"))
+        continue
 
     result = make_env(plat, target, arch, godotcpp_root, cfg, ext_native_dir)
     if result is None:

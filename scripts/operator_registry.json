@@ -12059,6 +12059,20 @@
     ]
   },
   {
+    "class_name": "SampleGeometrySOP",
+    "node_type": "sample_geometry",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/sample_geometry_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "sample",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "ScatterSOP",
     "node_type": "scatter",
     "family": "sop",

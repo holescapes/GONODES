@@ -33,3 +33,59 @@ All are under permissive open-source licenses that allow redistribution.
    URL:         https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky
    Attribution: None required (CC0), but credit to Poly Haven is appreciated.
    Note:        1K equirectangular HDR panorama for CubeMapTOP testing.
+
+
+4. meshes/suzanne/ (Suzanne.gltf, Suzanne.bin, textures)
+   ──────────────────────────────────────────────────────
+   Title:       Suzanne (Blender Monkey Head)
+   Author:      Norbert Nopper / UX3D
+   License:     CC0 1.0 Universal (Public Domain)
+   URL:         https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/Suzanne
+   Attribution: None required (CC0).
+   Note:        Classic CG test mesh from the Khronos glTF Sample Assets repo.
+
+
+5. meshes/fox.glb
+   ───────────────
+   Title:       Fox (Animated)
+   Authors:     PixelMannen (model, CC0), tomkranis (rigging & animation, CC BY 4.0),
+                @AsoboStudio & @scurest (glTF conversion, CC BY 4.0)
+   License:     CC0 1.0 (model) / CC BY 4.0 (rigging, animation, conversion)
+   URL:         https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/Fox
+   Attribution: Rigging & animation by tomkranis. glTF conversion by
+                @AsoboStudio and @scurest. Licensed under CC BY 4.0.
+   Note:        Skeletal mesh with Survey, Walk, and Run animation cycles.
+                From the Khronos glTF Sample Assets repo.
+
+
+6. meshes/duck.glb
+   ────────────────
+   Title:       Duck
+   Author:      Sony Computer Entertainment Inc.
+   License:     SCEA Shared Source License, Version 1.0
+   URL:         https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/Duck
+   Attribution: © Sony Computer Entertainment Inc.
+   Note:        Classic glTF test model from the Khronos glTF Sample Assets repo.
+
+
+7. meshes/teapot.glb
+   ──────────────────
+   Title:       Utah Teapot
+   Author:      Martin Newell (University of Utah, 1975)
+   License:     Public Domain
+   URL:         https://graphics.stanford.edu/courses/cs148-10-summer/as3/code/as3/teapot.obj
+   Attribution: None required (public domain).
+   Note:        The original CG benchmark mesh. Geometry only — no UVs, no textures,
+                no rig. Converted from OBJ to GLB via trimesh.
+
+
+8. meshes/damaged_helmet.glb
+   ──────────────────────────
+   Title:       Damaged Helmet
+   Author:      theblueturtle_ (original), ctxwing (conversion to glTF)
+   License:     Creative Commons Attribution 3.0 (CC BY 3.0)
+   URL:         https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/DamagedHelmet
+   Attribution: © theblueturtle_. Conversion by ctxwing. Licensed under CC BY 3.0.
+   Note:        Battle-worn sci-fi helmet with full PBR material set (base color,
+                normal, emissive, occlusion, metallic-roughness maps).
+                From the Khronos glTF Sample Assets repo.

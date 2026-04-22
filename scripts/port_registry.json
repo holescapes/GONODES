@@ -5156,6 +5156,20 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/reverse_sop.gd"
   },
+  "SampleGeometrySOP": {
+    "class_name": "SampleGeometrySOP",
+    "family": "SOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/sample_geometry_sop.gd"
+  },
   "ScatterSOP": {
     "class_name": "ScatterSOP",
     "family": "SOP",

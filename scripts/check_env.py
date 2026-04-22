@@ -123,6 +123,13 @@ def check_cpp_compiler():
 
 def check_godot(versions: dict):
     expected = versions.get("GODOT_VERSION", "")
+    # Check GONODES_GODOT environment variable first
+    env_godot = os.environ.get("GONODES_GODOT", "")
+    if env_godot and os.path.isfile(env_godot):
+        out = _run_quiet([env_godot, "--version"])
+        if out:
+            record(PASS, "Godot editor", f"{out.split(chr(10))[0]} (via GONODES_GODOT)")
+            return
     # Try common binary names
     for name in ["godot", f"Godot_v{expected}-stable_win64_console"]:
         exe = shutil.which(name)
