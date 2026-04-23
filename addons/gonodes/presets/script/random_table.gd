@@ -1,3 +1,4 @@
+# @output dat Output table
 # @param int cols 5 Number of columns
 # @param int rows 5 Number of rows
 # @param float seed 0.0 Random seed offset

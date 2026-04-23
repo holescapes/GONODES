@@ -177,6 +177,9 @@ Signature: `func get_device_menu() -> PackedStringArray`. Used by: BlackmagicInI
 | Extension configs | `addons/gn_ext_<name>/gn_extension.cfg` |
 | Core config | `addons/gonodes/gn_core.cfg` |
 | Help patches | `addons/gonodes/help/<family>/` or `addons/gn_ext_<name>/help/<family>/` |
+| C++ SDK headers | `addons/gn_ext_user_native/sdk/` (auto-included via `{sdk_path}`) |
+| Python SDK modules | `addons/gn_ext_user_python/sdk/gonodes/` (auto-imported via `sys.path`) |
+| Extension presets | `addons/gn_ext_<name>/presets/<folder>/` (auto-discovered by `GNPresetPaths`) |
 | Scripts | `scripts/` |
 | Dev docs | `dev_docs/` |
 | Context file | `GONODES_CONTEXT.md` (5000+ lines — read specific sections on demand) |
@@ -193,3 +196,31 @@ Signature: `func get_device_menu() -> PackedStringArray`. Used by: BlackmagicInI
 - New operator checklist: `dev_docs/NEW_OPERATOR_CHECKLIST.md`
 - Script reference: `dev_docs/SCRIPTS.md`
 - Host data formats: `dev_docs/HOST_DATA_GUIDE.md`
+
+## Script Node SDKs & Multi-Output
+
+Three script node types exist: **GDScriptSCRIPT** (GDScript), **NativeSCRIPT** (C++), **PythonSCRIPT** (Python). All support multi-input and multi-output.
+
+### Multi-output protocol (C++ / Python)
+
+- Single-output: `native_cook()` / `cook()` returns a flat Dictionary (e.g. `{"positions": [...]}`)
+- Multi-output: returns `{"outputs": [dict0, dict1, ...]}` where each element matches its output port
+- C++ helper: `gn::make_multi_output({result0, result1})`
+- Python helper: `make_multi_output(result0, result1)` from `gonodes`
+
+### Extension family SDKs
+
+Extensions can ship SDK files for C++ and Python script nodes:
+- C++ header: `addons/gn_ext_user_native/sdk/gn_user_<family>.h`
+- Python module: `addons/gn_ext_user_python/sdk/gonodes/<family>.py`
+- Generic marshalling in `native_script.gd` / `python_script.gd` handles extension data via `_marshal_extension()` / `_build_extension()`
+- Example: SDF extension ships `gn_user_sdf.h` and `gonodes/sdf.py`
+
+### Extension presets for code editors
+
+Extensions auto-contribute presets by placing files in `addons/gn_ext_<name>/presets/<folder>/`:
+- `script/` for GDScript presets
+- `cpp/` for C++ presets
+- `python/` for Python presets
+
+`GNPresetPaths.get_code_preset_dirs()` discovers them automatically.

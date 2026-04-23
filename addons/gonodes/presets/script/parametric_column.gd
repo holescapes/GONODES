@@ -1,3 +1,4 @@
+# @output sop Output geometry
 # @param float height 2.0 Total height
 # @param float base_radius 1.0 Radius at bottom
 # @param int stacks 12 Vertical divisions
@@ -44,4 +45,4 @@ func cook():
 			st.add_vertex(p01)
 
 	st.generate_normals()
-	op.set_from_surfacetool(st)
+	op.set_from_surface_tool(st)

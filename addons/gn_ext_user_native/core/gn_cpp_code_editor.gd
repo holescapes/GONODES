@@ -1,21 +1,16 @@
 class_name GNCppCodeEditor
 extends "res://addons/gonodes/ui/gn_base_code_editor.gd"
 ## C++ code editor for UserNative operators.
-## Subclasses GNBaseCodeEditor to match GNCodeEditor (Script / GLSL / ISF /
-## Shadertoy) architecture: consistent colour palette, preset load/save via
-## GNScriptHelper, line-level error markers from compiler output, template and
-## example menus, and SDK quick-reference labels.
+## Subclasses GNBaseCodeEditor with C++ syntax highlighting,
+## build button, preset system (via GNScriptHelper), and compiler output.
 ##
-## Additional features beyond what the base provides:
-##   • Build button (Ctrl+B) with compiler output panel
-##   • Line-level error markers parsed from GCC / Clang / MSVC output
-##   • Templates menu (per-family minimal starters)
-##   • Examples menu (fully-worked examples from examples/ dir)
-##   • Preset load/save via GNScriptHelper (factory + user)
-##   • SDK quick-reference label per family
+## Unified architecture: uses the same Presets + Save Preset toolbar
+## pattern as GNCodeEditor (GDScript / GLSL / ISF / Shadertoy).
+## Language-specific additions: Build button, compiler output panel, error markers.
 
 signal code_committed(text: String)
 signal build_requested(source_code: String)
+signal check_requested(source_code: String)
 
 
 # ─── Internal State ───────────────────────────────────────────────────────────
@@ -26,8 +21,7 @@ var _family: String = ""  # sop, chop, img, top, dat
 # ─── Toolbar Widgets ──────────────────────────────────────────────────────────
 
 var _build_btn: Button = null
-var _template_menu_btn: MenuButton = null
-var _examples_menu_btn: MenuButton = null
+var _check_btn: Button = null
 var _preset_menu_btn: MenuButton = null
 var _save_preset_btn: Button = null
 var _ref_label: Label = null
@@ -36,7 +30,6 @@ var _ref_label: Label = null
 
 var _output_toggle: Button = null
 var _output_panel: RichTextLabel = null
-var _apply_btn: Button = null
 
 # ─── Presets ──────────────────────────────────────────────────────────────────
 
@@ -46,10 +39,7 @@ var _preset_entries: Array = []
 
 var _error_lines: Array[int] = []
 
-# ─── Paths ────────────────────────────────────────────────────────────────────
 
-const _TEMPLATES_DIR := "res://addons/gn_ext_user_native/templates/"
-const _EXAMPLES_DIR := "res://addons/gn_ext_user_native/examples/"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -62,26 +52,17 @@ func _init() -> void:
 	size = Vector2i(900, 700)
 	min_size = Vector2i(600, 400)
 	exclusive = false  # non-modal — user can interact with the graph
+	process_mode = PROCESS_MODE_ALWAYS  # override parent's PROCESS_MODE_DISABLED
 
 
 func _ready() -> void:
 	super._ready()
 
-	# Customise inherited buttons: OK → "Build & Apply"
-	_ok_btn.text = "Build & Apply"
-	_ok_btn.tooltip_text = "Apply code and trigger build (Ctrl+Enter)"
-
-	# Insert "Apply" button before "Build & Apply"
-	_apply_btn = Button.new()
-	_apply_btn.text = "Apply"
-	_apply_btn.custom_minimum_size = Vector2(80, 30)
-	_apply_btn.tooltip_text = "Apply code without building"
-	_apply_btn.pressed.connect(_on_apply)
-	var btn_row := _ok_btn.get_parent()
-	btn_row.add_child(_apply_btn)
-	btn_row.move_child(_apply_btn, _ok_btn.get_index())
+	_ok_btn.text = "Done"
+	_ok_btn.tooltip_text = "Save code and close (Ctrl+Enter)"
 
 	# Insert compiler output panel between error_label and button row
+	var btn_row := _ok_btn.get_parent()
 	var btn_row_idx := btn_row.get_index()
 
 	_output_toggle = Button.new()
@@ -94,6 +75,7 @@ func _ready() -> void:
 
 	_output_panel = RichTextLabel.new()
 	_output_panel.bbcode_enabled = true
+	_output_panel.selection_enabled = true
 	_output_panel.fit_content = false
 	_output_panel.custom_minimum_size = Vector2(0, 120)
 	_output_panel.scroll_following = true
@@ -120,33 +102,21 @@ func _build_toolbar(parent: VBoxContainer) -> void:
 	_build_btn.pressed.connect(_on_build_pressed)
 	toolbar.add_child(_build_btn)
 
-	toolbar.add_child(VSeparator.new())
-
-	# Templates
-	_template_menu_btn = MenuButton.new()
-	_template_menu_btn.text = "Templates ▾"
-	_template_menu_btn.tooltip_text = "Load a minimal starter template"
-	_template_menu_btn.custom_minimum_size = Vector2(95, 28)
-	_template_menu_btn.flat = false
-	_template_menu_btn.get_popup().index_pressed.connect(_on_template_selected)
-	toolbar.add_child(_template_menu_btn)
-
-	# Examples
-	_examples_menu_btn = MenuButton.new()
-	_examples_menu_btn.text = "Examples ▾"
-	_examples_menu_btn.tooltip_text = "Load a fully-worked example"
-	_examples_menu_btn.custom_minimum_size = Vector2(90, 28)
-	_examples_menu_btn.flat = false
-	_examples_menu_btn.get_popup().index_pressed.connect(_on_example_selected)
-	toolbar.add_child(_examples_menu_btn)
+	# Check (syntax only)
+	_check_btn = Button.new()
+	_check_btn.text = "Check (Ctrl+K)"
+	_check_btn.tooltip_text = "Check C++ syntax without building"
+	_check_btn.custom_minimum_size = Vector2(120, 28)
+	_check_btn.pressed.connect(_on_check_pressed)
+	toolbar.add_child(_check_btn)
 
 	toolbar.add_child(VSeparator.new())
 
 	# Preset Load
 	_preset_menu_btn = MenuButton.new()
-	_preset_menu_btn.text = "Presets ▾"
-	_preset_menu_btn.tooltip_text = "Load a saved preset"
-	_preset_menu_btn.custom_minimum_size = Vector2(85, 28)
+	_preset_menu_btn.text = "Presets \u25be"
+	_preset_menu_btn.tooltip_text = "Load a preset script"
+	_preset_menu_btn.custom_minimum_size = Vector2(90, 28)
 	_preset_menu_btn.flat = false
 	_preset_menu_btn.get_popup().about_to_popup.connect(_build_preset_menu)
 	_preset_menu_btn.get_popup().id_pressed.connect(_on_preset_selected)
@@ -154,7 +124,7 @@ func _build_toolbar(parent: VBoxContainer) -> void:
 
 	# Preset Save
 	_save_preset_btn = Button.new()
-	_save_preset_btn.text = "Save Preset…"
+	_save_preset_btn.text = "Save Preset\u2026"
 	_save_preset_btn.tooltip_text = "Save current code as a user preset"
 	_save_preset_btn.custom_minimum_size = Vector2(100, 28)
 	_save_preset_btn.pressed.connect(_on_save_preset_pressed)
@@ -179,9 +149,9 @@ func _setup_code_edit(edit: CodeEdit) -> void:
 
 
 func _on_ok() -> void:
-	# Build & Apply: commit code then build
+	# Done: save code and close editor
 	code_committed.emit(_code_edit.text)
-	_on_build_pressed()
+	hide()
 
 
 func _on_cancel() -> void:
@@ -198,6 +168,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_B and event.ctrl_pressed:
 			_on_build_pressed()
+			get_viewport().set_input_as_handled()
+			return
+		if event.keycode == KEY_K and event.ctrl_pressed:
+			_on_check_pressed()
 			get_viewport().set_input_as_handled()
 			return
 	super._unhandled_key_input(event)
@@ -219,13 +193,11 @@ func open(node, initial_code: String) -> void:
 		_info_label.text = ""
 
 	_update_ref_label()
-	_populate_template_menu()
-	_populate_examples_menu()
 
 	_code_edit.text = initial_code
 	_code_edit.clear_undo_history()
 	_clear_error_marks()
-	_set_status("Ctrl+B = Build  |  Ctrl+Enter = Build & Apply  |  Escape = Cancel")
+	_set_status("Ctrl+B = Build  |  Ctrl+K = Check  |  Ctrl+Enter = Build & Apply  |  Escape = Cancel")
 
 	popup_centered()
 	_focus_end()
@@ -338,15 +310,19 @@ func _setup_cpp_highlighting(edit: CodeEdit) -> void:
 func _on_build_pressed() -> void:
 	_set_status("Building\u2026", Color(1.0, 0.8, 0.2))
 	_build_btn.disabled = true
+	code_committed.emit(_code_edit.text)
 	build_requested.emit(_code_edit.text)
-	# Re-enable after short delay (actual status set by set_compile_status)
 	get_tree().create_timer(0.5).timeout.connect(
 		func(): _build_btn.disabled = false, CONNECT_ONE_SHOT)
 
 
-func _on_apply() -> void:
+func _on_check_pressed() -> void:
+	_set_status("Checking\u2026", Color(1.0, 0.8, 0.2))
+	_check_btn.disabled = true
 	code_committed.emit(_code_edit.text)
-	_set_status("Applied", Color(0.4, 0.9, 0.5))
+	check_requested.emit(_code_edit.text)
+	get_tree().create_timer(0.5).timeout.connect(
+		func(): _check_btn.disabled = false, CONNECT_ONE_SHOT)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -401,139 +377,6 @@ func _extract_first_error(output: String) -> String:
 func _toggle_output() -> void:
 	_output_panel.visible = not _output_panel.visible
 	_output_toggle.text = ("\u25BC " if _output_panel.visible else "\u25B6 ") + "Compiler Output"
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Templates & Examples
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func _populate_template_menu() -> void:
-	var popup := _template_menu_btn.get_popup()
-	popup.clear()
-	if not DirAccess.dir_exists_absolute(_TEMPLATES_DIR):
-		popup.add_item("(no templates)", 0)
-		popup.set_item_disabled(0, true)
-		return
-
-	var dir := DirAccess.open(_TEMPLATES_DIR)
-	if dir == null:
-		return
-	dir.list_dir_begin()
-	var family_first: Array[String] = []
-	var others: Array[String] = []
-	var fname := dir.get_next()
-	while not fname.is_empty():
-		if fname.ends_with(".h"):
-			if _family in fname:
-				family_first.append(fname)
-			else:
-				others.append(fname)
-		fname = dir.get_next()
-
-	if family_first.is_empty() and others.is_empty():
-		popup.add_item("(no templates)", 0)
-		popup.set_item_disabled(0, true)
-		return
-
-	var idx := 0
-	if not family_first.is_empty():
-		popup.add_separator(_family.to_upper() + " Templates")
-		for f in family_first:
-			popup.add_item(f.get_basename().capitalize(), idx)
-			popup.set_item_metadata(idx, _TEMPLATES_DIR + f)
-			idx += 1
-	if not others.is_empty():
-		popup.add_separator("Other Families")
-		for f in others:
-			popup.add_item(f.get_basename().capitalize(), idx)
-			popup.set_item_metadata(idx, _TEMPLATES_DIR + f)
-			idx += 1
-
-
-func _populate_examples_menu() -> void:
-	var popup := _examples_menu_btn.get_popup()
-	popup.clear()
-	if not DirAccess.dir_exists_absolute(_EXAMPLES_DIR):
-		popup.add_item("(no examples)", 0)
-		popup.set_item_disabled(0, true)
-		return
-
-	var dir := DirAccess.open(_EXAMPLES_DIR)
-	if dir == null:
-		return
-	dir.list_dir_begin()
-	var family_first: Array[String] = []
-	var others: Array[String] = []
-	var fname := dir.get_next()
-	while not fname.is_empty():
-		if fname.ends_with(".h"):
-			if _family in fname:
-				family_first.append(fname)
-			else:
-				others.append(fname)
-		fname = dir.get_next()
-
-	if family_first.is_empty() and others.is_empty():
-		popup.add_item("(no examples)", 0)
-		popup.set_item_disabled(0, true)
-		return
-
-	var idx := 0
-	if not family_first.is_empty():
-		popup.add_separator(_family.to_upper() + " Examples")
-		for f in family_first:
-			popup.add_item(f.get_basename().capitalize(), idx)
-			popup.set_item_metadata(idx, _EXAMPLES_DIR + f)
-			idx += 1
-	if not others.is_empty():
-		popup.add_separator("Other Families")
-		for f in others:
-			popup.add_item(f.get_basename().capitalize(), idx)
-			popup.set_item_metadata(idx, _EXAMPLES_DIR + f)
-			idx += 1
-
-
-func _on_template_selected(idx: int) -> void:
-	var popup := _template_menu_btn.get_popup()
-	if idx >= popup.get_item_count():
-		return
-	var path = popup.get_item_metadata(idx)
-	if path == null or str(path).is_empty():
-		return
-	var code := _load_file(str(path))
-	if code.is_empty():
-		_set_status("Failed to load template", Color(1.0, 0.35, 0.3))
-		return
-	_code_edit.text = code
-	_code_edit.clear_undo_history()
-	_clear_error_marks()
-	_set_status("Loaded template: %s" % str(path).get_file().get_basename(),
-		Color(0.4, 0.9, 0.5))
-
-
-func _on_example_selected(idx: int) -> void:
-	var popup := _examples_menu_btn.get_popup()
-	if idx >= popup.get_item_count():
-		return
-	var path = popup.get_item_metadata(idx)
-	if path == null or str(path).is_empty():
-		return
-	var code := _load_file(str(path))
-	if code.is_empty():
-		_set_status("Failed to load example", Color(1.0, 0.35, 0.3))
-		return
-	_code_edit.text = code
-	_code_edit.clear_undo_history()
-	_clear_error_marks()
-	_set_status("Loaded example: %s" % str(path).get_file().get_basename(),
-		Color(0.4, 0.9, 0.5))
-
-
-func _load_file(path: String) -> String:
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		return ""
-	return f.get_as_text()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

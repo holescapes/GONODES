@@ -21,7 +21,7 @@ var _code_edit: CodeEdit = null
 var _info_label: Label = null
 
 ## Status / error label below the CodeEdit.
-var _error_label: Label = null
+var _error_label: RichTextLabel = null
 
 ## OK button (bottom-right).
 var _ok_btn: Button = null
@@ -90,12 +90,15 @@ func _ready() -> void:
 	_setup_code_edit(_code_edit)
 	_vbox.add_child(_code_edit)
 
-	# Error / status label
-	_error_label = Label.new()
-	_error_label.add_theme_font_size_override("font_size", 11)
-	_error_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+	# Error / status label (RichTextLabel for text selection)
+	_error_label = RichTextLabel.new()
+	_error_label.bbcode_enabled = false
+	_error_label.scroll_active = false
+	_error_label.fit_content = true
+	_error_label.selection_enabled = true
+	_error_label.add_theme_font_size_override("normal_font_size", 11)
+	_error_label.add_theme_color_override("default_color", Color(0.5, 0.5, 0.5))
 	_error_label.text = ""
-	_error_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_error_label.custom_minimum_size = Vector2(0, 20)
 	_vbox.add_child(_error_label)
 
@@ -185,4 +188,4 @@ func _focus_end() -> void:
 ## Sets the status / error label text and color.
 func _set_status(text: String, color: Color = Color(0.5, 0.5, 0.5)) -> void:
 	_error_label.text = text
-	_error_label.add_theme_color_override("font_color", color)
+	_error_label.add_theme_color_override("default_color", color)

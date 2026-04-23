@@ -160,6 +160,22 @@ inline Dictionary make_vector3(const String &name, const Vector3 &def = Vector3(
 	return p;
 }
 
+// ─── Multi-Output ─────────────────────────────────────────────────────────────
+
+/// Wraps an array of per-port result dictionaries into the multi-output
+/// protocol format.  Each element should be a result from make_chop_result(),
+/// make_dat_table(), make_sop_result(), make_img_result(), etc.
+///
+/// Example:
+///   Dictionary chop = gn::make_chop_result(channels);
+///   Dictionary dat  = gn::make_dat_table(headers, rows);
+///   return gn::make_multi_output({chop, dat});
+inline Dictionary make_multi_output(const Array &outputs) {
+	Dictionary result;
+	result["outputs"] = outputs;
+	return result;
+}
+
 } // namespace gn
 
 #endif // GN_USER_TYPES_H

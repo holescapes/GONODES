@@ -376,6 +376,8 @@ static func sync_native_extensions() -> bool:
 		return false
 
 	var changed := false
+	var active_gdext_paths: PackedStringArray = []
+
 	dir.list_dir_begin()
 	var folder_name := dir.get_next()
 	while folder_name != "":
@@ -391,18 +393,86 @@ static func sync_native_extensions() -> bool:
 						var sub_path := ext_path + "/" + sub_name
 						if _sync_native_dir(sub_path):
 							changed = true
+						# Collect active .gdextension paths for extension_list.cfg.
+						_collect_active_gdext(sub_path, active_gdext_paths)
 					sub_name = ext_dir.get_next()
 				ext_dir.list_dir_end()
 		folder_name = dir.get_next()
 	dir.list_dir_end()
+
+	# Ensure .godot/extension_list.cfg lists all active .gdextension files.
+	# Godot reads this at startup to load GDExtension DLLs; without it,
+	# .gdextension files inside .gdignore'd directories are never discovered.
+	if _sync_extension_list_cfg(active_gdext_paths):
+		changed = true
 
 	if changed:
 		print("[ExtRegistry] Native extension files changed — restart Godot to apply.")
 	return changed
 
 
-## Scans a single subdirectory for `.gdextension` / `.gdextension.disabled`
+## Recursively collects paths of active .gdextension files in a directory.
+## Skips vendored godot-cpp test directories.
+static func _collect_active_gdext(dir_path: String, out: PackedStringArray) -> void:
+	var nd := DirAccess.open(dir_path)
+	if nd == null:
+		return
+	nd.list_dir_begin()
+	var fname := nd.get_next()
+	while fname != "":
+		if nd.current_is_dir():
+			if fname != "godot-cpp":
+				_collect_active_gdext(dir_path + "/" + fname, out)
+		elif fname.ends_with(".gdextension"):
+			out.append(dir_path + "/" + fname)
+		fname = nd.get_next()
+	nd.list_dir_end()
+
+
+## Reads .godot/extension_list.cfg, merges our active paths, writes back if changed.
+## Returns true if the file was updated.
+static func _sync_extension_list_cfg(active_paths: PackedStringArray) -> bool:
+	var cfg_path := "res://.godot/extension_list.cfg"
+	var existing: PackedStringArray = []
+	if FileAccess.file_exists(cfg_path):
+		var fa := FileAccess.open(cfg_path, FileAccess.READ)
+		if fa != null:
+			while not fa.eof_reached():
+				var line := fa.get_line().strip_edges()
+				if not line.is_empty():
+					existing.append(line)
+			fa.close()
+
+	# Merge: keep non-GONODES entries, add our active paths.
+	var merged: PackedStringArray = []
+	for entry in existing:
+		if not entry.contains("/gn_ext_"):
+			merged.append(entry)
+	for gn_path in active_paths:
+		merged.append(gn_path)
+
+	# Sort for stable comparison
+	var merged_sorted := Array(merged)
+	merged_sorted.sort()
+	var existing_sorted := Array(existing)
+	existing_sorted.sort()
+
+	if merged_sorted == existing_sorted:
+		return false
+
+	var fa := FileAccess.open(cfg_path, FileAccess.WRITE)
+	if fa == null:
+		return false
+	for entry in merged:
+		fa.store_line(entry)
+	fa.close()
+	print("[ExtRegistry] Updated .godot/extension_list.cfg (%d entries)" % merged.size())
+	return true
+
+
+## Recursively scans a directory for `.gdextension` / `.gdextension.disabled`
 ## files and activates or deactivates them based on whether the library exists.
+## Skips vendored godot-cpp test directories.
 static func _sync_native_dir(native_dir_path: String) -> bool:
 	var nd := DirAccess.open(native_dir_path)
 	if nd == null:
@@ -412,7 +482,11 @@ static func _sync_native_dir(native_dir_path: String) -> bool:
 	nd.list_dir_begin()
 	var file_name := nd.get_next()
 	while file_name != "":
-		if not nd.current_is_dir():
+		if nd.current_is_dir():
+			if file_name != "godot-cpp":
+				if _sync_native_dir(native_dir_path + "/" + file_name):
+					changed = true
+		else:
 			var is_active := file_name.ends_with(".gdextension")
 			var is_disabled := file_name.ends_with(".gdextension.disabled")
 			if is_active or is_disabled:

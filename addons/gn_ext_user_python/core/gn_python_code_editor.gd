@@ -2,7 +2,11 @@ class_name GNPythonCodeEditor
 extends "res://addons/gonodes/ui/gn_base_code_editor.gd"
 ## Python code editor for UserPython operators.
 ## Subclasses GNBaseCodeEditor with Python syntax highlighting,
-## reload button, template/example menus, and error display.
+## reload button, preset system (via GNScriptHelper), and error display.
+##
+## Unified architecture: uses the same Presets + Save Preset toolbar
+## pattern as GNCodeEditor (GDScript / GLSL / ISF / Shadertoy).
+## Language-specific additions: Reload button, output panel, error markers.
 
 signal code_committed(text: String)
 signal reload_requested(source_code: String)
@@ -16,8 +20,6 @@ var _family: String = ""
 # ─── Toolbar Widgets ──────────────────────────────────────────────────────────
 
 var _reload_btn: Button = null
-var _template_menu_btn: MenuButton = null
-var _examples_menu_btn: MenuButton = null
 var _preset_menu_btn: MenuButton = null
 var _save_preset_btn: Button = null
 var _help_btn: Button = null
@@ -27,7 +29,6 @@ var _ref_label: Label = null
 
 var _output_toggle: Button = null
 var _output_panel: RichTextLabel = null
-var _apply_btn: Button = null
 
 # ─── Presets ──────────────────────────────────────────────────────────────────
 
@@ -37,10 +38,12 @@ var _preset_entries: Array = []
 
 var _error_lines: Array[int] = []
 
+# ─── Validation ───────────────────────────────────────────────────────────────
+
+var _validate_timer: Timer = null
+
 # ─── Paths ────────────────────────────────────────────────────────────────────
 
-const _TEMPLATES_DIR := "res://addons/gn_ext_user_python/templates/"
-const _EXAMPLES_DIR := "res://addons/gn_ext_user_python/examples/"
 const _HELP_DOC := "res://addons/gn_ext_user_python/help/user_python.md"
 
 
@@ -54,23 +57,16 @@ func _init() -> void:
 	size = Vector2i(900, 700)
 	min_size = Vector2i(600, 400)
 	exclusive = false
+	process_mode = PROCESS_MODE_ALWAYS  # override parent's PROCESS_MODE_DISABLED
 
 
 func _ready() -> void:
 	super._ready()
 
-	_ok_btn.text = "Reload & Apply"
-	_ok_btn.tooltip_text = "Apply code and reload Python (Ctrl+Enter)"
+	_ok_btn.text = "Done"
+	_ok_btn.tooltip_text = "Save code and close (Ctrl+Enter)"
 
-	_apply_btn = Button.new()
-	_apply_btn.text = "Apply"
-	_apply_btn.custom_minimum_size = Vector2(80, 30)
-	_apply_btn.tooltip_text = "Apply code without reloading"
-	_apply_btn.pressed.connect(_on_apply)
 	var btn_row := _ok_btn.get_parent()
-	btn_row.add_child(_apply_btn)
-	btn_row.move_child(_apply_btn, _ok_btn.get_index())
-
 	var btn_row_idx := btn_row.get_index()
 
 	_output_toggle = Button.new()
@@ -83,6 +79,7 @@ func _ready() -> void:
 
 	_output_panel = RichTextLabel.new()
 	_output_panel.bbcode_enabled = true
+	_output_panel.selection_enabled = true
 	_output_panel.fit_content = false
 	_output_panel.custom_minimum_size = Vector2(0, 120)
 	_output_panel.scroll_following = true
@@ -90,6 +87,14 @@ func _ready() -> void:
 	_output_panel.add_theme_font_size_override("normal_font_size", 12)
 	_vbox.add_child(_output_panel)
 	_vbox.move_child(_output_panel, btn_row_idx + 1)
+
+	# Debounced validation timer
+	_validate_timer = Timer.new()
+	_validate_timer.one_shot = true
+	_validate_timer.wait_time = 1.5
+	_validate_timer.timeout.connect(_validate_python)
+	add_child(_validate_timer)
+	_code_edit.text_changed.connect(_on_text_changed)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -111,31 +116,11 @@ func _build_toolbar(parent: VBoxContainer) -> void:
 
 	toolbar.add_child(VSeparator.new())
 
-	# Templates
-	_template_menu_btn = MenuButton.new()
-	_template_menu_btn.text = "Templates \u25BE"
-	_template_menu_btn.tooltip_text = "Load a minimal starter template"
-	_template_menu_btn.custom_minimum_size = Vector2(95, 28)
-	_template_menu_btn.flat = false
-	_template_menu_btn.get_popup().index_pressed.connect(_on_template_selected)
-	toolbar.add_child(_template_menu_btn)
-
-	# Examples
-	_examples_menu_btn = MenuButton.new()
-	_examples_menu_btn.text = "Examples \u25BE"
-	_examples_menu_btn.tooltip_text = "Load a fully-worked example"
-	_examples_menu_btn.custom_minimum_size = Vector2(90, 28)
-	_examples_menu_btn.flat = false
-	_examples_menu_btn.get_popup().index_pressed.connect(_on_example_selected)
-	toolbar.add_child(_examples_menu_btn)
-
-	toolbar.add_child(VSeparator.new())
-
 	# Preset Load
 	_preset_menu_btn = MenuButton.new()
-	_preset_menu_btn.text = "Presets \u25BE"
-	_preset_menu_btn.tooltip_text = "Load a saved preset"
-	_preset_menu_btn.custom_minimum_size = Vector2(85, 28)
+	_preset_menu_btn.text = "Presets \u25be"
+	_preset_menu_btn.tooltip_text = "Load a preset script"
+	_preset_menu_btn.custom_minimum_size = Vector2(90, 28)
 	_preset_menu_btn.flat = false
 	_preset_menu_btn.get_popup().about_to_popup.connect(_build_preset_menu)
 	_preset_menu_btn.get_popup().id_pressed.connect(_on_preset_selected)
@@ -179,7 +164,7 @@ func _setup_code_edit(edit: CodeEdit) -> void:
 
 func _on_ok() -> void:
 	code_committed.emit(_code_edit.text)
-	_on_reload_pressed()
+	hide()
 
 
 func _on_cancel() -> void:
@@ -217,13 +202,11 @@ func open(node, initial_code: String) -> void:
 		_info_label.text = ""
 
 	_update_ref_label()
-	_populate_template_menu()
-	_populate_examples_menu()
 
 	_code_edit.text = initial_code
 	_code_edit.clear_undo_history()
 	_clear_error_marks()
-	_set_status("Ctrl+R = Reload  |  Ctrl+Enter = Reload & Apply  |  Escape = Cancel")
+	_set_status("Ctrl+R = Reload  |  Ctrl+Enter = Done  |  Escape = Cancel")
 
 	popup_centered()
 	_focus_end()
@@ -319,6 +302,7 @@ func _setup_python_highlighting(edit: CodeEdit) -> void:
 func _on_reload_pressed() -> void:
 	_set_status("Reloading\u2026", Color(1.0, 0.8, 0.2))
 	_reload_btn.disabled = true
+	code_committed.emit(_code_edit.text)
 	reload_requested.emit(_code_edit.text)
 	get_tree().create_timer(0.3).timeout.connect(
 		func():
@@ -328,11 +312,6 @@ func _on_reload_pressed() -> void:
 			elif _owner_node != null:
 				set_error(_owner_node._load_error),
 		CONNECT_ONE_SHOT)
-
-
-func _on_apply() -> void:
-	code_committed.emit(_code_edit.text)
-	_set_status("Applied", Color(0.4, 0.9, 0.5))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -376,135 +355,52 @@ func _toggle_output() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Templates & Examples — family-first sorting with separators
+# Debounced Validation — ast.parse() via system Python
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func _populate_template_menu() -> void:
-	var popup := _template_menu_btn.get_popup()
-	popup.clear()
-	if not DirAccess.dir_exists_absolute(_TEMPLATES_DIR):
-		popup.add_item("(no templates)", 0)
-		popup.set_item_disabled(0, true)
+func _on_text_changed() -> void:
+	_validate_timer.start()
+
+
+func _validate_python() -> void:
+	var code := _code_edit.text
+	if code.strip_edges().is_empty():
+		_clear_error_marks()
+		_set_status("Ctrl+R = Reload  |  Ctrl+Enter = Done  |  Escape = Cancel")
 		return
 
-	var dir := DirAccess.open(_TEMPLATES_DIR)
-	if dir == null:
+	# Write to temp file to avoid command-line escaping issues
+	var tmp_dir := "user://python_scripts/"
+	DirAccess.make_dir_recursive_absolute(tmp_dir)
+	var tmp_path := tmp_dir + "_validate_tmp.py"
+	var fa := FileAccess.open(tmp_path, FileAccess.WRITE)
+	if fa == null:
 		return
-	dir.list_dir_begin()
-	var family_first: Array[String] = []
-	var others: Array[String] = []
-	var fname := dir.get_next()
-	while not fname.is_empty():
-		if fname.ends_with(".py"):
-			if _family in fname:
-				family_first.append(fname)
-			else:
-				others.append(fname)
-		fname = dir.get_next()
+	fa.store_string(code)
+	fa.close()
 
-	if family_first.is_empty() and others.is_empty():
-		popup.add_item("(no templates)", 0)
-		popup.set_item_disabled(0, true)
-		return
+	var global_path := ProjectSettings.globalize_path(tmp_path)
+	var output := []
+	var exit_code := OS.execute("python", PackedStringArray([
+		"-c",
+		"import ast, sys; ast.parse(open(sys.argv[1], encoding='utf-8').read())",
+		global_path,
+	]), output, true)
 
-	var idx := 0
-	if not family_first.is_empty():
-		popup.add_separator(_family.to_upper() + " Templates")
-		for f in family_first:
-			popup.add_item(f.get_basename().capitalize(), idx)
-			popup.set_item_metadata(idx, _TEMPLATES_DIR + f)
-			idx += 1
-	if not others.is_empty():
-		popup.add_separator("Other Families")
-		for f in others:
-			popup.add_item(f.get_basename().capitalize(), idx)
-			popup.set_item_metadata(idx, _TEMPLATES_DIR + f)
-			idx += 1
-
-
-func _populate_examples_menu() -> void:
-	var popup := _examples_menu_btn.get_popup()
-	popup.clear()
-	if not DirAccess.dir_exists_absolute(_EXAMPLES_DIR):
-		popup.add_item("(no examples)", 0)
-		popup.set_item_disabled(0, true)
-		return
-
-	var dir := DirAccess.open(_EXAMPLES_DIR)
-	if dir == null:
-		return
-	dir.list_dir_begin()
-	var family_first: Array[String] = []
-	var others: Array[String] = []
-	var fname := dir.get_next()
-	while not fname.is_empty():
-		if fname.ends_with(".py"):
-			if _family in fname:
-				family_first.append(fname)
-			else:
-				others.append(fname)
-		fname = dir.get_next()
-
-	if family_first.is_empty() and others.is_empty():
-		popup.add_item("(no examples)", 0)
-		popup.set_item_disabled(0, true)
-		return
-
-	var idx := 0
-	if not family_first.is_empty():
-		popup.add_separator(_family.to_upper() + " Examples")
-		for f in family_first:
-			popup.add_item(f.get_basename().capitalize(), idx)
-			popup.set_item_metadata(idx, _EXAMPLES_DIR + f)
-			idx += 1
-	if not others.is_empty():
-		popup.add_separator("Other Families")
-		for f in others:
-			popup.add_item(f.get_basename().capitalize(), idx)
-			popup.set_item_metadata(idx, _EXAMPLES_DIR + f)
-			idx += 1
-
-
-func _on_template_selected(idx: int) -> void:
-	var popup := _template_menu_btn.get_popup()
-	if idx >= popup.get_item_count():
-		return
-	var path = popup.get_item_metadata(idx)
-	if path == null or str(path).is_empty():
-		return
-	var code := _load_file(str(path))
-	if code.is_empty():
-		_set_status("Failed to load template", Color(1.0, 0.35, 0.3))
-		return
-	_code_edit.text = code
-	_code_edit.clear_undo_history()
 	_clear_error_marks()
-	_set_status("Loaded template: %s" % str(path).get_file().get_basename(),
-		Color(0.4, 0.9, 0.5))
-
-
-func _on_example_selected(idx: int) -> void:
-	var popup := _examples_menu_btn.get_popup()
-	if idx >= popup.get_item_count():
-		return
-	var path = popup.get_item_metadata(idx)
-	if path == null or str(path).is_empty():
-		return
-	var code := _load_file(str(path))
-	if code.is_empty():
-		_set_status("Failed to load example", Color(1.0, 0.35, 0.3))
-		return
-	_code_edit.text = code
-	_code_edit.clear_undo_history()
-	_clear_error_marks()
-	_set_status("Loaded example: %s" % str(path).get_file().get_basename(),
-		Color(0.4, 0.9, 0.5))
+	if exit_code == 0:
+		_set_status("\u2713 No syntax errors", Color(0.3, 1.0, 0.4))
+	else:
+		var err_text := "\n".join(output).strip_edges()
+		var first_line := err_text.get_slice("\n", err_text.count("\n"))
+		if first_line.is_empty():
+			first_line = err_text
+		_set_status("\u2717 %s" % first_line, Color(1.0, 0.35, 0.3))
+		_mark_python_error_lines(err_text)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Presets — via GNScriptHelper
-# ═══════════════════════════════════════════════════════════════════════════════
-# Preset System (via GNScriptHelper)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _get_preset_folder() -> String:
@@ -612,19 +508,10 @@ func _on_save_preset_pressed() -> void:
 # Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func _load_file(path: String) -> String:
-	var f := FileAccess.open(path, FileAccess.READ)
-	if f == null:
-		return ""
-	var text := f.get_as_text()
-	f.close()
-	return text
-
-
 func _detect_family(node) -> String:
 	if node == null:
 		return "sop"
-	var nt: String = node.node_type if node.has("node_type") else ""
+	var nt: String = node.node_type if "node_type" in node else ""
 	if "sop" in nt: return "sop"
 	if "chop" in nt: return "chop"
 	if "img" in nt: return "img"
@@ -661,7 +548,8 @@ func _focus_end() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _on_help_pressed() -> void:
-	var content := _load_file(_HELP_DOC)
+	var f := FileAccess.open(_HELP_DOC, FileAccess.READ)
+	var content := f.get_as_text() if f else ""
 	if content.is_empty():
 		_set_status("Help doc not found: %s" % _HELP_DOC, Color(1.0, 0.7, 0.3))
 		return

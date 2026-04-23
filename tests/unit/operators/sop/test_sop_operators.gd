@@ -1231,13 +1231,12 @@ func test_remesh_sop_with_box() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  GDScriptSCRIPT (SOP template)
+#  GDScriptSCRIPT (SOP via preset)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_gdscript_script_sop_template() -> void:
+func test_gdscript_script_sop_instantiate() -> void:
 	var node := _make_node(GDScriptSCRIPT.new(), "scr1")
-	node.set_param_value("template", GDScriptSCRIPT.Template.SOP)
-	GNTestAssert.assert_not_null(node, "GDScriptSCRIPT SOP created")
+	GNTestAssert.assert_not_null(node, "GDScriptSCRIPT created")
 	GNTestAssert.assert_eq(node.node_type, "script", "node_type")
 
 

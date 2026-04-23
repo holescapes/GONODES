@@ -1,3 +1,4 @@
+# @output sop Output geometry
 # @input sop Source geometry
 # @param float low_y -1.0 Bottom of color ramp (blue=cold)
 # @param float high_y 1.0 Top of color ramp (red=hot)

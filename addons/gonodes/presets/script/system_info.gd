@@ -1,3 +1,4 @@
+# @output dat Output table
 # @param string format %H:%M:%S Time format string
 
 func cook():

@@ -734,12 +734,25 @@ GDScript Wrapper (operators/sop/user_native_sop.gd etc.)
 | Header | Purpose |
 |--------|---------|
 | `gn_user_node.h` | Base class + lifecycle + param reader helpers (`parf`, `pari`, `parb`, `pars`, `parc`, `parv3`) |
-| `gn_user_types.h` | Type aliases + param definition factories (`gn::parf()`, `gn::pari()`, `gn::make_vector3()`, etc.) |
+| `gn_user_types.h` | Type aliases + param definition factories (`gn::parf()`, `gn::pari()`, `gn::make_vector3()`, `gn::make_multi_output()`, etc.) |
 | `gn_user_sop.h` | SOP output helpers (`make_sop_result()`, `make_point_cloud()`) |
 | `gn_user_chop.h` | CHOP output helpers (`make_chop_single()`, `make_chop_result()`) |
 | `gn_user_img.h` | IMG output helpers (`make_img_result()`, `get_input_image()`) |
 | `gn_user_top.h` | TOP output helpers (`make_top_shader_result()`, `make_top_image_result()`) |
 | `gn_user_dat.h` | DAT output helpers (`make_dat_table()`, `make_dat_text()`) |
+| `gn_user_sdf.h` | SDF tree construction — primitives, booleans, modifiers, materials (extension SDK) |
+
+### Multi-output support
+
+C++ and Python script nodes support multi-output via a `{"outputs": [dict0, dict1, ...]}` return from `native_cook()` / `cook()`. The wrapper detects the `"outputs"` key and routes each element to `_build_output_for_port()`. Use `gn::make_multi_output()` (C++) or `make_multi_output()` (Python) to build the return dict. Per-port data is cached in `_output_data[]` and served via `get_output_data(port_index)`.
+
+### Extension family SDK pattern
+
+Extension families (SDF, etc.) can ship SDK headers/modules in the existing SDK directories:
+- C++ headers in `addons/gn_ext_user_native/sdk/` (auto-included via `{sdk_path}`)
+- Python modules in `addons/gn_ext_user_python/sdk/gonodes/` (auto-imported via `sys.path`)
+
+The generic marshalling in `native_script.gd` and `python_script.gd` (`_marshal_extension()` / `_build_extension()`) handles serialization for any family registered with `GNFamily.register_data_factory()`.
 
 ### Vector3 parameter handling
 

@@ -21,9 +21,13 @@ platform/architecture/renderer guards, and the dependency system.
 7. [Platform, Architecture & Renderer Guards](#7-platform-architecture--renderer-guards)
 8. [Dependency Guards](#8-dependency-guards)
 9. [Extension Directory Layout](#9-extension-directory-layout)
-10. [Writing a New Family Extension](#10-writing-a-new-family-extension)
-11. [Shipped Extensions](#11-shipped-extensions)
-12. [Extension-Shipped Assets (.gnasset)](#12-extension-shipped-assets-gnasset)
+10. [Extension Directory Layout](#10-extension-directory-layout)
+11. [Writing a New Family Extension](#11-writing-a-new-family-extension)
+12. [Shipped Extensions](#12-shipped-extensions)
+13. [Extension SDKs for Script Nodes](#13-extension-sdks-for-script-nodes)
+14. [Multi-Output for Script Nodes](#14-multi-output-for-script-nodes)
+15. [Extension Presets for Code Editors](#15-extension-presets-for-code-editors)
+16. [Extension-Shipped Assets (.gnasset)](#16-extension-shipped-assets-gnasset)
 
 ---
 
@@ -627,8 +631,8 @@ addons/gn_ext_myext/
 │   └── test_myext_operators.gd
 ├── native/                   # C++ source (if GDExtension-based)
 │   ├── build.cfg             # Build manifest for gn_build.py
-│   ├── src/
-│   └── SConstruct            # 6-line shim delegating to build/gn_build.py
+│   ├── src/                  #   vendor_setup / vendor_clone keys enable
+│   └── SConstruct            #   zero-config CI for new SDK-dependent extensions
 └── cef_artifacts/            # Third-party SDK artifacts (if applicable)
     └── gdcef.gdextension.disabled
 ```
@@ -651,6 +655,19 @@ This means:
 - **Extension installed without binaries?** No startup warnings.
 - **Binaries compiled or downloaded?** Auto-activated on next launch.
 - **Binaries deleted?** Auto-deactivated on next launch.
+
+#### CLI sync (eliminates two-restart problem)
+
+Since Godot loads GDExtensions **before** plugins, the in-editor activation
+takes effect on the _next_ restart — meaning two restarts total. To avoid
+this, run the Python equivalent after building:
+
+```bash
+python scripts/sync_gdextensions.py            # auto-detect platform
+python scripts/sync_gdextensions.py --dry-run   # preview only
+```
+
+The SConstruct post-build step runs this automatically after `scons`.
 
 The test runner automatically discovers `test_*.gd` files under
 `addons/gn_ext_*/tests/`.
@@ -757,7 +774,225 @@ family name string.
 
 ---
 
-## 13. Extension-Shipped Assets (.gnasset)
+## 13. Extension SDKs for Script Nodes
+
+Extensions can ship SDK headers (C++) and Python modules that become
+available to UserNative and UserPython script operators. This lets
+extension families participate in the script-node ecosystem without
+modifying core code.
+
+### How It Works
+
+The UserNative C++ compiler automatically adds `{sdk_path}` (i.e.
+`addons/gn_ext_user_native/sdk/`) to the compiler's include path. Any
+`.h` file placed in that directory is `#include`-able from user C++ code.
+
+The UserPython runtime puts `addons/gn_ext_user_python/sdk/` on
+`sys.path`. Any Python package under that directory is `import`-able from
+user Python code.
+
+Extensions that define new families should ship SDK files in the
+**core SDK directories** — not inside their own extension folder — so that
+user scripts can include/import them without path manipulation.
+
+### C++ SDK Headers
+
+| Header | Provided By | Purpose |
+|--------|-------------|---------|
+| `gn_user_node.h` | Core | Base class + lifecycle + param helpers |
+| `gn_user_types.h` | Core | Type aliases, param factories, `make_multi_output()` |
+| `gn_user_sop.h` | Core | SOP output helpers |
+| `gn_user_chop.h` | Core | CHOP output helpers |
+| `gn_user_img.h` | Core | IMG output helpers |
+| `gn_user_top.h` | Core | TOP output helpers |
+| `gn_user_dat.h` | Core | DAT output helpers |
+| `gn_user_sdf.h` | SDF extension | SDF tree construction (primitives, booleans, modifiers, materials) |
+
+Extension authors adding a new family should create a corresponding
+`gn_user_<family>.h` in the SDK directory with result builders and input
+helpers matching the patterns in the existing headers.
+
+### Python SDK Modules
+
+| Module | Provided By | Purpose |
+|--------|-------------|---------|
+| `gonodes.sop` | Core | SOP result builders |
+| `gonodes.chop` | Core | CHOP result builders |
+| `gonodes.img` | Core | IMG result builders |
+| `gonodes.top` | Core | TOP result builders |
+| `gonodes.dat` | Core | DAT result builders |
+| `gonodes.params` | Core | Port + parameter definition helpers |
+| `gonodes` (init) | Core | Common helpers, `make_multi_output()` |
+| `gonodes.sdf` | SDF extension | SDF tree construction (mirrors C++ API) |
+
+### Adding an SDK for a New Extension Family
+
+1. Create `gn_user_<family>.h` in `addons/gn_ext_user_native/sdk/`
+2. Create `gonodes/<family>.py` in `addons/gn_ext_user_python/sdk/gonodes/`
+3. Both should provide:
+   - Result builder (e.g. `make_<family>_result()`)
+   - Input reader (e.g. `get_input_<family>()`, `has_input_<family>()`)
+   - Domain-specific helpers (e.g. SDF primitives, boolean ops)
+4. The generic extension marshalling in `native_script.gd` and
+   `python_script.gd` handles serialization/deserialization automatically
+   for any family registered via `GNFamily.register_data_factory()`
+
+### Generic Extension Data Marshalling
+
+The UserNative and UserPython wrapper operators include generic marshalling
+for extension data types. When a script's input or output belongs to an
+extension family (e.g. SDF), the wrappers:
+
+- **Marshal input:** Convert the `GNData` subclass to a plain Dictionary
+  by checking for known properties (e.g. `"sdf_tree" in data` for SDF).
+  The `_marshal_extension()` method handles this.
+- **Build output:** Create a fresh `GNData` instance via
+  `GNFamily.create_data_for_family(family_id)` and populate its properties
+  from the cook result Dictionary. The `_build_extension()` method handles
+  this.
+
+This means extension family SDKs only need to produce/consume plain
+Dictionaries — no special bridging code is required per extension.
+
+---
+
+## 14. Multi-Output for Script Nodes
+
+All three script node types support multi-output:
+
+| Script Type | Multi-Output Mechanism |
+|-------------|----------------------|
+| GDScriptSCRIPT | `# @output` annotations + `outputs[]` array |
+| UserNative (C++) | `get_port_definitions()` with multiple outputs + `{"outputs": [...]}` return |
+| UserPython | `get_port_definitions()` with multiple outputs + `{"outputs": [...]}` return |
+
+### GDScript Multi-Output
+
+Uses `# @output <family>` annotations. Each annotation creates a typed
+output port with a pre-prepared `GNData` subclass in the `outputs[]` array:
+
+```gdscript
+# @output chop  Channel data
+# @output dat   Statistics table
+
+func cook():
+    outputs[0].add_channel("lfo", PackedFloat32Array([sin(time)]))
+    outputs[1].set_headers(["stat", "value"])
+    outputs[1].append_row(["mean", "0.5"])
+```
+
+### C++ Multi-Output
+
+Define multiple output ports in `get_port_definitions()` and return a
+Dictionary with an `"outputs"` key containing an Array of per-port results:
+
+```cpp
+#include "gn_user_types.h"
+#include "gn_user_chop.h"
+#include "gn_user_dat.h"
+
+Array get_port_definitions() override {
+    return Array::make(
+        gn::output_port("channels", "CHOP", "Channel data"),
+        gn::output_port("stats", "DAT", "Statistics")
+    );
+}
+
+Dictionary native_cook(const Dictionary &params,
+                       const Array &inputs,
+                       const Dictionary &ctx) override {
+    Dictionary chop_result = gn::make_chop_single("lfo", arr);
+    Dictionary dat_result = gn::make_dat_table(headers, rows);
+    return gn::make_multi_output({chop_result, dat_result});
+}
+```
+
+### Python Multi-Output
+
+Same pattern — multiple output ports and an `"outputs"` return:
+
+```python
+from gonodes import make_multi_output
+from gonodes.chop import make_chop_result
+from gonodes.dat import make_dat_result
+from gonodes.params import output_port
+
+def get_port_definitions():
+    return {"ports": [
+        output_port("channels", "CHOP", label="Channel data"),
+        output_port("stats", "DAT", label="Statistics"),
+    ]}
+
+def cook(me, params, inputs, context):
+    chop = make_chop_result({"lfo": [math.sin(me["time"])]})
+    dat = make_dat_result([["mean", "0.5"]], header=["stat", "value"])
+    return make_multi_output(chop, dat)
+```
+
+### Protocol Details
+
+- Single-output (backwards-compatible): cook returns a flat Dictionary
+  (e.g. `{"positions": [...]}`)
+- Multi-output: cook returns `{"outputs": [dict0, dict1, ...]}`
+  where each element is the result for the corresponding output port index
+- The wrapper detects the `"outputs"` key and routes each element to
+  `_build_output_for_port(result, port_index, inputs)`
+- `get_output_data(port_index)` override returns per-port cached data
+
+---
+
+## 15. Extension Presets for Code Editors
+
+Extensions can contribute presets to the code editors (C++, Python,
+GDScript) by placing files in a `presets/` directory inside the extension
+folder. The `GNPresetPaths` system auto-discovers them.
+
+### Discovery Path
+
+`GNPresetPaths.get_code_preset_dirs(folder)` scans:
+1. `res://addons/gonodes/presets/<folder>/` — core factory presets
+2. `res://addons/gn_ext_*/presets/<folder>/` — extension presets
+3. `user://gonodes_presets/<folder>/` — user-saved presets
+
+### Folder Names
+
+| Language | Folder | Extension Example |
+|----------|--------|-------------------|
+| GDScript | `script` | `addons/gn_ext_sdf/presets/script/sdf_sphere.gd` |
+| C++ | `cpp` | `addons/gn_ext_sdf/presets/cpp/sdf_sphere.h` |
+| Python | `python` | `addons/gn_ext_sdf/presets/python/sdf_sphere.py` |
+
+### What Extensions Should Ship
+
+Extensions defining a new family should include presets demonstrating
+their SDK in all three languages (GDScript, C++, Python). These appear
+in the code editor's **Presets** dropdown alongside core presets,
+grouped by source.
+
+### Example: SDF Extension Presets
+
+```
+addons/gn_ext_sdf/presets/
+    script/                   # GDScript presets
+        sdf_sphere.gd
+        sdf_smooth_bool.gd
+        sdf_procedural_scene.gd
+    cpp/                      # C++ presets
+        sdf_sphere.h
+        sdf_smooth_bool.h
+        sdf_procedural_scene.h
+    python/                   # Python presets
+        sdf_sphere.py
+        sdf_smooth_bool.py
+        sdf_procedural_scene.py
+```
+
+No registration code is needed — placing files in the correct directory
+is sufficient. The preset menus pick them up automatically.
+
+---
+
+## 16. Extension-Shipped Assets (.gnasset)
 
 Extensions can ship reusable custom operator assets (`.gnasset` files) that
 appear in the palette under the extension's display name. These are

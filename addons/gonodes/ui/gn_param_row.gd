@@ -620,7 +620,12 @@ static func register_code_param(param_name: String) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Lazily creates (or re-opens) the windowed GNCodeEditor for this param.
+## If the owning node provides its own open_code_editor() (e.g. NativeSCRIPT,
+## PythonSCRIPT), delegate to it so the specialised editor is used.
 func _open_code_editor() -> void:
+	if owner_node and owner_node.has_method("open_code_editor"):
+		owner_node.open_code_editor()
+		return
 	if _code_editor == null:
 		_code_editor = GNCodeEditor.new()
 		add_child(_code_editor)

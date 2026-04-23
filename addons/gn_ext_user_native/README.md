@@ -59,12 +59,13 @@ addons/gn_ext_user_native/
 │   └── user_native_dat.gd
 ├── sdk/                     # C++ SDK headers (user-facing API)
 │   ├── gn_user_node.h       # Base class for all user nodes
-│   ├── gn_user_types.h      # Type aliases + param factories
+│   ├── gn_user_types.h      # Type aliases + param factories + make_multi_output()
 │   ├── gn_user_sop.h        # SOP output helpers
 │   ├── gn_user_chop.h       # CHOP output helpers
 │   ├── gn_user_img.h        # IMG output helpers
 │   ├── gn_user_top.h        # TOP output helpers
-│   └── gn_user_dat.h        # DAT output helpers
+│   ├── gn_user_dat.h        # DAT output helpers
+│   └── gn_user_sdf.h       # SDF tree construction (extension SDK)
 ├── templates/               # Starter templates for each family
 │   ├── sop_template.h
 │   ├── chop_template.h
@@ -95,6 +96,58 @@ C++ user nodes get **full WorkerThreadPool parallelism** automatically. The exis
 
 **Safe:** `ArrayMesh`, `SurfaceTool`, `PackedVector3Array`, `PackedFloat32Array`, `Image`, math operations.
 **Unsafe (main-thread only):** `RenderingServer`, `DisplayServer`, `AudioServer` direct calls.
+
+## Multi-Output
+
+C++ operators can produce multiple outputs of different families.
+
+1. Define multiple output ports in `get_port_definitions()`.
+2. Return `gn::make_multi_output({result0, result1, ...})` from `native_cook()`.
+
+```cpp
+#include "gn_user_types.h"
+#include "gn_user_chop.h"
+#include "gn_user_dat.h"
+
+Array get_port_definitions() override {
+    return Array::make(
+        gn::output_port("channels", "CHOP", "Channel data"),
+        gn::output_port("stats", "DAT", "Statistics")
+    );
+}
+
+Dictionary native_cook(const Dictionary &params,
+                       const Array &inputs,
+                       const Dictionary &ctx) override {
+    Dictionary chop = gn::make_chop_single("val", arr);
+    Dictionary dat = gn::make_dat_table(headers, rows);
+    return gn::make_multi_output({chop, dat});
+}
+```
+
+Single-output operators are unchanged — return a flat Dictionary as before.
+The wrapper detects the `"outputs"` key automatically.
+
+## Extension Family SDKs
+
+Extension families (like SDF) ship SDK headers in the same `sdk/` directory.
+Include them like any other header:
+
+```cpp
+#include "gn_user_sdf.h"
+
+Dictionary native_cook(...) override {
+    auto tree = gn::sdf_smooth_union(
+        gn::sdf_sphere(0, 0, 0, 1.0),
+        gn::sdf_box(2, 0, 0, 0.8, 0.8, 0.8),
+        0.3
+    );
+    return gn::make_sdf_result(tree);
+}
+```
+
+Available extension SDK headers:
+- `gn_user_sdf.h` — SDF primitives, booleans, modifiers, materials
 
 ## Bundled Toolchain
 

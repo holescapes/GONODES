@@ -1,38 +1,30 @@
 class_name PythonSCRIPT
 extends GNNode
-## Consolidated Python scripting node with per-family marshalling.
+## Python scripting node with per-family marshalling.
 ##
-## A single unified node replaces the five per-family Python operators
-## (UserPythonCHOP, UserPythonSOP, UserPythonDAT, UserPythonIMG, UserPythonTOP).
-## A **Template** dropdown selects the target data family, which determines
-## default Python source, port types, and input/output marshalling.
-
-## Template choices — determines marshalling and default source.
-enum Template { CHOP, SOP, DAT, IMG, TOP }
-
-const _TEMPLATE_NAMES: PackedStringArray = ["CHOP", "SOP", "DAT", "IMG", "TOP"]
+## Ports and parameters are defined by the Python code itself via
+## `get_port_definitions()` and `get_param_definitions()`.  Use Presets
+## in the code editor to load family-focused starting scripts (CHOP, SOP,
+## DAT, IMG, TOP).
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Default Python Sources per Template
-# ═══════════════════════════════════════════════════════════════════════════════
+## Default Python source used when no preset has been loaded.
+const _DEFAULT_SOURCE := """\"\"\"CHOP Template — Minimal channel generator.\"\"\"
 
-const _SRC_CHOP := """from gonodes.chop import make_chop_result, get_input_value
-from gonodes.params import input_port, output_port, float_param, int_param
+from gonodes.chop import make_chop_result
+from gonodes.params import output_port, float_param
 import numpy as np
 
 
 def get_port_definitions():
     return {"ports": [
-        input_port("in", "CHOP", label="Input channels"),
         output_port("out", "CHOP", label="Output channels"),
     ]}
 
 
 def get_param_definitions():
     return {"params": [
-        float_param("frequency", 1.0, 0.01, 100.0, 0.01, "Frequency", "Hz"),
-        int_param("channels", 3, 1, 64, "Channels", "Number of output channels."),
+        float_param("value", 0.0, -10.0, 10.0, 0.01, "Value"),
     ]}
 
 
@@ -41,201 +33,13 @@ def setup(me, context):
 
 
 def cook(me, params, inputs, context):
-    freq = params.get("frequency", 1.0)
-    num_ch = int(params.get("channels", 3))
-    t = context.get("elapsed", 0.0)
-
-    channels = {}
-    for i in range(num_ch):
-        phase = i / num_ch * 2.0 * np.pi
-        channels[f"ch{i}"] = np.array([np.sin(t * freq * 2.0 * np.pi + phase)],
-                                       dtype=np.float32)
-
+    val = params.get("value", 0.0)
+    channels = {"ch0": np.array([val], dtype=np.float32)}
     return make_chop_result(channels)
 """
 
-
-const _SRC_SOP := """from gonodes.sop import make_sop_result, get_input_positions
-from gonodes.params import input_port, output_port, float_param
-import numpy as np
-
-
-def get_port_definitions():
-    return {"ports": [
-        input_port("in", "SOP", label="Input geometry"),
-        output_port("out", "SOP", label="Output geometry"),
-    ]}
-
-
-def get_param_definitions():
-    return {"params": [
-        float_param("amplitude", 1.0, 0.0, 10.0, 0.01, "Amplitude", "Deformation strength."),
-    ]}
-
-
-def setup(me, context):
-    pass  # Called once at load and on reload
-
-
-def cook(me, params, inputs, context):
-    positions = get_input_positions(inputs, 0)
-    if positions is None:
-        return {}
-
-    amp = params.get("amplitude", 1.0)
-    t = context.get("elapsed", 0.0)
-
-    # Vectorized vertex deformation with NumPy
-    positions[:, 1] += np.sin(positions[:, 0] * 3.0 + t * 2.0) * amp
-
-    return make_sop_result(positions)
-"""
-
-
-const _SRC_DAT := """from gonodes.dat import make_dat_result, get_input_table
-from gonodes.params import input_port, output_port, string_param
-
-
-def get_port_definitions():
-    return {"ports": [
-        input_port("in", "DAT", label="Input table"),
-        output_port("out", "DAT", label="Output table"),
-    ]}
-
-
-def get_param_definitions():
-    return {"params": [
-        string_param("filter", "", "Filter", "Only keep rows containing this string."),
-    ]}
-
-
-def setup(me, context):
-    pass
-
-
-def cook(me, params, inputs, context):
-    header, rows = get_input_table(inputs, 0)
-    filter_str = params.get("filter", "")
-
-    if rows and filter_str:
-        rows = [r for r in rows if any(filter_str in str(c) for c in r)]
-
-    return make_dat_result(rows=rows, header=header)
-"""
-
-
-const _SRC_IMG := """from gonodes.img import make_img_result, get_input_image
-from gonodes.params import input_port, output_port, float_param
-import numpy as np
-
-
-def get_port_definitions():
-    return {"ports": [
-        input_port("in", "IMG", label="Input image"),
-        output_port("out", "IMG", label="Output image"),
-    ]}
-
-
-def get_param_definitions():
-    return {"params": [
-        float_param("brightness", 1.0, 0.0, 3.0, 0.01, "Brightness"),
-    ]}
-
-
-def setup(me, context):
-    pass
-
-
-def cook(me, params, inputs, context):
-    result = get_input_image(inputs, 0)
-    if result is None:
-        return {}
-
-    pixels, w, h, c = result
-    brightness = params.get("brightness", 1.0)
-
-    # Vectorized brightness adjustment
-    out = np.clip(pixels.astype(np.float32) * brightness, 0, 255).astype(np.uint8)
-
-    return make_img_result(out, w, h, c)
-"""
-
-
-const _SRC_TOP := """from gonodes.top import make_top_result
-from gonodes.params import output_port, int_param, float_param
-import numpy as np
-
-
-def get_port_definitions():
-    return {"ports": [
-        output_port("out", "TOP", label="Output texture"),
-    ]}
-
-
-def get_param_definitions():
-    return {"params": [
-        int_param("width", 512, 1, 4096, "Width"),
-        int_param("height", 512, 1, 4096, "Height"),
-        float_param("speed", 1.0, 0.0, 10.0, 0.01, "Speed"),
-    ]}
-
-
-def setup(me, context):
-    pass
-
-
-def cook(me, params, inputs, context):
-    w = int(params.get("width", 512))
-    h = int(params.get("height", 512))
-    speed = params.get("speed", 1.0)
-    t = context.get("elapsed", 0.0)
-
-    # Generate a gradient pattern
-    y = np.linspace(0, 1, h, dtype=np.float32)[:, None]
-    x = np.linspace(0, 1, w, dtype=np.float32)[None, :]
-
-    r = np.sin(x * 6.28 + t * speed) * 0.5 + 0.5
-    g = np.sin(y * 6.28 + t * speed * 0.7) * 0.5 + 0.5
-    b = np.sin((x + y) * 3.14 + t * speed * 1.3) * 0.5 + 0.5
-
-    pixels = np.zeros((h, w, 4), dtype=np.uint8)
-    pixels[:, :, 0] = (r * 255).astype(np.uint8)
-    pixels[:, :, 1] = (g * 255).astype(np.uint8)
-    pixels[:, :, 2] = (b * 255).astype(np.uint8)
-    pixels[:, :, 3] = 255
-
-    return make_top_result(pixels, w, h)
-"""
-
-
-const _SOURCES: Dictionary = {
-	Template.CHOP: _SRC_CHOP,
-	Template.SOP:  _SRC_SOP,
-	Template.DAT:  _SRC_DAT,
-	Template.IMG:  _SRC_IMG,
-	Template.TOP:  _SRC_TOP,
-}
-
-## File suffix used when writing the Python source to disk.
-const _SUFFIXES: Dictionary = {
-	Template.CHOP: "_chop.py",
-	Template.SOP:  "_sop.py",
-	Template.DAT:  "_dat.py",
-	Template.IMG:  "_img.py",
-	Template.TOP:  "_top.py",
-}
-
-## Default port family per template.
-const _PORT_FAMILIES: Dictionary = {
-	Template.CHOP: GNFamily.Type.CHOP,
-	Template.SOP:  GNFamily.Type.SOP,
-	Template.DAT:  GNFamily.Type.DAT,
-	Template.IMG:  GNFamily.Type.IMG,
-	Template.TOP:  GNFamily.Type.TOP,
-}
-
 ## System parameter names (not forwarded to Python).
-const _SYSTEM_PARAMS: PackedStringArray = ["template", "py_source", "auto_reload", "time_dep"]
+const _SYSTEM_PARAMS: PackedStringArray = ["py_source", "auto_reload", "time_dep"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -250,10 +54,12 @@ var _load_error: String = ""
 var _is_loaded: bool = false
 var _dynamic_params: Array[Dictionary] = []
 var _dynamic_ports: Array[Dictionary] = []
-var _current_template: int = Template.CHOP
 
 ## Last cook duration in milliseconds (for preview display).
 var _last_cook_ms: float = 0.0
+
+## Per-port output data for multi-output support.
+var _output_data: Array[GNData] = []
 
 ## TOP-specific: cached texture data for viewport-less texture output.
 var _cached_tex: GNTextureData = null
@@ -266,50 +72,16 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	_setup_ports_for_template(_current_template)
+	add_output("out", GNFamily.Type.CHOP, "Output channels")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_enum("template", _TEMPLATE_NAMES,
-		Template.CHOP, "Template",
-		"Target data family. Changing this replaces default source and port layout."))
-	add_parameter(GNParameter.create_string("py_source", _SRC_CHOP,
+	add_parameter(GNParameter.create_string("py_source", _DEFAULT_SOURCE.strip_edges(),
 		"Python Source", "Python source code. Click 'Edit Python ↗' to open the editor."))
 	add_parameter(GNParameter.create_bool("auto_reload", true,
 		"Auto Reload", "Automatically reload when source changes."))
 	add_parameter(GNParameter.create_bool("time_dep", true,
 		"Time Dependent", "Recook every frame."))
-
-
-## Called by the registry when the cfg entry has a `preset=` key.
-func apply_preset(preset_name: String) -> void:
-	var tpl: int = Template.CHOP
-	match preset_name.to_lower():
-		"chop": tpl = Template.CHOP
-		"sop":  tpl = Template.SOP
-		"dat":  tpl = Template.DAT
-		"img":  tpl = Template.IMG
-		"top":  tpl = Template.TOP
-	_apply_template(tpl)
-
-
-func _apply_template(tpl: int) -> void:
-	_current_template = tpl
-	set_param_value("template", tpl)
-	var src: String = _SOURCES.get(tpl, _SRC_CHOP)
-	set_param_value("py_source", src)
-	_py_source = ""       # Force reload on next cook
-	_is_loaded = false
-	_setup_ports_for_template(tpl)
-
-
-func _setup_ports_for_template(tpl: int) -> void:
-	input_ports.clear()
-	output_ports.clear()
-	var fam: int = _PORT_FAMILIES.get(tpl, GNFamily.Type.CHOP)
-	if tpl != Template.TOP:
-		add_input("in", fam, false, "Input")
-	add_output("out", fam, "Output")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -318,11 +90,6 @@ func _setup_ports_for_template(tpl: int) -> void:
 
 func _cook(inputs: Array[GNData]) -> GNData:
 	time_dependent = get_param_value("time_dep")
-
-	# Detect template change
-	var tpl_val: int = get_param_value("template")
-	if tpl_val != _current_template:
-		_apply_template(tpl_val)
 
 	_ensure_processor()
 
@@ -364,7 +131,17 @@ func _cook_python(inputs: Array[GNData]) -> GNData:
 		return null
 
 	node_warning = ""
-	return _build_output(result)
+
+	# Multi-output: {"outputs": [dict0, dict1, ...]}
+	if result.has("outputs"):
+		return _build_multi_output(result["outputs"])
+
+	# Single-output (backwards-compatible)
+	_output_data.clear()
+	var data := _build_output_for_port(result, 0)
+	if data != null:
+		_output_data.append(data)
+	return data
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -378,13 +155,14 @@ func _marshal_inputs(inputs: Array[GNData]) -> Array:
 		if in_data == null:
 			input_dicts.append(null)
 			continue
-		match _current_template:
-			Template.CHOP: input_dicts.append(_marshal_chop(in_data))
-			Template.SOP:  input_dicts.append(_marshal_sop(in_data))
-			Template.DAT:  input_dicts.append(_marshal_dat(in_data))
-			Template.IMG:  input_dicts.append(_marshal_img(in_data))
-			Template.TOP:  input_dicts.append(null)
-			_:             input_dicts.append(null)
+		var port_family: int = input_ports[i].family
+		match port_family:
+			GNFamily.Type.CHOP: input_dicts.append(_marshal_chop(in_data))
+			GNFamily.Type.SOP:  input_dicts.append(_marshal_sop(in_data))
+			GNFamily.Type.DAT:  input_dicts.append(_marshal_dat(in_data))
+			GNFamily.Type.IMG:  input_dicts.append(_marshal_img(in_data))
+			GNFamily.Type.TOP:  input_dicts.append(null)
+			_:                  input_dicts.append(_marshal_extension(in_data))
 	return input_dicts
 
 
@@ -429,18 +207,49 @@ func _marshal_img(data: GNData) -> Variant:
 	return null
 
 
+## Generic extension family marshalling — supports SDF and future extensions.
+func _marshal_extension(data: GNData) -> Variant:
+	# SDF data: carries an AST tree dictionary
+	if "sdf_tree" in data and "tree_hash" in data:
+		return {"sdf_tree": data.get("sdf_tree"), "tree_hash": data.get("tree_hash")}
+	return null
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Output Building — dispatch by template
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func _build_output(result: Dictionary) -> GNData:
-	match _current_template:
-		Template.CHOP: return _build_chop(result)
-		Template.SOP:  return _build_sop(result)
-		Template.DAT:  return _build_dat(result)
-		Template.IMG:  return _build_img(result)
-		Template.TOP:  return _build_top(result)
-	return null
+## Builds per-port output data from an array of result dicts.
+func _build_multi_output(outputs_arr: Array) -> GNData:
+	_output_data.clear()
+	for i in range(mini(outputs_arr.size(), output_ports.size())):
+		var port_result = outputs_arr[i]
+		if port_result is Dictionary and not port_result.is_empty():
+			_output_data.append(_build_output_for_port(port_result, i))
+		else:
+			_output_data.append(null)
+	return _output_data[0] if not _output_data.is_empty() else null
+
+
+## Builds typed GNData for a single port from its result dictionary.
+func _build_output_for_port(result: Dictionary, port_index: int) -> GNData:
+	if port_index < 0 or port_index >= output_ports.size():
+		return null
+	var out_family: int = output_ports[port_index].family
+	match out_family:
+		GNFamily.Type.CHOP: return _build_chop(result)
+		GNFamily.Type.SOP:  return _build_sop(result)
+		GNFamily.Type.DAT:  return _build_dat(result)
+		GNFamily.Type.IMG:  return _build_img(result)
+		GNFamily.Type.TOP:  return _build_top(result)
+		_:                  return _build_extension(result, out_family)
+
+
+## Per-port output routing — the cook engine calls this for each downstream wire.
+func get_output_data(port_index: int) -> GNData:
+	if port_index >= 0 and port_index < _output_data.size():
+		return _output_data[port_index]
+	return cached_output
 
 
 func _build_chop(result: Dictionary) -> GNData:
@@ -578,21 +387,35 @@ func _build_top(result: Dictionary) -> GNData:
 	return _cached_tex
 
 
+## Generic extension family output building — supports SDF and future extensions.
+func _build_extension(result: Dictionary, family_id: int) -> GNData:
+	var out: GNData = GNScriptHelper.create_data_for_family(family_id)
+	if out == null:
+		return null
+	out.valid = true
+	out.timestamp = current_frame
+	# SDF: set sdf_tree and tree_hash if present
+	if result.has("sdf_tree") and "sdf_tree" in out:
+		out.set("sdf_tree", result["sdf_tree"])
+		if result.has("tree_hash"):
+			out.set("tree_hash", result["tree_hash"])
+		else:
+			out.set("tree_hash", hash(var_to_str(result["sdf_tree"])))
+	return out
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Preview
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## SCRIPT nodes show cook time + status, not data preview.
+## Delegates to base GNNode for data-type-aware preview.
+## Shows warning text if there's an error, otherwise the data's preview.
 func update_preview_control(control: Control) -> void:
-	if not control is Label:
-		return
-	var label := control as Label
 	if not node_warning.is_empty():
-		label.text = "ERR | %s" % node_warning.substr(0, 40)
-	elif _last_cook_ms > 0.0:
-		label.text = "%.1fms | OK" % _last_cook_ms
-	else:
-		label.text = ""
+		if control is Label:
+			(control as Label).text = "ERR | %s" % node_warning.substr(0, 40)
+		return
+	super.update_preview_control(control)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -619,7 +442,8 @@ func _ensure_processor() -> void:
 	if _processor != null:
 		return
 	if not ClassDB.class_exists(&"GNPythonProcessor"):
-		node_warning = "GNPythonRuntime not loaded. Check gn_python.gdextension."
+		_load_error = "GNPythonRuntime not loaded. Check gn_python.gdextension."
+		node_warning = _load_error
 		return
 	_processor = ClassDB.instantiate(&"GNPythonProcessor")
 
@@ -631,8 +455,7 @@ func _load_script() -> void:
 
 	var dir_path := "user://python_scripts/"
 	DirAccess.make_dir_recursive_absolute(dir_path)
-	var suffix: String = _SUFFIXES.get(_current_template, "_chop.py")
-	_script_path = dir_path + id.replace("-", "_") + suffix
+	_script_path = dir_path + id.replace("-", "_") + ".py"
 
 	var fa := FileAccess.open(_script_path, FileAccess.WRITE)
 	if fa == null:

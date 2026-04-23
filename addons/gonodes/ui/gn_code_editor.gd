@@ -64,6 +64,11 @@ var _save_btn: Button = null
 var _ref_label: Label = null
 var _preset_entries: Array = []
 
+# ─── Validation ───────────────────────────────────────────────────────────────
+
+var _validate_timer: Timer = null
+var _error_lines: Array[int] = []
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Lifecycle Overrides
@@ -74,6 +79,16 @@ func _init() -> void:
 	title = "Code Editor"
 	size = Vector2i(720, 560)
 	min_size = Vector2i(480, 320)
+
+
+func _ready() -> void:
+	super._ready()
+	_validate_timer = Timer.new()
+	_validate_timer.one_shot = true
+	_validate_timer.wait_time = 1.5
+	_validate_timer.timeout.connect(_validate_code)
+	add_child(_validate_timer)
+	_code_edit.text_changed.connect(_on_text_changed)
 
 
 ## Adds the preset toolbar between info label and CodeEdit.
@@ -450,3 +465,42 @@ func _on_save_preset_pressed() -> void:
 	add_child(dlg)
 	dlg.popup_centered()
 	name_edit.grab_focus()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Debounced Validation (GDScript only)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _on_text_changed() -> void:
+	_validate_timer.start()
+
+
+func _validate_code() -> void:
+	# Only validate GDScript — skip shaders and extension languages
+	if _shader_mode or _ext_languages.has(_param_name):
+		return
+
+	var code := _code_edit.text.strip_edges()
+	_clear_error_marks()
+
+	if code.is_empty():
+		_set_status("Ctrl+Enter to confirm  |  Escape to cancel")
+		return
+
+	var full_source: String = GNScriptHelper._PREAMBLE + code
+	var test_script := GDScript.new()
+	test_script.source_code = full_source
+	var err := test_script.reload()
+
+	if err == OK:
+		_set_status("\u2713 No syntax errors", Color(0.3, 1.0, 0.4))
+	else:
+		_set_status("\u2717 Syntax error \u2014 check your code (error %d)" % err,
+			Color(1.0, 0.35, 0.3))
+
+
+func _clear_error_marks() -> void:
+	for line_idx in _error_lines:
+		if line_idx < _code_edit.get_line_count():
+			_code_edit.set_line_background_color(line_idx, Color(0, 0, 0, 0))
+	_error_lines.clear()

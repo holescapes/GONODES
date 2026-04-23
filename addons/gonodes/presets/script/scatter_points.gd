@@ -1,3 +1,4 @@
+# @output sop Output geometry
 # @param int count 100 Number of points to scatter
 # @param float radius 2.0 Scatter radius
 # @param int seed 0 Random seed (0 = use frame number)

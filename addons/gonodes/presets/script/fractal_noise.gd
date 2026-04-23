@@ -1,3 +1,4 @@
+# @output img Output image
 # @param vec2i resolution 256,256 Output image size
 # @param float scale 4.0 Noise scale
 # @param int octaves 4 Number of octaves

@@ -132,3 +132,23 @@ for name in built:
 for name, reason in skipped:
     print(f"  [--] {name} -- {reason}")
 print(f"{'='*60}\n")
+
+# ── Post-build: sync .gdextension activation ──────────────────────────────────
+
+def _post_build_sync(target, source, env):
+    """After all libraries are built, activate .gdextension files whose
+    binaries now exist (and deactivate any whose binaries were removed)."""
+    sync_script = os.path.join(_workspace_root, "scripts", "sync_gdextensions.py")
+    if os.path.isfile(sync_script):
+        import subprocess
+        subprocess.run(
+            [sys.executable, sync_script, "--platform", plat, "--arch", arch],
+            cwd=_workspace_root,
+        )
+
+if built:
+    # Create a pseudo-target that runs after all libraries are linked.
+    _sync = Command("_gdext_sync", [], _post_build_sync)
+    AlwaysBuild(_sync)
+    # Ensure sync runs after every library target.
+    Depends(_sync, DEFAULT_TARGETS)

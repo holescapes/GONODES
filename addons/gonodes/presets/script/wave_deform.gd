@@ -1,3 +1,4 @@
+# @output sop Output geometry
 # @input sop Source geometry to deform
 # @param float amplitude 0.5 Noise displacement strength
 # @param float frequency 2.0 Noise spatial frequency

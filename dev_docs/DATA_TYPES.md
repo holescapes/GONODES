@@ -337,3 +337,34 @@ The extension registry calls `GNFamily.register_data_factory()` so that
 `GNFamily.create_data_for_family(family_id)` returns fresh instances of
 the custom data class — used by the script annotation system when a script
 declares `# @output sdf`.
+
+### Marshalling Extension Data for Script Nodes
+
+Script nodes (NativeSCRIPT, PythonSCRIPT) can produce and consume
+extension data types via generic marshalling — no per-extension code
+changes are needed in the wrappers.
+
+**Input marshalling (`_marshal_extension`):** Converts a `GNData` subclass
+to a plain Dictionary by checking for known properties. For example,
+`GNSDFData` is serialized as `{"sdf_tree": [...], "tree_hash": N}`.
+
+**Output building (`_build_extension`):** Creates a fresh `GNData`
+instance via `GNFamily.create_data_for_family(family_id)` and sets
+properties from the cook result dict.
+
+This pattern means extension SDK authors only need to produce/consume
+plain Dictionaries from C++ and Python code — the generic marshalling
+bridge handles the GDScript data class conversion automatically.
+
+### SDK Helpers for Extension Data
+
+Extensions can ship SDK files that simplify creating/consuming their data
+from script nodes:
+
+| Language | SDK Location | Example (SDF) |
+|----------|-------------|---------------|
+| C++ | `addons/gn_ext_user_native/sdk/gn_user_sdf.h` | `gn::sdf_sphere()`, `gn::make_sdf_result()` |
+| Python | `addons/gn_ext_user_python/sdk/gonodes/sdf.py` | `sdf_sphere()`, `make_sdf_result()` |
+| GDScript | Direct `GNData` subclass API | `GNSDFData.sdf_tree = [...]` |
+
+See `dev_docs/EXTENSIONS.md` §13 for the full extension SDK pattern.

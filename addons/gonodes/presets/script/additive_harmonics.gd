@@ -1,3 +1,4 @@
+# @output chop Output signal
 # @param float frequency 1.0 Oscillation frequency
 # @param float amplitude 1.0 Peak amplitude
 # @param int harmonics 3 Number of additive harmonics

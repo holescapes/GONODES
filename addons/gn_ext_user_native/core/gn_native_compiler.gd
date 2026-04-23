@@ -53,14 +53,54 @@ const _SCONSTRUCT_TEMPLATE := """
 #!/usr/bin/env python
 import os, sys
 
-# Find godot-cpp
 godot_cpp_path = "{godot_cpp_path}"
 if not os.path.isdir(godot_cpp_path):
     print("ERROR: godot-cpp not found at:", godot_cpp_path)
     sys.exit(1)
 
-env = SConscript(os.path.join(godot_cpp_path, "SConstruct"))
-env.Append(CPPPATH=["{sdk_path}"])
+# Import the godotcpp tool from toolchain/tools/ to set up compiler flags,
+# but do NOT run godot-cpp's own SConstruct (which tries to build godot-cpp from
+# source).  Instead we configure the environment manually and link against the
+# pre-built static library.
+sys.path.insert(0, godot_cpp_path)
+
+EnsureSConsVersion(4, 0)
+
+platform = ARGUMENTS.get("platform", "")
+target   = ARGUMENTS.get("target", "template_release")
+arch     = ARGUMENTS.get("arch", "x86_64")
+
+env = Environment(tools=["default"], PLATFORM="")
+env.PrependENVPath("PATH", os.getenv("PATH"))
+
+opts = Variables([], ARGUMENTS)
+cpp_tool = Tool("godotcpp", toolpath=[os.path.join(godot_cpp_path, "tools")])
+cpp_tool.options(opts, env)
+opts.Update(env)
+cpp_tool.generate(env)
+
+# Headers
+env.Append(CPPPATH=[
+    os.path.join(godot_cpp_path, "include"),
+    os.path.join(godot_cpp_path, "gen", "include"),
+    os.path.join(godot_cpp_path, "gdextension"),
+    "{sdk_path}",
+])
+
+# Link against pre-built godot-cpp static library
+lib_dir = os.path.join(godot_cpp_path, "bin")
+env.Append(LIBPATH=[lib_dir])
+# Find the matching lib file
+import glob
+libs = glob.glob(os.path.join(lib_dir, "libgodot-cpp.*" + target + "*"))
+if libs:
+    lib_name_full = os.path.splitext(os.path.basename(libs[0]))[0]
+    if lib_name_full.startswith("lib"):
+        lib_name_full = lib_name_full[3:]  # strip "lib" prefix for linker
+    env.Append(LIBS=[lib_name_full])
+else:
+    print("ERROR: No pre-built godot-cpp library found in", lib_dir)
+    sys.exit(1)
 
 sources = Glob("*.cpp")
 library = env.SharedLibrary(
@@ -147,6 +187,91 @@ func _compile_thread(ctx: Dictionary) -> void:
 		result["output"], result["lib_path"])
 
 
+## Syntax-check only — compile without linking. Faster than a full build.
+## @param node_id       Unique node identifier
+## @param source_code   The full C++ source text
+## @param callback      Callable(success: bool, output: String)
+func syntax_check_async(node_id: String, source_code: String,
+		callback: Callable) -> void:
+	var thread := Thread.new()
+	var ctx := {
+		"node_id": node_id,
+		"source": source_code,
+		"callback": callback,
+	}
+	thread.start(_check_thread.bind(ctx))
+
+
+func _check_thread(ctx: Dictionary) -> void:
+	var node_id: String = ctx["node_id"]
+	var source: String = ctx["source"]
+	var callback: Callable = ctx["callback"]
+	var result := _do_syntax_check(node_id, source)
+	callback.call_deferred(result["success"], result["output"])
+
+
+func _do_syntax_check(node_id: String, source: String) -> Dictionary:
+	var build_dir := _get_build_dir(node_id)
+	if not DirAccess.dir_exists_absolute(build_dir):
+		DirAccess.make_dir_recursive_absolute(build_dir)
+
+	# Write source to temp file
+	var src_path := build_dir.path_join("_check_tmp.h")
+	var f := FileAccess.open(src_path, FileAccess.WRITE)
+	if f == null:
+		return {"success": false, "output": "Failed to write temp source file."}
+	f.store_string(source)
+	f.close()
+
+	var compiler := _find_system_compiler()
+	if compiler.is_empty():
+		return {"success": false, "output": "No C++ compiler found."}
+
+	var godot_cpp_path := _find_godot_cpp()
+	if godot_cpp_path.is_empty():
+		return {"success": false, "output": "godot-cpp not found."}
+
+	var sdk_path := ProjectSettings.globalize_path(_ext_dir + "sdk")
+	var global_src := ProjectSettings.globalize_path(src_path)
+	var includes := [
+		godot_cpp_path.path_join("include"),
+		godot_cpp_path.path_join("gen/include"),
+		godot_cpp_path.path_join("gdextension"),
+		sdk_path,
+	]
+
+	var output := []
+	var exit_code: int
+	var platform := _get_platform()
+
+	if platform == "windows" and compiler == "cl":
+		var args := PackedStringArray([
+			"/Zs", "/std:c++17", "/EHsc", "/utf-8",
+			"/DWINDOWS_ENABLED", "/DTYPED_METHOD_BIND", "/DNOMINMAX",
+			"/DWIN32", "/D_WIN32",
+		])
+		for inc in includes:
+			args.append("/I%s" % inc)
+		args.append(global_src)
+		exit_code = OS.execute("cl", args, output, true)
+	else:
+		var args := PackedStringArray([
+			"-fsyntax-only", "-std=c++17", "-DTYPED_METHOD_BIND",
+		])
+		if platform == "linux":
+			args.append("-DLINUX_ENABLED")
+		elif platform == "macos":
+			args.append("-DMACOS_ENABLED")
+		else:
+			args.append("-DWINDOWS_ENABLED")
+		for inc in includes:
+			args.append("-I%s" % inc)
+		args.append(global_src)
+		exit_code = OS.execute(compiler, args, output, true)
+
+	return {"success": exit_code == 0, "output": "\n".join(output)}
+
+
 func _do_compile(node_id: String, source: String, cls_name: String,
 		build_dir: String) -> Dictionary:
 	# Ensure build directory exists
@@ -178,7 +303,7 @@ func _do_compile(node_id: String, source: String, cls_name: String,
 	f.store_string(reg_source)
 	f.close()
 
-	# Write SConstruct
+	# Write SConstruct (for advanced users who prefer SCons)
 	var godot_cpp_path := _find_godot_cpp()
 	var sdk_path := ProjectSettings.globalize_path(_ext_dir + "sdk")
 	var sconstruct := _SCONSTRUCT_TEMPLATE.format({
@@ -192,29 +317,31 @@ func _do_compile(node_id: String, source: String, cls_name: String,
 	f.store_string(sconstruct)
 	f.close()
 
-	# Run SCons, or fall back to direct compiler invocation
-	var scons_path := _find_scons()
+	# Prefer direct compiler (fast, no SCons dependency), fall back to SCons
 	var output_text := ""
 	var exit_code := -1
+	var direct_compiler := _find_system_compiler()
 
-	if not scons_path.is_empty():
-		var args := PackedStringArray([
-			"-C", ProjectSettings.globalize_path(build_dir),
-			"platform=%s" % platform,
-			"arch=%s" % arch,
-			"target=template_release",
-			"-j%d" % OS.get_processor_count(),
-		])
-
-		var output := []
-		exit_code = OS.execute(scons_path, args, output, true)
-		output_text = "\n".join(output)
-	else:
-		# Fallback: try direct compiler invocation
+	if not direct_compiler.is_empty():
 		var direct_result := _compile_direct(build_dir, source_filename, lib_name,
 			platform, arch, godot_cpp_path, sdk_path)
 		exit_code = direct_result["exit_code"]
 		output_text = direct_result["output"]
+	else:
+		var scons_path := _find_scons()
+		if not scons_path.is_empty():
+			var args := PackedStringArray([
+				"-C", ProjectSettings.globalize_path(build_dir),
+				"platform=%s" % platform,
+				"arch=%s" % arch,
+				"target=template_release",
+				"-j%d" % OS.get_processor_count(),
+			])
+			var output := []
+			exit_code = OS.execute(scons_path, args, output, true)
+			output_text = "\n".join(output)
+		else:
+			return {"success": false, "output": "No C++ compiler found.\nInstall Visual Studio Build Tools (cl.exe), g++, or clang++.", "lib_path": ""}
 
 	if exit_code != 0:
 		return {"success": false, "output": output_text, "lib_path": ""}
@@ -327,14 +454,13 @@ func _write_gdextension(build_dir: String, lib_name: String,
 
 
 ## Check if a compiler is available on this system.
-## Returns true if godot-cpp is found and either SCons or a direct compiler exists.
+## Returns true if godot-cpp is found and a C++ compiler (direct or SCons) exists.
 func is_toolchain_available() -> bool:
 	if _find_godot_cpp().is_empty():
 		return false
-	if not _find_scons().is_empty():
-		return true
-	# SCons absent — check for direct compiler fallback
 	if not _find_system_compiler().is_empty():
+		return true
+	if not _find_scons().is_empty():
 		return true
 	return false
 
@@ -343,8 +469,8 @@ func is_toolchain_available() -> bool:
 func get_toolchain_status() -> String:
 	var status := ""
 	var godot_cpp := _find_godot_cpp()
-	var scons := _find_scons()
 	var compiler := _find_system_compiler()
+	var scons := _find_scons()
 
 	if godot_cpp.is_empty():
 		status += "⚠ godot-cpp not found.\n"
@@ -353,15 +479,13 @@ func get_toolchain_status() -> String:
 	else:
 		status += "✓ godot-cpp: %s\n" % godot_cpp
 
-	if scons.is_empty():
-		if compiler.is_empty():
-			status += "⚠ SCons not found and no system compiler detected.\n"
-			status += "  Install SCons: pip install scons\n"
-		else:
-			status += "⚠ SCons not found — will use direct compiler fallback.\n"
-			status += "✓ Compiler: %s\n" % compiler
+	if not compiler.is_empty():
+		status += "✓ Compiler: %s (direct build)\n" % compiler
+	elif not scons.is_empty():
+		status += "✓ SCons: %s (SCons build)\n" % scons
 	else:
-		status += "✓ SCons: %s\n" % scons
+		status += "⚠ No C++ compiler or SCons found.\n"
+		status += "  Install Visual Studio Build Tools, g++, or clang++.\n"
 
 	status += "✓ Platform: %s  Arch: %s\n" % [_get_platform(), _get_arch()]
 	return status

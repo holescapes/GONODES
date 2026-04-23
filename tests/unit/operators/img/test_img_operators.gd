@@ -234,13 +234,12 @@ func test_image_sequence_img_instantiate() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# GDScriptSCRIPT (IMG template)
+# GDScriptSCRIPT (IMG via preset)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_gdscript_script_img_template() -> void:
+func test_gdscript_script_img_instantiate() -> void:
 	var node := _make_node(GDScriptSCRIPT.new(), "script1")
-	node.set_param_value("template", GDScriptSCRIPT.Template.IMG)
-	GNTestAssert.assert_not_null(node, "GDScriptSCRIPT IMG created")
+	GNTestAssert.assert_not_null(node, "GDScriptSCRIPT created")
 	GNTestAssert.assert_eq(node.node_type, "script", "node_type")
 
 

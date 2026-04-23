@@ -39,34 +39,10 @@ func test_native_script_instantiate() -> void:
 	GNTestAssert.assert_eq(node.family, GNFamily.Type.SCRIPT, "NativeSCRIPT family is SCRIPT")
 
 
-func test_native_script_template_chop() -> void:
-	var node := _make_node(NativeSCRIPT.new(), "nativescript_chop")
-	node.set_param_value("template", NativeSCRIPT.Template.CHOP)
-	GNTestAssert.assert_eq(node._current_template, NativeSCRIPT.Template.CHOP, "Template is CHOP")
-
-
-func test_native_script_template_sop() -> void:
-	var node := _make_node(NativeSCRIPT.new(), "nativescript_sop")
-	node._apply_template(NativeSCRIPT.Template.SOP)
-	GNTestAssert.assert_eq(node._current_template, NativeSCRIPT.Template.SOP, "Template is SOP")
-
-
-func test_native_script_template_dat() -> void:
-	var node := _make_node(NativeSCRIPT.new(), "nativescript_dat")
-	node._apply_template(NativeSCRIPT.Template.DAT)
-	GNTestAssert.assert_eq(node._current_template, NativeSCRIPT.Template.DAT, "Template is DAT")
-
-
-func test_native_script_template_img() -> void:
-	var node := _make_node(NativeSCRIPT.new(), "nativescript_img")
-	node._apply_template(NativeSCRIPT.Template.IMG)
-	GNTestAssert.assert_eq(node._current_template, NativeSCRIPT.Template.IMG, "Template is IMG")
-
-
-func test_native_script_template_top() -> void:
-	var node := _make_node(NativeSCRIPT.new(), "nativescript_top")
-	node._apply_template(NativeSCRIPT.Template.TOP)
-	GNTestAssert.assert_eq(node._current_template, NativeSCRIPT.Template.TOP, "Template is TOP")
+func test_native_script_default_output() -> void:
+	var node := _make_node(NativeSCRIPT.new(), "nativescript_default")
+	GNTestAssert.assert_eq(node.output_ports.size(), 1, "Default has 1 output")
+	GNTestAssert.assert_eq(node.output_ports[0].family, GNFamily.Type.CHOP, "Default output is CHOP")
 
 
 func test_native_script_preview_default() -> void:

@@ -4471,6 +4471,42 @@ A family-less node with annotated output ports (`# @output chop`, `# @output top
 
 **File:** `addons/gonodes/operators/comp/generic_script_node.gd`
 
+### 27.10-native Multi-Output for C++ and Python Script Nodes
+
+**Status: ✅ Done**
+
+NativeSCRIPT and PythonSCRIPT now support multi-output via a backwards-compatible protocol.
+
+**Protocol:**
+- Single-output (unchanged): `native_cook()` / `cook()` returns a flat Dictionary (e.g. `{"positions": [...]}`)
+- Multi-output: returns `{"outputs": [dict0, dict1, ...]}` where each element is the result for the corresponding output port index
+
+**Implementation (both `native_script.gd` and `python_script.gd`):**
+- `_output_data: Array[GNData]` — per-port data cache, resized to match output port count
+- `_build_multi_output(outputs_arr, inputs)` — iterates the array, calls `_build_output_for_port()` per element
+- `_build_output_for_port(result, port_index, inputs)` — dispatches to family-specific build logic per port
+- `get_output_data(port_index)` override — returns the per-port cached data
+
+**SDK helpers:**
+- C++: `gn::make_multi_output({result0, result1})` in `gn_user_types.h`
+- Python: `make_multi_output(result0, result1)` in `gonodes/__init__.py`
+
+**Extension data marshalling:**
+- `_marshal_extension(data)` — serializes extension family data (e.g. SDF) to plain Dictionary for C++/Python boundary
+- `_build_extension(result, family_id)` — creates GNData via `GNFamily.create_data_for_family()` and sets properties from result
+
+### 27.10-sdk Extension SDKs for Script Nodes
+
+**Status: ✅ Done**
+
+Extensions can ship SDK files for C++ and Python script nodes in the existing SDK directories:
+- C++ headers: `addons/gn_ext_user_native/sdk/gn_user_<family>.h`
+- Python modules: `addons/gn_ext_user_python/sdk/gonodes/<family>.py`
+
+The SDF extension ships `gn_user_sdf.h` and `gonodes/sdf.py` providing tree construction helpers, primitives (sphere, box, torus, cylinder), boolean operations (union, smooth union, subtract, intersect), modifiers (twist, repeat, mirror, round), and material assignment.
+
+Extensions also auto-contribute code editor presets via `addons/gn_ext_<name>/presets/<folder>/` (script/, cpp/, python/). `GNPresetPaths.get_code_preset_dirs()` discovers them automatically.
+
 ### 27.10a CallbackDAT (Event-Driven Scripting)
 
 **Status: ✅ Done**

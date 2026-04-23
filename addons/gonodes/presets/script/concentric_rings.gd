@@ -1,3 +1,4 @@
+# @output img Output image
 # @param vec2i resolution 256,256 Output image size
 # @param int rings 8 Number of concentric rings
 # @param float thickness 0.3 Ring line thickness (0-1)

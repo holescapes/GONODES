@@ -1,3 +1,4 @@
+# @output img Output image
 # @param vec2i resolution 256,256 Output image size
 # @param color color_a #ff0000 Gradient start color
 # @param color color_b #0000ff Gradient end color

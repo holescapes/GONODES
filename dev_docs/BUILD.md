@@ -28,6 +28,40 @@ Two build scripts automate template creation:
 Both scripts are functionally identical and produce the same output.
 
 
+## Fresh Clone — Complete Build
+
+After cloning the repository, nothing is compiled. All native extension
+`.gdextension` files ship as `.gdextension.disabled` so Godot starts
+cleanly without missing-binary errors.
+
+```bash
+# 1. Fetch dependencies (godot-cpp, open-source SDKs)
+python setup_deps.py --core
+
+# 2. Build godot-cpp (once per Godot version)
+cd addons/gn_ext_native/native/godot-cpp
+scons platform=windows arch=x86_64 target=template_release -j8
+cd ../../../..
+
+# 3. Build all native extensions
+cd build
+scons platform=windows arch=x86_64 target=template_release -j8
+cd ..
+# Post-build hook automatically runs sync_gdextensions.py to activate extensions.
+
+# 4. Bundle toolchains for user C++/Python nodes (optional)
+python scripts/bundle_toolchain.py
+python addons/gn_ext_user_python/setup_python.py
+
+# 5. Export Player templates (optional — only needed for Quick Build)
+.\scripts\build_templates.ps1 -Platforms all
+```
+
+After step 3, open Godot — all native extensions will be loaded and
+functional. Steps 4–5 are only needed if you want NativeSCRIPT/PythonSCRIPT
+operators or the Quick Build export feature.
+
+
 ## When to Rebuild Templates
 
 Rebuild the templates whenever you:
@@ -64,8 +98,7 @@ GODOTCPP_BRANCH=4.5
 2. Run `python scripts/check_versions.py` to verify all CI workflows match.
 3. Fix any reported mismatches in `.github/workflows/*.yml`.
 4. Run `python setup_deps.py --core` to re-fetch godot-cpp at the new branch.
-5. Rebuild godot-cpp and all native extensions (see Phase 2 in
-   [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)).
+5. Rebuild godot-cpp and all native extensions (see "Fresh Clone" above).
 6. Rebuild Player templates (see below).
 
 ### Validation
@@ -517,8 +550,42 @@ See the existing extensions for reference:
 | `gn_ext_blackmagic` | `addons/gn_ext_blackmagic/` | Blackmagic DeckLink I/O (3 ops — requires DeckLink SDK) |
 | `gn_ext_host_bridge` | `addons/gn_ext_host_bridge/` | Internal bridge between libgonodes C API and GNEmbeddedHost (GDExtension, no operators) |
 
+> **Note:** This table is a reference snapshot. New extensions added to
+> `addons/gn_ext_*/` are auto-discovered by the build system, CI pipelines,
+> and `setup_deps.py` — no manual registration needed. Update this table
+> when adding or removing extensions for documentation purposes.
+
 Full details on the required directory layout and the discovery mechanism
 are in [CONTRIBUTING.md → Extension Self-Containment Rule](CONTRIBUTING.md#extension-self-containment-rule).
+
+
+## libgonodes (Embedding SDK)
+
+`libgonodes/` is the C shared library for embedding GONODES in third-party
+apps.  It uses CMake (not SCons) and has its own version (`LIBGONODES_VERSION`
+in `versions.env`, currently **2.5.0**).
+
+libgonodes has a **separate release cycle** — it only needs rebuilding when
+the Godot version bumps or the C API changes.  See
+[RELEASE_CHECKLIST.md → libgonodes](RELEASE_CHECKLIST.md#libgonodes-separate-release-cycle)
+for the full release procedure.
+
+### Quick build
+
+```bash
+# 1. Build LibGodot (from Godot source tree):
+scons platform=windows target=template_release libgodot=yes -j8
+
+# 2. Build libgonodes:
+cd libgonodes
+mkdir build && cd build
+cmake .. -DGONODES_BUILD_EXAMPLES=ON
+cmake --build . --config Release
+
+# 3. Ship: libgonodes.dll + libgodot.dll + GONODES .pck in the same directory.
+```
+
+See `libgonodes/README.md` for the full C API reference and examples.
 
 
 ## Native Library Builds (gn_native)
@@ -798,6 +865,8 @@ defines = <linux defines if any>
 | `[library]` | `name` | Output library name (e.g., `gn_hap_codec` produces `libgn_hap_codec.<platform>.<target>.<arch>.dll`) |
 | | `entry_symbol` | GDExtension init function name |
 | | `platforms` | Comma-separated list: `windows`, `macos`, `linux` (or omit for all) |
+| | `vendor_setup` | Pre-build setup script relative to extension root + flags (e.g., `setup_ml.py --sdk-only --no-enable`). CI auto-discovers and runs it. |
+| | `vendor_clone` | Git repo + destination dir for vendored source (e.g., `https://github.com/leadedge/Spout2.git Spout2`). CI auto-clones before build. |
 | `[sources]` | `cpp` | Glob pattern for C++ sources (default: `src/*.cpp`) |
 | | `c` | Glob pattern for C sources |
 | | `objcxx` | Glob pattern for Objective-C++ sources (`.mm` files, macOS) |
@@ -965,8 +1034,11 @@ addons/gn_ext_midi/native/bin/
    build_extension(native_dir=Dir("#").abspath)
    ```
 4. Write your C++ source in `src/`
-5. Build: `cd build && scons ext=gn_ext_<name> platform=windows -j4`
-6. The CI pipelines auto-discover the new extension — no workflow edits needed
+5. If the extension needs a vendored SDK, add `vendor_setup` and/or
+   `vendor_clone` to `build.cfg` (see the build.cfg format table above).
+   CI will auto-discover and run them — no workflow edits needed.
+6. Build: `cd build && scons ext=gn_ext_<name> platform=windows -j4`
+7. The CI pipelines auto-discover the new extension — no workflow edits needed
 
 
 ## CI Pipelines
@@ -1183,3 +1255,7 @@ writing it back produces mojibake: `—` (em-dash) becomes `Ã¢â‚¬â€`,
 | `setup_deps.py`                               | Root setup script — clones godot-cpp, Spout2, runs extension SDKs |
 | `addons/gn_ext_ml/setup_ml.py`                | Downloads ONNX Runtime SDK + pre-trained models |
 | `addons/gn_ext_user_python/setup_python.py`   | Downloads embeddable CPython + NumPy |
+| **Post-build / release** | |
+| `scripts/sync_gdextensions.py`                | Activate/deactivate `.gdextension` based on binary presence |
+| `scripts/clean_builds.py`                     | Remove all binaries + deactivate extensions (pre-release clean) |
+| `scripts/check_builds.py`                     | Verify native extension build outputs exist |

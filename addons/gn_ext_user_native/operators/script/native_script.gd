@@ -1,24 +1,17 @@
 class_name NativeSCRIPT
 extends GNNode
-## Consolidated Native C++ scripting node with per-family marshalling.
+## Native C++ scripting node with hot-reloadable compilation.
 ##
-## A single unified node replaces the five per-family Native operators
-## (UserNativeCHOP, UserNativeSOP, UserNativeDAT, UserNativeIMG, UserNativeTOP).
-## A **Template** dropdown selects the target data family, which determines
-## default C++ source, port types, and input/output marshalling.
+## Ports and parameters are defined dynamically in the C++ source via
+## `get_port_definitions()` / `get_param_definitions()`.  Use presets to
+## load starting-point code for different families.
 
-## Template choices — determines marshalling and default source.
-enum Template { CHOP, SOP, DAT, IMG, TOP }
-
-const _TEMPLATE_NAMES: PackedStringArray = ["CHOP", "SOP", "DAT", "IMG", "TOP"]
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Default C++ Sources per Template
-# ═══════════════════════════════════════════════════════════════════════════════
-
-const _SRC_CHOP := """#ifndef MY_CHOP_H
-#define MY_CHOP_H
+const _DEFAULT_SOURCE := \
+"""/*  CHOP Template — Minimal starting point for a UserNativeCHOP.
+ *  Generates a single sine wave channel.
+ */
+#ifndef USER_CHOP_TEMPLATE_H
+#define USER_CHOP_TEMPLATE_H
 
 #include <gn_user_node.h>
 #include <gn_user_chop.h>
@@ -27,22 +20,14 @@ using namespace godot;
 
 class MyUserCHOP : public gn::GNUserNode {
 	GDCLASS(MyUserCHOP, gn::GNUserNode)
-
 protected:
-	static void _bind_methods() {
-		gn::GNUserNode::_bind_methods();
-	}
-
+	static void _bind_methods() { gn::GNUserNode::_bind_methods(); }
 public:
 	String get_node_type() const override { return "my_user_chop"; }
 	String get_node_description() const override { return "My custom CHOP."; }
 
 	Array get_port_definitions() const override {
 		Array ports;
-		Dictionary in0;
-		in0["name"] = "in"; in0["family"] = "CHOP"; in0["direction"] = "input";
-		in0["required"] = false; in0["label"] = "Input channels";
-		ports.push_back(in0);
 		Dictionary out0;
 		out0["name"] = "out"; out0["family"] = "CHOP"; out0["direction"] = "output";
 		out0["label"] = "Output channels";
@@ -52,369 +37,26 @@ public:
 
 	Array get_param_definitions() const override {
 		Array params;
-		Dictionary p;
-		p["name"] = "frequency"; p["type"] = "float";
-		p["default"] = 1.0; p["min"] = 0.01; p["max"] = 100.0; p["step"] = 0.01;
-		p["label"] = "Frequency"; p["description"] = "Oscillation frequency in Hz.";
-		params.push_back(p);
-		Dictionary p2;
-		p2["name"] = "channels"; p2["type"] = "int";
-		p2["default"] = 3; p2["min"] = 1; p2["max"] = 64;
-		p2["label"] = "Channels"; p2["description"] = "Number of output channels.";
-		params.push_back(p2);
+		params.push_back(gn::parf("frequency", 1.0, 0.01, 100.0, 0.01,
+			"Frequency", "Oscillation frequency in Hz."));
 		return params;
 	}
 
 	Dictionary native_cook(const Dictionary &params, const Array &inputs,
 	                        const Dictionary &context) override {
 		float freq = parf(params, "frequency", 1.0);
-		int num_ch = pari(params, "channels", 3);
 		float elapsed = parf(context, "elapsed", 0.0);
-
-		Dictionary channels;
-		for (int i = 0; i < num_ch; i++) {
-			PackedFloat32Array arr;
-			float phase = float(i) / float(num_ch) * Math_TAU;
-			arr.push_back(sin(elapsed * freq * Math_TAU + phase));
-			channels[String("ch") + String::num_int64(i)] = arr;
-		}
-
-		return gn::make_chop_result(channels);
+		PackedFloat32Array arr;
+		arr.push_back(sin(elapsed * freq * Math_TAU));
+		return gn::make_chop_single("value", arr);
 	}
 };
 
-#endif // MY_CHOP_H
+#endif
 """
-
-
-const _SRC_SOP := """#ifndef MY_SOP_H
-#define MY_SOP_H
-
-#include <gn_user_node.h>
-#include <gn_user_sop.h>
-
-using namespace godot;
-
-class MyUserSOP : public gn::GNUserNode {
-	GDCLASS(MyUserSOP, gn::GNUserNode)
-
-protected:
-	static void _bind_methods() {
-		gn::GNUserNode::_bind_methods();
-	}
-
-public:
-	String get_node_type() const override { return "my_user_sop"; }
-	String get_node_description() const override { return "My custom SOP."; }
-
-	Array get_port_definitions() const override {
-		Array ports;
-		Dictionary in0;
-		in0["name"] = "in"; in0["family"] = "SOP"; in0["direction"] = "input";
-		in0["required"] = false; in0["label"] = "Input geometry";
-		ports.push_back(in0);
-		Dictionary out0;
-		out0["name"] = "out"; out0["family"] = "SOP"; out0["direction"] = "output";
-		out0["label"] = "Output geometry";
-		ports.push_back(out0);
-		return ports;
-	}
-
-	Array get_param_definitions() const override {
-		Array params;
-		Dictionary p;
-		p["name"] = "amplitude"; p["type"] = "float";
-		p["default"] = 1.0; p["min"] = 0.0; p["max"] = 10.0; p["step"] = 0.01;
-		p["label"] = "Amplitude"; p["description"] = "Deformation strength.";
-		params.push_back(p);
-		return params;
-	}
-
-	Dictionary native_cook(const Dictionary &params, const Array &inputs,
-	                        const Dictionary &context) override {
-		if (inputs.size() == 0 || inputs[0].get_type() == Variant::NIL)
-			return Dictionary();
-
-		Dictionary in_geo = inputs[0];
-		if (!in_geo.has("positions")) return Dictionary();
-
-		PackedVector3Array positions = in_geo["positions"];
-		float amp = parf(params, "amplitude", 1.0);
-		float elapsed = parf(context, "elapsed", 0.0);
-
-		for (int i = 0; i < positions.size(); i++) {
-			Vector3 &p = positions.ptrw()[i];
-			p.y += sin(p.x * 3.0 + elapsed * 2.0) * amp;
-		}
-
-		return gn::make_sop_result(positions);
-	}
-};
-
-#endif // MY_SOP_H
-"""
-
-
-const _SRC_DAT := """#ifndef MY_DAT_H
-#define MY_DAT_H
-
-#include <gn_user_node.h>
-#include <gn_user_dat.h>
-
-using namespace godot;
-
-class MyUserDAT : public gn::GNUserNode {
-	GDCLASS(MyUserDAT, gn::GNUserNode)
-
-protected:
-	static void _bind_methods() {
-		gn::GNUserNode::_bind_methods();
-	}
-
-public:
-	String get_node_type() const override { return "my_user_dat"; }
-	String get_node_description() const override { return "My custom DAT — table/text processing."; }
-
-	Array get_port_definitions() const override {
-		Array ports;
-		Dictionary in0;
-		in0["name"] = "in"; in0["family"] = "DAT"; in0["direction"] = "input";
-		in0["required"] = false; in0["label"] = "Input table/text";
-		ports.push_back(in0);
-		Dictionary out0;
-		out0["name"] = "out"; out0["family"] = "DAT"; out0["direction"] = "output";
-		out0["label"] = "Output table/text";
-		ports.push_back(out0);
-		return ports;
-	}
-
-	Array get_param_definitions() const override {
-		Array params;
-		Dictionary p;
-		p["name"] = "rows"; p["type"] = "int";
-		p["default"] = 10; p["min"] = 1; p["max"] = 10000;
-		p["label"] = "Rows"; p["description"] = "Number of rows to generate.";
-		params.push_back(p);
-		Dictionary p2;
-		p2["name"] = "columns"; p2["type"] = "int";
-		p2["default"] = 3; p2["min"] = 1; p2["max"] = 256;
-		p2["label"] = "Columns"; p2["description"] = "Number of columns.";
-		params.push_back(p2);
-		return params;
-	}
-
-	Dictionary native_cook(const Dictionary &params, const Array &inputs,
-	                        const Dictionary &context) override {
-		int num_rows = pari(params, "rows", 10);
-		int num_cols = pari(params, "columns", 3);
-		float elapsed = parf(context, "elapsed", 0.0);
-
-		PackedStringArray headers;
-		for (int c = 0; c < num_cols; c++) {
-			headers.push_back(String("col") + String::num_int64(c));
-		}
-
-		Array rows;
-		for (int r = 0; r < num_rows; r++) {
-			PackedStringArray row;
-			for (int c = 0; c < num_cols; c++) {
-				float val = sin(elapsed + float(r * num_cols + c) * 0.1);
-				row.push_back(String::num(val, 3));
-			}
-			rows.push_back(row);
-		}
-
-		return gn::make_dat_table(headers, rows);
-	}
-};
-
-#endif // MY_DAT_H
-"""
-
-
-const _SRC_IMG := """#ifndef MY_IMG_H
-#define MY_IMG_H
-
-#include <gn_user_node.h>
-#include <gn_user_img.h>
-
-using namespace godot;
-
-class MyUserIMG : public gn::GNUserNode {
-	GDCLASS(MyUserIMG, gn::GNUserNode)
-
-protected:
-	static void _bind_methods() {
-		gn::GNUserNode::_bind_methods();
-	}
-
-public:
-	String get_node_type() const override { return "my_user_img"; }
-	String get_node_description() const override { return "My custom IMG — per-pixel processing."; }
-
-	Array get_port_definitions() const override {
-		Array ports;
-		Dictionary in0;
-		in0["name"] = "in"; in0["family"] = "IMG"; in0["direction"] = "input";
-		in0["required"] = true; in0["label"] = "Input image";
-		ports.push_back(in0);
-		Dictionary out0;
-		out0["name"] = "out"; out0["family"] = "IMG"; out0["direction"] = "output";
-		out0["label"] = "Output image";
-		ports.push_back(out0);
-		return ports;
-	}
-
-	Array get_param_definitions() const override {
-		Array params;
-		Dictionary p;
-		p["name"] = "brightness"; p["type"] = "float";
-		p["default"] = 1.0; p["min"] = 0.0; p["max"] = 4.0; p["step"] = 0.01;
-		p["label"] = "Brightness"; p["description"] = "Brightness multiplier.";
-		params.push_back(p);
-		return params;
-	}
-
-	Dictionary native_cook(const Dictionary &params, const Array &inputs,
-	                        const Dictionary &context) override {
-		float brightness = parf(params, "brightness", 1.0);
-
-		Ref<Image> img = gn::get_input_image(inputs, 0);
-		if (img.is_null()) {
-			return Dictionary();
-		}
-
-		Ref<Image> out = gn::create_like(img);
-		int w = img->get_width();
-		int h = img->get_height();
-
-		for (int y = 0; y < h; y++) {
-			for (int x = 0; x < w; x++) {
-				Color c = img->get_pixel(x, y);
-				c.r = CLAMP(c.r * brightness, 0.0f, 1.0f);
-				c.g = CLAMP(c.g * brightness, 0.0f, 1.0f);
-				c.b = CLAMP(c.b * brightness, 0.0f, 1.0f);
-				out->set_pixel(x, y, c);
-			}
-		}
-
-		return gn::make_img_result(out);
-	}
-};
-
-#endif // MY_IMG_H
-"""
-
-
-const _SRC_TOP := """#ifndef MY_TOP_H
-#define MY_TOP_H
-
-#include <gn_user_node.h>
-#include <gn_user_top.h>
-
-using namespace godot;
-
-class MyUserTOP : public gn::GNUserNode {
-	GDCLASS(MyUserTOP, gn::GNUserNode)
-
-protected:
-	static void _bind_methods() {
-		gn::GNUserNode::_bind_methods();
-	}
-
-public:
-	String get_node_type() const override { return "my_user_top"; }
-	String get_node_description() const override { return "My custom TOP — GPU shader."; }
-
-	Array get_port_definitions() const override {
-		Array ports;
-		Dictionary in0;
-		in0["name"] = "in"; in0["family"] = "TOP"; in0["direction"] = "input";
-		in0["required"] = false; in0["label"] = "Input texture";
-		ports.push_back(in0);
-		Dictionary out0;
-		out0["name"] = "out"; out0["family"] = "TOP"; out0["direction"] = "output";
-		out0["label"] = "Output texture";
-		ports.push_back(out0);
-		return ports;
-	}
-
-	Array get_param_definitions() const override {
-		Array params;
-		Dictionary p;
-		p["name"] = "speed"; p["type"] = "float";
-		p["default"] = 1.0; p["min"] = 0.0; p["max"] = 10.0; p["step"] = 0.01;
-		p["label"] = "Speed"; p["description"] = "Animation speed.";
-		params.push_back(p);
-		Dictionary p2;
-		p2["name"] = "color"; p2["type"] = "color";
-		p2["default"] = Color(0.2, 0.6, 1.0, 1.0);
-		p2["label"] = "Color"; p2["description"] = "Primary color.";
-		params.push_back(p2);
-		return params;
-	}
-
-	Dictionary native_cook(const Dictionary &params, const Array &inputs,
-	                        const Dictionary &context) override {
-		float speed = parf(params, "speed", 1.0);
-		Color color = params.get("color", Color(0.2, 0.6, 1.0, 1.0));
-		float elapsed = parf(context, "elapsed", 0.0);
-
-		String shader = R"(
-shader_type canvas_item;
-uniform float u_time;
-uniform vec4 u_color : source_color;
-
-void fragment() {
-	vec2 uv = UV;
-	float d = length(uv - 0.5);
-	float ring = smoothstep(0.3, 0.28, d) - smoothstep(0.25, 0.23, d);
-	float angle = atan(uv.y - 0.5, uv.x - 0.5);
-	float wave = sin(angle * 6.0 + u_time * 3.0) * 0.5 + 0.5;
-	COLOR = vec4(u_color.rgb * ring * wave, 1.0);
-}
-)";
-
-		Dictionary uniforms;
-		uniforms["u_time"] = elapsed * speed;
-		uniforms["u_color"] = color;
-
-		return gn::make_top_shader_result(shader, uniforms);
-	}
-};
-
-#endif // MY_TOP_H
-"""
-
-
-const _SOURCES: Dictionary = {
-	Template.CHOP: _SRC_CHOP,
-	Template.SOP:  _SRC_SOP,
-	Template.DAT:  _SRC_DAT,
-	Template.IMG:  _SRC_IMG,
-	Template.TOP:  _SRC_TOP,
-}
-
-## Default class names per template.
-const _CLASS_NAMES: Dictionary = {
-	Template.CHOP: "MyUserCHOP",
-	Template.SOP:  "MyUserSOP",
-	Template.DAT:  "MyUserDAT",
-	Template.IMG:  "MyUserIMG",
-	Template.TOP:  "MyUserTOP",
-}
-
-## Default port family per template.
-const _PORT_FAMILIES: Dictionary = {
-	Template.CHOP: GNFamily.Type.CHOP,
-	Template.SOP:  GNFamily.Type.SOP,
-	Template.DAT:  GNFamily.Type.DAT,
-	Template.IMG:  GNFamily.Type.IMG,
-	Template.TOP:  GNFamily.Type.TOP,
-}
 
 ## System parameter names (not forwarded to native code).
-const _SYSTEM_PARAMS: PackedStringArray = ["template", "cpp_source", "cpp_class", "auto_build", "time_dep"]
+const _SYSTEM_PARAMS: PackedStringArray = ["cpp_source", "auto_build", "time_dep"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -427,14 +69,17 @@ var _reloader: GNNativeReloader = null
 var _file_watch: GNNativeFileWatch = null
 var _code_editor: GNCppCodeEditor = null
 var _cpp_source: String = ""
+var _cpp_class: String = "MyUserCHOP"
 var _compile_error: String = ""
 var _is_compiled: bool = false
 var _dynamic_params: Array[Dictionary] = []
 var _dynamic_ports: Array[Dictionary] = []
-var _current_template: int = Template.CHOP
 
 ## Last cook duration in milliseconds (for preview display).
 var _last_cook_ms: float = 0.0
+
+## Per-port output data for multi-output support.
+var _output_data: Array[GNData] = []
 
 ## TOP-specific: viewport infrastructure for shader rendering.
 var _viewport: SubViewport = null
@@ -450,58 +95,20 @@ func _init() -> void:
 	_reloader = GNNativeReloader.new()
 	_file_watch = GNNativeFileWatch.new()
 	_file_watch.file_changed.connect(_on_source_file_changed)
-	_cpp_source = _SRC_CHOP
+	_cpp_source = _DEFAULT_SOURCE
 
 
 func _init_ports() -> void:
-	_setup_ports_for_template(_current_template)
+	add_output("out", GNFamily.Type.CHOP, "Output channels")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_enum("template", _TEMPLATE_NAMES,
-		Template.CHOP, "Template",
-		"Target data family. Changing this replaces default source and port layout."))
-	add_parameter(GNParameter.create_string("cpp_source", _SRC_CHOP,
+	add_parameter(GNParameter.create_string("cpp_source", _DEFAULT_SOURCE,
 		"C++ Source", "C++ source code. Click 'Edit C++ ↗' to open the editor."))
-	add_parameter(GNParameter.create_string("cpp_class", "MyUserCHOP",
-		"Class Name", "C++ class name to register."))
 	add_parameter(GNParameter.create_bool("auto_build", true,
 		"Auto Build", "Automatically rebuild on source change."))
 	add_parameter(GNParameter.create_bool("time_dep", true,
 		"Time Dependent", "Recook every frame."))
-
-
-## Called by the registry when the cfg entry has a `preset=` key.
-func apply_preset(preset_name: String) -> void:
-	var tpl: int = Template.CHOP
-	match preset_name.to_lower():
-		"chop": tpl = Template.CHOP
-		"sop":  tpl = Template.SOP
-		"dat":  tpl = Template.DAT
-		"img":  tpl = Template.IMG
-		"top":  tpl = Template.TOP
-	_apply_template(tpl)
-
-
-func _apply_template(tpl: int) -> void:
-	_current_template = tpl
-	set_param_value("template", tpl)
-	var src: String = _SOURCES.get(tpl, _SRC_CHOP)
-	var cls: String = _CLASS_NAMES.get(tpl, "MyUserCHOP")
-	set_param_value("cpp_source", src)
-	set_param_value("cpp_class", cls)
-	_cpp_source = ""       # Force reload on next cook
-	_is_compiled = false
-	_processor = null
-	_setup_ports_for_template(tpl)
-
-
-func _setup_ports_for_template(tpl: int) -> void:
-	input_ports.clear()
-	output_ports.clear()
-	var fam: int = _PORT_FAMILIES.get(tpl, GNFamily.Type.CHOP)
-	add_input("in", fam, false, "Input")
-	add_output("out", fam, "Output")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -510,11 +117,6 @@ func _setup_ports_for_template(tpl: int) -> void:
 
 func _cook(inputs: Array[GNData]) -> GNData:
 	time_dependent = get_param_value("time_dep")
-
-	# Detect template change
-	var tpl_val: int = get_param_value("template")
-	if tpl_val != _current_template:
-		_apply_template(tpl_val)
 
 	var source: String = get_param_value("cpp_source")
 	if source != _cpp_source:
@@ -549,11 +151,21 @@ func _cook_native(inputs: Array[GNData]) -> GNData:
 		return null
 
 	node_warning = ""
-	return _build_output(result, inputs)
+
+	# Multi-output: {"outputs": [dict0, dict1, ...]}
+	if result.has("outputs"):
+		return _build_multi_output(result["outputs"], inputs)
+
+	# Single-output (backwards-compatible)
+	_output_data.clear()
+	var data := _build_output_for_port(result, 0, inputs)
+	if data != null:
+		_output_data.append(data)
+	return data
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Input Marshalling — dispatch by template
+# Input Marshalling — dispatch by port family
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _marshal_inputs(inputs: Array[GNData]) -> Array:
@@ -563,13 +175,14 @@ func _marshal_inputs(inputs: Array[GNData]) -> Array:
 		if in_data == null:
 			input_dicts.append(null)
 			continue
-		match _current_template:
-			Template.CHOP: input_dicts.append(_marshal_chop(in_data))
-			Template.SOP:  input_dicts.append(_marshal_sop(in_data))
-			Template.DAT:  input_dicts.append(_marshal_dat(in_data))
-			Template.IMG:  input_dicts.append(_marshal_img(in_data))
-			Template.TOP:  input_dicts.append({"family": "TOP"})
-			_:             input_dicts.append(null)
+		var port_family: int = input_ports[i].family
+		match port_family:
+			GNFamily.Type.CHOP: input_dicts.append(_marshal_chop(in_data))
+			GNFamily.Type.SOP:  input_dicts.append(_marshal_sop(in_data))
+			GNFamily.Type.DAT:  input_dicts.append(_marshal_dat(in_data))
+			GNFamily.Type.IMG:  input_dicts.append(_marshal_img(in_data))
+			GNFamily.Type.TOP:  input_dicts.append({"family": "TOP"})
+			_:                  input_dicts.append(_marshal_extension(in_data))
 	return input_dicts
 
 
@@ -606,18 +219,50 @@ func _marshal_img(data: GNData) -> Variant:
 	return null
 
 
+## Generic extension family marshalling — supports SDF and future extensions.
+## Convention: if the data has a known property (e.g. sdf_tree), serialize it.
+func _marshal_extension(data: GNData) -> Variant:
+	# SDF data: carries an AST tree dictionary
+	if "sdf_tree" in data and "tree_hash" in data:
+		return {"sdf_tree": data.get("sdf_tree"), "tree_hash": data.get("tree_hash")}
+	return null
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
-# Output Building — dispatch by template
+# Output Building — dispatch by port family
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func _build_output(result: Dictionary, inputs: Array[GNData]) -> GNData:
-	match _current_template:
-		Template.CHOP: return _build_chop(result)
-		Template.SOP:  return _build_sop(result)
-		Template.DAT:  return _build_dat(result)
-		Template.IMG:  return _build_img(result)
-		Template.TOP:  return _build_top(result, inputs)
-	return null
+## Builds per-port output data from an array of result dicts.
+func _build_multi_output(outputs_arr: Array, inputs: Array[GNData]) -> GNData:
+	_output_data.clear()
+	for i in range(mini(outputs_arr.size(), output_ports.size())):
+		var port_result = outputs_arr[i]
+		if port_result is Dictionary and not port_result.is_empty():
+			_output_data.append(_build_output_for_port(port_result, i, inputs))
+		else:
+			_output_data.append(null)
+	return _output_data[0] if not _output_data.is_empty() else null
+
+
+## Builds typed GNData for a single port from its result dictionary.
+func _build_output_for_port(result: Dictionary, port_index: int, inputs: Array[GNData]) -> GNData:
+	if port_index < 0 or port_index >= output_ports.size():
+		return null
+	var out_family: int = output_ports[port_index].family
+	match out_family:
+		GNFamily.Type.CHOP: return _build_chop(result)
+		GNFamily.Type.SOP:  return _build_sop(result)
+		GNFamily.Type.DAT:  return _build_dat(result)
+		GNFamily.Type.IMG:  return _build_img(result)
+		GNFamily.Type.TOP:  return _build_top(result, inputs)
+		_:                  return _build_extension(result, out_family)
+
+
+## Per-port output routing — the cook engine calls this for each downstream wire.
+func get_output_data(port_index: int) -> GNData:
+	if port_index >= 0 and port_index < _output_data.size():
+		return _output_data[port_index]
+	return cached_output
 
 
 func _build_chop(result: Dictionary) -> GNData:
@@ -731,7 +376,26 @@ func _build_top(result: Dictionary, inputs: Array[GNData]) -> GNData:
 	return null
 
 
-## Lazily creates viewport infrastructure for TOP-template shader rendering.
+## Generic extension family output building — supports SDF and future extensions.
+## Uses GNFamily.create_data_for_family() to instantiate the right data type,
+## then sets properties from the result dictionary.
+func _build_extension(result: Dictionary, family_id: int) -> GNData:
+	var out: GNData = GNScriptHelper.create_data_for_family(family_id)
+	if out == null:
+		return null
+	out.valid = true
+	out.timestamp = current_frame
+	# SDF: set sdf_tree and tree_hash if present
+	if result.has("sdf_tree") and "sdf_tree" in out:
+		out.set("sdf_tree", result["sdf_tree"])
+		if result.has("tree_hash"):
+			out.set("tree_hash", result["tree_hash"])
+		else:
+			out.set("tree_hash", hash(var_to_str(result["sdf_tree"])))
+	return out
+
+
+## Lazily creates viewport infrastructure for TOP shader rendering.
 func _ensure_top_viewport(size: Vector2i) -> void:
 	if _viewport != null:
 		return
@@ -759,17 +423,14 @@ func _ensure_top_viewport(size: Vector2i) -> void:
 # Preview
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## SCRIPT nodes show cook time + status, not data preview.
+## Delegates to base GNNode for data-type-aware preview.
+## Shows warning text if there's an error, otherwise the data's preview.
 func update_preview_control(control: Control) -> void:
-	if not control is Label:
-		return
-	var label := control as Label
 	if not node_warning.is_empty():
-		label.text = "ERR | %s" % node_warning.substr(0, 40)
-	elif _last_cook_ms > 0.0:
-		label.text = "%.1fms | OK" % _last_cook_ms
-	else:
-		label.text = ""
+		if control is Label:
+			(control as Label).text = "ERR | %s" % node_warning.substr(0, 40)
+		return
+	super.update_preview_control(control)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -794,12 +455,12 @@ func _gather_user_params() -> Dictionary:
 
 func _trigger_build() -> void:
 	var source: String = get_param_value("cpp_source")
-	var cls_name: String = get_param_value("cpp_class")
-	if source.is_empty() or cls_name.is_empty():
+	_auto_detect_class_name(source)
+	if source.is_empty() or _cpp_class.is_empty():
 		return
 	_compile_error = ""
 	node_warning = "Building C++..."
-	_compiler.compile_async(id, source, cls_name, _on_compile_finished)
+	_compiler.compile_async(id, source, _cpp_class, _on_compile_finished)
 
 
 func _on_compile_finished(success: bool, output: String, lib_path: String) -> void:
@@ -807,10 +468,9 @@ func _on_compile_finished(success: bool, output: String, lib_path: String) -> vo
 		_is_compiled = true
 		_compile_error = ""
 		node_warning = ""
-		var cls_name: String = get_param_value("cpp_class")
 		var gdext_path := lib_path.get_base_dir().path_join(
 			"libuser_%s.gdextension" % id.replace("-", "_"))
-		_processor = _reloader.load_and_instantiate(id, gdext_path, cls_name)
+		_processor = _reloader.load_and_instantiate(id, gdext_path, _cpp_class)
 		if _processor != null:
 			_processor.native_setup({"project_dir": ProjectSettings.globalize_path("res://")})
 			_sync_ports_and_params()
@@ -915,9 +575,44 @@ func open_code_editor() -> void:
 	if _code_editor == null:
 		_code_editor = GNCppCodeEditor.new()
 		add_child(_code_editor)
-		_code_editor.code_committed.connect(func(text): set_param_value("cpp_source", text); mark_dirty())
-		_code_editor.build_requested.connect(func(src): set_param_value("cpp_source", src); _cpp_source = src; _trigger_build())
+		_code_editor.code_committed.connect(_on_code_committed)
+		_code_editor.build_requested.connect(_on_build_requested)
+		_code_editor.check_requested.connect(_on_check_requested)
 	_code_editor.open(self, get_param_value("cpp_source"))
+
+
+func _on_code_committed(text: String) -> void:
+	_auto_detect_class_name(text)
+	set_param_value("cpp_source", text)
+	mark_dirty()
+
+
+func _on_build_requested(src: String) -> void:
+	_auto_detect_class_name(src)
+	set_param_value("cpp_source", src)
+	_cpp_source = src
+	_trigger_build()
+
+
+func _on_check_requested(src: String) -> void:
+	_auto_detect_class_name(src)
+	set_param_value("cpp_source", src)
+	_compiler.syntax_check_async(id, src, _on_check_finished)
+
+
+func _on_check_finished(success: bool, output: String) -> void:
+	if _code_editor != null and _code_editor.visible:
+		_code_editor.set_compile_status(success, output)
+
+
+## Extracts the C++ class name from source (e.g. "class Foo : public gn::GNUserNode")
+## and updates _cpp_class.
+func _auto_detect_class_name(source: String) -> void:
+	var regex := RegEx.new()
+	regex.compile("class\\s+(\\w+)\\s*:\\s*public\\s+gn::GNUserNode")
+	var m := regex.search(source)
+	if m != null:
+		_cpp_class = m.get_string(1)
 
 
 func _on_node_removed() -> void:

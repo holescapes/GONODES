@@ -73,6 +73,30 @@ A dictionary with:
 | `gonodes.img` | `make_img_result(pixels, width, height)` |
 | `gonodes.top` | `make_top_result(pixels, width, height)` |
 | `gonodes.dat` | `make_dat_result(rows, header)` or `make_dat_result(text=...)` |
+| `gonodes.sdf` | `sdf_sphere()`, `sdf_box()`, `sdf_smooth_union()`, `make_sdf_result()` |
+
+### Multi-Output
+
+Return `make_multi_output(result0, result1, ...)` from `cook()` with
+multiple output ports defined in `get_port_definitions()`:
+
+```python
+from gonodes import make_multi_output
+from gonodes.chop import make_chop_result
+from gonodes.dat import make_dat_result
+from gonodes.params import output_port
+
+def get_port_definitions():
+    return {"ports": [
+        output_port("channels", "CHOP"),
+        output_port("stats", "DAT"),
+    ]}
+
+def cook(me, params, inputs, context):
+    return make_multi_output(chop_result, dat_result)
+```
+
+Single-output operators return a flat dict as before.
 
 ### Parameter Builders
 
@@ -246,8 +270,9 @@ addons/gn_ext_user_python/
     gn_python.gdextension   # GDExtension manifest
     python_config.py        # Python path discovery
   sdk/gonodes/              # Python SDK package
-    __init__.py
+    __init__.py             # Common helpers + make_multi_output()
     sop.py, chop.py, img.py, top.py, dat.py
+    sdf.py                  # SDF extension SDK
     params.py
   core/                     # GDScript infrastructure
     gn_python_code_editor.gd

@@ -90,6 +90,32 @@ Each family has its own header with result-building helpers:
 | `gn_user_img.h` | `make_img_result(image)`, `get_input_image(inputs, i)`, `create_like(img)` |
 | `gn_user_top.h` | `make_top_shader_result(code, uniforms)`, `make_top_image_result(img)` |
 | `gn_user_dat.h` | `make_dat_table(headers, rows)`, `make_dat_text(text)` |
+| `gn_user_sdf.h` | `sdf_sphere()`, `sdf_box()`, `sdf_smooth_union()`, `make_sdf_result(tree)` |
+
+### Multi-Output
+
+Return `gn::make_multi_output({result0, result1, ...})` from `native_cook()`.
+Define multiple output ports in `get_port_definitions()` — one per result
+element. Each result dict is built with the appropriate family helper.
+
+```cpp
+#include "gn_user_types.h"
+#include "gn_user_chop.h"
+#include "gn_user_dat.h"
+
+Array get_port_definitions() override {
+    return Array::make(
+        gn::output_port("channels", "CHOP"),
+        gn::output_port("stats", "DAT")
+    );
+}
+
+Dictionary native_cook(...) override {
+    return gn::make_multi_output({chop_result, dat_result});
+}
+```
+
+Single-output operators return a flat Dictionary as before — no changes needed.
 
 ---
 

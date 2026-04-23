@@ -104,7 +104,7 @@ For distribution, place the Python embeddable package in
 | Feature | Python | C++ Native |
 |---------|--------|-----------|
 | Compilation | None | 2-8 seconds |
-| Performance | NumPy speed (~5-20× GDScript) | Full native (~10-50× GDScript) |
+| Performance | NumPy speed (~5-20x GDScript) | Full native (~10-50x GDScript) |
 | Dependencies | Python + NumPy | C++ compiler + SCons |
 | Hot-reload | Instant (<10ms) | Rebuild required |
 | Libraries | Any pip package | Manual linking |
@@ -113,3 +113,50 @@ For distribution, place the Python embeddable package in
 Use Python when you want rapid iteration and access to the Python
 ecosystem (ML, data science, etc.). Use C++ when you need maximum
 throughput for per-element operations.
+
+## Multi-Output
+
+Python operators can produce multiple outputs of different families.
+
+1. Define multiple output ports in `get_port_definitions()`.
+2. Return `make_multi_output(result0, result1, ...)` from `cook()`.
+
+```python
+from gonodes import make_multi_output
+from gonodes.chop import make_chop_result
+from gonodes.dat import make_dat_result
+from gonodes.params import output_port
+
+def get_port_definitions():
+    return {"ports": [
+        output_port("channels", "CHOP", label="Channel data"),
+        output_port("stats", "DAT", label="Statistics"),
+    ]}
+
+def cook(me, params, inputs, context):
+    chop = make_chop_result({"val": [1.0, 2.0, 3.0]})
+    dat = make_dat_result([["mean", "2.0"]], header=["stat", "value"])
+    return make_multi_output(chop, dat)
+```
+
+Single-output operators are unchanged - return a flat dict as before.
+
+## Extension Family SDKs
+
+Extension families (like SDF) ship SDK modules in the `gonodes` package.
+Import them like any other module:
+
+```python
+from gonodes.sdf import sdf_sphere, sdf_smooth_union, make_sdf_result
+
+def cook(me, params, inputs, context):
+    tree = sdf_smooth_union(
+        sdf_sphere(0, 0, 0, 1.0),
+        sdf_sphere(2, 0, 0, 0.8),
+        k=0.3
+    )
+    return make_sdf_result(tree)
+```
+
+Available extension SDK modules:
+- `gonodes.sdf` - SDF primitives, booleans, modifiers, materials

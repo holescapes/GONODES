@@ -1,3 +1,4 @@
+# @output sop Output geometry
 # @param int segments 64 Number of ring segments
 # @param float inner_radius 0.3 Inner ring radius
 # @param float outer_radius 1.0 Outer ring radius
@@ -45,4 +46,4 @@ func cook():
 		st.add_vertex(vi1)
 
 	st.generate_normals()
-	op.set_from_surfacetool(st)
+	op.set_from_surface_tool(st)

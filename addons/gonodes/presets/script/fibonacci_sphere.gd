@@ -1,3 +1,4 @@
+# @output sop Output geometry
 # @param int count 100 Number of points
 # @param float radius 1.0 Sphere radius
 # @param bool animate false Rotate points over time
@@ -28,4 +29,4 @@ func cook():
 			(pos.z / rad + 1.0) * 0.5))
 		st.add_vertex(pos)
 
-	op.set_from_surfacetool(st)
+	op.set_from_surface_tool(st)

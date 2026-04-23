@@ -29,6 +29,26 @@ The ``me`` dict contains:
     me["delta"] — frame delta time
 """
 
+
+def make_multi_output(*outputs):
+    """Wrap per-port result dicts into multi-output protocol format.
+
+    Each argument should be a result from make_chop_result(),
+    make_dat_result(), make_sop_result(), etc.
+
+    Example::
+
+        from gonodes import make_multi_output
+        from gonodes.chop import make_chop_result
+        from gonodes.dat import make_dat_result
+
+        def cook(me, params, inputs, context):
+            chop = make_chop_result({"ch0": np.array([1.0])})
+            dat = make_dat_result(rows=[["a", "b"]], header=["x", "y"])
+            return make_multi_output(chop, dat)
+    """
+    return {"outputs": list(outputs)}
+
 __version__ = "0.1.0"
 
 from gonodes.sop import make_sop_result, make_point_cloud

@@ -706,7 +706,7 @@ func _show_save_snippet_dialog() -> void:
 	var code := _code_edit.text.strip_edges()
 	if code.is_empty():
 		_error_label.text = "Nothing to save — editor is empty."
-		_error_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+		_error_label.add_theme_color_override("default_color", Color(1.0, 0.7, 0.3))
 		return
 
 	var dlg := AcceptDialog.new()
@@ -840,7 +840,7 @@ func _validate_expression(text: String) -> void:
 	var err := expr.parse(text, input_names)
 	if err != OK:
 		_error_label.text = "Error: %s" % expr.get_error_text()
-		_error_label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.3))
+		_error_label.add_theme_color_override("default_color", Color(1.0, 0.35, 0.3))
 	else:
 		_error_label.text = "Expression OK"
-		_error_label.add_theme_color_override("font_color", Color(0.4, 0.85, 0.4))
+		_error_label.add_theme_color_override("default_color", Color(0.4, 0.85, 0.4))

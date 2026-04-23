@@ -7,12 +7,9 @@ static func boot() -> void:
 	# Register "py_source" as a code-editor-eligible param
 	GNParamRow.register_code_param("py_source")
 
-	# Register Python code language with preset folder
-	# (uses default GDScript highlighter since Python syntax is close enough)
-	GNCodeEditor.register_code_language("pythonscript", {
-		"preset_folder": "pythonscript",
-	})
+	# Register Python code language with preset folder.
+	# The preset folder "python" matches addons/gn_ext_user_python/presets/python/
 	GNCodeEditor.register_code_language("py_source", {
-		"preset_folder": "pythonscript",
+		"preset_folder": "python",
 		"file_ext": ".py",
 	})

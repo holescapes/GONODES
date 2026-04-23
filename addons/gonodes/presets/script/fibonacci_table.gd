@@ -1,3 +1,4 @@
+# @output dat Output table
 # @param int rows 8 Number of Fibonacci rows
 # @param bool include_ratio true Show golden ratio column
 

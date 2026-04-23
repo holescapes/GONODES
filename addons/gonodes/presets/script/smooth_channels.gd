@@ -1,3 +1,4 @@
+# @output chop Output signal
 # @input chop Source channels to smooth
 # @param float smoothing 0.1 Smoothing factor (0=instant, 1=frozen)
 

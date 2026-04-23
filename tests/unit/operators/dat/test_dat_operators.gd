@@ -505,13 +505,12 @@ func test_callback_dat_instantiate() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# GDScriptSCRIPT (DAT template)
+# GDScriptSCRIPT (DAT via preset)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_gdscript_script_dat_template() -> void:
+func test_gdscript_script_dat_instantiate() -> void:
 	var node := _make_node(GDScriptSCRIPT.new(), "script1")
-	node.set_param_value("template", GDScriptSCRIPT.Template.DAT)
-	GNTestAssert.assert_not_null(node, "GDScriptSCRIPT DAT created")
+	GNTestAssert.assert_not_null(node, "GDScriptSCRIPT created")
 	GNTestAssert.assert_eq(node.node_type, "script", "node_type")
 
 

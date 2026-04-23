@@ -72,6 +72,8 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.scan.outputs.matrix }}
+      vendor_setup: ${{ steps.scan.outputs.vendor_setup }}
+      vendor_clone: ${{ steps.scan.outputs.vendor_clone }}
     steps:
       - uses: actions/checkout@v4
       - name: Scan extensions
@@ -303,9 +305,19 @@ jobs:
       - name: Clone godot-cpp
         run: git clone --depth 1 --branch $env:GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
 
-      - name: Clone Spout2 SDK (if building gn_ext_spout)
-        if: matrix.ext == 'gn_ext_spout'
-        run: git clone --depth 1 https://github.com/leadedge/Spout2.git addons/gn_ext_spout/native/Spout2
+      - name: Clone vendor SDK (if needed)
+        shell: python
+        run: |
+          import json, subprocess, sys, os
+          vc = json.loads(r'''${{ needs.discover.outputs.vendor_clone || '{}' }}''')
+          clone_spec = vc.get('${{ matrix.ext }}', '')
+          if clone_spec:
+              parts = clone_spec.split()
+              repo_url, dest_dir = parts[0], parts[1]
+              ext_base = '${{ matrix.ext }}'.split('/')[0]
+              dest = os.path.join('addons', ext_base, 'native', dest_dir)
+              if not os.path.isdir(dest):
+                  subprocess.run(['git', 'clone', '--depth', '1', repo_url, dest], check=True)
 
       - name: Check platform support
         id: check

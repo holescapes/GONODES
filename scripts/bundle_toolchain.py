@@ -114,6 +114,23 @@ def copy_sconstruct():
         print(f"  [+] SConstruct")
 
 
+def copy_tools():
+    """Copy godot-cpp tools/ directory (SCons tool modules, platform configs)."""
+    src = os.path.join(GODOTCPP_SRC, "tools")
+    dst = os.path.join(TOOLCHAIN_DST, "tools")
+    if not os.path.isdir(src):
+        print(f"  [!] tools/ not found in godot-cpp source")
+        return
+    if os.path.isdir(dst):
+        shutil.rmtree(dst)
+    shutil.copytree(
+        src, dst,
+        ignore=shutil.ignore_patterns("*.pyc", "__pycache__"),
+    )
+    file_count = sum(1 for _, _, files in os.walk(dst) for _ in files)
+    print(f"  [+] tools/ → {file_count} files")
+
+
 def verify(platforms: list[str]) -> bool:
     """Check that the toolchain has all required files."""
     ok = True
@@ -144,6 +161,16 @@ def verify(platforms: list[str]) -> bool:
             else:
                 print(f"  [X] bin/ — no release lib for {plat}")
                 ok = False
+
+    # Tools (SCons tool modules)
+    tools_dir = os.path.join(TOOLCHAIN_DST, "tools")
+    godotcpp_tool = os.path.join(tools_dir, "godotcpp.py")
+    if os.path.isfile(godotcpp_tool):
+        count = sum(1 for _, _, files in os.walk(tools_dir) for _ in files)
+        print(f"  [+] tools/ — {count} files (godotcpp.py present)")
+    else:
+        print(f"  [X] tools/godotcpp.py — MISSING (SCons builds will fail)")
+        ok = False
 
     return ok
 
@@ -189,6 +216,7 @@ def main():
     copy_headers()
     success = copy_libs(platforms)
     copy_sconstruct()
+    copy_tools()
 
     print("-" * 50)
     if success:

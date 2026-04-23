@@ -17,6 +17,8 @@ All helper scripts live in `scripts/`.  They require **Python 3.10+** and no ext
 | `check_versions.py` | Verify CI workflows agree with `versions.env` | Bumping Godot or extension versions |
 | `check_env.py` | Pre-flight build environment check (tools, SDKs) | Before first build or release |
 | `check_builds.py` | Verify native extension build outputs exist | After building native extensions |
+| `sync_gdextensions.py` | Activate/deactivate `.gdextension` files based on binary presence | After building (also runs automatically as SConstruct post-build) |
+| `clean_builds.py` | Remove all compiled binaries and deactivate extensions | Before release tagging (clean source-only state) |
 | `bundle_toolchain.py` | Bundle godot-cpp into user_native toolchain | Before packaging a release |
 
 ---
@@ -251,6 +253,35 @@ python scripts/bundle_toolchain.py              # current platform
 python scripts/bundle_toolchain.py --all        # all shipping platforms
 python scripts/bundle_toolchain.py --verify     # check without copying
 ```
+
+### `sync_gdextensions.py`
+
+Activates or deactivates `.gdextension` files based on whether the referenced
+platform binary exists on disk. Mirrors the GDScript
+`GNExtensionRegistry.sync_native_extensions()` logic but runs outside Godot,
+eliminating the two-restart problem after building.
+
+Also runs automatically as a post-build step in `build/SConstruct`.
+
+```
+python scripts/sync_gdextensions.py                      # auto-detect platform
+python scripts/sync_gdextensions.py --dry-run             # preview only
+python scripts/sync_gdextensions.py --platform linux      # cross-platform check
+```
+
+### `clean_builds.py`
+
+Removes all compiled native extension binaries (`native/bin/` directories),
+deactivates all `.gdextension` files, and cleans bundled toolchains. Used
+before release tagging to return the repository to source-only state.
+
+```
+python scripts/clean_builds.py              # remove + deactivate
+python scripts/clean_builds.py --dry-run    # preview only
+```
+
+After a fresh clone and build, `sync_gdextensions.py` (or the SConstruct
+post-build hook) re-activates extensions whose binaries exist.
 
 ### `gen_manual_test_patches.py`
 

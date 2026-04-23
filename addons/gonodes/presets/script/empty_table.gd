@@ -1,3 +1,4 @@
+# @output dat Output table
 # @param int rows 10 Number of rows
 # @param int cols 3 Number of columns
 # @param string col_prefix col Column name prefix

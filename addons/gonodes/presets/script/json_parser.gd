@@ -1,3 +1,4 @@
+# @output dat Output table
 # @param string json_text {"items":[1,2,3]} JSON string to parse
 # @param bool flatten true Flatten nested keys with dot notation
 

@@ -7,11 +7,9 @@ static func boot() -> void:
 	# Register "cpp_source" as a code-editor-eligible param
 	GNParamRow.register_code_param("cpp_source")
 
-	# Register Native C++ code language with preset folder
-	GNCodeEditor.register_code_language("nativescript", {
-		"preset_folder": "nativescript",
-	})
+	# Register Native C++ code language with preset folder.
+	# The preset folder "cpp" matches addons/gn_ext_user_native/presets/cpp/
 	GNCodeEditor.register_code_language("cpp_source", {
-		"preset_folder": "nativescript",
+		"preset_folder": "cpp",
 		"file_ext": ".h",
 	})

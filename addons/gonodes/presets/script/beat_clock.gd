@@ -1,3 +1,4 @@
+# @output chop Output signal
 # @param float bpm 120.0 Beats per minute
 # @param float swing 0.0 Swing amount (0-1)
 

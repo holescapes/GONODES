@@ -1,3 +1,4 @@
+# @output chop Output signal
 # @input chop Source signal
 # @param float attack 0.02 Attack time in seconds
 # @param float release 0.2 Release time in seconds

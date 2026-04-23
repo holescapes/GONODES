@@ -14,39 +14,7 @@ macos.debug = "res://addons/gn_ext_ffmpeg/native/macos/libgdffmpeg.macos.templat
 macos.release = "res://addons/gn_ext_ffmpeg/native/macos/libgdffmpeg.macos.template_release.framework"
 
 [dependencies]
-
-windows.x86_64 = 
-    {"res://addons/gn_ext_ffmpeg/native/win64/avcodec-60.dll": "",
-    "res://addons/gn_ext_ffmpeg/native/win64/avfilter-9.dll": "",
-    "res://addons/gn_ext_ffmpeg/native/win64/avformat-60.dll": "",
-    "res://addons/gn_ext_ffmpeg/native/win64/avutil-58.dll": "",
-    "res://addons/gn_ext_ffmpeg/native/win64/swresample-4.dll": "",
-    "res://addons/gn_ext_ffmpeg/native/win64/swscale-7.dll": ""}
-
-linux.x86_64 = 
-    {"res://addons/gn_ext_ffmpeg/native/linux64/libavcodec.so.60": "",
-    "res://addons/gn_ext_ffmpeg/native/linux64/libavfilter.so.9": "",
-    "res://addons/gn_ext_ffmpeg/native/linux64/libavformat.so.60": "",
-    "res://addons/gn_ext_ffmpeg/native/linux64/libavutil.so.58": "",
-    "res://addons/gn_ext_ffmpeg/native/linux64/libswresample.so.4": "",
-    "res://addons/gn_ext_ffmpeg/native/linux64/libswscale.so.7": ""}
-
-android.arm64 =
-    {
-        "res://addons/gn_ext_ffmpeg/native/android/libavcodec.so": "",
-        "res://addons/gn_ext_ffmpeg/native/android/libavfilter.so": "",
-        "res://addons/gn_ext_ffmpeg/native/android/libavformat.so": "",
-        "res://addons/gn_ext_ffmpeg/native/android/libavutil.so": "",
-        "res://addons/gn_ext_ffmpeg/native/android/libswresample.so": "",
-        "res://addons/gn_ext_ffmpeg/native/android/libswscale.so": ""
-    }
-
-macos =
-    {
-        "res://addons/gn_ext_ffmpeg/native/macos/libavcodec.dylib": "",
-        "res://addons/gn_ext_ffmpeg/native/macos/libavfilter.dylib": "",
-        "res://addons/gn_ext_ffmpeg/native/macos/libavformat.dylib": "",
-        "res://addons/gn_ext_ffmpeg/native/macos/libavutil.dylib": "",
-        "res://addons/gn_ext_ffmpeg/native/macos/libswresample.dylib": "",
-        "res://addons/gn_ext_ffmpeg/native/macos/libswscale.dylib": ""
-    }
+windows.x86_64 = {"res://addons/gn_ext_ffmpeg/native/win64/avcodec-60.dll": "", "res://addons/gn_ext_ffmpeg/native/win64/avfilter-9.dll": "", "res://addons/gn_ext_ffmpeg/native/win64/avformat-60.dll": "", "res://addons/gn_ext_ffmpeg/native/win64/avutil-58.dll": "", "res://addons/gn_ext_ffmpeg/native/win64/swresample-4.dll": "", "res://addons/gn_ext_ffmpeg/native/win64/swscale-7.dll": ""}
+linux.x86_64 = {"res://addons/gn_ext_ffmpeg/native/linux64/libavcodec.so.60": "", "res://addons/gn_ext_ffmpeg/native/linux64/libavfilter.so.9": "", "res://addons/gn_ext_ffmpeg/native/linux64/libavformat.so.60": "", "res://addons/gn_ext_ffmpeg/native/linux64/libavutil.so.58": "", "res://addons/gn_ext_ffmpeg/native/linux64/libswresample.so.4": "", "res://addons/gn_ext_ffmpeg/native/linux64/libswscale.so.7": ""}
+android.arm64 = {"res://addons/gn_ext_ffmpeg/native/android/libavcodec.so": "", "res://addons/gn_ext_ffmpeg/native/android/libavfilter.so": "", "res://addons/gn_ext_ffmpeg/native/android/libavformat.so": "", "res://addons/gn_ext_ffmpeg/native/android/libavutil.so": "", "res://addons/gn_ext_ffmpeg/native/android/libswresample.so": "", "res://addons/gn_ext_ffmpeg/native/android/libswscale.so": ""}
+macos = {"res://addons/gn_ext_ffmpeg/native/macos/libavcodec.dylib": "", "res://addons/gn_ext_ffmpeg/native/macos/libavfilter.dylib": "", "res://addons/gn_ext_ffmpeg/native/macos/libavformat.dylib": "", "res://addons/gn_ext_ffmpeg/native/macos/libavutil.dylib": "", "res://addons/gn_ext_ffmpeg/native/macos/libswresample.dylib": "", "res://addons/gn_ext_ffmpeg/native/macos/libswscale.dylib": ""}

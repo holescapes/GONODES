@@ -33,4 +33,4 @@ func cook():
 		var v = sin(time * TAU * freq)
 		st.set_color(Color(0.4, 0.7, 1.0).lerp(Color(1.0, 0.3, 0.3), (v + 1.0) * 0.5))
 		st.add_vertex(Vector3(float(i) * 0.5 - float(n) * 0.25, v, 0.0))
-	outputs[2].set_from_surfacetool(st)
+	outputs[2].set_from_surface_tool(st)

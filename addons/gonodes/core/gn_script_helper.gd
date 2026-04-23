@@ -184,9 +184,6 @@ var dynamic_param_names: PackedStringArray = PackedStringArray()
 ## Parsed input annotations from the last compile.
 var parsed_inputs: Array = []  # Array of { "family": GNFamily.Type, "desc": String }
 
-## Whether setup() has been called on the current instance.
-var _setup_done: bool = false
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Regex Initialization
@@ -218,7 +215,6 @@ func compile(code: String) -> bool:
 		return true  # Already compiled this exact code
 
 	_last_compiled_code = code
-	_setup_done = false
 
 	if code.strip_edges().is_empty():
 		compile_error = "Empty script"
@@ -280,13 +276,6 @@ func run_cook(node: GNNode, inputs: Array[GNData], output: Variant,
 	_instance.frame = engine.frame_count
 	_instance.dt = engine.current_delta
 	_instance._engine = engine
-
-	# Run setup() once after compilation
-	if not _setup_done and _instance.has_method("setup"):
-		_setup_done = true
-		var setup_err := _safe_call(_instance, "setup", node)
-		if not setup_err.is_empty():
-			GNLogger.error("ScriptHelper", "'%s' setup() error: %s" % [node.id, setup_err])
 
 	# Run cook()
 	var cook_err := _safe_call(_instance, "cook", node)
@@ -528,8 +517,6 @@ func rebuild_dynamic_params(node: GNNode, code: String) -> bool:
 				param.resolved_value = old["value"]
 
 		node.add_parameter(param)
-		param.value_changed.connect(node._on_parameter_changed)
-		param.mode_changed.connect(node._on_parameter_mode_changed)
 		dynamic_param_names.append(a.param_name)
 
 	GNLogger.info("ScriptHelper", "'%s' dynamic params → %s" % [node.id, str(dynamic_param_names)])
@@ -609,7 +596,24 @@ func rebuild_input_ports(node: GNNode, code: String) -> bool:
 func on_code_changed(node: GNNode, code: String) -> bool:
 	rebuild_input_ports(node, code)
 	rebuild_dynamic_params(node, code)
-	return compile(code)
+	var ok := compile(code)
+	if ok:
+		_run_setup(node)
+	return ok
+
+
+## Runs setup() eagerly after compilation, injecting only the node reference.
+## Consistent with C++/Python which call native_setup()/python_setup() right
+## after build/load — before any cook frame.
+func _run_setup(node: GNNode) -> void:
+	if _instance == null:
+		return
+	if not _instance.has_method("setup"):
+		return
+	_instance.me = node
+	var setup_err := _safe_call(_instance, "setup", node)
+	if not setup_err.is_empty():
+		GNLogger.error("ScriptHelper", "'%s' setup() error: %s" % [node.id, setup_err])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -637,12 +641,12 @@ static func get_preset_list(family_folder: String) -> Array:
 
 
 ## Scans a directory for code preset files.
-## Recognised extensions: .gd, .gdshader, .fs, .glsl, .frag, .isf, .html, .js, .h, .hpp
+## Recognised extensions: .gd, .gdshader, .fs, .glsl, .frag, .isf, .html, .js, .h, .hpp, .py
 static func _scan_preset_dir(dir_path: String, is_factory: bool, result: Array) -> void:
 	var dir := DirAccess.open(dir_path)
 	if dir == null:
 		return
-	const EXTS := [".gd", ".gdshader", ".fs", ".glsl", ".frag", ".isf", ".html", ".js", ".h", ".hpp"]
+	const EXTS := [".gd", ".gdshader", ".fs", ".glsl", ".frag", ".isf", ".html", ".js", ".h", ".hpp", ".py"]
 	dir.list_dir_begin()
 	var fname := dir.get_next()
 	while fname != "":

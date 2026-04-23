@@ -1,3 +1,4 @@
+# @output img Output image
 # @input img Source image to process
 # @param float contrast 1.5 Contrast multiplier
 # @param float brightness 0.0 Brightness offset (-1 to 1)

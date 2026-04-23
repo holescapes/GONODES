@@ -1,3 +1,4 @@
+# @output img Output image
 # @input img Source image to process
 # @param float threshold 0.5 Brightness threshold (0-1)
 # @param color true_color #ffffff Color for pixels above threshold

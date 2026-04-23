@@ -1,3 +1,4 @@
+# @output dat Output table
 # @input chop Source channel data to convert
 # @param bool headers true Include header row with channel names
 # @param bool transpose false Rows=channels (true) vs Rows=samples (false)

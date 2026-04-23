@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.scan.outputs.matrix }}
+      vendor_setup: ${{ steps.scan.outputs.vendor_setup }}
+      vendor_clone: ${{ steps.scan.outputs.vendor_clone }}
     steps:
       - uses: actions/checkout@v4
 
@@ -74,10 +76,10 @@ jobs:
       - name: Setup vendor SDK (if needed)
         if: steps.check.outputs.supported == 'true'
         run: |
-          if [ "${{ matrix.ext }}" = "gn_ext_ml" ]; then
-            python3 addons/gn_ext_ml/setup_ml.py --sdk-only --no-enable
-          elif [ "${{ matrix.ext }}" = "gn_ext_user_python" ]; then
-            python3 addons/gn_ext_user_python/setup_python.py --no-enable
+          VENDOR_SETUP='${{ fromJson(needs.discover.outputs.vendor_setup || '{}')[matrix.ext] }}'
+          if [ -n "$VENDOR_SETUP" ]; then
+            EXT_BASE=$(echo '${{ matrix.ext }}' | cut -d/ -f1)
+            python3 "addons/${EXT_BASE}/${VENDOR_SETUP}"
           fi
 
       - name: Build ${{ matrix.ext }} (Linux x86_64)
@@ -130,10 +132,10 @@ jobs:
       - name: Setup vendor SDK (if needed)
         if: steps.check.outputs.supported == 'true'
         run: |
-          if [ "${{ matrix.ext }}" = "gn_ext_ml" ]; then
-            python3 addons/gn_ext_ml/setup_ml.py --sdk-only --no-enable
-          elif [ "${{ matrix.ext }}" = "gn_ext_user_python" ]; then
-            python3 addons/gn_ext_user_python/setup_python.py --no-enable
+          VENDOR_SETUP='${{ fromJson(needs.discover.outputs.vendor_setup || '{}')[matrix.ext] }}'
+          if [ -n "$VENDOR_SETUP" ]; then
+            EXT_BASE=$(echo '${{ matrix.ext }}' | cut -d/ -f1)
+            python3 "addons/${EXT_BASE}/${VENDOR_SETUP}"
           fi
 
       - name: Build ${{ matrix.ext }} (Linux ARM64)
@@ -183,10 +185,10 @@ jobs:
       - name: Setup vendor SDK (if needed)
         if: steps.check.outputs.supported == 'true'
         run: |
-          if [ "${{ matrix.ext }}" = "gn_ext_ml" ]; then
-            python3 addons/gn_ext_ml/setup_ml.py --sdk-only --no-enable
-          elif [ "${{ matrix.ext }}" = "gn_ext_user_python" ]; then
-            python3 addons/gn_ext_user_python/setup_python.py --no-enable
+          VENDOR_SETUP='${{ fromJson(needs.discover.outputs.vendor_setup || '{}')[matrix.ext] }}'
+          if [ -n "$VENDOR_SETUP" ]; then
+            EXT_BASE=$(echo '${{ matrix.ext }}' | cut -d/ -f1)
+            python3 "addons/${EXT_BASE}/${VENDOR_SETUP}"
           fi
 
       - name: Build ${{ matrix.ext }} (macOS arm64)
@@ -240,9 +242,19 @@ jobs:
       - name: Clone godot-cpp
         run: git clone --depth 1 --branch $env:GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
 
-      - name: Clone Spout2 SDK (if building gn_ext_spout)
-        if: matrix.ext == 'gn_ext_spout'
-        run: git clone --depth 1 https://github.com/leadedge/Spout2.git addons/gn_ext_spout/native/Spout2
+      - name: Clone vendor SDK (if needed)
+        shell: python
+        run: |
+          import json, subprocess, sys, os
+          vc = json.loads(r'''${{ needs.discover.outputs.vendor_clone || '{}' }}''')
+          clone_spec = vc.get('${{ matrix.ext }}', '')
+          if clone_spec:
+              parts = clone_spec.split()
+              repo_url, dest_dir = parts[0], parts[1]
+              ext_base = '${{ matrix.ext }}'.split('/')[0]
+              dest = os.path.join('addons', ext_base, 'native', dest_dir)
+              if not os.path.isdir(dest):
+                  subprocess.run(['git', 'clone', '--depth', '1', repo_url, dest], check=True)
 
       - name: Check platform support
         id: check
@@ -263,12 +275,14 @@ jobs:
         if: steps.check.outputs.supported == 'true'
         shell: python
         run: |
-          import subprocess, sys
-          ext = '${{ matrix.ext }}'
-          if ext == 'gn_ext_ml':
-              subprocess.run([sys.executable, 'addons/gn_ext_ml/setup_ml.py', '--sdk-only', '--no-enable'], check=True)
-          elif ext == 'gn_ext_user_python':
-              subprocess.run([sys.executable, 'addons/gn_ext_user_python/setup_python.py', '--no-enable'], check=True)
+          import json, subprocess, sys, os
+          vs = json.loads(r'''${{ needs.discover.outputs.vendor_setup || '{}' }}''')
+          setup_cmd = vs.get('${{ matrix.ext }}', '')
+          if setup_cmd:
+              parts = setup_cmd.split()
+              ext_base = '${{ matrix.ext }}'.split('/')[0]
+              script = os.path.join('addons', ext_base, parts[0])
+              subprocess.run([sys.executable, script] + parts[1:], check=True)
 
       - name: Build ${{ matrix.ext }} (Windows x86_64)
         if: steps.check.outputs.supported == 'true'
@@ -299,9 +313,19 @@ jobs:
       - name: Clone godot-cpp
         run: git clone --depth 1 --branch $env:GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
 
-      - name: Clone Spout2 SDK (if building gn_ext_spout)
-        if: matrix.ext == 'gn_ext_spout'
-        run: git clone --depth 1 https://github.com/leadedge/Spout2.git addons/gn_ext_spout/native/Spout2
+      - name: Clone vendor SDK (if needed)
+        shell: python
+        run: |
+          import json, subprocess, sys, os
+          vc = json.loads(r'''${{ needs.discover.outputs.vendor_clone || '{}' }}''')
+          clone_spec = vc.get('${{ matrix.ext }}', '')
+          if clone_spec:
+              parts = clone_spec.split()
+              repo_url, dest_dir = parts[0], parts[1]
+              ext_base = '${{ matrix.ext }}'.split('/')[0]
+              dest = os.path.join('addons', ext_base, 'native', dest_dir)
+              if not os.path.isdir(dest):
+                  subprocess.run(['git', 'clone', '--depth', '1', repo_url, dest], check=True)
 
       - name: Check platform support
         id: check
@@ -322,12 +346,14 @@ jobs:
         if: steps.check.outputs.supported == 'true'
         shell: python
         run: |
-          import subprocess, sys
-          ext = '${{ matrix.ext }}'
-          if ext == 'gn_ext_ml':
-              subprocess.run([sys.executable, 'addons/gn_ext_ml/setup_ml.py', '--sdk-only', '--no-enable'], check=True)
-          elif ext == 'gn_ext_user_python':
-              subprocess.run([sys.executable, 'addons/gn_ext_user_python/setup_python.py', '--no-enable'], check=True)
+          import json, subprocess, sys, os
+          vs = json.loads(r'''${{ needs.discover.outputs.vendor_setup || '{}' }}''')
+          setup_cmd = vs.get('${{ matrix.ext }}', '')
+          if setup_cmd:
+              parts = setup_cmd.split()
+              ext_base = '${{ matrix.ext }}'.split('/')[0]
+              script = os.path.join('addons', ext_base, parts[0])
+              subprocess.run([sys.executable, script] + parts[1:], check=True)
 
       - name: Build ${{ matrix.ext }} (Windows ARM64)
         if: steps.check.outputs.supported == 'true'
