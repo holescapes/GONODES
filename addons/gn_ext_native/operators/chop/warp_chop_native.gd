@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "warp"
+	node_type = "warp_native"
 	node_description = "Time-warp / retime channel data — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeWarpChop"):
 		_processor = ClassDB.instantiate("GNNativeWarpChop")

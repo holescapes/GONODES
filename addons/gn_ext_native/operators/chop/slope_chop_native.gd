@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "slope"
+	node_type = "slope_native"
 	time_dependent = true
 	node_description = "Per-sample derivative of channels — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeSlopeChop"):

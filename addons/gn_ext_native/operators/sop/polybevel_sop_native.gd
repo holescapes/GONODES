@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "polybevel"
+	node_type = "polybevel_native"
 	node_description = "Vertex-pull edge bevel with rounded divisions — native C++ accelerated."
 	if ClassDB.class_exists("GNNativePolyBevelSop"):
 		_processor = ClassDB.instantiate("GNNativePolyBevelSop")

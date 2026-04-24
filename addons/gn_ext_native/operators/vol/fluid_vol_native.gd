@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "fluid"
+	node_type = "fluid_native"
 	time_dependent = true
 	node_description = "Navier-Stokes fluid solver with density & velocity — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeFluidVol"):

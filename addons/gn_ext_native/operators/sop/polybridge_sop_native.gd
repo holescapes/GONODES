@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "polybridge"
+	node_type = "polybridge_native"
 	if ClassDB.class_exists("GNNativePolyBridgeSop"):
 		_processor = ClassDB.instantiate("GNNativePolyBridgeSop")
 

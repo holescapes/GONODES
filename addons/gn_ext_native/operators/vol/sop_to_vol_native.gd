@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "soptovol"
+	node_type = "soptovol_native"
 	node_description = "Rasterize SOP points into a density volume — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeSopToVol"):
 		_processor = ClassDB.instantiate("GNNativeSopToVol")

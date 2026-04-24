@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "force"
+	node_type = "force_native"
 	time_dependent = true
 	node_description = "Apply gravity, wind, and drag forces — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeForcePop"):

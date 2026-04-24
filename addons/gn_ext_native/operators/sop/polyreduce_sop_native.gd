@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "polyreduce"
+	node_type = "polyreduce_native"
 	node_description = "Mesh decimation via QEM edge collapse (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativePolyReduce"):
 		_processor = ClassDB.instantiate("GNNativePolyReduce")

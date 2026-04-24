@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "physics"
+	node_type = "physics_native"
 	node_description = "Reads transform & velocity from a physics body COMP — native C++ accelerated."
 	if ClassDB.class_exists("GNNativePhysicsChop"):
 		_processor = ClassDB.instantiate("GNNativePhysicsChop")

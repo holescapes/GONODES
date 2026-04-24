@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "skin"
+	node_type = "skin_native"
 	node_description = "Skin cross-sections into a mesh surface — native C++ accelerated."
 	_enable_dynamic_inputs(GNFamily.Type.SOP, "section", "Cross-section")
 	if ClassDB.class_exists("GNNativeSkinSop"):

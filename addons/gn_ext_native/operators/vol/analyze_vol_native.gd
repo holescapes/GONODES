@@ -8,7 +8,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "analyze"
+	node_type = "analyze_native"
 	node_description = "Compute volume density statistics → CHOP output — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeAnalyzeVol"):
 		_processor = ClassDB.instantiate("GNNativeAnalyzeVol")

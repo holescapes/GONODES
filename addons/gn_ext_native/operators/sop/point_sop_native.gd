@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "point"
+	node_type = "point_native"
 	time_dependent = true
 	node_description = "Per-vertex position expressions — native C++ accelerated."
 	if ClassDB.class_exists("GNNativePointSop"):

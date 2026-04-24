@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "ik"
+	node_type = "ik_native"
 	node_description = "FABRIK inverse kinematics solver — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeIkChop"):
 		_processor = ClassDB.instantiate("GNNativeIkChop")

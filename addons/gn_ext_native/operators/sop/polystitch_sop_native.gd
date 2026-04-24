@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "polystitch"
+	node_type = "polystitch_native"
 	node_description = "Stitch two point sets by nearest-pair quad strips — native C++ accelerated."
 	if ClassDB.class_exists("GNNativePolyStitchSop"):
 		_processor = ClassDB.instantiate("GNNativePolyStitchSop")

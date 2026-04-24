@@ -17248,7 +17248,27 @@
       {
         "name": "html",
         "type": "string",
-        "default": "The html string"
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "fps",
+        "type": "int",
+        "default": 30
+      },
+      {
+        "name": "javascript",
+        "type": "string",
+        "default": "The javascript string"
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },

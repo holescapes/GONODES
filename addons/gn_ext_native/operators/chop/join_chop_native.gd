@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "join"
+	node_type = "join_native"
 	if ClassDB.class_exists("GNNativeJoinChop"):
 		_processor = ClassDB.instantiate("GNNativeJoinChop")
 

@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "transform"
+	node_type = "transform_native"
 	node_description = "Translate, rotate, and scale geometry — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeTransformSop"):
 		_processor = ClassDB.instantiate("GNNativeTransformSop")

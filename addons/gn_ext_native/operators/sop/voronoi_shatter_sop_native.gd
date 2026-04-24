@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "voronoi_shatter"
+	node_type = "voronoi_shatter_native"
 	if ClassDB.class_exists("GNNativeVoronoiShatterSop"):
 		_processor = ClassDB.instantiate("GNNativeVoronoiShatterSop")
 

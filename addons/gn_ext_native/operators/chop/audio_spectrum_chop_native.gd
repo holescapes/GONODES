@@ -12,7 +12,7 @@ var _smoothed: PackedFloat32Array = PackedFloat32Array()
 
 
 func _init() -> void:
-	node_type = "audiospectrum"
+	node_type = "audiospectrum_native"
 	time_dependent = true
 	node_description = "FFT spectrum analysis — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeAudioSpectrumChop"):

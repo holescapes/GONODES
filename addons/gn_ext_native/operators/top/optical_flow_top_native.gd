@@ -8,7 +8,7 @@ var _prev_image: Image = null
 
 
 func _init() -> void:
-	node_type = "opticalflow"
+	node_type = "opticalflow_native"
 	time_dependent = true
 	node_description = "Motion vector estimation between frames — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeOpticalFlowTop"):

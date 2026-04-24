@@ -8,7 +8,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "metaball"
+	node_type = "metaball_native"
 	node_description = "Metaball implicit surface via marching cubes (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeMetaball"):
 		_processor = ClassDB.instantiate("GNNativeMetaball")

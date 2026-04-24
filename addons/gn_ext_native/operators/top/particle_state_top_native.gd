@@ -8,7 +8,7 @@ var _cached_texture: GNTextureData = null
 
 func _init() -> void:
 	family = GNFamily.Type.TOP
-	node_type = "particle_state"
+	node_type = "particle_state_native"
 	node_description = "Visualize particle attributes as a 2D texture — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeParticleStateTop"):
 		_processor = ClassDB.instantiate("GNNativeParticleStateTop")

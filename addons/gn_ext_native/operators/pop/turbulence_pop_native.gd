@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "turbulence"
+	node_type = "turbulence_native"
 	time_dependent = true
 	node_description = "Curl noise turbulence force field — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeTurbulencePop"):

@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "extrude"
+	node_type = "extrude_native"
 	node_description = "Extrude faces along normals — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeExtrudeSop"):
 		_processor = ClassDB.instantiate("GNNativeExtrudeSop")

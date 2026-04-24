@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "attract"
+	node_type = "attract_native"
 	time_dependent = true
 	node_description = "Inverse-square point attractor — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeAttractPop"):

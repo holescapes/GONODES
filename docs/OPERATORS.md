@@ -18,7 +18,7 @@
 - [POP — Point Operators](#pop--point-operators)
 - [VOL — Volume Operators](#vol--volume-operators)
 
-> **Help example patches:** Every operator has 3+ `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (2,054 total).
+> **Help example patches:** Every operator has 3+ `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (2,050 total).
 >
 > ### Help Patch Hard Rule
 > Every help example patch **MUST**:

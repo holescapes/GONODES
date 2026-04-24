@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "lattice"
+	node_type = "lattice_native"
 	node_description = "Free-form deformation via control-point lattice — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeLatticeSop"):
 		_processor = ClassDB.instantiate("GNNativeLatticeSop")

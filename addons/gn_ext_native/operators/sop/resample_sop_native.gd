@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "resample"
+	node_type = "resample_native"
 	if ClassDB.class_exists("GNNativeResampleSop"):
 		_processor = ClassDB.instantiate("GNNativeResampleSop")
 

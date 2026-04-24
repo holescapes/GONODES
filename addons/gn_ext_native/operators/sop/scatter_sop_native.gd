@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "scatter"
+	node_type = "scatter_native"
 	node_description = "Scatter random points on mesh surface — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeScatterSop"):
 		_processor = ClassDB.instantiate("GNNativeScatterSop")

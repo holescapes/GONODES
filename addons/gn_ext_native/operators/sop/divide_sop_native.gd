@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "divide"
+	node_type = "divide_native"
 	node_description = "Triangulate or clean mesh topology — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeDivideSop"):
 		_processor = ClassDB.instantiate("GNNativeDivideSop")

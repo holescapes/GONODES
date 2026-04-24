@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "magnet"
+	node_type = "magnet_native"
 	node_description = "Attract/repel vertices toward points — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeMagnetSop"):
 		_processor = ClassDB.instantiate("GNNativeMagnetSop")

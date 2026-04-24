@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "twist"
+	node_type = "twist_native"
 	node_description = "Twist geometry around an axis — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeTwistSop"):
 		_processor = ClassDB.instantiate("GNNativeTwistSop")

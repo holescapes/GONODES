@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "ray"
+	node_type = "ray_native"
 	node_description = "Project vertices onto surface via raycasting (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeRay"):
 		_processor = ClassDB.instantiate("GNNativeRay")

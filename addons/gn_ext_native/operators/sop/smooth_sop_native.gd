@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "smooth"
+	node_type = "smooth_native"
 	node_description = "Laplacian vertex smoothing with border pinning — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeSmoothSop"):
 		_processor = ClassDB.instantiate("GNNativeSmoothSop")

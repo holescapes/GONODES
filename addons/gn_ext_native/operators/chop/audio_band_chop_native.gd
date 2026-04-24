@@ -8,7 +8,7 @@ var _peaks: PackedFloat32Array = PackedFloat32Array()
 
 
 func _init() -> void:
-	node_type = "audio_band"
+	node_type = "audio_band_native"
 	time_dependent = true
 	if ClassDB.class_exists("GNNativeAudioBandChop"):
 		_processor = ClassDB.instantiate("GNNativeAudioBandChop")

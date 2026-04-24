@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "choptotop"
+	node_type = "choptotop_native"
 	node_description = "Render CHOP channels as a texture — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeChopToTop"):
 		_processor = ClassDB.instantiate("GNNativeChopToTop")

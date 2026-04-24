@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "noiseimg"
+	node_type = "noiseimg_native"
 	node_description = "Procedural noise generator (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeNoise"):
 		_processor = ClassDB.instantiate("GNNativeNoise")

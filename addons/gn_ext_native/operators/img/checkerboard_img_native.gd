@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "checkerboardimg"
+	node_type = "checkerboardimg_native"
 	node_description = "CPU checkerboard pattern generator — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeCheckerboardImg"):
 		_processor = ClassDB.instantiate("GNNativeCheckerboardImg")

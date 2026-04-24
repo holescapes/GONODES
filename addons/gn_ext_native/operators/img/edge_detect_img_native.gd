@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "edgedetectimg"
+	node_type = "edgedetectimg_native"
 	node_description = "CPU edge detection (Sobel/Prewitt) — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeEdgeDetect"):
 		_processor = ClassDB.instantiate("GNNativeEdgeDetect")

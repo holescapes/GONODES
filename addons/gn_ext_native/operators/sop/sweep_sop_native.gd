@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "sweep"
+	node_type = "sweep_native"
 	node_description = "Sweep a cross-section along a curve — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeSweepSop"):
 		_processor = ClassDB.instantiate("GNNativeSweepSop")

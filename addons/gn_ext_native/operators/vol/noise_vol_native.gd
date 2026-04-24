@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "noise"
+	node_type = "noise_native"
 	node_description = "FBM value noise volume generator — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeNoiseVol"):
 		_processor = ClassDB.instantiate("GNNativeNoiseVol")

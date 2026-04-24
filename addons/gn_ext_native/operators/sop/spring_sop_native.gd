@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "spring"
+	node_type = "spring_native"
 	time_dependent = true
 	node_description = "Damped spring vertex deformer (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeSpring"):

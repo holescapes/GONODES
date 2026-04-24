@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "fan"
+	node_type = "fan_native"
 	node_description = "Fan a single channel into multiple with offset — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeFanChop"):
 		_processor = ClassDB.instantiate("GNNativeFanChop")

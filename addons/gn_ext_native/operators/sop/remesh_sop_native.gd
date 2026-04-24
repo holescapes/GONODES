@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "remesh"
+	node_type = "remesh_native"
 	node_description = "Adaptive remeshing by edge-length subdivision — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeRemeshSop"):
 		_processor = ClassDB.instantiate("GNNativeRemeshSop")

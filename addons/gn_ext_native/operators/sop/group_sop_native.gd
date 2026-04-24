@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "group"
+	node_type = "group_native"
 	if ClassDB.class_exists("GNNativeGroupSop"):
 		_processor = ClassDB.instantiate("GNNativeGroupSop")
 

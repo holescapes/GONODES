@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "stretch"
+	node_type = "stretch_native"
 	node_description = "Resample channels to a new length — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeStretchChop"):
 		_processor = ClassDB.instantiate("GNNativeStretchChop")

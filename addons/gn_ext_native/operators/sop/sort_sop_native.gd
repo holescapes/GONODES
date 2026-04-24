@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "sort"
+	node_type = "sort_native"
 	node_description = "Sort vertices by axis, distance, or randomly — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeSortSop"):
 		_processor = ClassDB.instantiate("GNNativeSortSop")

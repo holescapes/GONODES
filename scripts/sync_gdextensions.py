@@ -46,7 +46,10 @@ def gdextension_has_binary(gdext_path: str, workspace_root: str,
         return False
 
     # Try keys from most specific to least, matching Godot's resolution order.
+    # Godot uses: platform.arch.target (e.g. windows.x86_64.release)
     keys_to_try = [
+        f"{plat}.{arch}.debug",
+        f"{plat}.{arch}.release",
         f"{plat}.debug.{arch}",
         f"{plat}.release.{arch}",
         f"{plat}.debug",

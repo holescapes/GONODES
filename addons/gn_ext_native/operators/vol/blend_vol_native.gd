@@ -9,7 +9,7 @@ const OP_MAP := {"add": 0, "subtract": 1, "multiply": 2, "max": 3, "min": 4, "mi
 
 func _init() -> void:
 	super._init()
-	node_type = "blend"
+	node_type = "blend_native"
 	node_description = "Blend two volumes with arithmetic operations — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeBlendVol"):
 		_processor = ClassDB.instantiate("GNNativeBlendVol")

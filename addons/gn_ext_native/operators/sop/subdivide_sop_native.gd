@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "subdivide"
+	node_type = "subdivide_native"
 	node_description = "Subdivide triangles into 4 sub-triangles (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeSubdivide"):
 		_processor = ClassDB.instantiate("GNNativeSubdivide")

@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "audioenvelope"
+	node_type = "audioenvelope_native"
 	if ClassDB.class_exists("GNNativeAudioEnvelopeChop"):
 		_processor = ClassDB.instantiate("GNNativeAudioEnvelopeChop")
 

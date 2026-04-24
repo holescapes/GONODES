@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "lookup"
+	node_type = "lookup_native"
 	node_description = "Table lookup using one channel to index another — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeLookupChop"):
 		_processor = ClassDB.instantiate("GNNativeLookupChop")

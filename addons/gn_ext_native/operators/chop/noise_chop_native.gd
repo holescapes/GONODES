@@ -8,7 +8,7 @@ var _time_accum: float = 0.0
 
 
 func _init() -> void:
-	node_type = "noise"
+	node_type = "noise_native"
 	time_dependent = true
 	node_description = "Generate smooth noise channels over time — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeNoiseChop"):

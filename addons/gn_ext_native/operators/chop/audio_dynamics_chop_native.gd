@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "audio_dynamics"
+	node_type = "audio_dynamics_native"
 	time_dependent = true
 	node_description = "Compressor / Limiter / Expander / Gate — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeAudioDynamicsChop"):

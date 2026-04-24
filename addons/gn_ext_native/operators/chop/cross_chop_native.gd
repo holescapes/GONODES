@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "cross"
+	node_type = "cross_native"
 	if ClassDB.class_exists("GNNativeCrossChop"):
 		_processor = ClassDB.instantiate("GNNativeCrossChop")
 

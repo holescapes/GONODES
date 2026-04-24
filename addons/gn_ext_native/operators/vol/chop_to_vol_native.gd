@@ -8,7 +8,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "choptovol"
+	node_type = "choptovol_native"
 	node_description = "Convert CHOP channel data to a 3D volume — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeChopToVol"):
 		_processor = ClassDB.instantiate("GNNativeChopToVol")

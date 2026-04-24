@@ -7,7 +7,7 @@ var _angle_accum: float = 0.0
 
 
 func _init() -> void:
-	node_type = "laser"
+	node_type = "laser_native"
 	time_dependent = true
 	node_description = "Generate ILDA laser control channels — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeLaserChop"):

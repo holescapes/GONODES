@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "math"
+	node_type = "math_native"
 	node_description = "Per-sample math on CHOP channels — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeMathChop"):
 		_processor = ClassDB.instantiate("GNNativeMathChop")

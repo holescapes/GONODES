@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "taper"
+	node_type = "taper_native"
 	node_description = "Taper geometry along an axis — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeTaperSop"):
 		_processor = ClassDB.instantiate("GNNativeTaperSop")

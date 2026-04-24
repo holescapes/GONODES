@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "lsystem"
+	node_type = "lsystem_native"
 	node_description = "L-System fractal/branching geometry (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeLSystem"):
 		_processor = ClassDB.instantiate("GNNativeLSystem")

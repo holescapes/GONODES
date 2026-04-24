@@ -9,7 +9,7 @@ var _source_prim: int = Mesh.PRIMITIVE_TRIANGLES
 
 
 func _init() -> void:
-	node_type = "cloth"
+	node_type = "cloth_native"
 	time_dependent = true
 	if ClassDB.class_exists("GNNativeClothSop"):
 		_processor = ClassDB.instantiate("GNNativeClothSop")

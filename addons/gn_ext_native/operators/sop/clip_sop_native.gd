@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "clip"
+	node_type = "clip_native"
 	node_description = "Clip geometry against a plane — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeClipSop"):
 		_processor = ClassDB.instantiate("GNNativeClipSop")

@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "facet"
+	node_type = "facet_native"
 	node_description = "Unique / consolidate vertices (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeFacet"):
 		_processor = ClassDB.instantiate("GNNativeFacet")

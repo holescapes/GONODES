@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "wave"
+	node_type = "wave_native"
 	time_dependent = true
 	node_description = "Advanced waveform generator — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeWaveChop"):

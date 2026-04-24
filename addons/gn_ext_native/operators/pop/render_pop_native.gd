@@ -11,7 +11,7 @@ var _scene_node: Node3D = null
 
 func _init() -> void:
 	super._init()
-	node_type = "render"
+	node_type = "render_native"
 	node_description = "Render particles as point cloud or billboards — native C++ accelerated."
 	family = GNFamily.Type.COMP
 	if ClassDB.class_exists("GNNativeRenderPop"):

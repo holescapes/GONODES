@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "uvproject"
+	node_type = "uvproject_native"
 	node_description = "Project UV coordinates onto geometry — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeUvProjectSop"):
 		_processor = ClassDB.instantiate("GNNativeUvProjectSop")

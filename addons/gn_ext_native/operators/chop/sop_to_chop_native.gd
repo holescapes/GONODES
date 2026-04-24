@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "soptochop"
+	node_type = "soptochop_native"
 	node_description = "Extract vertex attributes as CHOP channels — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeSopToChop"):
 		_processor = ClassDB.instantiate("GNNativeSopToChop")

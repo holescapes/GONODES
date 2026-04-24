@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "advect"
+	node_type = "advect_native"
 	time_dependent = true
 	node_description = "Advect particles through a velocity volume field — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeAdvectPop"):

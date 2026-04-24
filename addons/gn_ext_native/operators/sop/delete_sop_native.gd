@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "delete"
+	node_type = "delete_native"
 	node_description = "Delete triangles by range, bounding box, or random — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeDeleteSop"):
 		_processor = ClassDB.instantiate("GNNativeDeleteSop")

@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "filter"
+	node_type = "filter_native"
 	time_dependent = true
 	node_description = "Smooth/filter channels with LP or HP — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeFilterChop"):

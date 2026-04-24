@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "trail_ribbon"
+	node_type = "trail_ribbon_native"
 	time_dependent = true
 	if ClassDB.class_exists("GNNativeTrailRibbonSop"):
 		_processor = ClassDB.instantiate("GNNativeTrailRibbonSop")

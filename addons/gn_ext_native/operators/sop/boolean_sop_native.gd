@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "boolean"
+	node_type = "boolean_native"
 	node_description = "Boolean operations (union, intersect, subtract) — native C++ BSP-tree accelerated."
 	if ClassDB.class_exists("GNNativeBooleanSop"):
 		_processor = ClassDB.instantiate("GNNativeBooleanSop")

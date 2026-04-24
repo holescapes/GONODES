@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "normal"
+	node_type = "normal_native"
 	node_description = "Recompute, flip, or facet vertex normals — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeNormalSop"):
 		_processor = ClassDB.instantiate("GNNativeNormalSop")

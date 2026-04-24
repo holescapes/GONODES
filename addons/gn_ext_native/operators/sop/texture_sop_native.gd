@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "texture"
+	node_type = "texture_native"
 	if ClassDB.class_exists("GNNativeTextureSop"):
 		_processor = ClassDB.instantiate("GNNativeTextureSop")
 

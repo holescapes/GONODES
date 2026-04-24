@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "isosurface"
+	node_type = "isosurface_native"
 	node_description = "Analytic implicit surface via marching cubes (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeIsoSurface"):
 		_processor = ClassDB.instantiate("GNNativeIsoSurface")

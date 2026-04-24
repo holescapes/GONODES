@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "mountain"
+	node_type = "mountain_native"
 	node_description = "Fractal noise displacement along normals — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeMountainSop"):
 		_processor = ClassDB.instantiate("GNNativeMountainSop")

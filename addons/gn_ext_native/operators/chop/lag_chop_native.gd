@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "lag"
+	node_type = "lag_native"
 	time_dependent = true
 	if ClassDB.class_exists("GNNativeLagChop"):
 		_processor = ClassDB.instantiate("GNNativeLagChop")

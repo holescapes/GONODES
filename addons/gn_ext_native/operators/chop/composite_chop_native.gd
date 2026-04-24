@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "composite"
+	node_type = "composite_native"
 	node_description = "Blend multiple CHOP inputs with weighted operations — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeCompositeChop"):
 		_processor = ClassDB.instantiate("GNNativeCompositeChop")

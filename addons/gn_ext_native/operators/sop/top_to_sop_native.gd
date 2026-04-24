@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "toptosop"
+	node_type = "toptosop_native"
 	node_description = "Convert TOP texture to SOP heightfield or point cloud — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeTopToSop"):
 		_processor = ClassDB.instantiate("GNNativeTopToSop")

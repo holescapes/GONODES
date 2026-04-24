@@ -8,7 +8,7 @@ var _cpu_data: GNParticleData = null
 
 func _init() -> void:
 	super._init()
-	node_type = "source"
+	node_type = "source_native"
 	time_dependent = true
 	node_description = "Emit particles with age/kill/pscale — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeSourcePop"):

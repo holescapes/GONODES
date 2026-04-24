@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "wireframe"
+	node_type = "wireframe_native"
 	node_description = "Extract triangle edges as line pairs — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeWireframeSop"):
 		_processor = ClassDB.instantiate("GNNativeWireframeSop")

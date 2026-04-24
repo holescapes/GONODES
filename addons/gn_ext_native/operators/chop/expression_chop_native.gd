@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "expression"
+	node_type = "expression_native"
 	time_dependent = true
 	node_description = "Evaluate per-channel math expressions — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeExpressionChop"):

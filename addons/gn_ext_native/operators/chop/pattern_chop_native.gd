@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "pattern"
+	node_type = "pattern_native"
 	node_description = "Generate multi-sample patterns — native C++ accelerated."
 	if ClassDB.class_exists("GNNativePatternChop"):
 		_processor = ClassDB.instantiate("GNNativePatternChop")

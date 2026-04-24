@@ -259,14 +259,19 @@ func _find_example_patches(family_dir: String) -> Array[String]:
 	var results: Array[String] = []
 	var prefix := gn_node.node_type  # e.g. "noise_top"
 
-	# Scan core help directory
-	_scan_dir_for_patches("%s/%s" % [HELP_DIR, family_dir], prefix, results)
-
-	# Scan extension help directory (if this operator comes from an extension)
+	# Extension operators show only their own patches (avoids showing core
+	# patches that reference the GDScript class instead of the native one).
+	# Falls back to core patches only if the extension has none.
 	var registry := GNExtensionRegistry.instance()
 	var entry: GNExtensionRegistry.OperatorEntry = registry.get_entry_by_script(gn_node.get_script())
 	if entry != null and not entry.extension_dir.is_empty():
 		_scan_dir_for_patches("%s/help/%s" % [entry.extension_dir, family_dir], prefix, results)
+		if not results.is_empty():
+			results.sort()
+			return results
+
+	# Core operator, or extension operator with no patches — scan core help
+	_scan_dir_for_patches("%s/%s" % [HELP_DIR, family_dir], prefix, results)
 
 	results.sort()
 	return results

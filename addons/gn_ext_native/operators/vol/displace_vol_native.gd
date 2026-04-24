@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "displace"
+	node_type = "displace_native"
 	node_description = "Displace density by a velocity field — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeDisplaceVol"):
 		_processor = ClassDB.instantiate("GNNativeDisplaceVol")

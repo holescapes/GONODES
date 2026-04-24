@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "audiooscillator"
+	node_type = "audiooscillator_native"
 	time_dependent = true
 	if ClassDB.class_exists("GNNativeAudioOscillatorChop"):
 		_processor = ClassDB.instantiate("GNNativeAudioOscillatorChop")

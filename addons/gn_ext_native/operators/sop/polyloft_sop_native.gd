@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "polyloft"
+	node_type = "polyloft_native"
 	node_description = "Loft polygon surface between cross-sections — native C++ accelerated."
 	if ClassDB.class_exists("GNNativePolyLoftSop"):
 		_processor = ClassDB.instantiate("GNNativePolyLoftSop")

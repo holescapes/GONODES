@@ -2400,7 +2400,7 @@
         "type": "DAT"
       }
     ],
-    "dynamic_inputs": null,
+    "dynamic_inputs": "DAT",
     "file": "addons/gonodes/operators/dat/merge_dat.gd"
   },
   "MidiInDAT": {

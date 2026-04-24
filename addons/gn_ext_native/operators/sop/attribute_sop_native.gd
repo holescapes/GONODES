@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "attribute"
+	node_type = "attribute_native"
 	time_dependent = true
 	node_description = "Create/modify per-vertex point attributes — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeAttributeSop"):

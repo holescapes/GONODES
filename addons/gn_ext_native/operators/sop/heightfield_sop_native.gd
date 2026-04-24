@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "heightfield"
+	node_type = "heightfield_native"
 	if ClassDB.class_exists("GNNativeHeightfieldSop"):
 		_processor = ClassDB.instantiate("GNNativeHeightfieldSop")
 

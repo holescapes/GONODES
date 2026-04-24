@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "limit"
+	node_type = "limit_native"
 	time_dependent = true
 	node_description = "Kill particles outside bbox and clamp speed — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeLimitPop"):

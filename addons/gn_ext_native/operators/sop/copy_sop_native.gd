@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "copy"
+	node_type = "copy_native"
 	node_description = "Copy geometry onto points (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeCopy"):
 		_processor = ClassDB.instantiate("GNNativeCopy")

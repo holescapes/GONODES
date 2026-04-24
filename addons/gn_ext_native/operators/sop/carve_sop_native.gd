@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "carve"
+	node_type = "carve_native"
 	node_description = "Trim triangles by parametric U range — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeCarveSop"):
 		_processor = ClassDB.instantiate("GNNativeCarveSop")

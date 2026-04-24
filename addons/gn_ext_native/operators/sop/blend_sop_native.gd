@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "blend"
+	node_type = "blend_native"
 	node_description = "Morph/blend between two geometries — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeBlendSop"):
 		_processor = ClassDB.instantiate("GNNativeBlendSop")

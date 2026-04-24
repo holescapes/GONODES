@@ -8,7 +8,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "marchingcubes"
+	node_type = "marchingcubes_native"
 	node_description = "Extract iso-surface mesh from volume (marching cubes) — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeMarchingCubesVol"):
 		_processor = ClassDB.instantiate("GNNativeMarchingCubesVol")

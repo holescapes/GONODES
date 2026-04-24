@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "fuse"
+	node_type = "fuse_native"
 	node_description = "Merge coincident vertices (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativeFuse"):
 		_processor = ClassDB.instantiate("GNNativeFuse")

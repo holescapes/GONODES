@@ -699,6 +699,27 @@ python scripts/sync_gdextensions.py --dry-run   # preview only
 
 The SConstruct post-build step runs this automatically after `scons`.
 
+#### `.gdextension` library key format
+
+Godot resolves `[libraries]` keys as **`platform.arch.target`** — not
+`platform.target.arch`. Getting this wrong silently prevents binary discovery.
+
+```ini
+# CORRECT — Godot format:
+[libraries]
+windows.x86_64.debug   = "res://addons/gn_ext_foo/cef/windows/libfoo.dll"
+windows.x86_64.release = "res://addons/gn_ext_foo/cef/windows/libfoo.dll"
+linux.x86_64.release   = "res://addons/gn_ext_foo/cef/linux/libfoo.so"
+macos.release          = "res://addons/gn_ext_foo/cef/macos/libfoo.dylib"
+
+# WRONG — arch and target swapped (Godot ignores these):
+windows.debug.x86_64 = "..."
+```
+
+`sync_gdextensions.py` probes keys in Godot's resolution order:
+`{plat}.{arch}.debug` → `{plat}.{arch}.release` → `{plat}.debug` →
+`{plat}.release` → `{plat}.{arch}` → `{plat}`.
+
 The test runner automatically discovers `test_*.gd` files under
 `addons/gn_ext_*/tests/`.
 

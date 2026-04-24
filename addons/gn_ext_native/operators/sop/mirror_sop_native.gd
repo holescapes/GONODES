@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "mirror"
+	node_type = "mirror_native"
 	node_description = "Mirror geometry across a plane — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeMirrorSop"):
 		_processor = ClassDB.instantiate("GNNativeMirrorSop")

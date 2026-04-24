@@ -7,7 +7,7 @@ var _last_count: int = -1
 
 
 func _init() -> void:
-	node_type = "ramp"
+	node_type = "ramp_native"
 	if ClassDB.class_exists("GNNativeRampChop"):
 		_processor = ClassDB.instantiate("GNNativeRampChop")
 

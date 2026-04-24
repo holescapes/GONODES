@@ -22,7 +22,7 @@ var _cached_indices := PackedInt32Array()
 
 
 func _init() -> void:
-	node_type = "particle"
+	node_type = "particle_native"
 	node_description = "CPU particle emitter from SOP surface (native C++ accelerated)."
 	time_dependent = true
 	if ClassDB.class_exists("GNNativeParticle"):

@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "creep"
+	node_type = "creep_native"
 	if ClassDB.class_exists("GNNativeCreepSop"):
 		_processor = ClassDB.instantiate("GNNativeCreepSop")
 

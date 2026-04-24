@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "pixelsortimg"
+	node_type = "pixelsortimg_native"
 	node_description = "Pixel-sorting glitch effect (native C++ accelerated)."
 	if ClassDB.class_exists("GNNativePixelSort"):
 		_processor = ClassDB.instantiate("GNNativePixelSort")

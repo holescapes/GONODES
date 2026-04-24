@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "bend"
+	node_type = "bend_native"
 	node_description = "Bend geometry along an axis — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeBendSop"):
 		_processor = ClassDB.instantiate("GNNativeBendSop")

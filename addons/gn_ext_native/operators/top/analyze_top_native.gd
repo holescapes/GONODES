@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "analyze"
+	node_type = "analyze_native"
 	node_description = "Per-pixel min/max/avg/sum statistics — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeAnalyzeTop"):
 		_processor = ClassDB.instantiate("GNNativeAnalyzeTop")

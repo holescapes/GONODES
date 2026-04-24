@@ -7,7 +7,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "collision"
+	node_type = "collision_native"
 	time_dependent = true
 	node_description = "Ground plane collision with bounce and kill — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeCollisionPop"):

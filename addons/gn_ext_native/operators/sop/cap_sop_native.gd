@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "cap"
+	node_type = "cap_native"
 	node_description = "Close open boundary holes with triangle fan caps — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeCapSop"):
 		_processor = ClassDB.instantiate("GNNativeCapSop")

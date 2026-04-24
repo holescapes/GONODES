@@ -8,7 +8,7 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	super._init()
-	node_type = "instance"
+	node_type = "instance_native"
 	node_description = "Copy SOP geometry onto each particle — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeInstancePop"):
 		_processor = ClassDB.instantiate("GNNativeInstancePop")

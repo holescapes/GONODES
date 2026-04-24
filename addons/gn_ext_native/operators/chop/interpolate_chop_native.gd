@@ -6,7 +6,7 @@ var _processor: RefCounted = null
 
 
 func _init() -> void:
-	node_type = "interpolate"
+	node_type = "interpolate_native"
 	node_description = "Blend between two channel inputs with easing — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeInterpolateChop"):
 		_processor = ClassDB.instantiate("GNNativeInterpolateChop")
