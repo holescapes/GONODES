@@ -29,7 +29,7 @@ func _init_parameters() -> void:
 	# Shader source
 	add_parameter(GNParameter.create_string("shader_code", _default_shader_code(),
 		"Shader Code", "Godot shading language source"))
-	add_parameter(GNParameter.create_file("shader_file", "",
+	add_parameter(GNParameter.create_file("shader_file", "Path to the shader file",
 		PackedStringArray(["*.gdshader"]),
 		"Shader File", "Load shader from .gdshader file (overrides Shader Code if set)"))
 

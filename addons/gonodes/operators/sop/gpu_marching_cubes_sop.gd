@@ -1,8 +1,11 @@
-class_name GPUMarchingCubesVOL
-extends GNVolBase
+class_name GPUMarchingCubesSOP
+extends GNSopBase
 ## GPU-accelerated marching cubes: extracts iso-surface from a 3D volume
-## using a compute shader with atomic append buffer.  10–100× faster than
-## the CPU MarchingCubesVOL for volumes above ~32³.
+## using a compute shader with atomic append buffer.  10-100x faster than
+## the CPU MarchingCubesSOP for volumes above ~32^3.
+##
+## Consumes VOL data but outputs SOP geometry (Rule 25.28).
+## Requires compute shaders (forward_plus / mobile renderers).
 
 var _vertex_buf: RID = RID()
 var _counter_buf: RID = RID()
@@ -11,12 +14,11 @@ var _tri_table_buf: RID = RID()
 var _tables_uploaded: bool = false
 var _last_max_tris: int = 0
 
-const FLOATS_PER_TRI: int = 24  # 3 verts × (pos vec4 + normal vec4)
+const FLOATS_PER_TRI: int = 24  # 3 verts x (pos vec4 + normal vec4)
 const BYTES_PER_TRI: int = FLOATS_PER_TRI * 4  # 96 bytes
 
 
 func _init() -> void:
-	super._init()
 	node_type = "gpu_marching_cubes"
 
 
@@ -32,12 +34,28 @@ func _init_parameters() -> void:
 		10000, 5000000, "Max Triangles", "Output buffer capacity"))
 
 
+func requires_compute() -> bool:
+	return true
+
+
+func requires_main_thread() -> bool:
+	return true
+
+
+func has_cpu_fallback() -> bool:
+	return true
+
+
+func supported_renderers() -> PackedStringArray:
+	return PackedStringArray(["forward_plus", "mobile"])
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
-	var vol: GNVolumeData = _get_input_vol(inputs, 0)
+	var vol: GNVolumeData = inputs[0] as GNVolumeData if inputs.size() > 0 and inputs[0] is GNVolumeData else null
 	if vol == null or not vol.has_volume():
 		return null
 
-	var ctx := _get_ctx()
+	var ctx := GNGpuContext.get_context()
 	if ctx.rd == null:
 		return _cook_cpu(inputs)
 
@@ -68,7 +86,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# Create sampler for volume input
 	var sampler: RID = ctx.create_linear_sampler()
 
-	# Push constants: 12 values × 4 bytes = 48 bytes
+	# Push constants: 12 values x 4 bytes = 48 bytes
 	var pc := PackedByteArray()
 	pc.resize(48)
 	pc.encode_s32(0, res.x)
@@ -93,8 +111,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		ctx.uniform_buffer(4, _tri_table_buf),
 	], shader, 0)
 
-	# Dispatch: one thread per cell, local_size = 4³
-	var wg := _workgroups_3d(res - Vector3i.ONE, 4)
+	# Dispatch: one thread per cell, local_size = 4^3
+	var cells := res - Vector3i.ONE
+	var wg := Vector3i(
+		ceili(float(cells.x) / 4.0),
+		ceili(float(cells.y) / 4.0),
+		ceili(float(cells.z) / 4.0))
 	ctx.dispatch(shader, uniform_set, wg.x, wg.y, wg.z, pc)
 
 	ctx.rd.free_rid(uniform_set)
@@ -118,7 +140,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	normals.resize(vert_count)
 
 	for i in range(vert_count):
-		var base: int = i * 32  # 8 floats × 4 bytes per vertex
+		var base: int = i * 32  # 8 floats x 4 bytes per vertex
 		positions[i] = Vector3(
 			raw.decode_float(base),
 			raw.decode_float(base + 4),
@@ -141,7 +163,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 func _cook_cpu(inputs: Array[GNData]) -> GNData:
 	# Fall back to the CPU marching cubes algorithm
-	var vol := _get_input_vol_cpu(inputs, 0)
+	var vol: GNVolumeData = null
+	if inputs.size() > 0 and inputs[0] is GNVolumeData:
+		var vd := inputs[0] as GNVolumeData
+		if vd.is_cpu:
+			vol = vd
 	if vol == null or not vol.has_volume():
 		return null
 
@@ -201,7 +227,7 @@ func _upload_lookup_tables(ctx: GNGpuContext) -> void:
 		edge_bytes.encode_s32(i * 4, MetaballSOP._mc_edge_table[i])
 	_edge_table_buf = ctx.rd.storage_buffer_create(edge_bytes.size(), edge_bytes)
 
-	# Tri table: 256 rows × 16 ints = 4096 ints (padded to 16, -1 terminated)
+	# Tri table: 256 rows x 16 ints = 4096 ints (padded to 16, -1 terminated)
 	var tri_bytes := PackedByteArray()
 	tri_bytes.resize(256 * 16 * 4)
 	tri_bytes.fill(0)
@@ -229,7 +255,7 @@ func _realloc_buffers(ctx: GNGpuContext, max_tris: int) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CPU Fallback March Cell (simplified from MarchingCubesVOL)
+# CPU Fallback March Cell (simplified from MarchingCubesSOP)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _march_cell_cpu(ix: int, iy: int, iz: int, gx: int, gy: int,

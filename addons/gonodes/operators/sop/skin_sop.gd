@@ -16,13 +16,13 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_bool("close_u", true, "",
+	add_parameter(GNParameter.create_bool("close_u", true, "Enable close u",
 		"Close each cross-section ring"))
-	add_parameter(GNParameter.create_bool("close_v", false, "",
+	add_parameter(GNParameter.create_bool("close_v", false, "Enable close v",
 		"Close along backbone (loop)"))
-	add_parameter(GNParameter.create_bool("end_caps", false, "",
+	add_parameter(GNParameter.create_bool("end_caps", false, "Enable end caps",
 		"Cap ends with fan triangles"))
-	add_parameter(GNParameter.create_bool("recompute_normals", true, "",
+	add_parameter(GNParameter.create_bool("recompute_normals", true, "Enable recompute normals",
 		"Recompute smooth normals after skinning"))
 
 

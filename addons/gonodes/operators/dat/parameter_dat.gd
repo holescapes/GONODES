@@ -15,7 +15,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("node_id", "",
+	add_parameter(GNParameter.create_string("node_id", "The node id string",
 		"Node", "ID of the node whose parameters to expose"))
 	add_parameter(GNParameter.create_bool("show_defaults", true,
 		"Show Defaults", "Include default values column"))

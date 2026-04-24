@@ -35,7 +35,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("mode",
 		PackedStringArray(["Toggle", "Momentary"]), 1,
 		"Mode", "Toggle: flip on key-down. Momentary: follow physical state."))
-	add_parameter(GNParameter.create_string("window", "",
+	add_parameter(GNParameter.create_string("window", "Window ID to capture from (0 = main)",
 		"Window", "WindowOUT node name to read from (empty = global)"))
 
 

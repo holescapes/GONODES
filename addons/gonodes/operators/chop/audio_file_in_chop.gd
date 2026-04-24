@@ -47,7 +47,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_file("file", "",
+	add_parameter(GNParameter.create_file("file", "Path to the file",
 		PackedStringArray(["*.wav", "*.ogg"]), "File",
 		"Audio file path (WAV or OGG Vorbis)"))
 	add_parameter(GNParameter.create_bool("play", false, "Play",

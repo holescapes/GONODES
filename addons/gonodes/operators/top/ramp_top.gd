@@ -15,14 +15,14 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Resolution", "Output texture resolution in pixels"))
 	add_parameter(GNParameter.create_enum("type",
 		PackedStringArray(["Horizontal", "Vertical", "Radial", "Circular"]), 0, "", "Gradient direction"))
-	add_parameter(GNParameter.create_color("color_a", Color.BLACK, "", "Start color"))
-	add_parameter(GNParameter.create_color("color_b", Color.WHITE, "", "End color"))
-	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5), "", "Center point for radial/circular"))
-	add_parameter(GNParameter.create_float("phase", 0.0, null, null, 0.01, "", "Phase offset"))
-	add_parameter(GNParameter.create_bool("repeat", false, "", "Repeat the gradient pattern"))
+	add_parameter(GNParameter.create_color("color_a", Color.BLACK, "Color A", "Start color"))
+	add_parameter(GNParameter.create_color("color_b", Color.WHITE, "Color B", "End color"))
+	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5), "Center", "Center point for radial/circular"))
+	add_parameter(GNParameter.create_float("phase", 0.0, null, null, 0.01, "Phase", "Phase offset"))
+	add_parameter(GNParameter.create_bool("repeat", false, "Repeat", "Repeat the gradient pattern"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

@@ -25,7 +25,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("res_z", 64, 4, 256, "Resolution Z", "Grid depth"))
 	add_parameter(GNParameter.create_enum("mode", ["slice", "stack", "map"], 0, "Mode",
 		"How to map channels to voxels"))
-	add_parameter(GNParameter.create_string("channel", "", "Channel",
+	add_parameter(GNParameter.create_string("channel", "Channel", "Channel",
 		"Channel name (for stack/map modes, leave empty for first)"))
 
 

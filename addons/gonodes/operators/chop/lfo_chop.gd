@@ -22,11 +22,11 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("waveform",
 		PackedStringArray(["Sine", "Triangle", "Square", "Sawtooth", "Pulse"]), 0, "", "Waveform shape"))
-	add_parameter(GNParameter.create_float("frequency", 1.0, 0.001, 100.0, 0.01, "", "Oscillation frequency in Hz"))
-	add_parameter(GNParameter.create_float("amplitude", 1.0, 0.0, null, 0.01, "", "Output amplitude"))
-	add_parameter(GNParameter.create_float("offset", 0.0, null, null, 0.01, "", "DC offset added to output"))
-	add_parameter(GNParameter.create_float("phase", 0.0, 0.0, 1.0, 0.001, "", "Phase offset (0-1)"))
-	add_parameter(GNParameter.create_float("duty_cycle", 0.5, 0.0, 1.0, 0.01, "", "Pulse width for pulse waveform"))
+	add_parameter(GNParameter.create_float("frequency", 1.0, 0.001, 100.0, 0.01, "Frequency", "Oscillation frequency in Hz"))
+	add_parameter(GNParameter.create_float("amplitude", 1.0, 0.0, null, 0.01, "Amplitude", "Output amplitude"))
+	add_parameter(GNParameter.create_float("offset", 0.0, null, null, 0.01, "Offset", "DC offset added to output"))
+	add_parameter(GNParameter.create_float("phase", 0.0, 0.0, 1.0, 0.001, "Phase", "Phase offset (0-1)"))
+	add_parameter(GNParameter.create_float("duty_cycle", 0.5, 0.0, 1.0, 0.01, "Duty Cycle", "Pulse width for pulse waveform"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

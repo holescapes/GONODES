@@ -16,10 +16,10 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("weight", 0.1, 0.0, 2.0, 0.01, "", "Displacement strength"))
+	add_parameter(GNParameter.create_float("weight", 0.1, 0.0, 2.0, 0.01, "Weight", "Displacement strength"))
 	add_parameter(GNParameter.create_enum("method",
 		PackedStringArray(["RG as XY", "Luminance", "RGB as XYZ"]), 0, "", "How to read the displacement map"))
-	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0), "", "Per-axis displacement scale"))
+	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0), "Scale", "Per-axis displacement scale"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

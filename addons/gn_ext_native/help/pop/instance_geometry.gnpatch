@@ -15,7 +15,7 @@
       }
     },
     "focus1": {
-      "type": "InstancePOPNative",
+      "type": "InstanceSOPNative",
       "position": [
         450,
         100

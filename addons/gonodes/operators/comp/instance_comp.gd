@@ -60,7 +60,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("sz", 1.0, null, null, 0.01, "Scale Z", "Group scale Z"))
 
 	# Per-instance variation
-	add_parameter(GNParameter.create_bool("align_to_normal", true, "",
+	add_parameter(GNParameter.create_bool("align_to_normal", true, "Enable align to normal",
 		"Align instances to point normals"))
 	add_parameter(GNParameter.create_float("scale_rand", 0.0, 0.0, 1.0, 0.01,
 		"Scale Randomize", "Random scale variation (0 = uniform, 1 = ±100%)"))

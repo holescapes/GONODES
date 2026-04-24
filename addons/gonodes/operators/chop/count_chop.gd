@@ -19,10 +19,10 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "", "Edge trigger threshold"))
+	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "Threshold", "Edge trigger threshold"))
 	add_parameter(GNParameter.create_float("step", 1.0, null, null, 0.01, "Count Step", "Amount added per trigger"))
-	add_parameter(GNParameter.create_float("limit_min", 0.0, null, null, 0.01, "", "Minimum count value"))
-	add_parameter(GNParameter.create_float("limit_max", 1000000.0, null, null, 0.01, "", "Maximum count value"))
+	add_parameter(GNParameter.create_float("limit_min", 0.0, null, null, 0.01, "Limit Min", "Minimum count value"))
+	add_parameter(GNParameter.create_float("limit_max", 1000000.0, null, null, 0.01, "Limit Max", "Maximum count value"))
 	add_parameter(GNParameter.create_enum("overflow",
 		PackedStringArray(["Clamp", "Loop"]), 0, "", "Behaviour when count exceeds limits"))
 	add_parameter(GNParameter.create_bool("reset_all", false, "Reset All", "Reset all counters to zero"))

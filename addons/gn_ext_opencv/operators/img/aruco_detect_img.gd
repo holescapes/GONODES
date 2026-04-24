@@ -49,7 +49,7 @@ func _init_parameters() -> void:
 		"Thickness", "Marker outline thickness"))
 	add_parameter(GNParameter.create_bool("draw_ids", true,
 		"Draw IDs", "Overlay numeric marker IDs"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

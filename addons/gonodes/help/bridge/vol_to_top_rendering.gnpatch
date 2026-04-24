@@ -36,7 +36,7 @@
             }
         },
         "raymarch1": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 900,
                 200
@@ -121,7 +121,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "VOL \u2192 TOP Rendering Pipeline\n\nRaymarchVOL converts a 3D volume into a 2D image (TOP).\nThis is the primary rendering path for volumetric data.\n\nHigh-quality settings:\n  - 200 steps at 0.006 step size for smooth results\n  - High density_scale + absorption for rich contrast\n  - BlurVOL softens before rendering\n\nThe NullTOP holds the 2D texture for further compositing\n(e.g. CompositeTOP, LevelTOP, FeedbackTOP).",
+            "text": "VOL \u2192 TOP Rendering Pipeline\n\nRaymarchTOP converts a 3D volume into a 2D image (TOP).\nThis is the primary rendering path for volumetric data.\n\nHigh-quality settings:\n  - 200 steps at 0.006 step size for smooth results\n  - High density_scale + absorption for rich contrast\n  - BlurVOL softens before rendering\n\nThe NullTOP holds the 2D texture for further compositing\n(e.g. CompositeTOP, LevelTOP, FeedbackTOP).",
             "position": [
                 -100.0,
                 -100.0

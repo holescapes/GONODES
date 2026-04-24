@@ -168,14 +168,6 @@ static func get_expression_func_variants() -> Array[String]:
 	return result
 
 
-## Returns expression function names with value-type suffixes only (f, i, s)
-## — same as get_expression_func_variants() now that p/pf are deprecated.
-## Kept as a separate method for semantic clarity in autocomplete:
-## second-arg context triggers data key/channel completions.
-static func get_expression_func_value_variants() -> Array[String]:
-	return get_expression_func_variants()
-
-
 ## Resolves a function name (possibly with a variant suffix like "chopf")
 ## to its registered family ID.  Returns -1 if not found.
 static func resolve_expression_func_family(func_name: String) -> int:

@@ -26,7 +26,7 @@ func _init_parameters() -> void:
 		"CHOP", "Name (id) of a remote CHOP to reference (empty = use wired input)"))
 	add_parameter(GNParameter.create_string("pattern", "*",
 		"Channel name pattern (* = all, comma-separated for multiple)", "Channel name filter pattern"))
-	add_parameter(GNParameter.create_string("rename", "",
+	add_parameter(GNParameter.create_string("rename", "Rename pattern for output channels",
 		"Rename pattern (leave empty to keep names)", "New names for selected channels"))
 
 

@@ -674,7 +674,7 @@ func test_my_chain() -> void:
 - **GNNetwork** — node add/remove, connection management, topological sort, cycle detection, dirty propagation, rename with connection update, unique ID generation, serialization structure
 - **GNChannelData** — channel I/O, index bounds behavior, missing data handling, metadata tracking, deep copy, family identity
 - **GNParamPresetManager** — clipboard lifecycle, type-safe paste, reset to defaults, null safety
-- **All 528 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
+- **All 575 operators** — instantiation, default parameter verification, cook-without-crash, correct output data types. Core operators tested in `tests/operators/<family>/`, extension operators in `addons/gn_ext_*/tests/`
 - **SOP behavioral verification** — vertex counts, geometry presence, subdivision effects, deformation correctness (transform shifts, noise deforms, bend/twist/taper), merge/switch/blend output, position data comparison
 - **SOP functional verification** — vertex positions within bounds, AABB size changes after scale/peak/extrude, normal directions after flip/recompute, scatter point counts, copy multiplication, clip plane enforcement, sort ordering, fuse deduplication
 - **DAT behavioral verification** — cell content, row/column counts, sort correctness (ascending/descending, numeric/alphabetic), merge row stacking, transpose dimension swap, switch selection
@@ -703,7 +703,7 @@ func test_my_chain() -> void:
 - **COMP (20 patches)** — one per component (GeometryCOMP, CameraCOMP, RigidBodyCOMP, SubNetworkNode, etc.)
 - **UI (31 patches)** — one per widget (ButtonUI, SliderUI, KnobUI, XYPadUI, etc.)
 - **POP (12 patches)** — one per particle operator (SourcePOP, ForcePOP, BoidsPOP, RenderPOP, etc.)
-- **VOL (13 patches)** — one per volume operator (NoiseVOL, FluidVOL, MarchingCubesVOL, RaymarchVOL, etc.)
+- **VOL (13 patches)** — one per volume operator (NoiseVOL, FluidVOL, MarchingCubesSOP, RaymarchTOP, etc.)
 - **MAT (10 patches)** — one per material (PbrMAT, WireframeMAT, ShaderMAT, etc.)
 - **IMG (13 patches)** — one per image operator (NoiseIMG, BlurIMG, PixelSortIMG, ImgToTOP, etc.)
 - **OUTPUT (12 patches)** — one per output operator (WindowOUT, MovieOUT, OscOUT, etc.)
@@ -790,7 +790,7 @@ tests/
 
 addons/gn_ext_*/tests/                      # Self-contained extension tests (287 tests)
 ├── gn_ext_native/tests/test_native_operators.gd    # 176 tests — all *Native variants
-├── tests/operators/sdf/test_sdf_operators.gd          # 53 tests — all SDF operators
+├── gn_ext_sdf/tests/test_sdf_operators.gd          # 53 tests — all SDF operators
 ├── gn_ext_mapper/tests/test_mapper_operators.gd     # 14 tests — projection mapping
 ├── gn_ext_ml/tests/test_ml_operators.gd             # 7 tests — ML inference operators
 ├── gn_ext_depth_sensor/tests/...                    # 5 tests

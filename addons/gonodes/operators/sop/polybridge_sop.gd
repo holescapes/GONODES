@@ -10,7 +10,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "sop"
+	node_type = "polybridge"
 
 
 func _init_ports() -> void:

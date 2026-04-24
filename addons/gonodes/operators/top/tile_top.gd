@@ -15,10 +15,10 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2("repeat", Vector2(2.0, 2.0), "", "Repeat count per axis"))
-	add_parameter(GNParameter.create_vector2("offset", Vector2.ZERO, "", "UV offset"))
-	add_parameter(GNParameter.create_bool("mirror_x", false, "", "Mirror on horizontal repeats"))
-	add_parameter(GNParameter.create_bool("mirror_y", false, "", "Mirror on vertical repeats"))
+	add_parameter(GNParameter.create_vector2("repeat", Vector2(2.0, 2.0), "Repeat", "Repeat count per axis"))
+	add_parameter(GNParameter.create_vector2("offset", Vector2.ZERO, "Offset", "UV offset"))
+	add_parameter(GNParameter.create_bool("mirror_x", false, "Mirror X", "Mirror on horizontal repeats"))
+	add_parameter(GNParameter.create_bool("mirror_y", false, "Mirror Y", "Mirror on vertical repeats"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

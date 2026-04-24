@@ -17,11 +17,11 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("distance", 0.2, -10.0, 10.0, 0.01,
 		"Distance", "Extrusion distance along face normals"))
-	add_parameter(GNParameter.create_bool("output_sides", true, "",
+	add_parameter(GNParameter.create_bool("output_sides", true, "Enable output sides",
 		"Generate side walls between original and extruded faces"))
-	add_parameter(GNParameter.create_bool("output_front", true, "",
+	add_parameter(GNParameter.create_bool("output_front", true, "Enable output front",
 		"Output the extruded (front) face"))
-	add_parameter(GNParameter.create_bool("output_back", false, "",
+	add_parameter(GNParameter.create_bool("output_back", false, "Enable output back",
 		"Output the original (back) face"))
 
 

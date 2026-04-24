@@ -28,7 +28,7 @@ func _init_parameters() -> void:
 		"Cutoff (0-1)", "Normalised cutoff frequency"))
 	add_parameter(GNParameter.create_float("q", 0.707, 0.1, 10.0, 0.01,
 		"Q (Resonance)", "Quality factor (0.707 = Butterworth flat)"))
-	add_parameter(GNParameter.create_bool("reset", false, "", "Clear filter state"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset", "Clear filter state"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

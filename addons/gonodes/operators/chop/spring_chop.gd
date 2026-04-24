@@ -25,7 +25,7 @@ func _init_parameters() -> void:
 		"Damping (c)", "Damping coefficient — higher = less overshoot"))
 	add_parameter(GNParameter.create_float("mass", 1.0, 0.01, 10.0, 0.01,
 		"Mass", "Object mass — higher = slower response"))
-	add_parameter(GNParameter.create_bool("reset", false, "", "Reset spring state"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset", "Reset spring state"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

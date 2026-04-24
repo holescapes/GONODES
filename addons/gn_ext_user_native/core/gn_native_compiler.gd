@@ -55,7 +55,7 @@ import os, sys
 
 godot_cpp_path = "{godot_cpp_path}"
 if not os.path.isdir(godot_cpp_path):
-    print("ERROR: godot-cpp not found at:", godot_cpp_path)
+	print("ERROR: godot-cpp not found at:", godot_cpp_path)
     sys.exit(1)
 
 # Import the godotcpp tool from toolchain/tools/ to set up compiler flags,
@@ -63,6 +63,19 @@ if not os.path.isdir(godot_cpp_path):
 # source).  Instead we configure the environment manually and link against the
 # pre-built static library.
 sys.path.insert(0, godot_cpp_path)
+
+# SCons resolves env.Dir("tools") relative to the SConstruct directory (build
+# dir), but platform tool files (android.py, windows.py etc.) live in
+# godot-cpp/tools/.  Create a symlink so they're discoverable.
+_cpp_tools = os.path.join(godot_cpp_path, "tools")
+if not os.path.isdir("tools") and os.path.isdir(_cpp_tools):
+    try:
+		os.symlink(os.path.abspath(_cpp_tools), os.path.abspath("tools"),
+                   target_is_directory=True)
+    except (OSError, NotImplementedError):
+        import shutil
+		shutil.copytree(_cpp_tools, "tools",
+						ignore=shutil.ignore_patterns("__pycache__"))
 
 EnsureSConsVersion(4, 0)
 
@@ -81,10 +94,10 @@ cpp_tool.generate(env)
 
 # Headers
 env.Append(CPPPATH=[
-    os.path.join(godot_cpp_path, "include"),
-    os.path.join(godot_cpp_path, "gen", "include"),
-    os.path.join(godot_cpp_path, "gdextension"),
-    "{sdk_path}",
+	os.path.join(godot_cpp_path, "include"),
+	os.path.join(godot_cpp_path, "gen", "include"),
+	os.path.join(godot_cpp_path, "gdextension"),
+	"{sdk_path}",
 ])
 
 # Link against pre-built godot-cpp static library
@@ -95,16 +108,16 @@ import glob
 libs = glob.glob(os.path.join(lib_dir, "libgodot-cpp.*" + target + "*"))
 if libs:
     lib_name_full = os.path.splitext(os.path.basename(libs[0]))[0]
-    if lib_name_full.startswith("lib"):
-        lib_name_full = lib_name_full[3:]  # strip "lib" prefix for linker
+	if lib_name_full.startswith("lib"):
+		lib_name_full = lib_name_full[3:]  # strip "lib" prefix for linker
     env.Append(LIBS=[lib_name_full])
 else:
-    print("ERROR: No pre-built godot-cpp library found in", lib_dir)
+	print("ERROR: No pre-built godot-cpp library found in", lib_dir)
     sys.exit(1)
 
 sources = Glob("*.cpp")
 library = env.SharedLibrary(
-    target="bin/{lib_name}" + env["suffix"] + env["SHLIBSUFFIX"],
+	target="bin/{lib_name}" + env["suffix"] + env["SHLIBSUFFIX"],
     source=sources,
 )
 Default(library)

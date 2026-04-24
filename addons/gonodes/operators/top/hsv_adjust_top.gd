@@ -16,9 +16,9 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("hue_offset", 0.0, -1.0, 1.0, 0.01, "", "Hue rotation (wraps around)"))
-	add_parameter(GNParameter.create_float("saturation", 1.0, 0.0, 4.0, 0.01, "", "Saturation multiplier (0 = grayscale)"))
-	add_parameter(GNParameter.create_float("value", 1.0, 0.0, 4.0, 0.01, "", "Value/brightness multiplier"))
+	add_parameter(GNParameter.create_float("hue_offset", 0.0, -1.0, 1.0, 0.01, "Hue Offset", "Hue rotation (wraps around)"))
+	add_parameter(GNParameter.create_float("saturation", 1.0, 0.0, 4.0, 0.01, "Saturation", "Saturation multiplier (0 = grayscale)"))
+	add_parameter(GNParameter.create_float("value", 1.0, 0.0, 4.0, 0.01, "Value", "Value/brightness multiplier"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

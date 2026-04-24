@@ -23,9 +23,9 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("length", 10.0, 0.0, null, 0.1, "Length (sec)", "Timer duration in seconds"))
-	add_parameter(GNParameter.create_bool("loop", false, "", "Loop when complete"))
+	add_parameter(GNParameter.create_bool("loop", false, "Loop", "Loop when complete"))
 	add_parameter(GNParameter.create_bool("auto_start", true, "Auto Start", "Start automatically on first cook"))
-	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, null, 0.01, "", "Playback speed multiplier"))
+	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, null, 0.01, "Speed", "Playback speed multiplier"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

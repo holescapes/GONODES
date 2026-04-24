@@ -11,7 +11,7 @@
             "parameters": {}
         },
         "raymarch1": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 400,
                 100

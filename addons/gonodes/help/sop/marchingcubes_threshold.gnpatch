@@ -2,30 +2,57 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "source1": {
-            "type": "SourcePOP",
+        "noisevol1": {
+            "type": "NoiseVOL",
             "position": [
                 100,
                 100
             ],
+            "parameters": {}
+        },
+        "marchingcubes1": {
+            "type": "MarchingCubesSOP",
+            "position": [
+                400,
+                100
+            ],
             "parameters": {
-                "emit_rate": {
-                    "value": 100
+                "threshold": {
+                    "value": 0.25,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
+                },
+                "smooth_normals": {
+                    "value": true,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },
-        "focus1": {
-            "type": "InstancePOP",
+        "geo1": {
+            "type": "GeometryCOMP",
             "position": [
-                450,
+                700,
                 100
             ],
             "parameters": {}
         },
-        "pop_render": {
-            "type": "RenderPOP",
+        "cam1": {
+            "type": "CameraCOMP",
             "position": [
-                800,
+                700,
+                300
+            ],
+            "parameters": {
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
                 100
             ],
             "parameters": {
@@ -41,7 +68,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1150,
+                1400,
                 100
             ],
             "parameters": {
@@ -60,19 +87,31 @@
     },
     "connections": [
         {
-            "from": "source1",
+            "from": "noisevol1",
             "from_port": 0,
-            "to": "focus1",
+            "to": "marchingcubes1",
             "to_port": 0
         },
         {
-            "from": "focus1",
+            "from": "marchingcubes1",
             "from_port": 0,
-            "to": "pop_render",
+            "to": "geo1",
             "to_port": 0
         },
         {
-            "from": "pop_render",
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "cam1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -82,14 +121,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Instance POP — Geometry\n\nCopy SOP geometry onto each particle position as instances.",
+            "text": "Noise VOL — Threshold\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                500.0,
-                120.0
+                400.0,
+                100.0
             ],
             "color": [
                 1.0,

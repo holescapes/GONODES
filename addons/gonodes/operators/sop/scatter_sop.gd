@@ -18,9 +18,9 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("count", 100, 1, 100000, "Point Count",
 		"Number of points to scatter"))
 	add_parameter(GNParameter.create_int("seed", 42, 0, 99999, "Seed", "Random seed"))
-	add_parameter(GNParameter.create_bool("emit_normals", true, "",
+	add_parameter(GNParameter.create_bool("emit_normals", true, "Enable emit normals",
 		"Interpolate and emit normals at scattered points"))
-	add_parameter(GNParameter.create_bool("emit_uvs", true, "",
+	add_parameter(GNParameter.create_bool("emit_uvs", true, "Enable emit uvs",
 		"Interpolate and emit UVs at scattered points"))
 
 

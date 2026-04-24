@@ -22,7 +22,7 @@ func _init_parameters() -> void:
 		"Attack Time (sec)", "Rise smoothing time in seconds"))
 	add_parameter(GNParameter.create_float("release", 0.2, 0.0, 10.0, 0.01,
 		"Release Time (sec)", "Fall smoothing time in seconds"))
-	add_parameter(GNParameter.create_bool("reset", false, "", "Clear smooth state"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset", "Clear smooth state"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

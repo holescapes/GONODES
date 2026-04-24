@@ -20,7 +20,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("file", "",
+	add_parameter(GNParameter.create_string("file", "Path to the file",
 		"File", "Path to video file"))
 	add_parameter(GNParameter.create_bool("play", true,
 		"Play", "Enable playback"))

@@ -21,9 +21,9 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("mix", 0.9, 0.0, 1.0, 0.01, "Feedback Mix", "Persistence (higher = longer trails)"))
-	add_parameter(GNParameter.create_vector2("translate", Vector2.ZERO, "", "Feedback UV translation per frame"))
+	add_parameter(GNParameter.create_vector2("translate", Vector2.ZERO, "Translate", "Feedback UV translation per frame"))
 	add_parameter(GNParameter.create_float("rotate", 0.0, null, null, 0.01, "Rotate (rad)", "Feedback rotation per frame"))
-	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0), "", "Feedback scale per frame"))
+	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0), "Scale", "Feedback scale per frame"))
 	add_parameter(GNParameter.create_bool("reset", false, "Reset Feedback", "Clear the feedback buffer"))
 
 

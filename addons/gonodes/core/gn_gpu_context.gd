@@ -38,8 +38,9 @@ static func get_context() -> GNGpuContext:
 ## Does NOT allow submit()/sync() — dispatches are fire-and-forget.
 var rd: RenderingDevice = null
 
-## Alias for rd.  Kept for API compatibility with code that explicitly
-## targets the renderer device (e.g. Texture2DRD creation helpers).
+## Same device as [member rd].  Used by GPU-dispatching operators
+## (ComputeShaderTOP, GLSLMultiTOP, PointCloudRenderTOP) that manage
+## their own shader pipelines on the renderer device.
 var main_rd: RenderingDevice = null
 
 ## Compiled shader cache: shader_source_path → RID
@@ -327,6 +328,7 @@ func create_texture_2d(width: int, height: int,
 	fmt.format = data_format
 	fmt.usage_bits = (
 		RenderingDevice.TEXTURE_USAGE_STORAGE_BIT |
+		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
 		RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT |
 		RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
 	)
@@ -426,84 +428,6 @@ func dispatch(shader_rid: RID, uniform_set: RID,
 		rd.compute_list_set_push_constant(compute_list, push_constants, push_constants.size())
 	rd.compute_list_dispatch(compute_list, groups_x, groups_y, groups_z)
 	rd.compute_list_end()
-
-
-## Dispatches a compute shader on the main renderer device (no submit/sync).
-## Now identical to dispatch() since all operators use the unified device.
-## Kept for API compatibility with TOP operators that explicitly target main_rd.
-func dispatch_on_main(shader_rid: RID, uniform_set: RID,
-		groups_x: int, groups_y: int = 1, groups_z: int = 1,
-		push_constants: PackedByteArray = PackedByteArray()) -> void:
-	if main_rd == null:
-		return
-	var pipeline: RID = _get_or_create_main_pipeline(shader_rid)
-	var compute_list: int = main_rd.compute_list_begin()
-	main_rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
-	main_rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
-	if push_constants.size() > 0:
-		main_rd.compute_list_set_push_constant(compute_list, push_constants, push_constants.size())
-	main_rd.compute_list_dispatch(compute_list, groups_x, groups_y, groups_z)
-	main_rd.compute_list_end()
-
-
-## Compiles a compute shader on main_rd (cached).
-## Now identical to get_shader() since all operators share the unified device.
-## Kept for API compatibility.
-func get_shader_on_main(glsl_path: String) -> RID:
-	return get_shader(glsl_path)
-
-
-## Creates a 2D storage texture on main_rd for Texture2DRD output.
-## Now delegates to rd since all operators share the unified device.
-func create_texture_2d_on_main(width: int, height: int,
-		data_format: int = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM) -> RID:
-	if rd == null:
-		return RID()
-	var fmt := RDTextureFormat.new()
-	fmt.texture_type = RenderingDevice.TEXTURE_TYPE_2D
-	fmt.width = width
-	fmt.height = height
-	fmt.depth = 1
-	fmt.format = data_format
-	fmt.usage_bits = (
-		RenderingDevice.TEXTURE_USAGE_STORAGE_BIT |
-		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
-		RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
-	)
-	fmt.mipmaps = 1
-	return rd.texture_create(fmt, RDTextureView.new())
-
-
-## Creates a storage buffer on main_rd from raw bytes.
-## Now delegates to rd since all operators share the unified device.
-func create_buffer_on_main(data: PackedByteArray) -> RID:
-	if rd == null:
-		return RID()
-	return rd.storage_buffer_create(data.size(), data)
-
-
-## Returns a cached compute pipeline for main_rd.
-## Now delegates to get_pipeline() since all operators share the unified device.
-func _get_or_create_main_pipeline(shader_rid: RID) -> RID:
-	return get_pipeline(shader_rid)
-
-
-## Creates an RDUniform for a storage buffer on main_rd at [param binding].
-func uniform_buffer_main(binding: int, buffer_rid: RID) -> RDUniform:
-	var u := RDUniform.new()
-	u.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	u.binding = binding
-	u.add_id(buffer_rid)
-	return u
-
-
-## Creates an RDUniform for a storage image on main_rd at [param binding].
-func uniform_image_main(binding: int, texture_rid: RID) -> RDUniform:
-	var u := RDUniform.new()
-	u.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
-	u.binding = binding
-	u.add_id(texture_rid)
-	return u
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

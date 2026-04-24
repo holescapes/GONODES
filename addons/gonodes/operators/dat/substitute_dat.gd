@@ -14,9 +14,9 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("find", "",
+	add_parameter(GNParameter.create_string("find", "The find string",
 		"Find", "Text or regex pattern to find"))
-	add_parameter(GNParameter.create_string("replace_with", "",
+	add_parameter(GNParameter.create_string("replace_with", "The replace with string",
 		"Replace With", "Replacement text"))
 	add_parameter(GNParameter.create_bool("use_regex", false,
 		"Use Regex", "Treat find pattern as a regular expression"))

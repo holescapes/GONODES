@@ -21,7 +21,7 @@ func _init_parameters() -> void:
 		"UV translation"))
 	add_parameter(GNParameter.create_vector2("uv_scale", Vector2(1.0, 1.0), "UV Scale",
 		"UV scale multiplier"))
-	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 0.01, "",
+	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 0.01, "The rotation value",
 		"UV rotation in radians"))
 
 

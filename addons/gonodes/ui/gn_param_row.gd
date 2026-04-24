@@ -2201,7 +2201,7 @@ static func _ensure_ac_regexes() -> void:
 	var family_alt := "|".join(variants) if not variants.is_empty() else "(?!x)"
 	# All family funcs now support port args natively, so second-arg
 	# context always suggests data keys/channels.
-	var value_variants := GNFamily.get_expression_func_value_variants()
+	var value_variants := GNFamily.get_expression_func_variants()
 	var value_alt := "|".join(value_variants) if not value_variants.is_empty() else "(?!x)"
 	# First arg: (family_func|op|par|set_par)("partial...
 	_ac_trigger_re = RegEx.new()

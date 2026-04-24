@@ -129,7 +129,7 @@ func open(param: GNParameter, component_idx: int = -1) -> void:
 	# Validate initial text
 	_validate_expression(expr_text)
 
-	popup_centered()
+	_popup_clamped()
 	_focus_end()
 
 
@@ -294,7 +294,7 @@ func _get_family_func_alternation() -> String:
 ## Builds a regex alternation for non-port-aware variants only (f/i/s).
 ## Used for second-arg detection where the arg is a data key, not a port.
 func _get_value_func_alternation() -> String:
-	var variants := GNFamily.get_expression_func_value_variants()
+	var variants := GNFamily.get_expression_func_variants()
 	if variants.is_empty():
 		return ""
 	return "|".join(variants)

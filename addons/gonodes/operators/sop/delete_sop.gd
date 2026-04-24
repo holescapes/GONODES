@@ -22,15 +22,15 @@ func _init_parameters() -> void:
 		0, "", "Deletion criterion"))
 	add_parameter(GNParameter.create_int("start", 0, 0, 999999, "Start Index", "Start of range"))
 	add_parameter(GNParameter.create_int("end", 10, 0, 999999, "End Index", "End of range (inclusive)"))
-	add_parameter(GNParameter.create_float("bmin_x", -0.5, null, null, 0.01, "Box Min X", ""))
-	add_parameter(GNParameter.create_float("bmin_y", -0.5, null, null, 0.01, "Box Min Y", ""))
-	add_parameter(GNParameter.create_float("bmin_z", -0.5, null, null, 0.01, "Box Min Z", ""))
-	add_parameter(GNParameter.create_float("bmax_x", 0.5, null, null, 0.01, "Box Max X", ""))
-	add_parameter(GNParameter.create_float("bmax_y", 0.5, null, null, 0.01, "Box Max Y", ""))
-	add_parameter(GNParameter.create_float("bmax_z", 0.5, null, null, 0.01, "Box Max Z", ""))
+	add_parameter(GNParameter.create_float("bmin_x", -0.5, null, null, 0.01, "Box Min X", "The bmin x value"))
+	add_parameter(GNParameter.create_float("bmin_y", -0.5, null, null, 0.01, "Box Min Y", "The bmin y value"))
+	add_parameter(GNParameter.create_float("bmin_z", -0.5, null, null, 0.01, "Box Min Z", "The bmin z value"))
+	add_parameter(GNParameter.create_float("bmax_x", 0.5, null, null, 0.01, "Box Max X", "The bmax x value"))
+	add_parameter(GNParameter.create_float("bmax_y", 0.5, null, null, 0.01, "Box Max Y", "The bmax y value"))
+	add_parameter(GNParameter.create_float("bmax_z", 0.5, null, null, 0.01, "Box Max Z", "The bmax z value"))
 	add_parameter(GNParameter.create_float("percent", 50.0, 0.0, 100.0, 1.0, "Percent", "Random deletion percentage"))
 	add_parameter(GNParameter.create_int("seed", 0, 0, 9999, "Seed", "Random seed"))
-	add_parameter(GNParameter.create_bool("invert", false, "", "Invert selection (keep instead of delete)"))
+	add_parameter(GNParameter.create_bool("invert", false, "Invert", "Invert selection (keep instead of delete)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

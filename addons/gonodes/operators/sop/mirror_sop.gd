@@ -19,9 +19,9 @@ func _init_parameters() -> void:
 		0, "", "Reflection plane"))
 	add_parameter(GNParameter.create_float("origin", 0.0, null, null, 0.01,
 		"Origin", "Plane offset along the mirror axis"))
-	add_parameter(GNParameter.create_bool("merge", true, "",
+	add_parameter(GNParameter.create_bool("merge", true, "Enable merge",
 		"Merge original and mirrored geometry"))
-	add_parameter(GNParameter.create_bool("reverse_winding", true, "",
+	add_parameter(GNParameter.create_bool("reverse_winding", true, "Enable reverse winding",
 		"Reverse winding of mirrored faces (keeps normals correct)"))
 
 

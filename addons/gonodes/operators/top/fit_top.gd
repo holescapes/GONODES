@@ -17,7 +17,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("fit_mode",
 		PackedStringArray(["Fit", "Fill", "Stretch", "Native"]), 0, "Fit Mode",
 		"How to scale the source into the target resolution"))
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "",
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Target output resolution"))
 	add_parameter(GNParameter.create_color("border_color", Color.BLACK, "Border Color",
 		"Letterbox / pillarbox fill color"))

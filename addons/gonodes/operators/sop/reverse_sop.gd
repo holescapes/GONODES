@@ -14,9 +14,9 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_bool("reverse_winding", true, "",
+	add_parameter(GNParameter.create_bool("reverse_winding", true, "Enable reverse winding",
 		"Reverse triangle winding order"))
-	add_parameter(GNParameter.create_bool("flip_normals", true, "",
+	add_parameter(GNParameter.create_bool("flip_normals", true, "Enable flip normals",
 		"Flip vertex normals"))
 
 

@@ -19,12 +19,12 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("waveform",
 		PackedStringArray(["Sine", "Triangle", "Square", "Sawtooth", "Pulse", "Ramp"]), 0, "", "Waveform shape"))
-	add_parameter(GNParameter.create_int("channels", 1, 1, 16, "", "Number of channels"))
+	add_parameter(GNParameter.create_int("channels", 1, 1, 16, "Channels", "Number of channels"))
 	add_parameter(GNParameter.create_int("length", 1, 1, 4096, "Sample Length", "Samples per channel"))
-	add_parameter(GNParameter.create_float("frequency", 1.0, 0.001, 1000.0, 0.01, "", "Wave frequency in Hz"))
-	add_parameter(GNParameter.create_float("amplitude", 1.0, 0.0, null, 0.01, "", "Output amplitude"))
-	add_parameter(GNParameter.create_float("offset", 0.0, null, null, 0.01, "", "DC offset"))
-	add_parameter(GNParameter.create_float("phase", 0.0, 0.0, 1.0, 0.001, "", "Initial phase offset (0-1)"))
+	add_parameter(GNParameter.create_float("frequency", 1.0, 0.001, 1000.0, 0.01, "Frequency", "Wave frequency in Hz"))
+	add_parameter(GNParameter.create_float("amplitude", 1.0, 0.0, null, 0.01, "Amplitude", "Output amplitude"))
+	add_parameter(GNParameter.create_float("offset", 0.0, null, null, 0.01, "Offset", "DC offset"))
+	add_parameter(GNParameter.create_float("phase", 0.0, 0.0, 1.0, 0.001, "Phase", "Initial phase offset (0-1)"))
 	add_parameter(GNParameter.create_float("phase_step", 0.0, 0.0, 1.0, 0.01,
 		"Phase offset per channel", "Phase offset added per channel"))
 

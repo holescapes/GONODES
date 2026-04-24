@@ -10,9 +10,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in1", GNFamily.Type.DAT, false, "First table", "Input 1")
-	add_input("in2", GNFamily.Type.DAT, false, "Second table", "Input 2")
+	add_input("in", GNFamily.Type.DAT, false, "Table to merge", "Input")
 	add_output("out", GNFamily.Type.DAT, "Merged table")
+	_enable_dynamic_inputs(GNFamily.Type.DAT, "in", "Input")
 
 
 func _init_parameters() -> void:
@@ -21,13 +21,17 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var in1: GNTableData = inputs[0] as GNTableData if inputs.size() > 0 and inputs[0] is GNTableData else null
-	var in2: GNTableData = inputs[1] as GNTableData if inputs.size() > 1 and inputs[1] is GNTableData else null
+	# Collect all valid table inputs
+	var tables: Array[GNTableData] = []
+	for inp in inputs:
+		var td := inp as GNTableData if inp is GNTableData else null
+		if td != null:
+			tables.append(td)
 
-	if in1 == null:
-		return in2
-	if in2 == null:
-		return in1
+	if tables.is_empty():
+		return null
+	if tables.size() == 1:
+		return tables[0]
 
 	if _cached_table == null:
 		_cached_table = GNTableData.new()
@@ -37,34 +41,30 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	if mode_idx == 0:
 		# Row merge — stack vertically
-		_cached_table.has_header = in1.has_header
+		_cached_table.has_header = tables[0].has_header
 		_cached_table.is_table = true
-		# Copy all rows from in1 (including header)
-		for row in in1.table:
+		for row in tables[0].table:
 			_cached_table.table.append(row.duplicate())
-		# Add data rows from in2 (skip header if present)
-		var start_row: int = 1 if in2.has_header else 0
-		for r in range(start_row, in2.table.size()):
-			_cached_table.table.append(in2.table[r].duplicate())
+		for i in range(1, tables.size()):
+			var t: GNTableData = tables[i]
+			var start_row: int = 1 if t.has_header else 0
+			for r in range(start_row, t.table.size()):
+				_cached_table.table.append(t.table[r].duplicate())
 	else:
 		# Column merge — place side by side
 		_cached_table.is_table = true
-		var max_rows: int = maxi(in1.table.size(), in2.table.size())
-		_cached_table.has_header = in1.has_header or in2.has_header
+		var max_rows: int = 0
+		for t in tables:
+			max_rows = maxi(max_rows, t.table.size())
+		_cached_table.has_header = tables[0].has_header
 		for r in range(max_rows):
 			var row := PackedStringArray()
-			# Columns from in1
-			if r < in1.table.size():
-				row.append_array(in1.table[r])
-			else:
-				for _c in range(in1.num_cols()):
-					row.append("")
-			# Columns from in2
-			if r < in2.table.size():
-				row.append_array(in2.table[r])
-			else:
-				for _c in range(in2.num_cols()):
-					row.append("")
+			for t in tables:
+				if r < t.table.size():
+					row.append_array(t.table[r])
+				else:
+					for _c in range(t.num_cols()):
+						row.append("")
 			_cached_table.table.append(row)
 
 	return _cached_table

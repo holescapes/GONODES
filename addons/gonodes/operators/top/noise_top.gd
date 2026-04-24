@@ -23,19 +23,19 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Resolution", "Output texture resolution in pixels"))
 	add_parameter(GNParameter.create_enum("noise_type",
 		PackedStringArray(["Simplex", "Perlin", "Voronoi", "White", "Value", "Ridged"]), 0, "", "Noise algorithm"))
-	add_parameter(GNParameter.create_float("scale", 4.0, 0.1, 100.0, 0.1, "", "Noise frequency / zoom level"))
-	add_parameter(GNParameter.create_vector2("offset", Vector2.ZERO, "", "Spatial offset for panning the noise"))
-	add_parameter(GNParameter.create_float("time_offset", 0.0, null, null, 0.01, "", "Z-axis offset for animation (drive with LFO)"))
-	add_parameter(GNParameter.create_int("seed", 0, 0, 99999, "", "Random seed for noise variation"))
-	add_parameter(GNParameter.create_bool("monochrome", true, "", "Grayscale (on) or RGB color noise (off)"))
-	add_parameter(GNParameter.create_int("octaves", 1, 1, 8, "", "FBM octave count (1 = single layer, higher = more detail)"))
-	add_parameter(GNParameter.create_float("lacunarity", 2.0, 1.0, 4.0, 0.1, "", "Frequency multiplier per octave"))
-	add_parameter(GNParameter.create_float("gain", 0.5, 0.0, 1.0, 0.01, "", "Amplitude multiplier per octave"))
-	add_parameter(GNParameter.create_bool("periodic", false, "", "Seamless tiling — output tiles perfectly when repeated"))
-	add_parameter(GNParameter.create_float("tile_size", 4.0, 1.0, 64.0, 0.1, "", "Tile period in noise-space units (periodic mode)"))
+	add_parameter(GNParameter.create_float("scale", 4.0, 0.1, 100.0, 0.1, "Scale", "Noise frequency / zoom level"))
+	add_parameter(GNParameter.create_vector2("offset", Vector2.ZERO, "Offset", "Spatial offset for panning the noise"))
+	add_parameter(GNParameter.create_float("time_offset", 0.0, null, null, 0.01, "Time Offset", "Z-axis offset for animation (drive with LFO)"))
+	add_parameter(GNParameter.create_int("seed", 0, 0, 99999, "Seed", "Random seed for noise variation"))
+	add_parameter(GNParameter.create_bool("monochrome", true, "Monochrome", "Grayscale (on) or RGB color noise (off)"))
+	add_parameter(GNParameter.create_int("octaves", 1, 1, 8, "Octaves", "FBM octave count (1 = single layer, higher = more detail)"))
+	add_parameter(GNParameter.create_float("lacunarity", 2.0, 1.0, 4.0, 0.1, "Lacunarity", "Frequency multiplier per octave"))
+	add_parameter(GNParameter.create_float("gain", 0.5, 0.0, 1.0, 0.01, "Gain", "Amplitude multiplier per octave"))
+	add_parameter(GNParameter.create_bool("periodic", false, "Periodic", "Seamless tiling — output tiles perfectly when repeated"))
+	add_parameter(GNParameter.create_float("tile_size", 4.0, 1.0, 64.0, 0.1, "Tile Size", "Tile period in noise-space units (periodic mode)"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

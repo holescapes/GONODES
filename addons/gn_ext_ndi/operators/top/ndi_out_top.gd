@@ -28,7 +28,7 @@ func _init_parameters() -> void:
 		"Frame-rate numerator"))
 	add_parameter(GNParameter.create_int("fps_d", 1, 1, 1001, "FPS Den",
 		"Frame-rate denominator"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable sending"))
 
 

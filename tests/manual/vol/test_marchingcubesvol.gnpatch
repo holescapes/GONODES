@@ -11,7 +11,7 @@
             "parameters": {}
         },
         "test": {
-            "class_name": "MarchingCubesVOL",
+            "class_name": "MarchingCubesSOP",
             "position": [
                 350,
                 0
@@ -31,7 +31,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MANUAL TEST: NoiseVOL \u2192 MarchingCubesVOL\n\nVerify: extracts an isosurface mesh (outputs SOP geometry)",
+            "text": "MANUAL TEST: NoiseVOL \u2192 MarchingCubesSOP\n\nVerify: extracts an isosurface mesh (outputs SOP geometry)",
             "position": [
                 -120.0,
                 -140.0

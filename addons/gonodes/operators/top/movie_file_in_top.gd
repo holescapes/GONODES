@@ -33,18 +33,18 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_file("file", "",
+	add_parameter(GNParameter.create_file("file", "Path to the file",
 		PackedStringArray(["*.ogv", "*.ogg"]),
 		"", "Video file path (Theora .ogv format). Must be in the project directory."))
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "",
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output resolution. Auto-set from video when a new file is loaded."))
-	add_parameter(GNParameter.create_bool("play", true, "", "Play / pause the video"))
-	add_parameter(GNParameter.create_bool("loop", true, "", "Loop the video when it reaches the end"))
-	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, 4.0, 0.05, "",
+	add_parameter(GNParameter.create_bool("play", true, "Play", "Play / pause the video"))
+	add_parameter(GNParameter.create_bool("loop", true, "Loop", "Loop the video when it reaches the end"))
+	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, 4.0, 0.05, "Playback speed multiplier",
 		"Playback speed multiplier (1.0 = normal)"))
-	add_parameter(GNParameter.create_float("seek", -1.0, -1.0, null, 0.1, "",
+	add_parameter(GNParameter.create_float("seek", -1.0, -1.0, null, 0.1, "The seek value",
 		"Seek to time in seconds. Set -1 to disable manual seek."))
-	add_parameter(GNParameter.create_color("bg_color", Color.BLACK, "",
+	add_parameter(GNParameter.create_color("bg_color", Color.BLACK, "The bg color color",
 		"Background color shown when no video is loaded or during gaps"))
 	add_parameter(GNParameter.create_bool("mute", false, "Mute",
 		"Mute direct audio output (audio still available on CHOP port)"))

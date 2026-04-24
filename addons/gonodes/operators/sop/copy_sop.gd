@@ -16,11 +16,11 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_bool("align_to_normal", true, "",
+	add_parameter(GNParameter.create_bool("align_to_normal", true, "Enable align to normal",
 		"Rotate copies to align with target point normals"))
 	add_parameter(GNParameter.create_float("scale", 1.0, 0.001, 100.0, 0.01,
 		"Scale", "Uniform scale per copy"))
-	add_parameter(GNParameter.create_bool("use_point_scale", false, "",
+	add_parameter(GNParameter.create_bool("use_point_scale", false, "Enable use point scale",
 		"Use 'pscale' point attribute from target for per-point scale"))
 
 

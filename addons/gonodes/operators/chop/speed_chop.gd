@@ -19,10 +19,10 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("scale", 1.0, null, null, 0.01, "", "Velocity multiplier"))
-	add_parameter(GNParameter.create_bool("clamp", false, "", "Clamp output to min/max range"))
-	add_parameter(GNParameter.create_float("min", -1000.0, null, null, 0.01, "", "Minimum clamp value"))
-	add_parameter(GNParameter.create_float("max", 1000.0, null, null, 0.01, "", "Maximum clamp value"))
+	add_parameter(GNParameter.create_float("scale", 1.0, null, null, 0.01, "Scale", "Velocity multiplier"))
+	add_parameter(GNParameter.create_bool("clamp", false, "Clamp", "Clamp output to min/max range"))
+	add_parameter(GNParameter.create_float("min", -1000.0, null, null, 0.01, "Min", "Minimum clamp value"))
+	add_parameter(GNParameter.create_float("max", 1000.0, null, null, 0.01, "Max", "Maximum clamp value"))
 	add_parameter(GNParameter.create_bool("reset_all", false, "Reset", "Reset all accumulators"))
 
 

@@ -88,7 +88,7 @@ func _init_parameters() -> void:
 		"Discard points beyond this distance in meters"))
 	add_parameter(GNParameter.create_int("timeout_ms", 33, 0, 1000, "Timeout",
 		"Frame capture timeout in milliseconds"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable sensor capture"))
 
 

@@ -1,10 +1,12 @@
-class_name InstancePOP
-extends GNPopBase
+class_name InstanceSOP
+extends GNSopBase
 ## Copies SOP geometry onto each particle position.
-## Bridge operator: reads POP SSBO → outputs GNGeoData (SOP) via CPU readback.
+## Bridge operator: reads POP particle data and outputs GNGeoData (SOP).
+##
+## Consumes POP data but outputs SOP geometry (Rule 25.28).
+
 
 func _init() -> void:
-	super._init()
 	node_type = "instance"
 
 
@@ -23,8 +25,12 @@ func _init_parameters() -> void:
 		"Apply particle color attribute to instance vertex colors"))
 
 
+func has_cpu_fallback() -> bool:
+	return true
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
-	var pd := _get_input_pop(inputs, 0)
+	var pd: GNParticleData = inputs[0] as GNParticleData if inputs.size() > 0 and inputs[0] is GNParticleData else null
 	if pd == null or not pd.has_particles():
 		return null
 
@@ -34,7 +40,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if geo == null or not geo.has_geometry():
 		return null
 
-	# CPU readback — positions + pscale
+	# CPU readback -- positions + pscale
 	var positions: PackedVector3Array = pd.read_positions()
 	var pscales: PackedFloat32Array = pd.read_float_attrib("pscale") if get_param_value("use_pscale") else PackedFloat32Array()
 
@@ -42,7 +48,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if max_inst <= 0:
 		return null
 
-	# Build instanced mesh — transform source geometry by each particle's position
+	# Build instanced mesh -- transform source geometry by each particle's position
 	var source_mesh: Mesh = geo.mesh
 	if source_mesh.get_surface_count() == 0:
 		return null
@@ -112,8 +118,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 func _cook_cpu(inputs: Array[GNData]) -> GNData:
-	# CPU fallback — identical logic but reads from CPU arrays directly
-	var pd := _get_input_pop_cpu(inputs, 0)
+	# CPU fallback -- reads from CPU arrays directly
+	var pd: GNParticleData = null
+	if inputs.size() > 0 and inputs[0] is GNParticleData:
+		var vd := inputs[0] as GNParticleData
+		if vd.is_cpu:
+			pd = vd
 	if pd == null or not pd.has_particles():
 		return null
 
@@ -162,6 +172,7 @@ func _cook_cpu(inputs: Array[GNData]) -> GNData:
 		if pscales.size() > i:
 			var s: float = pscales[i]
 			xform.basis = xform.basis.scaled(Vector3(s, s, s))
+
 		var base_v: int = i * src_vert_count
 		for v in range(src_vert_count):
 			all_verts[base_v + v] = xform * src_verts[v]
@@ -173,8 +184,10 @@ func _cook_cpu(inputs: Array[GNData]) -> GNData:
 			var base_i: int = i * src_indices.size()
 			for idx in range(src_indices.size()):
 				all_indices[base_i + idx] = src_indices[idx] + base_v
-		if use_color and i < pd.particle_count:
-			var c: Color = pd.cpu_colors[i]
+		if use_color:
+			var c := Color.WHITE
+			if i < pd.cpu_colors.size():
+				c = pd.cpu_colors[i]
 			for v in range(src_vert_count):
 				all_colors[base_v + v] = c
 

@@ -18,16 +18,16 @@ func _cook_no_input(node: GNNode) -> GNData:
 
 
 func test_gpu_marching_cubes_instantiate() -> void:
-	var node := _make_node(GPUMarchingCubesVOL.new(), "gpu_marching_cubes1")
-	GNTestAssert.assert_not_null(node, "GPUMarchingCubesVOL instantiates")
+	var node := _make_node(GPUMarchingCubesSOP.new(), "gpu_marching_cubes1")
+	GNTestAssert.assert_not_null(node, "GPUMarchingCubesSOP instantiates")
 	GNTestAssert.assert_eq(node.node_type, "gpu_marching_cubes", "node_type")
-	GNTestAssert.assert_eq(node.family, 8, "family is VOL")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.SOP, "family is SOP")
 
 func test_gpu_marching_cubes_cook_null() -> void:
-	var node := _make_node(GPUMarchingCubesVOL.new(), "gpu_marching_cubes1")
+	var node := _make_node(GPUMarchingCubesSOP.new(), "gpu_marching_cubes1")
 	_cook_no_input(node)
 	# No crash = pass. Output may be null for operators that need input.
-	GNTestAssert.assert_true(true, "GPUMarchingCubesVOL cook-null no crash")
+	GNTestAssert.assert_true(true, "GPUMarchingCubesSOP cook-null no crash")
 func test_pyro_instantiate() -> void:
 	var node := _make_node(PyroVOL.new(), "pyro1")
 	GNTestAssert.assert_not_null(node, "PyroVOL instantiates")

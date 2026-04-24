@@ -15,13 +15,13 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
-	add_parameter(GNParameter.create_color("fill_color", Color.WHITE, "", "Circle fill color"))
-	add_parameter(GNParameter.create_color("bg_color", Color.BLACK, "", "Background color"))
-	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5), "", "Circle center in UV space"))
-	add_parameter(GNParameter.create_float("radius", 0.4, 0.0, 1.0, 0.01, "", "Circle radius"))
-	add_parameter(GNParameter.create_float("border_width", 0.0, 0.0, 0.5, 0.01, "", "Ring border width (0 = filled)"))
-	add_parameter(GNParameter.create_float("softness", 0.005, 0.0, 0.1, 0.001, "", "Edge antialiasing"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Resolution", "Output texture resolution in pixels"))
+	add_parameter(GNParameter.create_color("fill_color", Color.WHITE, "Fill Color", "Circle fill color"))
+	add_parameter(GNParameter.create_color("bg_color", Color.BLACK, "Bg Color", "Background color"))
+	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5), "Center", "Circle center in UV space"))
+	add_parameter(GNParameter.create_float("radius", 0.4, 0.0, 1.0, 0.01, "Radius", "Circle radius"))
+	add_parameter(GNParameter.create_float("border_width", 0.0, 0.0, 0.5, 0.01, "Border Width", "Ring border width (0 = filled)"))
+	add_parameter(GNParameter.create_float("softness", 0.005, 0.0, 0.1, 0.001, "Softness", "Edge antialiasing"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

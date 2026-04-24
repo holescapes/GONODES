@@ -33,12 +33,12 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("url", "",
+	add_parameter(GNParameter.create_string("url", "URL address",
 		"URL", "Target URL to fetch"))
 	add_parameter(GNParameter.create_enum("method",
 		PackedStringArray(["GET", "POST"]), 0,
 		"Method", "HTTP method"))
-	add_parameter(GNParameter.create_string("body", "",
+	add_parameter(GNParameter.create_string("body", "The body string",
 		"Body", "Request body (POST only)"))
 	add_parameter(GNParameter.create_string("content_type", "application/json",
 		"Content Type", "Content-Type header value"))

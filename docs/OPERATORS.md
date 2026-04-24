@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **575 operators** across 13 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 23 extension addons.
+> **575 operators** across 14 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 23 extension addons.
 
 ---
 
@@ -18,7 +18,7 @@
 - [POP — Point Operators](#pop--point-operators)
 - [VOL — Volume Operators](#vol--volume-operators)
 
-> **Help example patches:** Every operator has 3+ `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (1,413 total).
+> **Help example patches:** Every operator has 3+ `.gnpatch` example files accessible via the `?` help button on each node. See `addons/gonodes/help/<family>/` for the full set (2,054 total).
 >
 > ### Help Patch Hard Rule
 > Every help example patch **MUST**:
@@ -1923,7 +1923,7 @@ Subtracts the previous frame from the current frame — outputs a motion delta i
 
 ---
 
-#### CubeMapTOP
+#### CubeMapIMG
 
 Assemble cubemap faces, extract individual faces, or convert equirectangular panoramas to cross layout.
 
@@ -6206,7 +6206,7 @@ Interactive NxM grid drag pad for grid warp control.
 
 ## POP — Point Operators
 
-GPU-accelerated particle system based on SSBO compute shaders. The pipeline flows: **SourcePOP** (emitter) → processor chain (Force, Turbulence, Collision, etc.) → bridge operators (RenderPOP, InstancePOP) for visualization. All POP processors modify the SSBO in-place.
+GPU-accelerated particle system based on SSBO compute shaders. The pipeline flows: **SourcePOP** (emitter) → processor chain (Force, Turbulence, Collision, etc.) → bridge operators (RenderPOP, InstanceSOP) for visualization. All POP processors modify the SSBO in-place.
 
 ### SourcePOP
 Emits particles from SOP geometry points or from origin. Generator: allocates the SSBO and emits new particles each frame.
@@ -6256,7 +6256,7 @@ Flocking/boids simulation using Reynolds rules (separation, alignment, cohesion)
 - **Outputs:** `out` (POP)
 - **Parameters:** `perception_radius` (FLOAT, 2.0), `avoid_radius` (FLOAT, 0.5), `separation/alignment/cohesion` (FLOAT, 1.5/1.0/1.0), `max_speed` (FLOAT, 5.0), `max_force` (FLOAT, 3.0), `bounds_radius` (FLOAT, 10.0), `bounds_force` (FLOAT, 5.0)
 
-### InstancePOP
+### InstanceSOP
 Copies SOP geometry onto each particle position. Bridge: reads POP SSBO → outputs GNGeoData (SOP) via CPU readback.
 - **Inputs:** `pop_in` (POP), `geo_in` (SOP — instance geometry)
 - **Outputs:** `out` (SOP)
@@ -6326,20 +6326,20 @@ Reads back a volume to CPU and outputs statistics as CHOP channels (min, max, me
 - **Outputs:** `stats` (CHOP)
 - **Parameters:** `histogram` (BOOL, false), `hist_bins` (INT, 64)
 
-### RaymarchVOL
+### RaymarchTOP
 Volume ray-march renderer → 2D image (TOP). Front-to-back compositing with Beer-Lambert absorption, Henyey-Greenstein scattering, shadow rays, and self-emission.
 - **Inputs:** `vol` (VOL)
 - **Outputs:** `image` (TOP)
 - **Parameters:** `width/height` (INT, 512), `max_steps` (INT, 128), `step_size` (FLOAT, 0.01), `density_scale` (FLOAT, 5.0), `absorption` (FLOAT, 10.0), `cam_dist` (FLOAT, 1.5), `cam_yaw/cam_pitch` (FLOAT, 0/20), `fov` (FLOAT, 60), `light_yaw/light_pitch` (FLOAT, 45/60), `light_color` (COLOR), `light_intensity` (FLOAT, 2.0), `hg_g` (FLOAT, 0.3), `shadow_steps` (INT, 32), `ambient` (FLOAT, 0.15), `emit_color` (COLOR)
 
-### MarchingCubesVOL
+### MarchingCubesSOP
 Extracts iso-surface from a volume → SOP mesh. CPU readback with Bourke marching cubes algorithm.
 - **Inputs:** `vol` (VOL)
 - **Outputs:** `mesh` (SOP)
 - **Parameters:** `threshold` (FLOAT, 0.5), `smooth_normals` (BOOL, true)
 
-### GPUMarchingCubesVOL
-GPU-accelerated marching cubes via compute shader with atomic append buffer. 10–100× faster than CPU MarchingCubesVOL above ~32³.
+### GPUMarchingCubesSOP
+GPU-accelerated marching cubes via compute shader with atomic append buffer. 10–100× faster than CPU MarchingCubesSOP above ~32³.
 - **Inputs:** `vol` (VOL)
 - **Outputs:** `mesh` (SOP)
 - **Parameters:** `threshold` (FLOAT, 0.5), `max_triangles` (INT, 500000)
@@ -6387,8 +6387,8 @@ The viewer panel and on-node inline previews use **output-type dispatch** — th
 | `GNMaterialData` | Label | Material label |
 
 This means **cross-family nodes** automatically get the correct preview. For example:
-- RaymarchVOL (VOL family) outputs `GNTextureData` → shows texture thumbnail, not volume stats
-- InstancePOP (POP family) outputs `GNGeoData` → shows vertex counts, not particle counts
+- RaymarchTOP (TOP family) outputs `GNTextureData` → shows texture thumbnail, not volume stats
+- InstanceSOP (SOP family) outputs `GNGeoData` → shows vertex counts, not particle counts
 - AnalyzeVOL (VOL family) outputs `GNChannelData` → shows channel values, not volume stats
 
 COMP, UI, and OUT families override `update_preview_control()` because they display non-data state (`_scene_node`, `_control_node`, sink status).
@@ -6627,7 +6627,7 @@ The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of *
 | AttractPOP | AttractPOPNative | Inverse-square point attractor — native C++ accelerated |
 | CollisionPOP | CollisionPOPNative | Ground plane collision with bounce/kill — native C++ accelerated |
 | ForcePOP | ForcePOPNative | Gravity/wind/drag force integration — native C++ accelerated |
-| InstancePOP | InstancePOPNative | Copy geometry onto particles with native C++ acceleration |
+| InstanceSOP | InstanceSOPNative | Copy geometry onto particles with native C++ acceleration |
 | LimitPOP | LimitPOPNative | Bounding box kill + speed clamp — native C++ accelerated |
 | RenderPOP | RenderPOPNative | Render particles as point cloud/billboards with native C++ acceleration |
 | SourcePOP | SourcePOPNative | Particle emitter with age/kill — native C++ accelerated |
@@ -6714,7 +6714,7 @@ The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of *
 | CHOPtoVOL | CHOPtoVOLNative | Convert CHOP channels to 3D volume with native C++ acceleration |
 | DisplaceVOL | DisplaceVOLNative | Velocity-field density displacement — native C++ accelerated |
 | FluidVOL | FluidVOLNative | Navier-Stokes fluid simulation — native C++ accelerated |
-| MarchingCubesVOL | MarchingCubesVOLNative | Marching cubes iso-surface extraction with native C++ acceleration |
+| MarchingCubesSOP | MarchingCubesSOPNative | Marching cubes iso-surface extraction with native C++ acceleration |
 | NoiseVOL | NoiseVOLNative | FBM value noise volume generator — native C++ accelerated |
 | SOPtoVOL | SOPtoVOLNative | Point-splatting SOP to density volume — native C++ accelerated |
 

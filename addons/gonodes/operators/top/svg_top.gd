@@ -17,7 +17,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "",
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output texture resolution"))
 	add_parameter(GNParameter.create_file("svg_path",
 		"", PackedStringArray(["*.svg"]),

@@ -1,11 +1,13 @@
-class_name MarchingCubesVOL
-extends GNVolBase
+class_name MarchingCubesSOP
+extends GNSopBase
 ## Extracts an iso-surface from a 3D volume using marching cubes → SOP mesh.
 ## CPU readback of the volume, then standard Bourke marching cubes algorithm.
 ## Reuses MetaballSOP's pre-baked lookup tables.
+##
+## Consumes VOL data but outputs SOP geometry (Rule 25.28).
+
 
 func _init() -> void:
-	super._init()
 	node_type = "marching_cubes"
 
 
@@ -21,8 +23,12 @@ func _init_parameters() -> void:
 		"Use gradient normals (true) or face normals (false)"))
 
 
+func has_cpu_fallback() -> bool:
+	return true
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
-	var vol: GNVolumeData = _get_input_vol(inputs, 0)
+	var vol: GNVolumeData = inputs[0] as GNVolumeData if inputs.size() > 0 and inputs[0] is GNVolumeData else null
 	if vol == null or not vol.has_volume():
 		return null
 
@@ -85,7 +91,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 func _cook_cpu(inputs: Array[GNData]) -> GNData:
-	var vol := _get_input_vol_cpu(inputs, 0)
+	var vol: GNVolumeData = null
+	if inputs.size() > 0 and inputs[0] is GNVolumeData:
+		var vd := inputs[0] as GNVolumeData
+		if vd.is_cpu:
+			vol = vd
 	if vol == null or not vol.has_volume():
 		return null
 

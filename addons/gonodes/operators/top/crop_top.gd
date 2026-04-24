@@ -16,8 +16,8 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output Resolution", "Output texture resolution"))
-	add_parameter(GNParameter.create_vector2("left_top", Vector2(0.0, 0.0), "", "Top-left UV corner of crop region"))
-	add_parameter(GNParameter.create_vector2("right_bottom", Vector2(1.0, 1.0), "", "Bottom-right UV corner of crop region"))
+	add_parameter(GNParameter.create_vector2("left_top", Vector2(0.0, 0.0), "Left Top", "Top-left UV corner of crop region"))
+	add_parameter(GNParameter.create_vector2("right_bottom", Vector2(1.0, 1.0), "Right Bottom", "Bottom-right UV corner of crop region"))
 	add_parameter(GNParameter.create_enum("edge_mode",
 		PackedStringArray(["Clamp", "Repeat", "Mirror", "Zero"]), 0, "Edge Mode",
 		"How to handle UVs outside source bounds"))

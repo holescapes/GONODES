@@ -25,9 +25,9 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("num_joints", 3, 2, 32, "Joints", "Number of joints in the chain"))
 	add_parameter(GNParameter.create_float("bone_length", 1.0, 0.01, 100.0, 0.01,
 		"Bone Length", "Length of each bone segment (uniform)"))
-	add_parameter(GNParameter.create_float("target_x", 2.0, -100.0, 100.0, 0.01, "Target X", ""))
-	add_parameter(GNParameter.create_float("target_y", 1.0, -100.0, 100.0, 0.01, "Target Y", ""))
-	add_parameter(GNParameter.create_float("target_z", 0.0, -100.0, 100.0, 0.01, "Target Z", ""))
+	add_parameter(GNParameter.create_float("target_x", 2.0, -100.0, 100.0, 0.01, "Target X", "Target position X component"))
+	add_parameter(GNParameter.create_float("target_y", 1.0, -100.0, 100.0, 0.01, "Target Y", "Target position Y component"))
+	add_parameter(GNParameter.create_float("target_z", 0.0, -100.0, 100.0, 0.01, "Target Z", "Target position Z component"))
 	add_parameter(GNParameter.create_int("iterations", 10, 1, MAX_ITERATIONS, "Iterations", "FABRIK solver iterations"))
 	add_parameter(GNParameter.create_bool("constrain_y", false, "Constrain Y", "Keep chain in XY plane"))
 

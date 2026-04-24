@@ -357,11 +357,14 @@ func _invalidate_port_cache() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Scans `res://addons/gn_ext_*/` for `.gdextension` and
-## `.gdextension.disabled` files in any subdirectory.  For each one, checks
-## whether the native binary for the current platform actually exists.  If it
-## does, ensures the file has the `.gdextension` extension (active).  If it
-## doesn't, renames it to `.gdextension.disabled` so Godot won't attempt to
-## load it.
+## `.gdextension.disabled` files at the extension root and in any subdirectory.
+## For each one, checks whether the native binary for the current platform
+## actually exists.  If it does, ensures the file has the `.gdextension`
+## extension (active).  If it doesn't, renames it to `.gdextension.disabled`
+## so Godot won't attempt to load it.
+##
+## `.gdextension` files MUST live at the extension root (not inside `native/`)
+## because `native/` has `.gdignore` and Godot won't discover files there.
 ##
 ## Call this from the plugin's `_enter_tree()`.  Changes only take effect on
 ## the *next* Godot restart (because Godot loads GDExtensions at engine init,
@@ -383,20 +386,12 @@ static func sync_native_extensions() -> bool:
 	while folder_name != "":
 		if dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
 			var ext_path := addons_path + "/" + folder_name
-			# Scan every subdirectory inside the extension for .gdextension files.
-			var ext_dir := DirAccess.open(ext_path)
-			if ext_dir != null:
-				ext_dir.list_dir_begin()
-				var sub_name := ext_dir.get_next()
-				while sub_name != "":
-					if ext_dir.current_is_dir():
-						var sub_path := ext_path + "/" + sub_name
-						if _sync_native_dir(sub_path):
-							changed = true
-						# Collect active .gdextension paths for extension_list.cfg.
-						_collect_active_gdext(sub_path, active_gdext_paths)
-					sub_name = ext_dir.get_next()
-				ext_dir.list_dir_end()
+			# Scan the extension root and all subdirectories for .gdextension files.
+			# .gdextension files live at the extension root (outside .gdignore'd
+			# native/ dirs) so Godot can auto-discover them.
+			if _sync_native_dir(ext_path):
+				changed = true
+			_collect_active_gdext(ext_path, active_gdext_paths)
 		folder_name = dir.get_next()
 	dir.list_dir_end()
 
@@ -513,32 +508,75 @@ static func _sync_native_dir(native_dir_path: String) -> bool:
 
 ## Parses a `.gdextension` (or `.gdextension.disabled`) ConfigFile and checks
 ## whether the library binary for the current OS + build type + architecture
-## exists on disk.
+## exists on disk.  Also verifies any `[dependencies]` entries in the
+## `.gdextension` file exist, and checks the companion `gn_extension.cfg` for
+## `runtime_dlls` (system DLLs that must be loadable, e.g. NDI SDK runtime).
 static func _gdextension_has_platform_binary(gdext_path: String) -> bool:
 	var cfg := ConfigFile.new()
 	if cfg.load(gdext_path) != OK:
 		return false
 
 	# Build platform keys to try, from most specific to least.
-	# Godot uses: "<os>.<build>.<arch>" → "<os>.<build>" → "<os>.<arch>" → "<os>"
+	# Godot tries: "<os>.<build>.<arch>" | "<os>.<arch>.<build>" → "<os>.<build>" → "<os>.<arch>" → "<os>"
 	var os_name := OS.get_name().to_lower()   # "windows", "linux", "macos"
 	var arch := Engine.get_architecture_name() # "x86_64", "arm64", etc.
 	var build := "debug" if OS.is_debug_build() else "release"
 
 	var keys_to_try: PackedStringArray = [
 		"%s.%s.%s" % [os_name, build, arch],   # windows.debug.x86_64
+		"%s.%s.%s" % [os_name, arch, build],   # windows.x86_64.debug  (gdCEF format)
 		"%s.%s" % [os_name, build],             # macos.debug
 		"%s.%s" % [os_name, arch],              # windows.x86_64
 		os_name,                                # linux
 	]
 
+	var lib_found := false
+	var matched_key := ""
 	for key in keys_to_try:
 		if cfg.has_section_key("libraries", key):
 			var lib_path: String = cfg.get_value("libraries", key, "")
 			if not lib_path.is_empty() and FileAccess.file_exists(lib_path):
-				return true
+				lib_found = true
+				matched_key = key
+				break
 
-	return false
+	if not lib_found:
+		return false
+
+	# Also verify [dependencies] entries exist (co-located DLLs like python312.dll).
+	if cfg.has_section("dependencies"):
+		for dep_key in keys_to_try:
+			if cfg.has_section_key("dependencies", dep_key):
+				var deps_val = cfg.get_value("dependencies", dep_key, {})
+				if deps_val is Dictionary:
+					for dep_path: String in deps_val.keys():
+						if not dep_path.is_empty() and not FileAccess.file_exists(dep_path):
+							return false
+				break
+
+	# Check runtime_dlls from the companion gn_extension.cfg.
+	# These are external system DLLs (not bundled) that must be loadable
+	# for the extension to work (e.g. NDI SDK runtime, Blackmagic drivers).
+	# Example:  runtime_dlls = {"windows": ["Processing.NDI.Lib.x64.dll"]}
+	var ext_dir := gdext_path.get_base_dir()
+	var ext_cfg_path := ext_dir + "/gn_extension.cfg"
+	if FileAccess.file_exists(ext_cfg_path):
+		var ext_cfg := ConfigFile.new()
+		if ext_cfg.load(ext_cfg_path) == OK:
+			var rt_dlls = ext_cfg.get_value("extension", "runtime_dlls", {})
+			if rt_dlls is Dictionary and rt_dlls.has(os_name):
+				var dll_names: Array = rt_dlls[os_name]
+				for dll_name: String in dll_names:
+					var output: Array = []
+					var exit_code: int
+					if os_name == "windows":
+						exit_code = OS.execute("where.exe", [dll_name], output)
+					else:
+						exit_code = OS.execute("which", [dll_name], output)
+					if exit_code != 0:
+						return false
+
+	return true
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -178,7 +178,7 @@ func open(node: GNNode, param_name: String) -> void:
 
 	_set_status("Ctrl+Enter to confirm  |  Escape to cancel")
 
-	popup_centered()
+	_popup_clamped()
 	_focus_end()
 
 

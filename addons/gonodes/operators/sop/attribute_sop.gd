@@ -28,8 +28,8 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("expression", "sin(float(i) / float(n) * 6.28)",
 		"Expression", "Per-vertex expression — vars: px,py,pz,i,n,t,dt,frame"))
 	add_parameter(GNParameter.create_int("seed", 42, 0, 99999, "Seed", "Random seed"))
-	add_parameter(GNParameter.create_float("rand_min", 0.0, null, null, 0.01, "Random Min", ""))
-	add_parameter(GNParameter.create_float("rand_max", 1.0, null, null, 0.01, "Random Max", ""))
+	add_parameter(GNParameter.create_float("rand_min", 0.0, null, null, 0.01, "Random Min", "The rand min value"))
+	add_parameter(GNParameter.create_float("rand_max", 1.0, null, null, 0.01, "Random Max", "The rand max value"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

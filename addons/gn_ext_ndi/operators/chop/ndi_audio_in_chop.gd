@@ -23,14 +23,14 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.CHOP, "Audio channel data")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("source", "", "Source",
+	add_parameter(GNParameter.create_string("source", "Source", "Source",
 		"NDI source name (e.g. 'OBS (DESKTOP-ABC)')"))
 	add_parameter(GNParameter.create_enum("bandwidth",
 		PackedStringArray(["Highest", "Audio Only", "Lowest"]), 1, "Bandwidth",
 		"NDI receive quality (default: Audio Only)"))
 	add_parameter(GNParameter.create_int("timeout_ms", 16, 0, 1000, "Timeout",
 		"Audio capture timeout in milliseconds"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable receiving"))
 
 

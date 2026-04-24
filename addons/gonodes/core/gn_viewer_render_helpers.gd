@@ -179,8 +179,8 @@ static func render_pop_gpu(pd: GNParticleData, size: Vector2i,
 	# Reallocate if resolution changed
 	if res != _pop_prev_res:
 		_free_pop_textures(mrd)
-		_pop_output_tex_rid = ctx.create_texture_2d_on_main(w, h)
-		_pop_depth_tex_rid = ctx.create_texture_2d_on_main(w, h,
+		_pop_output_tex_rid = ctx.create_texture_2d(w, h)
+		_pop_depth_tex_rid = ctx.create_texture_2d(w, h,
 			RenderingDevice.DATA_FORMAT_R32_SFLOAT)
 		_pop_prev_res = res
 
@@ -238,9 +238,9 @@ static func render_pop_gpu(pd: GNParticleData, size: Vector2i,
 		return null
 
 	var us: RID = mrd.uniform_set_create([
-		ctx.uniform_buffer_main(0, pd.rd_buffer),
-		ctx.uniform_image_main(1, _pop_output_tex_rid),
-		ctx.uniform_image_main(2, _pop_depth_tex_rid),
+		ctx.uniform_buffer(0, pd.rd_buffer),
+		ctx.uniform_image(1, _pop_output_tex_rid),
+		ctx.uniform_image(2, _pop_depth_tex_rid),
 	], shader, 0)
 
 	var wg_x: int = ceili(float(pd.particle_count) / 64.0)
@@ -546,7 +546,7 @@ static func render_vol_gpu(vd: GNVolumeData, size: Vector2i,
 	# Reallocate output texture if resolution changed.
 	if res != _vol_prev_res:
 		_free_vol_textures(mrd)
-		_vol_output_tex_rid = ctx.create_texture_2d_on_main(w, h)
+		_vol_output_tex_rid = ctx.create_texture_2d(w, h)
 		_vol_prev_res = res
 
 	# Ensure sampler exists.

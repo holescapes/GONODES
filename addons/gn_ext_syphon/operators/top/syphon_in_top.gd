@@ -20,9 +20,9 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("app_name", "", "App Name",
+	add_parameter(GNParameter.create_string("app_name", "App Name", "App Name",
 		"Syphon server application name. Empty = first available."))
-	add_parameter(GNParameter.create_string("server_name", "", "Server Name",
+	add_parameter(GNParameter.create_string("server_name", "Server Name", "Server Name",
 		"Syphon server name. Empty = first available."))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1920, 1080),
 		"Resolution", "Expected resolution (auto-updates from server)."))

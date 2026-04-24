@@ -46,7 +46,7 @@
 			}
 		},
 		"raymarch1": {
-			"type": "RaymarchVOL",
+			"type": "RaymarchTOP",
 			"position": {
 				"_type": "Vector2i",
 				"x": 400,

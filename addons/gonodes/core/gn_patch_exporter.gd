@@ -48,16 +48,6 @@ const _DESKTOP_PLATFORMS := ["windows_x86_64", "windows_arm64", "linux_x86_64", 
 ## Mobile platform IDs (produce .apk / .ipa bundles).
 const _MOBILE_PLATFORMS := ["android", "ios"]
 
-## Player binary filename per platform.
-const _PLAYER_FILENAMES := {
-	"windows_x86_64": "GONODESPlayer.exe",
-	"windows_arm64":  "GONODESPlayer.exe",
-	"linux_x86_64":   "GONODESPlayer",
-	"linux_arm64":    "GONODESPlayer",
-	"macos":          "GONODESPlayer.app",
-}
-
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # Quick Build — Public Entry Point
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -108,16 +98,11 @@ func _quick_build_desktop() -> Error:
 	var template_dir := _find_template_dir(target_platform)
 
 	if template_dir.is_empty():
-		# Fallback: look for the Player binary next to the editor or in project root
-		# (only works when exporting for the host platform)
-		var player_path := _find_player_binary_legacy()
-		if player_path.is_empty():
-			_fail("Player template not found for '%s'.\n\n"
-				+ "Expected at templates/%s/ next to the editor or project root.\n"
-				+ "Build it with: scripts/build_templates -Platforms %s" % [
-				target_platform, target_platform, target_platform])
-			return ERR_FILE_NOT_FOUND
-		return _quick_build_desktop_from_binary(player_path)
+		_fail("Player template not found for '%s'.\n\n"
+			+ "Expected at templates/%s/ next to the editor or project root.\n"
+			+ "Build it with: scripts/build_templates -Platforms %s" % [
+			target_platform, target_platform, target_platform])
+		return ERR_FILE_NOT_FOUND
 
 	# 3. Copy all template files to output
 	progress.emit("Copying Player files...")
@@ -127,34 +112,6 @@ func _quick_build_desktop() -> Error:
 		return err
 
 	# 4. Copy patch + assets + config
-	err = _copy_patch_and_config()
-	if err != OK:
-		return err
-
-	_succeed("%s build complete: %s" % [target_platform, output_dir])
-	return OK
-
-
-## Legacy path: copies a single Player binary + .pck found outside of templates/.
-## Only useful when the user has a Player binary sitting next to the editor.
-func _quick_build_desktop_from_binary(player_path: String) -> Error:
-	progress.emit("Copying Player binary...")
-	var player_dest := output_dir.path_join(player_path.get_file())
-	var err := _copy_file(player_path, player_dest)
-	if err != OK:
-		_fail("Failed to copy Player binary (error %d)" % err)
-		return err
-
-	# Copy the .pck file if it exists (Godot export produces exe + pck pair)
-	var pck_source := player_path.get_basename() + ".pck"
-	if FileAccess.file_exists(pck_source):
-		progress.emit("Copying Player data pack...")
-		var pck_dest := output_dir.path_join(pck_source.get_file())
-		err = _copy_file(pck_source, pck_dest)
-		if err != OK:
-			_fail("Failed to copy .pck file (error %d)" % err)
-			return err
-
 	err = _copy_patch_and_config()
 	if err != OK:
 		return err
@@ -305,32 +262,6 @@ func _find_template_dir(platform: String) -> String:
 				d.list_dir_end()
 				if not first.is_empty():
 					return candidate
-	return ""
-
-
-## Legacy fallback: searches for a GONODESPlayer binary next to the editor
-## executable or in common subdirectories.  Only works when exporting for the
-## host platform (the binary on disk matches the OS you're running on).
-func _find_player_binary_legacy() -> String:
-	var exe_name: String = _PLAYER_FILENAMES.get(target_platform, "")
-	if exe_name.is_empty():
-		return ""
-
-	var search_dirs: PackedStringArray = []
-	var exe_dir := OS.get_executable_path().get_base_dir()
-	var project_root := ProjectSettings.globalize_path("res://")
-
-	search_dirs.append(exe_dir)
-	search_dirs.append(project_root)
-	search_dirs.append(project_root.path_join("player"))
-	search_dirs.append(project_root.path_join("build"))
-	search_dirs.append(exe_dir.path_join("player"))
-
-	for dir in search_dirs:
-		var candidate := dir.path_join(exe_name)
-		if FileAccess.file_exists(candidate):
-			return candidate
-
 	return ""
 
 

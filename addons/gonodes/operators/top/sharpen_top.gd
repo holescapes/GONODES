@@ -13,9 +13,9 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 10.0, 0.1, "",
+	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 10.0, 0.1, "Effect strength",
 		"Sharpening strength"))
-	add_parameter(GNParameter.create_float("radius", 1.0, 0.1, 10.0, 0.1, "",
+	add_parameter(GNParameter.create_float("radius", 1.0, 0.1, 10.0, 0.1, "Radius in world units",
 		"Sample radius in pixels"))
 
 

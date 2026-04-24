@@ -19,7 +19,7 @@ func _init_parameters() -> void:
 		0, "", "Faceting mode"))
 	add_parameter(GNParameter.create_float("distance", 0.001, 0.0, 1.0, 0.0001,
 		"Merge Distance", "Distance threshold for consolidation"))
-	add_parameter(GNParameter.create_bool("recompute_normals", true, "",
+	add_parameter(GNParameter.create_bool("recompute_normals", true, "Enable recompute normals",
 		"Recompute normals after operation"))
 
 

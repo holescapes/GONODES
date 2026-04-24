@@ -67,7 +67,7 @@
             }
         },
         "marching1": {
-            "type": "MarchingCubesVOL",
+            "type": "MarchingCubesSOP",
             "position": [
                 1250,
                 200
@@ -87,7 +87,7 @@
             "parameters": {}
         },
         "raymarch_before": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 550,
                 500
@@ -105,7 +105,7 @@
             }
         },
         "raymarch_after": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 1250,
                 500
@@ -215,7 +215,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SOP \u2192 VOL \u2192 SOP Round-Trip\n\nDemonstrates the full conversion pipeline:\n  1. TorusSOP \u2192 mesh geometry\n  2. SOPtoVOL \u2192 rasterize into 64\u00b3 density grid\n  3. BlurVOL \u2192 smooth the density (rounds edges)\n  4. MarchingCubesVOL \u2192 extract iso-surface back to mesh\n\nThe bottom row shows raymarched views of the volume\nbefore and after blurring. The NullSOP at the end\nholds the reconstructed mesh for downstream use.",
+            "text": "SOP \u2192 VOL \u2192 SOP Round-Trip\n\nDemonstrates the full conversion pipeline:\n  1. TorusSOP \u2192 mesh geometry\n  2. SOPtoVOL \u2192 rasterize into 64\u00b3 density grid\n  3. BlurVOL \u2192 smooth the density (rounds edges)\n  4. MarchingCubesSOP \u2192 extract iso-surface back to mesh\n\nThe bottom row shows raymarched views of the volume\nbefore and after blurring. The NullSOP at the end\nholds the reconstructed mesh for downstream use.",
             "position": [
                 -100.0,
                 -100.0

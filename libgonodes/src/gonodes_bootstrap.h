@@ -11,6 +11,8 @@
 
 #include "gonodes_host.h"
 
+#include <atomic>
+
 typedef void* GDExtensionInstanceHandle;
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
@@ -189,8 +191,8 @@ struct gn_command {
 /** Per-instance command queue — lock-free single-producer / single-consumer. */
 struct gn_command_queue {
     gn_command commands[GN_CMD_QUEUE_SIZE];
-    volatile int write_pos;  /* Next slot to write (C API side). */
-    volatile int read_pos;   /* Next slot to read (GDScript side). */
+    std::atomic<int> write_pos{0};  /* Next slot to write (C API side). */
+    std::atomic<int> read_pos{0};   /* Next slot to read (GDScript side). */
 };
 
 

@@ -25,7 +25,7 @@ func _init_parameters() -> void:
 		"Enable / disable touch capture"))
 	add_parameter(GNParameter.create_bool("normalize", false, "Normalize",
 		"Output 0-1 normalized coords instead of pixels"))
-	add_parameter(GNParameter.create_string("window", "",
+	add_parameter(GNParameter.create_string("window", "Window ID to capture from (0 = main)",
 		"Window", "WindowOUT node name to read from (empty = global)"))
 
 

@@ -16,9 +16,9 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("bpm", 120.0, 1.0, 999.0, 0.1,
 		"BPM", "Beats per minute for beat channels"))
-	add_parameter(GNParameter.create_bool("time_channels", true, "",
+	add_parameter(GNParameter.create_bool("time_channels", true, "Include time-related channels in the output",
 		"Output time / frame / fps channels"))
-	add_parameter(GNParameter.create_bool("beat_channels", true, "",
+	add_parameter(GNParameter.create_bool("beat_channels", true, "Include beat-related channels in the output",
 		"Output beat / bar / beat_frac channels"))
 	add_parameter(GNParameter.create_int("beats_per_bar", 4, 1, 16,
 		"Beats per Bar", "Time signature numerator"))

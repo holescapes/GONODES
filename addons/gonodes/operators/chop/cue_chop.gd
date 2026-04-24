@@ -40,7 +40,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("source",
 		PackedStringArray(["Timeline", "Manual"]),
 		CueSource.TIMELINE, "Source", "Timeline = auto by time, Manual = trigger only"))
-	add_parameter(GNParameter.create_string("timeline", "",
+	add_parameter(GNParameter.create_string("timeline", "Timeline to sync with",
 		"Timeline", "Node ID of TimelineCHOP for auto mode (empty = use engine time)"))
 	add_parameter(GNParameter.create_pulse("go_next",
 		"Go Next", "Advance to next cue"))
@@ -48,7 +48,7 @@ func _init_parameters() -> void:
 		"Go Prev", "Go back one cue"))
 	add_parameter(GNParameter.create_int("go_to", -1, -1, 999,
 		"Go To", "Jump to cue index (-1 = disabled)"))
-	add_parameter(GNParameter.create_string("go_to_name", "",
+	add_parameter(GNParameter.create_string("go_to_name", "Cue name to jump to",
 		"Go To Name", "Jump to cue by name (empty = disabled)"))
 	add_parameter(GNParameter.create_bool("apply_data", true,
 		"Apply Data", "When true, applies cue data{} overrides on cue change"))

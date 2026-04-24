@@ -15,7 +15,7 @@
             }
         },
         "raymarch1": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 600,
                 100
@@ -128,7 +128,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RaymarchVOL \u2014 Backlit Fog\n\nBack-scattering (hg_g = -0.3) with cool\nblue light from above creates a misty,\nfoggy atmosphere. Higher ambient (0.3)\nfills shadows with soft diffuse light.\n\nCompare with the sunset scatter example:\nforward vs backward scattering changes\nthe entire character of the volume.",
+            "text": "RaymarchTOP \u2014 Backlit Fog\n\nBack-scattering (hg_g = -0.3) with cool\nblue light from above creates a misty,\nfoggy atmosphere. Higher ambient (0.3)\nfills shadows with soft diffuse light.\n\nCompare with the sunset scatter example:\nforward vs backward scattering changes\nthe entire character of the volume.",
             "position": [
                 -100.0,
                 -100.0

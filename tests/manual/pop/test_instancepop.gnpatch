@@ -11,7 +11,7 @@
             "parameters": {}
         },
         "test": {
-            "class_name": "InstancePOP",
+            "class_name": "InstanceSOP",
             "position": [
                 350,
                 0
@@ -31,7 +31,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MANUAL TEST: SourcePOP \u2192 InstancePOP\n\nVerify: mesh instances appear at each particle position",
+            "text": "MANUAL TEST: SourcePOP \u2192 InstanceSOP\n\nVerify: mesh instances appear at each particle position",
             "position": [
                 -120.0,
                 -140.0

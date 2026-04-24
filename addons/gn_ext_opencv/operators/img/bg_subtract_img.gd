@@ -47,7 +47,7 @@ func _init_parameters() -> void:
 		"Detect Shadows", "Mark shadow pixels as gray (127) instead of white"))
 	add_parameter(GNParameter.create_pulse("reset", "Reset Model",
 		"Discard background model and re-learn from scratch"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

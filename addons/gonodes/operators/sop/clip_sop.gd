@@ -18,7 +18,7 @@ func _init_parameters() -> void:
 		PackedStringArray(["X", "Y", "Z"]), 1, "", "Clip plane normal axis"))
 	add_parameter(GNParameter.create_float("origin", 0.0, null, null, 0.01,
 		"Origin", "Plane offset along axis"))
-	add_parameter(GNParameter.create_bool("keep_above", true, "",
+	add_parameter(GNParameter.create_bool("keep_above", true, "Enable keep above",
 		"Keep geometry above the plane (true) or below (false)"))
 
 

@@ -93,6 +93,11 @@ renderers = ["forward_plus", "mobile"]
 # ClassDB dependency guard (optional)
 dependencies = ["SomeNativeClass"]
 
+# External runtime DLLs that must be on the system PATH (optional).
+# sync_native_extensions() keeps the .gdextension disabled if these
+# are not found via `where.exe` (Windows) / `which` (Linux/macOS).
+# runtime_dlls = {"windows": ["vendor_runtime.dll"], "linux": ["libvendor.so"]}
+
 # Register a new family (optional — only for family-defining extensions)
 [family.SDF]
 color = "0.95,0.65,0.15"
@@ -640,6 +645,31 @@ addons/gn_ext_myext/
 **Key rule:** Everything lives inside the extension folder — including
 third-party binary artifacts like CEF. Never place extension assets in
 `addons/gonodes/` or the project root.
+
+### `.gdignore` Requirements
+
+Certain extension subdirectories contain non-GDScript files (C++ headers,
+Python modules, ISF shaders, CEF binaries) that Godot should **not** scan.
+Without a `.gdignore` marker, Godot tries to parse these files as resources,
+causing import errors and slowing down project scans.
+
+**Place an empty `.gdignore` file** in each of these directories if they exist:
+
+| Directory | Contents to hide from Godot |
+|-----------|---------------------------|
+| `native/` | C++ source, `godot-cpp/`, build outputs (`bin/`) |
+| `presets/` | C++ snippets, Python scripts, ISF shaders, GLSL |
+| `sdk/` | C/C++ headers, Python SDK modules |
+| `cef_artifacts/` | CEF browser binaries and support files |
+
+The `.gitignore` already uses wildcard patterns (`addons/gn_ext_*/native/bin/`,
+`addons/gn_ext_*/native/godot-cpp/`) for build outputs, but `.gdignore` is a
+separate Godot-level concern — it prevents the editor from scanning those
+directories at all.
+
+**Checklist for new extensions:** After creating the extension folder, add an
+empty `.gdignore` to every subdirectory that contains non-GDScript/non-resource
+files.
 
 ### Native Binary Auto-Activation
 

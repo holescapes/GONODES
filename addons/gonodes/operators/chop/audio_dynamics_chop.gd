@@ -36,7 +36,7 @@ func _init_parameters() -> void:
 		"Release (ms)", "Gain reduction disengage time"))
 	add_parameter(GNParameter.create_float("makeup", 0.0, -20.0, 40.0, 0.5,
 		"Makeup (dBFS)", "Output gain added after processing"))
-	add_parameter(GNParameter.create_bool("reset", false, "", "Clear envelope follower state"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset", "Clear envelope follower state"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

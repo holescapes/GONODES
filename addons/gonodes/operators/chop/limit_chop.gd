@@ -18,8 +18,8 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("type",
 		PackedStringArray(["Clamp", "Loop", "Zig-Zag"]), 0, "", "Limit mode"))
-	add_parameter(GNParameter.create_float("min", 0.0, null, null, 0.01, "", "Lower bound"))
-	add_parameter(GNParameter.create_float("max", 1.0, null, null, 0.01, "", "Upper bound"))
+	add_parameter(GNParameter.create_float("min", 0.0, null, null, 0.01, "Min", "Lower bound"))
+	add_parameter(GNParameter.create_float("max", 1.0, null, null, 0.01, "Max", "Upper bound"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

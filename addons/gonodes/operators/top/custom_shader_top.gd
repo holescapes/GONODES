@@ -91,7 +91,7 @@ func _init_parameters() -> void:
 		"Time Dependent", "Re-cook every frame (enable for shaders using TIME)"))
 	add_parameter(GNParameter.create_bool("cook_once", false,
 		"Cook Once", "Pulse: toggle ON to force a single cook, auto-resets to OFF"))
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Resolution", "Output texture resolution in pixels"))
 	add_parameter(GNParameter.create_string("shader_code", DEFAULT_SHADER_CODE.strip_edges(),
 		"Shader Code", "Full shader_type canvas_item shader code (live recompile)"))
 
@@ -226,7 +226,7 @@ func _compile_shader(code: String) -> void:
 	var is_generator := tex_count == 0
 	var has_res_param := parameters.has("resolution")
 	if is_generator and not has_res_param:
-		var res_param := GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels")
+		var res_param := GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Resolution", "Output texture resolution in pixels")
 		# Insert resolution before shader_code by removing/re-adding
 		var saved_params: Dictionary = {}
 		for k in parameters:

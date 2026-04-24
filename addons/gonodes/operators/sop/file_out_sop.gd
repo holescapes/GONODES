@@ -18,7 +18,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_file("file", "",
+	add_parameter(GNParameter.create_file("file", "Path to the file",
 		PackedStringArray(["*.obj"]),
 		"File", "Output file path (.obj)"))
 	add_parameter(GNParameter.create_bool("write", false, "Write",

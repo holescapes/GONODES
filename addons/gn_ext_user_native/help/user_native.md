@@ -27,6 +27,11 @@ edit `.h` files on disk and enable **Auto Build** — the node watches for chang
 | Linux    | GCC 11+ or Clang 14+ | `build-essential` package |
 | macOS    | Xcode Command Line Tools (Apple Clang) | `xcode-select --install` |
 
+> **Windows / MSVC:** The compiler (`cl.exe`) must be on your PATH.
+> Launch Godot from a **Developer Command Prompt for VS** or run
+> `vcvarsall.bat x64` in your terminal before starting Godot.
+> MinGW/TDM-GCC users already have `g++` on PATH after installation.
+
 You also need:
 - **SCons** — `pip install scons`
 - **godot-cpp** — placed in `addons/gn_ext_user_native/toolchain/godot-cpp/`

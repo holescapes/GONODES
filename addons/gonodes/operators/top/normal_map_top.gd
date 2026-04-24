@@ -13,7 +13,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("strength", 1.0, 0.01, 20.0, 0.1, "",
+	add_parameter(GNParameter.create_float("strength", 1.0, 0.01, 20.0, 0.1, "Effect strength",
 		"Height scale / normal intensity"))
 	add_parameter(GNParameter.create_bool("invert_y", false, "Invert Y",
 		"Flip green channel (DirectX vs OpenGL normal map convention)"))

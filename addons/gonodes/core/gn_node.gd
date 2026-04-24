@@ -506,20 +506,6 @@ func update_preview_control(control: Control) -> void:
 		(control as Label).text = cached_output.get_preview_text()
 
 
-## Short human-readable name for Image.Format (used by IMG preview).
-static func _preview_format_name(fmt: Image.Format) -> String:
-	match fmt:
-		Image.FORMAT_RGBA8: return "RGBA8"
-		Image.FORMAT_RGB8: return "RGB8"
-		Image.FORMAT_L8: return "L8"
-		Image.FORMAT_LA8: return "LA8"
-		Image.FORMAT_RGBAF: return "RGBAF"
-		Image.FORMAT_RGBAH: return "RGBAH"
-		Image.FORMAT_RF: return "RF"
-		Image.FORMAT_RGF: return "RGF"
-		_: return "fmt:%d" % fmt
-
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # Viewer Display — Per-Node Viewer Visualization
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -775,11 +761,6 @@ func remove_spare_parameter(param_name: String) -> bool:
 	spare_parameters.erase(param_name)
 	parameters_changed.emit(id)
 	return true
-
-
-## Returns true if the node has any spare parameters.
-func has_spare_parameters() -> bool:
-	return not spare_parameters.is_empty()
 
 
 ## Returns the raw GNParameter object, or null if not found.

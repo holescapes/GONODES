@@ -30,7 +30,7 @@ func _init_parameters() -> void:
 		"Normalize by Δt", "Divide by sample interval to give units per second"))
 	add_parameter(GNParameter.create_float("multiply", 1.0, null, null, 0.01,
 		"Multiply", "Output scale factor"))
-	add_parameter(GNParameter.create_bool("reset", false, "",
+	add_parameter(GNParameter.create_bool("reset", false, "Trigger to reset the internal state",
 		"Reset derivative state (clear history)"))
 
 

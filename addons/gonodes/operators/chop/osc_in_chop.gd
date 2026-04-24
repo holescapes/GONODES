@@ -38,7 +38,7 @@ func _init_parameters() -> void:
 		"UDP port to listen on"))
 	add_parameter(GNParameter.create_bool("active", true, "Active",
 		"Enable/disable the OSC listener"))
-	add_parameter(GNParameter.create_string("address_filter", "", "Filter",
+	add_parameter(GNParameter.create_string("address_filter", "Address Filter", "Filter",
 		"Only accept addresses matching this prefix (empty = all)"))
 	add_parameter(GNParameter.create_bool("normalize_names", true, "Clean Names",
 		"Strip leading '/' from channel names"))

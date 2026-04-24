@@ -18,7 +18,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("mode",
 		PackedStringArray(["UV Remap", "Value Remap (LUT)"]), 0, "",
 		"Remap method — UV displaces coordinates, Value uses luminance as LUT index"))
-	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 2.0, 0.01, "",
+	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 2.0, 0.01, "Effect strength",
 		"Remap strength / blend amount"))
 
 

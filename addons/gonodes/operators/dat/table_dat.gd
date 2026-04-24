@@ -21,7 +21,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("cols", 3, 1, 100, "Cols", "Number of columns"))
 	add_parameter(GNParameter.create_string("headers", "name,value,weight",
 		"Headers", "Comma-separated column headers"))
-	add_parameter(GNParameter.create_string("data", "",
+	add_parameter(GNParameter.create_string("data", "The data string",
 		"Data", "Cell data: one row per line, comma-separated values"))
 	add_parameter(GNParameter.create_bool("merge_input", false,
 		"Merge Input", "Append input DAT rows after this table's data"))

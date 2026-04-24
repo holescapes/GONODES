@@ -205,7 +205,7 @@ func _create_texture_display() -> void:
 
 	_tex_display = TextureRect.new()
 	_tex_display.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_tex_display.stretch_mode = TextureRect.STRETCH_SCALE
+	_tex_display.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_tex_display.mouse_filter = MOUSE_FILTER_IGNORE
 	_tex_clip.add_child(_tex_display)
 

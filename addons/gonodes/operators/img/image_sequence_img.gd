@@ -33,20 +33,20 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_file("file", "",
+	add_parameter(GNParameter.create_file("file", "Path to the file",
 		PackedStringArray(["*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.tga"]),
 		"", "Path to ANY frame in the sequence. Auto-discovers all numbered siblings."))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(0, 0),
 		"Resolution", "Resize frames to this size. (0, 0) = native."))
-	add_parameter(GNParameter.create_bool("play", true, "", "Play / pause"))
-	add_parameter(GNParameter.create_float("speed", 1.0, 0.01, 10.0, 0.1, "",
+	add_parameter(GNParameter.create_bool("play", true, "Play", "Play / pause"))
+	add_parameter(GNParameter.create_float("speed", 1.0, 0.01, 10.0, 0.1, "Playback speed multiplier",
 		"Playback speed multiplier (1.0 ≈ 30 fps)"))
 	add_parameter(GNParameter.create_int("index", -1, -1, null,
 		"", "Manual frame index override. -1 = auto-playback."))
 	add_parameter(GNParameter.create_enum("loop_mode",
 		PackedStringArray(["Loop", "Hold First", "Hold Last", "Ping-Pong"]),
 		0, "", "Behavior at sequence end"))
-	add_parameter(GNParameter.create_bool("preload_all", false, "",
+	add_parameter(GNParameter.create_bool("preload_all", false, "Enable preload all",
 		"Load all frames into memory at startup (faster playback, more RAM)"))
 
 

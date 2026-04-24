@@ -38,7 +38,7 @@ func _init_parameters() -> void:
 		"Block Size", "Neighborhood size for adaptive methods (must be odd)"))
 	add_parameter(GNParameter.create_float("c_offset", 2.0, -50.0, 50.0, 0.5,
 		"C Offset", "Constant subtracted from mean in adaptive methods"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

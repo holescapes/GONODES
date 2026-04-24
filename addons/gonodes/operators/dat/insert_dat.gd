@@ -21,7 +21,7 @@ func _init_parameters() -> void:
 		"Index", "Position to insert at (0-based data row or column index)"))
 	add_parameter(GNParameter.create_int("count", 1, 1, 100,
 		"Count", "Number of rows or columns to insert"))
-	add_parameter(GNParameter.create_string("fill_value", "",
+	add_parameter(GNParameter.create_string("fill_value", "Value used to fill missing samples",
 		"Fill Value", "Value to fill new cells with"))
 
 

@@ -222,14 +222,15 @@ Multi-channel float arrays — audio samples, sensor streams, animation
 curves, analysis data.
 
 ```c
-// Write: 2 channels × 480 samples
-float audio[2][480];
-gonodes_set_input_chop(gn, p, "audio_in", (float*)audio, 2, 480);
+// Write: push samples one channel at a time
+float left[480], right[480];
+gonodes_set_input_chop(gn, p, "audio_in", "left", left, 480);
+gonodes_set_input_chop(gn, p, "audio_in", "right", right, 480);
 
-// Read: retrieve processed channels
-int channels, samples;
-const float* data = gonodes_get_output_chop(gn, p, "fft_out", &channels, &samples);
-// data[ch * samples + s] for channel ch, sample s
+// Read: retrieve processed channel into a buffer
+float fft_buf[256];
+int n = gonodes_get_output_chop(gn, p, "fft_out", "magnitude", fft_buf, 256);
+// n = number of samples written into fft_buf
 ```
 
 ### 3. Tables (DAT Family)
@@ -237,14 +238,13 @@ const float* data = gonodes_get_output_chop(gn, p, "fft_out", &channels, &sample
 String-based row × column grids — CSV data, OSC address maps, metadata.
 
 ```c
-// Write: 3 columns × 2 rows (row-major, NULL-terminated strings)
-const char* cells[] = {"x","y","z", "1.0","2.0","3.0"};
-gonodes_set_input_table(gn, p, "data_in", cells, 3, 2);
+// Write: send table as JSON
+gonodes_set_input_table(gn, p, "data_in",
+    "[[\"x\",\"y\",\"z\"],[\"1.0\",\"2.0\",\"3.0\"]]");
 
-// Read: retrieve table
-int cols, rows;
-const char** table = gonodes_get_output_table(gn, p, "data_out", &cols, &rows);
-// table[row * cols + col]
+// Read: retrieve table as JSON string
+const char* json = gonodes_get_output_table(gn, p, "data_out");
+// json is valid until next gonodes_cook_frame() call
 ```
 
 ### 4. Geometry (SOP Family)

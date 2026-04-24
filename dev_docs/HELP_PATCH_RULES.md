@@ -117,7 +117,7 @@ A patch is meaningful if and only if:
 - **Organizational COMPs** (Null, Switch, Merge, SubNetwork): Show practical use in a chain, not just pass-through.
 
 ### VOL (Volume Operators)
-- **Visualization:** End with VOL→RaymarchVOL→WindowOUT (raymarch produces a TOP).
+- **Visualization:** End with VOL→RaymarchTOP→WindowOUT (raymarch produces a TOP).
 - **Generators** (NoiseVOL): Show resolution and channel count effects.
 - **Simulation** (FluidVOL, PyroVOL): Show initial conditions and what the first few frames look like.
 

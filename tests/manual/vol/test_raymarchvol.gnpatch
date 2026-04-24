@@ -11,7 +11,7 @@
             "parameters": {}
         },
         "test": {
-            "class_name": "RaymarchVOL",
+            "class_name": "RaymarchTOP",
             "position": [
                 350,
                 0
@@ -31,7 +31,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MANUAL TEST: NoiseVOL \u2192 RaymarchVOL\n\nVerify: raymarched visualization shows volumetric clouds/density",
+            "text": "MANUAL TEST: NoiseVOL \u2192 RaymarchTOP\n\nVerify: raymarched visualization shows volumetric clouds/density",
             "position": [
                 -120.0,
                 -140.0

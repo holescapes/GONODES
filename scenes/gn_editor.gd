@@ -286,7 +286,7 @@ func _setup_log_panel() -> void:
 	log_panel = GNLogPanel.new()
 	log_panel.visible = false  # hidden by default, toggled by LogToggle
 	# Anchor to bottom, just above InfoBar (66px toolbar height)
-	log_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	log_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	add_child(log_panel)
 	move_child(log_panel, hsplit.get_index() + 1)  # between HSplit and InfoBar
 	_layout_log_panel()
@@ -312,7 +312,7 @@ func _setup_debug_panel() -> void:
 	debug_panel.visible = false
 	debug_panel.cook_engine = cook_engine
 	debug_panel.network = network
-	debug_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	debug_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	debug_panel.node_selected.connect(_on_debug_node_selected)
 	add_child(debug_panel)
 	move_child(debug_panel, hsplit.get_index() + 1)
@@ -328,7 +328,7 @@ func _setup_compat_panel() -> void:
 	compat_panel = GNCompatReportPanel.new()
 	compat_panel.visible = false
 	compat_panel.network = network
-	compat_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	compat_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	compat_panel.node_selected.connect(_on_debug_node_selected)
 	add_child(compat_panel)
 	move_child(compat_panel, hsplit.get_index() + 1)
@@ -340,7 +340,7 @@ func _setup_take_panel() -> void:
 	take_panel = GNTakePanel.new()
 	take_panel.visible = false
 	take_panel.setup(take_manager)
-	take_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	take_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	add_child(take_panel)
 	move_child(take_panel, hsplit.get_index() + 1)
 

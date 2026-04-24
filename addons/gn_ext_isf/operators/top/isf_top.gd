@@ -85,7 +85,7 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("time_dependent", true,
 		"Time Dependent", "Re-cook every frame (enable for shaders using TIME)"))
-	add_parameter(GNParameter.create_file("isf_file", "",
+	add_parameter(GNParameter.create_file("isf_file", "Path to the isf file",
 		PackedStringArray(["*.fs", "*.isf", "*.frag"]),
 		"ISF File", "Load an external ISF file into the code editor below"))
 	add_parameter(GNParameter.create_vector2i("resolution",

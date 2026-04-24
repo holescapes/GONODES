@@ -31,7 +31,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("label", "", "Label",
+	add_parameter(GNParameter.create_string("label", "Label", "Label",
 		"Optional label for this output in the host's UI"))
 
 

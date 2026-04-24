@@ -18,7 +18,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("operation",
 		PackedStringArray(["Overwrite", "Add", "Subtract", "Multiply"]),
 		0, "", "How B channels are applied to A"))
-	add_parameter(GNParameter.create_bool("pass_non_matching", true, "",
+	add_parameter(GNParameter.create_bool("pass_non_matching", true, "Pass through channels not matching the pattern",
 		"Pass A channels that have no match in B"))
 
 

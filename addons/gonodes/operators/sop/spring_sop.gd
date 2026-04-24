@@ -32,7 +32,7 @@ func _init_parameters() -> void:
 		"Damping (c)", "Damping coefficient — higher = less overshoot"))
 	add_parameter(GNParameter.create_float("mass", 1.0, 0.01, 10.0, 0.01,
 		"Mass", "Vertex mass — higher = slower response"))
-	add_parameter(GNParameter.create_bool("reset", false, "", "Reset spring state"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset", "Reset spring state"))
 	add_parameter(GNParameter.create_float("max_displacement", 10.0, 0.01, 100.0, 0.01,
 		"Max Disp.", "Clamp maximum displacement from target (safety)"))
 

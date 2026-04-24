@@ -29,7 +29,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_file("file", "",
+	add_parameter(GNParameter.create_file("file", "Path to the file",
 		PackedStringArray(["*.mov"]),
 		"File", "HAP .mov video file path"))
 	add_parameter(GNParameter.create_bool("play", true,

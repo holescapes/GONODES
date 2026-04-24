@@ -55,16 +55,15 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("url",
 		"https://godotengine.org", "URL",
 		"Web page URL to render (URL mode)"))
-	add_parameter(GNParameter.create_string("html", """<!DOCTYPE html>
-<html><body style="background:#222;color:#eee;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
-<h1>WebRenderTOP</h1></body></html>""",
+	add_parameter(GNParameter.create_string("html",
+		"<!DOCTYPE html>\n<html><body style=\"background:#222;color:#eee;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0\">\n<h1>WebRenderTOP</h1></body></html>",
 		"HTML", "Inline HTML content (HTML mode)"))
 	add_parameter(GNParameter.create_vector2i("resolution",
 		Vector2i(1280, 720), "Resolution",
 		"Browser viewport size in pixels"))
 	add_parameter(GNParameter.create_int("fps", 30, 1, 120,
 		"FPS", "Browser rendering frame rate"))
-	add_parameter(GNParameter.create_string("javascript", "",
+	add_parameter(GNParameter.create_string("javascript", "The javascript string",
 		"JavaScript", "Execute JS snippet each cook (optional)"))
 	add_parameter(GNParameter.create_bool("active", true,
 		"Active", "Enable/disable rendering"))

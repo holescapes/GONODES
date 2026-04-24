@@ -368,7 +368,7 @@
       {
         "name": "file",
         "type": "string",
-        "default": ""
+        "default": "Path to the file"
       },
       {
         "name": "play",
@@ -894,7 +894,7 @@
       {
         "name": "timeline",
         "type": "string",
-        "default": ""
+        "default": "Timeline to sync with"
       },
       {
         "name": "go_next",
@@ -914,7 +914,7 @@
       {
         "name": "go_to_name",
         "type": "string",
-        "default": ""
+        "default": "Cue name to jump to"
       },
       {
         "name": "apply_data",
@@ -1435,7 +1435,7 @@
       {
         "name": "window",
         "type": "string",
-        "default": ""
+        "default": "Window ID to capture from (0 = main)"
       }
     ]
   },
@@ -1667,7 +1667,7 @@
       {
         "name": "channel_name",
         "type": "string",
-        "default": ""
+        "default": "Channel Name"
       }
     ]
   },
@@ -1744,7 +1744,7 @@
       {
         "name": "window",
         "type": "string",
-        "default": ""
+        "default": "Window ID to capture from (0 = main)"
       }
     ]
   },
@@ -1758,7 +1758,7 @@
       {
         "name": "source",
         "type": "string",
-        "default": ""
+        "default": "Source"
       },
       {
         "name": "bandwidth",
@@ -1876,7 +1876,7 @@
       {
         "name": "address_filter",
         "type": "string",
-        "default": ""
+        "default": "Address Filter"
       },
       {
         "name": "normalize_names",
@@ -1905,7 +1905,7 @@
       {
         "name": "parameters",
         "type": "string",
-        "default": ""
+        "default": "Comma-separated parameter paths to export"
       }
     ]
   },
@@ -1963,12 +1963,12 @@
       {
         "name": "patch",
         "type": "string",
-        "default": ""
+        "default": "The patch string"
       },
       {
         "name": "send_prefix",
         "type": "string",
-        "default": ""
+        "default": "The send prefix string"
       },
       {
         "name": "receive_names",
@@ -1997,7 +1997,7 @@
       {
         "name": "patch",
         "type": "string",
-        "default": ""
+        "default": "The patch string"
       },
       {
         "name": "param1",
@@ -2031,7 +2031,7 @@
       {
         "name": "patch",
         "type": "string",
-        "default": ""
+        "default": "The patch string"
       },
       {
         "name": "buffer_size",
@@ -2443,7 +2443,7 @@
       {
         "name": "rename",
         "type": "string",
-        "default": ""
+        "default": "Rename pattern for output channels"
       }
     ]
   },
@@ -3397,7 +3397,7 @@
       {
         "name": "file",
         "type": "string",
-        "default": ""
+        "default": "Path to the file"
       },
       {
         "name": "volume_db",
@@ -5550,7 +5550,7 @@
       {
         "name": "fill_value",
         "type": "string",
-        "default": ""
+        "default": "Value used to fill missing samples"
       }
     ]
   },
@@ -5569,7 +5569,7 @@
       {
         "name": "json_string",
         "type": "string",
-        "default": ""
+        "default": "The json string string"
       },
       {
         "name": "pretty",
@@ -5651,12 +5651,12 @@
       {
         "name": "username",
         "type": "string",
-        "default": ""
+        "default": "The username string"
       },
       {
         "name": "password",
         "type": "string",
-        "default": ""
+        "default": "The password string"
       },
       {
         "name": "subscribe",
@@ -5705,7 +5705,7 @@
       {
         "name": "window",
         "type": "string",
-        "default": ""
+        "default": "Window ID to capture from (0 = main)"
       }
     ]
   },
@@ -5849,7 +5849,7 @@
       {
         "name": "address_filter",
         "type": "string",
-        "default": ""
+        "default": "Address Filter"
       },
       {
         "name": "clear",
@@ -5897,7 +5897,7 @@
       {
         "name": "node_id",
         "type": "string",
-        "default": ""
+        "default": "The node id string"
       },
       {
         "name": "show_defaults",
@@ -6163,12 +6163,12 @@
       {
         "name": "find",
         "type": "string",
-        "default": ""
+        "default": "The find string"
       },
       {
         "name": "replace_with",
         "type": "string",
-        "default": ""
+        "default": "The replace with string"
       },
       {
         "name": "use_regex",
@@ -6268,7 +6268,7 @@
       {
         "name": "data",
         "type": "string",
-        "default": ""
+        "default": "The data string"
       },
       {
         "name": "merge_input",
@@ -6309,7 +6309,7 @@
       {
         "name": "url",
         "type": "string",
-        "default": ""
+        "default": "URL address"
       },
       {
         "name": "method",
@@ -6319,7 +6319,7 @@
       {
         "name": "body",
         "type": "string",
-        "default": ""
+        "default": "The body string"
       },
       {
         "name": "content_type",
@@ -6426,7 +6426,7 @@
       {
         "name": "file_path",
         "type": "string",
-        "default": ""
+        "default": "The file path string"
       },
       {
         "name": "include_text",
@@ -6856,6 +6856,30 @@
         "name": "active",
         "type": "bool",
         "default": true
+      }
+    ]
+  },
+  {
+    "class_name": "CubeMapIMG",
+    "node_type": "cube_map",
+    "family": "img",
+    "file": "addons/gonodes/operators/img/cube_map_img.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "extract_face",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "face_size",
+        "type": "int",
+        "default": 256
       }
     ]
   },
@@ -8253,7 +8277,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       },
       {
         "name": "sample_rate",
@@ -8272,7 +8296,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       },
       {
         "name": "mode",
@@ -8291,7 +8315,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       },
       {
         "name": "max_particles",
@@ -8310,7 +8334,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       }
     ]
   },
@@ -8324,7 +8348,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       }
     ]
   },
@@ -8338,7 +8362,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       },
       {
         "name": "field_name",
@@ -8357,7 +8381,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       }
     ]
   },
@@ -8371,7 +8395,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       }
     ]
   },
@@ -8385,7 +8409,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       }
     ]
   },
@@ -8399,7 +8423,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       }
     ]
   },
@@ -8413,7 +8437,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       }
     ]
   },
@@ -8427,7 +8451,7 @@
       {
         "name": "label",
         "type": "string",
-        "default": ""
+        "default": "Label"
       }
     ]
   },
@@ -9053,30 +9077,6 @@
     ]
   },
   {
-    "class_name": "InstancePOP",
-    "node_type": "instance",
-    "family": "pop",
-    "file": "addons/gonodes/operators/pop/instance_pop.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "max_instances",
-        "type": "int",
-        "default": 10000
-      },
-      {
-        "name": "use_pscale",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "use_color",
-        "type": "bool",
-        "default": true
-      }
-    ]
-  },
-  {
     "class_name": "LimitPOP",
     "node_type": "limit",
     "family": "pop",
@@ -9259,11 +9259,6 @@
     "extension": null,
     "params": [
       {
-        "name": "template",
-        "type": "menu",
-        "default": null
-      },
-      {
         "name": "time_dependent",
         "type": "bool",
         "default": false
@@ -9293,19 +9288,9 @@
     "extension": "gn_ext_user_native",
     "params": [
       {
-        "name": "template",
-        "type": "menu",
-        "default": null
-      },
-      {
         "name": "cpp_source",
         "type": "string",
         "default": null
-      },
-      {
-        "name": "cpp_class",
-        "type": "string",
-        "default": "MyUserCHOP"
       },
       {
         "name": "auto_build",
@@ -9326,11 +9311,6 @@
     "file": "addons/gn_ext_user_python/operators/script/python_script.gd",
     "extension": "gn_ext_user_python",
     "params": [
-      {
-        "name": "template",
-        "type": "menu",
-        "default": null
-      },
       {
         "name": "py_source",
         "type": "string",
@@ -10805,6 +10785,25 @@
     ]
   },
   {
+    "class_name": "GPUMarchingCubesSOP",
+    "node_type": "gpu_marching_cubes",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/gpu_marching_cubes_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "max_triangles",
+        "type": "int",
+        "default": 500000
+      }
+    ]
+  },
+  {
     "class_name": "GridSOP",
     "node_type": "grid",
     "family": "sop",
@@ -11031,6 +11030,30 @@
     ]
   },
   {
+    "class_name": "InstanceSOP",
+    "node_type": "instance",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/instance_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "max_instances",
+        "type": "int",
+        "default": 10000
+      },
+      {
+        "name": "use_pscale",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "use_color",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "IsoSurfaceSOP",
     "node_type": "isosurface",
     "family": "sop",
@@ -11099,12 +11122,12 @@
       {
         "name": "rule_b",
         "type": "string",
-        "default": ""
+        "default": "Rule B"
       },
       {
         "name": "rule_c",
         "type": "string",
-        "default": ""
+        "default": "Rule C"
       },
       {
         "name": "iterations",
@@ -11267,6 +11290,25 @@
         "name": "att_z",
         "type": "float",
         "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "MarchingCubesSOP",
+    "node_type": "marching_cubes",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/marching_cubes_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "smooth_normals",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -11762,7 +11804,7 @@
   },
   {
     "class_name": "PolyBridgeSOP",
-    "node_type": "sop",
+    "node_type": "polybridge",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/polybridge_sop.gd",
     "extension": null,
@@ -12466,7 +12508,7 @@
   },
   {
     "class_name": "TextureSOP",
-    "node_type": "sop",
+    "node_type": "texture",
     "family": "sop",
     "file": "addons/gonodes/operators/sop/texture_sop.gd",
     "extension": null,
@@ -13443,30 +13485,6 @@
         "name": "cross",
         "type": "float",
         "default": 0.5
-      }
-    ]
-  },
-  {
-    "class_name": "CubeMapTOP",
-    "node_type": "cube_map",
-    "family": "top",
-    "file": "addons/gonodes/operators/top/cube_map_top.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "mode",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "extract_face",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "face_size",
-        "type": "int",
-        "default": 256
       }
     ]
   },
@@ -15072,7 +15090,7 @@
       {
         "name": "source",
         "type": "string",
-        "default": ""
+        "default": "Source"
       },
       {
         "name": "resolution",
@@ -15766,6 +15784,105 @@
     ]
   },
   {
+    "class_name": "RaymarchTOP",
+    "node_type": "raymarch",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/raymarch_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "width",
+        "type": "int",
+        "default": 512
+      },
+      {
+        "name": "height",
+        "type": "int",
+        "default": 512
+      },
+      {
+        "name": "max_steps",
+        "type": "int",
+        "default": 128
+      },
+      {
+        "name": "step_size",
+        "type": "float",
+        "default": 0.01
+      },
+      {
+        "name": "density_scale",
+        "type": "float",
+        "default": 5.0
+      },
+      {
+        "name": "absorption",
+        "type": "float",
+        "default": 10.0
+      },
+      {
+        "name": "cam_dist",
+        "type": "float",
+        "default": 1.5
+      },
+      {
+        "name": "cam_yaw",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "cam_pitch",
+        "type": "float",
+        "default": 20.0
+      },
+      {
+        "name": "fov",
+        "type": "float",
+        "default": 60.0
+      },
+      {
+        "name": "light_yaw",
+        "type": "float",
+        "default": 45.0
+      },
+      {
+        "name": "light_pitch",
+        "type": "float",
+        "default": 60.0
+      },
+      {
+        "name": "light_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "light_intensity",
+        "type": "float",
+        "default": 2.0
+      },
+      {
+        "name": "hg_g",
+        "type": "float",
+        "default": 0.3
+      },
+      {
+        "name": "shadow_steps",
+        "type": "int",
+        "default": 32
+      },
+      {
+        "name": "ambient",
+        "type": "float",
+        "default": 0.15
+      },
+      {
+        "name": "emit_color",
+        "type": "color",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "ReactionDiffusionTOP",
     "node_type": "reaction_diffusion",
     "family": "top",
@@ -16228,12 +16345,12 @@
       {
         "name": "shadertoy_url",
         "type": "string",
-        "default": ""
+        "default": "The shadertoy url string"
       },
       {
         "name": "shadertoy_api_key",
         "type": "string",
-        "default": ""
+        "default": "The shadertoy api key string"
       },
       {
         "name": "shadertoy_code",
@@ -16363,7 +16480,7 @@
       {
         "name": "sender_name",
         "type": "string",
-        "default": ""
+        "default": "Sender Name"
       },
       {
         "name": "resolution",
@@ -16537,12 +16654,12 @@
       {
         "name": "app_name",
         "type": "string",
-        "default": ""
+        "default": "App Name"
       },
       {
         "name": "server_name",
         "type": "string",
-        "default": ""
+        "default": "Server Name"
       },
       {
         "name": "resolution",
@@ -17131,7 +17248,7 @@
       {
         "name": "html",
         "type": "string",
-        "default": ""
+        "default": "The html string"
       }
     ]
   },
@@ -18318,7 +18435,7 @@
       {
         "name": "channel",
         "type": "string",
-        "default": ""
+        "default": "Channel"
       }
     ]
   },
@@ -18382,44 +18499,6 @@
         "name": "reset",
         "type": "bool",
         "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "GPUMarchingCubesVOL",
-    "node_type": "gpu_marching_cubes",
-    "family": "vol",
-    "file": "addons/gonodes/operators/vol/gpu_marching_cubes_vol.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "threshold",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "max_triangles",
-        "type": "int",
-        "default": 500000
-      }
-    ]
-  },
-  {
-    "class_name": "MarchingCubesVOL",
-    "node_type": "marching_cubes",
-    "family": "vol",
-    "file": "addons/gonodes/operators/vol/marching_cubes_vol.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "threshold",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "smooth_normals",
-        "type": "bool",
-        "default": true
       }
     ]
   },
@@ -18581,105 +18660,6 @@
         "name": "reset",
         "type": "bool",
         "default": false
-      }
-    ]
-  },
-  {
-    "class_name": "RaymarchVOL",
-    "node_type": "raymarch",
-    "family": "vol",
-    "file": "addons/gonodes/operators/vol/raymarch_vol.gd",
-    "extension": null,
-    "params": [
-      {
-        "name": "width",
-        "type": "int",
-        "default": 512
-      },
-      {
-        "name": "height",
-        "type": "int",
-        "default": 512
-      },
-      {
-        "name": "max_steps",
-        "type": "int",
-        "default": 128
-      },
-      {
-        "name": "step_size",
-        "type": "float",
-        "default": 0.01
-      },
-      {
-        "name": "density_scale",
-        "type": "float",
-        "default": 5.0
-      },
-      {
-        "name": "absorption",
-        "type": "float",
-        "default": 10.0
-      },
-      {
-        "name": "cam_dist",
-        "type": "float",
-        "default": 1.5
-      },
-      {
-        "name": "cam_yaw",
-        "type": "float",
-        "default": 0.0
-      },
-      {
-        "name": "cam_pitch",
-        "type": "float",
-        "default": 20.0
-      },
-      {
-        "name": "fov",
-        "type": "float",
-        "default": 60.0
-      },
-      {
-        "name": "light_yaw",
-        "type": "float",
-        "default": 45.0
-      },
-      {
-        "name": "light_pitch",
-        "type": "float",
-        "default": 60.0
-      },
-      {
-        "name": "light_color",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "light_intensity",
-        "type": "float",
-        "default": 2.0
-      },
-      {
-        "name": "hg_g",
-        "type": "float",
-        "default": 0.3
-      },
-      {
-        "name": "shadow_steps",
-        "type": "int",
-        "default": 32
-      },
-      {
-        "name": "ambient",
-        "type": "float",
-        "default": 0.15
-      },
-      {
-        "name": "emit_color",
-        "type": "color",
-        "default": null
       }
     ]
   },

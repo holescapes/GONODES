@@ -118,7 +118,7 @@ all currently registered operators:
 python scripts/gen_all_core_patches.py
 ```
 
-This creates 13 `.gnpatch` files covering **all 574 operators** across every family,
+This creates 13 `.gnpatch` files covering **all 575 operators** across every family,
 organized into logical chains with a SwitchTOP → WindowOUT for visual inspection.
 Use the chain slider to step through each operator group.
 
@@ -166,7 +166,7 @@ nodes cook without errors, and visual output looks correct.
 | **TOP** | NoiseTOP, CompositeTOP, BlurTOP, FeedbackTOP, RenderTOP, CustomShaderTOP, DeformTOP, ChromaKeyTOP | Textures render, animated params move, shader compilation |
 | **COMP** | GeometryCOMP, CameraCOMP, LightCOMP, RigidBodyCOMP, InstanceCOMP, SubNetworkNode | 3D scene assembles, physics simulates, subnets dive/exit |
 | **POP** | SourcePOP, ForcePOP, TurbulencePOP, CollisionPOP, RenderPOP | Particles spawn, move, collide, render to texture |
-| **VOL** | NoiseVOL, FluidVOL, MarchingCubesVOL, RaymarchVOL | Volumes generate, fluid simulates, surface extracts |
+| **VOL** | NoiseVOL, FluidVOL, MarchingCubesSOP, RaymarchTOP | Volumes generate, fluid simulates, surface extracts |
 | **MAT** | PbrMAT, ShaderMAT, WireframeMAT, ConstantMAT | Materials apply to geometry, shader compiles |
 | **IMG** | NoiseIMG, BlurIMG, EdgeDetectIMG, PixelSortIMG | CPU images generate and display correctly |
 | **UI** | SliderUI, ButtonUI, KnobUI, XYPadUI, ColorPickerUI | Widgets render in PanelTOP, interaction works |
@@ -300,10 +300,10 @@ The initial public release of GONODES is **Beta**, not Alpha. This is a delibera
 
 Alpha implies incomplete core functionality, frequent crashes, and missing fundamental features. GONODES has none of these issues:
 
-- **574 operators** across 14 families — complete creative toolkit covering textures, geometry, channels, particles, volumes, compositing, materials, data tables, ISF shaders, SDF, and network I/O
+- **575 operators** across 14 families — complete creative toolkit covering textures, geometry, channels, particles, volumes, compositing, materials, data tables, ISF shaders, SDF, and network I/O
 - **1764 automated tests**, 1763 passing (99.94%) — the single failure is a smoke test for extension patches that require compiled native binaries, not a code defect
 - **100% operator test coverage** — every operator has at least instantiation + output type verification
-- **100% help file coverage** — 1,588 help .gnpatch files covering all 574 unique node types
+- **100% help file coverage** — 1,588 help .gnpatch files covering all 575 unique node types
 - **Cook engine is stable** — expression system, dirty propagation, timeline, and multi-family data flow all verified
 - **GPU zero-copy discipline** — audit confirmed zero unjustified CPU-GPU roundtrips across the entire codebase
 - **Cross-platform build system** — SCons-based native builds, player export templates, and CI pipeline all functional on Windows, macOS, and Linux

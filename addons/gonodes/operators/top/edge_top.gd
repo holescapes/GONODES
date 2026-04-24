@@ -15,7 +15,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 10.0, 0.1, "", "Edge strength multiplier"))
+	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 10.0, 0.1, "Strength", "Edge strength multiplier"))
 	add_parameter(GNParameter.create_bool("grayscale", true, "Grayscale Output", "Output grayscale or colored edges"))
 
 

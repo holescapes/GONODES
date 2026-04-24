@@ -74,7 +74,7 @@
       }
     },
     "raymarch1": {
-      "type": "RaymarchVOL",
+      "type": "RaymarchTOP",
       "position": [
         1250,
         350

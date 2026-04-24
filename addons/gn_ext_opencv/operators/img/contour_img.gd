@@ -46,7 +46,7 @@ func _init_parameters() -> void:
 		"Thickness", "Contour line thickness (-1 = filled)"))
 	add_parameter(GNParameter.create_bool("draw_all", true,
 		"Draw All", "Draw all contours (off = draw only the largest)"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

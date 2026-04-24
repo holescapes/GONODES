@@ -28,7 +28,7 @@ func _init_parameters() -> void:
 		"NDI sender name visible on the network"))
 	add_parameter(GNParameter.create_int("sample_rate", 48000, 8000, 192000,
 		"Sample Rate", "Audio sample rate in Hz"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable sending"))
 
 

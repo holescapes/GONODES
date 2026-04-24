@@ -20,7 +20,7 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("frames", 10, 1, 600, "Delay Frames",
 		"Number of frames to delay"))
-	add_parameter(GNParameter.create_bool("reset", false, "", "Clear delay buffers"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset", "Clear delay buffers"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

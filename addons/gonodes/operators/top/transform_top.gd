@@ -15,10 +15,10 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2("translate", Vector2.ZERO, "", "UV translation"))
+	add_parameter(GNParameter.create_vector2("translate", Vector2.ZERO, "Translate", "UV translation"))
 	add_parameter(GNParameter.create_float("rotate", 0.0, null, null, 0.01, "Rotate (rad)", "Rotation in radians"))
-	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0), "", "UV scale"))
-	add_parameter(GNParameter.create_vector2("pivot", Vector2(0.5, 0.5), "", "Transform pivot point in UV space"))
+	add_parameter(GNParameter.create_vector2("scale", Vector2(1.0, 1.0), "Scale", "UV scale"))
+	add_parameter(GNParameter.create_vector2("pivot", Vector2(0.5, 0.5), "Pivot", "Transform pivot point in UV space"))
 	add_parameter(GNParameter.create_enum("extend",
 		PackedStringArray(["Clamp", "Repeat", "Mirror", "Zero"]), 0, "", "Edge extension mode"))
 

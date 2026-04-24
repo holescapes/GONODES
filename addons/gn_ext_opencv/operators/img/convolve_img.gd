@@ -56,7 +56,7 @@ func _init_parameters() -> void:
 		"Custom Height", "Kernel height (must be odd)"))
 	add_parameter(GNParameter.create_bool("normalize", true,
 		"Normalize", "Normalize kernel so values sum to 1"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

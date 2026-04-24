@@ -175,26 +175,12 @@ var _expr_ref_hover_consumer: String = ""  ## Consumer node ID for tooltip text
 var _expr_ref_hover_source: String = ""    ## Source node ID for tooltip text
 const _EXPR_REF_HOVER_DELAY := 2.0      ## Seconds before tooltip appears
 
-## Annotation views: ann_id → GNNetworkBox or GNStickyNote.
-var _annotation_views: Dictionary = {}
+## Annotation manager (network boxes, sticky notes).
+var _annotations: GNAnnotationManager = null
 
-## Guard flag to prevent recursive group-move updates.
-var _group_moving: bool = false
-
-## Last-known zoom for detecting zoom changes and syncing annotations.
+## Last-known zoom/scroll for detecting changes (used by expr_ref_overlay redraw).
 var _last_zoom: float = 0.8
-
-## Last-known scroll for detecting scroll changes and syncing annotations.
 var _last_scroll: Vector2 = Vector2.ZERO
-
-## Pre-move positions of box-sibling nodes (for undo when box is dragged).
-var _box_drag_pre_positions: Dictionary = {}  # node_id → Vector2
-
-## Pre-move position of the box itself.
-var _box_drag_pre_box_pos: Vector2 = Vector2.ZERO
-
-## The ann_id of the box currently being dragged (empty if none).
-var _box_drag_ann_id: String = ""
 
 ## Currently selected wires.  Each entry is a connection dict:
 ## { "from_node": String, "from_port": int, "to_node": String, "to_port": int }
@@ -238,12 +224,7 @@ const _EDGE_SCROLL_SPEED  := 800.0  ## Pixels per second at full speed.
 var _toast_container: VBoxContainer = null
 
 ## ── Node search overlay (Ctrl+F) ─────────────────────────────────────────────
-var _search_bar: PanelContainer = null
-var _search_edit: LineEdit = null
-var _search_label: Label = null
-var _search_matches: Array[String] = []  ## node IDs matching current query
-var _search_index: int = -1               ## cursor into _search_matches
-var _search_dimmed: bool = false          ## whether nodes are currently dimmed
+var _search: GNGraphSearch = null
 
 ## ── Shake-to-disconnect state ────────────────────────────────────────────────
 ## Tracks rapid direction reversals during node drag. When the user "shakes"
@@ -396,7 +377,7 @@ func _ready() -> void:
 	_toast_container = VBoxContainer.new()
 	_toast_container.name = "ToastContainer"
 	_toast_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_toast_container.set_anchors_preset(Control.PRESET_CENTER)
+	_toast_container.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_toast_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_toast_container.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_toast_container.position = Vector2(-200, -30)
@@ -411,7 +392,12 @@ func _ready() -> void:
 	GNLogger.toast_sink = Callable(self, "_on_logger_toast")
 
 	# Build the node search bar (hidden by default)
-	_build_search_bar()
+	_search = GNGraphSearch.new()
+	_search.setup(self, _node_views, _deselect_all, scroll_to_node)
+
+	# Build the annotation manager
+	_annotations = GNAnnotationManager.new()
+	_annotations.setup(self, _node_views, network, _undo_redo, _ur_set_positions)
 
 	GNLogger.info("GraphEditor", "Graph editor ready")
 
@@ -433,7 +419,7 @@ func _handle_key_input(event: InputEventKey) -> bool:
 	if event.ctrl_pressed:
 		match event.keycode:
 			KEY_F:
-				_open_search()
+				_search.open_search()
 			KEY_Z:
 				if event.shift_pressed:
 					redo_action()
@@ -472,8 +458,8 @@ func _handle_key_input(event: InputEventKey) -> bool:
 					return false
 				toggle_shortcut_overlay()
 			KEY_ESCAPE:
-				if _search_bar != null and _search_bar.visible:
-					_close_search()
+				if _search != null and _search._search_bar != null and _search._search_bar.visible:
+					_search.close_search()
 				elif _shortcut_overlay != null:
 					_shortcut_overlay.queue_free()
 					_shortcut_overlay = null
@@ -490,9 +476,9 @@ func _handle_key_input(event: InputEventKey) -> bool:
 func _gui_input(event: InputEvent) -> void:
 	# Skip mouse events that land on the search bar overlay.
 	# Must accept_event() to prevent GraphEdit's base class from consuming it.
-	if event is InputEventMouse and _search_bar != null and _search_bar.visible:
+	if event is InputEventMouse and _search != null and _search._search_bar != null and _search._search_bar.visible:
 		var local: Vector2 = (event as InputEventMouse).position
-		if _search_bar.get_global_rect().has_point(get_global_transform() * local):
+		if _search._search_bar.get_global_rect().has_point(get_global_transform() * local):
 			accept_event()
 			return
 
@@ -587,6 +573,8 @@ func bind_network(net: GNNetwork) -> void:
 		_unbind_network()
 
 	network = net
+	if _annotations != null:
+		_annotations.set_network(net)
 
 	# Wire network signals for dynamic updates
 	network.node_added.connect(_on_network_node_added)
@@ -620,6 +608,8 @@ func _unbind_network() -> void:
 
 	_clear_graph()
 	network = null
+	if _annotations != null:
+		_annotations.set_network(null)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -653,7 +643,7 @@ func _populate_from_network() -> void:
 	_deferred_restore_connections.call_deferred()
 
 	# Create annotation views (network boxes & sticky notes)
-	_rebuild_annotation_views()
+	_annotations.rebuild_views()
 
 
 ## Removes all node views and connections from the graph.
@@ -665,7 +655,7 @@ func _clear_graph() -> void:
 		view.queue_free()
 	_node_views.clear()
 	# Also remove annotation views
-	_clear_annotation_views()
+	_annotations.clear_views()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -3508,9 +3498,9 @@ func _on_context_menu_id_pressed(id: int) -> void:
 		_CtxID.ADD_CHOP_EXPORT, _CtxID.INSERT_CHOP_REF:
 			_show_insert_chop_ref_dialog()
 		_CtxID.ADD_NETWORK_BOX:
-			_add_annotation_at_mouse("box")
+			_annotations.add_annotation_at_mouse("box", _get_selected_node_ids(), get_local_mouse_position())
 		_CtxID.ADD_STICKY_NOTE:
-			_add_annotation_at_mouse("note")
+			_annotations.add_annotation_at_mouse("note", _get_selected_node_ids(), get_local_mouse_position())
 		_CtxID.PROMOTE_TO_ASSET:
 			_show_promote_to_asset_dialog()
 		_CtxID.EDIT_ASSET:
@@ -3534,7 +3524,7 @@ func _on_context_menu_id_pressed(id: int) -> void:
 		_CtxID.COPY_NETWORK_JSON:
 			_copy_network_json_to_clipboard()
 		_CtxID.SEARCH_NODES:
-			_open_search()
+			_search.open_search()
 		_:
 			# Dynamic preset load IDs
 			if id >= _CtxID.LOAD_PARAM_PRESET_BASE:
@@ -3921,8 +3911,8 @@ func _on_begin_node_move() -> void:
 	# For each annotation (box or note), check if any selected node is inside it.
 	# Annotation rect is in pixel space (regular Control); convert node centers
 	# from graph space to pixel space for a correct containment test.
-	for ann_id in _annotation_views:
-		var ann_view: Control = _annotation_views[ann_id]
+	for ann_id in _annotations.get_annotation_views():
+		var ann_view: Control = _annotations.get_annotation_views()[ann_id]
 		var is_box := ann_view is GNNetworkBox
 		var is_note := ann_view is GNStickyNote
 		if not is_box and not is_note:
@@ -3960,6 +3950,8 @@ func _process(delta: float) -> void:
 	# expression ref lines aligned with the graph content).
 	if zoom != _last_zoom or scroll_offset != _last_scroll:
 		_expr_ref_overlay.queue_redraw()
+		_last_zoom = zoom
+		_last_scroll = scroll_offset
 
 	# ── Edge auto-scroll while dragging a wire or node near the border ──
 	if _wire_dragging or _node_drag_active:
@@ -3970,21 +3962,18 @@ func _process(delta: float) -> void:
 		_tick_expr_ref_hover(delta)
 
 	# Fast path: nothing to do if no annotations exist and no node drag is active.
-	if _annotation_views.is_empty() and not _node_drag_active:
+	if not _annotations.has_annotations() and not _node_drag_active:
 		return
 
 	# --- Lightweight scroll/zoom sync for annotations ---
 	# Skip during active drags (positions are managed by drag handlers).
-	if not _annotation_views.is_empty() and not _node_drag_active and _box_drag_ann_id.is_empty():
-		if zoom != _last_zoom or scroll_offset != _last_scroll:
-			_last_zoom = zoom
-			_last_scroll = scroll_offset
-			_sync_annotation_transforms()
+	if _annotations.has_annotations() and not _node_drag_active and not _annotations.is_box_dragging():
+		_annotations.sync_if_needed(zoom, scroll_offset)
 
 	# --- Group-move tracking during node drags ---
 	if not _node_drag_active or _pre_move_positions.is_empty():
 		return
-	if _group_moving:
+	if _annotations.is_group_moving():
 		return
 
 	# Compute delta from the first selected node's current position
@@ -4018,25 +4007,12 @@ func _process(delta: float) -> void:
 			_shake_triggered = true
 			_perform_shake_disconnect(first_id)
 
-	_group_moving = true
 	_node_drag_last_pos = current_pos
 
 	# frame_delta is in graph space (from position_offset); convert to pixel
 	# space for annotation Controls.
 	var pixel_delta := frame_delta * zoom
-
-	for ann_id in _node_drag_ann_info:
-		var info: Dictionary = _node_drag_ann_info[ann_id]
-		# Move annotation view (pixel space)
-		if _annotation_views.has(ann_id):
-			_annotation_views[ann_id].position += pixel_delta
-		# Move non-selected siblings (graph space — position_offset)
-		var siblings: Dictionary = info.get("siblings", {})
-		for sib_id in siblings:
-			if _node_views.has(sib_id):
-				_node_views[sib_id].position_offset += frame_delta
-
-	_group_moving = false
+	_annotations.apply_drag_delta(pixel_delta, frame_delta, _node_drag_ann_info)
 
 	# ── Drop-on-wire detection during drag ──
 	_update_drag_over_wire()
@@ -4077,8 +4053,8 @@ func _on_end_node_move() -> void:
 	if changed and not _node_drag_ann_info.is_empty():
 		for ann_id in _node_drag_ann_info:
 			var info: Dictionary = _node_drag_ann_info[ann_id]
-			if _annotation_views.has(ann_id) and network:
-				var pixel_pos: Vector2 = _annotation_views[ann_id].position
+			if _annotations.get_annotation_views().has(ann_id) and network:
+				var pixel_pos: Vector2 = _annotations.get_annotation_views()[ann_id].position
 				var graph_pos := (pixel_pos + scroll_offset) / zoom
 				network.update_annotation(ann_id, {"position": graph_pos})
 			var siblings: Dictionary = info.get("siblings", {})
@@ -4875,242 +4851,6 @@ func _show_insert_chop_ref_dialog() -> void:
 	dialog.popup_centered()
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Annotation Management (Network Boxes & Sticky Notes)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-## Adds a network box or sticky note at the current mouse position,
-## or around the selected nodes if any are selected.
-func _add_annotation_at_mouse(ann_type: String) -> void:
-	if network == null:
-		return
-
-	var default_color := Color(0.15, 0.35, 0.65, 0.7) if ann_type == "box" else Color(0.9, 0.85, 0.4, 0.9)
-	var default_text := "Group" if ann_type == "box" else "Note"
-
-	# If nodes are selected, wrap the annotation around them
-	var selected_ids := _get_selected_node_ids()
-
-	# Compute annotation position/size in graph space for model storage.
-	var graph_pos: Vector2
-	var graph_size: Vector2
-
-	if not selected_ids.is_empty():
-		var padding := 30.0
-		var title_pad := 28.0 if ann_type == "box" else 0.0  # room for title bar
-		# Compute bounding rect in graph space (same space as position_offset).
-		var first_view: GNNodeView = _node_views[selected_ids[0]]
-		var rect := Rect2(first_view.position_offset, first_view.size)
-		for i in range(1, selected_ids.size()):
-			var v: GNNodeView = _node_views[selected_ids[i]]
-			rect = rect.merge(Rect2(v.position_offset, v.size))
-		# Padding in graph space (divide pixel padding by zoom so it looks
-		# consistent across zoom levels).
-		var gpad := padding / zoom
-		var gtitle := title_pad / zoom
-		graph_pos = rect.position - Vector2(gpad, gpad + gtitle)
-		graph_size = rect.size + Vector2(gpad * 2.0, gpad * 2.0 + gtitle)
-	else:
-		# Convert mouse position from pixel to graph space.
-		graph_pos = (get_local_mouse_position() + scroll_offset) / zoom
-		graph_size = Vector2(300, 200) if ann_type == "box" else Vector2(200, 120)
-
-	var ann_id := network.add_annotation(ann_type, graph_pos, graph_size, default_text, default_color)
-	_create_annotation_view(network.get_annotation(ann_id))
-
-
-## Creates a visual Control for an annotation dictionary.
-func _create_annotation_view(ann: Variant) -> void:
-	if ann == null or not ann is Dictionary:
-		return
-	var ann_dict: Dictionary = ann as Dictionary
-	var ann_id: String = ann_dict.get("id", "")
-	var ann_type: String = ann_dict.get("type", "")
-	var ann_pos: Variant = ann_dict.get("position", Vector2.ZERO)
-	var ann_size: Variant = ann_dict.get("size", Vector2(200, 150))
-	var ann_text: String = str(ann_dict.get("text", ""))
-	var ann_color: Variant = ann_dict.get("color", Color(0.3, 0.3, 0.3, 0.4))
-
-	# Ensure proper types for position/size/color from deserialized data
-	var pos := ann_pos if ann_pos is Vector2 else Vector2.ZERO
-	var sz := ann_size if ann_size is Vector2 else Vector2(200, 150)
-	var col := ann_color if ann_color is Color else Color(0.3, 0.3, 0.3, 0.4)
-
-	# Convert graph-space model coords to pixel space for the view.
-	var pixel_pos: Vector2 = pos * zoom - scroll_offset
-	var pixel_size: Vector2 = sz * zoom
-
-	if ann_type == "box":
-		var box := GNNetworkBox.new()
-		box.setup(ann_id, pixel_pos, pixel_size, ann_text, col)
-		box.box_changed.connect(_on_annotation_moved)
-		box.text_changed.connect(_on_annotation_text_changed)
-		box.delete_requested.connect(_on_annotation_delete_requested)
-		box.color_changed.connect(_on_annotation_color_changed)
-		box.box_dragging.connect(_on_box_dragging)
-		box.drag_started.connect(_on_box_drag_started)
-		box.drag_ended.connect(_on_box_drag_ended)
-		add_child(box)
-		# Move to back so it's behind GraphNodes
-		move_child(box, 0)
-		_annotation_views[ann_id] = box
-	elif ann_type == "note":
-		var note := GNStickyNote.new()
-		note.setup(ann_id, pixel_pos, pixel_size, ann_text, col)
-		note.note_changed.connect(_on_annotation_moved)
-		note.text_changed.connect(_on_annotation_text_changed)
-		note.delete_requested.connect(_on_annotation_delete_requested)
-		note.color_changed.connect(_on_annotation_color_changed)
-		add_child(note)
-		move_child(note, 0)
-		_annotation_views[ann_id] = note
-
-
-## Rebuilds all annotation views from the network model.
-func _rebuild_annotation_views() -> void:
-	_clear_annotation_views()
-	if network == null:
-		return
-	for ann in network.annotations:
-		_create_annotation_view(ann)
-	# Seed tracking vars so the first _process frame doesn't trigger a redundant sync.
-	_last_zoom = zoom
-	_last_scroll = scroll_offset
-
-
-## Syncs all annotation Control positions and sizes from graph-space model data
-## to pixel-space using the current scroll_offset and zoom.
-func _sync_annotation_transforms() -> void:
-	if network == null:
-		return
-	for ann_id in _annotation_views:
-		var ann: Variant = network.get_annotation(ann_id)
-		if ann == null:
-			continue
-		var view: Control = _annotation_views[ann_id]
-		var graph_pos: Variant = ann.get("position", Vector2.ZERO)
-		var graph_size: Variant = ann.get("size", Vector2(200, 150))
-		var gp: Vector2 = graph_pos if graph_pos is Vector2 else Vector2.ZERO
-		var gs: Vector2 = graph_size if graph_size is Vector2 else Vector2(200, 150)
-		view.position = gp * zoom - scroll_offset
-		view.size = gs * zoom
-
-
-## Removes all annotation views.
-func _clear_annotation_views() -> void:
-	for ann_id in _annotation_views:
-		var view: Control = _annotation_views[ann_id]
-		if view != null and is_instance_valid(view):
-			remove_child(view)
-			view.queue_free()
-	_annotation_views.clear()
-
-
-## Handles annotation move/resize events.
-## The view emits pixel-space coords; convert to graph space for model storage.
-func _on_annotation_moved(ann_id: String, new_pos: Vector2, new_size: Vector2) -> void:
-	if network:
-		var graph_pos := (new_pos + scroll_offset) / zoom
-		var graph_size := new_size / zoom
-		network.update_annotation(ann_id, {"position": graph_pos, "size": graph_size})
-
-
-## Handles annotation text change events.
-func _on_annotation_text_changed(ann_id: String, new_text: String) -> void:
-	if network:
-		network.update_annotation(ann_id, {"text": new_text})
-
-
-## Handles annotation deletion requests.
-func _on_annotation_delete_requested(ann_id: String) -> void:
-	if network:
-		network.remove_annotation(ann_id)
-	if _annotation_views.has(ann_id):
-		var view: Control = _annotation_views[ann_id]
-		_annotation_views.erase(ann_id)
-		if view != null and is_instance_valid(view):
-			remove_child(view)
-			view.queue_free()
-
-
-## Handles annotation color change events.
-func _on_annotation_color_changed(ann_id: String, new_color: Color) -> void:
-	if network:
-		network.update_annotation(ann_id, {"color": new_color})
-
-
-# ── Network Box Group-Move ────────────────────────────────────────────────────
-
-## Returns node IDs whose visual center (in pixel space) falls inside the given
-## box rect (also in pixel space, since annotation Controls are regular Controls).
-func _get_nodes_inside_box(box_pos: Vector2, box_size: Vector2) -> Array[String]:
-	var ids: Array[String] = []
-	var box_rect := Rect2(box_pos, box_size)
-	for view_name in _node_views:
-		var view: GNNodeView = _node_views[view_name]
-		# Convert node center from graph space to pixel space
-		var center := view.position_offset * zoom - scroll_offset + view.size * zoom / 2.0
-		if box_rect.has_point(center):
-			ids.append(view_name)
-	return ids
-
-
-## Called when a network box drag starts — snapshot contained node positions.
-func _on_box_drag_started(ann_id: String) -> void:
-	_box_drag_ann_id = ann_id
-	_box_drag_pre_positions.clear()
-	var box_view: GNNetworkBox = _annotation_views.get(ann_id) as GNNetworkBox
-	if box_view == null:
-		return
-	_box_drag_pre_box_pos = box_view.position
-	var contained := _get_nodes_inside_box(box_view.position, box_view.size)
-	for node_id in contained:
-		_box_drag_pre_positions[node_id] = _node_views[node_id].position_offset
-
-
-## Called each frame while a network box is being dragged — move contained nodes.
-## The delta from GNNetworkBox is in pixel space (Control.position delta), so
-## divide by zoom to convert to graph-space before applying to position_offset.
-func _on_box_dragging(ann_id: String, delta: Vector2) -> void:
-	if _group_moving:
-		return
-	_group_moving = true
-	var graph_delta := delta / zoom
-	for node_id in _box_drag_pre_positions:
-		if _node_views.has(node_id):
-			var view: GNNodeView = _node_views[node_id]
-			view.position_offset += graph_delta
-			if network and network.nodes.has(node_id):
-				network.nodes[node_id].graph_position = view.position_offset
-	_group_moving = false
-
-
-## Called when a network box drag ends — record undo action for contained nodes.
-func _on_box_drag_ended(ann_id: String) -> void:
-	if _box_drag_pre_positions.is_empty():
-		_box_drag_ann_id = ""
-		return
-
-	var old_positions := _box_drag_pre_positions.duplicate()
-	var new_positions: Dictionary = {}
-	var changed := false
-	for node_id in old_positions:
-		if _node_views.has(node_id):
-			var new_pos: Vector2 = _node_views[node_id].position_offset
-			new_positions[node_id] = new_pos
-			if new_pos != old_positions[node_id]:
-				changed = true
-
-	if changed:
-		_undo_redo.create_action("Move box group (%d nodes)" % old_positions.size())
-		_undo_redo.add_do_method(_ur_set_positions.bind(new_positions))
-		_undo_redo.add_undo_method(_ur_set_positions.bind(old_positions))
-		_undo_redo.commit_action(false)
-
-	_box_drag_pre_positions.clear()
-	_box_drag_ann_id = ""
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Edge auto-scroll while dragging wires or nodes near the viewport border
 # ─────────────────────────────────────────────────────────────────────────────
@@ -5208,189 +4948,6 @@ func _on_logger_toast(log_level: int, message: String) -> void:
 			show_toast(message, ToastType.ERROR)
 		GNLogger.Level.WARN:
 			show_toast(message, ToastType.WARNING)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Node Search (Ctrl+F)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func _build_search_bar() -> void:
-	_search_bar = PanelContainer.new()
-	_search_bar.name = "SearchBar"
-	_search_bar.visible = false
-	_search_bar.z_index = 4096
-	_search_bar.z_as_relative = false
-	_search_bar.mouse_filter = Control.MOUSE_FILTER_STOP
-	_search_bar.custom_minimum_size = Vector2(380, 0)
-	_search_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_search_bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_search_bar.position = Vector2(-190, 8)
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.1, 0.1, 0.14, 0.95)
-	style.set_corner_radius_all(6)
-	style.set_content_margin_all(8)
-	style.border_color = Color(0.4, 0.6, 1.0, 0.6)
-	style.set_border_width_all(1)
-	_search_bar.add_theme_stylebox_override("panel", style)
-
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 8)
-	_search_bar.add_child(hbox)
-
-	var icon := Label.new()
-	icon.text = "🔍"
-	icon.add_theme_font_size_override("font_size", 14)
-	hbox.add_child(icon)
-
-	_search_edit = LineEdit.new()
-	_search_edit.placeholder_text = "Search nodes…"
-	_search_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_search_edit.clear_button_enabled = true
-	_search_edit.text_changed.connect(_on_search_text_changed)
-	_search_edit.gui_input.connect(_on_search_edit_input)
-	hbox.add_child(_search_edit)
-
-	_search_label = Label.new()
-	_search_label.text = ""
-	_search_label.add_theme_font_size_override("font_size", 12)
-	_search_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.9))
-	_search_label.custom_minimum_size = Vector2(80, 0)
-	_search_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	hbox.add_child(_search_label)
-
-	var prev_btn := Button.new()
-	prev_btn.text = "▲"
-	prev_btn.flat = true
-	prev_btn.tooltip_text = "Previous match (Shift+Enter)"
-	prev_btn.custom_minimum_size = Vector2(24, 24)
-	prev_btn.pressed.connect(_navigate_search.bind(-1))
-	hbox.add_child(prev_btn)
-
-	var next_btn := Button.new()
-	next_btn.text = "▼"
-	next_btn.flat = true
-	next_btn.tooltip_text = "Next match (Enter)"
-	next_btn.custom_minimum_size = Vector2(24, 24)
-	next_btn.pressed.connect(_navigate_search.bind(1))
-	hbox.add_child(next_btn)
-
-	var close_btn := Button.new()
-	close_btn.text = "✕"
-	close_btn.flat = true
-	close_btn.custom_minimum_size = Vector2(24, 24)
-	close_btn.pressed.connect(_close_search)
-	hbox.add_child(close_btn)
-
-	add_child(_search_bar)
-
-
-func _open_search() -> void:
-	if _search_bar == null:
-		return
-	_search_bar.visible = true
-	_search_edit.text = ""
-	_search_matches.clear()
-	_search_index = -1
-	_search_label.text = ""
-	_search_edit.grab_focus()
-	# Don't dim yet — will dim when user types
-
-
-func _close_search() -> void:
-	if _search_bar == null:
-		return
-	_search_bar.visible = false
-	_search_edit.release_focus()
-	_restore_search_modulation()
-	_search_matches.clear()
-	_search_index = -1
-
-
-func _on_search_text_changed(query: String) -> void:
-	_search_matches.clear()
-	_search_index = -1
-
-	if query.is_empty():
-		_restore_search_modulation()
-		_search_label.text = ""
-		return
-
-	var q := query.to_lower()
-	for node_id in _node_views:
-		var view: GNNodeView = _node_views[node_id]
-		var id_lower: String = str(node_id).to_lower()
-		var type_lower: String = view.gn_node.node_type.to_lower()
-		if id_lower.contains(q) or type_lower.contains(q):
-			_search_matches.append(node_id)
-
-	# Sort matches alphabetically for stable navigation
-	_search_matches.sort()
-
-	_apply_search_modulation()
-
-	if _search_matches.is_empty():
-		_search_label.text = "No matches"
-	else:
-		_search_index = 0
-		_search_label.text = "1 of %d" % _search_matches.size()
-		_navigate_to_current_match()
-
-
-func _on_search_edit_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		match event.keycode:
-			KEY_ENTER, KEY_KP_ENTER:
-				if event.shift_pressed:
-					_navigate_search(-1)
-				else:
-					_navigate_search(1)
-				_search_edit.accept_event()
-			KEY_ESCAPE:
-				_close_search()
-				_search_edit.accept_event()
-
-
-func _navigate_search(direction: int) -> void:
-	if _search_matches.is_empty():
-		return
-	_search_index = (_search_index + direction + _search_matches.size()) % _search_matches.size()
-	_search_label.text = "%d of %d" % [_search_index + 1, _search_matches.size()]
-	_navigate_to_current_match()
-
-
-func _navigate_to_current_match() -> void:
-	if _search_index < 0 or _search_index >= _search_matches.size():
-		return
-	var node_id: String = _search_matches[_search_index]
-	_deselect_all()
-	var view: GNNodeView = _node_views.get(node_id, null)
-	if view != null:
-		view.selected = true
-	scroll_to_node(node_id)
-
-
-func _apply_search_modulation() -> void:
-	var match_set := {}
-	for nid in _search_matches:
-		match_set[nid] = true
-
-	for node_id in _node_views:
-		var view: GNNodeView = _node_views[node_id]
-		if match_set.has(node_id):
-			view.modulate = Color.WHITE
-		else:
-			view.modulate = Color(1, 1, 1, 0.25)
-	_search_dimmed = true
-
-
-func _restore_search_modulation() -> void:
-	if not _search_dimmed:
-		return
-	for node_id in _node_views:
-		var view: GNNodeView = _node_views[node_id]
-		view.modulate = Color.WHITE
-	_search_dimmed = false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -22,7 +22,7 @@ func _init_parameters() -> void:
 		"Position Y expression", "Expression for output Y position"))
 	add_parameter(GNParameter.create_string("expr_z", "pz",
 		"Position Z expression", "Expression for output Z position"))
-	add_parameter(GNParameter.create_bool("recompute_normals", true, "",
+	add_parameter(GNParameter.create_bool("recompute_normals", true, "Enable recompute normals",
 		"Recompute normals after modification"))
 
 

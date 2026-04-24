@@ -18,7 +18,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("patch", "",
+	add_parameter(GNParameter.create_string("patch", "The patch string",
 		"Patch", "Path to Pure Data (.pd) patch file"))
 	add_parameter(GNParameter.create_int("buffer_size", 512, 64, 8192,
 		"Buffer Size", "Output buffer size in samples"))

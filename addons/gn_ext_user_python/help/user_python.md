@@ -263,11 +263,11 @@ separator, followed by items from other families under "Other Families".
 ```
 addons/gn_ext_user_python/
   gn_extension.cfg          # Extension manifest
+  gn_python.gdextension     # GDExtension manifest
   README.md
   native/                   # C++ GDExtension (CPython embedding)
     src/                    # C++ sources
     build.cfg               # Build configuration
-    gn_python.gdextension   # GDExtension manifest
     python_config.py        # Python path discovery
   sdk/gonodes/              # Python SDK package
     __init__.py             # Common helpers + make_multi_output()

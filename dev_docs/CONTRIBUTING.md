@@ -528,7 +528,7 @@ This keeps patches portable — the same `.gnpatch` works on every platform with
 
 By default, the cook engine's active-set BFS follows **all** wire connections
 upstream from a node. Some operators only read a subset of their inputs depending
-on their current parameter state — Switch (only selected index), CubeMapTOP
+on their current parameter state — Switch (only selected index), CubeMapIMG
 (only input 0 in Extract/Equirect mode), MathCHOP (only input 0 for unary ops).
 
 If you don't declare which inputs are active, the cook engine will cook **all**
@@ -553,7 +553,7 @@ when the operator actually reads from them.
 #### When to override
 
 - **Switch-type operators** — only the selected input feeds through
-- **Mode-dependent operators** — e.g., CubeMapTOP in Extract mode only uses input 0
+- **Mode-dependent operators** — e.g., CubeMapIMG in Extract mode only uses input 0
 - **Unary/binary operators** — e.g., MathCHOP in unary mode only uses input 0
 - **No-input modes** — e.g., JSONDAT in Parse mode ignores all wired inputs
 
@@ -587,7 +587,7 @@ behaviour.  During the transition frame, `_cook()` returns `cached_output`
 | Operator | Active behavior |
 |----------|----------------|
 | SwitchTOP/CHOP/SOP/DAT/COMP + IMG/POP/VOL/MAT/UI/SDF | `[selected_index]` |
-| CubeMapTOP | Assemble=all, Extract/Equirect=`[0]` |
+| CubeMapIMG | Assemble=all, Extract/Equirect=`[0]` |
 | MathCHOP | Unary ops=`[0]`, binary ops=all |
 | JSONDAT | Parse mode=`[-1]` (none), Generate=all |
 

@@ -214,7 +214,6 @@ func _update_expressions_for_rename(old_id: String, new_id: String) -> void:
 	# Build a regex that matches the old_id inside quoted strings:
 	#   1. As a standalone ID:   "old_id"
 	#   2. As a path segment:    "something/old_id"  or  "old_id/something"
-	var esc_old := old_id.replace(".", "\\.").replace("-", "\\-")
 	var re := RegEx.new()
 	# Match "old_id" as a complete ID or as a path segment within quotes.
 	# We replace the ID portion while preserving surrounding path segments.
@@ -511,42 +510,6 @@ func prune_stale_connections(node_id: String) -> int:
 		notify_state_changed()
 		GNLogger.info("Network", "Pruned %d stale connection(s) on '%s'" % [stale.size(), node_id])
 	return stale.size()
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Graph Queries
-# ═══════════════════════════════════════════════════════════════════════════════
-
-## Returns all nodes directly upstream of the given node (connected to its inputs).
-func get_upstream_nodes(node_id: String) -> Array[GNNode]:
-	var result: Array[GNNode] = []
-	for conn in connections:
-		if conn.to_node == node_id:
-			var upstream: GNNode = nodes.get(conn.from_node, null)
-			if upstream and upstream not in result:
-				result.append(upstream)
-	return result
-
-
-## Returns all nodes directly downstream of the given node (it feeds into them).
-func get_downstream_nodes(node_id: String) -> Array[GNNode]:
-	var result: Array[GNNode] = []
-	for conn in connections:
-		if conn.from_node == node_id:
-			var downstream: GNNode = nodes.get(conn.to_node, null)
-			if downstream and downstream not in result:
-				result.append(downstream)
-	return result
-
-
-## Returns all nodes that are dirty in the network.
-func get_dirty_nodes() -> Array[GNNode]:
-	var result: Array[GNNode] = []
-	for node_id in nodes:
-		var node: GNNode = nodes[node_id]
-		if node.dirty:
-			result.append(node)
-	return result
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

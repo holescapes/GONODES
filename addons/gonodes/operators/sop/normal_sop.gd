@@ -18,7 +18,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("mode",
 		PackedStringArray(["Recompute (Smooth)", "Flip", "Flat (Faceted)"]),
 		0, "", "Normal computation mode"))
-	add_parameter(GNParameter.create_bool("generate_tangents", true, "",
+	add_parameter(GNParameter.create_bool("generate_tangents", true, "Enable generate tangents",
 		"Also generate tangents (needed for normal mapping)"))
 
 

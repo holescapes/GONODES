@@ -69,7 +69,7 @@
             }
         },
         "raymarch1": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 800,
                 100
@@ -128,7 +128,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PyroVOL — Fire/Smoke Simulation\n\nNoiseVOL provides fuel source (injected each frame).\nPyroVOL runs combustion: fuel burns → heat rises → smoke produced.\nBuoyancy drives hot air upward, cooling decays temperature.\nVorticity adds turbulent swirl.\n\nOutputs: smoke density (port 0), temperature (port 1), velocity (port 2).\nRaymarchVOL renders the smoke density as a volume cloud.",
+            "text": "PyroVOL — Fire/Smoke Simulation\n\nNoiseVOL provides fuel source (injected each frame).\nPyroVOL runs combustion: fuel burns → heat rises → smoke produced.\nBuoyancy drives hot air upward, cooling decays temperature.\nVorticity adds turbulent swirl.\n\nOutputs: smoke density (port 0), temperature (port 1), velocity (port 2).\nRaymarchTOP renders the smoke density as a volume cloud.",
             "position": [
                 -120.0,
                 -160.0

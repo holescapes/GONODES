@@ -17,11 +17,11 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("brightness", 1.0, 0.0, 4.0, 0.01, "", "Brightness multiplier"))
-	add_parameter(GNParameter.create_float("contrast", 1.0, 0.0, 4.0, 0.01, "", "Contrast amount"))
-	add_parameter(GNParameter.create_float("gamma", 1.0, 0.01, 4.0, 0.01, "", "Gamma correction curve"))
-	add_parameter(GNParameter.create_bool("invert", false, "", "Invert all colors"))
-	add_parameter(GNParameter.create_float("opacity", 1.0, 0.0, 1.0, 0.01, "", "Output opacity"))
+	add_parameter(GNParameter.create_float("brightness", 1.0, 0.0, 4.0, 0.01, "Brightness", "Brightness multiplier"))
+	add_parameter(GNParameter.create_float("contrast", 1.0, 0.0, 4.0, 0.01, "Contrast", "Contrast amount"))
+	add_parameter(GNParameter.create_float("gamma", 1.0, 0.01, 4.0, 0.01, "Gamma", "Gamma correction curve"))
+	add_parameter(GNParameter.create_bool("invert", false, "Invert", "Invert all colors"))
+	add_parameter(GNParameter.create_float("opacity", 1.0, 0.0, 1.0, 0.01, "Opacity", "Output opacity"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

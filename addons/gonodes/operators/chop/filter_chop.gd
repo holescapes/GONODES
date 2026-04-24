@@ -22,7 +22,7 @@ func _init_parameters() -> void:
 		PackedStringArray(["Low Pass", "High Pass"]), 0, "", "Filter algorithm"))
 	add_parameter(GNParameter.create_float("cutoff", 0.1, 0.001, 1.0, 0.001,
 		"Filter Cutoff (0-1)", "Cutoff frequency (lower = smoother)"))
-	add_parameter(GNParameter.create_bool("reset", false, "", "Clear filter state"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset", "Clear filter state"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

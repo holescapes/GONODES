@@ -344,7 +344,7 @@ func _setup_info_display() -> void:
 	_info_label.name = "InfoLabel"
 	_info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_info_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_info_label.anchors_preset = PRESET_FULL_RECT
+	_info_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_info_label.add_theme_font_size_override("font_size", 14)
 	_info_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	_info_label.text = "Loading patch..."
@@ -363,7 +363,7 @@ func _show_error(message: String) -> void:
 	lbl.text = message
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lbl.anchors_preset = PRESET_FULL_RECT
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
 	lbl.add_theme_font_size_override("font_size", 18)
 	lbl.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))

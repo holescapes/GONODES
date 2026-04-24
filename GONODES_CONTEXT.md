@@ -5155,7 +5155,7 @@ All in `operators/pop/`, extend GNPopBase:
 - **AttractPOP**: Point/line/geometry attractor. Params: mode (point/line/geo), target, strength, falloff, max_distance.
 - **LimitPOP**: Kill by age/bounds/speed. Params: enable_age/bounds/speed, max_age, bounds_min/max, max_speed.
 - **AdvectPOP**: Advect particles by VOL velocity field. Params: scale.
-- **InstancePOP**: Copy SOP instances onto particles → COMP output.
+- **InstanceSOP**: Copy SOP instances onto particles → COMP output.
 - **RenderPOP**: Particle rendering → COMP output. Params: point_size, blend_mode.
 - **ParticleStateTOP**: POP → TOP visualization bridge. Registered under "TOP" family.
 
@@ -5172,8 +5172,8 @@ All in `operators/vol/`, extend GNVolBase:
 - **BlurVOL**: 3D Gaussian/box blur. Params: radius, mode (gaussian/box).
 - **DisplaceVOL**: Warp density by velocity field. Params: scale.
 - **FluidVOL**: Navier-Stokes sim (4-pass: advect, divergence, pressure, project). Params: resolution, viscosity, dissipation, pressure_iterations, force, force_radius, format.
-- **MarchingCubesVOL**: Iso-surface extraction → SOP (CPU). Params: threshold, close_boundary. Outputs GNGeoData.
-- **RaymarchVOL**: Volume rendering → TOP. Params: resolution, step_count, density_scale, light_dir, absorption. Outputs GNTextureData.
+- **MarchingCubesSOP**: Iso-surface extraction → SOP (CPU). Params: threshold, close_boundary. Outputs GNGeoData.
+- **RaymarchTOP**: Volume rendering → TOP. Params: resolution, step_count, density_scale, light_dir, absorption. Outputs GNTextureData.
 - **SOPtoVOL**: Rasterize SOP mesh → density grid. Params: resolution, radius.
 - **CHOPtoVOL**: CHOP channels → volume slices. Params: resolution.
 - **AnalyzeVOL**: Min/max/mean/sum statistics. Outputs GNChannelData.
@@ -5249,8 +5249,8 @@ Operators that delegate to Godot's GPU pipeline (GLSL compute shaders, ShaderMat
 
 | # | Operator | Family | Bottleneck Analysis |
 |---|----------|--------|---------------------|
-| 1 | **MarchingCubesVOL** | VOL→SOP | Triple-nested `(res-1)³` cell loop: 8 field lookups + edge interpolation + triangle emit + gradient normals per cell. At 128³ ≈ 2M cells. Heaviest pure-CPU operator in the project. |
-| 2 | **InstancePOP** | POP→SOP | GPU→CPU readback + O(instances × source_verts) vertex transform loop. 10K instances × 100 verts = 1M transforms in GDScript. SIMD-friendly matrix multiply. |
+| 1 | **MarchingCubesSOP** | VOL→SOP | Triple-nested `(res-1)³` cell loop: 8 field lookups + edge interpolation + triangle emit + gradient normals per cell. At 128³ ≈ 2M cells. Heaviest pure-CPU operator in the project. |
+| 2 | **InstanceSOP** | POP→SOP | GPU→CPU readback + O(instances × source_verts) vertex transform loop. 10K instances × 100 verts = 1M transforms in GDScript. SIMD-friendly matrix multiply. |
 | 3 | **TOPtoSOP** | TOP→SOP | Heightfield: `res×res` pixel reads (up to 512² = 262K), then per-triangle face normals (cross products), then per-vertex normal averaging. 3 passes over all data. |
 | 4 | **PointSOP** | SOP | **3× `Expression.execute()` per vertex** for X/Y/Z with 11 variable bindings each. 50K verts = 150K interpreted evaluations. Could use compiled expression trees in C++. |
 | 5 | **ClipSOP** | SOP | Per-triangle plane classification + split-edge lerp + mesh rebuild. Real-time clipping with vertex interpolation on every triangle. |
@@ -5302,8 +5302,8 @@ WireframeSOP, PeakSOP, GroupSOP, PrimitiveSOP, TransformCHOP, BlendCHOP, SOPtoCH
 
 Priority selection of **10 operators** that would cover every known CPU bottleneck in the POP/VOL/cross-family pipeline:
 
-1. **MarchingCubesVOL** — single highest-impact operator in the entire project
-2. **InstancePOP** — second highest-impact, directly in fluid/particle workflows
+1. **MarchingCubesSOP** — single highest-impact operator in the entire project
+2. **InstanceSOP** — second highest-impact, directly in fluid/particle workflows
 3. **CHOPtoVOL** — enables high-res CHOP→VOL pipelines
 4. **AnalyzeVOL** — enables responsive VOL statistics
 5. **TOPtoSOP** — heightfield displacement is a major use case
@@ -5510,7 +5510,7 @@ WindowOUT works on ALL platforms. Instead of being platform-restricted, it adapt
 
 ### 34.9 Remaining Phases — ALL IMPLEMENTED
 
-- **Phase 3 — CPU Fallback for Compute Operators** ✅: `has_cpu_fallback()` + `_cook_cpu()` virtual methods on GNNode. Cook engine branches: compute unavailable + has_cpu_fallback → call `_cook_cpu()` with full timing/caching. All 11 POP operators + all 11 VOL operators have CPU fallback implementations. GNParticleData/GNVolumeData store CPU-side arrays (zero overhead when GPU path is used — empty arrays are ~24 bytes each). POP CPU fallbacks: SourcePOP (emission + age/death), ForcePOP (gravity/wind/drag), AttractPOP (inverse-square), CollisionPOP (ground plane), TurbulencePOP (FastNoiseLite curl), LimitPOP (bounds/speed), AdvectPOP (velocity field sampling), NullPOP (pass-through), InstancePOP (MultiMesh from CPU arrays), RenderPOP (delegates to read_positions/read_float_attrib). VOL CPU fallbacks: NoiseVOL (FBM), BlurVOL (3D box blur), BlendVOL (6 blend modes), DisplaceVOL (trilinear), NullVOL (pass-through), AnalyzeVOL (statistics), FluidVOL (full Navier-Stokes), CHOPtoVOL (3 fill modes), SOPtoVOL (sphere splatting), MarchingCubesVOL (direct CPU read), RaymarchVOL (CPU ray marcher with Beer-Lambert compositing).
+- **Phase 3 — CPU Fallback for Compute Operators** ✅: `has_cpu_fallback()` + `_cook_cpu()` virtual methods on GNNode. Cook engine branches: compute unavailable + has_cpu_fallback → call `_cook_cpu()` with full timing/caching. All 11 POP operators + all 11 VOL operators have CPU fallback implementations. GNParticleData/GNVolumeData store CPU-side arrays (zero overhead when GPU path is used — empty arrays are ~24 bytes each). POP CPU fallbacks: SourcePOP (emission + age/death), ForcePOP (gravity/wind/drag), AttractPOP (inverse-square), CollisionPOP (ground plane), TurbulencePOP (FastNoiseLite curl), LimitPOP (bounds/speed), AdvectPOP (velocity field sampling), NullPOP (pass-through), InstanceSOP (MultiMesh from CPU arrays), RenderPOP (delegates to read_positions/read_float_attrib). VOL CPU fallbacks: NoiseVOL (FBM), BlurVOL (3D box blur), BlendVOL (6 blend modes), DisplaceVOL (trilinear), NullVOL (pass-through), AnalyzeVOL (statistics), FluidVOL (full Navier-Stokes), CHOPtoVOL (3 fill modes), SOPtoVOL (sphere splatting), MarchingCubesSOP (direct CPU read), RaymarchTOP (CPU ray marcher with Beer-Lambert compositing).
 - **Phase 4 — Export Presets & Build Pipeline** ✅: Added Android ARM64 (preset 10, Compatibility renderer, APK, ETC2/ASTC), iOS ARM64 (preset 11, Mobile renderer, IPA), and Web/WASM (preset 12, Compatibility renderer, PWA, thread support enabled) export presets to `export_presets.cfg`. All use `shader_baker/enabled=true`, `embed_pck=true`, `script_export_mode=2`.
 - **Phase 5 — Thread Detection** ✅: `GNGpuContext.are_threads_available()` returns false on web. Cook engine caches `_threads_available` flag on first frame, logs thread status at startup.
 - **Phase 6 — WindowOUT Mobile/Web Adaptation** ✅: `_embedded_mode` flag detects single-window platforms (android/ios/web). `_ensure_embedded()` creates fullscreen Control → TextureRect + VBoxContainer UI panel in main viewport. Window params (monitor, position, window_mode) become no-ops in embedded mode.
@@ -5603,7 +5603,7 @@ Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VO
 | FluidSurfaceMAT | MAT | Fluid surface material — Fresnel, refraction, dual-layer Voronoi caustics, procedural wave normals |
 | PyroVOL | VOL | Pyro fire/smoke simulation — fuel/combustion/buoyancy/cooling, 3 compute shaders, 11-step GPU pipeline |
 | HeightfieldSOP | SOP | Procedural terrain heightfield — FastNoiseLite FBM, 4 noise types, thermal erosion |
-| GPUMarchingCubesVOL | VOL | GPU-accelerated marching cubes via compute shader with atomic append buffer — 10–100× faster than CPU |
+| GPUMarchingCubesSOP | VOL | GPU-accelerated marching cubes via compute shader with atomic append buffer — 10–100× faster than CPU |
 | BoidsPOP | POP | Reynolds flocking simulation — separation/alignment/cohesion, brute-force O(n²) compute shader, spherical boundary |
 | TrailRibbonSOP | SOP | Ribbon mesh from particle trails — ring buffer recording, width taper, alpha fade, proper normals/UVs |
 | VoronoiShatterSOP | SOP | 3D Voronoi fracture — Sutherland-Hodgman clipping, interior faces, piece attribute, explode offset |
@@ -5630,7 +5630,7 @@ Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VO
 | Operator | Changes |
 |----------|---------|
 | NoiseTOP | Added FBM octaves (1–8), lacunarity, gain, periodic tiling mode (seamless Perlin), tile_size |
-| RaymarchVOL | Multi-pass lighting — Henyey-Greenstein phase function, shadow rays, directional light (yaw/pitch/color/intensity), ambient, configurable emission color |
+| RaymarchTOP | Multi-pass lighting — Henyey-Greenstein phase function, shadow rays, directional light (yaw/pitch/color/intensity), ambient, configurable emission color |
 
 ### TD Gap Resolution
 
@@ -5654,7 +5654,7 @@ Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VO
 | TabletInCHOP | ✅ Implemented | Pen/stylus input |
 | PanelExecuteDAT | ✅ Implemented | UI event logging |
 | NDI Video/Audio I/O | ✅ Implemented | gn_ext_ndi — 4 operators (video+audio in/out), C++ GDExtension wrapping NDI SDK |
-| Multi-Pass Vol Lighting | ✅ Implemented | RaymarchVOL — HG phase, shadow rays, directional/ambient/emission |
+| Multi-Pass Vol Lighting | ✅ Implemented | RaymarchTOP — HG phase, shadow rays, directional/ambient/emission |
 | VoronoiShatterSOP | ✅ Implemented | 3D Voronoi fracture with interior faces and piece attribute |
 | PointCloudRenderTOP | ✅ Implemented | GPU compute splatting with depth test and per-particle color |
 | ML Body/Hand/Face Tracking | ✅ Implemented | gn_ext_ml — PoseDetectCHOP (33 keypoints), HandDetectCHOP (21 per hand), FaceDetectCHOP (468 landmarks) |

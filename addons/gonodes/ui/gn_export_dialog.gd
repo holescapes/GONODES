@@ -107,7 +107,7 @@ func _ready() -> void:
 	unresizable = false
 
 	var margin := MarginContainer.new()
-	margin.anchors_preset = Control.PRESET_FULL_RECT
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 16)
 	margin.add_theme_constant_override("margin_right", 16)
 	margin.add_theme_constant_override("margin_top", 16)

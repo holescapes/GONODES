@@ -20,7 +20,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_file("lut_file", "",
+	add_parameter(GNParameter.create_file("lut_file", "Path to the lut file",
 		PackedStringArray(["*.cube", "*.3dl"]),
 		"LUT File", "Path to .cube or .3dl LUT file"))
 	add_parameter(GNParameter.create_float("intensity", 1.0, 0.0, 1.0, 0.01,

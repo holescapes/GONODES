@@ -20,7 +20,7 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("operation",
 		PackedStringArray(["AND", "OR", "XOR", "NAND", "NOR", "NOT"]), 0, "", "Logic operation to apply"))
-	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "", "Boolean threshold (>= = true)"))
+	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "Threshold", "Boolean threshold (>= = true)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

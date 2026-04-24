@@ -59,7 +59,7 @@ func _init_parameters() -> void:
 		"Draw IDs", "Draw numeric IDs on each blob"))
 	add_parameter(GNParameter.create_bool("draw_bbox", false,
 		"Draw BBox", "Draw bounding boxes around blobs"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

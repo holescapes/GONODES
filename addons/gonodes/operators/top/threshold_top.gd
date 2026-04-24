@@ -15,9 +15,9 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("threshold", 0.5, 0.0, 1.0, 0.01, "", "Luminance cutoff value"))
-	add_parameter(GNParameter.create_float("softness", 0.0, 0.0, 0.5, 0.01, "", "Soft transition width"))
-	add_parameter(GNParameter.create_bool("use_alpha", false, "", "Threshold alpha channel instead of luminance"))
+	add_parameter(GNParameter.create_float("threshold", 0.5, 0.0, 1.0, 0.01, "Threshold", "Luminance cutoff value"))
+	add_parameter(GNParameter.create_float("softness", 0.0, 0.0, 0.5, 0.01, "Softness", "Soft transition width"))
+	add_parameter(GNParameter.create_bool("use_alpha", false, "Use Alpha", "Threshold alpha channel instead of luminance"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

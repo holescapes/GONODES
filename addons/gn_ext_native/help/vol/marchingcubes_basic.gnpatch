@@ -11,7 +11,7 @@
       "parameters": {}
     },
     "marchingcubes1": {
-      "type": "MarchingCubesVOLNative",
+      "type": "MarchingCubesSOPNative",
       "position": [
         400,
         100

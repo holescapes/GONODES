@@ -200,20 +200,20 @@ func test_advect_pop_no_input() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  InstancePOP
+#  InstanceSOP (reclassified from InstancePOP — Rule 25.28)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_instance_pop_instantiation() -> void:
-	var node := _make_node(InstancePOP.new(), "inst1")
-	GNTestAssert.assert_not_null(node, "InstancePOP created")
+func test_instance_sop_instantiation() -> void:
+	var node := _make_node(InstanceSOP.new(), "inst1")
+	GNTestAssert.assert_not_null(node, "InstanceSOP created")
 
-func test_instance_pop_no_input() -> void:
-	var node := _make_node(InstancePOP.new(), "inst2")
+func test_instance_sop_no_input() -> void:
+	var node := _make_node(InstanceSOP.new(), "inst2")
 	var out := _cook_no_input(node)
 	GNTestAssert.assert_true(true, "no crash on null input")
 
-func test_instance_pop_ports() -> void:
-	var node := _make_node(InstancePOP.new(), "inst3")
+func test_instance_sop_ports() -> void:
+	var node := _make_node(InstanceSOP.new(), "inst3")
 	GNTestAssert.assert_gt(node.input_ports.size(), 0, "has POP input port")
 
 

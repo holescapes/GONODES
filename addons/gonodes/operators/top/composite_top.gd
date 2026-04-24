@@ -22,7 +22,7 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("operation",
 		PackedStringArray(["Add", "Multiply", "Over", "Screen", "Subtract", "Difference", "Power", "Abs", "Min", "Max"]), 0, "", "Blend mode"))
-	add_parameter(GNParameter.create_float("opacity", 1.0, 0.0, 1.0, 0.01, "", "Blend opacity"))
+	add_parameter(GNParameter.create_float("opacity", 1.0, 0.0, 1.0, 0.01, "Opacity", "Blend opacity"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

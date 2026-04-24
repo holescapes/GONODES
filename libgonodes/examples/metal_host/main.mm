@@ -38,7 +38,8 @@
 }
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   commandQueue:(id<MTLCommandQueue>)queue
-                      instance:(gonodes_instance_t)gn;
+                      instance:(gonodes_instance_t)gn
+                         patch:(gonodes_patch_t)patch;
 @end
 
 @implementation GonodesRenderer
@@ -46,13 +47,14 @@
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   commandQueue:(id<MTLCommandQueue>)queue
                       instance:(gonodes_instance_t)gn
+                         patch:(gonodes_patch_t)patch
 {
     self = [super init];
     if (self) {
         _device = device;
         _cmdQueue = queue;
         _gn = gn;
-        _p = p;
+        _p = patch;
         _prevTime = CFAbsoluteTimeGetCurrent();
     }
     return self;
@@ -202,7 +204,7 @@ int main(int argc, char* argv[]) {
         metalView.framebufferOnly = NO;  /* Allow blit to drawable texture. */
 
         GonodesRenderer* renderer = [[GonodesRenderer alloc]
-            initWithDevice:device commandQueue:cmdQueue instance:gn];
+            initWithDevice:device commandQueue:cmdQueue instance:gn patch:p];
         metalView.delegate = renderer;
 
         [window setContentView:metalView];

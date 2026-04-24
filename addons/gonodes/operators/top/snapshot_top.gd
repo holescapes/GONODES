@@ -334,7 +334,7 @@ func _ensure_dat_viewport(size: Vector2i) -> void:
 	_dat_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	_dat_vp.transparent_bg = false
 	_dat_draw = _DATTableDraw.new()
-	_dat_draw.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_dat_draw.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_dat_vp.add_child(_dat_draw)
 	add_child(_dat_vp)
 

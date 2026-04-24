@@ -28,6 +28,10 @@ writes source, generates register_types.cpp + SConstruct + .gdextension,
 invokes SCons (or falls back to direct g++/clang++/cl compilation), and
 hot-reloads the result.
 
+> **Windows / MSVC:** `cl.exe` must be on your PATH. Launch Godot from a
+> **Developer Command Prompt for VS** or run `vcvarsall.bat x64` first.
+> MinGW/TDM-GCC users already have `g++` on PATH after installation.
+
 ### From the command line
 
 ```bash

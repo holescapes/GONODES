@@ -10,6 +10,7 @@
 .godot/
 /android/
 *.import
+*.uid
 
 # ── Built Player/Editor templates (rebuild with scripts/build_templates.ps1) ──
 /templates/

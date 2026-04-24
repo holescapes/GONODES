@@ -2389,12 +2389,7 @@
     "inputs": [
       {
         "port": 0,
-        "name": "in1",
-        "type": "DAT"
-      },
-      {
-        "port": 1,
-        "name": "in2",
+        "name": "in",
         "type": "DAT"
       }
     ],
@@ -2901,6 +2896,51 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/img/checkerboard_img.gd"
+  },
+  "CubeMapIMG": {
+    "class_name": "CubeMapIMG",
+    "family": "IMG",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in0",
+        "type": "IMG"
+      },
+      {
+        "port": 1,
+        "name": "in1",
+        "type": "IMG"
+      },
+      {
+        "port": 2,
+        "name": "in2",
+        "type": "IMG"
+      },
+      {
+        "port": 3,
+        "name": "in3",
+        "type": "IMG"
+      },
+      {
+        "port": 4,
+        "name": "in4",
+        "type": "IMG"
+      },
+      {
+        "port": 5,
+        "name": "in5",
+        "type": "IMG"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "IMG"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/img/cube_map_img.gd"
   },
   "EdgeDetectIMG": {
     "class_name": "EdgeDetectIMG",
@@ -3824,31 +3864,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/pop/force_pop.gd"
   },
-  "InstancePOP": {
-    "class_name": "InstancePOP",
-    "family": "POP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "pop_in",
-        "type": "POP"
-      },
-      {
-        "port": 1,
-        "name": "geo_in",
-        "type": "SOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "SOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/pop/instance_pop.gd"
-  },
   "LimitPOP": {
     "class_name": "LimitPOP",
     "family": "POP",
@@ -3986,23 +4001,12 @@
   "GDScriptSCRIPT": {
     "class_name": "GDScriptSCRIPT",
     "family": "SCRIPT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in0",
-        "type": "CHOP"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,
         "name": "out0",
         "type": "CHOP"
-      },
-      {
-        "port": 1,
-        "name": "out1",
-        "type": "DAT"
       }
     ],
     "dynamic_inputs": null,
@@ -4478,6 +4482,26 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/fuse_sop.gd"
   },
+  "GPUMarchingCubesSOP": {
+    "class_name": "GPUMarchingCubesSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "vol",
+        "type": "VOL"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "mesh",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/gpu_marching_cubes_sop.gd"
+  },
   "GridSOP": {
     "class_name": "GridSOP",
     "family": "SOP",
@@ -4550,6 +4574,31 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/hole_sop.gd"
+  },
+  "InstanceSOP": {
+    "class_name": "InstanceSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "pop_in",
+        "type": "POP"
+      },
+      {
+        "port": 1,
+        "name": "geo_in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/instance_sop.gd"
   },
   "IsoSurfaceSOP": {
     "class_name": "IsoSurfaceSOP",
@@ -4637,6 +4686,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/magnet_sop.gd"
+  },
+  "MarchingCubesSOP": {
+    "class_name": "MarchingCubesSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "vol",
+        "type": "VOL"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "mesh",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/marching_cubes_sop.gd"
   },
   "MeasureSOP": {
     "class_name": "MeasureSOP",
@@ -6088,51 +6157,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/cross_top.gd"
   },
-  "CubeMapTOP": {
-    "class_name": "CubeMapTOP",
-    "family": "TOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in0",
-        "type": "TOP"
-      },
-      {
-        "port": 1,
-        "name": "in1",
-        "type": "TOP"
-      },
-      {
-        "port": 2,
-        "name": "in2",
-        "type": "TOP"
-      },
-      {
-        "port": 3,
-        "name": "in3",
-        "type": "TOP"
-      },
-      {
-        "port": 4,
-        "name": "in4",
-        "type": "TOP"
-      },
-      {
-        "port": 5,
-        "name": "in5",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "TOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/top/cube_map_top.gd"
-  },
   "CurlNoiseTOP": {
     "class_name": "CurlNoiseTOP",
     "family": "TOP",
@@ -7410,6 +7434,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/ramp_top.gd"
+  },
+  "RaymarchTOP": {
+    "class_name": "RaymarchTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "vol",
+        "type": "VOL"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "image",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/raymarch_top.gd"
   },
   "ReactionDiffusionTOP": {
     "class_name": "ReactionDiffusionTOP",
@@ -8896,46 +8940,6 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/vol/fluid_vol.gd"
   },
-  "GPUMarchingCubesVOL": {
-    "class_name": "GPUMarchingCubesVOL",
-    "family": "VOL",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "vol",
-        "type": "VOL"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "mesh",
-        "type": "SOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/vol/gpu_marching_cubes_vol.gd"
-  },
-  "MarchingCubesVOL": {
-    "class_name": "MarchingCubesVOL",
-    "family": "VOL",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "vol",
-        "type": "VOL"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "mesh",
-        "type": "SOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/vol/marching_cubes_vol.gd"
-  },
   "NoiseVOL": {
     "class_name": "NoiseVOL",
     "family": "VOL",
@@ -9009,26 +9013,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/vol/pyro_vol.gd"
-  },
-  "RaymarchVOL": {
-    "class_name": "RaymarchVOL",
-    "family": "VOL",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "vol",
-        "type": "VOL"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "image",
-        "type": "TOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gonodes/operators/vol/raymarch_vol.gd"
   },
   "SelectVOL": {
     "class_name": "SelectVOL",
@@ -13506,7 +13490,13 @@
     "class_name": "NativeSCRIPT",
     "family": "SCRIPT",
     "inputs": [],
-    "outputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_user_native/operators/script/native_script.gd"
   },
@@ -13514,7 +13504,13 @@
     "class_name": "PythonSCRIPT",
     "family": "SCRIPT",
     "inputs": [],
-    "outputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_user_python/operators/script/python_script.gd"
   },

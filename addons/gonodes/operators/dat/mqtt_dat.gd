@@ -54,9 +54,9 @@ func _init_parameters() -> void:
 		"Port", "MQTT broker port (default 1883)"))
 	add_parameter(GNParameter.create_string("client_id", "gonodes",
 		"Client ID", "MQTT client identifier"))
-	add_parameter(GNParameter.create_string("username", "",
+	add_parameter(GNParameter.create_string("username", "The username string",
 		"Username", "Broker username (leave empty for anonymous)"))
-	add_parameter(GNParameter.create_string("password", "",
+	add_parameter(GNParameter.create_string("password", "The password string",
 		"Password", "Broker password"))
 	add_parameter(GNParameter.create_string("subscribe", "gonodes/#",
 		"Subscribe", "Comma-separated topic filters to subscribe"))

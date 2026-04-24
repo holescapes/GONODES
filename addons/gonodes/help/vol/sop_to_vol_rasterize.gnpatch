@@ -60,7 +60,7 @@
             }
         },
         "raymarch1": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 900,
                 200
@@ -94,7 +94,7 @@
             }
         },
         "raymarch_blur": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 900,
                 500

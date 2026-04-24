@@ -49,7 +49,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("provider",
 		PackedStringArray(["CPU", "DirectML", "CUDA", "CoreML"]), 0,
 		"Provider", "ONNX execution provider"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable detection"))
 
 

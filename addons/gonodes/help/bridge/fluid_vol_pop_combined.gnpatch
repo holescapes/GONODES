@@ -145,7 +145,7 @@
             }
         },
         "raymarch_vol": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 900,
                 400
@@ -292,7 +292,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Full Pipeline \u2014 Fluid VOL Driving POP Particles\n\nThis patch combines fluid simulation with particle advection:\n\n  VOL chain (bottom): NoiseVOL \u2192 FluidVOL \u2192 RaymarchVOL\n    Creates animated fluid density with Navier-Stokes solver.\n\n  POP chain (top): SourcePOP \u2192 AdvectPOP(+FluidVOL) \u2192 Turbulence \u2192 Limit \u2192 Render\n    Particles are advected by the same fluid velocity field,\n    creating a unified smoke + particle system.\n\nBoth windows show the same simulation from the VOL and POP\nperspectives \u2014 the particles track the fluid motion.",
+            "text": "Full Pipeline \u2014 Fluid VOL Driving POP Particles\n\nThis patch combines fluid simulation with particle advection:\n\n  VOL chain (bottom): NoiseVOL \u2192 FluidVOL \u2192 RaymarchTOP\n    Creates animated fluid density with Navier-Stokes solver.\n\n  POP chain (top): SourcePOP \u2192 AdvectPOP(+FluidVOL) \u2192 Turbulence \u2192 Limit \u2192 Render\n    Particles are advected by the same fluid velocity field,\n    creating a unified smoke + particle system.\n\nBoth windows show the same simulation from the VOL and POP\nperspectives \u2014 the particles track the fluid motion.",
             "position": [
                 -100.0,
                 -130.0

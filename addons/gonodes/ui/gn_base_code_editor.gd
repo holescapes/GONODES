@@ -47,6 +47,23 @@ func _init() -> void:
 	transient = true
 
 
+## Clamps the window size to the current screen's usable area, then opens
+## centered.  Prevents the window being taller/wider than the display on
+## the very first popup (before the OS window-manager has had a chance to
+## clamp it).
+func _popup_clamped() -> void:
+	var scr: int = DisplayServer.get_primary_screen()
+	var pw := get_parent()
+	while pw and not (pw is Window):
+		pw = pw.get_parent()
+	if pw is Window:
+		scr = (pw as Window).current_screen
+	var usable := DisplayServer.screen_get_usable_rect(scr)
+	var max_sz := usable.size - Vector2i(20, 20)
+	size = Vector2i(mini(size.x, max_sz.x), mini(size.y, max_sz.y))
+	popup_centered()
+
+
 func _ready() -> void:
 	# Root margin container
 	var root := MarginContainer.new()

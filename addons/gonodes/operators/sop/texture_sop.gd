@@ -9,7 +9,7 @@ extends GNSopBase
 
 
 func _init() -> void:
-	node_type = "sop"
+	node_type = "texture"
 
 
 func _init_ports() -> void:

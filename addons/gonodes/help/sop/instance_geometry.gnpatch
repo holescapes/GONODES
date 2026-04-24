@@ -2,36 +2,41 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_grid": {
-            "type": "GridSOP",
+        "source1": {
+            "type": "SourcePOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "rows": {
-                    "value": 20
-                },
-                "cols": {
-                    "value": 20
+                "emit_rate": {
+                    "value": 100
                 }
             }
         },
         "focus1": {
-            "type": "MarchingCubesVOL",
+            "type": "InstanceSOP",
             "position": [
                 450,
                 100
             ],
             "parameters": {}
         },
-        "raymarch1": {
-            "type": "RaymarchVOL",
+        "pop_render": {
+            "type": "RenderPOP",
             "position": [
                 800,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         },
         "window1": {
             "type": "WindowOUT",
@@ -55,7 +60,7 @@
     },
     "connections": [
         {
-            "from": "src_grid",
+            "from": "source1",
             "from_port": 0,
             "to": "focus1",
             "to_port": 0
@@ -63,11 +68,11 @@
         {
             "from": "focus1",
             "from_port": 0,
-            "to": "raymarch1",
+            "to": "pop_render",
             "to_port": 0
         },
         {
-            "from": "raymarch1",
+            "from": "pop_render",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -77,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Marching Cubes VOL — Isosurface\n\nExtract iso-surface mesh from volume density field (CPU marching cubes).",
+            "text": "Instance POP — Geometry\n\nCopy SOP geometry onto each particle position as instances.",
             "position": [
                 -100.0,
                 -100.0

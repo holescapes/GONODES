@@ -24,12 +24,12 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("num_channels", 1, 1, 16, "", "Number of noise channels"))
+	add_parameter(GNParameter.create_int("num_channels", 1, 1, 16, "Num Channels", "Number of noise channels"))
 	add_parameter(GNParameter.create_string("channel_names", "chan1",
 		"Channel Names", "Comma-separated channel names"))
-	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01, "", "Octave detail (0 = smooth, 1 = rough)"))
-	add_parameter(GNParameter.create_float("period", 1.0, 0.01, 100.0, 0.01, "", "Time period of noise cycle"))
-	add_parameter(GNParameter.create_int("seed", 0, 0, 99999, "", "Random seed"))
+	add_parameter(GNParameter.create_float("roughness", 0.5, 0.0, 1.0, 0.01, "Roughness", "Octave detail (0 = smooth, 1 = rough)"))
+	add_parameter(GNParameter.create_float("period", 1.0, 0.01, 100.0, 0.01, "Period", "Time period of noise cycle"))
+	add_parameter(GNParameter.create_int("seed", 0, 0, 99999, "Seed", "Random seed"))
 	add_parameter(GNParameter.create_float("speed", 1.0, 0.0, 10.0, 0.01, "Speed", "Time evolution speed (0 = frozen)"))
 
 

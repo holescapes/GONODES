@@ -20,7 +20,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("sender_name", "", "Sender Name",
+	add_parameter(GNParameter.create_string("sender_name", "Sender Name", "Sender Name",
 		"Spout sender name to receive from. Empty = active sender."))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1920, 1080),
 		"Resolution", "Expected resolution (auto-updates from sender)."))

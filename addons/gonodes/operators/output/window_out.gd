@@ -114,18 +114,18 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("title", "GONODES Output", "Title", "Window title bar text"))
 
 	# Monitor selection — 0 = primary, 1 = secondary, etc.
-	add_parameter(GNParameter.create_int("monitor", 0, 0, 8, "", "Target display index (0 = primary)"))
+	add_parameter(GNParameter.create_int("monitor", 0, 0, 8, "Monitor", "Target display index (0 = primary)"))
 
 	add_parameter(GNParameter.create_enum("window_mode",
 		PackedStringArray(["Windowed", "Fullscreen", "Borderless"]), 0, "", "Window display mode"))
 
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Window resolution in pixels"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Resolution", "Window resolution in pixels"))
 
 	# Position: (-1, -1) = auto-center on target monitor
-	add_parameter(GNParameter.create_vector2i("position", Vector2i(-1, -1), "", "Window position (-1,-1 = auto center)"))
+	add_parameter(GNParameter.create_vector2i("position", Vector2i(-1, -1), "Position", "Window position (-1,-1 = auto center)"))
 
-	add_parameter(GNParameter.create_bool("always_on_top", false, "", "Keep window above all other windows"))
-	add_parameter(GNParameter.create_bool("vsync", true, "", "Enable vertical sync"))
+	add_parameter(GNParameter.create_bool("always_on_top", false, "Always On Top", "Keep window above all other windows"))
+	add_parameter(GNParameter.create_bool("vsync", true, "Vsync", "Enable vertical sync"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

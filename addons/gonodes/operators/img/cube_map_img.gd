@@ -1,21 +1,22 @@
-class_name CubeMapTOP
-extends GNTopBase
-## Assembles or extracts cubemap faces.
+class_name CubeMapIMG
+extends GNImgBase
+## Assembles or extracts cubemap faces using CPU Image operations.
 ##
 ## Modes:
-##   • Assemble — Takes 6 TOP inputs (+X, -X, +Y, -Y, +Z, -Z) and packs them
-##     into a horizontal cross layout (4×3 grid) output texture.
-##   • Extract — Takes a single equirectangular or cross-layout TOP and outputs
+##   - Assemble: Takes 6 IMG inputs (+X, -X, +Y, -Y, +Z, -Z) and packs them
+##     into a horizontal cross layout (4x3 grid) output image.
+##   - Extract: Takes a single cross-layout or equirectangular IMG and outputs
 ##     one face at a time (select which face via parameter).
-##   • Equirect→Cross — Converts a single equirectangular panorama into the
-##     4×3 cross layout for cubemap usage.
+##   - Equirect to Cross: Converts a single equirectangular panorama into the
+##     4x3 cross layout for cubemap usage.
 ##
 ## Useful for skyboxes, reflection probes, IBL, and environment map authoring.
+## Use ImgToTOP to upload the result to the GPU texture pipeline.
 
 
 static var FACE_NAMES := PackedStringArray(["+X", "-X", "+Y", "-Y", "+Z", "-Z"])
 
-# Cross layout positions (4 cols × 3 rows):  +X right, -X left, +Y top, -Y bottom, +Z front, -Z back
+# Cross layout positions (4 cols x 3 rows):  +X right, -X left, +Y top, -Y bottom, +Z front, -Z back
 static var CROSS_POSITIONS := [
 	Vector2i(2, 1),  # +X
 	Vector2i(0, 1),  # -X
@@ -32,13 +33,13 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	# In Assemble mode, inputs 0-5 are the 6 faces; in Extract/Equirect mode only input 0 is used
-	add_input("in0", GNFamily.Type.TOP, false, "+X face / source panorama", "+X / Source")
-	add_input("in1", GNFamily.Type.TOP, false, "-X face", "-X")
-	add_input("in2", GNFamily.Type.TOP, false, "+Y face", "+Y")
-	add_input("in3", GNFamily.Type.TOP, false, "-Y face", "-Y")
-	add_input("in4", GNFamily.Type.TOP, false, "+Z face", "+Z")
-	add_input("in5", GNFamily.Type.TOP, false, "-Z face", "-Z")
-	add_output("out", GNFamily.Type.TOP, "Cubemap output")
+	add_input("in0", GNFamily.Type.IMG, false, "+X face / source panorama", "+X / Source")
+	add_input("in1", GNFamily.Type.IMG, false, "-X face", "-X")
+	add_input("in2", GNFamily.Type.IMG, false, "+Y face", "+Y")
+	add_input("in3", GNFamily.Type.IMG, false, "-Y face", "-Y")
+	add_input("in4", GNFamily.Type.IMG, false, "+Z face", "+Z")
+	add_input("in5", GNFamily.Type.IMG, false, "-Z face", "-Z")
+	add_output("out", GNFamily.Type.IMG, "Cubemap output image")
 
 
 func _init_parameters() -> void:
@@ -71,7 +72,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 # ===========================================================================
-# Assemble: 6 face inputs → cross layout
+# Assemble: 6 face inputs -> cross layout
 # ===========================================================================
 
 func _cook_assemble(inputs: Array[GNData]) -> GNData:
@@ -79,15 +80,12 @@ func _cook_assemble(inputs: Array[GNData]) -> GNData:
 	var faces: Array[Image] = []
 
 	for i in range(6):
-		var tex: GNTextureData = inputs[i] as GNTextureData if i < inputs.size() and inputs[i] is GNTextureData else null
-		if tex != null and tex.texture != null:
-			var img := tex.texture.get_image()
-			if img != null:
-				img.convert(Image.FORMAT_RGBA8)
-				img.resize(face_size, face_size)
-				faces.append(img)
-			else:
-				faces.append(_blank_face(face_size))
+		var img_data: GNImageData = inputs[i] as GNImageData if i < inputs.size() and inputs[i] is GNImageData else null
+		if img_data != null and img_data.image != null:
+			var img := img_data.image.duplicate()
+			img.convert(Image.FORMAT_RGBA8)
+			img.resize(face_size, face_size)
+			faces.append(img)
 		else:
 			faces.append(_blank_face(face_size))
 
@@ -104,18 +102,16 @@ func _cook_assemble(inputs: Array[GNData]) -> GNData:
 
 
 # ===========================================================================
-# Extract: cross layout input → single face output
+# Extract: cross layout input -> single face output
 # ===========================================================================
 
 func _cook_extract(inputs: Array[GNData]) -> GNData:
-	var tex_in: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
-	if tex_in == null or tex_in.texture == null:
-		GNLogger.warn("CubeMapTOP", "'%s' — no valid input for Extract mode" % id)
+	var img_in: GNImageData = inputs[0] as GNImageData if inputs.size() > 0 and inputs[0] is GNImageData else null
+	if img_in == null or img_in.image == null:
+		GNLogger.warn("CubeMapIMG", "'%s' -- no valid input for Extract mode" % id)
 		return null
 
-	var src_img := tex_in.texture.get_image()
-	if src_img == null:
-		return null
+	var src_img := img_in.image.duplicate()
 	src_img.convert(Image.FORMAT_RGBA8)
 
 	var face_idx: int = get_param_value("extract_face")
@@ -136,11 +132,11 @@ func _cook_extract(inputs: Array[GNData]) -> GNData:
 		face_img = Image.create(cell_w, cell_h, false, Image.FORMAT_RGBA8)
 		face_img.blit_rect(src_img, src_rect, Vector2i.ZERO)
 	elif absf(aspect - 2.0) < 0.2:
-		# Equirectangular (2:1) — sample the requested face
+		# Equirectangular (2:1) -- sample the requested face
 		var eq_size: int = mini(face_size, 2048)
 		face_img = _equirect_face(src_img, face_idx, eq_size)
 	else:
-		GNLogger.warn("CubeMapTOP", "'%s' — unrecognized layout (aspect %.2f)" % [id, aspect])
+		GNLogger.warn("CubeMapIMG", "'%s' -- unrecognized layout (aspect %.2f)" % [id, aspect])
 		return null
 
 	if face_img.get_width() != face_size or face_img.get_height() != face_size:
@@ -150,18 +146,16 @@ func _cook_extract(inputs: Array[GNData]) -> GNData:
 
 
 # ===========================================================================
-# Equirect → Cross: equirectangular panorama → cross layout
+# Equirect -> Cross: equirectangular panorama -> cross layout
 # ===========================================================================
 
 func _cook_equirect_to_cross(inputs: Array[GNData]) -> GNData:
-	var tex_in: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
-	if tex_in == null or tex_in.texture == null:
-		GNLogger.warn("CubeMapTOP", "'%s' — no valid input for Equirect→Cross mode" % id)
+	var img_in: GNImageData = inputs[0] as GNImageData if inputs.size() > 0 and inputs[0] is GNImageData else null
+	if img_in == null or img_in.image == null:
+		GNLogger.warn("CubeMapIMG", "'%s' -- no valid input for Equirect to Cross mode" % id)
 		return null
 
-	var src_img := tex_in.texture.get_image()
-	if src_img == null:
-		return null
+	var src_img := img_in.image.duplicate()
 	src_img.convert(Image.FORMAT_RGBA8)
 
 	var face_size: int = get_param_value("face_size")
@@ -189,12 +183,11 @@ func _blank_face(size: int) -> Image:
 
 
 func _output_image(img: Image, res: Vector2i) -> GNData:
-	var tex := ImageTexture.create_from_image(img)
-	if _cached_tex_data == null:
-		_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = tex
-	_cached_tex_data.resolution = res
-	return _cached_tex_data
+	var data := _prepare_image()
+	data.image = img
+	data.resolution = res
+	data.format = img.get_format()
+	return data
 
 
 ## Samples an equirectangular image for a specific cubemap face.
@@ -213,7 +206,7 @@ func _equirect_face(src: Image, face_idx: int, size: int) -> Image:
 			# Convert face UV to 3D direction
 			var dir: Vector3 = _face_uv_to_dir(face_idx, u, v)
 
-			# 3D direction → equirectangular UV
+			# 3D direction -> equirectangular UV
 			var theta: float = atan2(dir.x, -dir.z)
 			var phi: float = asin(clampf(dir.y, -1.0, 1.0))
 			var eq_u: float = (theta / TAU) + 0.5

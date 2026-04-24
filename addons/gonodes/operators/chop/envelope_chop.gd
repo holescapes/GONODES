@@ -26,7 +26,7 @@ func _init_parameters() -> void:
 		"Sliding window length (samples/frames)"))
 	add_parameter(GNParameter.create_float("decay", 0.95, 0.0, 1.0, 0.01,
 		"Peak Decay", "For Peak mode — how fast the peak decays (0=instant, 1=hold)"))
-	add_parameter(GNParameter.create_bool("reset", false, "", "Clear envelope state"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset", "Clear envelope state"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

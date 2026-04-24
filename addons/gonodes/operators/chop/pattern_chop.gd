@@ -21,11 +21,11 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("type",
 		PackedStringArray(["Ramp", "Sine", "Cosine", "Step", "Random", "Constant"]), 0, "", "Pattern shape"))
 	add_parameter(GNParameter.create_int("length", 100, 1, 16384, "Sample Count", "Number of samples"))
-	add_parameter(GNParameter.create_int("channels", 1, 1, 16, "", "Number of channels"))
+	add_parameter(GNParameter.create_int("channels", 1, 1, 16, "Channels", "Number of channels"))
 	add_parameter(GNParameter.create_float("from_value", 0.0, null, null, 0.01, "From", "Start value of range"))
 	add_parameter(GNParameter.create_float("to_value", 1.0, null, null, 0.01, "To", "End value of range"))
-	add_parameter(GNParameter.create_float("cycles", 1.0, 0.001, null, 0.01, "", "Number of pattern repetitions"))
-	add_parameter(GNParameter.create_int("seed", 0, 0, 99999, "", "Random seed for random pattern"))
+	add_parameter(GNParameter.create_float("cycles", 1.0, 0.001, null, 0.01, "Cycles", "Number of pattern repetitions"))
+	add_parameter(GNParameter.create_int("seed", 0, 0, 99999, "Seed", "Random seed for random pattern"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

@@ -48,7 +48,7 @@ func _init_parameters() -> void:
 		"Poly Sigma", "Gaussian sigma for polynomial expansion"))
 	add_parameter(GNParameter.create_float("mag_scale", 10.0, 0.1, 100.0, 0.1,
 		"Magnitude Scale", "Multiplier for visualizing small motions"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

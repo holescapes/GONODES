@@ -23,7 +23,7 @@ func _init_parameters() -> void:
 		"Radial segments"))
 	add_parameter(GNParameter.create_int("rows", 1, 1, 100, "Rows",
 		"Height subdivisions"))
-	add_parameter(GNParameter.create_bool("caps", true, "",
+	add_parameter(GNParameter.create_bool("caps", true, "Enable caps",
 		"Generate top and bottom caps"))
 	add_parameter(GNParameter.create_enum("orientation",
 		PackedStringArray(["Y (Up)", "X", "Z"]), 0, "", "Tube axis"))

@@ -76,11 +76,19 @@ static int push_cmd(gonodes_instance_s* inst, int type, int patch_id,
 /*  Lifecycle                                                                */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
+static int s_instance_created = 0;
+
 gonodes_instance_t gonodes_create(
     const char* project_path,
     const gonodes_gpu_context_t* gpu_context
 ) {
     if (!project_path) return nullptr;
+
+    if (s_instance_created) {
+        fprintf(stderr, "[GONODES] Only one instance per process is supported. "
+                        "Call gonodes_destroy() before creating a new one.\n");
+        return nullptr;
+    }
 
     auto* inst = (gonodes_instance_s*)calloc(1, sizeof(gonodes_instance_s));
     if (!inst) return nullptr;
@@ -106,6 +114,7 @@ gonodes_instance_t gonodes_create(
     }
 
     gn_set_active_instance(inst);
+    s_instance_created = 1;
     return inst;
 }
 
@@ -125,6 +134,7 @@ void gonodes_destroy(gonodes_instance_t inst) {
     gn_bootstrap_shutdown(inst->godot_handle);
     gn_free_cached(&inst->last_error);
     free(inst);
+    s_instance_created = 0;
 }
 
 
@@ -152,7 +162,11 @@ gonodes_patch_t gonodes_load_patch(
     }
 
     size_t len = strlen(patch_path);
-    if (len >= sizeof(p->path)) len = sizeof(p->path) - 1;
+    if (len >= sizeof(p->path)) {
+        gn_set_error(inst, "Patch path too long (max 4095 bytes)");
+        gn_free_patch(inst, p);
+        return nullptr;
+    }
     memcpy(p->path, patch_path, len);
     p->path[len] = '\0';
 
@@ -797,8 +811,8 @@ const gonodes_volume_data_t* gonodes_get_output_volume(
     const char* node_id
 ) {
     VALIDATE_PATCH(inst, patch, nullptr);
-    /* Volume CPU output not yet supported — use gonodes_get_output_volume_gpu(). */
     (void)node_id;
+    gn_set_error(inst, "CPU volume readback not yet supported; use gonodes_get_output_volume_gpu()");
     return nullptr;
 }
 
@@ -808,8 +822,8 @@ const gonodes_particle_data_t* gonodes_get_output_particles(
     const char* node_id
 ) {
     VALIDATE_PATCH(inst, patch, nullptr);
-    /* Particle CPU output not yet supported — use gonodes_get_output_particles_gpu(). */
     (void)node_id;
+    gn_set_error(inst, "CPU particle readback not yet supported; use gonodes_get_output_particles_gpu()");
     return nullptr;
 }
 
@@ -1092,7 +1106,10 @@ double gonodes_get_transport_time(
 ) {
     if (!inst || !patch) return 0.0;
     gonodes_patch_s* p = gn_find_patch(inst, patch);
-    if (!p) return 0.0;
+    if (!p) {
+        gn_set_error(inst, "Invalid patch handle");
+        return 0.0;
+    }
     return p->transport_time;
 }
 

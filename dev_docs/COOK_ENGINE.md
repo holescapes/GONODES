@@ -108,7 +108,7 @@ Inactive nodes keep their `cached_output` frozen — zero per-frame cost.
 #### Selective Input Activation (`get_active_input_indices`)
 
 By default, BFS follows all wire connections upstream. But some operators only
-read a subset of their inputs — Switch (one input), CubeMapTOP in Extract mode
+read a subset of their inputs — Switch (one input), CubeMapIMG in Extract mode
 (input 0 only), MathCHOP in unary mode (input 0 only).
 
 `GNNode.get_active_input_indices() -> PackedInt32Array` is a virtual method

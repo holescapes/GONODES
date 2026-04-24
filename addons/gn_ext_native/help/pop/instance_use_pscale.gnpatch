@@ -11,7 +11,7 @@
       "parameters": {}
     },
     "instance1": {
-      "type": "InstancePOPNative",
+      "type": "InstanceSOPNative",
       "position": [
         400,
         100

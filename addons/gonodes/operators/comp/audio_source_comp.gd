@@ -24,7 +24,7 @@ func _init_parameters() -> void:
 		"Translate Y", "Source Y position"))
 	add_parameter(GNParameter.create_float("tz", 0.0, null, null, 0.01,
 		"Translate Z", "Source Z position"))
-	add_parameter(GNParameter.create_string("file", "",
+	add_parameter(GNParameter.create_string("file", "Path to the file",
 		"File", "Path to audio file (res:// or user://)"))
 	add_parameter(GNParameter.create_float("volume_db", 0.0, -80.0, 24.0, 0.1,
 		"Volume (dB)", "Playback volume in decibels"))

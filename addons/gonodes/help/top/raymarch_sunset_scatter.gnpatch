@@ -15,7 +15,7 @@
             }
         },
         "raymarch1": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
                 600,
                 100
@@ -128,7 +128,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RaymarchVOL \u2014 Sunset Scattering\n\nStrong forward scattering (hg_g=0.7) with\nwarm orange light creates a sunset/fire look.\nHigh shadow_steps (48) for deep self-shadowing.\nThe light is to the side for dramatic raking.\n\nTry rotating the light with light_yaw to\nsee how scattering direction changes.",
+            "text": "RaymarchTOP \u2014 Sunset Scattering\n\nStrong forward scattering (hg_g=0.7) with\nwarm orange light creates a sunset/fire look.\nHigh shadow_steps (48) for deep self-shadowing.\nThe light is to the side for dramatic raking.\n\nTry rotating the light with light_yaw to\nsee how scattering direction changes.",
             "position": [
                 -100.0,
                 -100.0

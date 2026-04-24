@@ -13,12 +13,12 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "",
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output texture resolution"))
 	add_parameter(GNParameter.create_enum("type",
 		PackedStringArray(["Stripes", "Checkerboard", "Concentric", "Grid", "Dots"]), 0,
 		"Pattern", "Pattern type"))
-	add_parameter(GNParameter.create_float("frequency", 8.0, 0.1, 100.0, 0.1, "",
+	add_parameter(GNParameter.create_float("frequency", 8.0, 0.1, 100.0, 0.1, "Oscillation frequency in Hz",
 		"Pattern repetition frequency"))
 	add_parameter(GNParameter.create_float("duty_cycle", 0.5, 0.0, 1.0, 0.01, "Duty Cycle",
 		"Width ratio of the pattern's primary shape"))
@@ -28,7 +28,7 @@ func _init_parameters() -> void:
 		"Secondary / background colour"))
 	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 0.01, "Rotation",
 		"Pattern rotation in radians"))
-	add_parameter(GNParameter.create_float("softness", 0.02, 0.0, 0.2, 0.001, "",
+	add_parameter(GNParameter.create_float("softness", 0.02, 0.0, 0.2, 0.001, "The softness value",
 		"Edge anti-aliasing / softness"))
 
 

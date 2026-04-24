@@ -17,7 +17,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("output",
 		PackedStringArray(["Magnitude", "Horizontal (dx)", "Vertical (dy)"]), 0, "",
 		"Which gradient component to output"))
-	add_parameter(GNParameter.create_float("strength", 1.0, 0.1, 20.0, 0.1, "",
+	add_parameter(GNParameter.create_float("strength", 1.0, 0.1, 20.0, 0.1, "Effect strength",
 		"Gradient amplification"))
 
 

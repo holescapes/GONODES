@@ -52,7 +52,7 @@ func _init_parameters() -> void:
 		"Label", "Text string (for Text mode)"))
 	add_parameter(GNParameter.create_float("font_scale", 1.0, 0.1, 10.0, 0.1,
 		"Font Scale", "Text font size multiplier"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

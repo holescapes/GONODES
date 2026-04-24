@@ -20,6 +20,9 @@
 #include <cstdio>
 #include <cinttypes>
 
+/* Forward declaration — defined later in this file. */
+static gonodes_instance_s* s_active_inst;
+
 #if defined(_WIN32)
   #include <windows.h>
   #include <sys/stat.h>
@@ -42,16 +45,23 @@ char* gn_strdup(const char* src) {
     return dst;
 }
 
+/* Sentinel address: if last_error == s_oom_sentinel, skip free(). */
+static char s_oom_sentinel[] = "[Out of Memory]";
+
 void gn_free_cached(char** ptr) {
-    if (ptr && *ptr) {
+    if (ptr && *ptr && *ptr != s_oom_sentinel) {
         free(*ptr);
         *ptr = nullptr;
     }
 }
 
 void gn_set_error(gonodes_instance_s* inst, const char* msg) {
+    if (!inst) return;
     gn_free_cached(&inst->last_error);
     inst->last_error = gn_strdup(msg);
+    if (!inst->last_error) {
+        inst->last_error = s_oom_sentinel;
+    }
 }
 
 uint64_t gn_file_mtime(const char* path) {
@@ -73,14 +83,15 @@ uint64_t gn_file_mtime(const char* path) {
 int gn_cmd_push(gonodes_instance_s* inst, const gn_command* cmd) {
     if (!inst || !cmd) return 0;
     gn_command_queue* q = &inst->cmd_queue;
-    int next = (q->write_pos + 1) % GN_CMD_QUEUE_SIZE;
-    if (next == q->read_pos) {
+    int cur = q->write_pos.load(std::memory_order_relaxed);
+    int next = (cur + 1) % GN_CMD_QUEUE_SIZE;
+    if (next == q->read_pos.load(std::memory_order_acquire)) {
         /* Queue full. */
         gn_set_error(inst, "Command queue full");
         return 0;
     }
-    q->commands[q->write_pos] = *cmd;
-    q->write_pos = next;
+    q->commands[cur] = *cmd;
+    q->write_pos.store(next, std::memory_order_release);
     return 1;
 }
 
@@ -414,7 +425,8 @@ int gn_bytes_per_pixel(int format) {
 void gn_track_staging_buf(gonodes_instance_s* inst, void* buf) {
     if (!inst || !buf) return;
     if (inst->staging_buf_count >= GONODES_MAX_STAGING_BUFS) {
-        fprintf(stderr, "[libgonodes] staging_bufs overflow, leaking buffer\n");
+        gn_set_error(inst, "Staging buffer pool exhausted (128 max)");
+        free(buf);
         return;
     }
     inst->staging_bufs[inst->staging_buf_count++] = buf;
@@ -474,8 +486,7 @@ void gn_patch_set_chop_output(gonodes_patch_s* p, const char* node_id,
     int to_copy = count;
     if (to_copy > 4096) {
         to_copy = 4096;
-        /* Warn once per overflow to help diagnose truncation. */
-        fprintf(stderr, "[libgonodes] CHOP output '%s.%s' truncated: %d → 4096 samples\n",
+        fprintf(stderr, "[libgonodes] CHOP output '%s.%s' truncated: %d -> 4096 samples\n",
                 node_id, channel_name, count);
     }
 

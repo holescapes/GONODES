@@ -410,7 +410,7 @@ func _ensure_top_viewport(size: Vector2i) -> void:
 	var canvas := ColorRect.new()
 	canvas.name = "Canvas"
 	canvas.material = _material
-	canvas.anchors_preset = Control.PRESET_FULL_RECT
+	canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_viewport.add_child(canvas)
 
 	_cached_tex = GNTextureData.new()

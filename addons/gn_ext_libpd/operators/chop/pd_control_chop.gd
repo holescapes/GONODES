@@ -19,9 +19,9 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("patch", "",
+	add_parameter(GNParameter.create_string("patch", "The patch string",
 		"Patch", "Path to Pure Data (.pd) control patch"))
-	add_parameter(GNParameter.create_string("send_prefix", "",
+	add_parameter(GNParameter.create_string("send_prefix", "The send prefix string",
 		"Send Prefix", "Prefix for Pd receiver names (e.g., 'ctrl_' maps channel 'x' → 'ctrl_x')"))
 	add_parameter(GNParameter.create_string("receive_names", "out1 out2 out3",
 		"Receive Names", "Space-separated list of Pd sender names to listen for"))

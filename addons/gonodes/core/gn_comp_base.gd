@@ -116,19 +116,6 @@ static func _resolve_scene_node_r(node: GNNode, net: GNNetwork,
 	return null
 
 
-## Resolves the upstream scene node and extracts its MeshInstance3D.
-## Searches the node itself and its direct children.
-static func resolve_mesh_upstream(node: GNNode, net: GNNetwork) -> MeshInstance3D:
-	var scene_nd: Node3D = resolve_scene_node_upstream(node, net)
-	if scene_nd == null:
-		return null
-	if scene_nd is MeshInstance3D:
-		return scene_nd as MeshInstance3D
-	for child in scene_nd.get_children():
-		if child is MeshInstance3D:
-			return child as MeshInstance3D
-	return null
-
 
 ## Instance convenience: resolves the scene node from an upstream input port.
 ## Reads cached_output as GNCompData — works for any upstream node type.

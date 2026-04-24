@@ -118,24 +118,3 @@ static func consume_dirty() -> bool:
 		_dirty = false
 		return true
 	return false
-
-
-# ─── Serialization ───────────────────────────────────────────────────────────
-
-## Serializes user-defined functions to a dictionary for saving.
-## Built-in functions are NOT serialized — they're re-registered on load.
-## Note: Only GDScript expression-string functions are serializable.
-static func serialize_custom() -> Array[Dictionary]:
-	var result: Array[Dictionary] = []
-	for fname in _functions:
-		var entry: FuncEntry = _functions[fname]
-		if entry.is_builtin:
-			continue
-		# We can only serialize if the function is a static method or lambda string
-		# For now, store metadata; actual callable storage requires GDScript eval
-		result.append({
-			"name": fname,
-			"description": entry.description,
-			"arg_names": entry.arg_names,
-		})
-	return result

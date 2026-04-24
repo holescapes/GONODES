@@ -26,7 +26,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_file("file", "",
+	add_parameter(GNParameter.create_file("file", "Path to the file",
 		PackedStringArray(["*.obj", "*.glb", "*.gltf", "*.tres", "*.res"]),
 		"File", "Path to geometry file (OBJ, glTF, .tres, .res)"))
 	add_parameter(GNParameter.create_bool("reload", false, "Reload",

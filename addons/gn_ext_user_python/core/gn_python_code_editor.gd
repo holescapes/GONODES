@@ -208,7 +208,7 @@ func open(node, initial_code: String) -> void:
 	_clear_error_marks()
 	_set_status("Ctrl+R = Reload  |  Ctrl+Enter = Done  |  Escape = Cancel")
 
-	popup_centered()
+	_popup_clamped()
 	_focus_end()
 
 

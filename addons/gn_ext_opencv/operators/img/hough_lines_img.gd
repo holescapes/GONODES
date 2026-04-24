@@ -45,7 +45,7 @@ func _init_parameters() -> void:
 		"Color", "Line drawing color"))
 	add_parameter(GNParameter.create_int("thickness", 2, 1, 10,
 		"Thickness", "Line drawing thickness"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

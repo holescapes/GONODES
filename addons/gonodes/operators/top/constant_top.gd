@@ -12,8 +12,8 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "", "Output texture resolution in pixels"))
-	add_parameter(GNParameter.create_color("color", Color.BLACK, "", "Fill color (RGBA)"))
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Resolution", "Output texture resolution in pixels"))
+	add_parameter(GNParameter.create_color("color", Color.BLACK, "Color", "Fill color (RGBA)"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

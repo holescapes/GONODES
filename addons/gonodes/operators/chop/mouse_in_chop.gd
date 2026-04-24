@@ -40,7 +40,7 @@ func _init_parameters() -> void:
 		"Buttons", "Output mouse button channels (lmb, rmb, mmb)"))
 	add_parameter(GNParameter.create_bool("scroll", true,
 		"Scroll", "Output accumulated scroll wheel channel"))
-	add_parameter(GNParameter.create_string("window", "",
+	add_parameter(GNParameter.create_string("window", "Window ID to capture from (0 = main)",
 		"Window", "WindowOUT node name to read from (empty = global)"))
 
 

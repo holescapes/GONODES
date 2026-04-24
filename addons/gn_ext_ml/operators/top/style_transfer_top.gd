@@ -30,14 +30,14 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("model_path",
 		"res://addons/gn_ext_ml/models/style_mosaic.onnx",
 		"Model", "Path to style transfer ONNX model"))
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "",
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output resolution"))
 	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 1.0,
 		0.01, "Strength", "Blend between original (0) and stylized (1)"))
 	add_parameter(GNParameter.create_enum("provider",
 		PackedStringArray(["CPU", "DirectML", "CUDA", "CoreML"]), 0,
 		"Provider", "ONNX execution provider"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable style transfer"))
 
 

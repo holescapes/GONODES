@@ -16,7 +16,7 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("distance", 0.1, -100.0, 100.0, 0.01,
 		"Distance", "Displacement distance along normals"))
-	add_parameter(GNParameter.create_bool("recompute_normals", true, "",
+	add_parameter(GNParameter.create_bool("recompute_normals", true, "Enable recompute normals",
 		"Recompute normals after displacement"))
 
 

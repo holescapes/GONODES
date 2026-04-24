@@ -903,17 +903,6 @@ func from_dict(d: Dictionary) -> void:
 	match mode_str:
 		"EXPRESSION":
 			mode = Mode.EXPRESSION
-		"BIND":
-			# Legacy migration: convert old BIND to expression par() reference
-			mode = Mode.EXPRESSION
-			var bsn: String = d.get("bind_source_node", "")
-			var bsp: String = d.get("bind_source_param", "")
-			if not bsn.is_empty() and not bsp.is_empty():
-				expression = 'par("%s", "%s")' % [bsn, bsp]
-		"EXPORT":
-			# Legacy migration: EXPORT params revert to CONSTANT;
-			# users should re-create as chop() expressions.
-			mode = Mode.CONSTANT
 		_:
 			mode = Mode.CONSTANT
 
@@ -948,5 +937,3 @@ func from_dict(d: Dictionary) -> void:
 	# Restore pulse flag
 	if d.has("is_pulse"):
 		is_pulse = d["is_pulse"]
-
-	# Legacy bind info is handled above in the mode restore block

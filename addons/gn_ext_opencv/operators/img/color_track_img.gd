@@ -46,7 +46,7 @@ func _init_parameters() -> void:
 		"Val Max", "Maximum value"))
 	add_parameter(GNParameter.create_bool("invert", false,
 		"Invert", "Invert the output mask"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

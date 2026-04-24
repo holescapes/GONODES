@@ -20,11 +20,11 @@ func _init_parameters() -> void:
 		"Profile Scale", "Uniform scale of the cross-section"))
 	add_parameter(GNParameter.create_int("profile_segs", 12, 3, 128,
 		"Profile Segments", "Circle segments if no profile input"))
-	add_parameter(GNParameter.create_bool("close_profile", true, "",
+	add_parameter(GNParameter.create_bool("close_profile", true, "Enable close profile",
 		"Close the profile ring"))
-	add_parameter(GNParameter.create_bool("close_backbone", false, "",
+	add_parameter(GNParameter.create_bool("close_backbone", false, "Enable close backbone",
 		"Close the backbone (loop)"))
-	add_parameter(GNParameter.create_bool("end_caps", false, "",
+	add_parameter(GNParameter.create_bool("end_caps", false, "Enable end caps",
 		"Generate end caps"))
 
 

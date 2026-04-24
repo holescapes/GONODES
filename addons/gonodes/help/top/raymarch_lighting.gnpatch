@@ -8,20 +8,28 @@
                 100,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "resolution": {
+                    "value": 64
+                }
+            }
         },
         "raymarch1": {
-            "type": "RaymarchVOL",
+            "type": "RaymarchTOP",
             "position": [
-                400,
+                600,
                 100
             ],
             "parameters": {
                 "width": {
-                    "value": 512
+                    "value": 512,
+                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "height": {
-                    "value": 512
+                    "value": 512,
+                    "expression": "(512 * (0.5 + 0.5 * sin(time * 2.0)))",
+                    "mode": "EXPRESSION"
                 },
                 "max_steps": {
                     "value": 128
@@ -36,23 +44,38 @@
                     "value": 10.0
                 },
                 "cam_dist": {
-                    "value": 1.5
+                    "value": 1.8
                 },
                 "cam_yaw": {
-                    "value": 0.0
+                    "value": 30.0
                 },
                 "cam_pitch": {
-                    "value": 20.0
+                    "value": 25.0
                 },
-                "fov": {
+                "light_yaw": {
+                    "value": 45.0
+                },
+                "light_pitch": {
                     "value": 60.0
+                },
+                "light_intensity": {
+                    "value": 3.0
+                },
+                "hg_g": {
+                    "value": 0.4
+                },
+                "shadow_steps": {
+                    "value": 32
+                },
+                "ambient": {
+                    "value": 0.1
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                800,
+                1100,
                 100
             ],
             "parameters": {
@@ -87,14 +110,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Raymarch VOL — Basic\n\nRender volume as density cloud via GPU raymarching into a TOP texture.\nUsing: width=512, height=512, max_steps=128, step_size=0.01.",
+            "text": "RaymarchTOP \u2014 Multi-Pass Lighting\n\nVolume rendering with directional light,\nshadow rays, Henyey-Greenstein phase function,\nand ambient contribution.\n\nAdjust light_yaw/pitch and hg_g for\ndifferent scattering effects.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                500.0,
-                140.0
+                450.0,
+                120.0
             ],
             "color": [
                 1.0,

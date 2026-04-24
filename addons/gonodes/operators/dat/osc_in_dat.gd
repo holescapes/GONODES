@@ -38,7 +38,7 @@ func _init_parameters() -> void:
 		"Maximum stored messages (ring buffer)"))
 	add_parameter(GNParameter.create_bool("active", true, "Active",
 		"Enable/disable the OSC listener"))
-	add_parameter(GNParameter.create_string("address_filter", "", "Filter",
+	add_parameter(GNParameter.create_string("address_filter", "Address Filter", "Filter",
 		"Only accept addresses matching this prefix (empty = all)"))
 	add_parameter(GNParameter.create_bool("clear", false, "Clear",
 		"Pulse: clear all stored messages"))

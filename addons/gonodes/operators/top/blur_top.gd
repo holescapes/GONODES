@@ -23,7 +23,7 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("size", 5.0, 0.0, 100.0, 0.1, "Blur Size", "Blur radius in pixels"))
-	add_parameter(GNParameter.create_int("quality", 4, 1, 16, "", "Samples within the blur radius (higher = smoother)"))
+	add_parameter(GNParameter.create_int("quality", 4, 1, 16, "Quality", "Samples within the blur radius (higher = smoother)"))
 	add_parameter(GNParameter.create_enum("method",
 		PackedStringArray(["Gaussian", "Box", "Triangle", "Sinc", "Hanning", "Blackman", "Bump"]), 0, "", "Blur filter type"))
 

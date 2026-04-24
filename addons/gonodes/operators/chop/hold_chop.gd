@@ -19,10 +19,10 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "", "Trigger threshold"))
+	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "Threshold", "Trigger threshold"))
 	add_parameter(GNParameter.create_bool("hold_on_start", true,
 		"Capture initial value on first cook", "Capture value on first cook"))
-	add_parameter(GNParameter.create_bool("reset", false, "", "Clear held values"))
+	add_parameter(GNParameter.create_bool("reset", false, "Reset", "Clear held values"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

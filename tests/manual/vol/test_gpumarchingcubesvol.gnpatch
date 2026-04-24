@@ -11,7 +11,7 @@
             "parameters": {}
         },
         "test": {
-            "class_name": "GPUMarchingCubesVOL",
+            "class_name": "GPUMarchingCubesSOP",
             "position": [
                 350,
                 0
@@ -31,7 +31,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MANUAL TEST: NoiseVOL \u2192 GPUMarchingCubesVOL\n\nVerify: extracts isosurface mesh on GPU; compare with CPU MarchingCubesVOL",
+            "text": "MANUAL TEST: NoiseVOL \u2192 GPUMarchingCubesSOP\n\nVerify: extracts isosurface mesh on GPU; compare with CPU MarchingCubesVOL",
             "position": [
                 -120.0,
                 -140.0

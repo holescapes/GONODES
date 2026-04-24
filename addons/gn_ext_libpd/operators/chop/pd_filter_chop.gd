@@ -18,7 +18,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("patch", "",
+	add_parameter(GNParameter.create_string("patch", "The patch string",
 		"Patch", "Path to Pure Data (.pd) effect patch"))
 	add_parameter(GNParameter.create_float("param1", 0.0, -1000.0, 1000.0, 0.01,
 		"Param 1", "Send to 'param1' receiver in Pd"))

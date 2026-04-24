@@ -292,9 +292,9 @@ Both the **on-node inline preview** and the **docked viewer panel** display
 content based on the **actual output data type**, not the operator family.
 This means cross-family nodes automatically get the correct preview:
 
-- A VOL operator that outputs `GNTextureData` (e.g. RaymarchVOL) shows a
+- A VOL operator that outputs `GNTextureData` (e.g. RaymarchTOP) shows a
   texture thumbnail, not volume stats.
-- A POP operator that outputs `GNGeoData` (e.g. InstancePOP) shows vertex
+- A POP operator that outputs `GNGeoData` (e.g. InstanceSOP) shows vertex
   counts, not particle counts.
 - An IMG operator with a CHOP on port 1 gets `GNChannelRenderer` for that
   port automatically.

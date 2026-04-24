@@ -50,7 +50,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("dist_coeffs",
 		"0,0,0,0,0",
 		"Dist Coeffs", "Distortion k1,k2,p1,p2,k3"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

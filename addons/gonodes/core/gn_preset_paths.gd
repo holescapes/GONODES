@@ -11,10 +11,6 @@ extends RefCounted
 ##   Factory (read-only):  res://addons/gonodes/presets/<category>/
 ##   Extensions:           res://addons/gn_ext_*/presets/<category>/
 ##   User (read-write):    user://gonodes/presets/<category>/
-##
-## On first access the user root is created.  Legacy directories
-## (user://gonodes_param_presets/, user://gonodes_presets/,
-## user://gonodes_assets/) are auto-migrated once.
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -32,16 +28,8 @@ const CATEGORY_PARAMS := "params"
 const CATEGORY_CODE := "code"
 const CATEGORY_ASSETS := "assets"
 
-## Legacy user directories (pre-unification).
-const _LEGACY_PARAM_DIR := "user://gonodes_param_presets/"
-const _LEGACY_CODE_DIR := "user://gonodes_presets/"
-const _LEGACY_ASSET_DIR := "user://gonodes_assets/"
-
-## Migration sentinel file to avoid re-scanning every startup.
-const _MIGRATION_SENTINEL := "user://gonodes/.migrated_v1"
-
-## Whether migration has already run this session.
-static var _migrated_this_session: bool = false
+## Whether dirs have already been created this session.
+static var _dirs_created_this_session: bool = false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -152,81 +140,17 @@ static func get_asset_save_dir() -> String:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Migration — Legacy Directory Auto-Move
+# Directory Initialization
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Ensures user directories exist and migrates legacy paths once.
+## Ensures user directories exist.
 ## Called automatically on first directory access each session.
 static func _ensure_user_dirs() -> void:
-	if _migrated_this_session:
+	if _dirs_created_this_session:
 		return
-	_migrated_this_session = true
+	_dirs_created_this_session = true
 
-	# Create canonical directory tree
 	for subdir in [CATEGORY_PARAMS, CATEGORY_CODE, CATEGORY_ASSETS]:
 		var path: String = USER_ROOT + subdir
 		if not DirAccess.dir_exists_absolute(path):
 			DirAccess.make_dir_recursive_absolute(path)
-
-	# Run migration if sentinel is absent
-	if not FileAccess.file_exists(_MIGRATION_SENTINEL):
-		_run_migration()
-		# Write sentinel
-		var sentinel_dir := _MIGRATION_SENTINEL.get_base_dir()
-		if not DirAccess.dir_exists_absolute(sentinel_dir):
-			DirAccess.make_dir_recursive_absolute(sentinel_dir)
-		var f := FileAccess.open(_MIGRATION_SENTINEL, FileAccess.WRITE)
-		if f != null:
-			f.store_string("migrated %s" % Time.get_datetime_string_from_system())
-			f.close()
-
-
-## Migrates files from legacy directories to the new canonical layout.
-static func _run_migration() -> void:
-	# 1. user://gonodes_param_presets/ → user://gonodes/presets/params/
-	_migrate_dir(_LEGACY_PARAM_DIR, USER_ROOT + CATEGORY_PARAMS + "/")
-
-	# 2. user://gonodes_presets/ → user://gonodes/presets/code/
-	_migrate_dir(_LEGACY_CODE_DIR, USER_ROOT + CATEGORY_CODE + "/")
-
-	# 3. user://gonodes_assets/ → user://gonodes/presets/assets/
-	_migrate_dir(_LEGACY_ASSET_DIR, USER_ROOT + CATEGORY_ASSETS + "/")
-
-	GNLogger.info("PresetPaths", "Legacy preset migration complete")
-
-
-## Recursively copies all files/folders from [param src] to [param dst].
-## Does NOT delete the source (user can clean up manually if they want).
-## Skips files that already exist at the destination to avoid overwriting.
-static func _migrate_dir(src: String, dst: String) -> void:
-	if not DirAccess.dir_exists_absolute(src):
-		return
-
-	GNLogger.info("PresetPaths", "Migrating '%s' → '%s'" % [src, dst])
-	var dir := DirAccess.open(src)
-	if dir == null:
-		return
-
-	if not DirAccess.dir_exists_absolute(dst):
-		DirAccess.make_dir_recursive_absolute(dst)
-
-	dir.list_dir_begin()
-	var entry := dir.get_next()
-	while entry != "":
-		if entry.begins_with("."):
-			entry = dir.get_next()
-			continue
-		var src_path := src + entry
-		var dst_path := dst + entry
-		if dir.current_is_dir():
-			_migrate_dir(src_path + "/", dst_path + "/")
-		else:
-			if not FileAccess.file_exists(dst_path):
-				var parent_dir := dst_path.get_base_dir()
-				if not DirAccess.dir_exists_absolute(parent_dir):
-					DirAccess.make_dir_recursive_absolute(parent_dir)
-				var d := DirAccess.open(src)
-				if d != null:
-					d.copy(src_path, dst_path)
-		entry = dir.get_next()
-	dir.list_dir_end()

@@ -157,56 +157,56 @@ func test_fluid_vol_output_type() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  MarchingCubesVOL
+#  MarchingCubesSOP (reclassified from MarchingCubesVOL — Rule 25.28)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_marching_cubes_vol_instantiation() -> void:
-	var node := _make_node(MarchingCubesVOL.new(), "mc1")
-	GNTestAssert.assert_not_null(node, "MarchingCubesVOL created")
+func test_marching_cubes_sop_instantiation() -> void:
+	var node := _make_node(MarchingCubesSOP.new(), "mc1")
+	GNTestAssert.assert_not_null(node, "MarchingCubesSOP created")
 
-func test_marching_cubes_vol_params() -> void:
-	var node := _make_node(MarchingCubesVOL.new(), "mc2")
+func test_marching_cubes_sop_params() -> void:
+	var node := _make_node(MarchingCubesSOP.new(), "mc2")
 	GNTestAssert.assert_not_null(node.get_parameter("threshold"), "has threshold param")
 
-func test_marching_cubes_vol_output_family() -> void:
-	var node := _make_node(MarchingCubesVOL.new(), "mc3")
-	# MarchingCubesVOL outputs SOP (GNGeoData), not VOL
+func test_marching_cubes_sop_output_family() -> void:
+	var node := _make_node(MarchingCubesSOP.new(), "mc3")
+	# MarchingCubesSOP outputs SOP (GNGeoData)
 	var has_sop_out := false
 	for p in node.output_ports:
 		if p.family == GNFamily.Type.SOP:
 			has_sop_out = true
 	GNTestAssert.assert_true(has_sop_out, "has SOP output port")
 
-func test_marching_cubes_vol_no_input() -> void:
-	var node := _make_node(MarchingCubesVOL.new(), "mc4")
+func test_marching_cubes_sop_no_input() -> void:
+	var node := _make_node(MarchingCubesSOP.new(), "mc4")
 	var out := _cook_no_input(node)
 	GNTestAssert.assert_true(true, "no crash on null input")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  RaymarchVOL
+#  RaymarchTOP (reclassified from RaymarchVOL — Rule 25.28)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_raymarch_vol_instantiation() -> void:
-	var node := _make_node(RaymarchVOL.new(), "rm1")
-	GNTestAssert.assert_not_null(node, "RaymarchVOL created")
+func test_raymarch_top_instantiation() -> void:
+	var node := _make_node(RaymarchTOP.new(), "rm1")
+	GNTestAssert.assert_not_null(node, "RaymarchTOP created")
 
-func test_raymarch_vol_params() -> void:
-	var node := _make_node(RaymarchVOL.new(), "rm2")
+func test_raymarch_top_params() -> void:
+	var node := _make_node(RaymarchTOP.new(), "rm2")
 	GNTestAssert.assert_not_null(node.get_parameter("max_steps"), "has max_steps param")
 	GNTestAssert.assert_not_null(node.get_parameter("density_scale"), "has density_scale param")
 
-func test_raymarch_vol_output_family() -> void:
-	var node := _make_node(RaymarchVOL.new(), "rm3")
-	# RaymarchVOL outputs TOP (texture), not VOL
+func test_raymarch_top_output_family() -> void:
+	var node := _make_node(RaymarchTOP.new(), "rm3")
+	# RaymarchTOP outputs TOP (texture)
 	var has_top_out := false
 	for p in node.output_ports:
 		if p.family == GNFamily.Type.TOP:
 			has_top_out = true
 	GNTestAssert.assert_true(has_top_out, "has TOP output port")
 
-func test_raymarch_vol_no_input() -> void:
-	var node := _make_node(RaymarchVOL.new(), "rm4")
+func test_raymarch_top_no_input() -> void:
+	var node := _make_node(RaymarchTOP.new(), "rm4")
 	var out := _cook_no_input(node)
 	GNTestAssert.assert_true(true, "no crash on null input")
 

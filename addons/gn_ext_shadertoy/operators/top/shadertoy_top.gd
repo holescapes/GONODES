@@ -65,9 +65,9 @@ func _init_parameters() -> void:
 	add_parameter(fetch_param)
 	add_parameter(GNParameter.create_vector2i("resolution",
 		Vector2i(512, 512), "", "Output resolution for generator shaders"))
-	add_parameter(GNParameter.create_string("shadertoy_url", "",
+	add_parameter(GNParameter.create_string("shadertoy_url", "The shadertoy url string",
 		"Shadertoy URL", "Shadertoy page URL or shader ID (e.g. Ms2SD1)"))
-	add_parameter(GNParameter.create_string("shadertoy_api_key", "",
+	add_parameter(GNParameter.create_string("shadertoy_api_key", "The shadertoy api key string",
 		"API Key", "Your Shadertoy API key — register at shadertoy.com/myapps"))
 	add_parameter(GNParameter.create_string("shadertoy_code",
 		DEFAULT_SHADERTOY_CODE.strip_edges(),
@@ -291,8 +291,6 @@ func _rebuild_uniform_params(godot_code: String) -> void:
 				param.resolved_value = old["value"]
 
 		add_parameter(param)
-		param.value_changed.connect(_on_parameter_changed)
-		param.mode_changed.connect(_on_parameter_mode_changed)
 		_dynamic_param_names.append(ui.uniform_name)
 
 	GNLogger.info("ShadertoyTOP",

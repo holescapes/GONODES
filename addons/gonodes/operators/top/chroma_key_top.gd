@@ -17,8 +17,8 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("key_mode",
 		PackedStringArray(["Chroma", "Luma"]), 0, "Key Mode", "Chroma (color-based) or Luma (brightness-based) keying"))
 	add_parameter(GNParameter.create_color("key_color", Color(0.0, 1.0, 0.0), "Key Color", "Color to remove (default green)"))
-	add_parameter(GNParameter.create_float("threshold", 0.4, 0.0, 1.0, 0.01, "", "Similarity threshold — lower = tighter key"))
-	add_parameter(GNParameter.create_float("smoothness", 0.08, 0.0, 0.5, 0.01, "", "Edge softness ramp width"))
+	add_parameter(GNParameter.create_float("threshold", 0.4, 0.0, 1.0, 0.01, "Threshold", "Similarity threshold — lower = tighter key"))
+	add_parameter(GNParameter.create_float("smoothness", 0.08, 0.0, 0.5, 0.01, "Smoothness", "Edge softness ramp width"))
 	add_parameter(GNParameter.create_float("spill_reduction", 0.5, 0.0, 1.0, 0.01, "Spill Reduction", "Suppress key color bleeding into edges"))
 
 

@@ -1,13 +1,15 @@
-class_name RaymarchVOL
-extends GNVolBase
-## Volume ray-march renderer → 2D image (TOP output).
-## Dispatches a compute shader that front-to-back composites the density field.
+class_name RaymarchTOP
+extends GNTopBase
+## Volume ray-march renderer: dispatches a compute shader that front-to-back
+## composites a density field into a 2D texture (TOP output).
+##
+## Consumes VOL data but outputs TOP texture (Rule 25.28).
+## Requires compute shaders (forward_plus / mobile renderers).
 
 var _out_tex: GNTextureData = null
 
 
 func _init() -> void:
-	super._init()
 	node_type = "raymarch"
 
 
@@ -55,12 +57,24 @@ func _init_parameters() -> void:
 		"Emission Color", "Self-emission color (density-proportional glow)"))
 
 
+func requires_compute() -> bool:
+	return true
+
+
+func has_cpu_fallback() -> bool:
+	return true
+
+
+func supported_renderers() -> PackedStringArray:
+	return PackedStringArray(["forward_plus", "mobile"])
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
-	var vol: GNVolumeData = _get_input_vol(inputs, 0)
+	var vol: GNVolumeData = inputs[0] as GNVolumeData if inputs.size() > 0 and inputs[0] is GNVolumeData else null
 	if vol == null or not vol.has_volume():
 		return null
 
-	var ctx := _get_ctx()
+	var ctx := GNGpuContext.get_context()
 	if ctx.rd == null:
 		return null
 
@@ -125,7 +139,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var sampler: RID = ctx.create_linear_sampler()
 
-	# Push constants: camera + lighting (40 fields → 160 bytes)
+	# Push constants: camera + lighting (40 fields -> 160 bytes)
 	var pc := PackedByteArray()
 	pc.resize(160)
 	pc.encode_s32(0, w)
@@ -182,7 +196,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.free_rid(us)
 	ctx.rd.free_rid(sampler)
 
-	# Read back 2D texture → Image → ImageTexture → GNTextureData
+	# Read back 2D texture -> Image -> ImageTexture -> GNTextureData
 	var bytes: PackedByteArray = ctx.rd.texture_get_data(out_tex, 0)
 	ctx.rd.free_rid(out_tex)
 
@@ -198,7 +212,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 func _cook_cpu(inputs: Array[GNData]) -> GNData:
-	var vol := _get_input_vol_cpu(inputs, 0)
+	var vol: GNVolumeData = null
+	if inputs.size() > 0 and inputs[0] is GNVolumeData:
+		var vd := inputs[0] as GNVolumeData
+		if vd.is_cpu:
+			vol = vd
 	if vol == null or not vol.has_volume():
 		return null
 
@@ -309,3 +327,46 @@ func _cook_cpu(inputs: Array[GNData]) -> GNData:
 	_out_tex.resolution = Vector2i(w, h)
 	_out_tex.format = Image.FORMAT_RGBA8
 	return _out_tex
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Volume Sampling Helpers (inlined from GNVolBase for cross-family access)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func _vol_sample(data: PackedFloat32Array, x: int, y: int, z: int,
+		res: Vector3i, channels: int = 1) -> float:
+	x = clampi(x, 0, res.x - 1)
+	y = clampi(y, 0, res.y - 1)
+	z = clampi(z, 0, res.z - 1)
+	return data[(z * res.y * res.x + y * res.x + x) * channels]
+
+
+func _vol_sample_trilinear(data: PackedFloat32Array, uvw: Vector3,
+		res: Vector3i, channels: int = 1) -> float:
+	var fx: float = uvw.x * (res.x - 1)
+	var fy: float = uvw.y * (res.y - 1)
+	var fz: float = uvw.z * (res.z - 1)
+	var x0: int = int(fx)
+	var y0: int = int(fy)
+	var z0: int = int(fz)
+	var x1: int = mini(x0 + 1, res.x - 1)
+	var y1: int = mini(y0 + 1, res.y - 1)
+	var z1: int = mini(z0 + 1, res.z - 1)
+	var xf: float = fx - x0
+	var yf: float = fy - y0
+	var zf: float = fz - z0
+	var c000: float = _vol_sample(data, x0, y0, z0, res, channels)
+	var c100: float = _vol_sample(data, x1, y0, z0, res, channels)
+	var c010: float = _vol_sample(data, x0, y1, z0, res, channels)
+	var c110: float = _vol_sample(data, x1, y1, z0, res, channels)
+	var c001: float = _vol_sample(data, x0, y0, z1, res, channels)
+	var c101: float = _vol_sample(data, x1, y0, z1, res, channels)
+	var c011: float = _vol_sample(data, x0, y1, z1, res, channels)
+	var c111: float = _vol_sample(data, x1, y1, z1, res, channels)
+	var c00: float = lerpf(c000, c100, xf)
+	var c10: float = lerpf(c010, c110, xf)
+	var c01: float = lerpf(c001, c101, xf)
+	var c11: float = lerpf(c011, c111, xf)
+	var c0: float = lerpf(c00, c10, yf)
+	var c1: float = lerpf(c01, c11, yf)
+	return lerpf(c0, c1, zf)

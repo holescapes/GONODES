@@ -21,16 +21,16 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.TOP, "Received video frame")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("source", "", "Source",
+	add_parameter(GNParameter.create_string("source", "Source", "Source",
 		"NDI source name (e.g. 'OBS (DESKTOP-ABC)')"))
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1920, 1080), "",
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1920, 1080), "Output resolution",
 		"Output resolution (auto-set from stream when 0×0)"))
 	add_parameter(GNParameter.create_enum("bandwidth",
 		PackedStringArray(["Highest", "Audio Only", "Lowest"]), 0, "Bandwidth",
 		"NDI receive quality"))
 	add_parameter(GNParameter.create_int("timeout_ms", 16, 0, 1000, "Timeout",
 		"Frame capture timeout in milliseconds"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable receiving"))
 
 

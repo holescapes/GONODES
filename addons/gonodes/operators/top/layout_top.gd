@@ -12,12 +12,12 @@ func _init_ports() -> void:
 	# Dynamic ports — start with 2, grow on connect
 	add_input("in0", GNFamily.Type.TOP, false, "Input texture 0", "Input 0")
 	add_input("in1", GNFamily.Type.TOP, false, "Input texture 1", "Input 1")
-	add_input("", GNFamily.Type.TOP, false, "")  # trailing empty for auto-grow
+	add_input("", GNFamily.Type.TOP, false, "Additional input")  # trailing empty for auto-grow
 	add_output("out", GNFamily.Type.TOP, "Mosaic texture")
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1024, 512), "",
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(1024, 512), "Output resolution",
 		"Output resolution"))
 	add_parameter(GNParameter.create_int("columns", 2, 1, 8, "Columns",
 		"Number of columns in the grid"))

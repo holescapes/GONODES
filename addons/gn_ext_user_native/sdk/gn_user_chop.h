@@ -17,6 +17,19 @@
 
 namespace gn {
 
+/// Helper: build a CHOP result with a single named channel.
+/// @param name    Channel name (e.g., "value")
+/// @param values  Sample array for that channel
+inline godot::Dictionary make_chop_single(
+		const godot::String &name,
+		const PackedFloat32Array &values) {
+	godot::Dictionary channels;
+	channels[name] = values;
+	godot::Dictionary result;
+	result["channels"] = channels;
+	return result;
+}
+
 /// Helper: build a CHOP result with single-value channels.
 /// @param names   Channel names (e.g., {"tx", "ty", "tz"})
 /// @param values  Corresponding values

@@ -226,7 +226,7 @@
 			}
 		},
 		"instance1": {
-			"type": "InstancePOP",
+			"type": "InstanceSOP",
 			"position": [
 				300,
 				800

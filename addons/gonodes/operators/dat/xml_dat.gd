@@ -27,7 +27,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("xml_string",
 		"<root><item name=\"alpha\" value=\"1\"/><item name=\"beta\" value=\"2\"/></root>",
 		"XML String", "XML text to parse (String mode)"))
-	add_parameter(GNParameter.create_string("file_path", "",
+	add_parameter(GNParameter.create_string("file_path", "The file path string",
 		"File Path", "Absolute or res:// path to an XML file (File mode)"))
 	add_parameter(GNParameter.create_bool("include_text", true,
 		"Include Text", "Include element text-content rows (#text attribute)"))

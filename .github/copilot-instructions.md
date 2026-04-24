@@ -1,7 +1,7 @@
 # GONODES — Copilot Instructions
 
 > Node-based visual programming framework on Godot 4.6 for real-time visual art.
-> 574 operators, 14 families, GDScript + GDExtension C++.
+> 575 operators, 14 families, GDScript + GDExtension C++.
 
 ## Architecture
 
@@ -19,8 +19,8 @@ NEVER call `Texture2D.get_image()` or `Image.get_data()` in per-frame code. Use 
 ### 25.13 — Lazy Cook / No Unnecessary Work
 Never set `time_dependent = true` unless the operator genuinely changes every frame.
 
-### 25.14 — Descriptions Mandatory
-Every operator needs: (1) `description=` in its `.cfg` entry, (2) description on every `add_input()`/`add_output()`, (3) description on every `GNParameter.create_*()`.
+### 25.14 — Descriptions and Labels Mandatory
+Every operator needs: (1) `description=` in its `.cfg` entry, (2) description on every `add_input()`/`add_output()`, (3) **non-empty label AND non-empty description** on every `GNParameter.create_*()`. Labels appear in the inspector UI; descriptions appear in tooltips and help docs. Empty labels (`""`) cause blank inspector rows. Empty descriptions (`""`) leave tooltips and docs incomplete.
 
 ### 25.20 — Editor/Engine Separation
 `core/` and `operators/` must NEVER import `ui/`. All operators must run headless.
@@ -50,7 +50,7 @@ Use `DisplayServer.screen_get_size()` / `screen_get_position()` (not `get_screen
 NEVER call `_update_mode_display()` per-cook — clobbers edits 60×/sec. Use lightweight `update_expression_status()` per-cook. Check `_expr_edit.has_focus()` before setting text.
 
 ### 25.10 — Dynamic Input Ports (Auto-Grow)
-Variable-input operators use `_enable_dynamic_inputs()` in `_init_ports()`. Ports auto-grow on connect (trailing empty slot) and auto-shrink on disconnect. Used by: MergeSOP, MergeCOMP, RenderTOP, MergeCHOP, SwitchTOP, SwitchCHOP, SwitchSOP, SwitchDAT. Operators must handle null inputs for disconnected ports. Supersedes the old `num_inputs` parameter pattern.
+Variable-input operators use `_enable_dynamic_inputs()` in `_init_ports()`. Ports auto-grow on connect (trailing empty slot) and auto-shrink on disconnect. Used by: MergeSOP, MergeCOMP, MergeDAT, RenderTOP, MergeCHOP, SwitchTOP, SwitchCHOP, SwitchSOP, SwitchDAT. Operators must handle null inputs for disconnected ports. Supersedes the old `num_inputs` parameter pattern.
 
 ### 25.11 — COMP Nodes: Scene-Node Ownership, Proxy Fan-Out
 COMPs return `GNCompData` (via `_build_comp_data()`) wrapping a **reference** to their singleton `_scene_node` (MeshInstance3D, Camera3D, Light3D, etc.). All scene-node resolution uses `cached_output as GNCompData` (data-type check, not node-type check). When a COMP scene node fans out to multiple consumers (two RenderTOPs, or two MergeCOMPs), the first consumer adopts the original (zero overhead), subsequent consumers get visual proxies via `GNProxyTree`. Proxies share GPU resources (Mesh, Material, MultiMesh). Physics bodies become plain Node3D placeholders in proxies. Both RenderTOP and MergeCOMP use `_adopt_or_proxy()` / `_adopt_or_proxy_child()` respectively. EnvironmentCOMP returns GNCompData with the `environment` field set (no scene node); RenderTOP checks `comp_data.environment != null`.
@@ -74,6 +74,7 @@ On rename: update `nodes` dict key → `GNNode.id` + `.name` → all `GNConnecti
 - `.new()` / `_init()` — sets `node_type`, `family`, `node_description`. **No ports, no parameters.**
 - `initialize(id)` — calls `_init_ports()` + `_init_parameters()`, wires param signals. Full lifecycle for network nodes.
 - For introspection only (palette cache): call `node._init_ports()` explicitly after `.new()`. Do NOT call `initialize()`.
+- When an operator script is **deleted or renamed**, also delete its orphaned `.gd.uid` sidecar file. Godot does not clean these up automatically.
 
 ### 25.21 — Help Example Patches Required
 Every operator MUST ship with at least one `.gnpatch` in `help/<family>/`. Naming: `<node_type>_<label>.gnpatch`. Must use `class_name` in the `type` field. Keep patches to 1–4 nodes. Max ~3 patches per operator.
@@ -103,11 +104,31 @@ When consuming upstream output, check the **data type** (`cached_output as GNTex
 ### 25.27 — COMP Proxy Bookkeeping for New Node Types
 When adding a new COMP that creates a `_scene_node`, check `GNProxyTree._create_proxy_node()` for its type. Currently proxied: MeshInstance3D, MultiMeshInstance3D, Camera3D, DirectionalLight3D, OmniLight3D, SpotLight3D. Unknown types become plain Node3D placeholders. If the new COMP creates a NEW visual node type (e.g., GPUParticles3D, Decal), add a typed proxy factory + sync method to GNProxyTree and a test in `tests/unit/core/test_proxy_tree.gd`.
 
-### 25.28 — Family-Output Coherence (No Hidden Conversions)
-Every operator MUST output data matching its declared family. A CHOP outputs `GNChannelData`, a DAT outputs `GNTableData`, a TOP outputs `GNTextureData`, an IMG outputs `GNImageData`, a SOP outputs `GNGeoData`, etc. **Never embed a silent cross-family conversion inside a non-bridge operator.** If a node works with float/channel data, it belongs in CHOP — not DAT. If it processes CPU images, it belongs in IMG — not TOP. Users convert between families explicitly via bridge operators (`CHOPtoTOP`, `ImgToTOP`, `SOPtoDAT`, etc.). The only exceptions are: (1) explicit bridge operators whose name declares the conversion, (2) multi-output operators that emit secondary ports of a different family (rule 25.24 demand-gated), and (3) NET family host-bridge operators that output typed data matching their specific bridge target.
+### 25.28 — Family-Output Coherence (Port 0 = Family Identity)
+An operator's family MUST match its **primary output (port 0) data type**. A CHOP outputs `GNChannelData`, a DAT outputs `GNTableData`, a TOP outputs `GNTextureData`, an IMG outputs `GNImageData`, a SOP outputs `GNGeoData`, etc.
+
+If an operator consumes family X and produces family Y on port 0, it belongs to family **Y**. Name it to indicate the conversion — either `<Source>To<Target>` (e.g., `VOLtoSOP`) or `<Descriptive><OutputFamily>` (e.g., `MarchingCubesSOP` consumes VOL, outputs SOP).
+
+When reclassifying an operator to a different family, **carry renderer/compute requirements** via method overrides (`requires_compute()`, `supported_renderers()`, `requires_main_thread()`). The compat checker calls these on the node instance, not on the family. Example: `MarchingCubesSOP extends GNSopBase` but overrides `requires_compute() → true` and `supported_renderers() → ["forward_plus", "mobile"]`.
+
+**Never embed a silent cross-family conversion inside a non-bridge operator.** If a node works with float/channel data, it belongs in CHOP — not DAT. If it processes CPU images, it belongs in IMG — not TOP. Users convert between families explicitly via bridge operators (`CHOPtoTOP`, `ImgToTOP`, `SOPtoDAT`, etc.).
+
+**Exceptions:**
+1. Explicit bridge operators whose name declares the conversion (`CHOPtoTOP`, `ImgToTOP`)
+2. Multi-output operators where **secondary ports** (port 1+) emit a different family — demand-gated per Rule 25.24 (e.g., MovieFileInTOP: port 0 = TOP, port 1 = CHOP audio)
+3. NET family host-bridge operators that output typed data matching their specific bridge target
 
 ### 25.29 — Native Extension Graceful Degradation
-Extensions with GDExtension native binaries MUST degrade gracefully when binaries are missing. Three mandatory layers: (1) Ship `.gdextension` as `.gdextension.disabled` — auto-activated by `sync_native_extensions()` when binary exists. (2) Declare `dependencies = ["MyNativeClass"]` in `gn_extension.cfg` — registry skips the extension if `ClassDB.class_exists()` fails. (3) NEVER reference native class names directly in GDScript — use `ClassDB.class_exists(&"...")` + `ClassDB.instantiate(&"...")` + `.call(&"method", args)`. Declare variables as `Object`/`RefCounted`/`Node`, not the native type. Show `node_warning` when the native instance is null.
+Extensions with GDExtension native binaries MUST degrade gracefully when binaries are missing. Three mandatory layers: (1) Ship `.gdextension` at the **extension root** (NOT inside `native/` which has `.gdignore`) as `.gdextension.disabled` — auto-activated by `sync_native_extensions()` when binary exists. (2) Declare `dependencies = ["MyNativeClass"]` in `gn_extension.cfg` — registry skips the extension if `ClassDB.class_exists()` fails. (3) NEVER reference native class names directly in GDScript — use `ClassDB.class_exists(&"...")` + `ClassDB.instantiate(&"...")` + `.call(&"method", args)`. Declare variables as `Object`/`RefCounted`/`Node`, not the native type. Show `node_warning` when the native instance is null.
+
+### 25.30 — node_type Uniqueness
+Every operator's `node_type` must be a **unique string** matching its logical name — never the family name (e.g., `"texture"` not `"sop"`, `"polybridge"` not `"sop"`). Collisions break: operator registry keying, help patch generation (`--operator`), `op()` expression lookups, and palette search. Run `python scripts/check_node_types.py` to detect duplicates.
+
+### 25.31 — No Pre-Release Compatibility Code
+Before v1 ships, **never add migration paths, compat shims, or fallback code** for internal-only features. Backward compatibility is only meaningful after a public release. Code that says "kept for API compatibility" or "legacy migration" during development is dead weight. Remove it before tagging. After v1, migration code for shipped formats is expected and necessary.
+
+### 25.32 — Stub API Functions Must Report Errors
+Any public API function — GDScript or C — that is declared but not yet implemented **must set an error/warning**, never return null/zero silently. In GDScript: `push_warning()` or `node_warning`. In libgonodes C API: `gn_set_error(inst, "...")` + return the appropriate error code. Silent null returns are traps for integrators.
 
 ### File Encoding
 All text files are UTF-8 without BOM. NEVER use PowerShell `Get-Content`/`Set-Content` without `-Encoding UTF8` on BOTH calls. Prefer Python for non-ASCII text manipulation.

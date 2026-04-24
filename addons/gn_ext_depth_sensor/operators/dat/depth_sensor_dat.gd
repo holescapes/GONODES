@@ -31,7 +31,7 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.DAT, "Sensor info table")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable device enumeration"))
 	add_parameter(GNParameter.create_pulse("rescan", "Rescan Devices",
 		"Re-enumerate connected sensors and refresh cached device list"))

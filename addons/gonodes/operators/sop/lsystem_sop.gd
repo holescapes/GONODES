@@ -42,9 +42,9 @@ func _init_parameters() -> void:
 		"Starting string for the L-System"))
 	add_parameter(GNParameter.create_string("rule_a", "F=F[+F]F[-F]F", "Rule A",
 		"Production rule (format: X=replacement)"))
-	add_parameter(GNParameter.create_string("rule_b", "", "Rule B",
+	add_parameter(GNParameter.create_string("rule_b", "Rule B", "Rule B",
 		"Second production rule (optional)"))
-	add_parameter(GNParameter.create_string("rule_c", "", "Rule C",
+	add_parameter(GNParameter.create_string("rule_c", "Rule C", "Rule C",
 		"Third production rule (optional)"))
 	add_parameter(GNParameter.create_int("iterations", 3, 0, 8, "Iterations",
 		"Number of grammar rewriting passes"))

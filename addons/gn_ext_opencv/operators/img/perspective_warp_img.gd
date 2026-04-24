@@ -67,7 +67,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("interpolation",
 		PackedStringArray(["Nearest", "Linear", "Cubic", "Lanczos"]), 1,
 		"Interpolation", "Pixel interpolation mode"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

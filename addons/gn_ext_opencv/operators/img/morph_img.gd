@@ -37,7 +37,7 @@ func _init_parameters() -> void:
 		"Kernel Size", "Size of the structuring element (must be odd)"))
 	add_parameter(GNParameter.create_int("iterations", 1, 1, 20,
 		"Iterations", "Number of times to apply the operation"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

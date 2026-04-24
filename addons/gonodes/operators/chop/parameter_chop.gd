@@ -21,7 +21,7 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_node_ref("node_path", -1,
 		"Node ID", "The id of the operator whose parameters to read"))
-	add_parameter(GNParameter.create_string("parameters", "",
+	add_parameter(GNParameter.create_string("parameters", "Comma-separated parameter paths to export",
 		"Parameters", "Space-separated parameter names to read (empty = all)"))
 
 

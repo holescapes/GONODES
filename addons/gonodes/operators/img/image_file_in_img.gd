@@ -29,7 +29,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_file("file", "",
+	add_parameter(GNParameter.create_file("file", "Path to the file",
 		PackedStringArray(["*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.tga",
 			"*.svg", "*.hdr", "*.exr", "*.tres", "*.res"]),
 		"", "Image or texture file path."))

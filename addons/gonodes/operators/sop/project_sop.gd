@@ -21,7 +21,7 @@ func _init_parameters() -> void:
 		"Axis", "Projection axis direction"))
 	add_parameter(GNParameter.create_float("offset", 0.0, -100.0, 100.0, 0.01,
 		"Offset", "Normal offset after projection"))
-	add_parameter(GNParameter.create_bool("recompute_normals", true, "",
+	add_parameter(GNParameter.create_bool("recompute_normals", true, "Enable recompute normals",
 		"Recompute normals after projection"))
 
 

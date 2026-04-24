@@ -2,44 +2,41 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src1": {
-            "type": "NoiseTOP",
+        "src_grid": {
+            "type": "GridSOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
+                "rows": {
+                    "value": 20
                 },
-                "scale": {
-                    "value": 2.0
+                "cols": {
+                    "value": 20
                 }
             }
         },
         "focus1": {
-            "type": "CubeMapTOP",
+            "type": "MarchingCubesSOP",
             "position": [
-                500,
+                450,
                 100
             ],
-            "parameters": {
-                "mode": {
-                    "value": 0
-                },
-                "face_size": {
-                    "value": 256
-                }
-            }
+            "parameters": {}
+        },
+        "raymarch1": {
+            "type": "RaymarchTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                900,
+                1150,
                 100
             ],
             "parameters": {
@@ -58,13 +55,19 @@
     },
     "connections": [
         {
-            "from": "src1",
+            "from": "src_grid",
             "from_port": 0,
             "to": "focus1",
             "to_port": 0
         },
         {
             "from": "focus1",
+            "from_port": 0,
+            "to": "raymarch1",
+            "to_port": 0
+        },
+        {
+            "from": "raymarch1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -74,14 +77,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Cube Map TOP \u2014 Basic\n\nConvert between equirectangular and cube map layouts.\nmode selects conversion direction. face_size controls output face resolution.\nUseful for environment maps and 360-degree content.",
+            "text": "Marching Cubes VOL — Isosurface\n\nExtract iso-surface mesh from volume density field (CPU marching cubes).",
             "position": [
-                -100,
-                -100
+                -100.0,
+                -100.0
             ],
             "size": [
-                500,
-                120
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

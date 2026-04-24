@@ -355,13 +355,6 @@ func set_active_sinks(sinks: Array[String]) -> void:
 	_consumer_counts_dirty = true
 
 
-## Marks the active set for recomputation on the next cook frame.
-## Called by the editor when viewer targets change, or internally
-## when topology changes.
-func invalidate_active_set() -> void:
-	_active_set_dirty = true
-
-
 ## Computes the set of node IDs that feed into any active sink.
 ## Auto-detects structural sinks (nodes with [member GNNode.is_sink] = true)
 ## in addition to any UI sinks listed in [member active_sinks].

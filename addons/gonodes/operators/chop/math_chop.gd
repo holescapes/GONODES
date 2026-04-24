@@ -24,8 +24,8 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("operation",
 		PackedStringArray(["Add", "Subtract", "Multiply", "Divide",
 			"Abs", "Sin", "Cos", "Pow"]), 0, "", "Math operation to apply"))
-	add_parameter(GNParameter.create_float("operand", 0.0, null, null, 0.01, "", "Scalar operand when in2 is absent"))
-	add_parameter(GNParameter.create_string("channel_name", "", "",
+	add_parameter(GNParameter.create_float("operand", 0.0, null, null, 0.01, "Operand", "Scalar operand when in2 is absent"))
+	add_parameter(GNParameter.create_string("channel_name", "Channel Name", "Name pattern for output channels",
 		"Pick a specific channel from in2 (empty = auto-match)"))
 
 

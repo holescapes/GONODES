@@ -46,12 +46,12 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("end", 50, 0, 999999, "End Index",
 		"Last element index to keep, inclusive (Range mode)"))
 	# Bounding-box params
-	add_parameter(GNParameter.create_float("bmin_x", -0.5, null, null, 0.01, "Box Min X", ""))
-	add_parameter(GNParameter.create_float("bmin_y", -0.5, null, null, 0.01, "Box Min Y", ""))
-	add_parameter(GNParameter.create_float("bmin_z", -0.5, null, null, 0.01, "Box Min Z", ""))
-	add_parameter(GNParameter.create_float("bmax_x",  0.5, null, null, 0.01, "Box Max X", ""))
-	add_parameter(GNParameter.create_float("bmax_y",  0.5, null, null, 0.01, "Box Max Y", ""))
-	add_parameter(GNParameter.create_float("bmax_z",  0.5, null, null, 0.01, "Box Max Z", ""))
+	add_parameter(GNParameter.create_float("bmin_x", -0.5, null, null, 0.01, "Box Min X", "The bmin x value"))
+	add_parameter(GNParameter.create_float("bmin_y", -0.5, null, null, 0.01, "Box Min Y", "The bmin y value"))
+	add_parameter(GNParameter.create_float("bmin_z", -0.5, null, null, 0.01, "Box Min Z", "The bmin z value"))
+	add_parameter(GNParameter.create_float("bmax_x",  0.5, null, null, 0.01, "Box Max X", "The bmax x value"))
+	add_parameter(GNParameter.create_float("bmax_y",  0.5, null, null, 0.01, "Box Max Y", "The bmax y value"))
+	add_parameter(GNParameter.create_float("bmax_z",  0.5, null, null, 0.01, "Box Max Z", "The bmax z value"))
 	# Expression param
 	add_parameter(GNParameter.create_string("expression", "i % 2 == 0",
 		"Expression", "GDScript expression returning bool. Variables: i, x, y, z, count"))
@@ -61,7 +61,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("offset", 0, 0, 99,
 		"Offset", "Starting offset within step cycle"))
 	# Invert
-	add_parameter(GNParameter.create_bool("invert", false, "",
+	add_parameter(GNParameter.create_bool("invert", false, "Invert the output",
 		"Invert selection (discard matching, keep non-matching)"))
 	# Transform (remote reference only)
 	add_parameter(GNParameter.create_bool("apply_transform", false,

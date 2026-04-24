@@ -323,8 +323,8 @@ def _write_toolchain_env(py_exe):
 
 def enable_gdextension():
     """Rename .gdextension.disabled → .gdextension."""
-    disabled = os.path.join(NATIVE_DIR, "gn_python.gdextension.disabled")
-    enabled = os.path.join(NATIVE_DIR, "gn_python.gdextension")
+    disabled = os.path.join(EXT_DIR, "gn_python.gdextension.disabled")
+    enabled = os.path.join(EXT_DIR, "gn_python.gdextension")
     if os.path.isfile(enabled):
         log("gn_python.gdextension already enabled.")
     elif os.path.isfile(disabled):
@@ -409,7 +409,7 @@ def verify_toolchain() -> int:
             ok = False
 
     # Check .gdextension
-    gdext = os.path.join(EXT_DIR, "native", "gn_python.gdextension")
+    gdext = os.path.join(EXT_DIR, "gn_python.gdextension")
     if os.path.isfile(gdext):
         log(f"[+] gn_python.gdextension enabled")
     else:

@@ -31,7 +31,7 @@
             }
         },
         "gpumc1": {
-            "type": "GPUMarchingCubesVOL",
+            "type": "GPUMarchingCubesSOP",
             "position": [
                 450,
                 100
@@ -119,7 +119,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GPU Marching Cubes\n\nGPUMarchingCubesVOL extracts an iso-surface from a 3D volume\nusing a compute shader \u2014 10-100\u00d7 faster than the CPU version.\n\nNoiseVOL generates a 48\u00b3 density field.\nThe compute shader processes all cells in parallel with\natomic vertex append for thread-safe triangle output.\n\nTry adjusting the threshold to see different iso-surfaces,\nor increase NoiseVOL resolution for smoother results.",
+            "text": "GPU Marching Cubes\n\nGPUMarchingCubesSOP extracts an iso-surface from a 3D volume\nusing a compute shader \u2014 10-100\u00d7 faster than the CPU version.\n\nNoiseVOL generates a 48\u00b3 density field.\nThe compute shader processes all cells in parallel with\natomic vertex append for thread-safe triangle output.\n\nTry adjusting the threshold to see different iso-surfaces,\nor increase NoiseVOL resolution for smoother results.",
             "position": [
                 -100.0,
                 -170.0

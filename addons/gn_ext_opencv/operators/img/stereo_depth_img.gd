@@ -43,7 +43,7 @@ func _init_parameters() -> void:
 		"Speckle Window", "Window size for speckle noise filtering"))
 	add_parameter(GNParameter.create_int("speckle_range", 32, 0, 128,
 		"Speckle Range", "Max disparity variation within speckle component"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

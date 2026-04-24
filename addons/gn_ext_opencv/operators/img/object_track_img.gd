@@ -56,7 +56,7 @@ func _init_parameters() -> void:
 		"Thickness", "Bounding box line thickness"))
 	add_parameter(GNParameter.create_pulse("reinit", "Re-init Tracker",
 		"Re-initialize the tracker from the current ROI"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable processing"))
 
 

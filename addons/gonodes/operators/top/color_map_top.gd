@@ -18,7 +18,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("luma_mode",
 		PackedStringArray(["Luminance", "Red", "Green", "Blue"]), 0, "Luma Mode",
 		"Which channel or luminance formula to use as the lookup index"))
-	add_parameter(GNParameter.create_float("intensity", 1.0, 0.0, 1.0, 0.01, "",
+	add_parameter(GNParameter.create_float("intensity", 1.0, 0.0, 1.0, 0.01, "Effect intensity",
 		"Blend between original (0) and mapped (1) colors"))
 
 

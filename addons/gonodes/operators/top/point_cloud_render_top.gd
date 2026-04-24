@@ -97,8 +97,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# ── Reallocate output/depth textures on main_rd if resolution changed ──
 	if res != _prev_res:
 		_free_main_rd_textures(mrd)
-		_output_tex_rid = ctx.create_texture_2d_on_main(w, h)
-		_depth_tex_rid = ctx.create_texture_2d_on_main(w, h,
+		_output_tex_rid = ctx.create_texture_2d(w, h)
+		_depth_tex_rid = ctx.create_texture_2d(w, h,
 			RenderingDevice.DATA_FORMAT_R32_SFLOAT)
 		_prev_res = res
 
@@ -144,13 +144,13 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# ── Dispatch (fire-and-forget, no submit/sync) ──
 	var us: RID = mrd.uniform_set_create([
-		ctx.uniform_buffer_main(0, pd.rd_buffer),
-		ctx.uniform_image_main(1, _output_tex_rid),
-		ctx.uniform_image_main(2, _depth_tex_rid),
+		ctx.uniform_buffer(0, pd.rd_buffer),
+		ctx.uniform_image(1, _output_tex_rid),
+		ctx.uniform_image(2, _depth_tex_rid),
 	], shader, 0)
 
 	var wg_x: int = ceili(float(pd.particle_count) / 64.0)
-	ctx.dispatch_on_main(shader, us, wg_x, 1, 1, pc)
+	ctx.dispatch(shader, us, wg_x, 1, 1, pc)
 	mrd.free_rid(us)
 
 	# ── Wrap as Texture2DRD — zero-copy display ──

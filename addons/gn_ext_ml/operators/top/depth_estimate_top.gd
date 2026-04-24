@@ -30,7 +30,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("model_path",
 		"res://addons/gn_ext_ml/models/midas_v21_small_256.onnx",
 		"Model", "Path to MiDaS depth estimation ONNX model"))
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "",
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output depth map resolution"))
 	add_parameter(GNParameter.create_bool("invert", false, "Invert",
 		"Invert depth (dark=close, bright=far)"))
@@ -39,7 +39,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("provider",
 		PackedStringArray(["CPU", "DirectML", "CUDA", "CoreML"]), 0,
 		"Provider", "ONNX execution provider"))
-	add_parameter(GNParameter.create_bool("active", true, "",
+	add_parameter(GNParameter.create_bool("active", true, "Enable or disable the operator",
 		"Enable / disable estimation"))
 
 

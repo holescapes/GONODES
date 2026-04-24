@@ -13,12 +13,12 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "",
+	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output texture resolution"))
 	add_parameter(GNParameter.create_enum("shape",
 		PackedStringArray(["Triangle", "Line", "Pentagon"]), 0, "",
 		"Shape type to render"))
-	add_parameter(GNParameter.create_float("size", 0.4, 0.01, 0.5, 0.01, "",
+	add_parameter(GNParameter.create_float("size", 0.4, 0.01, 0.5, 0.01, "Size value",
 		"Shape radius (0..0.5 of UV space)"))
 	add_parameter(GNParameter.create_color("fill_color", Color.WHITE, "Fill Color",
 		"Shape interior colour"))
@@ -28,9 +28,9 @@ func _init_parameters() -> void:
 		"Border thickness (0 = no border)"))
 	add_parameter(GNParameter.create_color("border_color", Color.WHITE, "Border Color",
 		"Border / outline colour"))
-	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 0.01, "",
+	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 0.01, "The rotation value",
 		"Shape rotation in radians"))
-	add_parameter(GNParameter.create_float("softness", 0.005, 0.0, 0.05, 0.001, "",
+	add_parameter(GNParameter.create_float("softness", 0.005, 0.0, 0.05, 0.001, "The softness value",
 		"Edge anti-aliasing"))
 
 

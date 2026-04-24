@@ -20,6 +20,10 @@ All helper scripts live in `scripts/`.  They require **Python 3.10+** and no ext
 | `sync_gdextensions.py` | Activate/deactivate `.gdextension` files based on binary presence | After building (also runs automatically as SConstruct post-build) |
 | `clean_builds.py` | Remove all compiled binaries and deactivate extensions | Before release tagging (clean source-only state) |
 | `bundle_toolchain.py` | Bundle godot-cpp into user_native toolchain | Before packaging a release |
+| `clone_native_help_patches.py` | Clone help patches to Native C++ variants | Adding a new native wrapper |
+| `regen_broken_patches.py` | Regenerate structurally broken `.gnpatch` files | Patch validation failures |
+| `gen_native_operators_md.py` | Generate native ops section of `OPERATORS.md` | Adding/removing native wrappers |
+| `gen_all_core_patches.py` | Generate full manual QA test patches (all operators) | Before release QA |
 
 ---
 
@@ -102,6 +106,22 @@ Counts `.gnpatch` files per family across all `help/` directories.
 python scripts/count_patches.py
 ```
 
+### `clone_native_help_patches.py`
+
+Clones help patches from GDScript operators to their Native C++ wrapper variants (e.g., CopyCHOP patches are duplicated for CopyCHOPNative). Reads class mappings from `operator_registry.json`.
+
+```
+python scripts/clone_native_help_patches.py
+```
+
+### `regen_broken_patches.py`
+
+Regenerates `.gnpatch` files whose focus operator node is missing or structurally invalid. Uses `help_patch_engine.py` for generation.
+
+```
+python scripts/regen_broken_patches.py
+```
+
 ---
 
 ## Validation & Auditing
@@ -181,6 +201,14 @@ Pretty-prints all operators grouped by family from `operator_registry.json`.
 
 ```
 python scripts/list_ops.py
+```
+
+### `gen_native_operators_md.py`
+
+Auto-generates the Native Acceleration Extension section of `docs/OPERATORS.md` by scanning native wrapper descriptions from `gn_extension.cfg`.
+
+```
+python scripts/gen_native_operators_md.py
 ```
 
 ---
@@ -292,6 +320,16 @@ python scripts/gen_manual_test_patches.py
 ```
 
 Output goes to `tests/manual/<family>/`.
+
+### `gen_all_core_patches.py`
+
+Generates comprehensive `ALL_CORE_*.gnpatch` test patches covering every registered operator, organized by family into SwitchTOP/SwitchCHOP/SwitchSOP chains. Used for full manual QA sweeps before release.
+
+```
+python scripts/gen_all_core_patches.py
+```
+
+Output goes to `tests/manual/`. Required before release QA (see RELEASE_CHECKLIST.md).
 
 ---
 

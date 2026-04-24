@@ -19,7 +19,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "", "Trigger threshold"))
+	add_parameter(GNParameter.create_float("threshold", 0.5, null, null, 0.01, "Threshold", "Trigger threshold"))
 	add_parameter(GNParameter.create_float("attack", 0.0, 0.0, 10.0, 0.01, "Attack (sec)", "Pulse rise time in seconds"))
 	add_parameter(GNParameter.create_float("peak", 1.0, 0.0, null, 0.01, "Peak Value", "Maximum pulse value"))
 	add_parameter(GNParameter.create_float("decay", 0.5, 0.0, 10.0, 0.01, "Decay (sec)", "Pulse fall time in seconds"))

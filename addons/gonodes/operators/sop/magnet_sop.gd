@@ -34,9 +34,9 @@ func _init_parameters() -> void:
 		"Affect Normals", "Recompute normals after deformation"))
 
 	# Built-in single attractor (when no 2nd input)
-	add_parameter(GNParameter.create_float("att_x", 0.0, -100.0, 100.0, 0.1, "Attractor X", ""))
-	add_parameter(GNParameter.create_float("att_y", 0.0, -100.0, 100.0, 0.1, "Attractor Y", ""))
-	add_parameter(GNParameter.create_float("att_z", 0.0, -100.0, 100.0, 0.1, "Attractor Z", ""))
+	add_parameter(GNParameter.create_float("att_x", 0.0, -100.0, 100.0, 0.1, "Attractor X", "The att x value"))
+	add_parameter(GNParameter.create_float("att_y", 0.0, -100.0, 100.0, 0.1, "Attractor Y", "The att y value"))
+	add_parameter(GNParameter.create_float("att_z", 0.0, -100.0, 100.0, 0.1, "Attractor Z", "The att z value"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

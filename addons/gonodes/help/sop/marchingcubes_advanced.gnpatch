@@ -11,17 +11,21 @@
             "parameters": {}
         },
         "marchingcubes1": {
-            "type": "MarchingCubesVOL",
+            "type": "MarchingCubesSOP",
             "position": [
                 400,
                 100
             ],
             "parameters": {
                 "threshold": {
-                    "value": 0.5
+                    "value": 1.0,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 },
                 "smooth_normals": {
-                    "value": true
+                    "value": false,
+                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                    "mode": "EXPRESSION"
                 }
             }
         },
@@ -117,7 +121,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Noise VOL — Basic\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).",
+            "text": "Noise VOL — Advanced\n\nGenerate 3D noise density volume (Perlin, Simplex, Cellular).",
             "position": [
                 -100.0,
                 -100.0
