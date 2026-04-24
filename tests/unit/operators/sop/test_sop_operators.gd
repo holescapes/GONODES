@@ -1129,7 +1129,7 @@ func test_heightfield_sop_produces_geometry() -> void:
 func test_objectmerge_sop_instantiate() -> void:
 	var node := _make_node(ObjectMergeSOP.new(), "om1")
 	GNTestAssert.assert_not_null(node, "ObjectMergeSOP created")
-	GNTestAssert.assert_eq(node.node_type, "sop", "ObjectMergeSOP is sop")
+	GNTestAssert.assert_eq(node.node_type, "objectmerge", "ObjectMergeSOP node_type")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1174,7 +1174,7 @@ func test_polybevel_sop_with_box() -> void:
 func test_polybridge_sop_instantiate() -> void:
 	var node := _make_node(PolyBridgeSOP.new(), "pbr1")
 	GNTestAssert.assert_not_null(node, "PolyBridgeSOP created")
-	GNTestAssert.assert_eq(node.node_type, "sop", "PolyBridgeSOP is sop")
+	GNTestAssert.assert_eq(node.node_type, "polybridge", "PolyBridgeSOP node_type")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1282,7 +1282,7 @@ func test_spring_sop_with_grid() -> void:
 func test_texture_sop_instantiate() -> void:
 	var node := _make_node(TextureSOP.new(), "tex1")
 	GNTestAssert.assert_not_null(node, "TextureSOP created")
-	GNTestAssert.assert_eq(node.node_type, "sop", "TextureSOP is sop")
+	GNTestAssert.assert_eq(node.node_type, "texture", "TextureSOP node_type")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

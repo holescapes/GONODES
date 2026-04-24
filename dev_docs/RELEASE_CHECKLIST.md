@@ -74,6 +74,24 @@ See BUILD.md § "Quick Start" and § "Output Structure".
 
 ## Phase 2: Validate
 
+### Automated test suite (run first)
+
+Run the automated test suite **before** any manual checks. Failures here often
+reveal regressions from Phase 1 changes (renamed operators, moved configs, etc.)
+and are faster to diagnose before manual QA.
+
+- [ ] Run: `godot --headless -s tests/test_runner.gd` — **ALL PASSED**, zero failures
+- [ ] Run patch smoke: `godot --headless -s tests/test_runner.gd --test-tag=patch` — all help patches parse
+- [ ] Fix any failures before proceeding — do not defer test fixes to later phases
+
+### Audit scripts
+
+- [ ] `python scripts/scan_operators.py` — operator count matches expected
+- [ ] `python scripts/check_node_types.py` — zero collisions
+- [ ] `python scripts/audit_labels.py` — no blank labels or descriptions
+- [ ] `python scripts/build_port_registry.py` — port registry regenerated
+- [ ] `python scripts/count_patches.py` — help patch count matches docs
+
 ### Smoke tests
 
 - [ ] Open project in Godot editor — **no red errors** in Output panel
@@ -96,11 +114,6 @@ See BUILD.md § "Quick Start" and § "Output Structure".
 - [ ] Drop a **PythonSCRIPT** into a patch
 - [ ] Write minimal Python in the editor → Reload (Ctrl+R) → confirm it loads and cooks
 - [ ] Verify NumPy import works: `import numpy as np` in the script
-
-### Automated test suite
-
-- [ ] Run: `godot --headless -s tests/test_runner.gd` — **ALL PASSED**, zero failures
-- [ ] Run patch smoke: `godot --headless -s tests/test_runner.gd --test-tag=patch` — all help patches parse
 
 ### Manual QA — visual & workflow verification
 

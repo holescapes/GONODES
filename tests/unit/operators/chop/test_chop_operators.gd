@@ -1566,8 +1566,8 @@ func test_gesture_chop_produces_output() -> void:
 	var node := _make_node(GestureCHOP.new(), "gesture1")
 	var out: GNChannelData = _cook_no_input(node) as GNChannelData
 	GNTestAssert.assert_not_null(out, "gesture produces output")
-	GNTestAssert.assert_true(out.channels.has("pinch"), "has pinch channel")
-	GNTestAssert.assert_true(out.channels.has("rotate"), "has rotate channel")
+	GNTestAssert.assert_true(out.channels.has("pinch_scale"), "has pinch_scale channel")
+	GNTestAssert.assert_true(out.channels.has("rotate_angle"), "has rotate_angle channel")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1582,8 +1582,8 @@ func test_state_machine_chop_produces_output() -> void:
 	var node := _make_node(StateMachineCHOP.new(), "fsm1")
 	var out: GNChannelData = _cook_no_input(node) as GNChannelData
 	GNTestAssert.assert_not_null(out, "fsm produces output")
-	GNTestAssert.assert_true(out.channels.has("state"), "has state channel")
-	GNTestAssert.assert_true(out.channels.has("progress"), "has progress channel")
+	GNTestAssert.assert_true(out.channels.has("current_state"), "has current_state channel")
+	GNTestAssert.assert_true(out.channels.has("transition_progress"), "has transition_progress channel")
 
 func test_state_machine_chop_default_state_zero() -> void:
 	var node := _make_node(StateMachineCHOP.new(), "fsm2")

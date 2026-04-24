@@ -42,7 +42,7 @@ func _cook_no_input(node: GNNode) -> GNData:
 func test_hap_in_top_instantiate() -> void:
 	var node := _make_node(HapInTOP.new(), "hapin1")
 	GNTestAssert.assert_not_null(node, "HapInTOP created")
-	GNTestAssert.assert_eq(node.node_type, "hapin", "node_type")
+	GNTestAssert.assert_eq(node.node_type, "hapintop", "node_type")
 	GNTestAssert.assert_eq(node.family, GNFamily.Type.TOP, "family is TOP")
 
 func test_hap_in_top_ports() -> void:

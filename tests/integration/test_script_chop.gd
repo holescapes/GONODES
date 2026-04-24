@@ -133,7 +133,7 @@ func test_script_chop_reads_input() -> void:
 	c.set_param_value("value0", 7.0)
 
 	var s := _make_node(GDScriptSCRIPT, "script1")
-	s.set_param_value("code", """# @output chop Result
+	var code := """# @output chop Result
 # @input chop  Upstream data
 
 func cook():
@@ -142,11 +142,15 @@ func cook():
 		op.set_single_value("doubled", val * 2.0)
 	else:
 		op.set_single_value("doubled", 0.0)
-""".strip_edges())
+""".strip_edges()
+	s.set_param_value("code", code)
+
+	# Trigger compilation so input ports from @input annotations exist
+	# BEFORE we connect wires (connect_nodes validates port existence).
+	s._helper.on_code_changed(s, code)
 
 	_network.connect_nodes("const1", 0, "script1", 0)
 	_sink(["script1"])
-
 	_cook_one_frame()
 
 	var output := _get_chop_output(s)

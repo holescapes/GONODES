@@ -903,6 +903,14 @@ func from_dict(d: Dictionary) -> void:
 	match mode_str:
 		"EXPRESSION":
 			mode = Mode.EXPRESSION
+		"BIND":
+			# Legacy migration: BIND -> EXPRESSION with auto-generated par() ref
+			mode = Mode.EXPRESSION
+			var bind_node: String = d.get("bind_source_node", "")
+			var bind_param: String = d.get("bind_source_param", "")
+			if not bind_node.is_empty() and not bind_param.is_empty():
+				expression = 'par("%s", "%s")' % [bind_node, bind_param]
+				_compile_expression()
 		_:
 			mode = Mode.CONSTANT
 

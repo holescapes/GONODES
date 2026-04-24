@@ -52,13 +52,13 @@ func test_shadertoy_top_ports() -> void:
 
 func test_shadertoy_top_parameters() -> void:
 	var node := _make_node(ShadertoyTOP.new(), "shadertoy3")
-	GNTestAssert.assert_true(node.parameters.has("shader_code"), "has shader_code")
+	GNTestAssert.assert_true(node.parameters.has("shadertoy_code"), "has shadertoy_code")
 
 func test_shadertoy_top_set_shader_code() -> void:
 	var node := _make_node(ShadertoyTOP.new(), "shadertoy4")
 	var code := "void mainImage(out vec4 fragColor, in vec2 fragCoord) { fragColor = vec4(1.0); }"
-	node.set_parameter("shader_code", code)
-	GNTestAssert.assert_eq(node.get_parameter("shader_code"), code, "shader_code parameter set")
+	node.set_param_value("shadertoy_code", code)
+	GNTestAssert.assert_eq(node.get_param_value("shadertoy_code"), code, "shadertoy_code parameter set")
 
 func test_shadertoy_top_cook_null() -> void:
 	var node := _make_node(ShadertoyTOP.new(), "shadertoy5")
