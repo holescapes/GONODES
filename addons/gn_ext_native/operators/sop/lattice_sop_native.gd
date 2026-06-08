@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Geometry to deform")
-	add_output("out", GNFamily.Type.SOP, "Deformed geometry")
+	add_input("in", GNFamily.Type.SOP, false, "Geometry to deform", "In")
+	add_output("out", GNFamily.Type.SOP, "Deformed geometry", "Out")
 
 
 func _init_parameters() -> void:

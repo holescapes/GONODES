@@ -25,9 +25,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture")
-	add_input("disp", GNFamily.Type.TOP, true, "Displacement map (RG = XY offset, optional)")
-	add_output("out", GNFamily.Type.TOP, "Grid-warped texture")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture", "In")
+	add_input("disp", GNFamily.Type.TOP, true, "Displacement map (RG = XY offset, optional)", "Disp")
+	add_output("out", GNFamily.Type.TOP, "Grid-warped texture", "Out")
 
 
 func _init_parameters() -> void:

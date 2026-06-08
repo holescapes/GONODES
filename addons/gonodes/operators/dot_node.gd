@@ -16,8 +16,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Any data input")
-	add_output("out", GNFamily.Type.CHOP, "Same data (pass-through)")
+	add_input("in", GNFamily.Type.CHOP, false, "Any data input", "In")
+	add_output("out", GNFamily.Type.CHOP, "Same data (pass-through)", "Out")
 
 
 func _init_parameters() -> void:

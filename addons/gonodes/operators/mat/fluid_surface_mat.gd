@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("normal_map", GNFamily.Type.TOP, false, "Normal map texture (optional)")
-	add_output("out", GNFamily.Type.MAT, "Fluid surface material")
+	add_input("normal_map", GNFamily.Type.TOP, false, "Normal map texture (optional)", "Normal Map")
+	add_output("out", GNFamily.Type.MAT, "Fluid surface material", "Out")
 
 
 func _init_parameters() -> void:

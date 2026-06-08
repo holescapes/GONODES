@@ -24,8 +24,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Distorted input image")
-	add_output("out", GNFamily.Type.IMG, "Undistorted output")
+	add_input("in", GNFamily.Type.IMG, true, "Distorted input image", "In")
+	add_output("out", GNFamily.Type.IMG, "Undistorted output", "Out")
 
 
 func _init_parameters() -> void:

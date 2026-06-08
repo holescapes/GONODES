@@ -14,9 +14,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("a", GNFamily.Type.SOP, false, "Mesh A")
-	add_input("b", GNFamily.Type.SOP, false, "Mesh B")
-	add_output("out", GNFamily.Type.SOP, "Boolean result")
+	add_input("a", GNFamily.Type.SOP, false, "Mesh A", "A")
+	add_input("b", GNFamily.Type.SOP, false, "Mesh B", "B")
+	add_output("out", GNFamily.Type.SOP, "Boolean result", "Out")
 
 
 func _init_parameters() -> void:

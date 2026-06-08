@@ -10,9 +10,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("sdf_a", GNSdfBase.SDF_FAMILY, false, "First SDF shape")
-	add_input("sdf_b", GNSdfBase.SDF_FAMILY, false, "Second SDF shape")
-	add_output("out", GNSdfBase.SDF_FAMILY, "Combined SDF output")
+	add_input("sdf_a", GNSdfBase.SDF_FAMILY, false, "First SDF shape", "SDF A")
+	add_input("sdf_b", GNSdfBase.SDF_FAMILY, false, "Second SDF shape", "SDF B")
+	add_output("out", GNSdfBase.SDF_FAMILY, "Combined SDF output", "Out")
 
 
 func _init_parameters() -> void:

@@ -21,8 +21,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Audio input to stream")
-	add_output("out", GNFamily.Type.CHOP, "Pass-through of input")
+	add_input("in", GNFamily.Type.CHOP, false, "Audio input to stream", "In")
+	add_output("out", GNFamily.Type.CHOP, "Pass-through of input", "Out")
 
 
 func _init_parameters() -> void:

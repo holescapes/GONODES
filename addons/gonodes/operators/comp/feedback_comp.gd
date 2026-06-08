@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.COMP, false, "Current frame scene input")
-	add_output("out", GNFamily.Type.COMP, "Previous frame's scene data")
+	add_input("in", GNFamily.Type.COMP, false, "Current frame scene input", "In")
+	add_output("out", GNFamily.Type.COMP, "Previous frame's scene data", "Out")
 
 
 func _init_parameters() -> void:

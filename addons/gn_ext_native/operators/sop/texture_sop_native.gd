@@ -12,9 +12,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo", GNFamily.Type.SOP, false, "Input geometry with UVs")
-	add_input("tex", GNFamily.Type.TOP, true, "Texture input")
-	add_output("out", GNFamily.Type.SOP, "Textured geometry")
+	add_input("geo", GNFamily.Type.SOP, false, "Input geometry with UVs", "Geometry")
+	add_input("tex", GNFamily.Type.TOP, true, "Texture input", "Texture")
+	add_output("out", GNFamily.Type.SOP, "Textured geometry", "Out")
 
 
 func _init_parameters() -> void:

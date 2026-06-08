@@ -21,8 +21,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture to project")
-	add_output("out", GNFamily.Type.TOP, "Keystoned texture")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to project", "In")
+	add_output("out", GNFamily.Type.TOP, "Keystoned texture", "Out")
 
 
 func _init_parameters() -> void:

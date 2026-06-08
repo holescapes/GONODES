@@ -14,9 +14,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("dat", GNFamily.Type.DAT, false, "Table: first column = item text")
-	add_input("top", GNFamily.Type.TOP, false, "Icon texture for items")
-	add_output("out", GNFamily.Type.UI, "Widget output")
+	add_input("dat", GNFamily.Type.DAT, false, "Table: first column = item text", "DAT")
+	add_input("top", GNFamily.Type.TOP, false, "Icon texture for items", "TOP")
+	add_output("out", GNFamily.Type.UI, "Widget output", "Out")
 
 
 func _init_parameters() -> void:

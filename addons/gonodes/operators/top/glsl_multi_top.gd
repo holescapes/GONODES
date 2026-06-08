@@ -133,7 +133,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("in0", GNFamily.Type.TOP, false, "Texture input 0 (gn_tex0)", "Input 0")
-	add_output("out0", GNFamily.Type.TOP, "Shader output 0 (gn_out0)")
+	add_output("out0", GNFamily.Type.TOP, "Shader output 0 (gn_out0)", "Out0")
 
 
 func _init_parameters() -> void:
@@ -185,7 +185,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var res := Vector2i(512, 512)
 	if parameters.has("resolution"):
 		res = get_param_value("resolution")
-	var tex0: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
+	var tex0: GNTextureData = _get_input_top(inputs, 0)
 	if tex0 != null:
 		res = tex0.resolution
 	res = Vector2i(maxi(res.x, 1), maxi(res.y, 1))

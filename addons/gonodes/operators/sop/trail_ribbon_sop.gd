@@ -19,7 +19,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("pop_in", GNFamily.Type.POP, false, "Particle input", "Pop")
-	add_output("out", GNFamily.Type.SOP, "Ribbon mesh")
+	add_output("out", GNFamily.Type.SOP, "Ribbon mesh", "Out")
 
 
 func _init_parameters() -> void:

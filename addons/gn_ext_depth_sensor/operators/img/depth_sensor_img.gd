@@ -54,10 +54,10 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_output("image", GNFamily.Type.IMG, "Sensor image (depth/color/IR/player index)")
-	add_output("skeleton", GNFamily.Type.CHOP, "Skeleton joint channels (per-body)")
-	add_output("hands", GNFamily.Type.CHOP, "Hand/finger tracking channels")
-	add_output("points", GNFamily.Type.SOP, "Dense 3D point cloud mesh")
+	add_output("image", GNFamily.Type.IMG, "Sensor image (depth/color/IR/player index)", "Image")
+	add_output("skeleton", GNFamily.Type.CHOP, "Skeleton joint channels (per-body)", "Skeleton")
+	add_output("hands", GNFamily.Type.CHOP, "Hand/finger tracking channels", "Hands")
+	add_output("points", GNFamily.Type.SOP, "Dense 3D point cloud mesh", "Points")
 
 
 func _init_parameters() -> void:

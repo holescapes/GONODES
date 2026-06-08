@@ -13,9 +13,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("table", GNFamily.Type.CHOP, false, "Lookup table channel")
-	add_input("index", GNFamily.Type.CHOP, false, "Index channel (0..1)")
-	add_output("out", GNFamily.Type.CHOP, "Looked-up values")
+	add_input("table", GNFamily.Type.CHOP, false, "Lookup table channel", "Table")
+	add_input("index", GNFamily.Type.CHOP, false, "Index channel (0..1)", "Index")
+	add_output("out", GNFamily.Type.CHOP, "Looked-up values", "Out")
 
 
 func _init_parameters() -> void:

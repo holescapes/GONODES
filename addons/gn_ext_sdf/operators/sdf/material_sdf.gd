@@ -11,8 +11,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("sdf_in", GNSdfBase.SDF_FAMILY, false, "SDF shape to assign material to")
-	add_output("out", GNSdfBase.SDF_FAMILY, "SDF with material applied")
+	add_input("sdf_in", GNSdfBase.SDF_FAMILY, false, "SDF shape to assign material to", "SDF")
+	add_output("out", GNSdfBase.SDF_FAMILY, "SDF with material applied", "Out")
 
 
 func _init_parameters() -> void:

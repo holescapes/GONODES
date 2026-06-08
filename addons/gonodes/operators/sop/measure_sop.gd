@@ -10,8 +10,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input geometry to measure")
-	add_output("out", GNFamily.Type.SOP, "Geometry with measurement attributes")
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry to measure", "In")
+	add_output("out", GNFamily.Type.SOP, "Geometry with measurement attributes", "Out")
 
 
 func _init_parameters() -> void:

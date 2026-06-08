@@ -1,7 +1,7 @@
-class_name InstancePOPNative
-extends GNPopBase
+class_name InstanceSOPNative
+extends GNSopBase
 ## Native-accelerated particle instancing — delegates to GNNativeInstancePop (C++).
-## Bridge: reads POP SSBO → outputs GNGeoData (SOP) via CPU readback + C++ transform.
+## Consumes POP data but outputs SOP geometry (Rule 25.28).
 
 var _processor: RefCounted = null
 
@@ -15,9 +15,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("pop_in", GNFamily.Type.POP, false, "Particle input")
-	add_input("geo_in", GNFamily.Type.SOP, false, "Instance geometry")
-	add_output("out", GNFamily.Type.SOP, "Instanced geometry output")
+	add_input("pop_in", GNFamily.Type.POP, false, "Particle input", "POP")
+	add_input("geo_in", GNFamily.Type.SOP, false, "Instance geometry", "Geometry")
+	add_output("out", GNFamily.Type.SOP, "Instanced geometry output", "Out")
 
 
 func _init_parameters() -> void:
@@ -30,7 +30,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var pd := _get_input_pop(inputs, 0)
+	var pd: GNParticleData = inputs[0] as GNParticleData if inputs.size() > 0 and inputs[0] is GNParticleData else null
 	if pd == null or not pd.has_particles():
 		return null
 

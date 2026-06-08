@@ -58,6 +58,18 @@ func _notification(what: int) -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Input Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Safely extracts a GNCompData from the inputs array at [param port].
+## Returns null if the port doesn't exist or the data is not GNCompData.
+func _get_input_comp(inputs: Array[GNData], port: int = 0) -> GNCompData:
+	if port < inputs.size() and inputs[port] is GNCompData:
+		return inputs[port] as GNCompData
+	return null
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Scene Node Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
 

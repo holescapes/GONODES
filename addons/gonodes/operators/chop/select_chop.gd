@@ -17,8 +17,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Input channels (used when 'chop' is empty)")
-	add_output("out", GNFamily.Type.CHOP, "Selected channels")
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels (used when 'chop' is empty)", "In")
+	add_output("out", GNFamily.Type.CHOP, "Selected channels", "Out")
 
 
 func _init_parameters() -> void:
@@ -38,7 +38,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if not remote_id.is_empty():
 		in_data = _resolve_remote_chop(remote_id)
 	else:
-		in_data = inputs[0] as GNChannelData if inputs.size() > 0 and inputs[0] is GNChannelData else null
+		in_data = _get_input_chop(inputs, 0)
 
 	if in_data == null:
 		if not remote_id.is_empty():

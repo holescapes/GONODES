@@ -43,7 +43,7 @@ func _init() -> void:
 	min_size = Vector2i(400, 280)
 	unresizable = false
 	exclusive = true
-	wrap_controls = true
+	wrap_controls = false
 	transient = true
 
 

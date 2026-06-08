@@ -19,8 +19,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, false, "Source image to analyse")
-	add_output("out", GNFamily.Type.IMG, "Histogram chart image")
+	add_input("in", GNFamily.Type.IMG, false, "Source image to analyse", "In")
+	add_output("out", GNFamily.Type.IMG, "Histogram chart image", "Out")
 
 
 func _init_parameters() -> void:

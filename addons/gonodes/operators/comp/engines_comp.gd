@@ -27,8 +27,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in",  GNFamily.Type.COMP, false, "Upstream component")
-	add_output("out", GNFamily.Type.COMP, "Pass-through or cached output")
+	add_input("in",  GNFamily.Type.COMP, false, "Upstream component", "In")
+	add_output("out", GNFamily.Type.COMP, "Pass-through or cached output", "Out")
 
 
 func _init_parameters() -> void:

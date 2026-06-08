@@ -177,8 +177,10 @@ func _setup_syntax_highlighter() -> void:
 
 	# GONODES built-in expression functions (on CookEngine)
 	for fn_name in ["fit", "fit01", "smooth", "lag", "pulse", "step",
-			"smoothstep", "cycle", "bounce", "noise1", "noise2",
-			"trigger", "fn"]:
+			"smoothstep", "cycle", "bounce", "noise1", "noise2", "noise3",
+			"trigger", "fn", "iif", "rand", "digits", "store", "fetch",
+			"npoints", "ncells", "ramp", "fps", "speed", "tstart", "tend",
+			"frames"]:
 		highlighter.add_keyword_color(fn_name, Color(0.45, 0.92, 0.72))
 
 	# GDScript keywords
@@ -537,9 +539,22 @@ func _suggest_general() -> void:
 		["bounce(", "Bounce: abs(sin(t * PI))"],
 		["noise1(", "1D value noise: noise1(x)"],
 		["noise2(", "2D value noise: noise2(x, y)"],
+		["noise3(", "3D value noise: noise3(x, y, z)"],
 		["trigger(\"", "Trigger on threshold cross: trigger(key, value, threshold)"],
 		["fn(\"", "Call custom function: fn(name, arg1, arg2, ...)"],
 		["ramp(\"", "Sample ramp curve: ramp(param_name, t) or ramp(node, param, t)"],
+		["iif(", "Inline conditional: iif(condition, true_val, false_val)"],
+		["rand(", "Seeded random [0,1): rand(seed)"],
+		["digits(", "Trailing digits from node ID: digits()"],
+		["store(\"", "Persist per-node state: store(key, value)"],
+		["fetch(\"", "Read persistent state: fetch(key, default)"],
+		["npoints(\"", "Count SOP points: npoints(node_id)"],
+		["ncells(\"", "Count DAT cells: ncells(node_id)"],
+		["fps(", "Current FPS (NRT-aware)"],
+		["speed(", "Current playback speed"],
+		["tstart(", "Timeline start (seconds)"],
+		["tend(", "Timeline end (seconds)"],
+		["frames(", "Total frames in timeline"],
 	]
 	for fn_entry in builtin_funcs:
 		_code_edit.add_code_completion_option(

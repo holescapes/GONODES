@@ -39,7 +39,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	# One input: receives data from an inner graph operator.
-	add_input("in", tunnel_family, false, "Data to send to parent output %d" % tunnel_index)
+	add_input("in", tunnel_family, false, "Data to send to parent output %d" % tunnel_index, "Out %d" % tunnel_index)
 
 
 func _init_parameters() -> void:
@@ -70,7 +70,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 ## Called when the user changes the family parameter.
 func _rebuild_input_port() -> void:
 	input_ports.clear()
-	add_input("in", tunnel_family, false, "Data to send to parent output %d" % tunnel_index)
+	add_input("in", tunnel_family, false, "Data to send to parent output %d" % tunnel_index, "Out %d" % tunnel_index)
 	ports_changed.emit(id)
 
 
@@ -110,7 +110,7 @@ func from_dict(d: Dictionary) -> void:
 		tunnel_label = str(d["tunnel_label"])
 	# Rebuild input port to match restored family before super restores params
 	input_ports.clear()
-	add_input("in", tunnel_family, false, "Data to send to parent output %d" % tunnel_index)
+	add_input("in", tunnel_family, false, "Data to send to parent output %d" % tunnel_index, "Out %d" % tunnel_index)
 	super.from_dict(d)
 
 

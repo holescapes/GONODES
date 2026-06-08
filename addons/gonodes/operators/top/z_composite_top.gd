@@ -13,11 +13,11 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("color_a", GNFamily.Type.TOP, false, "Colour texture A")
-	add_input("depth_a", GNFamily.Type.TOP, false, "Depth texture A")
-	add_input("color_b", GNFamily.Type.TOP, false, "Colour texture B")
-	add_input("depth_b", GNFamily.Type.TOP, false, "Depth texture B")
-	add_output("out", GNFamily.Type.TOP, "Z-composited result")
+	add_input("color_a", GNFamily.Type.TOP, false, "Colour texture A", "Color A")
+	add_input("depth_a", GNFamily.Type.TOP, false, "Depth texture A", "Depth A")
+	add_input("color_b", GNFamily.Type.TOP, false, "Colour texture B", "Color B")
+	add_input("depth_b", GNFamily.Type.TOP, false, "Depth texture B", "Depth B")
+	add_output("out", GNFamily.Type.TOP, "Z-composited result", "Out")
 
 
 func _init_parameters() -> void:
@@ -29,10 +29,10 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var col_a: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
-	var dep_a: GNTextureData = inputs[1] as GNTextureData if inputs.size() > 1 and inputs[1] is GNTextureData else null
-	var col_b: GNTextureData = inputs[2] as GNTextureData if inputs.size() > 2 and inputs[2] is GNTextureData else null
-	var dep_b: GNTextureData = inputs[3] as GNTextureData if inputs.size() > 3 and inputs[3] is GNTextureData else null
+	var col_a: GNTextureData = _get_input_top(inputs, 0)
+	var dep_a: GNTextureData = _get_input_top(inputs, 1)
+	var col_b: GNTextureData = _get_input_top(inputs, 2)
+	var dep_b: GNTextureData = _get_input_top(inputs, 3)
 
 	if col_a == null:
 		return null

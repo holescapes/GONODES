@@ -13,9 +13,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("color", GNFamily.Type.TOP, false, "Colour texture")
-	add_input("depth", GNFamily.Type.TOP, false, "Depth texture (0=near, 1=far)")
-	add_output("out", GNFamily.Type.TOP, "DoF-blurred texture")
+	add_input("color", GNFamily.Type.TOP, false, "Colour texture", "Color")
+	add_input("depth", GNFamily.Type.TOP, false, "Depth texture (0=near, 1=far)", "Depth")
+	add_output("out", GNFamily.Type.TOP, "DoF-blurred texture", "Out")
 
 
 func _init_parameters() -> void:

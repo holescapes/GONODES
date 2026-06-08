@@ -27,8 +27,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Input image")
-	add_output("out", GNFamily.Type.DAT, "Pose data per marker")
+	add_input("in", GNFamily.Type.IMG, true, "Input image", "In")
+	add_output("out", GNFamily.Type.DAT, "Pose data per marker", "Out")
 
 
 func _init_parameters() -> void:

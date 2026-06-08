@@ -32,8 +32,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Text messages to send (one per row)")
-	add_output("out", GNFamily.Type.DAT, "Send log")
+	add_input("in", GNFamily.Type.DAT, false, "Text messages to send (one per row)", "In")
+	add_output("out", GNFamily.Type.DAT, "Send log", "Out")
 
 
 func _init_parameters() -> void:

@@ -14,9 +14,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("A", GNFamily.Type.TOP, false, "First texture (base)")
-	add_input("B", GNFamily.Type.TOP, false, "Second texture (blend)")
-	add_output("out", GNFamily.Type.TOP, "Composited texture")
+	add_input("A", GNFamily.Type.TOP, false, "First texture (base)", "A")
+	add_input("B", GNFamily.Type.TOP, false, "Second texture (blend)", "B")
+	add_output("out", GNFamily.Type.TOP, "Composited texture", "Out")
 
 
 func _init_parameters() -> void:
@@ -26,8 +26,8 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var tex_a: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
-	var tex_b: GNTextureData = inputs[1] as GNTextureData if inputs.size() > 1 and inputs[1] is GNTextureData else null
+	var tex_a: GNTextureData = _get_input_top(inputs, 0)
+	var tex_b: GNTextureData = _get_input_top(inputs, 1)
 
 	if tex_a == null:
 		GNLogger.warn("CompositeTOP", "'%s' — no valid input on port A" % id)

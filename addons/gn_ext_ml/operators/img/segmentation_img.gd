@@ -1,8 +1,8 @@
-class_name SegmentationTOP
-extends GNTopBase
+class_name SegmentationIMG
+extends GNImgBase
 ## Person / background segmentation via ONNX model.
 ##
-## Accepts a TOP input and outputs a binary mask texture where
+## Accepts an IMG input and outputs a binary mask image where
 ## white = person, black = background.  Useful for compositing,
 ## virtual backgrounds, and interactive installations.
 ##
@@ -18,14 +18,14 @@ const MODEL_H := 256
 
 func _init() -> void:
 	node_type = "segmentation"
-	node_description = "Person segmentation — outputs a mask texture. Requires gn_ext_ml."
+	node_description = "Person segmentation — outputs a mask image. Requires gn_ext_ml."
 
 func supported_platforms() -> PackedStringArray:
 	return PackedStringArray(["windows", "macos", "linux"])
 
 func _init_ports() -> void:
-	add_input("image", GNFamily.Type.TOP, true, "Camera / video input", "Image")
-	add_output("out", GNFamily.Type.TOP, "Segmentation mask")
+	add_input("image", GNFamily.Type.IMG, true, "Camera / video input", "Image")
+	add_output("out", GNFamily.Type.IMG, "Segmentation mask", "Out")
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("model_path",
@@ -47,15 +47,17 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
+	var out := _prepare_image()
+
 	if not _is_ml_available():
-		GNLogger.warn("SegmentationTOP", "'%s': gn_ext_ml not loaded" % id)
+		GNLogger.warn("SegmentationIMG", "'%s': gn_ext_ml not loaded" % id)
 		return null
 
 	if not get_param_value("active"):
-		return _cached_tex_data
+		return out
 
-	var in_tex: GNTextureData = _get_input_top(inputs, 0)
-	if in_tex == null or in_tex.texture == null:
+	var in_img: GNImageData = _get_input_img(inputs, 0)
+	if in_img == null or in_img.image == null:
 		return null
 
 	_ensure_onnx()
@@ -70,14 +72,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_model_loaded = _onnx.load_model(model_path)
 		_last_model = model_path
 		if not _model_loaded:
-			GNLogger.error("SegmentationTOP", "'%s': failed to load '%s'" % [id, model_path])
+			GNLogger.error("SegmentationIMG", "'%s': failed to load '%s'" % [id, model_path])
 
 	if not _model_loaded:
 		return null
 
-	var img: Image = in_tex.texture.get_image()
-	if img == null:
-		return null
+	var img: Image = in_img.image
 
 	var input_names: PackedStringArray = _onnx.get_input_names()
 	if input_names.is_empty():
@@ -124,15 +124,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if res.x > 0 and res.y > 0 and (res.x != MODEL_W or res.y != MODEL_H):
 		mask_img.resize(res.x, res.y, Image.INTERPOLATE_BILINEAR)
 
-	var out_w: int = mask_img.get_width()
-	var out_h: int = mask_img.get_height()
-	var tex := ImageTexture.create_from_image(mask_img)
-	if _cached_tex_data == null:
-		_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = tex
-	_cached_tex_data.resolution = Vector2i(out_w, out_h)
-	_cached_tex_data.format = Image.FORMAT_RGBA8
-	return _cached_tex_data
+	out.set_image(mask_img)
+	return out
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -145,4 +138,4 @@ func _ensure_onnx() -> void:
 		return
 	_onnx = ClassDB.instantiate(&"GNOnnxInference")
 	if _onnx == null:
-		GNLogger.error("SegmentationTOP", "'%s': failed to instantiate GNOnnxInference" % id)
+		GNLogger.error("SegmentationIMG", "'%s': failed to instantiate GNOnnxInference" % id)

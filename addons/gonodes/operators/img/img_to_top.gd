@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, false, "CPU Image input")
-	add_output("out", GNFamily.Type.TOP, "GPU Texture output")
+	add_input("in", GNFamily.Type.IMG, false, "CPU Image input", "In")
+	add_output("out", GNFamily.Type.TOP, "GPU Texture output", "Out")
 
 
 func _init_parameters() -> void:

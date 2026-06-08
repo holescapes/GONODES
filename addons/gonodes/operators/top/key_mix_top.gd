@@ -12,10 +12,10 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("A", GNFamily.Type.TOP, false, "Background texture")
-	add_input("B", GNFamily.Type.TOP, false, "Foreground texture")
-	add_input("matte", GNFamily.Type.TOP, false, "Matte / mask texture")
-	add_output("out", GNFamily.Type.TOP, "Blended result")
+	add_input("A", GNFamily.Type.TOP, false, "Background texture", "A")
+	add_input("B", GNFamily.Type.TOP, false, "Foreground texture", "B")
+	add_input("matte", GNFamily.Type.TOP, false, "Matte / mask texture", "Matte")
+	add_output("out", GNFamily.Type.TOP, "Blended result", "Out")
 
 
 func _init_parameters() -> void:

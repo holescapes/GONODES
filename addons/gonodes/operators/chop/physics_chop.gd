@@ -20,7 +20,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("comp_in", GNFamily.Type.COMP, false, "Physics body COMP input", "Comp")
-	add_output("out", GNFamily.Type.CHOP, "Physics readback channels")
+	add_output("out", GNFamily.Type.CHOP, "Physics readback channels", "Out")
 
 
 func _init_parameters() -> void:

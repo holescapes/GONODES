@@ -27,9 +27,9 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	_enable_dynamic_inputs(GNFamily.Type.COMP, "comp", "COMP Input")
-	add_output("out", GNFamily.Type.TOP, "Rendered color texture")
-	add_output("depth", GNFamily.Type.TOP, "Depth buffer (luminance)")
-	add_output("normal", GNFamily.Type.TOP, "World-space normal buffer (RGB)")
+	add_output("out", GNFamily.Type.TOP, "Rendered color texture", "Out")
+	add_output("depth", GNFamily.Type.TOP, "Depth buffer (luminance)", "Depth")
+	add_output("normal", GNFamily.Type.TOP, "World-space normal buffer (RGB)", "Normal")
 
 
 func _init_parameters() -> void:

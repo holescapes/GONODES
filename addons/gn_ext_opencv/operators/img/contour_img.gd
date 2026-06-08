@@ -26,9 +26,9 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Binary / thresholded input")
-	add_output("out", GNFamily.Type.IMG, "Overlay with contours drawn")
-	add_output("data", GNFamily.Type.DAT, "Contour table (index, area, cx, cy, perimeter, vertices)")
+	add_input("in", GNFamily.Type.IMG, true, "Binary / thresholded input", "In")
+	add_output("out", GNFamily.Type.IMG, "Overlay with contours drawn", "Out")
+	add_output("data", GNFamily.Type.DAT, "Contour table (index, area, cx, cy, perimeter, vertices)", "Data")
 
 
 func _init_parameters() -> void:

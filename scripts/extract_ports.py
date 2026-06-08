@@ -69,7 +69,8 @@ def guess_family(filepath, port_lines):
     parts = rel.split("/")
     
     # Check path for family folder
-    family_names = ["chop", "top", "sop", "dat", "comp", "mat", "output", "ui", "pop", "vol", "img"]
+    from _registry_utils import get_all_families
+    family_names = get_all_families()
     for p in parts:
         if p.lower() in family_names:
             return p.lower()

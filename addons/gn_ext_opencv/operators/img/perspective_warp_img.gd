@@ -25,8 +25,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Input image")
-	add_output("out", GNFamily.Type.IMG, "Warped output")
+	add_input("in", GNFamily.Type.IMG, true, "Input image", "In")
+	add_output("out", GNFamily.Type.IMG, "Warped output", "Out")
 
 
 func _init_parameters() -> void:

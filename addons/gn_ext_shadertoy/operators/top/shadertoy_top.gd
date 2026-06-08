@@ -53,7 +53,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	# Default: generator (no inputs).  Ports rebuilt when shader is parsed.
-	add_output("out", GNFamily.Type.TOP, "Shader output texture")
+	add_output("out", GNFamily.Type.TOP, "Shader output texture", "Out")
 
 
 func _init_parameters() -> void:

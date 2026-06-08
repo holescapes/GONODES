@@ -40,9 +40,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("emitter", GNFamily.Type.SOP, false, "Emitter surface geometry")
-	add_input("attractor", GNFamily.Type.SOP, false, "Attractor surface (optional)")
-	add_output("out", GNFamily.Type.SOP, "Particle point cloud")
+	add_input("emitter", GNFamily.Type.SOP, false, "Emitter surface geometry", "Emitter")
+	add_input("attractor", GNFamily.Type.SOP, false, "Attractor surface (optional)", "Attractor")
+	add_output("out", GNFamily.Type.SOP, "Particle point cloud", "Out")
 
 
 func _init_parameters() -> void:

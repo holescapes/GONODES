@@ -10,8 +10,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("sdf_in", GNSdfBase.SDF_FAMILY, false, "SDF shape to repeat")
-	add_output("out", GNSdfBase.SDF_FAMILY, "Repeated SDF output")
+	add_input("sdf_in", GNSdfBase.SDF_FAMILY, false, "SDF shape to repeat", "SDF")
+	add_output("out", GNSdfBase.SDF_FAMILY, "Repeated SDF output", "Out")
 
 
 func _init_parameters() -> void:

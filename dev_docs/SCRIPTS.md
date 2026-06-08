@@ -24,6 +24,11 @@ All helper scripts live in `scripts/`.  They require **Python 3.10+** and no ext
 | `regen_broken_patches.py` | Regenerate structurally broken `.gnpatch` files | Patch validation failures |
 | `gen_native_operators_md.py` | Generate native ops section of `OPERATORS.md` | Adding/removing native wrappers |
 | `gen_all_core_patches.py` | Generate full manual QA test patches (all operators) | Before release QA |
+| `audit_help_patches.py` | Audit help patches for quality issues per `HELP_PATCH_RULES.md` | Before release |
+| `fix_help_patches.py` | Auto-fix common help patch quality issues | After `audit_help_patches.py` |
+| `fix_native_help_warnings.py` | Fix native variant help patch warnings by cloning originals | Adding native wrappers |
+| `generate_operator_tests.py` | Generate contract tests for untested operators | Before release |
+| `fix_labels.py` | Auto-add missing port labels to operators (Rule 25.14) | After `audit_labels.py` |
 
 ---
 
@@ -122,6 +127,30 @@ Regenerates `.gnpatch` files whose focus operator node is missing or structurall
 python scripts/regen_broken_patches.py
 ```
 
+### `audit_help_patches.py`
+
+Scans all help patches for common quality issues per `HELP_PATCH_RULES.md` (missing sinks, wrong families, oversized patches, etc.).
+
+```
+python scripts/audit_help_patches.py
+```
+
+### `fix_help_patches.py`
+
+Auto-fixes common quality issues detected by `audit_help_patches.py` (adds missing WindowOUT sinks, corrects chain families, etc.).
+
+```
+python scripts/fix_help_patches.py
+```
+
+### `fix_native_help_warnings.py`
+
+Fixes native operator help patch warnings by cloning original patches and replacing class names with native variants.
+
+```
+python scripts/fix_native_help_warnings.py
+```
+
 ---
 
 ## Validation & Auditing
@@ -167,12 +196,30 @@ Reports multi-port operators that lack descriptive labels on `add_input()` / `ad
 python scripts/audit_labels.py
 ```
 
+### `fix_labels.py`
+
+Auto-adds missing port labels to all operators by deriving title-cased labels from port names. Companion to `audit_labels.py`. Scans both core and extension operators.
+
+```
+python scripts/fix_labels.py              # apply fixes
+python scripts/fix_labels.py --dry-run    # preview only
+```
+
 ### `check_node_types.py`
 
 Lists every `node_type` string across all operator files.  Useful for spotting duplicates or typos.
 
 ```
 python scripts/check_node_types.py
+```
+
+### `generate_operator_tests.py`
+
+Generates operator contract tests for untested operators. Reads `operator_registry.json`, checks existing test files, and creates coverage tests for any operator missing tests.
+
+```
+python scripts/generate_operator_tests.py
+python scripts/generate_operator_tests.py --dry-run
 ```
 
 ---

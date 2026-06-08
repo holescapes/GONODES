@@ -32,9 +32,9 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Input image (video frames)")
-	add_output("out", GNFamily.Type.IMG, "Overlay with tracked bounding box")
-	add_output("data", GNFamily.Type.CHOP, "Tracked ROI (cx, cy, w, h, confidence)")
+	add_input("in", GNFamily.Type.IMG, true, "Input image (video frames)", "In")
+	add_output("out", GNFamily.Type.IMG, "Overlay with tracked bounding box", "Out")
+	add_output("data", GNFamily.Type.CHOP, "Tracked ROI (cx, cy, w, h, confidence)", "Data")
 
 
 func _init_parameters() -> void:

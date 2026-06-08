@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("dat", GNFamily.Type.DAT, false, "DAT text/BBCode content")
-	add_output("out", GNFamily.Type.UI, "Widget output")
+	add_input("dat", GNFamily.Type.DAT, false, "DAT text/BBCode content", "DAT")
+	add_output("out", GNFamily.Type.UI, "Widget output", "Out")
 
 
 func _init_parameters() -> void:

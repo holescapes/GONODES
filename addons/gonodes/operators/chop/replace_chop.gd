@@ -10,9 +10,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("base", GNFamily.Type.CHOP, false, "Base channels (destination)")
-	add_input("replace", GNFamily.Type.CHOP, false, "Replacement channels (source)")
-	add_output("out", GNFamily.Type.CHOP, "Output with replaced channels")
+	add_input("base", GNFamily.Type.CHOP, false, "Base channels (destination)", "Base")
+	add_input("replace", GNFamily.Type.CHOP, false, "Replacement channels (source)", "Replace")
+	add_output("out", GNFamily.Type.CHOP, "Output with replaced channels", "Out")
 
 
 func _init_parameters() -> void:

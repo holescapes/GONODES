@@ -58,15 +58,12 @@ if not os.path.isdir(godot_cpp_path):
 	print("ERROR: godot-cpp not found at:", godot_cpp_path)
     sys.exit(1)
 
-# Import the godotcpp tool from toolchain/tools/ to set up compiler flags,
-# but do NOT run godot-cpp's own SConstruct (which tries to build godot-cpp from
-# source).  Instead we configure the environment manually and link against the
-# pre-built static library.
+# Import the godotcpp tool to configure compiler flags.
+# We link against the pre-built static library, not rebuild godot-cpp from source.
 sys.path.insert(0, godot_cpp_path)
 
-# SCons resolves env.Dir("tools") relative to the SConstruct directory (build
-# dir), but platform tool files (android.py, windows.py etc.) live in
-# godot-cpp/tools/.  Create a symlink so they're discoverable.
+# SCons resolves platform tool files (windows.py, linux.py, etc.) from godot-cpp/tools/.
+# Create a symlink (or copy) so they are discoverable from the build directory.
 _cpp_tools = os.path.join(godot_cpp_path, "tools")
 if not os.path.isdir("tools") and os.path.isdir(_cpp_tools):
     try:
@@ -101,10 +98,9 @@ env.Append(CPPPATH=[
 ])
 
 # Link against pre-built godot-cpp static library
+import glob
 lib_dir = os.path.join(godot_cpp_path, "bin")
 env.Append(LIBPATH=[lib_dir])
-# Find the matching lib file
-import glob
 libs = glob.glob(os.path.join(lib_dir, "libgodot-cpp.*" + target + "*"))
 if libs:
     lib_name_full = os.path.splitext(os.path.basename(libs[0]))[0]
@@ -319,11 +315,13 @@ func _do_compile(node_id: String, source: String, cls_name: String,
 	# Write SConstruct (for advanced users who prefer SCons)
 	var godot_cpp_path := _find_godot_cpp()
 	var sdk_path := ProjectSettings.globalize_path(_ext_dir + "sdk")
+	# Normalize to 4-space indentation regardless of what the GDScript formatter
+	# did to the template (it may have converted spaces → tabs).
 	var sconstruct := _SCONSTRUCT_TEMPLATE.format({
 		"godot_cpp_path": godot_cpp_path.replace("\\", "/"),
 		"sdk_path": sdk_path.replace("\\", "/"),
 		"lib_name": lib_name,
-	})
+	}).replace("\t", "    ")
 	f = FileAccess.open(build_dir.path_join("SConstruct"), FileAccess.WRITE)
 	if f == null:
 		return {"success": false, "output": "Failed to write SConstruct", "lib_path": ""}
@@ -455,8 +453,8 @@ func _write_gdextension(build_dir: String, lib_name: String,
 		lib_entries += 'macos.debug = "%s"\n' % relative_path
 		lib_entries += 'macos.release = "%s"\n' % relative_path
 	else:
-		lib_entries += '%s.debug.%s = "%s"\n' % [platform, arch, relative_path]
-		lib_entries += '%s.release.%s = "%s"\n' % [platform, arch, relative_path]
+		lib_entries += '%s.%s.debug = "%s"\n' % [platform, arch, relative_path]
+		lib_entries += '%s.%s.release = "%s"\n' % [platform, arch, relative_path]
 
 	var content := _GDEXTENSION_TEMPLATE.format({"lib_entries": lib_entries}).strip_edges()
 	var gde_path := build_dir.path_join(lib_name + ".gdextension")

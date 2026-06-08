@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("chop", GNFamily.Type.CHOP, false, "CHOP to drive bar value")
-	add_output("out", GNFamily.Type.UI, "Widget output")
+	add_input("chop", GNFamily.Type.CHOP, false, "CHOP to drive bar value", "CHOP")
+	add_output("out", GNFamily.Type.UI, "Widget output", "Out")
 
 
 func _init_parameters() -> void:

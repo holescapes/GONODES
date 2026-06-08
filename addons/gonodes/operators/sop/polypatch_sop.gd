@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input geometry (uses first 4 edge loops)")
-	add_output("out", GNFamily.Type.SOP, "Patch surface")
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry (uses first 4 edge loops)", "In")
+	add_output("out", GNFamily.Type.SOP, "Patch surface", "Out")
 
 
 func _init_parameters() -> void:

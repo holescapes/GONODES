@@ -10,9 +10,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("backbone", GNFamily.Type.SOP, false, "Backbone curve (line strip)")
-	add_input("profile", GNFamily.Type.SOP, true, "Profile cross-section (optional — uses circle)")
-	add_output("out", GNFamily.Type.SOP, "Swept mesh")
+	add_input("backbone", GNFamily.Type.SOP, false, "Backbone curve (line strip)", "Backbone")
+	add_input("profile", GNFamily.Type.SOP, true, "Profile cross-section (optional — uses circle)", "Profile")
+	add_output("out", GNFamily.Type.SOP, "Swept mesh", "Out")
 
 
 func _init_parameters() -> void:

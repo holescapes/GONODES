@@ -25,8 +25,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, true, "Optional upstream cue table (overrides built-in rows)")
-	add_output("out", GNFamily.Type.DAT, "Cue table (index, name, time, duration, transition, data)")
+	add_input("in", GNFamily.Type.DAT, true, "Optional upstream cue table (overrides built-in rows)", "In")
+	add_output("out", GNFamily.Type.DAT, "Cue table (index, name, time, duration, transition, data)", "Out")
 
 
 func _init_parameters() -> void:

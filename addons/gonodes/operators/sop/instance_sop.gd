@@ -13,7 +13,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("pop_in", GNFamily.Type.POP, false, "Particle input", "Pop")
 	add_input("geo_in", GNFamily.Type.SOP, false, "Instance geometry", "Geometry")
-	add_output("out", GNFamily.Type.SOP, "Instanced geometry output")
+	add_output("out", GNFamily.Type.SOP, "Instanced geometry output", "Out")
 
 
 func _init_parameters() -> void:

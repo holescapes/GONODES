@@ -822,12 +822,12 @@ func test_force_pop_native_cook() -> void:
 	GNTestAssert.assert_true(true, "no crash on cook")
 
 func test_instance_pop_native_instantiation() -> void:
-	var node := _make_node(InstancePOPNative.new(), "instn1")
-	GNTestAssert.assert_not_null(node, "InstancePOPNative created")
-	GNTestAssert.assert_eq(node.family, GNFamily.Type.POP, "family is POP")
+	var node := _make_node(InstanceSOPNative.new(), "instn1")
+	GNTestAssert.assert_not_null(node, "InstanceSOPNative created")
+	GNTestAssert.assert_eq(node.family, GNFamily.Type.SOP, "family is SOP")
 
 func test_instance_pop_native_cook() -> void:
-	var node := _make_node(InstancePOPNative.new(), "instn2")
+	var node := _make_node(InstanceSOPNative.new(), "instn2")
 	var out := _cook_no_input(node)
 	GNTestAssert.assert_true(true, "no crash on cook")
 
@@ -920,11 +920,11 @@ func test_fluid_vol_native_cook() -> void:
 	GNTestAssert.assert_true(true, "cooks without crash")
 
 func test_marching_cubes_vol_native_instantiation() -> void:
-	var node := _make_node(MarchingCubesVOLNative.new(), "mc_native1")
-	GNTestAssert.assert_not_null(node, "MarchingCubesVOLNative created")
+	var node := _make_node(MarchingCubesSOPNative.new(), "mc_native1")
+	GNTestAssert.assert_not_null(node, "MarchingCubesSOPNative created")
 
 func test_marching_cubes_vol_native_cook() -> void:
-	var node := _make_node(MarchingCubesVOLNative.new(), "mc_native2")
+	var node := _make_node(MarchingCubesSOPNative.new(), "mc_native2")
 	var out := _cook_no_input(node)
 	GNTestAssert.assert_true(true, "cooks without crash")
 

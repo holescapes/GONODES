@@ -9,7 +9,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("vol_in", GNFamily.Type.VOL, false, "Volume input", "Volume")
-	add_output("out", GNFamily.Type.VOL, "Blurred volume")
+	add_output("out", GNFamily.Type.VOL, "Blurred volume", "Out")
 
 
 func _init_parameters() -> void:

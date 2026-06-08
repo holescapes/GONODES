@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.MAT, false, "Input material (used when 'mat' is empty)")
-	add_output("out", GNFamily.Type.MAT, "Selected material")
+	add_input("in", GNFamily.Type.MAT, false, "Input material (used when 'mat' is empty)", "In")
+	add_output("out", GNFamily.Type.MAT, "Selected material", "Out")
 
 
 func _init_parameters() -> void:

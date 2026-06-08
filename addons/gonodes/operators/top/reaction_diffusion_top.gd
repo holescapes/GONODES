@@ -25,8 +25,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("seed", GNFamily.Type.TOP, true, "Optional seed mask texture")
-	add_output("out", GNFamily.Type.TOP, "Rendered pattern texture")
+	add_input("seed", GNFamily.Type.TOP, true, "Optional seed mask texture", "Seed")
+	add_output("out", GNFamily.Type.TOP, "Rendered pattern texture", "Out")
 
 
 func _init_parameters() -> void:

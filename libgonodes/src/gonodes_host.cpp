@@ -23,6 +23,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <atomic>
 #include <cinttypes>
 
 /* ── Build-time version consistency check ────────────────────────────────
@@ -76,7 +77,7 @@ static int push_cmd(gonodes_instance_s* inst, int type, int patch_id,
 /*  Lifecycle                                                                */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-static int s_instance_created = 0;
+static std::atomic<int> s_instance_created{0};
 
 gonodes_instance_t gonodes_create(
     const char* project_path,
@@ -153,7 +154,7 @@ gonodes_patch_t gonodes_load_patch(
     gonodes_instance_t inst, const char* patch_path
 ) {
     VALIDATE(inst, nullptr);
-    if (!patch_path) return nullptr;
+    if (!patch_path) { gn_set_error(inst, "patch_path is NULL"); return nullptr; }
 
     gonodes_patch_s* p = gn_alloc_patch(inst);
     if (!p) {
@@ -203,7 +204,7 @@ void gonodes_unload_patch(gonodes_instance_t inst, gonodes_patch_t patch) {
 
 int gonodes_reload_patch(gonodes_instance_t inst, gonodes_patch_t patch) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!_p->loaded) return GONODES_ERR_NOT_LOADED;
+    if (!_p->loaded) { gn_set_error(inst, "Patch is not loaded"); return GONODES_ERR_NOT_LOADED; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_RELOAD_PATCH;
@@ -288,7 +289,7 @@ int gonodes_set_input_texture(
     uint64_t texture_handle, int width, int height, int format
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id) { gn_set_error(inst, "node_id is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_SET_TEXTURE;
@@ -310,8 +311,9 @@ int gonodes_set_input_chop(
     const float* samples, int num_samples
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !channel_name || !samples || num_samples <= 0)
-        return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !channel_name || !samples || num_samples <= 0) {
+        gn_set_error(inst, "Invalid arguments to gonodes_set_input_chop()"); return GONODES_ERR_NODE_NOT_FOUND;
+    }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_SET_CHOP;
@@ -334,7 +336,7 @@ int gonodes_set_input_table(
     const char* node_id, const char* json_data
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !json_data) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !json_data) { gn_set_error(inst, "node_id or json_data is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_SET_TABLE;
@@ -356,8 +358,9 @@ int gonodes_set_parameter(
     const char* value_json
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !param_name || !value_json)
-        return GONODES_ERR_PARAM_NOT_FOUND;
+    if (!node_id || !param_name || !value_json) {
+        gn_set_error(inst, "node_id, param_name, or value_json is NULL"); return GONODES_ERR_PARAM_NOT_FOUND;
+    }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_SET_PARAM;
@@ -380,8 +383,9 @@ int gonodes_set_input_pixels(
     const void* pixels, int width, int height, int format, int row_stride
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !pixels || width <= 0 || height <= 0)
-        return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !pixels || width <= 0 || height <= 0) {
+        gn_set_error(inst, "Invalid arguments to gonodes_set_input_pixels()"); return GONODES_ERR_NODE_NOT_FOUND;
+    }
 
     int bpp = gn_bytes_per_pixel(format);
     int tight_stride = width * bpp;
@@ -428,8 +432,9 @@ int gonodes_set_input_geometry(
     int vertex_count, const uint32_t* indices, int index_count
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !positions || vertex_count <= 0)
-        return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !positions || vertex_count <= 0) {
+        gn_set_error(inst, "Invalid arguments to gonodes_set_input_geometry()"); return GONODES_ERR_NODE_NOT_FOUND;
+    }
 
     /* Pass pointer addresses; GDScript reads via GNHostBridge. */
     gn_command cmd = {};
@@ -457,7 +462,7 @@ int gonodes_set_input_volume(
     const char* field_name
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !voxels) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !voxels) { gn_set_error(inst, "node_id or voxels is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     /* Pass pointer address; GDScript reads via GNHostBridge.read_float32(). */
     gn_command cmd = {};
@@ -484,7 +489,7 @@ int gonodes_set_input_particles(
     const float* colors, const float* ages, int particle_count
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !positions) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !positions) { gn_set_error(inst, "node_id or positions is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     /* Pass pointer addresses; GDScript reads via GNHostBridge. */
     gn_command cmd = {};
@@ -516,8 +521,9 @@ int gonodes_set_input_chop_direct(
     const int* sample_counts, int num_channels
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !channel_names || !channel_data || !sample_counts || num_channels <= 0)
-        return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !channel_names || !channel_data || !sample_counts || num_channels <= 0) {
+        gn_set_error(inst, "Invalid arguments to gonodes_set_input_chop_direct()"); return GONODES_ERR_NODE_NOT_FOUND;
+    }
 
     /* Push one GN_CMD_SET_CHOP per channel — each carries its own pointer. */
     for (int i = 0; i < num_channels; ++i) {
@@ -537,7 +543,7 @@ int gonodes_set_input_table_direct(
     const char* node_id, const char* json_data, int length
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !json_data) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !json_data) { gn_set_error(inst, "node_id or json_data is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_SET_TABLE;
@@ -560,8 +566,9 @@ int gonodes_set_input_geometry_direct(
     int vertex_count, const uint32_t* indices, int index_count
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !positions || vertex_count <= 0)
-        return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !positions || vertex_count <= 0) {
+        gn_set_error(inst, "Invalid arguments to gonodes_set_input_geometry_direct()"); return GONODES_ERR_NODE_NOT_FOUND;
+    }
 
     /* Same as gonodes_set_input_geometry but includes the colors pointer. */
     gn_command cmd = {};
@@ -590,7 +597,7 @@ int gonodes_set_input_volume_gpu(
     const char* field_name
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || texture_handle == 0) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || texture_handle == 0) { gn_set_error(inst, "node_id is NULL or texture_handle is 0"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     if (_p->staged_vol_gpu_count >= GONODES_MAX_STAGED) {
         gn_set_error(inst, "Too many staged VOL GPU inputs");
@@ -617,7 +624,7 @@ int gonodes_set_input_particles_gpu(
     uint64_t buffer_handle, int particle_count, int stride, int buffer_size
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || buffer_handle == 0) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || buffer_handle == 0) { gn_set_error(inst, "node_id is NULL or buffer_handle is 0"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     if (_p->staged_pop_gpu_count >= GONODES_MAX_STAGED) {
         gn_set_error(inst, "Too many staged POP GPU inputs");
@@ -648,7 +655,7 @@ uint64_t gonodes_get_output_texture(
     const char* node_id, int* out_width, int* out_height
 ) {
     VALIDATE_PATCH(inst, patch, 0);
-    if (!node_id) return 0;
+    if (!node_id) { gn_set_error(inst, "node_id is NULL"); return 0; }
 
     for (int i = 0; i < _p->tex_output_count; ++i) {
         if (strcmp(_p->tex_outputs[i].node_id, node_id) == 0) {
@@ -657,6 +664,7 @@ uint64_t gonodes_get_output_texture(
             return _p->tex_outputs[i].handle;
         }
     }
+    gn_set_error(inst, "Output texture not found for specified node");
     return 0;
 }
 
@@ -667,8 +675,9 @@ int gonodes_get_output_chop(
     float* out_buffer, int buffer_size
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !channel_name || !out_buffer || buffer_size <= 0)
-        return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !channel_name || !out_buffer || buffer_size <= 0) {
+        gn_set_error(inst, "Invalid arguments to gonodes_get_output_chop()"); return GONODES_ERR_NODE_NOT_FOUND;
+    }
 
     for (int i = 0; i < _p->chop_output_count; ++i) {
         if (strcmp(_p->chop_outputs[i].node_id, node_id) == 0 &&
@@ -680,6 +689,7 @@ int gonodes_get_output_chop(
             return to_copy;
         }
     }
+    gn_set_error(inst, "CHOP channel not found for specified node");
     return 0;
 }
 
@@ -689,13 +699,14 @@ const char* gonodes_get_output_table(
     const char* node_id
 ) {
     VALIDATE_PATCH(inst, patch, nullptr);
-    if (!node_id) return nullptr;
+    if (!node_id) { gn_set_error(inst, "node_id is NULL"); return nullptr; }
 
     for (int i = 0; i < _p->dat_output_count; ++i) {
         if (strcmp(_p->dat_outputs[i].node_id, node_id) == 0) {
             return _p->dat_outputs[i].json_data;
         }
     }
+    gn_set_error(inst, "Output table not found for specified node");
     return nullptr;
 }
 
@@ -705,7 +716,7 @@ const char* gonodes_get_parameter(
     const char* node_id, const char* param_name
 ) {
     VALIDATE_PATCH(inst, patch, nullptr);
-    if (!node_id || !param_name) return nullptr;
+    if (!node_id || !param_name) { gn_set_error(inst, "node_id or param_name is NULL"); return nullptr; }
 
     for (int i = 0; i < _p->param_output_count; ++i) {
         if (strcmp(_p->param_outputs[i].node_id, node_id) == 0 &&
@@ -713,6 +724,7 @@ const char* gonodes_get_parameter(
             return _p->param_outputs[i].value_json;
         }
     }
+    gn_set_error(inst, "Parameter not found for specified node");
     return nullptr;
 }
 
@@ -722,7 +734,7 @@ int gonodes_get_texture_info(
     const char* node_id, gonodes_texture_info_t* out_info
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !out_info) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !out_info) { gn_set_error(inst, "node_id or out_info is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     memset(out_info, 0, sizeof(gonodes_texture_info_t));
 
@@ -739,6 +751,7 @@ int gonodes_get_texture_info(
             return GONODES_OK;
         }
     }
+    gn_set_error(inst, "Texture info not found for specified node");
     return GONODES_ERR_NODE_NOT_FOUND;
 }
 
@@ -750,8 +763,9 @@ int gonodes_read_output_pixels(
     int* out_width, int* out_height
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !out_pixels || buffer_size <= 0)
-        return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !out_pixels || buffer_size <= 0) {
+        gn_set_error(inst, "Invalid arguments to gonodes_read_output_pixels()"); return GONODES_ERR_NODE_NOT_FOUND;
+    }
 
     /* Request readback via the readback slot. */
     snprintf(_p->readback_slot.node_id, sizeof(_p->readback_slot.node_id),
@@ -789,7 +803,7 @@ const gonodes_geometry_data_t* gonodes_get_output_geometry(
     const char* node_id
 ) {
     VALIDATE_PATCH(inst, patch, nullptr);
-    if (!node_id) return nullptr;
+    if (!node_id) { gn_set_error(inst, "node_id is NULL"); return nullptr; }
 
     /* Request geometry export via the geo request slot. */
     snprintf(_p->geo_request_slot.node_id, sizeof(_p->geo_request_slot.node_id),
@@ -799,7 +813,7 @@ const gonodes_geometry_data_t* gonodes_get_output_geometry(
 
     gn_bootstrap_iteration(inst->godot_handle, 0.0);
 
-    if (!_p->geo_request_slot.completed) return nullptr;
+    if (!_p->geo_request_slot.completed) { gn_set_error(inst, "Geometry readback not completed for specified node"); return nullptr; }
 
     /* GNEmbeddedHost populated the geometry buffers directly. */
     return &_p->cached_geometry;
@@ -833,11 +847,12 @@ int gonodes_get_output_volume_gpu(
     const char* node_id, gonodes_volume_gpu_handle_t* out_info
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !out_info) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !out_info) { gn_set_error(inst, "node_id or out_info is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
     memset(out_info, 0, sizeof(gonodes_volume_gpu_handle_t));
 
-    if (_p->cached_vol_gpu.native_handle == 0)
-        return GONODES_ERR_NODE_NOT_FOUND;
+    if (_p->cached_vol_gpu.native_handle == 0) {
+        gn_set_error(inst, "No GPU volume output available"); return GONODES_ERR_NODE_NOT_FOUND;
+    }
 
     *out_info = _p->cached_vol_gpu;
     if (out_info->graphics_api == 0)
@@ -851,11 +866,12 @@ int gonodes_get_output_particles_gpu(
     const char* node_id, gonodes_particle_gpu_handle_t* out_info
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !out_info) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !out_info) { gn_set_error(inst, "node_id or out_info is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
     memset(out_info, 0, sizeof(gonodes_particle_gpu_handle_t));
 
-    if (_p->cached_pop_gpu.native_handle == 0)
-        return GONODES_ERR_NODE_NOT_FOUND;
+    if (_p->cached_pop_gpu.native_handle == 0) {
+        gn_set_error(inst, "No GPU particle output available"); return GONODES_ERR_NODE_NOT_FOUND;
+    }
 
     *out_info = _p->cached_pop_gpu;
     if (out_info->graphics_api == 0)
@@ -869,7 +885,7 @@ int gonodes_get_output_chop_direct(
     const char* node_id, gonodes_chop_data_t* out_data
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id || !out_data) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id || !out_data) { gn_set_error(inst, "node_id or out_data is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
     memset(out_data, 0, sizeof(gonodes_chop_data_t));
 
     /* Build chop_data from per-channel response slots. */
@@ -878,12 +894,17 @@ int gonodes_get_output_chop_direct(
         if (strcmp(_p->chop_outputs[i].node_id, node_id) == 0)
             num_ch++;
     }
-    if (num_ch == 0) return GONODES_ERR_NODE_NOT_FOUND;
+    if (num_ch == 0) { gn_set_error(inst, "No CHOP channels found for specified node"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     if (num_ch > _p->cached_chop_channels_capacity) {
         free(_p->cached_chop_channels);
         _p->cached_chop_channels = (gonodes_channel_info_t*)calloc(
             (size_t)num_ch, sizeof(gonodes_channel_info_t));
+        if (!_p->cached_chop_channels) {
+            _p->cached_chop_channels_capacity = 0;
+            gn_set_error(inst, "Failed to allocate CHOP channel cache");
+            return GONODES_ERR_NODE_NOT_FOUND;
+        }
         _p->cached_chop_channels_capacity = num_ch;
     }
 
@@ -922,7 +943,7 @@ const char* gonodes_get_node_info(
     const char* node_id
 ) {
     VALIDATE_PATCH(inst, patch, nullptr);
-    if (!node_id) return nullptr;
+    if (!node_id) { gn_set_error(inst, "node_id is NULL"); return nullptr; }
     return _p->cached_node_info_json;
 }
 
@@ -932,7 +953,7 @@ const char* gonodes_list_parameters(
     const char* node_id
 ) {
     VALIDATE_PATCH(inst, patch, nullptr);
-    if (!node_id) return nullptr;
+    if (!node_id) { gn_set_error(inst, "node_id is NULL"); return nullptr; }
     return _p->cached_params_json;
 }
 
@@ -1017,7 +1038,7 @@ int gonodes_send_midi_event(
     const gonodes_midi_event_t* event
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!event) return GONODES_ERR_INTERNAL;
+    if (!event) { gn_set_error(inst, "MIDI event is NULL"); return GONODES_ERR_INTERNAL; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_MIDI_EVENT;
@@ -1036,7 +1057,7 @@ int gonodes_send_osc_message(
     const char* address, const char* args
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!address) return GONODES_ERR_INTERNAL;
+    if (!address) { gn_set_error(inst, "OSC address is NULL"); return GONODES_ERR_INTERNAL; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_OSC_MESSAGE;
@@ -1123,8 +1144,8 @@ int gonodes_create_node(
     const char* node_id, const char* node_type
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!_p->loaded) return GONODES_ERR_NOT_LOADED;
-    if (!node_id || !node_type) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!_p->loaded) { gn_set_error(inst, "Patch is not loaded"); return GONODES_ERR_NOT_LOADED; }
+    if (!node_id || !node_type) { gn_set_error(inst, "node_id or node_type is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_CREATE_NODE;
@@ -1143,8 +1164,8 @@ int gonodes_delete_node(
     const char* node_id
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!_p->loaded) return GONODES_ERR_NOT_LOADED;
-    if (!node_id) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!_p->loaded) { gn_set_error(inst, "Patch is not loaded"); return GONODES_ERR_NOT_LOADED; }
+    if (!node_id) { gn_set_error(inst, "node_id is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_DELETE_NODE;
@@ -1163,8 +1184,8 @@ int gonodes_connect(
     const char* to_node, int to_port
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!_p->loaded) return GONODES_ERR_NOT_LOADED;
-    if (!from_node || !to_node) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!_p->loaded) { gn_set_error(inst, "Patch is not loaded"); return GONODES_ERR_NOT_LOADED; }
+    if (!from_node || !to_node) { gn_set_error(inst, "from_node or to_node is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_CONNECT;
@@ -1186,8 +1207,8 @@ int gonodes_disconnect(
     const char* to_node, int to_port
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!_p->loaded) return GONODES_ERR_NOT_LOADED;
-    if (!from_node || !to_node) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!_p->loaded) { gn_set_error(inst, "Patch is not loaded"); return GONODES_ERR_NOT_LOADED; }
+    if (!from_node || !to_node) { gn_set_error(inst, "from_node or to_node is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_DISCONNECT;
@@ -1212,7 +1233,7 @@ int gonodes_fire_event(
     const char* event_name, const char* payload
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!event_name) return GONODES_ERR_INTERNAL;
+    if (!event_name) { gn_set_error(inst, "event_name is NULL"); return GONODES_ERR_INTERNAL; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_FIRE_EVENT;
@@ -1234,7 +1255,7 @@ int gonodes_set_output_resolution(
     const char* node_id, int width, int height
 ) {
     VALIDATE_PATCH(inst, patch, GONODES_ERR_INVALID_HANDLE);
-    if (!node_id) return GONODES_ERR_NODE_NOT_FOUND;
+    if (!node_id) { gn_set_error(inst, "node_id is NULL"); return GONODES_ERR_NODE_NOT_FOUND; }
 
     gn_command cmd = {};
     cmd.type = GN_CMD_SET_RESOLUTION;

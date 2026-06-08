@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input geometry")
-	add_output("out", GNFamily.Type.SOP, "Geometry with per-primitive attribs")
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry", "In")
+	add_output("out", GNFamily.Type.SOP, "Geometry with per-primitive attribs", "Out")
 
 
 func _init_parameters() -> void:

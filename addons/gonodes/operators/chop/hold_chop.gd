@@ -13,9 +13,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Input to sample")
-	add_input("trigger", GNFamily.Type.CHOP, false, "Trigger signal")
-	add_output("out", GNFamily.Type.CHOP, "Held values")
+	add_input("in", GNFamily.Type.CHOP, false, "Input to sample", "In")
+	add_input("trigger", GNFamily.Type.CHOP, false, "Trigger signal", "Trigger")
+	add_output("out", GNFamily.Type.CHOP, "Held values", "Out")
 
 
 func _init_parameters() -> void:
@@ -26,8 +26,8 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var in_data: GNChannelData = inputs[0] as GNChannelData if inputs.size() > 0 and inputs[0] is GNChannelData else null
-	var trigger_data: GNChannelData = inputs[1] as GNChannelData if inputs.size() > 1 and inputs[1] is GNChannelData else null
+	var in_data: GNChannelData = _get_input_chop(inputs, 0)
+	var trigger_data: GNChannelData = _get_input_chop(inputs, 1)
 
 	if in_data == null:
 		GNLogger.warn("HoldCHOP", "'%s' — no valid input" % id)

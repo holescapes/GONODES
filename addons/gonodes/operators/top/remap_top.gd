@@ -9,9 +9,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Source texture")
-	add_input("map", GNFamily.Type.TOP, false, "UV map or LUT texture")
-	add_output("out", GNFamily.Type.TOP, "Remapped texture")
+	add_input("in", GNFamily.Type.TOP, false, "Source texture", "In")
+	add_input("map", GNFamily.Type.TOP, false, "UV map or LUT texture", "Map")
+	add_output("out", GNFamily.Type.TOP, "Remapped texture", "Out")
 
 
 func _init_parameters() -> void:

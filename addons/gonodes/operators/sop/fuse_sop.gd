@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input geometry")
-	add_output("out", GNFamily.Type.SOP, "Fused geometry")
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry", "In")
+	add_output("out", GNFamily.Type.SOP, "Fused geometry", "Out")
 
 
 func _init_parameters() -> void:

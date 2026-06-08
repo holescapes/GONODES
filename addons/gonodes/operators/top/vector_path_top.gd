@@ -21,9 +21,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("points", GNFamily.Type.CHOP, false, "Point positions (x0,y0,x1,y1,…)")
-	add_input("commands", GNFamily.Type.DAT, false, "SVG-like path commands (M,L,C,Q,A,Z)")
-	add_output("out", GNFamily.Type.TOP, "Rendered vector graphics texture")
+	add_input("points", GNFamily.Type.CHOP, false, "Point positions (x0,y0,x1,y1,…)", "Points")
+	add_input("commands", GNFamily.Type.DAT, false, "SVG-like path commands (M,L,C,Q,A,Z)", "Commands")
+	add_output("out", GNFamily.Type.TOP, "Rendered vector graphics texture", "Out")
 
 
 func _init_parameters() -> void:

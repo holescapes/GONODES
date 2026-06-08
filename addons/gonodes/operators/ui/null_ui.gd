@@ -8,8 +8,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.UI, false, "Input UI widget")
-	add_output("out", GNFamily.Type.UI, "Same widget (pass-through)")
+	add_input("in", GNFamily.Type.UI, false, "Input UI widget", "In")
+	add_output("out", GNFamily.Type.UI, "Same widget (pass-through)", "Out")
 
 
 func _init_parameters() -> void:

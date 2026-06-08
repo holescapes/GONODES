@@ -11,9 +11,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("source", GNFamily.Type.TOP, false, "Image to remap")
-	add_input("ramp", GNFamily.Type.TOP, false, "Color lookup table / ramp")
-	add_output("out", GNFamily.Type.TOP, "Remapped texture")
+	add_input("source", GNFamily.Type.TOP, false, "Image to remap", "Source")
+	add_input("ramp", GNFamily.Type.TOP, false, "Color lookup table / ramp", "Ramp")
+	add_output("out", GNFamily.Type.TOP, "Remapped texture", "Out")
 
 
 func _init_parameters() -> void:
@@ -22,8 +22,8 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var source: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
-	var ramp_tex: GNTextureData = inputs[1] as GNTextureData if inputs.size() > 1 and inputs[1] is GNTextureData else null
+	var source: GNTextureData = _get_input_top(inputs, 0)
+	var ramp_tex: GNTextureData = _get_input_top(inputs, 1)
 
 	if source == null:
 		GNLogger.warn("LookupTOP", "'%s' — no valid source input" % id)

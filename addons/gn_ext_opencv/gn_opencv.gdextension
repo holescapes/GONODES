@@ -1,11 +1,12 @@
 [configuration]
 entry_symbol = "gn_opencv_init"
 compatibility_minimum = 4.1
-
+[dependencies]
+windows.x86_64 = {"res://addons/gn_ext_opencv/native/bin/win64/opencv_world4100.dll": ""}
 [libraries]
-windows.debug.x86_64 = "res://addons/gn_ext_opencv/native/bin/win64/libgn_opencv.windows.template_release.x86_64.dll"
-windows.release.x86_64 = "res://addons/gn_ext_opencv/native/bin/win64/libgn_opencv.windows.template_release.x86_64.dll"
-linux.debug.x86_64 = "res://addons/gn_ext_opencv/native/bin/linux64/libgn_opencv.linux.template_release.x86_64.so"
-linux.release.x86_64 = "res://addons/gn_ext_opencv/native/bin/linux64/libgn_opencv.linux.template_release.x86_64.so"
+windows.x86_64.debug = "res://addons/gn_ext_opencv/native/bin/win64/libgn_opencv.windows.template_release.x86_64.dll"
+windows.x86_64.release = "res://addons/gn_ext_opencv/native/bin/win64/libgn_opencv.windows.template_release.x86_64.dll"
+linux.x86_64.debug = "res://addons/gn_ext_opencv/native/bin/linux64/libgn_opencv.linux.template_release.x86_64.so"
+linux.x86_64.release = "res://addons/gn_ext_opencv/native/bin/linux64/libgn_opencv.linux.template_release.x86_64.so"
 macos.debug = "res://addons/gn_ext_opencv/native/bin/macos/libgn_opencv.macos.template_release.framework"
 macos.release = "res://addons/gn_ext_opencv/native/bin/macos/libgn_opencv.macos.template_release.framework"

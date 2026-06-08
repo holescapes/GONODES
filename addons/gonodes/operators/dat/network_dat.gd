@@ -25,8 +25,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("send", GNFamily.Type.DAT, false, "Data to send (text or table)")
-	add_output("out", GNFamily.Type.DAT, "Received data")
+	add_input("send", GNFamily.Type.DAT, false, "Data to send (text or table)", "Send")
+	add_output("out", GNFamily.Type.DAT, "Received data", "Out")
 
 
 func _init_parameters() -> void:

@@ -17,8 +17,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Input table (new rows appended each cook)")
-	add_output("out", GNFamily.Type.DAT, "Accumulated row buffer")
+	add_input("in", GNFamily.Type.DAT, false, "Input table (new rows appended each cook)", "In")
+	add_output("out", GNFamily.Type.DAT, "Accumulated row buffer", "Out")
 
 
 func _init_parameters() -> void:

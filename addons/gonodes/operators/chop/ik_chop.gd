@@ -17,8 +17,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("target", GNFamily.Type.CHOP, false, "Target position (tx, ty, tz channels)")
-	add_output("out", GNFamily.Type.CHOP, "Joint positions and angles")
+	add_input("target", GNFamily.Type.CHOP, false, "Target position (tx, ty, tz channels)", "Target")
+	add_output("out", GNFamily.Type.CHOP, "Joint positions and angles", "Out")
 
 
 func _init_parameters() -> void:

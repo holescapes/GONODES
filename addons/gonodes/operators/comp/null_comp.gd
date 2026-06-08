@@ -8,8 +8,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.COMP, false, "Input component")
-	add_output("out", GNFamily.Type.COMP, "Pass-through output")
+	add_input("in", GNFamily.Type.COMP, false, "Input component", "In")
+	add_output("out", GNFamily.Type.COMP, "Pass-through output", "Out")
 
 
 func _init_parameters() -> void:

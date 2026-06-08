@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Optional DAT to append/merge")
-	add_output("out", GNFamily.Type.DAT, "Table output")
+	add_input("in", GNFamily.Type.DAT, false, "Optional DAT to append/merge", "In")
+	add_output("out", GNFamily.Type.DAT, "Table output", "Out")
 
 
 func _init_parameters() -> void:

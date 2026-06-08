@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Geometry to fracture")
-	add_output("out", GNFamily.Type.SOP, "Fractured geometry (one surface per piece)")
+	add_input("in", GNFamily.Type.SOP, false, "Geometry to fracture", "In")
+	add_output("out", GNFamily.Type.SOP, "Fractured geometry (one surface per piece)", "Out")
 
 
 func _init_parameters() -> void:

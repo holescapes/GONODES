@@ -13,7 +13,7 @@ func _init_ports() -> void:
 	add_input("in0", GNFamily.Type.TOP, false, "Input texture 0", "Input 0")
 	add_input("in1", GNFamily.Type.TOP, false, "Input texture 1", "Input 1")
 	add_input("", GNFamily.Type.TOP, false, "Additional input")  # trailing empty for auto-grow
-	add_output("out", GNFamily.Type.TOP, "Mosaic texture")
+	add_output("out", GNFamily.Type.TOP, "Mosaic texture", "Out")
 
 
 func _init_parameters() -> void:

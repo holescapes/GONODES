@@ -9,8 +9,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "SOP geometry input")
-	add_output("out", GNFamily.Type.DAT, "Geometry data table")
+	add_input("in", GNFamily.Type.SOP, false, "SOP geometry input", "In")
+	add_output("out", GNFamily.Type.DAT, "Geometry data table", "Out")
 
 
 func _init_parameters() -> void:

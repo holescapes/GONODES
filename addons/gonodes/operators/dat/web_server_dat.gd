@@ -16,8 +16,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("response", GNFamily.Type.DAT, false, "Response body (text or table)")
-	add_output("out", GNFamily.Type.DAT, "Request log table")
+	add_input("response", GNFamily.Type.DAT, false, "Response body (text or table)", "Response")
+	add_output("out", GNFamily.Type.DAT, "Request log table", "Out")
 
 
 func _init_parameters() -> void:

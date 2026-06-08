@@ -23,8 +23,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture to denoise")
-	add_output("out", GNFamily.Type.TOP, "Denoised output")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to denoise", "In")
+	add_output("out", GNFamily.Type.TOP, "Denoised output", "Out")
 
 
 func _init_parameters() -> void:

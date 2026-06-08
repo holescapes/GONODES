@@ -89,8 +89,8 @@ func _init() -> void:
 func _init_ports() -> void:
 	# Input 0: any family — the target node to observe.
 	# We use CHOP as default but accept any family via the palette.
-	add_input("target", GNFamily.Type.CHOP, false, "Target node to observe")
-	add_output("out", GNFamily.Type.DAT, "Event log table")
+	add_input("target", GNFamily.Type.CHOP, false, "Target node to observe", "Target")
+	add_output("out", GNFamily.Type.DAT, "Event log table", "Out")
 
 
 func _init_parameters() -> void:

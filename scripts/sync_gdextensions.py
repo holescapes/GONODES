@@ -131,13 +131,28 @@ def sync_all(workspace_root: str, plat: str, arch: str,
         if not os.path.isdir(ext_path):
             continue
 
-        # Scan every immediate subdirectory (matches GDScript logic)
+        # Track processed filenames to avoid double-processing if the same
+        # .gdextension file exists at both the root and a subdirectory.
+        seen_names: set = set()
+
+        # Scan the extension root directory (where .gdextension files live)
+        for change in sync_dir(ext_path, workspace_root, plat, arch, dry_run):
+            action, old, new, status = change
+            seen_names.add(old.replace(".disabled", ""))
+            all_changes.append((ext_name, action, old, new, status))
+
+        # Also scan immediate subdirectories for nested .gdextension files
         for sub_name in sorted(os.listdir(ext_path)):
             sub_path = os.path.join(ext_path, sub_name)
-            if os.path.isdir(sub_path):
-                changes = sync_dir(sub_path, workspace_root, plat, arch, dry_run)
-                for action, old, new, status in changes:
-                    all_changes.append((ext_name, action, old, new, status))
+            if not os.path.isdir(sub_path):
+                continue
+            for change in sync_dir(sub_path, workspace_root, plat, arch, dry_run):
+                action, old, new, status = change
+                base_name = old.replace(".disabled", "")
+                if base_name in seen_names:
+                    continue  # already processed at root level
+                seen_names.add(base_name)
+                all_changes.append((ext_name, action, old, new, status))
 
     return all_changes
 

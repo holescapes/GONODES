@@ -8,8 +8,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Height map / displacement texture")
-	add_output("out", GNFamily.Type.TOP, "Normal map texture (tangent space)")
+	add_input("in", GNFamily.Type.TOP, false, "Height map / displacement texture", "In")
+	add_output("out", GNFamily.Type.TOP, "Normal map texture (tangent space)", "Out")
 
 
 func _init_parameters() -> void:

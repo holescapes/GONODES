@@ -43,8 +43,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("publish", GNFamily.Type.DAT, false, "Text to publish")
-	add_output("out", GNFamily.Type.DAT, "Received messages table")
+	add_input("publish", GNFamily.Type.DAT, false, "Text to publish", "Publish")
+	add_output("out", GNFamily.Type.DAT, "Received messages table", "Out")
 
 
 func _init_parameters() -> void:

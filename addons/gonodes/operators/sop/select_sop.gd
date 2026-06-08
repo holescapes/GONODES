@@ -27,8 +27,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input geometry (used when 'sop' is empty)")
-	add_output("out", GNFamily.Type.SOP, "Selected geometry")
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry (used when 'sop' is empty)", "In")
+	add_output("out", GNFamily.Type.SOP, "Selected geometry", "Out")
 
 
 func _init_parameters() -> void:

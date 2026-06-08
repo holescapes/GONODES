@@ -30,8 +30,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("image", GNFamily.Type.IMG, false, "Image to output (RGBA)")
-	add_output("thru", GNFamily.Type.IMG, "Pass-through of input image")
+	add_input("image", GNFamily.Type.IMG, false, "Image to output (RGBA)", "Image")
+	add_output("thru", GNFamily.Type.IMG, "Pass-through of input image", "Thru")
 
 
 func _init_parameters() -> void:

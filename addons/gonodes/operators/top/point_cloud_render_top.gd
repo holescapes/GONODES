@@ -21,7 +21,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("pop", GNFamily.Type.POP, true, "Particle data to render", "Particles")
-	add_output("out", GNFamily.Type.TOP, "Rendered point cloud image")
+	add_output("out", GNFamily.Type.TOP, "Rendered point cloud image", "Out")
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("width", 512, 64, 4096,

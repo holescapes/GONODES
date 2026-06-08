@@ -9,9 +9,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Base input texture")
-	add_input("matte", GNFamily.Type.TOP, false, "Alpha source texture")
-	add_output("out", GNFamily.Type.TOP, "Matted texture")
+	add_input("in", GNFamily.Type.TOP, false, "Base input texture", "In")
+	add_input("matte", GNFamily.Type.TOP, false, "Alpha source texture", "Matte")
+	add_output("out", GNFamily.Type.TOP, "Matted texture", "Out")
 
 
 func _init_parameters() -> void:
@@ -23,7 +23,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var tex_in: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
+	var tex_in: GNTextureData = _get_input_top(inputs, 0)
 	if tex_in == null:
 		GNLogger.warn("MatteTOP", "'%s' — no valid input on port in" % id)
 		return null

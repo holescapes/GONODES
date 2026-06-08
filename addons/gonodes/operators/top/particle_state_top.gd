@@ -18,7 +18,7 @@ func initialize(p_id: String) -> void:
 
 func _init_ports() -> void:
 	add_input("pop_in", GNFamily.Type.POP, false, "Particle data input", "Pop")
-	add_output("out", GNFamily.Type.TOP, "Particle state texture")
+	add_output("out", GNFamily.Type.TOP, "Particle state texture", "Out")
 
 
 func _init_parameters() -> void:

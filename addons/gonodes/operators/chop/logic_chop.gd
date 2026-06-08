@@ -14,7 +14,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("in1", GNFamily.Type.CHOP, false, "First input", "Input 1")
 	add_input("in2", GNFamily.Type.CHOP, false, "Second input", "Input 2")
-	add_output("out", GNFamily.Type.CHOP, "Logic result (0 or 1)")
+	add_output("out", GNFamily.Type.CHOP, "Logic result (0 or 1)", "Out")
 
 
 func _init_parameters() -> void:
@@ -24,8 +24,8 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var in1: GNChannelData = inputs[0] as GNChannelData if inputs.size() > 0 and inputs[0] is GNChannelData else null
-	var in2: GNChannelData = inputs[1] as GNChannelData if inputs.size() > 1 and inputs[1] is GNChannelData else null
+	var in1: GNChannelData = _get_input_chop(inputs, 0)
+	var in2: GNChannelData = _get_input_chop(inputs, 1)
 
 	if in1 == null:
 		GNLogger.warn("LogicCHOP", "'%s' — no valid input" % id)

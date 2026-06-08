@@ -367,36 +367,8 @@ func test_round_trip_component_expressions() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Legacy Migration
+# Unknown Mode Fallback
 # ═══════════════════════════════════════════════════════════════════════════════
-
-func test_legacy_bind_migration() -> void:
-	## Simulates loading an old save that used BIND mode.
-	## Should auto-convert to EXPRESSION with par() reference.
-	var p := GNParameter.create_float("scale", 1.0)
-	var legacy_dict := {
-		"value": 1.0,
-		"mode": "BIND",
-		"bind_source_node": "ctrl",
-		"bind_source_param": "master_scale",
-	}
-	p.from_dict(legacy_dict)
-	GNTestAssert.assert_eq(p.mode, GNParameter.Mode.EXPRESSION, "BIND→EXPRESSION")
-	GNTestAssert.assert_eq(p.expression, 'par("ctrl", "master_scale")', "auto-generated par() expression")
-
-
-func test_legacy_export_migration() -> void:
-	## Simulates loading an old save that used EXPORT mode.
-	## Should revert to CONSTANT.
-	var p := GNParameter.create_float("scale", 1.0)
-	var legacy_dict := {
-		"value": 5.0,
-		"mode": "EXPORT",
-	}
-	p.from_dict(legacy_dict)
-	GNTestAssert.assert_eq(p.mode, GNParameter.Mode.CONSTANT, "EXPORT→CONSTANT")
-	GNTestAssert.assert_approx(p.value, 5.0, 0.001, "value preserved")
-
 
 func test_legacy_unknown_mode_falls_back() -> void:
 	var p := GNParameter.create_float("x", 0.0)

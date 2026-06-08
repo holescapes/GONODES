@@ -9,8 +9,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input geometry")
-	add_output("out", GNFamily.Type.SOP, "Wireframe mesh")
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry", "In")
+	add_output("out", GNFamily.Type.SOP, "Wireframe mesh", "Out")
 
 
 func _init_parameters() -> void:
@@ -18,7 +18,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var in_geo: GNGeoData = inputs[0] as GNGeoData if inputs.size() > 0 and inputs[0] is GNGeoData else null
+	var in_geo: GNGeoData = _get_input_sop(inputs, 0)
 	if in_geo == null or not in_geo.has_geometry():
 		return null
 

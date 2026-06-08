@@ -9,9 +9,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Source texture")
-	add_input("gradient", GNFamily.Type.TOP, false, "Gradient / ramp texture (horizontal)")
-	add_output("out", GNFamily.Type.TOP, "Color-mapped texture")
+	add_input("in", GNFamily.Type.TOP, false, "Source texture", "In")
+	add_input("gradient", GNFamily.Type.TOP, false, "Gradient / ramp texture (horizontal)", "Gradient")
+	add_output("out", GNFamily.Type.TOP, "Color-mapped texture", "Out")
 
 
 func _init_parameters() -> void:

@@ -17,8 +17,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Texture to share via Syphon")
-	add_output("out", GNFamily.Type.TOP, "Pass-through of input texture")
+	add_input("in", GNFamily.Type.TOP, false, "Texture to share via Syphon", "In")
+	add_output("out", GNFamily.Type.TOP, "Pass-through of input texture", "Out")
 
 
 func _init_parameters() -> void:

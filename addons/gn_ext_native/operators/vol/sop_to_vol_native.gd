@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo", GNFamily.Type.SOP, true, "Input geometry")
-	add_output("out", GNFamily.Type.VOL, "Density volume")
+	add_input("geo", GNFamily.Type.SOP, true, "Input geometry", "Geometry")
+	add_output("out", GNFamily.Type.VOL, "Density volume", "Out")
 
 
 func _init_parameters() -> void:

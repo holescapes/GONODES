@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("uv", GNFamily.Type.CHOP, false, "Pick UV coordinates (u, v channels)")
-	add_output("out", GNFamily.Type.DAT, "Pick result table")
+	add_input("uv", GNFamily.Type.CHOP, false, "Pick UV coordinates (u, v channels)", "UV")
+	add_output("out", GNFamily.Type.DAT, "Pick result table", "Out")
 
 
 func _init_parameters() -> void:

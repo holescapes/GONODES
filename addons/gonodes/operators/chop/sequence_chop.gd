@@ -21,8 +21,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "First CHOP input")
-	add_output("out", GNFamily.Type.CHOP, "Sequenced channel data")
+	add_input("in", GNFamily.Type.CHOP, false, "First CHOP input", "In")
+	add_output("out", GNFamily.Type.CHOP, "Sequenced channel data", "Out")
 
 
 func _init_parameters() -> void:

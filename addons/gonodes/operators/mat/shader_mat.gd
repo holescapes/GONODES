@@ -20,9 +20,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("tex0", GNFamily.Type.TOP, false, "Texture uniform 0 (optional)")
-	add_input("tex1", GNFamily.Type.TOP, false, "Texture uniform 1 (optional)")
-	add_output("out", GNFamily.Type.MAT, "Shader material output")
+	add_input("tex0", GNFamily.Type.TOP, false, "Texture uniform 0 (optional)", "Tex0")
+	add_input("tex1", GNFamily.Type.TOP, false, "Texture uniform 1 (optional)", "Tex1")
+	add_output("out", GNFamily.Type.MAT, "Shader material output", "Out")
 
 
 func _init_parameters() -> void:

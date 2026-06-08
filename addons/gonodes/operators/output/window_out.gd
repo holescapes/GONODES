@@ -105,8 +105,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Texture to display in the window")
-	add_input("panel", GNFamily.Type.UI, false, "Interactive UI panel (native input routing)")
+	add_input("in", GNFamily.Type.TOP, false, "Texture to display in the window", "In")
+	add_input("panel", GNFamily.Type.UI, false, "Interactive UI panel (native input routing)", "Panel")
 
 
 func _init_parameters() -> void:

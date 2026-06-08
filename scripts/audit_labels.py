@@ -13,8 +13,15 @@ for dirpath, dirs, files in os.walk(root):
             continue
         path = os.path.join(dirpath, f)
         text = open(path, "r", encoding="utf-8").read()
-        has_label = bool(re.search(
-            r'add_(input|output)\([^)]+,[^)]+,[^)]+,[^)]+,\s*"[A-Z]', text))
+        # add_input has 5 args (name, family, multi, desc, label)
+        # add_output has 4 args (name, family, desc, label)
+        # Labels can be plain strings or use % formatting: "Label %d" % var
+        _str = r'"[^"]*"(?:\s*%\s*\w+)?'  # matches "text" or "text %d" % var
+        has_input_label = bool(re.search(
+            rf'add_input\("[^"]+",\s*[^,]+,\s*(?:true|false),\s*{_str},\s*{_str}', text))
+        has_output_label = bool(re.search(
+            rf'add_output\("[^"]+",\s*[^,]+,\s*{_str},\s*{_str}', text))
+        has_label = has_input_label or has_output_label
         inputs = re.findall(r"add_input\(", text)
         outputs = re.findall(r"add_output\(", text)
         if has_label:

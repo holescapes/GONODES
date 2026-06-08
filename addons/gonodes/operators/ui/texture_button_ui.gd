@@ -13,10 +13,10 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("normal", GNFamily.Type.TOP, false, "Normal state texture")
-	add_input("pressed", GNFamily.Type.TOP, false, "Pressed state texture")
-	add_input("hover", GNFamily.Type.TOP, false, "Hover state texture")
-	add_output("out", GNFamily.Type.UI, "Widget output")
+	add_input("normal", GNFamily.Type.TOP, false, "Normal state texture", "Normal")
+	add_input("pressed", GNFamily.Type.TOP, false, "Pressed state texture", "Pressed")
+	add_input("hover", GNFamily.Type.TOP, false, "Hover state texture", "Hover")
+	add_output("out", GNFamily.Type.UI, "Widget output", "Out")
 
 
 func _init_parameters() -> void:

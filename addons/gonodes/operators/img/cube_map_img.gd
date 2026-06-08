@@ -39,7 +39,7 @@ func _init_ports() -> void:
 	add_input("in3", GNFamily.Type.IMG, false, "-Y face", "-Y")
 	add_input("in4", GNFamily.Type.IMG, false, "+Z face", "+Z")
 	add_input("in5", GNFamily.Type.IMG, false, "-Z face", "-Z")
-	add_output("out", GNFamily.Type.IMG, "Cubemap output image")
+	add_output("out", GNFamily.Type.IMG, "Cubemap output image", "Out")
 
 
 func _init_parameters() -> void:
@@ -106,7 +106,7 @@ func _cook_assemble(inputs: Array[GNData]) -> GNData:
 # ===========================================================================
 
 func _cook_extract(inputs: Array[GNData]) -> GNData:
-	var img_in: GNImageData = inputs[0] as GNImageData if inputs.size() > 0 and inputs[0] is GNImageData else null
+	var img_in: GNImageData = _get_input_img(inputs, 0)
 	if img_in == null or img_in.image == null:
 		GNLogger.warn("CubeMapIMG", "'%s' -- no valid input for Extract mode" % id)
 		return null
@@ -150,7 +150,7 @@ func _cook_extract(inputs: Array[GNData]) -> GNData:
 # ===========================================================================
 
 func _cook_equirect_to_cross(inputs: Array[GNData]) -> GNData:
-	var img_in: GNImageData = inputs[0] as GNImageData if inputs.size() > 0 and inputs[0] is GNImageData else null
+	var img_in: GNImageData = _get_input_img(inputs, 0)
 	if img_in == null or img_in.image == null:
 		GNLogger.warn("CubeMapIMG", "'%s' -- no valid input for Equirect to Cross mode" % id)
 		return null

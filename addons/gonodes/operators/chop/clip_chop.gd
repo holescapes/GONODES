@@ -26,8 +26,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Source CHOP to record/play")
-	add_output("out", GNFamily.Type.CHOP, "Playback channel data")
+	add_input("in", GNFamily.Type.CHOP, false, "Source CHOP to record/play", "In")
+	add_output("out", GNFamily.Type.CHOP, "Playback channel data", "Out")
 
 
 func _init_parameters() -> void:

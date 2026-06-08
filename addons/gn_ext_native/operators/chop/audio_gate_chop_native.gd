@@ -12,9 +12,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Audio input to gate")
-	add_input("sidechain", GNFamily.Type.CHOP, true, "Sidechain input (controls gate from external source)")
-	add_output("out", GNFamily.Type.CHOP, "Gated audio output")
+	add_input("in", GNFamily.Type.CHOP, false, "Audio input to gate", "In")
+	add_input("sidechain", GNFamily.Type.CHOP, true, "Sidechain input (controls gate from external source)", "Sidechain")
+	add_output("out", GNFamily.Type.CHOP, "Gated audio output", "Out")
 
 
 func _init_parameters() -> void:

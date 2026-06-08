@@ -14,9 +14,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, true, "Audio input source")
+	add_input("in", GNFamily.Type.CHOP, true, "Audio input source", "In")
 	_enable_dynamic_inputs(GNFamily.Type.CHOP, "in", "Audio input source")
-	add_output("out", GNFamily.Type.CHOP, "Mixed stereo output")
+	add_output("out", GNFamily.Type.CHOP, "Mixed stereo output", "Out")
 
 
 func _init_parameters() -> void:

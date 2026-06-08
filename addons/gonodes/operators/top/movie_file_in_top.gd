@@ -28,8 +28,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.TOP, "Video frame texture")
-	add_output("audio", GNFamily.Type.CHOP, "Audio waveform (left, right, level, pos, length, playing)")
+	add_output("out", GNFamily.Type.TOP, "Video frame texture", "Out")
+	add_output("audio", GNFamily.Type.CHOP, "Audio waveform (left, right, level, pos, length, playing)", "Audio")
 
 
 func _init_parameters() -> void:

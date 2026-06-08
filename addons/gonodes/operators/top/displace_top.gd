@@ -10,9 +10,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("source", GNFamily.Type.TOP, false, "Texture to distort")
-	add_input("displace", GNFamily.Type.TOP, false, "Displacement map")
-	add_output("out", GNFamily.Type.TOP, "Displaced texture")
+	add_input("source", GNFamily.Type.TOP, false, "Texture to distort", "Source")
+	add_input("displace", GNFamily.Type.TOP, false, "Displacement map", "Displace")
+	add_output("out", GNFamily.Type.TOP, "Displaced texture", "Out")
 
 
 func _init_parameters() -> void:
@@ -23,8 +23,8 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var source: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
-	var disp: GNTextureData = inputs[1] as GNTextureData if inputs.size() > 1 and inputs[1] is GNTextureData else null
+	var source: GNTextureData = _get_input_top(inputs, 0)
+	var disp: GNTextureData = _get_input_top(inputs, 1)
 
 	if source == null:
 		GNLogger.warn("DisplaceTOP", "'%s' — no valid source input" % id)

@@ -10,8 +10,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Input channels to integrate")
-	add_output("out", GNFamily.Type.CHOP, "Integrated area values")
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels to integrate", "In")
+	add_output("out", GNFamily.Type.CHOP, "Integrated area values", "Out")
 
 
 func _init_parameters() -> void:

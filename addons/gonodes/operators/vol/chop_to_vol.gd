@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("chop", GNFamily.Type.CHOP, true, "Channel data to convert")
-	add_output("out", GNFamily.Type.VOL, "Volume output")
+	add_input("chop", GNFamily.Type.CHOP, true, "Channel data to convert", "CHOP")
+	add_output("out", GNFamily.Type.VOL, "Volume output", "Out")
 
 
 func _init_parameters() -> void:

@@ -9,8 +9,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Input table")
-	add_output("out", GNFamily.Type.DAT, "Transposed table")
+	add_input("in", GNFamily.Type.DAT, false, "Input table", "In")
+	add_output("out", GNFamily.Type.DAT, "Transposed table", "Out")
 
 
 func _init_parameters() -> void:
@@ -18,7 +18,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var in_dat: GNTableData = inputs[0] as GNTableData if inputs.size() > 0 and inputs[0] is GNTableData else null
+	var in_dat: GNTableData = _get_input_dat(inputs, 0)
 	if in_dat == null or not in_dat.is_table or in_dat.table.is_empty():
 		return null
 

@@ -27,8 +27,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Base image to draw on")
-	add_output("out", GNFamily.Type.IMG, "Image with overlays drawn")
+	add_input("in", GNFamily.Type.IMG, true, "Base image to draw on", "In")
+	add_output("out", GNFamily.Type.IMG, "Image with overlays drawn", "Out")
 
 
 func _init_parameters() -> void:

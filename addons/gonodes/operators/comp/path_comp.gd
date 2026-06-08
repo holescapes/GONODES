@@ -25,7 +25,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("comp_in", GNFamily.Type.COMP, false, "COMP to move along path", "Comp")
 	add_input("path_in", GNFamily.Type.SOP, false, "SOP curve defining the path (optional)", "Path SOP")
-	add_output("out", GNFamily.Type.COMP, "Path-following component")
+	add_output("out", GNFamily.Type.COMP, "Path-following component", "Out")
 
 
 func _init_parameters() -> void:

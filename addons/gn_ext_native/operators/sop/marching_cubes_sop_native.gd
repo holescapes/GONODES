@@ -1,7 +1,7 @@
-class_name MarchingCubesVOLNative
-extends GNVolBase
+class_name MarchingCubesSOPNative
+extends GNSopBase
 ## Native-accelerated marching cubes — delegates to GNNativeMarchingCubesVol (C++).
-## Reads volume to CPU, passes to C++ for iso-surface extraction.
+## Consumes VOL data but outputs SOP geometry (Rule 25.28).
 
 var _processor: RefCounted = null
 
@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("vol", GNFamily.Type.VOL, true, "Density volume to mesh")
-	add_output("mesh", GNFamily.Type.SOP, "Extracted triangle mesh")
+	add_input("vol", GNFamily.Type.VOL, true, "Density volume to mesh", "VOL")
+	add_output("mesh", GNFamily.Type.SOP, "Extracted triangle mesh", "Mesh")
 
 
 func _init_parameters() -> void:
@@ -27,7 +27,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var vol: GNVolumeData = _get_input_vol(inputs, 0)
+	var vol: GNVolumeData = inputs[0] as GNVolumeData if inputs.size() > 0 and inputs[0] is GNVolumeData else null
 	if vol == null or not vol.has_volume():
 		return null
 

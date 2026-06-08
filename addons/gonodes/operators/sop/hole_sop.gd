@@ -10,9 +10,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("base", GNFamily.Type.SOP, false, "Base surface geometry")
-	add_input("hole", GNFamily.Type.SOP, false, "Hole profile geometry")
-	add_output("out", GNFamily.Type.SOP, "Surface with holes cut")
+	add_input("base", GNFamily.Type.SOP, false, "Base surface geometry", "Base")
+	add_input("hole", GNFamily.Type.SOP, false, "Hole profile geometry", "Hole")
+	add_output("out", GNFamily.Type.SOP, "Surface with holes cut", "Out")
 
 
 func _init_parameters() -> void:

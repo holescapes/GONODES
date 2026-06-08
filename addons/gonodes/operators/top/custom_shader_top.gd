@@ -83,7 +83,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	# Default shader uses gn_tex0 only — ports are rebuilt when shader code changes
 	add_input("in0", GNFamily.Type.TOP, false, "Texture input 0 (gn_tex0 in shader)", "Input 0")
-	add_output("out", GNFamily.Type.TOP, "Shader output texture")
+	add_output("out", GNFamily.Type.TOP, "Shader output texture", "Out")
 
 
 func _init_parameters() -> void:
@@ -142,7 +142,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		res = get_param_value("resolution")
 
 	# If an input is connected, use its resolution
-	var tex0: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
+	var tex0: GNTextureData = _get_input_top(inputs, 0)
 	if tex0 != null:
 		res = tex0.resolution
 

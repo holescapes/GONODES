@@ -12,9 +12,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("source", GNFamily.Type.SOP, false, "Geometry to project")
-	add_input("target", GNFamily.Type.SOP, true, "Target surface")
-	add_output("out", GNFamily.Type.SOP, "Projected geometry")
+	add_input("source", GNFamily.Type.SOP, false, "Geometry to project", "Source")
+	add_input("target", GNFamily.Type.SOP, true, "Target surface", "Target")
+	add_output("out", GNFamily.Type.SOP, "Projected geometry", "Out")
 
 
 func _init_parameters() -> void:

@@ -50,7 +50,7 @@ func supported_platforms() -> PackedStringArray:
 
 func _init_ports() -> void:
 	add_input("image", GNFamily.Type.TOP, true, "Camera / video input", "Image")
-	add_output("out", GNFamily.Type.CHOP, "Face landmark channels")
+	add_output("out", GNFamily.Type.CHOP, "Face landmark channels", "Out")
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("model_path",

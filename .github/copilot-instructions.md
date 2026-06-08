@@ -130,6 +130,16 @@ Before v1 ships, **never add migration paths, compat shims, or fallback code** f
 ### 25.32 — Stub API Functions Must Report Errors
 Any public API function — GDScript or C — that is declared but not yet implemented **must set an error/warning**, never return null/zero silently. In GDScript: `push_warning()` or `node_warning`. In libgonodes C API: `gn_set_error(inst, "...")` + return the appropriate error code. Silent null returns are traps for integrators.
 
+### 25.33 — Scripts Must Not Hardcode Family Lists
+Python build/utility scripts must NEVER hardcode family name lists (e.g., `["chop", "top", "sop", ...]`). Always read families from `operator_registry.json` or parse `[family.*]` sections from config files. Hardcoded lists silently miss extension families (SDF, future user families). Affected scripts: `catalog_operators.py`, `extract_ports.py`, `fix_help_patches.py`, `generate_operator_tests.py`, `verify_new_operator.py`.
+
+### 25.34 — Runtime DLLs That Need Godot Pre-loading Must Live Outside native/
+The `native/` directory in every extension has `.gdignore`, which makes `res://` paths inside it unresolvable. If a DLL must appear in a `.gdextension` `[dependencies]` section (for Godot to pre-load it before the main library), it MUST live outside `native/`. Use `runtime_dlls_dest` in `build.cfg` to copy it to a non-gdignored dir (e.g., `runtime/win64/`). DLLs that Windows finds via `LOAD_WITH_ALTERED_SEARCH_PATH` (same directory as the loading DLL) do NOT need pre-loading and can stay in `native/bin/`.
+
+**Critical extension:** The main extension DLL itself (`[libraries]` entry) also fails `FileAccess::exists()` if it is inside `native/`. For any extension whose Python/data-runtime dependencies require `[dependencies]` pre-loading, **both** the main DLL and its dependencies must live outside `native/`. Use `library_dest = ../bin` in `build.cfg` `[library]` section to copy the built DLL to `extension_root/bin/<platform>/`. Example: `gn_ext_user_python` uses `extension_root/bin/win64/` for all files (main DLL + python310.dll + python3.dll).
+
+**DLL version matching:** Always verify which Python version a compiled DLL actually links against using `pefile` before bundling. `libgn_python.dll` was compiled against Python 3.10 (imports `python310.dll`) — bundling `python312.dll` instead causes Error 126. Run: `python -c "import pefile; pe = pefile.PE('lib.dll'); print([e.dll.decode() for e in pe.DIRECTORY_ENTRY_IMPORT])"` to check.
+
 ### File Encoding
 All text files are UTF-8 without BOM. NEVER use PowerShell `Get-Content`/`Set-Content` without `-Encoding UTF8` on BOTH calls. Prefer Python for non-ASCII text manipulation.
 
@@ -187,6 +197,38 @@ Signature: `func get_device_menu() -> PackedStringArray`. Used by: BlackmagicInI
 4. Add entry in `docs/OPERATORS.md`
 5. Update operator counts in: README.md, docs/OPERATORS.md, dev_docs/TESTING.md, dev_docs/GONODES_VS_THE_REST.md
 6. Run `python scripts/verify_new_operator.py <ClassName>`
+
+## Build System
+
+All build steps MUST be scripted and reproducible. A fresh clone should get to a working GONODES via documented commands only:
+
+```bash
+# Full build from fresh clone:
+python setup_deps.py --core                           # 1. Fetch godot-cpp + SDKs
+cd addons/gn_ext_native/native/godot-cpp
+scons platform=windows arch=x86_64 target=template_release -j8   # 2. Build godot-cpp
+cd ../../../..
+cd build && scons platform=windows arch=x86_64 target=template_release -j8 && cd ..  # 3. Build extensions
+python scripts/bundle_toolchain.py                    # 4. NativeSCRIPT toolchain
+python addons/gn_ext_user_python/setup_python.py     # 5. PythonSCRIPT toolchain
+```
+
+### Key build system rules:
+- **`build.cfg`** in each extension's `native/` directory declares linking AND runtime deps
+- **`runtime_dlls`** field in platform sections (e.g., `[windows]`) lists DLLs that must be copied to `bin/` alongside the compiled library
+- **`gn_build.py`** auto-copies runtime DLLs during build step 3
+- **`sync_gdextensions.py`** activates `.gdextension` files when binaries exist, deactivates when missing
+- **`.gdextension` files** live at extension root (`addons/gn_ext_<name>/`), NOT inside `native/`
+- **`[dependencies]`** section in `.gdextension` tells Godot to pre-load runtime DLLs (single-line format)
+- **Never rebuild** just to fix a missing runtime DLL — check if it needs copying from the SDK directory first
+
+### Extension SDK setup scripts:
+| Extension | Script | What it does |
+|-----------|--------|-------------|
+| ML/ONNX | `scripts/setup_ml.py` | Downloads ONNX Runtime |
+| WebRender/CEF | `scripts/setup_cef.py` | Downloads gdCEF |
+| Python | `addons/gn_ext_user_python/setup_python.py` | Downloads embeddable CPython + NumPy |
+| OpenCV | (SDK bundled in `native/opencv_sdk/`) | Runtime DLL auto-copied via `build.cfg` |
 
 ## Key File Locations
 

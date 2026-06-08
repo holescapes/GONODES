@@ -40,8 +40,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Optional: custom point data (overrides pattern)")
-	add_output("out", GNFamily.Type.CHOP, "Laser point channels (x, y, r, g, b, i)")
+	add_input("in", GNFamily.Type.CHOP, false, "Optional: custom point data (overrides pattern)", "In")
+	add_output("out", GNFamily.Type.CHOP, "Laser point channels (x, y, r, g, b, i)", "Out")
 
 
 func _init_parameters() -> void:

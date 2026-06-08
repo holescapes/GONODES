@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Source texture (bright areas trigger flares)")
-	add_output("out", GNFamily.Type.TOP, "Input + lens flare overlay")
+	add_input("in", GNFamily.Type.TOP, false, "Source texture (bright areas trigger flares)", "In")
+	add_output("out", GNFamily.Type.TOP, "Input + lens flare overlay", "Out")
 
 
 func _init_parameters() -> void:

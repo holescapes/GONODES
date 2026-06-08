@@ -8,8 +8,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture")
-	add_output("out", GNFamily.Type.TOP, "Processed texture")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture", "In")
+	add_output("out", GNFamily.Type.TOP, "Processed texture", "Out")
 
 
 func _init_parameters() -> void:
@@ -19,7 +19,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var tex_in: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
+	var tex_in: GNTextureData = _get_input_top(inputs, 0)
 	if tex_in == null:
 		GNLogger.warn("PremultiplyTOP", "'%s' — no valid input" % id)
 		return null

@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input points (vertices used as control points)")
-	add_output("out", GNFamily.Type.SOP, "Spline curve or tube mesh")
+	add_input("in", GNFamily.Type.SOP, false, "Input points (vertices used as control points)", "In")
+	add_output("out", GNFamily.Type.SOP, "Spline curve or tube mesh", "Out")
 
 
 func _init_parameters() -> void:

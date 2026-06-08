@@ -9,8 +9,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture to warp")
-	add_output("out", GNFamily.Type.TOP, "Warped texture")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to warp", "In")
+	add_output("out", GNFamily.Type.TOP, "Warped texture", "Out")
 
 
 func _init_parameters() -> void:

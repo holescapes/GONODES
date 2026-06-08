@@ -30,8 +30,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Channel data to send as MIDI")
-	add_output("out", GNFamily.Type.CHOP, "Pass-through of input")
+	add_input("in", GNFamily.Type.CHOP, false, "Channel data to send as MIDI", "In")
+	add_output("out", GNFamily.Type.CHOP, "Pass-through of input", "Out")
 
 
 func _init_parameters() -> void:

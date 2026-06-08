@@ -23,9 +23,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("template", GNFamily.Type.COMP, false, "Template COMP to replicate")
-	add_input("table", GNFamily.Type.DAT, false, "DAT table for per-replica parameter overrides (optional)")
-	add_output("out", GNFamily.Type.COMP, "Replicator output (pass-through)")
+	add_input("template", GNFamily.Type.COMP, false, "Template COMP to replicate", "Template")
+	add_input("table", GNFamily.Type.DAT, false, "DAT table for per-replica parameter overrides (optional)", "Table")
+	add_output("out", GNFamily.Type.COMP, "Replicator output (pass-through)", "Out")
 
 
 func _init_parameters() -> void:

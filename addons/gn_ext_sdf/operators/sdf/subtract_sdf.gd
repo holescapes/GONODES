@@ -10,9 +10,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("sdf_a", GNSdfBase.SDF_FAMILY, false, "Base shape (kept)")
-	add_input("sdf_b", GNSdfBase.SDF_FAMILY, false, "Cutting shape (removed)")
-	add_output("out", GNSdfBase.SDF_FAMILY, "Subtracted SDF output")
+	add_input("sdf_a", GNSdfBase.SDF_FAMILY, false, "Base shape (kept)", "SDF A")
+	add_input("sdf_b", GNSdfBase.SDF_FAMILY, false, "Cutting shape (removed)", "SDF B")
+	add_output("out", GNSdfBase.SDF_FAMILY, "Subtracted SDF output", "Out")
 
 
 func _init_parameters() -> void:

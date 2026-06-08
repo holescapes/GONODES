@@ -10,9 +10,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("template", GNFamily.Type.SOP, false, "Template geometry to copy")
-	add_input("points", GNFamily.Type.SOP, false, "Target points / mesh")
-	add_output("out", GNFamily.Type.SOP, "Instanced copies")
+	add_input("template", GNFamily.Type.SOP, false, "Template geometry to copy", "Template")
+	add_input("points", GNFamily.Type.SOP, false, "Target points / mesh", "Points")
+	add_output("out", GNFamily.Type.SOP, "Instanced copies", "Out")
 
 
 func _init_parameters() -> void:

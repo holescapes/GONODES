@@ -28,9 +28,9 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in_a", GNFamily.Type.IMG, true, "First image")
-	add_input("in_b", GNFamily.Type.IMG, true, "Second image")
-	add_output("out", GNFamily.Type.IMG, "Side-by-side match overlay")
+	add_input("in_a", GNFamily.Type.IMG, true, "First image", "In A")
+	add_input("in_b", GNFamily.Type.IMG, true, "Second image", "In B")
+	add_output("out", GNFamily.Type.IMG, "Side-by-side match overlay", "Out")
 
 
 func _init_parameters() -> void:

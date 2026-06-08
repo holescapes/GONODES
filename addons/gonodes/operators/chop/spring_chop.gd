@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Target values")
-	add_output("out", GNFamily.Type.CHOP, "Springy values")
+	add_input("in", GNFamily.Type.CHOP, false, "Target values", "In")
+	add_output("out", GNFamily.Type.CHOP, "Springy values", "Out")
 
 
 func _init_parameters() -> void:

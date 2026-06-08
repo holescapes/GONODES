@@ -21,7 +21,7 @@ func initialize(p_id: String) -> void:
 
 func _init_ports() -> void:
 	add_input("pop_in", GNFamily.Type.POP, false, "Particle input", "Pop")
-	add_output("out", GNFamily.Type.COMP, "Renderable COMP output")
+	add_output("out", GNFamily.Type.COMP, "Renderable COMP output", "Out")
 
 
 func _init_parameters() -> void:

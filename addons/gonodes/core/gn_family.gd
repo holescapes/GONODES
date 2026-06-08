@@ -157,7 +157,8 @@ static func get_expression_func_registry() -> Dictionary:
 ## Returns all expression function names including variant suffixes
 ## (f, i, s) sorted by length descending.  Used by autocomplete
 ## to build regex alternation patterns that prefer longer matches first.
-## Note: p/pf suffixes are deprecated — base functions now support port args.
+## The f/i/s suffixes are type-cast variants (chopf, chopi, chops).
+## The old p/pf port-aware suffixes were removed — base functions now support port args.
 static func get_expression_func_variants() -> Array[String]:
 	var result: Array[String] = []
 	for func_name: String in _expression_func_registry:

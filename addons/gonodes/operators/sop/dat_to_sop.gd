@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, true, "Source DAT table")
-	add_output("out", GNFamily.Type.SOP, "Generated point geometry")
+	add_input("in", GNFamily.Type.DAT, true, "Source DAT table", "In")
+	add_output("out", GNFamily.Type.SOP, "Generated point geometry", "Out")
 
 
 func _init_parameters() -> void:

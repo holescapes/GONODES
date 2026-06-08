@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "src1": {
-            "type": "NoiseTOP",
+            "type": "NoiseIMG",
             "position": [
                 100,
                 100
@@ -22,7 +22,7 @@
             }
         },
         "focus1": {
-            "type": "StyleTransferTOP",
+            "type": "StyleTransferIMG",
             "position": [
                 500,
                 100
@@ -46,7 +46,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                900,
+                1150,
                 100
             ],
             "parameters": {
@@ -61,6 +61,14 @@
                     "value": true
                 }
             }
+        },
+        "img2top_focus1": {
+            "type": "ImgToTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
@@ -72,6 +80,12 @@
         },
         {
             "from": "focus1",
+            "from_port": 0,
+            "to": "img2top_focus1",
+            "to_port": 0
+        },
+        {
+            "from": "img2top_focus1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0

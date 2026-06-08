@@ -11,7 +11,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.DAT, false, "Table to merge", "Input")
-	add_output("out", GNFamily.Type.DAT, "Merged table")
+	add_output("out", GNFamily.Type.DAT, "Merged table", "Out")
 	_enable_dynamic_inputs(GNFamily.Type.DAT, "in", "Input")
 
 

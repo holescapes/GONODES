@@ -36,8 +36,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_output("image", GNFamily.Type.IMG, "Captured video frame (RGBA)")
-	add_output("status", GNFamily.Type.CHOP, "Signal status (dropped, timecode, active)")
+	add_output("image", GNFamily.Type.IMG, "Captured video frame (RGBA)", "Image")
+	add_output("status", GNFamily.Type.CHOP, "Signal status (dropped, timecode, active)", "Status")
 
 
 func _init_parameters() -> void:

@@ -19,8 +19,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("send", GNFamily.Type.DAT, false, "Data to send as text message")
-	add_output("out", GNFamily.Type.DAT, "Received messages table")
+	add_input("send", GNFamily.Type.DAT, false, "Data to send as text message", "Send")
+	add_output("out", GNFamily.Type.DAT, "Received messages table", "Out")
 
 
 func _init_parameters() -> void:

@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Current frame input")
-	add_output("out", GNFamily.Type.CHOP, "Previous frame's data")
+	add_input("in", GNFamily.Type.CHOP, false, "Current frame input", "In")
+	add_output("out", GNFamily.Type.CHOP, "Previous frame's data", "Out")
 
 
 func _init_parameters() -> void:
@@ -30,7 +30,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var output: GNChannelData = _prev_data
 
 	# Store the current input for next frame
-	var in_data: GNChannelData = inputs[0] as GNChannelData if inputs.size() > 0 and inputs[0] is GNChannelData else null
+	var in_data: GNChannelData = _get_input_chop(inputs, 0)
 	if in_data != null:
 		_prev_data = GNChannelData.new()
 		_prev_data.sample_rate = in_data.sample_rate

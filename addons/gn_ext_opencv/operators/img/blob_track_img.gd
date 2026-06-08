@@ -29,9 +29,9 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Input image (usually thresholded)")
-	add_output("out", GNFamily.Type.IMG, "Overlay with tracked blobs drawn")
-	add_output("data", GNFamily.Type.CHOP, "Tracking channels (id, cx, cy, area, width, height per blob)")
+	add_input("in", GNFamily.Type.IMG, true, "Input image (usually thresholded)", "In")
+	add_output("out", GNFamily.Type.IMG, "Overlay with tracked blobs drawn", "Out")
+	add_output("data", GNFamily.Type.CHOP, "Tracking channels (id, cx, cy, area, width, height per blob)", "Data")
 
 
 func _init_parameters() -> void:

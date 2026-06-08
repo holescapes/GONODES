@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Input channels with xyz groups")
-	add_output("out", GNFamily.Type.CHOP, "Transformed channels")
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels with xyz groups", "In")
+	add_output("out", GNFamily.Type.CHOP, "Transformed channels", "Out")
 
 
 func _init_parameters() -> void:

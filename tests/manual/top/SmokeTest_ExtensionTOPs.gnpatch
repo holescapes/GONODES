@@ -7,15 +7,15 @@
 			"position": [0, 0]
 		},
 		"styletransfer1": {
-			"type": "StyleTransferTOP",
+			"type": "StyleTransferIMG",
 			"position": [300, 0]
 		},
 		"segmentation1": {
-			"type": "SegmentationTOP",
+			"type": "SegmentationIMG",
 			"position": [600, 0]
 		},
 		"depthestimate1": {
-			"type": "DepthEstimateTOP",
+			"type": "DepthEstimateIMG",
 			"position": [900, 0]
 		},
 		"ffmpegin1": {

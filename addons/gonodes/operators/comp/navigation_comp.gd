@@ -27,7 +27,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("agent_in", GNFamily.Type.COMP, true, "COMP to navigate (the moving agent)", "Agent")
 	add_input("floor_in", GNFamily.Type.SOP, false, "Floor/terrain SOP for nav mesh baking", "Floor SOP")
-	add_output("out", GNFamily.Type.COMP, "Navigation component")
+	add_output("out", GNFamily.Type.COMP, "Navigation component", "Out")
 
 
 func _init_parameters() -> void:

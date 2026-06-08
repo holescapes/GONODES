@@ -9,9 +9,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("A", GNFamily.Type.CHOP, false, "First input")
-	add_input("B", GNFamily.Type.CHOP, false, "Second input")
-	add_output("out", GNFamily.Type.CHOP, "Blended output")
+	add_input("A", GNFamily.Type.CHOP, false, "First input", "A")
+	add_input("B", GNFamily.Type.CHOP, false, "Second input", "B")
+	add_output("out", GNFamily.Type.CHOP, "Blended output", "Out")
 
 
 func _init_parameters() -> void:
@@ -19,8 +19,8 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var in_a: GNChannelData = inputs[0] as GNChannelData if inputs.size() > 0 and inputs[0] is GNChannelData else null
-	var in_b: GNChannelData = inputs[1] as GNChannelData if inputs.size() > 1 and inputs[1] is GNChannelData else null
+	var in_a: GNChannelData = _get_input_chop(inputs, 0)
+	var in_b: GNChannelData = _get_input_chop(inputs, 1)
 
 	if in_a == null:
 		GNLogger.warn("CrossCHOP", "'%s' — no valid input on port A" % id)

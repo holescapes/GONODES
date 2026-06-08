@@ -30,7 +30,7 @@ func _init_ports() -> void:
 	add_input("lod1", GNFamily.Type.COMP, false, "LOD 1 — medium detail", "LOD 1")
 	add_input("lod2", GNFamily.Type.COMP, false, "LOD 2 — low detail", "LOD 2")
 	add_input("lod3", GNFamily.Type.COMP, false, "LOD 3 — lowest detail (farthest)", "LOD 3")
-	add_output("out", GNFamily.Type.COMP, "LOD-managed component")
+	add_output("out", GNFamily.Type.COMP, "LOD-managed component", "Out")
 
 
 func _init_parameters() -> void:

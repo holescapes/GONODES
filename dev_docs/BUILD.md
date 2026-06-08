@@ -35,8 +35,11 @@ After cloning the repository, nothing is compiled. All native extension
 cleanly without missing-binary errors.
 
 ```bash
-# 1. Fetch dependencies (godot-cpp, open-source SDKs)
-python setup_deps.py --core
+# 1. Fetch all dependencies (godot-cpp + ALL extension SDKs, runs setup_*.py per extension)
+python setup_deps.py
+
+# To fetch ONLY godot-cpp and skip extension SDKs (faster for CI/testing):
+# python setup_deps.py --core
 
 # 2. Build godot-cpp (once per Godot version)
 cd addons/gn_ext_native/native/godot-cpp
@@ -48,6 +51,9 @@ cd build
 scons platform=windows arch=x86_64 target=template_release -j8
 cd ..
 # Post-build hook automatically runs sync_gdextensions.py to activate extensions.
+# Runtime DLLs declared in build.cfg (runtime_dlls field) are auto-copied to their
+# destination (bin/ for most; runtime/ for extensions that need Godot [dependencies]
+# pre-loading, since native/ is .gdignored and invisible to res:// paths).
 
 # 4. Bundle toolchains for user C++/Python nodes (optional)
 python scripts/bundle_toolchain.py
@@ -60,6 +66,47 @@ python addons/gn_ext_user_python/setup_python.py
 After step 3, open Godot — all native extensions will be loaded and
 functional. Steps 4–5 are only needed if you want NativeSCRIPT/PythonSCRIPT
 operators or the Quick Build export feature.
+
+### Runtime Dependencies
+
+Some native extensions link against third-party shared libraries at load-time.
+The build system handles this via `runtime_dlls` in each extension's `native/build.cfg`:
+
+```ini
+[windows]
+libs = opencv_world4100
+runtime_dlls = opencv_sdk/opencv/build/x64/vc16/bin/opencv_world4100.dll
+```
+
+During build step 3, `gn_build.py` copies these DLLs to the output directory.
+
+#### Important: `.gdignore` and `res://` path resolution
+
+The `native/` directory in every extension has a `.gdignore` file, which prevents
+Godot's editor VFS from scanning its contents. A side effect: `res://` paths pointing
+inside `native/` **cannot be resolved by Godot** — this means:
+
+- `[dependencies]` entries in `.gdextension` that point inside `native/` are silently ignored
+- Godot will fail to pre-load those DLLs, causing Error 126 when loading the main library
+
+**Rule:** If a runtime DLL must appear in a `[dependencies]` section, it MUST live outside
+`native/`. Use `runtime_dlls_dest` in `build.cfg` to copy it to a non-gdignored location:
+
+```ini
+[windows]
+runtime_dlls = bin/win64/python3.dll, bin/win64/python312.dll
+runtime_dlls_dest = runtime/win64   # relative to extension root, NOT native/
+```
+
+OpenCV's `opencv_world4100.dll` doesn't need pre-loading (Windows finds it via
+`LOAD_WITH_ALTERED_SEARCH_PATH` in the same dir as the DLL) so it stays in `bin/`.
+Python's `python3.dll`/`python312.dll` DO need pre-loading, so they live in `runtime/win64/`.
+
+If you get "Could not find module ... (or one of its dependencies)" errors, verify:
+1. The SDK is present (e.g., `native/opencv_sdk/` for OpenCV)
+2. `runtime_dlls` paths in `build.cfg` are correct (relative to `native/`)
+3. If the DLL needs pre-loading: set `runtime_dlls_dest` to a path outside `native/`
+4. The `.gdextension` `[dependencies]` section uses the non-`native/` path
 
 
 ## When to Rebuild Templates

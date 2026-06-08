@@ -43,6 +43,20 @@ The `LaserCHOP` data model (ILDA point channels) exists. What's missing are nati
 
 **Ref:** [README.md § Roadmap](../README.md)
 
+### Palette Multi-Output Discoverability
+
+Operators with cross-family outputs (e.g. MovieFileInTOP: port 0 = TOP, port 1 = CHOP audio) are only listed under their primary family. Users searching the secondary output's family won't find the node.
+
+Three approaches, in order of increasing scope:
+
+| Approach | Effort | Effect |
+|----------|--------|--------|
+| **1. Search matches all output types** | Small | Palette text search shows operators by ANY output port family, not just the node's primary family |
+| **2. Cross-list multi-output nodes** | Medium | Family pill filter also shows nodes with a secondary output of that family, with a visual badge (e.g. "also outputs: CHOP") |
+| **3. Tag/capability system** | Large | Operators declare semantic tags ("audio", "video", "file", "camera") as an orthogonal search dimension |
+
+Port family data for all operators already exists in `port_registry.json`. Approach 1 requires only a palette search change. Approach 2 adds a second pass to the family pill filter. Approach 3 is a new metadata system.
+
 ### Network Collaboration (Shared Editing)
 
 Real-time multi-user editing of the same `.gnpatch` — cursor presence, node locking, operation broadcasting (OT or CRDT-based).

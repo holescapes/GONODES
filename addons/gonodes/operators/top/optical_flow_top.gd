@@ -25,8 +25,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture (video or animated source)")
-	add_output("out", GNFamily.Type.TOP, "Optical flow vectors (R=horizontal, G=vertical, B=magnitude)")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture (video or animated source)", "In")
+	add_output("out", GNFamily.Type.TOP, "Optical flow vectors (R=horizontal, G=vertical, B=magnitude)", "Out")
 
 
 func _init_parameters() -> void:

@@ -25,8 +25,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Input image")
-	add_output("out", GNFamily.Type.DAT, "Decoded text and bounding corners")
+	add_input("in", GNFamily.Type.IMG, true, "Input image", "In")
+	add_output("out", GNFamily.Type.DAT, "Decoded text and bounding corners", "Out")
 
 
 func _init_parameters() -> void:

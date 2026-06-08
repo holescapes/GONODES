@@ -15,10 +15,10 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("density_in", GNFamily.Type.VOL, false, "External density source (optional)")
-	add_input("vel_in", GNFamily.Type.VOL, false, "External velocity field (optional)")
-	add_output("density_out", GNFamily.Type.VOL, "Density volume")
-	add_output("velocity_out", GNFamily.Type.VOL, "Velocity volume (4-channel)")
+	add_input("density_in", GNFamily.Type.VOL, false, "External density source (optional)", "Density")
+	add_input("vel_in", GNFamily.Type.VOL, false, "External velocity field (optional)", "Velocity")
+	add_output("density_out", GNFamily.Type.VOL, "Density volume", "Density")
+	add_output("velocity_out", GNFamily.Type.VOL, "Velocity volume (4-channel)", "Velocity")
 
 
 func _init_parameters() -> void:

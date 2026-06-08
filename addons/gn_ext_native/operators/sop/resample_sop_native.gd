@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input geometry to resample")
-	add_output("out", GNFamily.Type.SOP, "Resampled geometry")
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry to resample", "In")
+	add_output("out", GNFamily.Type.SOP, "Resampled geometry", "Out")
 
 
 func _init_parameters() -> void:

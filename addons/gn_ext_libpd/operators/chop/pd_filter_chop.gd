@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Audio input to process through Pd patch")
-	add_output("out", GNFamily.Type.CHOP, "Processed audio output from Pd patch")
+	add_input("in", GNFamily.Type.CHOP, false, "Audio input to process through Pd patch", "In")
+	add_output("out", GNFamily.Type.CHOP, "Processed audio output from Pd patch", "Out")
 
 
 func _init_parameters() -> void:

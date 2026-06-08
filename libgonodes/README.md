@@ -103,11 +103,11 @@ gonodes_patch_t overlay = gonodes_load_patch(gn, "overlay.gnpatch");
 
 // In your frame loop — one call cooks ALL loaded patches:
 gonodes_cook_frame(gn, delta_seconds);
-uint64_t tex1 = gonodes_get_output_texture(gn, p, effects, "main_out", &w, &h);
-uint64_t tex2 = gonodes_get_output_texture(gn, p, overlay, "title", &w2, &h2);
+uint64_t tex1 = gonodes_get_output_texture(gn, effects, "main_out", &w, &h);
+uint64_t tex2 = gonodes_get_output_texture(gn, overlay, "title", &w2, &h2);
 // tex1/tex2 are VkImages on the shared device — bind directly.
 
-gonodes_unload_patch(gn, p, overlay);
+gonodes_unload_patch(gn, overlay);
 gonodes_destroy(gn);
 ```
 

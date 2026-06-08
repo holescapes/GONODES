@@ -29,7 +29,7 @@ import zipfile
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-PYTHON_VERSION = "3.12.8"
+PYTHON_VERSION = "3.10.11"  # Must match libgn_python.dll — compiled against Python 3.10
 
 EXT_DIR = os.path.dirname(os.path.abspath(__file__))
 TOOLCHAIN_DIR = os.path.join(EXT_DIR, "toolchain", "python")
@@ -187,19 +187,34 @@ def setup_windows(version, skip_numpy):
 
 
 def _install_numpy_windows(python_exe, ver_short):
-    """Install NumPy into the embeddable Python."""
-    # Check if already installed
+    """Install NumPy into the embeddable Python.
+
+    libgn_python.dll was compiled against the NumPy 1.x C API (NPY_1_7_API_VERSION).
+    NumPy 2.0 restructured its internal C module (numpy.core → numpy._core) in a
+    way that hard-crashes old import_array() calls instead of raising a Python
+    exception.  Pin to <2 until the extension is rebuilt against NumPy 2.x headers.
+    """
+    NUMPY_CONSTRAINT = "numpy<2"
+
+    # Check if already installed at a compatible version
     result = subprocess.run(
-        [python_exe, "-c", "import numpy; print(numpy.__version__)"],
+        [python_exe, "-c",
+         "import numpy; v=tuple(int(x) for x in numpy.__version__.split('.')[:2]); "
+         "exit(0 if v < (2, 0) else 1)"],
         capture_output=True, text=True
     )
     if result.returncode == 0:
-        log(f"NumPy already installed: {result.stdout.strip()}")
+        ver_result = subprocess.run(
+            [python_exe, "-c", "import numpy; print(numpy.__version__)"],
+            capture_output=True, text=True
+        )
+        log(f"NumPy already installed (compatible): {ver_result.stdout.strip()}")
         return True
 
-    log("Installing NumPy...")
+    log(f"Installing {NUMPY_CONSTRAINT}...")
     result = subprocess.run(
-        [python_exe, "-m", "pip", "install", "numpy", "--no-warn-script-location"],
+        [python_exe, "-m", "pip", "install", NUMPY_CONSTRAINT,
+         "--no-warn-script-location"],
         capture_output=True, text=True
     )
     if result.returncode != 0:

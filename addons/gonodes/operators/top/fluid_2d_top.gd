@@ -25,8 +25,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("dye", GNFamily.Type.TOP, true, "Optional dye source texture")
-	add_output("out", GNFamily.Type.TOP, "Rendered fluid texture")
+	add_input("dye", GNFamily.Type.TOP, true, "Optional dye source texture", "Dye")
+	add_output("out", GNFamily.Type.TOP, "Rendered fluid texture", "Out")
 
 
 func _init_parameters() -> void:

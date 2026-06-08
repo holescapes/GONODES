@@ -9,9 +9,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Source input texture")
-	add_input("palette", GNFamily.Type.TOP, false, "1D palette / ramp texture")
-	add_output("out", GNFamily.Type.TOP, "Palette-quantized texture")
+	add_input("in", GNFamily.Type.TOP, false, "Source input texture", "In")
+	add_input("palette", GNFamily.Type.TOP, false, "1D palette / ramp texture", "Palette")
+	add_output("out", GNFamily.Type.TOP, "Palette-quantized texture", "Out")
 
 
 func _init_parameters() -> void:
@@ -21,7 +21,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var tex_in: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
+	var tex_in: GNTextureData = _get_input_top(inputs, 0)
 	if tex_in == null:
 		GNLogger.warn("PaletteTOP", "'%s' — no valid input on port in" % id)
 		return null

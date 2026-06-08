@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Input channels to trail")
-	add_output("out", GNFamily.Type.CHOP, "Trailed channel history")
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels to trail", "In")
+	add_output("out", GNFamily.Type.CHOP, "Trailed channel history", "Out")
 
 
 func _init_parameters() -> void:

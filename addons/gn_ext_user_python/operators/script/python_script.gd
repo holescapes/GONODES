@@ -41,6 +41,10 @@ def cook(me, params, inputs, context):
 ## System parameter names (not forwarded to Python).
 const _SYSTEM_PARAMS: PackedStringArray = ["py_source", "auto_reload", "time_dep"]
 
+## Crash-safe diagnostic log path. Written via FileAccess so it survives a hard
+## C++ abort() — unlike print() which is buffered over IPC and lost on crash.
+const _DIAG_LOG := "user://python_diag.log"
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Instance State
@@ -54,6 +58,7 @@ var _load_error: String = ""
 var _is_loaded: bool = false
 var _dynamic_params: Array[Dictionary] = []
 var _dynamic_ports: Array[Dictionary] = []
+var _diag_started: bool = false
 
 ## Last cook duration in milliseconds (for preview display).
 var _last_cook_ms: float = 0.0
@@ -72,7 +77,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.CHOP, "Output channels")
+	add_output("out", GNFamily.Type.CHOP, "Output channels", "Out")
 
 
 func _init_parameters() -> void:
@@ -91,13 +96,24 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	time_dependent = get_param_value("time_dep")
 
+	if not _diag_started:
+		_diag_started = true
+		# Fresh log each session (truncate on first cook)
+		var f := FileAccess.open(_DIAG_LOG, FileAccess.WRITE)
+		if f:
+			f.store_string("=== PythonSCRIPT diag log — node: %s ===\n" % id)
+			f.close()
+	_diag("cook start")
 	_ensure_processor()
+	_diag("_ensure_processor done — processor null: %s" % str(_processor == null))
 
 	var source: String = get_param_value("py_source")
 	if source != _py_source:
 		_py_source = source
 		if get_param_value("auto_reload"):
+			_diag("source changed, calling _load_script")
 			_load_script()
+			_diag("_load_script returned — is_loaded: %s  error: '%s'" % [str(_is_loaded), _load_error])
 
 	if _processor != null and _processor.is_loaded():
 		var t0 := Time.get_ticks_usec()
@@ -438,20 +454,44 @@ func _gather_user_params() -> Dictionary:
 	return params
 
 
+## Write msg to crash-safe file log AND to Godot output.
+func _diag(msg: String) -> void:
+	var full := "[PythonSCRIPT] %s" % msg
+	print(full)
+	var f := FileAccess.open(_DIAG_LOG, FileAccess.READ_WRITE)
+	if f:
+		f.seek_end(0)
+		f.store_string(full + "\n")
+		f.close()
+
+
 func _ensure_processor() -> void:
 	if _processor != null:
 		return
+	_diag("checking ClassDB for GNPythonProcessor")
 	if not ClassDB.class_exists(&"GNPythonProcessor"):
 		_load_error = "GNPythonRuntime not loaded. Check gn_python.gdextension."
 		node_warning = _load_error
+		_diag("ERROR: GNPythonProcessor not in ClassDB — extension failed to load")
 		return
+	_diag("GNPythonProcessor in ClassDB — calling ClassDB.instantiate...")
 	_processor = ClassDB.instantiate(&"GNPythonProcessor")
+	_diag("ClassDB.instantiate returned — null: %s" % str(_processor == null))
 
 
 func _load_script() -> void:
 	_ensure_processor()
 	if _processor == null:
 		return
+
+	# Log toolchain state before any native call — file write survives C++ abort()
+	var toolchain := ProjectSettings.globalize_path("res://addons/gn_ext_user_python/toolchain/python")
+	_diag("toolchain path: " + toolchain)
+	_diag("toolchain python3.dll present: %s" % str(FileAccess.file_exists(toolchain + "/python3.dll")))
+	_diag("toolchain python310.dll present: %s" % str(FileAccess.file_exists(toolchain + "/python310.dll")))
+	_diag("toolchain python310.zip present: %s" % str(FileAccess.file_exists(toolchain + "/python310.zip")))
+	_diag("bin/win64/python310.dll present: %s" % str(FileAccess.file_exists(
+			ProjectSettings.globalize_path("res://addons/gn_ext_user_python/bin/win64/python310.dll"))))
 
 	var dir_path := "user://python_scripts/"
 	DirAccess.make_dir_recursive_absolute(dir_path)
@@ -460,25 +500,35 @@ func _load_script() -> void:
 	var fa := FileAccess.open(_script_path, FileAccess.WRITE)
 	if fa == null:
 		_load_error = "Cannot write script file."
+		_diag("ERROR: Cannot write script file to " + _script_path)
 		return
 	fa.store_string(_py_source)
 	fa.close()
 
 	var global_path := ProjectSettings.globalize_path(_script_path)
+	_diag("script written to: " + global_path)
 	if _is_loaded:
+		_diag(">>> calling reload_script() <<<")
 		if not _processor.reload_script():
 			_load_error = _processor.get_last_error()
+			_diag("ERROR: reload_script failed: " + _load_error)
 			return
+		_diag("reload_script() returned OK")
 	else:
+		_diag(">>> calling load_script() — THIS IS WHERE Py_Initialize RUNS <<<")
 		if not _processor.load_script(global_path):
 			_load_error = _processor.get_last_error()
+			_diag("ERROR: load_script failed: " + _load_error)
 			return
+		_diag("load_script() returned OK")
 
 	_is_loaded = true
 	_load_error = ""
 
+	_diag(">>> calling python_setup() <<<")
 	var ctx := {"project_dir": ProjectSettings.globalize_path("res://"), "node_name": name}
 	_processor.python_setup(ctx)
+	_diag("python_setup() returned — calling _sync_ports_and_params")
 	_sync_ports_and_params()
 	mark_dirty()
 

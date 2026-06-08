@@ -1,8 +1,8 @@
-class_name DepthEstimateTOP
-extends GNTopBase
+class_name DepthEstimateIMG
+extends GNImgBase
 ## Monocular depth estimation via MiDaS ONNX model.
 ##
-## Accepts a TOP input and produces a single-channel depth map texture.
+## Accepts an IMG input and produces a single-channel depth map image.
 ## Brighter = closer, darker = farther (or inverted via parameter).
 ##
 ## Requires the gn_ext_ml GDExtension (GNOnnxInference class).
@@ -23,8 +23,8 @@ func supported_platforms() -> PackedStringArray:
 	return PackedStringArray(["windows", "macos", "linux"])
 
 func _init_ports() -> void:
-	add_input("image", GNFamily.Type.TOP, true, "Source image / video", "Image")
-	add_output("out", GNFamily.Type.TOP, "Depth map texture")
+	add_input("image", GNFamily.Type.IMG, true, "Source image / video", "Image")
+	add_output("out", GNFamily.Type.IMG, "Depth map image", "Out")
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("model_path",
@@ -44,15 +44,17 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
+	var out := _prepare_image()
+
 	if not _is_ml_available():
-		GNLogger.warn("DepthEstimateTOP", "'%s': gn_ext_ml not loaded" % id)
+		GNLogger.warn("DepthEstimateIMG", "'%s': gn_ext_ml not loaded" % id)
 		return null
 
 	if not get_param_value("active"):
-		return _cached_tex_data
+		return out
 
-	var in_tex: GNTextureData = _get_input_top(inputs, 0)
-	if in_tex == null or in_tex.texture == null:
+	var in_img: GNImageData = _get_input_img(inputs, 0)
+	if in_img == null or in_img.image == null:
 		return null
 
 	_ensure_onnx()
@@ -67,14 +69,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_model_loaded = _onnx.load_model(model_path)
 		_last_model = model_path
 		if not _model_loaded:
-			GNLogger.error("DepthEstimateTOP", "'%s': failed to load '%s'" % [id, model_path])
+			GNLogger.error("DepthEstimateIMG", "'%s': failed to load '%s'" % [id, model_path])
 
 	if not _model_loaded:
 		return null
 
-	var img: Image = in_tex.texture.get_image()
-	if img == null:
-		return null
+	var img: Image = in_img.image
 
 	# MiDaS expects ImageNet-normalized input
 	var mean := PackedFloat32Array([0.485, 0.456, 0.406])
@@ -136,13 +136,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if out_w != MODEL_W or out_h != MODEL_H:
 		depth_img.resize(out_w, out_h, Image.INTERPOLATE_BILINEAR)
 
-	var tex := ImageTexture.create_from_image(depth_img)
-	if _cached_tex_data == null:
-		_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = tex
-	_cached_tex_data.resolution = Vector2i(out_w, out_h)
-	_cached_tex_data.format = Image.FORMAT_RGBA8
-	return _cached_tex_data
+	out.set_image(depth_img)
+	return out
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -155,4 +150,4 @@ func _ensure_onnx() -> void:
 		return
 	_onnx = ClassDB.instantiate(&"GNOnnxInference")
 	if _onnx == null:
-		GNLogger.error("DepthEstimateTOP", "'%s': failed to instantiate GNOnnxInference" % id)
+		GNLogger.error("DepthEstimateIMG", "'%s': failed to instantiate GNOnnxInference" % id)

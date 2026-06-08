@@ -3,12 +3,13 @@ import os
 import re
 import json
 from pathlib import Path
+from _registry_utils import get_all_families, family_to_suffix
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _ROOT = _SCRIPT_DIR.parent
 OPS_DIR = _ROOT / "addons" / "gonodes" / "operators"
 
-FAMILIES = ["chop", "comp", "dat", "img", "mat", "output", "pop", "sop", "top", "ui", "vol"]
+FAMILIES = get_all_families()
 
 # Also include root-level .gd files (dot_node.gd etc.)
 def collect_gd_files():
@@ -91,11 +92,9 @@ def main():
     print(f"  CROSS-FAMILY OUTPUT OPERATORS")
     print(f"{'='*60}")
     
-    family_map = {
-        "chop": "CHOP", "comp": "COMP", "dat": "DAT", "img": "IMG",
-        "mat": "MAT", "output": None, "pop": "POP", "sop": "SOP",
-        "top": "TOP", "ui": None, "vol": "VOL", "root": None,
-    }
+    # Families that are sinks or classifiers — no fixed output type to cross-check
+    _NO_OUTPUT_CHECK = {"output", "ui", "script", "net", "root"}
+    family_map = {f: (None if f in _NO_OUTPUT_CHECK else family_to_suffix(f)) for f in ["root"] + FAMILIES}
     
     for fam in FAMILIES:
         expected = family_map.get(fam)

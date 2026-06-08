@@ -12,9 +12,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("source", GNFamily.Type.SOP, false, "Points to creep along surface")
-	add_input("surface", GNFamily.Type.SOP, false, "Target surface to creep on")
-	add_output("out", GNFamily.Type.SOP, "Displaced points")
+	add_input("source", GNFamily.Type.SOP, false, "Points to creep along surface", "Source")
+	add_input("surface", GNFamily.Type.SOP, false, "Target surface to creep on", "Surface")
+	add_output("out", GNFamily.Type.SOP, "Displaced points", "Out")
 
 
 func _init_parameters() -> void:

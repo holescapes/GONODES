@@ -29,8 +29,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Input image (video frames)")
-	add_output("out", GNFamily.Type.IMG, "Foreground mask")
+	add_input("in", GNFamily.Type.IMG, true, "Input image (video frames)", "In")
+	add_output("out", GNFamily.Type.IMG, "Foreground mask", "Out")
 
 
 func _init_parameters() -> void:

@@ -10,8 +10,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("sdf_in", GNSdfBase.SDF_FAMILY, false, "SDF shape to mirror")
-	add_output("out", GNSdfBase.SDF_FAMILY, "Mirrored SDF output")
+	add_input("sdf_in", GNSdfBase.SDF_FAMILY, false, "SDF shape to mirror", "SDF")
+	add_output("out", GNSdfBase.SDF_FAMILY, "Mirrored SDF output", "Out")
 
 
 func _init_parameters() -> void:

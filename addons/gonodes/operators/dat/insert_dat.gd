@@ -9,8 +9,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Input table")
-	add_output("out", GNFamily.Type.DAT, "Table with inserted rows/columns")
+	add_input("in", GNFamily.Type.DAT, false, "Input table", "In")
+	add_output("out", GNFamily.Type.DAT, "Table with inserted rows/columns", "Out")
 
 
 func _init_parameters() -> void:

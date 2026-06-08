@@ -13,9 +13,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo_a", GNFamily.Type.SOP, false, "First geometry")
-	add_input("geo_b", GNFamily.Type.SOP, false, "Second geometry")
-	add_output("out", GNFamily.Type.SOP, "Stitched geometry")
+	add_input("geo_a", GNFamily.Type.SOP, false, "First geometry", "Geometry A")
+	add_input("geo_b", GNFamily.Type.SOP, false, "Second geometry", "Geometry B")
+	add_output("out", GNFamily.Type.SOP, "Stitched geometry", "Out")
 
 
 func _init_parameters() -> void:

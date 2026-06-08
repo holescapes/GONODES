@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, false, "Input image (used when 'img' is empty)")
-	add_output("out", GNFamily.Type.IMG, "Selected image")
+	add_input("in", GNFamily.Type.IMG, false, "Input image (used when 'img' is empty)", "In")
+	add_output("out", GNFamily.Type.IMG, "Selected image", "Out")
 
 
 func _init_parameters() -> void:

@@ -16,9 +16,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Source texture")
-	add_input("deform", GNFamily.Type.TOP, false, "Displacement map (RG = UV offset)")
-	add_output("out", GNFamily.Type.TOP, "Deformed texture")
+	add_input("in", GNFamily.Type.TOP, false, "Source texture", "In")
+	add_input("deform", GNFamily.Type.TOP, false, "Displacement map (RG = UV offset)", "Deform")
+	add_output("out", GNFamily.Type.TOP, "Deformed texture", "Out")
 
 
 func _init_parameters() -> void:
@@ -29,8 +29,8 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var tex_in: GNTextureData = inputs[0] as GNTextureData if inputs.size() > 0 and inputs[0] is GNTextureData else null
-	var deform_in: GNTextureData = inputs[1] as GNTextureData if inputs.size() > 1 and inputs[1] is GNTextureData else null
+	var tex_in: GNTextureData = _get_input_top(inputs, 0)
+	var deform_in: GNTextureData = _get_input_top(inputs, 1)
 	if tex_in == null or tex_in.texture == null:
 		return null
 

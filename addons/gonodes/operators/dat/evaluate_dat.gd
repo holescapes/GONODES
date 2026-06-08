@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Input table with expressions")
-	add_output("out", GNFamily.Type.DAT, "Evaluated table")
+	add_input("in", GNFamily.Type.DAT, false, "Input table with expressions", "In")
+	add_output("out", GNFamily.Type.DAT, "Evaluated table", "Out")
 
 
 func _init_parameters() -> void:
@@ -22,7 +22,7 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var in_dat: GNTableData = inputs[0] as GNTableData if inputs.size() > 0 and inputs[0] is GNTableData else null
+	var in_dat: GNTableData = _get_input_dat(inputs, 0)
 	if in_dat == null or not in_dat.is_table:
 		return null
 

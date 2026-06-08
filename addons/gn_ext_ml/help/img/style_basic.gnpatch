@@ -2,26 +2,18 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src1": {
-            "type": "NoiseTOP",
+        "webcam1": {
+            "type": "WebcamIMG",
             "position": [
                 100,
                 100
             ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
+            "parameters": {}
         },
-        "focus1": {
-            "type": "SegmentationTOP",
+        "style1": {
+            "type": "StyleTransferIMG",
             "position": [
-                500,
+                600,
                 100
             ],
             "parameters": {
@@ -32,21 +24,15 @@
                         "y": 512
                     }
                 },
-                "threshold": {
-                    "value": 0.5
-                },
-                "soft_mask": {
-                    "value": true
-                },
-                "active": {
-                    "value": true
+                "strength": {
+                    "value": 1.0
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                900,
+                1100,
                 100
             ],
             "parameters": {
@@ -61,17 +47,31 @@
                     "value": true
                 }
             }
+        },
+        "img2top_style1": {
+            "type": "ImgToTOP",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
-            "from": "src1",
+            "from": "webcam1",
             "from_port": 0,
-            "to": "focus1",
+            "to": "style1",
             "to_port": 0
         },
         {
-            "from": "focus1",
+            "from": "style1",
+            "from_port": 0,
+            "to": "img2top_style1",
+            "to_port": 0
+        },
+        {
+            "from": "img2top_style1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -81,14 +81,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Segmentation TOP \u2014 Basic\n\nSegment foreground/background using an ML model.\nthreshold controls mask cutoff. soft_mask outputs smooth alpha edges.\nUses ONNX Runtime. Set model_path to your segmentation model.",
+            "text": "Webcam IMG \u2014 Basic\n\nLive webcam/camera feed as CPU Image. Chain \u2192 ImgToTOP for GPU.",
             "position": [
-                -100,
-                -100
+                -100.0,
+                -100.0
             ],
             "size": [
-                520,
-                140
+                450.0,
+                100.0
             ],
             "color": [
                 1.0,

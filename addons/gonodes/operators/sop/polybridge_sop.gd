@@ -16,7 +16,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("geo_a", GNFamily.Type.SOP, false, "First boundary geometry", "Geometry A")
 	add_input("geo_b", GNFamily.Type.SOP, false, "Second boundary geometry", "Geometry B")
-	add_output("out", GNFamily.Type.SOP, "Bridged geometry")
+	add_output("out", GNFamily.Type.SOP, "Bridged geometry", "Out")
 
 
 func _init_parameters() -> void:

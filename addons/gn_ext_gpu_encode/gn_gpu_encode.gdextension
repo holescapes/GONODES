@@ -4,7 +4,7 @@ entry_symbol = "gn_gpu_encode_init"
 compatibility_minimum = 4.1
 
 [libraries]
-windows.debug.x86_64 = "res://addons/gn_ext_gpu_encode/native/bin/win64/libgn_gpu_encode.windows.template_release.x86_64.dll"
-windows.release.x86_64 = "res://addons/gn_ext_gpu_encode/native/bin/win64/libgn_gpu_encode.windows.template_release.x86_64.dll"
+windows.x86_64.debug = "res://addons/gn_ext_gpu_encode/native/bin/win64/libgn_gpu_encode.windows.template_release.x86_64.dll"
+windows.x86_64.release = "res://addons/gn_ext_gpu_encode/native/bin/win64/libgn_gpu_encode.windows.template_release.x86_64.dll"
 macos.debug = "res://addons/gn_ext_gpu_encode/native/bin/macos/libgn_gpu_encode.macos.template_release.universal.dylib"
 macos.release = "res://addons/gn_ext_gpu_encode/native/bin/macos/libgn_gpu_encode.macos.template_release.universal.dylib"

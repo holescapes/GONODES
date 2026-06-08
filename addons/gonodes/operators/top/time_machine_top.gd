@@ -28,8 +28,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture to record")
-	add_output("out", GNFamily.Type.TOP, "Time-shifted texture")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to record", "In")
+	add_output("out", GNFamily.Type.TOP, "Time-shifted texture", "Out")
 
 
 func _init_parameters() -> void:

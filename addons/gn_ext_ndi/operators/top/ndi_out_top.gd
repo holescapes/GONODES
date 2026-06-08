@@ -19,7 +19,7 @@ func supported_platforms() -> PackedStringArray:
 
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.TOP, true, "Texture to send", "Video")
-	add_output("thru", GNFamily.Type.TOP, "Pass-through of input")
+	add_output("thru", GNFamily.Type.TOP, "Pass-through of input", "Thru")
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("name", "GoNodes", "Name",

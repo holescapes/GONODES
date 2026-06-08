@@ -13,9 +13,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in1", GNFamily.Type.CHOP, false, "First input (required)")
-	add_input("in2", GNFamily.Type.CHOP, false, "Second input (optional)")
-	add_output("out", GNFamily.Type.CHOP, "Math result")
+	add_input("in1", GNFamily.Type.CHOP, false, "First input (required)", "In1")
+	add_input("in2", GNFamily.Type.CHOP, false, "Second input (optional)", "In2")
+	add_output("out", GNFamily.Type.CHOP, "Math result", "Out")
 
 
 func _init_parameters() -> void:

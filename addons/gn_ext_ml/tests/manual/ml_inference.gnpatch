@@ -1,6 +1,6 @@
 {
 	"generator": "GONODES",
-	"description": "Machine learning inference demo. Chain 1: NoiseTOP source → DepthEstimateTOP for monocular depth. Chain 2: TestCardTOP → StyleTransferTOP for neural art style. Chain 3: RampTOP → SegmentationTOP for foreground masking → CompositeTOP to composite over a color background. Set model_path parameters to .onnx model files. Requires GNOnnxInference native library.",
+	"description": "Machine learning inference demo. Chain 1: NoiseTOP source → DepthEstimateIMG for monocular depth. Chain 2: TestCardTOP → StyleTransferIMG for neural art style. Chain 3: RampTOP → SegmentationIMG for foreground masking → CompositeTOP to composite over a color background. Set model_path parameters to .onnx model files. Requires GNOnnxInference native library.",
 	"connections": [
 		{
 			"from": "photo_src",
@@ -61,7 +61,7 @@
 			}
 		},
 		"depth_est": {
-			"type": "DepthEstimateTOP",
+			"type": "DepthEstimateIMG",
 			"position": [400.0, 0.0],
 			"parameters": {
 				"model_path": {"value": ""},
@@ -85,7 +85,7 @@
 			}
 		},
 		"style_xfer": {
-			"type": "StyleTransferTOP",
+			"type": "StyleTransferIMG",
 			"position": [400.0, 300.0],
 			"parameters": {
 				"model_path": {"value": ""},
@@ -108,7 +108,7 @@
 			}
 		},
 		"segment": {
-			"type": "SegmentationTOP",
+			"type": "SegmentationIMG",
 			"position": [400.0, 600.0],
 			"parameters": {
 				"model_path": {"value": ""},

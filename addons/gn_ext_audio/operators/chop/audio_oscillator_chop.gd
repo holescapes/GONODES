@@ -18,9 +18,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("fm", GNFamily.Type.CHOP, true, "Frequency modulation input (Hz offset)")
-	add_input("am", GNFamily.Type.CHOP, true, "Amplitude modulation input (0-1 multiplier)")
-	add_output("out", GNFamily.Type.CHOP, "Generated audio waveform")
+	add_input("fm", GNFamily.Type.CHOP, true, "Frequency modulation input (Hz offset)", "Fm")
+	add_input("am", GNFamily.Type.CHOP, true, "Amplitude modulation input (0-1 multiplier)", "Am")
+	add_output("out", GNFamily.Type.CHOP, "Generated audio waveform", "Out")
 
 
 func _init_parameters() -> void:

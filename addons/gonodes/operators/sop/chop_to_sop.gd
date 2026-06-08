@@ -18,8 +18,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, true, "Source CHOP channels")
-	add_output("out", GNFamily.Type.SOP, "Generated geometry")
+	add_input("in", GNFamily.Type.CHOP, true, "Source CHOP channels", "In")
+	add_output("out", GNFamily.Type.SOP, "Generated geometry", "Out")
 
 
 func _init_parameters() -> void:

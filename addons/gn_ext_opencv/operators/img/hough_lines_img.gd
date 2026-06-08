@@ -25,9 +25,9 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Edge-detected or binary input")
-	add_output("out", GNFamily.Type.IMG, "Overlay with detected lines drawn")
-	add_output("data", GNFamily.Type.DAT, "Line segments table (x1, y1, x2, y2, length, angle)")
+	add_input("in", GNFamily.Type.IMG, true, "Edge-detected or binary input", "In")
+	add_output("out", GNFamily.Type.IMG, "Overlay with detected lines drawn", "Out")
+	add_output("data", GNFamily.Type.DAT, "Line segments table (x1, y1, x2, y2, length, angle)", "Data")
 
 
 func _init_parameters() -> void:

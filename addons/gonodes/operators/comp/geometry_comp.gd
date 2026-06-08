@@ -23,7 +23,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("geo_in", GNFamily.Type.SOP, false, "SOP geometry input", "Geometry")
 	add_input("mat_in", GNFamily.Type.MAT, false, "Material input (optional)", "Material")
-	add_output("out", GNFamily.Type.COMP, "Geometry component")
+	add_output("out", GNFamily.Type.COMP, "Geometry component", "Out")
 
 
 func _init_parameters() -> void:

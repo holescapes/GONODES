@@ -14,9 +14,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("section1", GNFamily.Type.SOP, false, "First cross-section")
-	add_input("section2", GNFamily.Type.SOP, false, "Second cross-section (optional)")
-	add_output("out", GNFamily.Type.SOP, "Lofted surface")
+	add_input("section1", GNFamily.Type.SOP, false, "First cross-section", "Section1")
+	add_input("section2", GNFamily.Type.SOP, false, "Second cross-section (optional)", "Section2")
+	add_output("out", GNFamily.Type.SOP, "Lofted surface", "Out")
 
 
 func _init_parameters() -> void:

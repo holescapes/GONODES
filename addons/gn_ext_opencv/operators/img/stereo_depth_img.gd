@@ -25,9 +25,9 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("left", GNFamily.Type.IMG, true, "Left camera image")
-	add_input("right", GNFamily.Type.IMG, true, "Right camera image")
-	add_output("out", GNFamily.Type.IMG, "Depth map (grayscale)")
+	add_input("left", GNFamily.Type.IMG, true, "Left camera image", "Left")
+	add_input("right", GNFamily.Type.IMG, true, "Right camera image", "Right")
+	add_output("out", GNFamily.Type.IMG, "Depth map (grayscale)", "Out")
 
 
 func _init_parameters() -> void:

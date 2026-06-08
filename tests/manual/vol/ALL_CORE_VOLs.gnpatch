@@ -1,663 +1,663 @@
 {
-	"version": "1.0.0",
-	"generator": "GONODES_manual_test",
-	"nodes": {
-		"noise1": {
-			"type": "NoiseVOL",
-			"position": [
-				0,
-				200
-			],
-			"parameters": {
-				"resolution": {
-					"value": 64
-				},
-				"frequency": {
-					"value": 3.0
-				}
-			}
-		},
-		"blur1": {
-			"type": "BlurVOL",
-			"position": [
-				300,
-				200
-			],
-			"parameters": {
-				"iterations": {
-					"value": 2
-				}
-			}
-		},
-		"analyze1": {
-			"type": "AnalyzeVOL",
-			"position": [
-				600,
-				200
-			]
-		},
-		"raymarch1": {
-			"type": "RaymarchVOL",
-			"position": [
-				900,
-				200
-			]
-		},
-		"snapshot1": {
-			"type": "SnapshotTOP",
-			"position": [
-				1200,
-				200
-			]
-		},
-		"OUTChain1": {
-			"type": "NullTOP",
-			"position": [
-				-200,
-				200
-			]
-		},
-		"noise2": {
-			"type": "NoiseVOL",
-			"position": [
-				0,
-				400
-			],
-			"parameters": {
-				"resolution": {
-					"value": 32
-				}
-			}
-		},
-		"displace1": {
-			"type": "DisplaceVOL",
-			"position": [
-				300,
-				400
-			],
-			"parameters": {
-				"amplitude": {
-					"value": 0.2
-				}
-			}
-		},
-		"blend1": {
-			"type": "BlendVOL",
-			"position": [
-				600,
-				400
-			],
-			"parameters": {
-				"mix": {
-					"value": 0.5
-				}
-			}
-		},
-		"marchingcubes1": {
-			"type": "MarchingCubesVOL",
-			"position": [
-				900,
-				400
-			],
-			"parameters": {
-				"threshold": {
-					"value": 0.3
-				}
-			}
-		},
-		"geo1": {
-			"type": "GeometryCOMP",
-			"position": [
-				1200,
-				400
-			]
-		},
-		"cam1": {
-			"type": "CameraCOMP",
-			"position": [
-				1200,
-				500
-			]
-		},
-		"render1": {
-			"type": "RenderTOP",
-			"position": [
-				1500,
-				400
-			]
-		},
-		"OUTChain2": {
-			"type": "NullTOP",
-			"position": [
-				-200,
-				400
-			]
-		},
-		"fluid1": {
-			"type": "FluidVOL",
-			"position": [
-				0,
-				600
-			],
-			"parameters": {
-				"resolution": {
-					"value": 32
-				}
-			}
-		},
-		"pyro1": {
-			"type": "PyroVOL",
-			"position": [
-				300,
-				600
-			]
-		},
-		"raymarch2": {
-			"type": "RaymarchVOL",
-			"position": [
-				600,
-				600
-			]
-		},
-		"snapshot2": {
-			"type": "SnapshotTOP",
-			"position": [
-				900,
-				600
-			]
-		},
-		"OUTChain3": {
-			"type": "NullTOP",
-			"position": [
-				-200,
-				600
-			]
-		},
-		"soptovol1": {
-			"type": "SOPtoVOL",
-			"position": [
-				0,
-				800
-			],
-			"parameters": {
-				"resolution": {
-					"value": 32
-				}
-			}
-		},
-		"sphere1": {
-			"type": "SphereSOP",
-			"position": [
-				-300,
-				800
-			],
-			"parameters": {
-				"radius": {
-					"value": 0.4
-				}
-			}
-		},
-		"choptovol1": {
-			"type": "CHOPtoVOL",
-			"position": [
-				300,
-				800
-			]
-		},
-		"gpumc1": {
-			"type": "GPUMarchingCubesVOL",
-			"position": [
-				600,
-				800
-			]
-		},
-		"geo2": {
-			"type": "GeometryCOMP",
-			"position": [
-				600,
-				800
-			]
-		},
-		"cam2": {
-			"type": "CameraCOMP",
-			"position": [
-				600,
-				900
-			]
-		},
-		"render2": {
-			"type": "RenderTOP",
-			"position": [
-				900,
-				800
-			]
-		},
-		"OUTChain4": {
-			"type": "NullTOP",
-			"position": [
-				-200,
-				800
-			]
-		},
-		"noise3": {
-			"type": "NoiseVOL",
-			"position": [
-				0,
-				1000
-			],
-			"parameters": {
-				"resolution": {
-					"value": 16
-				}
-			}
-		},
-		"null1": {
-			"type": "NullVOL",
-			"position": [
-				300,
-				1000
-			]
-		},
-		"select1": {
-			"type": "SelectVOL",
-			"position": [
-				600,
-				1000
-			]
-		},
-		"switch1": {
-			"type": "SwitchVOL",
-			"position": [
-				900,
-				1000
-			],
-			"parameters": {
-				"index": {
-					"value": 0
-				}
-			}
-		},
-		"raymarch3": {
-			"type": "RaymarchVOL",
-			"position": [
-				1200,
-				1000
-			]
-		},
-		"snapshot3": {
-			"type": "SnapshotTOP",
-			"position": [
-				1500,
-				1000
-			]
-		},
-		"OUTChain5": {
-			"type": "NullTOP",
-			"position": [
-				-200,
-				1000
-			]
-		},
-		"hostin1": {
-			"type": "HostInVOL",
-			"position": [
-				0,
-				1200
-			]
-		},
-		"hostout1": {
-			"type": "HostOutVOL",
-			"position": [
-				300,
-				1200
-			]
-		},
-		"raymarch4": {
-			"type": "RaymarchVOL",
-			"position": [
-				600,
-				1200
-			]
-		},
-		"snapshot4": {
-			"type": "SnapshotTOP",
-			"position": [
-				900,
-				1200
-			]
-		},
-		"OUTChain6": {
-			"type": "NullTOP",
-			"position": [
-				-200,
-				1200
-			]
-		},
-		"switch_main": {
-			"type": "SwitchTOP",
-			"position": [
-				-400,
-				0
-			]
-		},
-		"window_out1": {
-			"type": "WindowOUT",
-			"position": [
-				-700,
-				0
-			],
-			"parameters": {
-				"resolution": {
-					"value": {
-						"_type": "Vector2i",
-						"x": 512,
-						"y": 512
-					}
-				},
-				"open": {
-					"value": true
-				}
-			}
-		},
-		"chain_slider": {
-			"type": "SliderUI",
-			"position": [
-				-700,
-				200
-			],
-			"parameters": {
-				"label": {
-					"value": "Chain"
-				},
-				"min": {
-					"value": 0.0
-				},
-				"max": {
-					"value": 6.0
-				},
-				"value": {
-					"value": 0.0
-				}
-			}
-		},
-		"chain_label": {
-			"type": "LabelUI",
-			"position": [
-				-700,
-				400
-			],
-			"parameters": {
-				"text": {
-					"value": "ALL CORE VOLs \u2014 6 chains"
-				}
-			}
-		},
-		"panel_container": {
-			"type": "PanelContainerUI",
-			"position": [
-				-900,
-				200
-			]
-		}
-	},
-	"connections": [
-		{
-			"from": "noise1",
-			"from_port": 0,
-			"to": "blur1",
-			"to_port": 0
-		},
-		{
-			"from": "blur1",
-			"from_port": 0,
-			"to": "analyze1",
-			"to_port": 0
-		},
-		{
-			"from": "analyze1",
-			"from_port": 0,
-			"to": "raymarch1",
-			"to_port": 0
-		},
-		{
-			"from": "raymarch1",
-			"from_port": 0,
-			"to": "snapshot1",
-			"to_port": 0
-		},
-		{
-			"from": "snapshot1",
-			"from_port": 0,
-			"to": "OUTChain1",
-			"to_port": 0
-		},
-		{
-			"from": "noise2",
-			"from_port": 0,
-			"to": "displace1",
-			"to_port": 0
-		},
-		{
-			"from": "displace1",
-			"from_port": 0,
-			"to": "blend1",
-			"to_port": 0
-		},
-		{
-			"from": "blend1",
-			"from_port": 0,
-			"to": "marchingcubes1",
-			"to_port": 0
-		},
-		{
-			"from": "marchingcubes1",
-			"from_port": 0,
-			"to": "geo1",
-			"to_port": 0
-		},
-		{
-			"from": "geo1",
-			"from_port": 0,
-			"to": "render1",
-			"to_port": 0
-		},
-		{
-			"from": "cam1",
-			"from_port": 0,
-			"to": "render1",
-			"to_port": 1
-		},
-		{
-			"from": "render1",
-			"from_port": 0,
-			"to": "OUTChain2",
-			"to_port": 0
-		},
-		{
-			"from": "fluid1",
-			"from_port": 0,
-			"to": "pyro1",
-			"to_port": 0
-		},
-		{
-			"from": "pyro1",
-			"from_port": 0,
-			"to": "raymarch2",
-			"to_port": 0
-		},
-		{
-			"from": "raymarch2",
-			"from_port": 0,
-			"to": "snapshot2",
-			"to_port": 0
-		},
-		{
-			"from": "snapshot2",
-			"from_port": 0,
-			"to": "OUTChain3",
-			"to_port": 0
-		},
-		{
-			"from": "sphere1",
-			"from_port": 0,
-			"to": "soptovol1",
-			"to_port": 0
-		},
-		{
-			"from": "soptovol1",
-			"from_port": 0,
-			"to": "choptovol1",
-			"to_port": 0
-		},
-		{
-			"from": "choptovol1",
-			"from_port": 0,
-			"to": "gpumc1",
-			"to_port": 0
-		},
-		{
-			"from": "gpumc1",
-			"from_port": 0,
-			"to": "geo2",
-			"to_port": 0
-		},
-		{
-			"from": "geo2",
-			"from_port": 0,
-			"to": "render2",
-			"to_port": 0
-		},
-		{
-			"from": "cam2",
-			"from_port": 0,
-			"to": "render2",
-			"to_port": 1
-		},
-		{
-			"from": "render2",
-			"from_port": 0,
-			"to": "OUTChain4",
-			"to_port": 0
-		},
-		{
-			"from": "noise3",
-			"from_port": 0,
-			"to": "null1",
-			"to_port": 0
-		},
-		{
-			"from": "null1",
-			"from_port": 0,
-			"to": "select1",
-			"to_port": 0
-		},
-		{
-			"from": "select1",
-			"from_port": 0,
-			"to": "switch1",
-			"to_port": 0
-		},
-		{
-			"from": "switch1",
-			"from_port": 0,
-			"to": "raymarch3",
-			"to_port": 0
-		},
-		{
-			"from": "raymarch3",
-			"from_port": 0,
-			"to": "snapshot3",
-			"to_port": 0
-		},
-		{
-			"from": "snapshot3",
-			"from_port": 0,
-			"to": "OUTChain5",
-			"to_port": 0
-		},
-		{
-			"from": "hostin1",
-			"from_port": 0,
-			"to": "hostout1",
-			"to_port": 0
-		},
-		{
-			"from": "hostin1",
-			"from_port": 0,
-			"to": "raymarch4",
-			"to_port": 0
-		},
-		{
-			"from": "raymarch4",
-			"from_port": 0,
-			"to": "snapshot4",
-			"to_port": 0
-		},
-		{
-			"from": "snapshot4",
-			"from_port": 0,
-			"to": "OUTChain6",
-			"to_port": 0
-		},
-		{
-			"from": "switch_main",
-			"from_port": 0,
-			"to": "window_out1",
-			"to_port": 0
-		},
-		{
-			"from": "chain_slider",
-			"from_port": 0,
-			"to": "panel_container",
-			"to_port": 0
-		},
-		{
-			"from": "chain_label",
-			"from_port": 0,
-			"to": "panel_container",
-			"to_port": 1
-		},
-		{
-			"from": "panel_container",
-			"from_port": 0,
-			"to": "window_out1",
-			"to_port": 1
-		},
-		{
-			"from": "OUTChain1",
-			"from_port": 0,
-			"to": "switch_main",
-			"to_port": 0
-		},
-		{
-			"from": "OUTChain2",
-			"from_port": 0,
-			"to": "switch_main",
-			"to_port": 1
-		},
-		{
-			"from": "OUTChain3",
-			"from_port": 0,
-			"to": "switch_main",
-			"to_port": 2
-		},
-		{
-			"from": "OUTChain4",
-			"from_port": 0,
-			"to": "switch_main",
-			"to_port": 3
-		},
-		{
-			"from": "OUTChain5",
-			"from_port": 0,
-			"to": "switch_main",
-			"to_port": 4
-		},
-		{
-			"from": "OUTChain6",
-			"from_port": 0,
-			"to": "switch_main",
-			"to_port": 5
-		}
-	]
+  "version": "1.0.0",
+  "generator": "GONODES_manual_test",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseVOL",
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": 64
+        },
+        "frequency": {
+          "value": 3.0
+        }
+      }
+    },
+    "blur1": {
+      "type": "BlurVOL",
+      "position": [
+        300,
+        200
+      ],
+      "parameters": {
+        "iterations": {
+          "value": 2
+        }
+      }
+    },
+    "analyze1": {
+      "type": "AnalyzeVOL",
+      "position": [
+        600,
+        200
+      ]
+    },
+    "raymarch1": {
+      "type": "RaymarchTOP",
+      "position": [
+        900,
+        200
+      ]
+    },
+    "snapshot1": {
+      "type": "SnapshotTOP",
+      "position": [
+        1200,
+        200
+      ]
+    },
+    "OUTChain1": {
+      "type": "NullTOP",
+      "position": [
+        -200,
+        200
+      ]
+    },
+    "noise2": {
+      "type": "NoiseVOL",
+      "position": [
+        0,
+        400
+      ],
+      "parameters": {
+        "resolution": {
+          "value": 32
+        }
+      }
+    },
+    "displace1": {
+      "type": "DisplaceVOL",
+      "position": [
+        300,
+        400
+      ],
+      "parameters": {
+        "amplitude": {
+          "value": 0.2
+        }
+      }
+    },
+    "blend1": {
+      "type": "BlendVOL",
+      "position": [
+        600,
+        400
+      ],
+      "parameters": {
+        "mix": {
+          "value": 0.5
+        }
+      }
+    },
+    "marchingcubes1": {
+      "type": "MarchingCubesSOP",
+      "position": [
+        900,
+        400
+      ],
+      "parameters": {
+        "threshold": {
+          "value": 0.3
+        }
+      }
+    },
+    "geo1": {
+      "type": "GeometryCOMP",
+      "position": [
+        1200,
+        400
+      ]
+    },
+    "cam1": {
+      "type": "CameraCOMP",
+      "position": [
+        1200,
+        500
+      ]
+    },
+    "render1": {
+      "type": "RenderTOP",
+      "position": [
+        1500,
+        400
+      ]
+    },
+    "OUTChain2": {
+      "type": "NullTOP",
+      "position": [
+        -200,
+        400
+      ]
+    },
+    "fluid1": {
+      "type": "FluidVOL",
+      "position": [
+        0,
+        600
+      ],
+      "parameters": {
+        "resolution": {
+          "value": 32
+        }
+      }
+    },
+    "pyro1": {
+      "type": "PyroVOL",
+      "position": [
+        300,
+        600
+      ]
+    },
+    "raymarch2": {
+      "type": "RaymarchTOP",
+      "position": [
+        600,
+        600
+      ]
+    },
+    "snapshot2": {
+      "type": "SnapshotTOP",
+      "position": [
+        900,
+        600
+      ]
+    },
+    "OUTChain3": {
+      "type": "NullTOP",
+      "position": [
+        -200,
+        600
+      ]
+    },
+    "soptovol1": {
+      "type": "SOPtoVOL",
+      "position": [
+        0,
+        800
+      ],
+      "parameters": {
+        "resolution": {
+          "value": 32
+        }
+      }
+    },
+    "sphere1": {
+      "type": "SphereSOP",
+      "position": [
+        -300,
+        800
+      ],
+      "parameters": {
+        "radius": {
+          "value": 0.4
+        }
+      }
+    },
+    "choptovol1": {
+      "type": "CHOPtoVOL",
+      "position": [
+        300,
+        800
+      ]
+    },
+    "gpumc1": {
+      "type": "GPUMarchingCubesVOL",
+      "position": [
+        600,
+        800
+      ]
+    },
+    "geo2": {
+      "type": "GeometryCOMP",
+      "position": [
+        600,
+        800
+      ]
+    },
+    "cam2": {
+      "type": "CameraCOMP",
+      "position": [
+        600,
+        900
+      ]
+    },
+    "render2": {
+      "type": "RenderTOP",
+      "position": [
+        900,
+        800
+      ]
+    },
+    "OUTChain4": {
+      "type": "NullTOP",
+      "position": [
+        -200,
+        800
+      ]
+    },
+    "noise3": {
+      "type": "NoiseVOL",
+      "position": [
+        0,
+        1000
+      ],
+      "parameters": {
+        "resolution": {
+          "value": 16
+        }
+      }
+    },
+    "null1": {
+      "type": "NullVOL",
+      "position": [
+        300,
+        1000
+      ]
+    },
+    "select1": {
+      "type": "SelectVOL",
+      "position": [
+        600,
+        1000
+      ]
+    },
+    "switch1": {
+      "type": "SwitchVOL",
+      "position": [
+        900,
+        1000
+      ],
+      "parameters": {
+        "index": {
+          "value": 0
+        }
+      }
+    },
+    "raymarch3": {
+      "type": "RaymarchTOP",
+      "position": [
+        1200,
+        1000
+      ]
+    },
+    "snapshot3": {
+      "type": "SnapshotTOP",
+      "position": [
+        1500,
+        1000
+      ]
+    },
+    "OUTChain5": {
+      "type": "NullTOP",
+      "position": [
+        -200,
+        1000
+      ]
+    },
+    "hostin1": {
+      "type": "HostInVOL",
+      "position": [
+        0,
+        1200
+      ]
+    },
+    "hostout1": {
+      "type": "HostOutVOL",
+      "position": [
+        300,
+        1200
+      ]
+    },
+    "raymarch4": {
+      "type": "RaymarchTOP",
+      "position": [
+        600,
+        1200
+      ]
+    },
+    "snapshot4": {
+      "type": "SnapshotTOP",
+      "position": [
+        900,
+        1200
+      ]
+    },
+    "OUTChain6": {
+      "type": "NullTOP",
+      "position": [
+        -200,
+        1200
+      ]
+    },
+    "switch_main": {
+      "type": "SwitchTOP",
+      "position": [
+        -400,
+        0
+      ]
+    },
+    "window_out1": {
+      "type": "WindowOUT",
+      "position": [
+        -700,
+        0
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 512
+          }
+        },
+        "open": {
+          "value": true
+        }
+      }
+    },
+    "chain_slider": {
+      "type": "SliderUI",
+      "position": [
+        -700,
+        200
+      ],
+      "parameters": {
+        "label": {
+          "value": "Chain"
+        },
+        "min": {
+          "value": 0.0
+        },
+        "max": {
+          "value": 6.0
+        },
+        "value": {
+          "value": 0.0
+        }
+      }
+    },
+    "chain_label": {
+      "type": "LabelUI",
+      "position": [
+        -700,
+        400
+      ],
+      "parameters": {
+        "text": {
+          "value": "ALL CORE VOLs \u2014 6 chains"
+        }
+      }
+    },
+    "panel_container": {
+      "type": "PanelContainerUI",
+      "position": [
+        -900,
+        200
+      ]
+    }
+  },
+  "connections": [
+    {
+      "from": "noise1",
+      "from_port": 0,
+      "to": "blur1",
+      "to_port": 0
+    },
+    {
+      "from": "blur1",
+      "from_port": 0,
+      "to": "analyze1",
+      "to_port": 0
+    },
+    {
+      "from": "analyze1",
+      "from_port": 0,
+      "to": "raymarch1",
+      "to_port": 0
+    },
+    {
+      "from": "raymarch1",
+      "from_port": 0,
+      "to": "snapshot1",
+      "to_port": 0
+    },
+    {
+      "from": "snapshot1",
+      "from_port": 0,
+      "to": "OUTChain1",
+      "to_port": 0
+    },
+    {
+      "from": "noise2",
+      "from_port": 0,
+      "to": "displace1",
+      "to_port": 0
+    },
+    {
+      "from": "displace1",
+      "from_port": 0,
+      "to": "blend1",
+      "to_port": 0
+    },
+    {
+      "from": "blend1",
+      "from_port": 0,
+      "to": "marchingcubes1",
+      "to_port": 0
+    },
+    {
+      "from": "marchingcubes1",
+      "from_port": 0,
+      "to": "geo1",
+      "to_port": 0
+    },
+    {
+      "from": "geo1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 0
+    },
+    {
+      "from": "cam1",
+      "from_port": 0,
+      "to": "render1",
+      "to_port": 1
+    },
+    {
+      "from": "render1",
+      "from_port": 0,
+      "to": "OUTChain2",
+      "to_port": 0
+    },
+    {
+      "from": "fluid1",
+      "from_port": 0,
+      "to": "pyro1",
+      "to_port": 0
+    },
+    {
+      "from": "pyro1",
+      "from_port": 0,
+      "to": "raymarch2",
+      "to_port": 0
+    },
+    {
+      "from": "raymarch2",
+      "from_port": 0,
+      "to": "snapshot2",
+      "to_port": 0
+    },
+    {
+      "from": "snapshot2",
+      "from_port": 0,
+      "to": "OUTChain3",
+      "to_port": 0
+    },
+    {
+      "from": "sphere1",
+      "from_port": 0,
+      "to": "soptovol1",
+      "to_port": 0
+    },
+    {
+      "from": "soptovol1",
+      "from_port": 0,
+      "to": "choptovol1",
+      "to_port": 0
+    },
+    {
+      "from": "choptovol1",
+      "from_port": 0,
+      "to": "gpumc1",
+      "to_port": 0
+    },
+    {
+      "from": "gpumc1",
+      "from_port": 0,
+      "to": "geo2",
+      "to_port": 0
+    },
+    {
+      "from": "geo2",
+      "from_port": 0,
+      "to": "render2",
+      "to_port": 0
+    },
+    {
+      "from": "cam2",
+      "from_port": 0,
+      "to": "render2",
+      "to_port": 1
+    },
+    {
+      "from": "render2",
+      "from_port": 0,
+      "to": "OUTChain4",
+      "to_port": 0
+    },
+    {
+      "from": "noise3",
+      "from_port": 0,
+      "to": "null1",
+      "to_port": 0
+    },
+    {
+      "from": "null1",
+      "from_port": 0,
+      "to": "select1",
+      "to_port": 0
+    },
+    {
+      "from": "select1",
+      "from_port": 0,
+      "to": "switch1",
+      "to_port": 0
+    },
+    {
+      "from": "switch1",
+      "from_port": 0,
+      "to": "raymarch3",
+      "to_port": 0
+    },
+    {
+      "from": "raymarch3",
+      "from_port": 0,
+      "to": "snapshot3",
+      "to_port": 0
+    },
+    {
+      "from": "snapshot3",
+      "from_port": 0,
+      "to": "OUTChain5",
+      "to_port": 0
+    },
+    {
+      "from": "hostin1",
+      "from_port": 0,
+      "to": "hostout1",
+      "to_port": 0
+    },
+    {
+      "from": "hostin1",
+      "from_port": 0,
+      "to": "raymarch4",
+      "to_port": 0
+    },
+    {
+      "from": "raymarch4",
+      "from_port": 0,
+      "to": "snapshot4",
+      "to_port": 0
+    },
+    {
+      "from": "snapshot4",
+      "from_port": 0,
+      "to": "OUTChain6",
+      "to_port": 0
+    },
+    {
+      "from": "switch_main",
+      "from_port": 0,
+      "to": "window_out1",
+      "to_port": 0
+    },
+    {
+      "from": "chain_slider",
+      "from_port": 0,
+      "to": "panel_container",
+      "to_port": 0
+    },
+    {
+      "from": "chain_label",
+      "from_port": 0,
+      "to": "panel_container",
+      "to_port": 1
+    },
+    {
+      "from": "panel_container",
+      "from_port": 0,
+      "to": "window_out1",
+      "to_port": 1
+    },
+    {
+      "from": "OUTChain1",
+      "from_port": 0,
+      "to": "switch_main",
+      "to_port": 0
+    },
+    {
+      "from": "OUTChain2",
+      "from_port": 0,
+      "to": "switch_main",
+      "to_port": 1
+    },
+    {
+      "from": "OUTChain3",
+      "from_port": 0,
+      "to": "switch_main",
+      "to_port": 2
+    },
+    {
+      "from": "OUTChain4",
+      "from_port": 0,
+      "to": "switch_main",
+      "to_port": 3
+    },
+    {
+      "from": "OUTChain5",
+      "from_port": 0,
+      "to": "switch_main",
+      "to_port": 4
+    },
+    {
+      "from": "OUTChain6",
+      "from_port": 0,
+      "to": "switch_main",
+      "to_port": 5
+    }
+  ]
 }

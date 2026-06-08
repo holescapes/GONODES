@@ -90,6 +90,12 @@ def parse_build_cfg(cfg_path):
         "lib_name":      cp.get("library", "name", fallback=""),
         "entry_symbol":  cp.get("library", "entry_symbol", fallback=""),
         "platforms":     get_list("library", "platforms") or ALL_PLATFORMS,
+        # Optional extra destination for the built library (relative to extension
+        # root, NOT native/). Use when the main DLL must live outside native/
+        # (which has .gdignore) so Godot can resolve it via res:// paths.
+        # The platform bin subdir (e.g. win64/) is appended automatically.
+        # Example: library_dest = ../bin  -> extension_root/bin/win64/
+        "library_dest":  cp.get("library", "library_dest", fallback="").strip(),
         "sources":       get_list("sources", "cpp", fallback="src/*.cpp"),
         "c_sources":     get_list("sources", "c"),
         "objcxx_sources": get_list("sources", "objcxx"),  # .mm files (macOS)
@@ -112,6 +118,12 @@ def parse_build_cfg(cfg_path):
             "frameworks": get_list(plat, "frameworks") if cp.has_section(plat) else [],
             "defines":    get_list(plat, "defines") if cp.has_section(plat) else [],
             "objcxx_sources": get_list(plat, "objcxx_sources") if cp.has_section(plat) else [],
+            "runtime_dlls": get_list(plat, "runtime_dlls") if cp.has_section(plat) else [],
+            # Optional dest dir for runtime DLLs (relative to extension root, not native/).
+            # Defaults to the compiled output dir (native/bin/<platform>/).
+            # Use this for DLLs that Godot must pre-load via [dependencies] — those must
+            # live outside native/ which has .gdignore and is invisible to res:// paths.
+            "runtime_dlls_dest": cp.get(plat, "runtime_dlls_dest", fallback="").strip(),
             "optional_sdks": {},  # suffix → {key: [values]}
         }
 
@@ -445,4 +457,38 @@ def build_extension(native_dir=None, plat=None, target=None, arch=None):
     lib_target = os.path.join(out_dir, f"lib{cfg['lib_name']}{suffix}{lib_ext}")
     library = env.SharedLibrary(target=lib_target, source=sources)
     Default(library)
+
+    # If library_dest is set, also copy the built library to that location
+    # (relative to extension root). Needed when main DLL must be outside native/.
+    import shutil
+    lib_dest_rel = cfg.get("library_dest", "")
+    if lib_dest_rel:
+        ext_root = os.path.dirname(native_dir)
+        lib_dest_dir = os.path.normpath(os.path.join(ext_root, lib_dest_rel.rstrip("/\\"), BIN_DIRS[plat]))
+        os.makedirs(lib_dest_dir, exist_ok=True)
+        lib_copy_dst = os.path.join(lib_dest_dir, os.path.basename(lib_target))
+        if os.path.isfile(lib_target):
+            shutil.copy2(lib_target, lib_copy_dst)
+            print(f"  Copied library: {os.path.basename(lib_target)} -> {lib_dest_dir}")
+    import shutil
+    plat_cfg = cfg.get(plat, {})
+    runtime_dlls = plat_cfg.get("runtime_dlls", [])
+    if runtime_dlls:
+        # runtime_dlls_dest is relative to the extension root (parent of native_dir).
+        # Defaults to out_dir (native/bin/<platform>/) if not set.
+        ext_root = os.path.dirname(native_dir)
+        dlls_dest_rel = plat_cfg.get("runtime_dlls_dest", "")
+        if dlls_dest_rel:
+            dlls_dest = os.path.normpath(os.path.join(ext_root, dlls_dest_rel))
+        else:
+            dlls_dest = out_dir
+        os.makedirs(dlls_dest, exist_ok=True)
+        for dll_rel in runtime_dlls:
+            dll_src = os.path.join(native_dir, dll_rel)
+            if os.path.isfile(dll_src):
+                dll_dst = os.path.join(dlls_dest, os.path.basename(dll_src))
+                if not os.path.isfile(dll_dst):
+                    shutil.copy2(dll_src, dll_dst)
+                    print(f"  Copied runtime DLL: {os.path.basename(dll_src)} -> {dlls_dest}")
+
     return library

@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", SDF_FAMILY, false, "Input SDF (used when 'sdf' is empty)")
-	add_output("out", SDF_FAMILY, "Selected SDF tree")
+	add_input("in", SDF_FAMILY, false, "Input SDF (used when 'sdf' is empty)", "In")
+	add_output("out", SDF_FAMILY, "Selected SDF tree", "Out")
 
 
 func _init_parameters() -> void:

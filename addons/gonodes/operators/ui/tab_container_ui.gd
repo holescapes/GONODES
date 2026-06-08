@@ -15,9 +15,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("dat", GNFamily.Type.DAT, false, "DAT with tab names (one per row)")
+	add_input("dat", GNFamily.Type.DAT, false, "DAT with tab names (one per row)", "DAT")
 	_enable_dynamic_inputs(GNFamily.Type.UI, "ui", "UI Input")
-	add_output("out", GNFamily.Type.UI, "Container widget output")
+	add_output("out", GNFamily.Type.UI, "Container widget output", "Out")
 
 
 func _init_parameters() -> void:

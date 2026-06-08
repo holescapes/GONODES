@@ -34,8 +34,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("values", GNFamily.Type.CHOP, false, "Channel values to send (ch1-ch512)")
-	add_output("out", GNFamily.Type.DAT, "DMX channel table")
+	add_input("values", GNFamily.Type.CHOP, false, "Channel values to send (ch1-ch512)", "Values")
+	add_output("out", GNFamily.Type.DAT, "DMX channel table", "Out")
 
 
 func _init_parameters() -> void:

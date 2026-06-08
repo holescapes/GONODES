@@ -1,8 +1,8 @@
-class_name StyleTransferTOP
-extends GNTopBase
+class_name StyleTransferIMG
+extends GNImgBase
 ## Neural style transfer via ONNX model.
 ##
-## Accepts a content TOP input and applies an artistic style using a
+## Accepts a content IMG input and applies an artistic style using a
 ## pre-trained fast style transfer model (e.g. Mosaic, Candy, Udnie).
 ##
 ## Requires the gn_ext_ml GDExtension (GNOnnxInference class).
@@ -23,8 +23,8 @@ func supported_platforms() -> PackedStringArray:
 	return PackedStringArray(["windows", "macos", "linux"])
 
 func _init_ports() -> void:
-	add_input("content", GNFamily.Type.TOP, true, "Content image to stylize", "Content")
-	add_output("out", GNFamily.Type.TOP, "Stylized texture")
+	add_input("content", GNFamily.Type.IMG, true, "Content image to stylize", "Content")
+	add_output("out", GNFamily.Type.IMG, "Stylized image", "Out")
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("model_path",
@@ -42,15 +42,17 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
+	var out := _prepare_image()
+
 	if not _is_ml_available():
-		GNLogger.warn("StyleTransferTOP", "'%s': gn_ext_ml not loaded" % id)
+		GNLogger.warn("StyleTransferIMG", "'%s': gn_ext_ml not loaded" % id)
 		return null
 
 	if not get_param_value("active"):
-		return _cached_tex_data
+		return out
 
-	var in_tex: GNTextureData = _get_input_top(inputs, 0)
-	if in_tex == null or in_tex.texture == null:
+	var in_img: GNImageData = _get_input_img(inputs, 0)
+	if in_img == null or in_img.image == null:
 		return null
 
 	_ensure_onnx()
@@ -65,14 +67,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_model_loaded = _onnx.load_model(model_path)
 		_last_model = model_path
 		if not _model_loaded:
-			GNLogger.error("StyleTransferTOP", "'%s': failed to load '%s'" % [id, model_path])
+			GNLogger.error("StyleTransferIMG", "'%s': failed to load '%s'" % [id, model_path])
 
 	if not _model_loaded:
 		return null
 
-	var img: Image = in_tex.texture.get_image()
-	if img == null:
-		return null
+	var img: Image = in_img.image
 
 	# Style transfer models typically expect [0, 255] or [0, 1] NCHW
 	var input_names: PackedStringArray = _onnx.get_input_names()
@@ -114,7 +114,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# Get original pixels for blending
 	var orig_img: Image = null
 	if strength < 1.0:
-		orig_img = in_tex.texture.get_image()
+		orig_img = in_img.image.duplicate()
 		if orig_img.get_format() != Image.FORMAT_RGB8:
 			orig_img.convert(Image.FORMAT_RGB8)
 		orig_img.resize(out_w, out_h, Image.INTERPOLATE_BILINEAR)
@@ -145,16 +145,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
 	if res.x > 0 and res.y > 0 and (res.x != out_w or res.y != out_h):
 		result_img.resize(res.x, res.y, Image.INTERPOLATE_BILINEAR)
-		out_w = res.x
-		out_h = res.y
 
-	var tex := ImageTexture.create_from_image(result_img)
-	if _cached_tex_data == null:
-		_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = tex
-	_cached_tex_data.resolution = Vector2i(out_w, out_h)
-	_cached_tex_data.format = Image.FORMAT_RGBA8
-	return _cached_tex_data
+	out.set_image(result_img)
+	return out
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -167,4 +160,4 @@ func _ensure_onnx() -> void:
 		return
 	_onnx = ClassDB.instantiate(&"GNOnnxInference")
 	if _onnx == null:
-		GNLogger.error("StyleTransferTOP", "'%s': failed to instantiate GNOnnxInference" % id)
+		GNLogger.error("StyleTransferIMG", "'%s': failed to instantiate GNOnnxInference" % id)

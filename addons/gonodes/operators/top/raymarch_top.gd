@@ -15,7 +15,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("vol", GNFamily.Type.VOL, true, "Density volume to render", "Volume")
-	add_output("image", GNFamily.Type.TOP, "Rendered 2D image")
+	add_output("image", GNFamily.Type.TOP, "Rendered 2D image", "Image")
 
 
 func _init_parameters() -> void:

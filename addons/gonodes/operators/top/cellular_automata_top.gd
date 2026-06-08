@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("seed", GNFamily.Type.TOP, false, "Seed pattern (optional — uses noise if empty)")
-	add_output("out", GNFamily.Type.TOP, "Automata state")
+	add_input("seed", GNFamily.Type.TOP, false, "Seed pattern (optional — uses noise if empty)", "Seed")
+	add_output("out", GNFamily.Type.TOP, "Automata state", "Out")
 
 
 func _init_parameters() -> void:

@@ -8,8 +8,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.MAT, false, "Input material")
-	add_output("out", GNFamily.Type.MAT, "Same material (pass-through)")
+	add_input("in", GNFamily.Type.MAT, false, "Input material", "In")
+	add_output("out", GNFamily.Type.MAT, "Same material (pass-through)", "Out")
 
 
 func _init_parameters() -> void:

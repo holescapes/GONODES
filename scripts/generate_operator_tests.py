@@ -31,7 +31,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "scripts" / "operator_registry.json"
 
-# GNFamily.Type enum values
+# GNFamily.Type enum values for core families.
+# Extension families get IDs ≥ 1000 assigned at runtime by GNFamily.register_family().
+# We can't know those IDs at script time, so generated tests for extension families
+# use a GDScript expression (GNFamily.string_to_type(...)) instead of a literal.
 FAMILY_ENUM = {
     "top": 0, "img": 1, "chop": 2, "sop": 3, "pop": 4,
     "dat": 5, "mat": 6, "comp": 7, "vol": 8, "ui": 9,
@@ -93,19 +96,22 @@ def output_path_for(op: dict) -> Path:
 
 def family_enum_name(family: str) -> str:
     """Map registry family string to GNFamily.Type enum name."""
-    mapping = {
-        "top": "TOP", "img": "IMG", "chop": "CHOP", "sop": "SOP",
-        "pop": "POP", "dat": "DAT", "mat": "MAT", "comp": "COMP",
-        "vol": "VOL", "ui": "UI", "output": "OUT", "script": "SCRIPT",
-        "net": "NET",
-    }
-    return mapping.get(family, family.upper())
+    from _registry_utils import family_to_suffix
+    return family_to_suffix(family)
 
 
-def family_enum_value(family: str) -> int:
-    # Extension families (e.g., "sdf") fall back to COMP (7) at runtime
-    # via GNFamily.string_to_type() — mirror that behavior here.
-    return FAMILY_ENUM.get(family, FAMILY_ENUM["comp"])
+def family_enum_value(family: str) -> str:
+    """Return a GDScript expression for the expected GNFamily.Type int value.
+
+    Core families use their literal integer. Extension families (not in FAMILY_ENUM)
+    use GNFamily.string_to_type("NAME") so the test works regardless of which
+    runtime ID GNFamily.register_family() assigns them (IDs >= 1000).
+    """
+    from _registry_utils import family_to_suffix
+    if family in FAMILY_ENUM:
+        return str(FAMILY_ENUM[family])
+    fam_upper = family_to_suffix(family)
+    return f'GNFamily.string_to_type("{fam_upper}")'
 
 
 def generate_test_for_operator(op: dict) -> str:

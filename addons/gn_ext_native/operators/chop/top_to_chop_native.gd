@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Source TOP texture")
-	add_output("out", GNFamily.Type.CHOP, "Sampled colour channels")
+	add_input("in", GNFamily.Type.TOP, false, "Source TOP texture", "In")
+	add_output("out", GNFamily.Type.CHOP, "Sampled colour channels", "Out")
 
 
 func _init_parameters() -> void:

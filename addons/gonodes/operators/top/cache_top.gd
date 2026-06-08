@@ -19,8 +19,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture to cache")
-	add_output("out", GNFamily.Type.TOP, "Delayed/buffered texture")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to cache", "In")
+	add_output("out", GNFamily.Type.TOP, "Delayed/buffered texture", "Out")
 
 
 func _init_parameters() -> void:

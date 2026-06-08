@@ -14,9 +14,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Input channels to retime")
-	add_input("warp", GNFamily.Type.CHOP, false, "Warp curve (optional, 0-1 remap)")
-	add_output("out", GNFamily.Type.CHOP, "Warped channels")
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels to retime", "In")
+	add_input("warp", GNFamily.Type.CHOP, false, "Warp curve (optional, 0-1 remap)", "Warp")
+	add_output("out", GNFamily.Type.CHOP, "Warped channels", "Out")
 
 
 func _init_parameters() -> void:

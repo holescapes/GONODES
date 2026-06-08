@@ -30,8 +30,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("geo", GNFamily.Type.SOP, false, "Input mesh (grid recommended)")
-	add_output("out", GNFamily.Type.SOP, "Simulated cloth geometry")
+	add_input("geo", GNFamily.Type.SOP, false, "Input mesh (grid recommended)", "Geometry")
+	add_output("out", GNFamily.Type.SOP, "Simulated cloth geometry", "Out")
 
 
 func _init_parameters() -> void:

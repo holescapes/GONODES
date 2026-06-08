@@ -13,9 +13,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("a", GNFamily.Type.CHOP, false, "Channel set A")
-	add_input("b", GNFamily.Type.CHOP, false, "Channel set B")
-	add_output("out", GNFamily.Type.CHOP, "Blended channels")
+	add_input("a", GNFamily.Type.CHOP, false, "Channel set A", "A")
+	add_input("b", GNFamily.Type.CHOP, false, "Channel set B", "B")
+	add_output("out", GNFamily.Type.CHOP, "Blended channels", "Out")
 
 
 func _init_parameters() -> void:

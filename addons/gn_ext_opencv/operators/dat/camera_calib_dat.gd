@@ -30,8 +30,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Video frames with calibration pattern")
-	add_output("out", GNFamily.Type.DAT, "Calibration data table")
+	add_input("in", GNFamily.Type.IMG, true, "Video frames with calibration pattern", "In")
+	add_output("out", GNFamily.Type.DAT, "Calibration data table", "Out")
 
 
 func _init_parameters() -> void:

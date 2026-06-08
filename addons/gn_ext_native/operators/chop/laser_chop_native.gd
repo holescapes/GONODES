@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Modulation input (optional)")
-	add_output("out", GNFamily.Type.CHOP, "Laser XY + RGB + intensity channels")
+	add_input("in", GNFamily.Type.CHOP, false, "Modulation input (optional)", "In")
+	add_output("out", GNFamily.Type.CHOP, "Laser XY + RGB + intensity channels", "Out")
 
 
 func _init_parameters() -> void:

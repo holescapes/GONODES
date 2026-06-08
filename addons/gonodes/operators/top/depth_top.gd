@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("render", GNFamily.Type.TOP, false, "RenderTOP texture (connects to RenderTOP's output)")
-	add_output("out", GNFamily.Type.TOP, "Grayscale depth texture")
+	add_input("render", GNFamily.Type.TOP, false, "RenderTOP texture (connects to RenderTOP's output)", "Render")
+	add_output("out", GNFamily.Type.TOP, "Grayscale depth texture", "Out")
 
 
 func _init_parameters() -> void:

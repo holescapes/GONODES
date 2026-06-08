@@ -21,8 +21,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("comp", GNFamily.Type.COMP, false, "Target COMP to animate")
-	add_output("out", GNFamily.Type.COMP, "Animated component output")
+	add_input("comp", GNFamily.Type.COMP, false, "Target COMP to animate", "COMP")
+	add_output("out", GNFamily.Type.COMP, "Animated component output", "Out")
 
 
 func _init_parameters() -> void:

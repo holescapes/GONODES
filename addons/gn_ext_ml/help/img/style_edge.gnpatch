@@ -10,16 +10,8 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
-        "seg1": {
-            "type": "SegmentationTOP",
+        "style1": {
+            "type": "StyleTransferIMG",
             "position": [
                 600,
                 100
@@ -32,42 +24,25 @@
                         "y": 512
                     }
                 },
-                "threshold": {
-                    "value": 0.5,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
+                "strength": {
+                    "value": 1.0,
+                    "expression": "abs(sin(time * 2.0))",
                     "mode": "EXPRESSION"
-                },
-                "soft_mask": {
-                    "value": true,
-                    "expression": "sin(time * 2.0) * 0.5 + 0.5",
-                    "mode": "EXPRESSION"
-                }
-            }
-        },
-        "blur1": {
-            "type": "BlurTOP",
-            "position": [
-                850,
-                100
-            ],
-            "parameters": {
-                "radius": {
-                    "value": 8.0
                 }
             }
         },
         "edge1": {
             "type": "EdgeTOP",
             "position": [
-                850,
-                300
+                1100,
+                100
             ],
             "parameters": {}
         },
         "comp1": {
             "type": "CompositeTOP",
             "position": [
-                1100,
+                1600,
                 100
             ],
             "parameters": {
@@ -79,19 +54,22 @@
         "level1": {
             "type": "LevelTOP",
             "position": [
-                1350,
+                1850,
                 100
             ],
             "parameters": {
                 "brightness": {
-                    "value": 2.0
+                    "value": 1.2
+                },
+                "contrast": {
+                    "value": 1.1
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1600,
+                2100,
                 100
             ],
             "parameters": {
@@ -106,37 +84,33 @@
                     "value": true
                 }
             }
+        },
+        "img2top_style1": {
+            "type": "ImgToTOP",
+            "position": [
+                1600,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
             "from": "webcam1",
             "from_port": 0,
-            "to": "bridge1",
+            "to": "style1",
             "to_port": 0
         },
         {
-            "from": "bridge1",
+            "from": "style1",
             "from_port": 0,
-            "to": "seg1",
+            "to": "img2top_style1",
             "to_port": 0
         },
         {
-            "from": "seg1",
+            "from": "style1",
             "from_port": 0,
-            "to": "blur1",
-            "to_port": 0
-        },
-        {
-            "from": "seg1",
-            "from_port": 0,
-            "to": "edge1",
-            "to_port": 0
-        },
-        {
-            "from": "blur1",
-            "from_port": 0,
-            "to": "comp1",
+            "to": "img2top_style1",
             "to_port": 0
         },
         {
@@ -156,13 +130,25 @@
             "from_port": 0,
             "to": "window1",
             "to_port": 0
+        },
+        {
+            "from": "img2top_style1",
+            "from_port": 0,
+            "to": "edge1",
+            "to_port": 0
+        },
+        {
+            "from": "img2top_style1",
+            "from_port": 0,
+            "to": "comp1",
+            "to_port": 0
         }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Segmentation \u2014 Glow Silhouette\n\nSoft mask blurred heavily + edge detection composited.\nCreates a glowing outline effect around the person.\nLevel boost brightens the glow for neon effect.",
+            "text": "Style Transfer \u2014 Edge Composite\n\nStyled image + edge detection composited together.\nCreates a painterly look with visible brush strokes.\nLevel adjustment enhances contrast and vibrancy.",
             "position": [
                 -100.0,
                 -100.0

@@ -30,30 +30,30 @@ func _make_node(node: GNNode, id: String) -> GNNode:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# DepthEstimateTOP
+# DepthEstimateIMG
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_depth_estimate_top_instantiate() -> void:
-	var node := _make_node(DepthEstimateTOP.new(), "de1")
-	GNTestAssert.assert_not_null(node, "DepthEstimateTOP created")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SegmentationTOP
-# ═══════════════════════════════════════════════════════════════════════════════
-
-func test_segmentation_top_instantiate() -> void:
-	var node := _make_node(SegmentationTOP.new(), "seg1")
-	GNTestAssert.assert_not_null(node, "SegmentationTOP created")
+func test_depth_estimate_img_instantiate() -> void:
+	var node := _make_node(DepthEstimateIMG.new(), "de1")
+	GNTestAssert.assert_not_null(node, "DepthEstimateIMG created")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# StyleTransferTOP
+# SegmentationIMG
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_style_transfer_top_instantiate() -> void:
-	var node := _make_node(StyleTransferTOP.new(), "st1")
-	GNTestAssert.assert_not_null(node, "StyleTransferTOP created")
+func test_segmentation_img_instantiate() -> void:
+	var node := _make_node(SegmentationIMG.new(), "seg1")
+	GNTestAssert.assert_not_null(node, "SegmentationIMG created")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# StyleTransferIMG
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_style_transfer_img_instantiate() -> void:
+	var node := _make_node(StyleTransferIMG.new(), "st1")
+	GNTestAssert.assert_not_null(node, "StyleTransferIMG created")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

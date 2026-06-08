@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Audio input")
-	add_output("out", GNFamily.Type.CHOP, "Reverb output")
+	add_input("in", GNFamily.Type.CHOP, false, "Audio input", "In")
+	add_output("out", GNFamily.Type.CHOP, "Reverb output", "Out")
 
 
 func _init_parameters() -> void:

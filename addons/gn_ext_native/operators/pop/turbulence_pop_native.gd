@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("pop_in", GNFamily.Type.POP, false, "Particle input")
-	add_output("out", GNFamily.Type.POP, "Particle data output")
+	add_input("pop_in", GNFamily.Type.POP, false, "Particle input", "POP")
+	add_output("out", GNFamily.Type.POP, "Particle data output", "Out")
 
 
 func _init_parameters() -> void:

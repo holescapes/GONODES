@@ -13,8 +13,8 @@ func _init() -> void:
 	node_type = "voronoi_shatter"
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Geometry to fracture")
-	add_output("out", GNFamily.Type.SOP, "Fractured geometry (one surface per piece)")
+	add_input("in", GNFamily.Type.SOP, false, "Geometry to fracture", "In")
+	add_output("out", GNFamily.Type.SOP, "Fractured geometry (one surface per piece)", "Out")
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("num_points", 8, 2, 256,

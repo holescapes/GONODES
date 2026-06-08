@@ -15,9 +15,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("pop_in", GNFamily.Type.POP, false, "Particle input")
-	add_input("vol_in", GNFamily.Type.VOL, false, "Velocity volume field")
-	add_output("out", GNFamily.Type.POP, "Advected particles")
+	add_input("pop_in", GNFamily.Type.POP, false, "Particle input", "POP")
+	add_input("vol_in", GNFamily.Type.VOL, false, "Velocity volume field", "VOL")
+	add_output("out", GNFamily.Type.POP, "Advected particles", "Out")
 
 
 func _init_parameters() -> void:

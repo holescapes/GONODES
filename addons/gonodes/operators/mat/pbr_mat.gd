@@ -17,7 +17,7 @@ func _init_ports() -> void:
 	add_input("albedo_tex", GNFamily.Type.TOP, false, "Albedo texture (optional)", "Albedo Texture")
 	add_input("normal_tex", GNFamily.Type.TOP, false, "Normal map texture (optional)", "Normal Texture")
 	add_input("orm_tex", GNFamily.Type.TOP, false, "ORM texture — Occlusion/Roughness/Metallic (optional)", "Orm Texture")
-	add_output("out", GNFamily.Type.MAT, "PBR material output")
+	add_output("out", GNFamily.Type.MAT, "PBR material output", "Out")
 
 
 func _init_parameters() -> void:

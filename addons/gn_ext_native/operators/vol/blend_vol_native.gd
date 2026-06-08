@@ -16,9 +16,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("vol_a", GNFamily.Type.VOL, true, "Volume A")
-	add_input("vol_b", GNFamily.Type.VOL, true, "Volume B")
-	add_output("out", GNFamily.Type.VOL, "Blended volume")
+	add_input("vol_a", GNFamily.Type.VOL, true, "Volume A", "VOL A")
+	add_input("vol_b", GNFamily.Type.VOL, true, "Volume B", "VOL B")
+	add_output("out", GNFamily.Type.VOL, "Blended volume", "Out")
 
 
 func _init_parameters() -> void:

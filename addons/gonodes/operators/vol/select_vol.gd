@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.VOL, false, "Input volume (used when 'vol' is empty)")
-	add_output("out", GNFamily.Type.VOL, "Selected volume")
+	add_input("in", GNFamily.Type.VOL, false, "Input volume (used when 'vol' is empty)", "In")
+	add_output("out", GNFamily.Type.VOL, "Selected volume", "Out")
 
 
 func _init_parameters() -> void:

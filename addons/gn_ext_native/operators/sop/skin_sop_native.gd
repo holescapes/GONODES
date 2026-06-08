@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("section_0", GNFamily.Type.SOP, false, "Cross-section 0")
-	add_output("out", GNFamily.Type.SOP, "Skinned mesh")
+	add_input("section_0", GNFamily.Type.SOP, false, "Cross-section 0", "Section 0")
+	add_output("out", GNFamily.Type.SOP, "Skinned mesh", "Out")
 
 
 func _init_parameters() -> void:

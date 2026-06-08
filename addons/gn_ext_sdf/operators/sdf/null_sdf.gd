@@ -9,8 +9,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", SDF_FAMILY, false, "Input SDF tree")
-	add_output("out", SDF_FAMILY, "Same SDF tree (pass-through)")
+	add_input("in", SDF_FAMILY, false, "Input SDF tree", "In")
+	add_output("out", SDF_FAMILY, "Same SDF tree (pass-through)", "Out")
 
 
 func _init_parameters() -> void:

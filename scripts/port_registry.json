@@ -9873,65 +9873,65 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_ml/operators/dat/object_detect_dat.gd"
   },
-  "DepthEstimateTOP": {
-    "class_name": "DepthEstimateTOP",
-    "family": "TOP",
+  "DepthEstimateIMG": {
+    "class_name": "DepthEstimateIMG",
+    "family": "IMG",
     "inputs": [
       {
         "port": 0,
         "name": "image",
-        "type": "TOP"
+        "type": "IMG"
       }
     ],
     "outputs": [
       {
         "port": 0,
         "name": "out",
-        "type": "TOP"
+        "type": "IMG"
       }
     ],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_ml/operators/top/depth_estimate_top.gd"
+    "file": "addons/gn_ext_ml/operators/img/depth_estimate_img.gd"
   },
-  "SegmentationTOP": {
-    "class_name": "SegmentationTOP",
-    "family": "TOP",
+  "SegmentationIMG": {
+    "class_name": "SegmentationIMG",
+    "family": "IMG",
     "inputs": [
       {
         "port": 0,
         "name": "image",
-        "type": "TOP"
+        "type": "IMG"
       }
     ],
     "outputs": [
       {
         "port": 0,
         "name": "out",
-        "type": "TOP"
+        "type": "IMG"
       }
     ],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_ml/operators/top/segmentation_top.gd"
+    "file": "addons/gn_ext_ml/operators/img/segmentation_img.gd"
   },
-  "StyleTransferTOP": {
-    "class_name": "StyleTransferTOP",
-    "family": "TOP",
+  "StyleTransferIMG": {
+    "class_name": "StyleTransferIMG",
+    "family": "IMG",
     "inputs": [
       {
         "port": 0,
         "name": "content",
-        "type": "TOP"
+        "type": "IMG"
       }
     ],
     "outputs": [
       {
         "port": 0,
         "name": "out",
-        "type": "TOP"
+        "type": "IMG"
       }
     ],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_ml/operators/top/style_transfer_top.gd"
+    "file": "addons/gn_ext_ml/operators/img/style_transfer_img.gd"
   },
   "AnalyzeCHOPNative": {
     "class_name": "AnalyzeCHOPNative",
@@ -10994,31 +10994,6 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/pop/force_pop_native.gd"
   },
-  "InstancePOPNative": {
-    "class_name": "InstancePOPNative",
-    "family": "POP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "pop_in",
-        "type": "POP"
-      },
-      {
-        "port": 1,
-        "name": "geo_in",
-        "type": "SOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "SOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_native/operators/pop/instance_pop_native.gd"
-  },
   "LimitPOPNative": {
     "class_name": "LimitPOPNative",
     "family": "POP",
@@ -11498,6 +11473,31 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/hole_sop_native.gd"
   },
+  "InstanceSOPNative": {
+    "class_name": "InstanceSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "pop_in",
+        "type": "POP"
+      },
+      {
+        "port": 1,
+        "name": "geo_in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/instance_sop_native.gd"
+  },
   "IsoSurfaceSOPNative": {
     "class_name": "IsoSurfaceSOPNative",
     "family": "SOP",
@@ -11570,6 +11570,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/sop/magnet_sop_native.gd"
+  },
+  "MarchingCubesSOPNative": {
+    "class_name": "MarchingCubesSOPNative",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "vol",
+        "type": "VOL"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "mesh",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_native/operators/sop/marching_cubes_sop_native.gd"
   },
   "MeasureSOPNative": {
     "class_name": "MeasureSOPNative",
@@ -12564,26 +12584,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_native/operators/vol/fluid_vol_native.gd"
-  },
-  "MarchingCubesVOLNative": {
-    "class_name": "MarchingCubesVOLNative",
-    "family": "VOL",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "vol",
-        "type": "VOL"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "mesh",
-        "type": "SOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_native/operators/vol/marching_cubes_vol_native.gd"
   },
   "NoiseVOLNative": {
     "class_name": "NoiseVOLNative",

@@ -19,7 +19,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("comp_in", GNFamily.Type.COMP, true, "Source COMP to constrain", "Source")
 	add_input("target_in", GNFamily.Type.COMP, false, "Target COMP to follow", "Target")
-	add_output("out", GNFamily.Type.COMP, "Constrained component")
+	add_output("out", GNFamily.Type.COMP, "Constrained component", "Out")
 
 
 func _init_parameters() -> void:

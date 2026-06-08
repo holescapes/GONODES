@@ -10,8 +10,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("field", GNFamily.Type.TOP, false, "Vector field texture (RG = XY velocity)")
-	add_output("out", GNFamily.Type.TOP, "Flow visualization")
+	add_input("field", GNFamily.Type.TOP, false, "Vector field texture (RG = XY velocity)", "Field")
+	add_output("out", GNFamily.Type.TOP, "Flow visualization", "Out")
 
 
 func _init_parameters() -> void:

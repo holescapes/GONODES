@@ -23,8 +23,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, false, "Input channels")
-	add_output("out", GNFamily.Type.CHOP, "Renamed channels")
+	add_input("in", GNFamily.Type.CHOP, false, "Input channels", "In")
+	add_output("out", GNFamily.Type.CHOP, "Renamed channels", "Out")
 
 
 func _init_parameters() -> void:

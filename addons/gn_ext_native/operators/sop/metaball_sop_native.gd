@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("points", GNFamily.Type.SOP, false, "Point cloud for ball centres (optional)")
-	add_output("out", GNFamily.Type.SOP, "Metaball surface mesh")
+	add_input("points", GNFamily.Type.SOP, false, "Point cloud for ball centres (optional)", "Points")
+	add_output("out", GNFamily.Type.SOP, "Metaball surface mesh", "Out")
 
 
 func _init_parameters() -> void:

@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("dat", GNFamily.Type.DAT, false, "Table: name, parent (row index or empty)")
-	add_output("out", GNFamily.Type.UI, "Widget output")
+	add_input("dat", GNFamily.Type.DAT, false, "Table: name, parent (row index or empty)", "DAT")
+	add_output("out", GNFamily.Type.UI, "Widget output", "Out")
 
 
 func _init_parameters() -> void:

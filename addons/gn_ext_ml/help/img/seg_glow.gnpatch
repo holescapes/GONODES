@@ -10,16 +10,8 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
         "seg1": {
-            "type": "SegmentationTOP",
+            "type": "SegmentationIMG",
             "position": [
                 600,
                 100
@@ -44,21 +36,34 @@
                 }
             }
         },
-        "noise1": {
-            "type": "NoiseTOP",
+        "blur1": {
+            "type": "BlurTOP",
             "position": [
-                600,
-                300
+                1350,
+                100
             ],
             "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "type": {
+                "radius": {
+                    "value": 8.0
+                }
+            }
+        },
+        "edge1": {
+            "type": "EdgeTOP",
+            "position": [
+                1100,
+                300
+            ],
+            "parameters": {}
+        },
+        "comp1": {
+            "type": "CompositeTOP",
+            "position": [
+                1600,
+                100
+            ],
+            "parameters": {
+                "operation": {
                     "value": 0
                 }
             }
@@ -66,56 +71,20 @@
         "level1": {
             "type": "LevelTOP",
             "position": [
-                850,
-                200
-            ],
-            "parameters": {
-                "invert": {
-                    "value": true
-                }
-            }
-        },
-        "comp1": {
-            "type": "CompositeTOP",
-            "position": [
-                1100,
+                1850,
                 100
             ],
             "parameters": {
-                "operation": {
-                    "value": 5
-                }
-            }
-        },
-        "comp2": {
-            "type": "CompositeTOP",
-            "position": [
-                1100,
-                300
-            ],
-            "parameters": {
-                "operation": {
-                    "value": 5
-                }
-            }
-        },
-        "comp3": {
-            "type": "CompositeTOP",
-            "position": [
-                1350,
-                200
-            ],
-            "parameters": {
-                "operation": {
-                    "value": 0
+                "brightness": {
+                    "value": 2.0
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1350,
-                200
+                2100,
+                100
             ],
             "parameters": {
                 "resolution": {
@@ -129,17 +98,19 @@
                     "value": true
                 }
             }
+        },
+        "img2top_seg1": {
+            "type": "ImgToTOP",
+            "position": [
+                1100,
+                300
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
             "from": "webcam1",
-            "from_port": 0,
-            "to": "bridge1",
-            "to_port": 0
-        },
-        {
-            "from": "bridge1",
             "from_port": 0,
             "to": "seg1",
             "to_port": 0
@@ -147,49 +118,49 @@
         {
             "from": "seg1",
             "from_port": 0,
-            "to": "level1",
-            "to_port": 0
-        },
-        {
-            "from": "bridge1",
-            "from_port": 0,
-            "to": "comp1",
+            "to": "img2top_seg1",
             "to_port": 0
         },
         {
             "from": "seg1",
             "from_port": 0,
-            "to": "comp1",
-            "to_port": 1
-        },
-        {
-            "from": "noise1",
-            "from_port": 0,
-            "to": "comp2",
+            "to": "img2top_seg1",
             "to_port": 0
         },
         {
-            "from": "level1",
+            "from": "blur1",
             "from_port": 0,
-            "to": "comp2",
+            "to": "comp1",
+            "to_port": 0
+        },
+        {
+            "from": "edge1",
+            "from_port": 0,
+            "to": "comp1",
             "to_port": 1
         },
         {
             "from": "comp1",
             "from_port": 0,
-            "to": "comp3",
+            "to": "level1",
             "to_port": 0
         },
         {
-            "from": "comp2",
-            "from_port": 0,
-            "to": "comp3",
-            "to_port": 1
-        },
-        {
-            "from": "comp3",
+            "from": "level1",
             "from_port": 0,
             "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "img2top_seg1",
+            "from_port": 0,
+            "to": "blur1",
+            "to_port": 0
+        },
+        {
+            "from": "img2top_seg1",
+            "from_port": 0,
+            "to": "edge1",
             "to_port": 0
         }
     ],
@@ -197,7 +168,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Segmentation \u2014 Virtual Background\n\nPerson masked from webcam + noise background composited.\nSoft mask for smooth edges. LevelTOP inverts mask for BG.\nReplace noise with any TOP for custom backgrounds.",
+            "text": "Segmentation \u2014 Glow Silhouette\n\nSoft mask blurred heavily + edge detection composited.\nCreates a glowing outline effect around the person.\nLevel boost brightens the glow for neon effect.",
             "position": [
                 -100.0,
                 -100.0

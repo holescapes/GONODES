@@ -23,8 +23,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Optional: data to send")
-	add_output("out", GNFamily.Type.DAT, "Received serial data")
+	add_input("in", GNFamily.Type.DAT, false, "Optional: data to send", "In")
+	add_output("out", GNFamily.Type.DAT, "Received serial data", "Out")
 
 
 func _init_parameters() -> void:

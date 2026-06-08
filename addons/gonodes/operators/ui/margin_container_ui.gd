@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("ui", GNFamily.Type.UI, false, "Child widget to wrap")
-	add_output("out", GNFamily.Type.UI, "Container widget output")
+	add_input("ui", GNFamily.Type.UI, false, "Child widget to wrap", "UI")
+	add_output("out", GNFamily.Type.UI, "Container widget output", "Out")
 
 
 func _init_parameters() -> void:

@@ -19,8 +19,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture")
-	add_output("out", GNFamily.Type.TOP, "Convolved texture")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture", "In")
+	add_output("out", GNFamily.Type.TOP, "Convolved texture", "Out")
 
 
 func _init_parameters() -> void:

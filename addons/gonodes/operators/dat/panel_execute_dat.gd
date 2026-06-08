@@ -17,8 +17,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("panel", GNFamily.Type.CHOP, false, "UI state CHOP input (from widget)")
-	add_output("out", GNFamily.Type.DAT, "Event log table")
+	add_input("panel", GNFamily.Type.CHOP, false, "UI state CHOP input (from widget)", "Panel")
+	add_output("out", GNFamily.Type.DAT, "Event log table", "Out")
 
 
 func _init_parameters() -> void:

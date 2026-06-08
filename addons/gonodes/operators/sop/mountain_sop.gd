@@ -11,8 +11,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input geometry to displace")
-	add_output("out", GNFamily.Type.SOP, "Displaced geometry")
+	add_input("in", GNFamily.Type.SOP, false, "Input geometry to displace", "In")
+	add_output("out", GNFamily.Type.SOP, "Displaced geometry", "Out")
 
 
 func _init_parameters() -> void:

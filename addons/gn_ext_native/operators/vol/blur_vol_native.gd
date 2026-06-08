@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("vol_in", GNFamily.Type.VOL, true, "Volume to blur")
-	add_output("out", GNFamily.Type.VOL, "Blurred volume")
+	add_input("vol_in", GNFamily.Type.VOL, true, "Volume to blur", "VOL")
+	add_output("out", GNFamily.Type.VOL, "Blurred volume", "Out")
 
 
 func _init_parameters() -> void:

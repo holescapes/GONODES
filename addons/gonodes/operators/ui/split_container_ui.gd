@@ -17,7 +17,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("ui_a", GNFamily.Type.UI, false, "First child widget", "A")
 	add_input("ui_b", GNFamily.Type.UI, false, "Second child widget", "B")
-	add_output("out", GNFamily.Type.UI, "Container widget output")
+	add_output("out", GNFamily.Type.UI, "Container widget output", "Out")
 
 
 func _init_parameters() -> void:

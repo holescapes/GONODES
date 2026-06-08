@@ -49,4 +49,16 @@ func _prepare_output() -> GNMaterialData:
 	return _cached_mat_data
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Input Helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Safely extracts a GNMaterialData from the inputs array at [param port].
+## Returns null if the port doesn't exist or the data is not GNMaterialData.
+func _get_input_mat(inputs: Array[GNData], port: int = 0) -> GNMaterialData:
+	if port < inputs.size() and inputs[port] is GNMaterialData:
+		return inputs[port] as GNMaterialData
+	return null
+
+
 

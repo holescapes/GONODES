@@ -99,7 +99,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.CHOP, "Output channels")
+	add_output("out", GNFamily.Type.CHOP, "Output channels", "Out")
 
 
 func _init_parameters() -> void:

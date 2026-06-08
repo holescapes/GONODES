@@ -16,8 +16,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Input table (used when 'dat' is empty)")
-	add_output("out", GNFamily.Type.DAT, "Selected subset")
+	add_input("in", GNFamily.Type.DAT, false, "Input table (used when 'dat' is empty)", "In")
+	add_output("out", GNFamily.Type.DAT, "Selected subset", "Out")
 
 
 func _init_parameters() -> void:
@@ -38,7 +38,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if not remote_id.is_empty():
 		in_dat = _resolve_remote_dat(remote_id)
 	else:
-		in_dat = inputs[0] as GNTableData if inputs.size() > 0 and inputs[0] is GNTableData else null
+		in_dat = _get_input_dat(inputs, 0)
 
 	if in_dat == null or not in_dat.is_table:
 		if not remote_id.is_empty():

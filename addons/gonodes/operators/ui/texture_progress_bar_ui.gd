@@ -14,11 +14,11 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("chop", GNFamily.Type.CHOP, false, "CHOP value driver")
-	add_input("under", GNFamily.Type.TOP, false, "Under/background texture")
-	add_input("progress", GNFamily.Type.TOP, false, "Progress fill texture")
-	add_input("over", GNFamily.Type.TOP, false, "Over/foreground texture")
-	add_output("out", GNFamily.Type.UI, "Widget output")
+	add_input("chop", GNFamily.Type.CHOP, false, "CHOP value driver", "CHOP")
+	add_input("under", GNFamily.Type.TOP, false, "Under/background texture", "Under")
+	add_input("progress", GNFamily.Type.TOP, false, "Progress fill texture", "Progress")
+	add_input("over", GNFamily.Type.TOP, false, "Over/foreground texture", "Over")
+	add_output("out", GNFamily.Type.UI, "Widget output", "Out")
 
 
 func _init_parameters() -> void:

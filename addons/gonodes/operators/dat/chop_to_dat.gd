@@ -11,7 +11,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("chop_in", GNFamily.Type.CHOP, false, "CHOP channel input", "CHOP")
-	add_output("out", GNFamily.Type.DAT, "Table output")
+	add_output("out", GNFamily.Type.DAT, "Table output", "Out")
 
 
 func _init_parameters() -> void:

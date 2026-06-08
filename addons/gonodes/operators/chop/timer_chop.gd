@@ -16,9 +16,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("start", GNFamily.Type.CHOP, false, "Start trigger")
-	add_input("reset", GNFamily.Type.CHOP, false, "Reset trigger")
-	add_output("out", GNFamily.Type.CHOP, "Timer channels (seconds, fraction, running, done)")
+	add_input("start", GNFamily.Type.CHOP, false, "Start trigger", "Start")
+	add_input("reset", GNFamily.Type.CHOP, false, "Reset trigger", "Reset")
+	add_output("out", GNFamily.Type.CHOP, "Timer channels (seconds, fraction, running, done)", "Out")
 
 
 func _init_parameters() -> void:
@@ -29,8 +29,8 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var start_data: GNChannelData = inputs[0] as GNChannelData if inputs.size() > 0 and inputs[0] is GNChannelData else null
-	var reset_data: GNChannelData = inputs[1] as GNChannelData if inputs.size() > 1 and inputs[1] is GNChannelData else null
+	var start_data: GNChannelData = _get_input_chop(inputs, 0)
+	var reset_data: GNChannelData = _get_input_chop(inputs, 1)
 
 	var length_sec: float = get_param_value("length")
 	var do_loop: bool = get_param_value("loop")

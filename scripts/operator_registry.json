@@ -2443,7 +2443,7 @@
       {
         "name": "rename",
         "type": "string",
-        "default": "Rename pattern for output channels"
+        "default": ""
       }
     ]
   },
@@ -6884,6 +6884,45 @@
     ]
   },
   {
+    "class_name": "DepthEstimateIMG",
+    "node_type": "depthestimate",
+    "family": "img",
+    "file": "addons/gn_ext_ml/operators/img/depth_estimate_img.gd",
+    "extension": "gn_ext_ml",
+    "params": [
+      {
+        "name": "model_path",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "invert",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "normalize",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "provider",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "DepthSensorIMG",
     "node_type": "depthsensor",
     "family": "img",
@@ -7654,6 +7693,50 @@
     ]
   },
   {
+    "class_name": "SegmentationIMG",
+    "node_type": "segmentation",
+    "family": "img",
+    "file": "addons/gn_ext_ml/operators/img/segmentation_img.gd",
+    "extension": "gn_ext_ml",
+    "params": [
+      {
+        "name": "model_path",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "soft_mask",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "invert",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "provider",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
+      }
+    ]
+  },
+  {
     "class_name": "SelectIMG",
     "node_type": "select",
     "family": "img",
@@ -7736,6 +7819,40 @@
         "name": "color",
         "type": "bool",
         "default": false
+      }
+    ]
+  },
+  {
+    "class_name": "StyleTransferIMG",
+    "node_type": "styletransfer",
+    "family": "img",
+    "file": "addons/gn_ext_ml/operators/img/style_transfer_img.gd",
+    "extension": "gn_ext_ml",
+    "params": [
+      {
+        "name": "model_path",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "provider",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -13581,45 +13698,6 @@
     ]
   },
   {
-    "class_name": "DepthEstimateTOP",
-    "node_type": "depthestimate",
-    "family": "top",
-    "file": "addons/gn_ext_ml/operators/top/depth_estimate_top.gd",
-    "extension": "gn_ext_ml",
-    "params": [
-      {
-        "name": "model_path",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "resolution",
-        "type": "vector2i",
-        "default": null
-      },
-      {
-        "name": "invert",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "normalize",
-        "type": "bool",
-        "default": true
-      },
-      {
-        "name": "provider",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": true
-      }
-    ]
-  },
-  {
     "class_name": "DepthOfFieldTOP",
     "node_type": "depth_of_field",
     "family": "top",
@@ -16269,50 +16347,6 @@
     ]
   },
   {
-    "class_name": "SegmentationTOP",
-    "node_type": "segmentation",
-    "family": "top",
-    "file": "addons/gn_ext_ml/operators/top/segmentation_top.gd",
-    "extension": "gn_ext_ml",
-    "params": [
-      {
-        "name": "model_path",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "resolution",
-        "type": "vector2i",
-        "default": null
-      },
-      {
-        "name": "threshold",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "soft_mask",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "invert",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "provider",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": true
-      }
-    ]
-  },
-  {
     "class_name": "SelectTOP",
     "node_type": "select",
     "family": "top",
@@ -16599,40 +16633,6 @@
         "name": "test_grid_lines",
         "type": "int",
         "default": 8
-      }
-    ]
-  },
-  {
-    "class_name": "StyleTransferTOP",
-    "node_type": "styletransfer",
-    "family": "top",
-    "file": "addons/gn_ext_ml/operators/top/style_transfer_top.gd",
-    "extension": "gn_ext_ml",
-    "params": [
-      {
-        "name": "model_path",
-        "type": "string",
-        "default": null
-      },
-      {
-        "name": "resolution",
-        "type": "vector2i",
-        "default": null
-      },
-      {
-        "name": "strength",
-        "type": "float",
-        "default": 1.0
-      },
-      {
-        "name": "provider",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "active",
-        "type": "bool",
-        "default": true
       }
     ]
   },

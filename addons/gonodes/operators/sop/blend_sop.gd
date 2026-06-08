@@ -12,7 +12,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("geo_a", GNFamily.Type.SOP, false, "Base geometry (blend = 0)", "Geometry A")
 	add_input("geo_b", GNFamily.Type.SOP, false, "Target geometry (blend = 1)", "Geometry B")
-	add_output("out", GNFamily.Type.SOP, "Blended geometry")
+	add_output("out", GNFamily.Type.SOP, "Blended geometry", "Out")
 
 
 func _init_parameters() -> void:

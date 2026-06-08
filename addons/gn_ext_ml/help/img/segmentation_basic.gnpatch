@@ -2,26 +2,26 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "webcam1": {
-            "type": "WebcamIMG",
+        "src1": {
+            "type": "NoiseIMG",
             "position": [
                 100,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         },
-        "bridge1": {
-            "type": "ImgToTOP",
+        "focus1": {
+            "type": "SegmentationIMG",
             "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
-        "style1": {
-            "type": "StyleTransferTOP",
-            "position": [
-                600,
+                500,
                 100
             ],
             "parameters": {
@@ -32,17 +32,21 @@
                         "y": 512
                     }
                 },
-                "strength": {
-                    "value": 0.0,
-                    "expression": "abs(sin(time * 2.0))",
-                    "mode": "EXPRESSION"
+                "threshold": {
+                    "value": 0.5
+                },
+                "soft_mask": {
+                    "value": true
+                },
+                "active": {
+                    "value": true
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                850,
+                1150,
                 100
             ],
             "parameters": {
@@ -57,23 +61,31 @@
                     "value": true
                 }
             }
+        },
+        "img2top_focus1": {
+            "type": "ImgToTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
-            "from": "webcam1",
+            "from": "src1",
             "from_port": 0,
-            "to": "bridge1",
+            "to": "focus1",
             "to_port": 0
         },
         {
-            "from": "bridge1",
+            "from": "focus1",
             "from_port": 0,
-            "to": "style1",
+            "to": "img2top_focus1",
             "to_port": 0
         },
         {
-            "from": "style1",
+            "from": "img2top_focus1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -83,14 +95,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Style Transfer \u2014 Animated Blend\n\nStrength oscillates via sine expression.\nSmoothly crossfades between original and stylized.\nGreat for VJ transitions and live performance.",
+            "text": "Segmentation TOP \u2014 Basic\n\nSegment foreground/background using an ML model.\nthreshold controls mask cutoff. soft_mask outputs smooth alpha edges.\nUses ONNX Runtime. Set model_path to your segmentation model.",
             "position": [
-                -100.0,
-                -100.0
+                -100,
+                -100
             ],
             "size": [
-                450.0,
-                100.0
+                520,
+                140
             ],
             "color": [
                 1.0,

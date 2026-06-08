@@ -79,7 +79,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_output("out", GNFamily.Type.TOP, "ISF shader output texture")
+	add_output("out", GNFamily.Type.TOP, "ISF shader output texture", "Out")
 
 
 func _init_parameters() -> void:

@@ -12,9 +12,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("loop_a", GNFamily.Type.SOP, false, "First edge loop")
-	add_input("loop_b", GNFamily.Type.SOP, false, "Second edge loop")
-	add_output("out", GNFamily.Type.SOP, "Bridged geometry")
+	add_input("loop_a", GNFamily.Type.SOP, false, "First edge loop", "Loop A")
+	add_input("loop_b", GNFamily.Type.SOP, false, "Second edge loop", "Loop B")
+	add_output("out", GNFamily.Type.SOP, "Bridged geometry", "Out")
 
 
 func _init_parameters() -> void:

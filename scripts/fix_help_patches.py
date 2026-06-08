@@ -26,6 +26,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 from pathlib import Path
 from configparser import ConfigParser
 from collections import defaultdict
+from _registry_utils import get_all_suffixes
 
 ROOT = Path(__file__).resolve().parent.parent
 HELP_DIR = ROOT / "addons" / "gonodes" / "help"
@@ -172,8 +173,9 @@ def human_name(class_name):
     name = class_name
     # Handle known special cases
     name = name.replace("CHOPtoTOP", "CHOP to TOP")
-    # Separate trailing family suffix (TOP, CHOP, SOP, DAT, IMG, MAT, COMP, VOL, POP, UI, OUT, SDF)
-    m = re.match(r'^(.+?)(TOP|CHOP|SOP|DAT|IMG|MAT|COMP|VOL|POP|UI|OUT|SDF)$', name)
+    # Separate trailing family suffix — built dynamically from registry so extension families are included
+    _suffixes = "|".join(sorted(get_all_suffixes(), key=len, reverse=True))  # longest first avoids partial match
+    m = re.match(rf'^(.+?)({_suffixes})$', name)
     if m:
         body, suffix = m.group(1), m.group(2)
         # Insert spaces: "AntiAlias" -> "Anti Alias", "Fluid2D" -> "Fluid 2D"

@@ -14,9 +14,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("vol_in", GNFamily.Type.VOL, true, "Density volume")
-	add_input("vel_in", GNFamily.Type.VOL, false, "Velocity volume")
-	add_output("out", GNFamily.Type.VOL, "Displaced volume")
+	add_input("vol_in", GNFamily.Type.VOL, true, "Density volume", "VOL")
+	add_input("vel_in", GNFamily.Type.VOL, false, "Velocity volume", "Velocity")
+	add_output("out", GNFamily.Type.VOL, "Displaced volume", "Out")
 
 
 func _init_parameters() -> void:

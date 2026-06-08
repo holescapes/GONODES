@@ -14,8 +14,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.CHOP, true, "Control input (channel values sent to Pd receivers)")
-	add_output("out", GNFamily.Type.CHOP, "Values received from Pd senders")
+	add_input("in", GNFamily.Type.CHOP, true, "Control input (channel values sent to Pd receivers)", "In")
+	add_output("out", GNFamily.Type.CHOP, "Values received from Pd senders", "Out")
 
 
 func _init_parameters() -> void:

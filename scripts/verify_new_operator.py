@@ -210,7 +210,8 @@ BASE_TO_FAMILY = {
     "GNTopBase": "TOP", "GNChopBase": "CHOP", "GNSopBase": "SOP",
     "GNDatBase": "DAT", "GNCompBase": "COMP", "GNMatBase": "MAT",
     "GNImgBase": "IMG", "GNOutBase": "OUT", "GNUiBase": "UI",
-    "GNPopBase": "POP", "GNVolBase": "VOL", "GNNode": None,
+    "GNPopBase": "POP", "GNVolBase": "VOL", "GNSdfBase": "SDF",
+    "GNNode": None,
 }
 
 
@@ -226,11 +227,17 @@ def extract_family_from_extends(gd_text):
     if not m:
         return None
     base = m.group(1)
-    # Direct mapping
+    # Direct mapping for known core base classes
     if base in BASE_TO_FAMILY:
         return BASE_TO_FAMILY[base]
-    # Fallback: infer from suffix (e.g., RenderTOP → TOP, SphereSDF → SDF)
-    for suffix in ("TOP", "CHOP", "SOP", "DAT", "COMP", "MAT", "IMG", "OUT", "UI", "POP", "VOL", "SDF"):
+    # Auto-detect GN*Base convention: GNMyFluidBase -> MYFLUID
+    # Covers any extension family that follows the naming convention.
+    gnbase_match = re.match(r'^GN([A-Z][A-Za-z0-9]+)Base$', base)
+    if gnbase_match:
+        return gnbase_match.group(1).upper()
+    # Fallback: infer from suffix (e.g., RenderTOP -> TOP, SphereSDF -> SDF)
+    from _registry_utils import get_all_suffixes
+    for suffix in sorted(get_all_suffixes(), key=len, reverse=True):  # longest first avoids partial match
         if base.upper().endswith(suffix):
             return suffix
     return None

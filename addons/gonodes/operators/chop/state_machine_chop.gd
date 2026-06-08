@@ -20,8 +20,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("trigger", GNFamily.Type.CHOP, true, "Trigger channels (trigger0, trigger1, ...)")
-	add_output("out", GNFamily.Type.CHOP, "State machine output channels")
+	add_input("trigger", GNFamily.Type.CHOP, true, "Trigger channels (trigger0, trigger1, ...)", "Trigger")
+	add_output("out", GNFamily.Type.CHOP, "State machine output channels", "Out")
 
 
 func _init_parameters() -> void:

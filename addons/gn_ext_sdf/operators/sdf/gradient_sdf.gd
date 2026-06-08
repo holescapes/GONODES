@@ -11,8 +11,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("sdf_in", GNSdfBase.SDF_FAMILY, false, "SDF shape to color")
-	add_output("out", GNSdfBase.SDF_FAMILY, "SDF with gradient coloring")
+	add_input("sdf_in", GNSdfBase.SDF_FAMILY, false, "SDF shape to color", "SDF")
+	add_output("out", GNSdfBase.SDF_FAMILY, "SDF with gradient coloring", "Out")
 
 
 func _init_parameters() -> void:

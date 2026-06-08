@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("top", GNFamily.Type.TOP, false, "Texture source")
-	add_output("out", GNFamily.Type.UI, "Widget output")
+	add_input("top", GNFamily.Type.TOP, false, "Texture source", "TOP")
+	add_output("out", GNFamily.Type.UI, "Widget output", "Out")
 
 
 func _init_parameters() -> void:

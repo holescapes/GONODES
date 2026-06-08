@@ -555,7 +555,7 @@ abs(fmod(time * speed, 2.0) - 1.0)
 fmod(time * speed, 1.0)
 
 # Square wave (0 or 1)
-1.0 if fmod(time * speed, 1.0) < 0.5 else 0.0
+pulse(time * speed, 0.5)
 ```
 
 ### Remapping
@@ -571,8 +571,8 @@ chop("lfo1", "out") * 0.5 + 0.5) * 400.0 + 100.0
 ### Conditional
 
 ```gdscript
-# Ternary — switch between two values
-10.0 if chop("lfo1", "out") > 0.0 else 20.0
+# Conditional — switch between two values
+iif(chop("lfo1", "out") > 0.0, 10.0, 20.0)
 
 # Clamp to a safe range
 clamp(chop("noise1", "out"), 0.0, 1.0)
@@ -708,12 +708,15 @@ These functions are available in all expressions, called directly (no imports ne
 |----------|-----------|-------------|
 | `noise1` | `noise1(x)` | 1D value noise, returns ~[-1, 1] |
 | `noise2` | `noise2(x, y)` | 2D value noise, returns ~[-1, 1] |
+| `noise3` | `noise3(x, y, z)` | 3D value noise, returns ~[-1, 1] |
 
-### Conditionals
+### Conditionals & Utility
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
 | `iif` | `iif(condition, true_val, false_val)` | Inline conditional (if/else) |
+| `rand` | `rand(seed)` | Seeded deterministic random in [0, 1) |
+| `digits` | `digits()` | Trailing digits from current node ID (e.g. lfo3 → 3) |
 
 > **Important:** Godot's `Expression` class does **not** support the GDScript
 > ternary syntax (`X if Y else Z`). Use `iif()` instead:
@@ -724,6 +727,27 @@ These functions are available in all expressions, called directly (no imports ne
 > # CORRECT — use iif():
 > iif(int(chop("slider1", "value")) >= 6, int(chop("slider1", "value")) - 6, 4)
 > ```
+
+### Persistent State
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `store` | `store(key, value)` | Store a value in per-node persistent state. Returns the stored value. |
+| `fetch` | `fetch(key, default)` | Read a value from per-node state. Returns default if key not found. |
+
+> **Note:** `store()` and `fetch()` maintain **per-node** state that persists
+> across frames. Each node has its own isolated key-value store. Use for
+> counters, accumulators, or stateful logic:
+> ```gdscript
+> store("counter", fetch("counter", 0.0) + 1.0)
+> ```
+
+### Geometry & Table Queries
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `npoints` | `npoints(node_id)` | Number of vertices in a SOP node's output geometry |
+| `ncells` | `ncells(node_id)` | Number of cells (rows × columns) in a DAT node's output table |
 
 ### Examples
 
@@ -957,6 +981,7 @@ methods on `GNCookEngine`, callable directly in any expression.
 | `bounce` | `bounce(t)` | float | abs(sin(t * PI)) |
 | `noise1` | `noise1(x)` | float | 1D value noise [-1, 1] |
 | `noise2` | `noise2(x, y)` | float | 2D value noise [-1, 1] |
+| `noise3` | `noise3(x, y, z)` | float | 3D value noise [-1, 1] |
 
 ### Timeline
 
@@ -974,6 +999,13 @@ methods on `GNCookEngine`, callable directly in any expression.
 |--------|-----------|---------|-------------|
 | `log` | `log(message)` | float (0.0) | Log a message (returns 0 for inline use) |
 | `fn` | `fn(name, a?, b?, c?, d?, e?, f?)` | Variant | Call a registered custom function |
+| `digits` | `digits()` | int | Trailing digits from current node ID |
+| `iif` | `iif(cond, true_val, false_val)` | Variant | Inline conditional |
+| `rand` | `rand(seed)` | float | Seeded deterministic random [0, 1) |
+| `store` | `store(key, value)` | Variant | Persist per-node state |
+| `fetch` | `fetch(key, default?)` | Variant | Read persistent state |
+| `npoints` | `npoints(node_id)` | int | Vertex count of SOP output |
+| `ncells` | `ncells(node_id)` | int | Cell count of DAT output |
 
 ### Network API (Script operators only)
 

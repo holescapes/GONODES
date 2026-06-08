@@ -5,12 +5,12 @@ compatibility_minimum = 4.1
 reloadable = false
 
 [libraries]
-windows.debug.x86_64 = "res://addons/gn_ext_user_python/native/bin/win64/libgn_python.windows.template_release.x86_64.dll"
-windows.release.x86_64 = "res://addons/gn_ext_user_python/native/bin/win64/libgn_python.windows.template_release.x86_64.dll"
-linux.debug.x86_64 = "res://addons/gn_ext_user_python/native/bin/linux64/libgn_python.linux.template_release.x86_64.so"
-linux.release.x86_64 = "res://addons/gn_ext_user_python/native/bin/linux64/libgn_python.linux.template_release.x86_64.so"
+windows.x86_64.debug = "res://addons/gn_ext_user_python/bin/win64/libgn_python.windows.template_release.x86_64.dll"
+windows.x86_64.release = "res://addons/gn_ext_user_python/bin/win64/libgn_python.windows.template_release.x86_64.dll"
+linux.x86_64.debug = "res://addons/gn_ext_user_python/native/bin/linux64/libgn_python.linux.template_release.x86_64.so"
+linux.x86_64.release = "res://addons/gn_ext_user_python/native/bin/linux64/libgn_python.linux.template_release.x86_64.so"
 macos.debug = "res://addons/gn_ext_user_python/native/bin/macos/libgn_python.macos.template_release.dylib"
 macos.release = "res://addons/gn_ext_user_python/native/bin/macos/libgn_python.macos.template_release.dylib"
 
 [dependencies]
-windows.x86_64 = {"res://addons/gn_ext_user_python/native/bin/win64/python3.dll": "", "res://addons/gn_ext_user_python/native/bin/win64/python312.dll": ""}
+windows.x86_64 = {"res://addons/gn_ext_user_python/bin/win64/python310.dll": "", "res://addons/gn_ext_user_python/bin/win64/python3.dll": ""}

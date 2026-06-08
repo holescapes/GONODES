@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Input line geometry")
-	add_output("out", GNFamily.Type.SOP, "Converted line geometry")
+	add_input("in", GNFamily.Type.SOP, false, "Input line geometry", "In")
+	add_output("out", GNFamily.Type.SOP, "Converted line geometry", "Out")
 
 
 func _init_parameters() -> void:

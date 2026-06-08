@@ -13,8 +13,8 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.SOP, false, "Geometry to export")
-	add_output("out", GNFamily.Type.SOP, "Pass-through geometry")
+	add_input("in", GNFamily.Type.SOP, false, "Geometry to export", "In")
+	add_output("out", GNFamily.Type.SOP, "Pass-through geometry", "Out")
 
 
 func _init_parameters() -> void:

@@ -10,16 +10,8 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
-        "seg1": {
-            "type": "SegmentationTOP",
+        "style1": {
+            "type": "StyleTransferIMG",
             "position": [
                 600,
                 100
@@ -32,18 +24,17 @@
                         "y": 512
                     }
                 },
-                "threshold": {
-                    "value": 0.5
-                },
-                "soft_mask": {
-                    "value": false
+                "strength": {
+                    "value": 0.0,
+                    "expression": "abs(sin(time * 2.0))",
+                    "mode": "EXPRESSION"
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                850,
+                1100,
                 100
             ],
             "parameters": {
@@ -58,23 +49,31 @@
                     "value": true
                 }
             }
+        },
+        "img2top_style1": {
+            "type": "ImgToTOP",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
             "from": "webcam1",
             "from_port": 0,
-            "to": "bridge1",
+            "to": "style1",
             "to_port": 0
         },
         {
-            "from": "bridge1",
+            "from": "style1",
             "from_port": 0,
-            "to": "seg1",
+            "to": "img2top_style1",
             "to_port": 0
         },
         {
-            "from": "seg1",
+            "from": "img2top_style1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -84,7 +83,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Segmentation — Basic Mask\n\nWebcam -> person segmentation -> binary mask.\nWhite = person, black = background.\nAdjust threshold for tighter/looser segmentation.",
+            "text": "Style Transfer \u2014 Animated Blend\n\nStrength oscillates via sine expression.\nSmoothly crossfades between original and stylized.\nGreat for VJ transitions and live performance.",
             "position": [
                 -100.0,
                 -100.0

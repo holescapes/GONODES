@@ -18,8 +18,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, true, "Source TOP texture")
-	add_output("out", GNFamily.Type.SOP, "Generated geometry")
+	add_input("in", GNFamily.Type.TOP, true, "Source TOP texture", "In")
+	add_output("out", GNFamily.Type.SOP, "Generated geometry", "Out")
 
 
 func _init_parameters() -> void:

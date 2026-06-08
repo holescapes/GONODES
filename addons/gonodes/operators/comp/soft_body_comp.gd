@@ -33,7 +33,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("comp_in", GNFamily.Type.COMP, false, "Geometry COMP input (mesh + material)", "Comp")
-	add_output("out", GNFamily.Type.COMP, "SoftBody component")
+	add_output("out", GNFamily.Type.COMP, "SoftBody component", "Out")
 
 
 func _init_parameters() -> void:

@@ -27,8 +27,8 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("spectrum", GNFamily.Type.CHOP, false,
-		"Spectrum CHOP input (AudioSpectrumCHOP band:N channels)")
-	add_output("out", GNFamily.Type.CHOP, "Per-band level, peak, and normalized channels")
+		"Spectrum CHOP input (AudioSpectrumCHOP band:N channels)", "Spectrum")
+	add_output("out", GNFamily.Type.CHOP, "Per-band level, peak, and normalized channels", "Out")
 
 
 func _init_parameters() -> void:

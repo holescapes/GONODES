@@ -6,7 +6,7 @@ compatibility_minimum = 4.1
 # RealSense SDK installer and found via the OS library search path.
 
 [libraries]
-windows.debug.x86_64 = "res://addons/gn_ext_depth_sensor/native/realsense/bin/win64/libgn_depth_realsense.windows.template_release.x86_64.dll"
-windows.release.x86_64 = "res://addons/gn_ext_depth_sensor/native/realsense/bin/win64/libgn_depth_realsense.windows.template_release.x86_64.dll"
-linux.debug.x86_64 = "res://addons/gn_ext_depth_sensor/native/realsense/bin/linux64/libgn_depth_realsense.linux.template_release.x86_64.so"
-linux.release.x86_64 = "res://addons/gn_ext_depth_sensor/native/realsense/bin/linux64/libgn_depth_realsense.linux.template_release.x86_64.so"
+windows.x86_64.debug = "res://addons/gn_ext_depth_sensor/native/realsense/bin/win64/libgn_depth_realsense.windows.template_release.x86_64.dll"
+windows.x86_64.release = "res://addons/gn_ext_depth_sensor/native/realsense/bin/win64/libgn_depth_realsense.windows.template_release.x86_64.dll"
+linux.x86_64.debug = "res://addons/gn_ext_depth_sensor/native/realsense/bin/linux64/libgn_depth_realsense.linux.template_release.x86_64.so"
+linux.x86_64.release = "res://addons/gn_ext_depth_sensor/native/realsense/bin/linux64/libgn_depth_realsense.linux.template_release.x86_64.so"

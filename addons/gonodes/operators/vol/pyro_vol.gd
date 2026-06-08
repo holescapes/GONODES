@@ -28,7 +28,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("fuel_in", GNFamily.Type.VOL, false, "Fuel source volume (injected each frame)", "Fuel")
 	add_input("vel_in", GNFamily.Type.VOL, false, "External velocity force (optional)", "Velocity")
-	add_input("obstacle", GNFamily.Type.VOL, true, "Obstacle mask (R > 0.5 = solid)")
+	add_input("obstacle", GNFamily.Type.VOL, true, "Obstacle mask (R > 0.5 = solid)", "Obstacle")
 	add_output("density_out", GNFamily.Type.VOL, "Smoke density field", "Smoke")
 	add_output("temp_out", GNFamily.Type.VOL, "Temperature field", "Temperature")
 	add_output("velocity_out", GNFamily.Type.VOL, "Velocity field", "Velocity")

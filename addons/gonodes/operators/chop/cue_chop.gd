@@ -31,9 +31,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("cues", GNFamily.Type.DAT, false, "Cue table (from CueDAT or any DAT with cue columns)")
-	add_input("trigger", GNFamily.Type.CHOP, true, "Optional trigger CHOP — rising edge advances cue")
-	add_output("out", GNFamily.Type.CHOP, "Cue state channels")
+	add_input("cues", GNFamily.Type.DAT, false, "Cue table (from CueDAT or any DAT with cue columns)", "Cues")
+	add_input("trigger", GNFamily.Type.CHOP, true, "Optional trigger CHOP — rising edge advances cue", "Trigger")
+	add_output("out", GNFamily.Type.CHOP, "Cue state channels", "Out")
 
 
 func _init_parameters() -> void:

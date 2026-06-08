@@ -13,8 +13,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("target", GNFamily.Type.CHOP, false, "Target position (optional)")
-	add_output("out", GNFamily.Type.CHOP, "Joint transforms")
+	add_input("target", GNFamily.Type.CHOP, false, "Target position (optional)", "Target")
+	add_output("out", GNFamily.Type.CHOP, "Joint transforms", "Out")
 
 
 func _init_parameters() -> void:

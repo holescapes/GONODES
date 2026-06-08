@@ -9,8 +9,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture to analyze")
-	add_output("out", GNFamily.Type.TOP, "Analyzed texture")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to analyze", "In")
+	add_output("out", GNFamily.Type.TOP, "Analyzed texture", "Out")
 
 
 func _init_parameters() -> void:

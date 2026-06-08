@@ -12,7 +12,7 @@ func _init() -> void:
 
 func _init_ports() -> void:
 	add_input("vol", GNFamily.Type.VOL, true, "Volume to analyze", "Volume")
-	add_output("stats", GNFamily.Type.CHOP, "Statistics as channels")
+	add_output("stats", GNFamily.Type.CHOP, "Statistics as channels", "Stats")
 
 
 func _init_parameters() -> void:

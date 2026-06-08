@@ -15,8 +15,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.POP, false, "Input particles (used when 'pop' is empty)")
-	add_output("out", GNFamily.Type.POP, "Selected particles")
+	add_input("in", GNFamily.Type.POP, false, "Input particles (used when 'pop' is empty)", "In")
+	add_output("out", GNFamily.Type.POP, "Selected particles", "Out")
 
 
 func _init_parameters() -> void:

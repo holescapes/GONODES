@@ -27,9 +27,9 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, true, "Input image")
-	add_output("out", GNFamily.Type.IMG, "Overlay with detected markers drawn")
-	add_output("data", GNFamily.Type.DAT, "Marker table (id, cx, cy, corners)")
+	add_input("in", GNFamily.Type.IMG, true, "Input image", "In")
+	add_output("out", GNFamily.Type.IMG, "Overlay with detected markers drawn", "Out")
+	add_output("data", GNFamily.Type.DAT, "Marker table (id, cx, cy, corners)", "Data")
 
 
 func _init_parameters() -> void:

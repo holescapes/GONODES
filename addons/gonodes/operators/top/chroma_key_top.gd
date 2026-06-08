@@ -9,8 +9,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.TOP, false, "Input texture to key")
-	add_output("out", GNFamily.Type.TOP, "Keyed texture with transparent background")
+	add_input("in", GNFamily.Type.TOP, false, "Input texture to key", "In")
+	add_output("out", GNFamily.Type.TOP, "Keyed texture with transparent background", "Out")
 
 
 func _init_parameters() -> void:

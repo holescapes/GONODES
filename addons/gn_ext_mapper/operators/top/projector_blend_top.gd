@@ -12,9 +12,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("proj_a", GNFamily.Type.TOP, false, "Projector A (left/top)")
-	add_input("proj_b", GNFamily.Type.TOP, false, "Projector B (right/bottom)")
-	add_output("out", GNFamily.Type.TOP, "Blended composite")
+	add_input("proj_a", GNFamily.Type.TOP, false, "Projector A (left/top)", "Proj A")
+	add_input("proj_b", GNFamily.Type.TOP, false, "Projector B (right/bottom)", "Proj B")
+	add_output("out", GNFamily.Type.TOP, "Blended composite", "Out")
 
 
 func _init_parameters() -> void:

@@ -12,9 +12,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("color", GNFamily.Type.TOP, false, "Source colour texture")
-	add_input("flow", GNFamily.Type.TOP, false, "Motion vector texture (RG channels)")
-	add_output("out", GNFamily.Type.TOP, "Motion-blurred texture")
+	add_input("color", GNFamily.Type.TOP, false, "Source colour texture", "Color")
+	add_input("flow", GNFamily.Type.TOP, false, "Motion vector texture (RG channels)", "Flow")
+	add_output("out", GNFamily.Type.TOP, "Motion-blurred texture", "Out")
 
 
 func _init_parameters() -> void:

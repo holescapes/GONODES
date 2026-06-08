@@ -143,7 +143,7 @@ func supported_renderers() -> PackedStringArray:
 
 func _init_ports() -> void:
 	# Default template has no gn_tex sampler — ports rebuilt on shader compile.
-	add_output("out", GNFamily.Type.TOP, "Compute output texture")
+	add_output("out", GNFamily.Type.TOP, "Compute output texture", "Out")
 
 
 func _init_parameters() -> void:

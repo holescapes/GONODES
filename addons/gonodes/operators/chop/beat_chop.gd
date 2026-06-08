@@ -23,8 +23,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("audio", GNFamily.Type.CHOP, false, "Audio CHOP (waveform channels)")
-	add_output("out", GNFamily.Type.CHOP, "Beat channels (beat, energy, onset)")
+	add_input("audio", GNFamily.Type.CHOP, false, "Audio CHOP (waveform channels)", "Audio")
+	add_output("out", GNFamily.Type.CHOP, "Beat channels (beat, energy, onset)", "Out")
 
 
 func _init_parameters() -> void:

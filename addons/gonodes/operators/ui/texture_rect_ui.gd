@@ -14,9 +14,9 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("top", GNFamily.Type.TOP, false, "Texture to display")
+	add_input("top", GNFamily.Type.TOP, false, "Texture to display", "TOP")
 	add_input("mat", GNFamily.Type.MAT, false, "Shader material overlay", "Material")
-	add_output("out", GNFamily.Type.UI, "Widget output")
+	add_output("out", GNFamily.Type.UI, "Widget output", "Out")
 
 
 func _init_parameters() -> void:

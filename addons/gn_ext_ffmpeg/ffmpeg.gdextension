@@ -4,10 +4,10 @@ entry_symbol = "ffmpeg_init"
 compatibility_minimum = 4.1
 
 [libraries]
-windows.debug.x86_64 = "res://addons/gn_ext_ffmpeg/native/win64/libgdffmpeg.windows.template_release.x86_64.dll"
-windows.release.x86_64 = "res://addons/gn_ext_ffmpeg/native/win64/libgdffmpeg.windows.template_release.x86_64.dll"
-linux.debug.x86_64 = "res://addons/gn_ext_ffmpeg/native/linux64/libgdffmpeg.linux.template_release.x86_64.so"
-linux.release.x86_64 = "res://addons/gn_ext_ffmpeg/native/linux64/libgdffmpeg.linux.template_release.x86_64.so"
+windows.x86_64.debug = "res://addons/gn_ext_ffmpeg/native/win64/libgdffmpeg.windows.template_release.x86_64.dll"
+windows.x86_64.release = "res://addons/gn_ext_ffmpeg/native/win64/libgdffmpeg.windows.template_release.x86_64.dll"
+linux.x86_64.debug = "res://addons/gn_ext_ffmpeg/native/linux64/libgdffmpeg.linux.template_release.x86_64.so"
+linux.x86_64.release = "res://addons/gn_ext_ffmpeg/native/linux64/libgdffmpeg.linux.template_release.x86_64.so"
 android.debug.arm64 = "res://addons/gn_ext_ffmpeg/native/android/libgdffmpeg.android.template_release.arm64.so"
 android.release.arm64 = "res://addons/gn_ext_ffmpeg/native/android/libgdffmpeg.android.template_release.arm64.so"
 macos.debug = "res://addons/gn_ext_ffmpeg/native/macos/libgdffmpeg.macos.template_release.framework"

@@ -12,8 +12,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("pts", GNFamily.Type.SOP, false, "Control points")
-	add_output("out", GNFamily.Type.SOP, "Spline geometry")
+	add_input("pts", GNFamily.Type.SOP, false, "Control points", "Pts")
+	add_output("out", GNFamily.Type.SOP, "Spline geometry", "Out")
 
 
 func _init_parameters() -> void:

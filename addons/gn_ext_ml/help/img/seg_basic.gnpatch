@@ -10,16 +10,8 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
-        "style1": {
-            "type": "StyleTransferTOP",
+        "seg1": {
+            "type": "SegmentationIMG",
             "position": [
                 600,
                 100
@@ -32,15 +24,18 @@
                         "y": 512
                     }
                 },
-                "strength": {
-                    "value": 1.0
+                "threshold": {
+                    "value": 0.5
+                },
+                "soft_mask": {
+                    "value": false
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                850,
+                1100,
                 100
             ],
             "parameters": {
@@ -55,23 +50,31 @@
                     "value": true
                 }
             }
+        },
+        "img2top_seg1": {
+            "type": "ImgToTOP",
+            "position": [
+                1100,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
             "from": "webcam1",
             "from_port": 0,
-            "to": "bridge1",
+            "to": "seg1",
             "to_port": 0
         },
         {
-            "from": "bridge1",
+            "from": "seg1",
             "from_port": 0,
-            "to": "style1",
+            "to": "img2top_seg1",
             "to_port": 0
         },
         {
-            "from": "style1",
+            "from": "img2top_seg1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -81,7 +84,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Webcam IMG — Basic\n\nLive webcam/camera feed as CPU Image. Chain → ImgToTOP for GPU.",
+            "text": "Segmentation \u2014 Basic Mask\n\nWebcam -> person segmentation -> binary mask.\nWhite = person, black = background.\nAdjust threshold for tighter/looser segmentation.",
             "position": [
                 -100.0,
                 -100.0

@@ -9,8 +9,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.DAT, false, "Input table (for Generate mode)")
-	add_output("out", GNFamily.Type.DAT, "Parsed table or JSON text")
+	add_input("in", GNFamily.Type.DAT, false, "Input table (for Generate mode)", "In")
+	add_output("out", GNFamily.Type.DAT, "Parsed table or JSON text", "Out")
 
 
 func _init_parameters() -> void:

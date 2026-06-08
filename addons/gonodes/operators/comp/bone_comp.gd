@@ -25,7 +25,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("skeleton_in", GNFamily.Type.COMP, true, "COMP with Skeleton3D (e.g. from FileInSOP glTF)", "Skeleton")
 	add_input("attach_in", GNFamily.Type.COMP, false, "COMP to attach to the bone", "Attach")
-	add_output("out", GNFamily.Type.COMP, "Bone-attached component")
+	add_output("out", GNFamily.Type.COMP, "Bone-attached component", "Out")
 
 
 func _init_parameters() -> void:

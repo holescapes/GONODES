@@ -10,8 +10,8 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("depth", GNFamily.Type.IMG, false, "Depth map (brighter = closer)")
-	add_output("out", GNFamily.Type.IMG, "Stereogram image")
+	add_input("depth", GNFamily.Type.IMG, false, "Depth map (brighter = closer)", "Depth")
+	add_output("out", GNFamily.Type.IMG, "Stereogram image", "Out")
 
 
 func _init_parameters() -> void:
