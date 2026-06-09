@@ -734,6 +734,7 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 	# ── Register operators ──
 	# Sections named "operator.<ClassName>" declare individual operators.
 	var registered_count := 0
+
 	for section in cfg.get_sections():
 		if not section.begins_with("operator."):
 			continue
@@ -750,12 +751,20 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 
 		# Load the operator script
 		if not ResourceLoader.exists(script_path):
-			print("[ExtRegistry] Extension '%s': script not found '%s'" % [ext_name, script_path])
+			push_error("[ExtRegistry] Extension '%s': script not found '%s'" % [ext_name, script_path])
 			continue
 
 		var loaded_script: GDScript = load(script_path) as GDScript
 		if loaded_script == null:
-			print("[ExtRegistry] Extension '%s': failed to load script '%s'" % [ext_name, script_path])
+			push_error("[ExtRegistry] Extension '%s': failed to load script '%s' (load() returned null)" % [ext_name, script_path])
+			continue
+
+		# Verify the script has the expected class_name.
+		var got_class: StringName = loaded_script.get_global_name()
+		if got_class.is_empty():
+			push_warning("[ExtRegistry] [%s] '%s' has no class_name -- registered as '%s' anyway" % [ext_name, script_path.get_file(), op_class])
+		elif got_class != op_class:
+			push_error("[ExtRegistry] [%s] class_name mismatch: cfg says '%s', script declares '%s' -- skipping (cfg section='%s', script_path='%s', resource_path='%s')" % [ext_name, op_class, got_class, section, script_path, loaded_script.resource_path])
 			continue
 
 		var entry := register_operator(op_class, family, loaded_script, desc, ext_name, op_section, ext_dir)

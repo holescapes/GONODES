@@ -26,13 +26,20 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	if target_id.is_empty():
 		node_warning = "No source node set."
 		return null
-	var net: GNNetwork = _get_network()
+	var net: GNNetwork = _find_network()
 	if net == null:
 		node_warning = "Cannot find parent network."
 		return null
-	var target: GNNode = net.get_node(target_id)
+	var target: GNNode = net.get_node_by_id(target_id)
 	if target == null:
 		node_warning = "Node '%s' not found." % target_id
 		return null
 	node_warning = ""
 	return target.cached_output
+
+
+func _find_network() -> GNNetwork:
+	var p = get_parent()
+	while p != null and not (p is GNNetwork):
+		p = p.get_parent()
+	return p as GNNetwork

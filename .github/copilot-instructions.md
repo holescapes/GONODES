@@ -165,6 +165,9 @@ The README is the first thing a contributor reads before opening any code. Missi
 ### File Encoding
 All text files are UTF-8 without BOM. NEVER use PowerShell `Get-Content`/`Set-Content` without `-Encoding UTF8` on BOTH calls. Prefer Python for non-ASCII text manipulation.
 
+### 25.37 --- ConfigFile Must Be Pure ASCII, No Comments
+`gn_core.cfg` and all `gn_extension.cfg` files MUST contain **only ASCII characters** (codepoints U+0000-U+007F) and **NO comment lines** (`#`). Godot 4.6's `ConfigFile` parser has two bugs that silently corrupt section parsing: (1) Non-ASCII anywhere in the file (including description values) causes subsequent `[section]` headers to be swallowed, merging their keys into the previous section. (2) Comment lines (`# ...`) between sections cause the next `[section]` header to be skipped entirely, merging its keys into the previous section and losing the swallowed section from `get_sections()`. Use ASCII substitutes: `--` not `---`, `->` not arrow, `x` not multiplication sign. Never use comments for phase markers, separators, or documentation inside `.cfg` files. The class_name safety check in `_load_extension()` catches mismatches at runtime, but prevention is better.
+
 ### .uid Files
 Do NOT generate `.uid` sidecar files. Godot creates them on project scan.
 

@@ -318,6 +318,8 @@ func _switch_active_indices() -> PackedInt32Array:
 ## Standard discrete Switch cook: select input by index, hold cached_output
 ## on miss (or null if null_on_missing is true).
 func _switch_cook(inputs: Array[GNData]) -> GNData:
+	if inputs.is_empty():
+		return cached_output
 	var idx: int = clampi(get_param_value("index"), 0, inputs.size() - 1)
 	if idx < inputs.size() and _is_family_data(inputs[idx]):
 		return inputs[idx]

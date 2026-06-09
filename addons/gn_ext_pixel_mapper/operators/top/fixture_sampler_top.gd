@@ -44,10 +44,53 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
+	var fix_fam: int = GNFamily.string_to_type("FIX")
 	add_input("source", GNFamily.Type.TOP, true, "Source image to sample")
-	_enable_dynamic_inputs(GNFixtureBase.FIX_FAMILY, "fix", "Fixture")
-	# Re-assign — dynamic inputs occupy ports 1..N after port 0 (source)
-	# We handle port 0 manually; dynamic FIX ports start at 1.
+	_enable_dynamic_inputs(fix_fam, "fix", "Fixture")
+	# Port 0 is "source" (fixed TOP). Dynamic FIX ports occupy indices 1..N.
+	# update_dynamic_inputs and from_dict are overridden below to preserve port 0.
+
+
+## Rebuilds input ports: source at index 0, then [param fix_count] FIX ports.
+func _rebuild_input_ports(fix_count: int) -> void:
+	var fix_fam: int = GNFamily.string_to_type("FIX")
+	input_ports.clear()
+	add_input("source", GNFamily.Type.TOP, true, "Source image to sample")
+	for i in range(fix_count):
+		add_input("fix%d" % i, fix_fam, false, "Fixture %d" % i)
+	GNLogger.debug("GNNode", "'%s' input port count -> %d" % [id, input_ports.size()])
+	ports_changed.emit(id)
+
+
+## Overrides GNNode.update_dynamic_inputs to preserve the fixed "source" port at
+## index 0.  The base implementation calls set_input_count() which clears ALL ports.
+func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
+	if not _dynamic_input:
+		return
+	# FIX ports are at absolute indices 1..N. Only consider p >= 1.
+	var max_fix: int = -1
+	for p in connected_ports:
+		if p >= 1 and p > max_fix:
+			max_fix = p
+	var desired_fix_count: int = maxi(max_fix + 1, 1)
+	if 1 + desired_fix_count == input_ports.size():
+		return
+	_rebuild_input_ports(desired_fix_count)
+
+
+## Overrides GNNode.from_dict to handle dynamic_input_count correctly.
+## The base implementation passes the saved count directly to set_input_count(),
+## which would overwrite port 0. We intercept, call super without that key,
+## then rebuild with the correct FIX count.
+func from_dict(d: Dictionary) -> void:
+	var saved_total: int = -1
+	if _dynamic_input and d.has("dynamic_input_count"):
+		saved_total = int(d["dynamic_input_count"])
+		d = d.duplicate()
+		d.erase("dynamic_input_count")
+	super.from_dict(d)
+	if saved_total > 1:
+		_rebuild_input_ports(saved_total - 1)  # saved_total includes source port
 
 
 func _init_parameters() -> void:
@@ -115,6 +158,7 @@ func _rebuild_led_pos_texture(fix_inputs: Array[GNFixtureData]) -> void:
 			"name": fd.fixture_name,
 			"led_count": fd.led_count,
 			"channels_per_led": fd.channels_per_led,
+			"channel_layout": fd.channel_layout,
 			"dmx_start": fd.dmx_start,
 			"offset": _total_leds,
 		})
@@ -143,6 +187,8 @@ func _rebuild_led_pos_texture(fix_inputs: Array[GNFixtureData]) -> void:
 
 
 ## Hash the fixture inputs for change detection (avoids rebuild every frame).
+## NOTE: Only samples first+last LED positions for speed. A middle-LED-only UV
+## change won't trigger rebuild until fixture_name/led_count/layout also changes.
 static func _compute_fix_hash(fix_inputs: Array[GNFixtureData]) -> int:
 	var h: int = 0
 	for fd in fix_inputs:

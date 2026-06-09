@@ -6,9 +6,10 @@ extends GNChopBase
 ## and emits one CHOP channel per fixture·LED·colour component.
 ##
 ## Channel naming:
-##   "<fixture_name>.<channel>.<led_index>"  e.g. "strip.r.0", "strip.g.0", "strip.b.0"
+##   "<fixture_name>.<channel>"  e.g. "strip.r", "strip.g", "strip.b"
+##   Each channel contains N samples (one per LED in the fixture).
 ##
-## Channel layout abbreviations: rgb → r/g/b, rgbw → r/g/b/w, r/g/b/w → single channel.
+## Channel layout abbreviations: rgb -> r/g/b, rgbw -> r/g/b/w, r/g/b/w -> single channel.
 ##
 ## NOTE: CPU readback of the result texture is intentional here — the packed texture
 ## is tiny (1–4 px wide × total_leds tall, e.g. 3×288 = 864 pixels) so the readback
@@ -75,14 +76,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		var fix_name: String = entry["name"]
 		var led_count: int = entry["led_count"]
 		var cpl: int = entry["channels_per_led"]
+		var layout: String = entry.get("channel_layout", "rgb")
 		var offset: int = entry["offset"]
 
-		# Determine channel name list from layout
-		var ch_names: Array = []
-		for layout_key in _LAYOUT_CHANNELS:
-			if GNFixtureData.channels_for_layout(layout_key) == cpl:
-				ch_names = _LAYOUT_CHANNELS[layout_key]
-				break
+		# Determine channel name list from the stored layout string
+		var ch_names: Array = _LAYOUT_CHANNELS.get(layout, [])
 		if ch_names.is_empty():
 			ch_names = ["ch0", "ch1", "ch2", "ch3"].slice(0, cpl)
 
@@ -108,13 +106,20 @@ func _cook(inputs: Array[GNData]) -> GNData:
 ## Walks upstream to find the FixtureSamplerTOP that produced this texture.
 ## Returns null if not found (fallback: manifest will be empty).
 func _find_upstream_sampler(_data: GNData) -> FixtureSamplerTOP:
-	var net: GNNetwork = _get_network()
+	var net: GNNetwork = _find_network()
 	if net == null:
 		return null
 	# Find which node is connected to our input port 0
 	for conn in net.connections:
 		if conn.to_node == id and conn.to_port == 0:
-			var src: GNNode = net.get_node(conn.from_node)
+			var src: GNNode = net.get_node_by_id(conn.from_node)
 			if src is FixtureSamplerTOP:
 				return src as FixtureSamplerTOP
 	return null
+
+
+func _find_network() -> GNNetwork:
+	var p = get_parent()
+	while p != null and not (p is GNNetwork):
+		p = p.get_parent()
+	return p as GNNetwork
