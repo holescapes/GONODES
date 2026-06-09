@@ -1,7 +1,7 @@
 # GONODES — Copilot Instructions
 
 > Node-based visual programming framework on Godot 4.6 for real-time visual art.
-> 575 operators, 14 families, GDScript + GDExtension C++.
+> 578 operators, 14 families, GDScript + GDExtension C++.
 
 ## Architecture
 
@@ -139,6 +139,20 @@ The `native/` directory in every extension has `.gdignore`, which makes `res://`
 **Critical extension:** The main extension DLL itself (`[libraries]` entry) also fails `FileAccess::exists()` if it is inside `native/`. For any extension whose Python/data-runtime dependencies require `[dependencies]` pre-loading, **both** the main DLL and its dependencies must live outside `native/`. Use `library_dest = ../bin` in `build.cfg` `[library]` section to copy the built DLL to `extension_root/bin/<platform>/`. Example: `gn_ext_user_python` uses `extension_root/bin/win64/` for all files (main DLL + python310.dll + python3.dll).
 
 **DLL version matching:** Always verify which Python version a compiled DLL actually links against using `pefile` before bundling. `libgn_python.dll` was compiled against Python 3.10 (imports `python310.dll`) — bundling `python312.dll` instead causes Error 126. Run: `python -c "import pefile; pe = pefile.PE('lib.dll'); print([e.dll.decode() for e in pe.DIRECTORY_ENTRY_IMPORT])"` to check.
+
+### 25.35 — Wireless Referencing: Only Select Nodes
+**Only Select nodes** (`SelectCHOP`, `SelectDAT`, `SelectSOP`, `SelectTOP`, `SelectIMG`, `SelectPOP`, `SelectMAT`, `SelectVOL`, `SelectCOMP`) do wireless node referencing via `create_node_ref` params. All other operators must use wired inputs.
+
+Select nodes are **pure references** — they return the source node's `cached_output` directly with no filtering. For data transformation after a wireless reference, wire into the corresponding filter operator:
+
+| Select node | Paired filter |
+|-------------|---------------|
+| SelectCHOP | ChannelFilterCHOP (pattern + rename) |
+| SelectDAT | SubsetDAT (row/col range) |
+| SelectSOP | FilterSOP (range/bbox/expression/every-N) |
+
+Graph editor shows **amber dashed lines** on hover for any node with a node_ref parameter pointing to an existing node. Lines are hover-only (not always-on) to avoid clutter.
+
 
 ### File Encoding
 All text files are UTF-8 without BOM. NEVER use PowerShell `Get-Content`/`Set-Content` without `-Encoding UTF8` on BOTH calls. Prefer Python for non-ASCII text manipulation.

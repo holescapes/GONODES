@@ -2,42 +2,42 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "emit1": {
-            "type": "EmitterPOP",
+        "source1": {
+            "type": "SourcePOP",
             "position": [
                 100,
                 100
             ],
-            "parameters": {
-                "rate": {
-                    "value": 500
-                }
-            }
+            "parameters": {}
         },
-        "focus1": {
+        "select1": {
             "type": "SelectPOP",
             "position": [
-                450,
+                400,
                 100
             ],
             "parameters": {}
         },
-        "pstate1": {
-            "type": "ParticleStateTOP",
+        "renderpop1": {
+            "type": "RenderPOP",
             "position": [
-                800,
+                700,
                 100
             ],
             "parameters": {
-                "width": {
-                    "value": 512
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1150,
+                1100,
                 100
             ],
             "parameters": {
@@ -56,19 +56,19 @@
     },
     "connections": [
         {
-            "from": "emit1",
+            "from": "source1",
             "from_port": 0,
-            "to": "focus1",
+            "to": "select1",
             "to_port": 0
         },
         {
-            "from": "focus1",
+            "from": "select1",
             "from_port": 0,
-            "to": "pstate1",
+            "to": "renderpop1",
             "to_port": 0
         },
         {
-            "from": "pstate1",
+            "from": "renderpop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -78,14 +78,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Select POP \u2014 Basic\n\nReference another POP operator by name or wire.\nUseful for branching particle pipelines without duplicating emitters.",
+            "text": "SelectPOP \u2014 Basic\n\nDefault settings.",
             "position": [
-                -100,
-                -100
+                -100.0,
+                -100.0
             ],
             "size": [
-                500,
-                120
+                400.0,
+                100.0
             ],
             "color": [
                 1.0,

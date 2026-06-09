@@ -2,10 +2,102 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_noise": {
-            "type": "NoiseTOP",
+        "src_grid": {
+            "type": "GridSOP",
             "position": [
                 100,
+                100
+            ],
+            "parameters": {
+                "rows": {
+                    "value": 10
+                },
+                "cols": {
+                    "value": 10
+                }
+            }
+        },
+        "filter1": {
+            "type": "FilterSOP",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "entity": {
+                    "value": 0
+                },
+                "method": {
+                    "value": 0
+                },
+                "start": {
+                    "value": 0
+                },
+                "end": {
+                    "value": 50
+                },
+                "bmin_x": {
+                    "value": -0.5
+                },
+                "bmin_y": {
+                    "value": -0.5
+                },
+                "bmin_z": {
+                    "value": -0.5
+                },
+                "bmax_x": {
+                    "value": 0.5
+                },
+                "bmax_y": {
+                    "value": 0.5
+                },
+                "bmax_z": {
+                    "value": 0.5
+                },
+                "expression": {
+                    "value": "i % 2 == 0"
+                },
+                "step": {
+                    "value": 2
+                },
+                "offset": {
+                    "value": 0
+                },
+                "invert": {
+                    "value": false
+                }
+            }
+        },
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
                 100
             ],
             "parameters": {
@@ -15,43 +107,13 @@
                         "x": 512,
                         "y": 512
                     }
-                },
-                "scale": {
-                    "value": 4.0
-                },
-                "monochrome": {
-                    "value": true
-                }
-            }
-        },
-        "filter1": {
-            "type": "FilterTOP",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {
-                "mode": {
-                    "value": 0
-                },
-                "radius": {
-                    "value": 5.0
-                },
-                "radius_outer": {
-                    "value": 15.0
-                },
-                "strength": {
-                    "value": 1.0
-                },
-                "offset": {
-                    "value": 0.5
                 }
             }
         },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1200,
+                1550,
                 100
             ],
             "parameters": {
@@ -70,13 +132,31 @@
     },
     "connections": [
         {
-            "from": "src_noise",
+            "from": "src_grid",
             "from_port": 0,
             "to": "filter1",
             "to_port": 0
         },
         {
             "from": "filter1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
+        },
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
+        },
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -86,14 +166,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Filter TOP — Basic\n\nSpatial frequency filter — Low Pass, High Pass, or Band Pass.\nUsing: mode=0, radius=5.0, radius_outer=15.0, strength=1.0.",
+            "text": "FilterSOP \u2014 Basic\n\nDefault settings.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                500.0,
-                140.0
+                400.0,
+                100.0
             ],
             "color": [
                 1.0,

@@ -14,6 +14,10 @@ var sample_rate: float = 60.0
 ## Number of samples per channel.  All channels share the same length.
 var length: int = 1
 
+## Optional: the AudioServer bus name this data was captured from.
+## Set by AudioInCHOP so AudioSpectrumCHOP can auto-route its analyzer via wire.
+var source_bus: String = ""
+
 
 func get_family() -> int:
 	return GNFamily.Type.CHOP

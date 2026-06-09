@@ -1,10 +1,9 @@
 class_name SelectSDF
 extends GNSdfBase
-## References a remote SDF node by name — outputs that node's SDF tree
-## without requiring a wire connection.
+## Wireless reference — outputs a named remote SDF node's tree.
 ##
-## When the 'sdf' parameter names a remote SDF, its output is used.
-## When 'sdf' is empty, the wired input is used instead (pass-through).
+## The 'sdf' parameter holds the node id of the source SDF.
+## Rule: only Select nodes do wireless referencing — no wire input.
 
 var _network_cache: GNNetwork = null
 
@@ -15,29 +14,24 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", SDF_FAMILY, false, "Input SDF (used when 'sdf' is empty)", "In")
 	add_output("out", SDF_FAMILY, "Selected SDF tree", "Out")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_node_ref("sdf", SDF_FAMILY,
-		"SDF", "Name (id) of a remote SDF to reference (empty = use wired input)"))
+		"SDF", "Node id of the remote SDF to reference"))
 
 
-func _cook(inputs: Array[GNData]) -> GNData:
+func _cook(_inputs: Array[GNData]) -> GNData:
 	var remote_id: String = get_param_value("sdf")
-
-	if not remote_id.is_empty():
-		var data: GNData = _resolve_remote(remote_id)
-		if data is GNSDFData:
-			node_warning = ""
-			return data
-		node_warning = "Remote SDF '%s' not found or has no output" % remote_id
+	if remote_id.is_empty():
+		node_warning = "No node reference specified"
 		return null
-
-	node_warning = ""
-	if inputs.size() > 0 and inputs[0] is GNSDFData:
-		return inputs[0]
+	var data: GNData = _resolve_remote(remote_id)
+	if data is GNSDFData:
+		node_warning = ""
+		return data
+	node_warning = "Remote SDF '%s' not found or has no output" % remote_id
 	return null
 
 

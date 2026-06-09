@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **575 operators** across 14 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 23 extension addons.
+> **578 operators** across 14 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 23 extension addons.
 
 ---
 
@@ -2547,7 +2547,7 @@ Event counter with rising-edge detection.
 
 #### SelectCHOP
 
-Select channels from a CHOP — by wire or by wireless name reference. When the `chop` parameter names a remote CHOP, its output is used (no wire needed). When empty, the wired input is used. Channel name filtering and renaming apply in both modes.
+Wireless reference — returns a named remote CHOP node's output directly. Use ChannelFilterCHOP after this node to filter or rename channels.. Channel name filtering and renaming apply in both modes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -2661,6 +2661,18 @@ Rename input channels with explicit from→to mapping. Channels not matched by a
 **How it works:** For each channel in the input, checks if its name matches any `fromN` value. If matched, the channel is output under the corresponding `toN` name. Unmatched channels are copied unchanged. The number of from/to pairs is controlled by the `renames` parameter and can be changed dynamically.
 
 ---
+
+#### ChannelFilterCHOP
+
+Filter and optionally rename channels from a wired CHOP by name pattern. Use after SelectCHOP to narrow a wireless reference to specific channels, or inline in any wired CHOP chain.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| Pattern | String | Channel name filter (`*` = all, comma-separated, e.g. `tx,ty,tz`) |
+| Rename | String | Output rename pattern — empty keeps names. Supports `*(N)` capture groups. |
+
+---
+
 
 #### DATtoCHOP *(Bridge — DAT → CHOP)*
 
@@ -3611,7 +3623,7 @@ OSC message receiver. **Currently a stub** — UDP/OSC networking is not yet imp
 
 #### SelectDAT
 
-Select rows/columns from a DAT — by wire or by wireless name reference. When the `dat` parameter names a remote DAT, its output is used (no wire needed). When empty, the wired input is used. Row/column range filtering applies in both modes.
+Wireless reference — returns a named remote DAT node's output directly. Use SubsetDAT after this node to filter rows/columns. When the `dat` parameter names a remote DAT, its output is used (no wire needed). When empty, the wired input is used. Row/column range filtering applies in both modes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -3623,6 +3635,21 @@ Select rows/columns from a DAT — by wire or by wireless name reference. When t
 | include_header | Bool | true | — | Include header row in output |
 
 ---
+
+#### SubsetDAT
+
+Extract a row/column subset from a wired DAT input. Use after SelectDAT to narrow a wireless reference, or inline in any wired DAT chain. Indices are 0-based; use -1 for "all".
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| Row Start | Int | First row index to include |
+| Row End | Int | Last row index (-1 = all) |
+| Col Start | Int | First column index to include |
+| Col End | Int | Last column index (-1 = all) |
+| Include Header | Bool | Carry header row through to output |
+
+---
+
 
 #### SortDAT
 
@@ -4341,7 +4368,7 @@ Pass-through.
 
 #### SelectSOP
 
-Select geometry from a SOP — by wire or by wireless name reference. When the `sop` parameter names a remote SOP, its output is used (no wire needed). When empty, the wired input is used. Element filtering (range, bounding box, expression, every-Nth) applies in both modes.
+Wireless reference — returns a named remote SOP node's output directly. Use FilterSOP after this node to filter geometry elements. When the `sop` parameter names a remote SOP, its output is used (no wire needed). When empty, the wired input is used. Element filtering (range, bounding box, expression, every-Nth) applies in both modes.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -4358,6 +4385,23 @@ Select geometry from a SOP — by wire or by wireless name reference. When the `
 | invert | Bool | false | Invert selection (discard matching, keep non-matching) |
 
 ---
+
+#### FilterSOP
+
+Keep or discard geometry elements (faces or points) by range, bounding box, GDScript expression, or every-Nth selection. Use after SelectSOP to filter a wireless reference, or inline in any wired SOP chain.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| Entity | Enum | Triangles or Points |
+| Method | Enum | By Range / By Bounding Box / By Expression / Every Nth |
+| Start / End | Int | Range mode: first/last element index to keep |
+| Box Min/Max | Float | Bounding box corners |
+| Expression | String | GDScript bool expression: `i`, `x`, `y`, `z`, `count` variables |
+| Step / Offset | Int | Every-Nth mode parameters |
+| Invert | Bool | Discard matching elements, keep the rest |
+
+---
+
 
 #### SwitchSOP
 
@@ -6519,7 +6563,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
 | **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
 | **Generic** | 1 | Dot |
-| **Total** | **394** | *Core operators only. With extensions (109), SDF (29), SCRIPT (3), and native variants, total reaches 575.* |
+| **Total** | **394** | *Core operators only. With extensions (109), SDF (29), SCRIPT (3), and native variants, total reaches 578.* |
 
 ### Extension Operators (not included in count above)
 

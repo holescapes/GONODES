@@ -110,7 +110,13 @@
   "AudioSpectrumCHOP": {
     "class_name": "AudioSpectrumCHOP",
     "family": "CHOP",
-    "inputs": [],
+    "inputs": [
+      {
+        "port": 0,
+        "name": "audio_in",
+        "type": "CHOP"
+      }
+    ],
     "outputs": [
       {
         "port": 0,
@@ -168,6 +174,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/chop/channel_chop.gd"
+  },
+  "ChannelFilterCHOP": {
+    "class_name": "ChannelFilterCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/chop/channel_filter_chop.gd"
   },
   "ClipCHOP": {
     "class_name": "ClipCHOP",
@@ -1096,13 +1122,7 @@
   "SelectCHOP": {
     "class_name": "SelectCHOP",
     "family": "CHOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "CHOP"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,
@@ -2576,13 +2596,7 @@
   "SelectDAT": {
     "class_name": "SelectDAT",
     "family": "DAT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "DAT"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,
@@ -2652,6 +2666,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/dat/sort_dat.gd"
+  },
+  "SubsetDAT": {
+    "class_name": "SubsetDAT",
+    "family": "DAT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "DAT"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "DAT"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/dat/subset_dat.gd"
   },
   "SubstituteDAT": {
     "class_name": "SubstituteDAT",
@@ -3101,13 +3135,7 @@
   "SelectIMG": {
     "class_name": "SelectIMG",
     "family": "IMG",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "IMG"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,
@@ -3352,13 +3380,7 @@
   "SelectMAT": {
     "class_name": "SelectMAT",
     "family": "MAT",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "MAT"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,
@@ -3927,13 +3949,7 @@
   "SelectPOP": {
     "class_name": "SelectPOP",
     "family": "POP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "POP"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,
@@ -4447,6 +4463,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/sop/file_out_sop.gd"
+  },
+  "FilterSOP": {
+    "class_name": "FilterSOP",
+    "family": "SOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "SOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "SOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/sop/filter_sop.gd"
   },
   "FontSOP": {
     "class_name": "FontSOP",
@@ -5262,13 +5298,7 @@
   "SelectSOP": {
     "class_name": "SelectSOP",
     "family": "SOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "SOP"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,
@@ -9017,13 +9047,7 @@
   "SelectVOL": {
     "class_name": "SelectVOL",
     "family": "VOL",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "in",
-        "type": "VOL"
-      }
-    ],
+    "inputs": [],
     "outputs": [
       {
         "port": 0,

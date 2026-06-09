@@ -67,6 +67,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	var sample_rate: float = float(AudioServer.get_mix_rate())
 	var out: GNChannelData = _prepare_output(sample_rate)
+	out.source_bus = _bus_name
 
 	if not _active or _capture_effect == null:
 		# Output silence

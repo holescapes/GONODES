@@ -3,8 +3,9 @@ extends GNChopBase
 ## FFT spectrum analysis of an audio bus, output as CHOP channels.
 ##
 ## Uses Godot's built-in AudioEffectSpectrumAnalyzer to get frequency magnitude data.
-## Can analyze any audio bus — defaults to "Master" (captures all game audio),
-## or connect to AudioInCHOP's bus for microphone-specific spectrum.
+## Wire an AudioInCHOP into the input to automatically route spectrum analysis to
+## that node's capture bus.  When no wire is connected, the 'bus' parameter is
+## used instead (defaults to "Master" for full game audio).
 ##
 ## Output channels:
 ##   band:0 .. band:N  — magnitude of each frequency band (0-1)
@@ -32,6 +33,7 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
+	add_input("audio_in", GNFamily.Type.CHOP, false, "AudioInCHOP connection — auto-routes analysis to its capture bus", "Audio In")
 	add_output("out", GNFamily.Type.CHOP, "Frequency band magnitudes")
 
 
@@ -61,9 +63,11 @@ var _smoothed: PackedFloat32Array = PackedFloat32Array()
 # Cook
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func _cook(_inputs: Array[GNData]) -> GNData:
+func _cook(inputs: Array[GNData]) -> GNData:
 	var active: bool = get_param_value("active")
-	var bus: String = get_param_value("bus")
+	# If an AudioInCHOP is wired in, use its dedicated capture bus; else fall back to parameter.
+	var wired: GNChannelData = inputs[0] as GNChannelData if inputs.size() > 0 else null
+	var bus: String = wired.source_bus if (wired != null and not wired.source_bus.is_empty()) else get_param_value("bus")
 	var band_count: int = get_param_value("bands")
 	var freq_min: float = get_param_value("freq_min")
 	var freq_max: float = get_param_value("freq_max")

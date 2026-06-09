@@ -1,10 +1,9 @@
 class_name SelectPOP
 extends GNPopBase
-## References a remote POP node by name — outputs that node's particle data
-## without requiring a wire connection.
+## Wireless reference — outputs a named remote POP node's particle data.
 ##
-## When the 'pop' parameter names a remote POP, its output is used.
-## When 'pop' is empty, the wired input is used instead (pass-through).
+## The 'pop' parameter holds the node id of the source POP.
+## Rule: only Select nodes do wireless referencing — no wire input.
 
 var _network_cache: GNNetwork = null
 
@@ -15,29 +14,24 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.POP, false, "Input particles (used when 'pop' is empty)", "In")
 	add_output("out", GNFamily.Type.POP, "Selected particles", "Out")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_node_ref("pop", GNFamily.Type.POP,
-		"POP", "Name (id) of a remote POP to reference (empty = use wired input)"))
+		"POP", "Node id of the remote POP to reference"))
 
 
-func _cook(inputs: Array[GNData]) -> GNData:
+func _cook(_inputs: Array[GNData]) -> GNData:
 	var remote_id: String = get_param_value("pop")
-
-	if not remote_id.is_empty():
-		var data: GNData = _resolve_remote(remote_id, GNFamily.Type.POP)
-		if data is GNParticleData:
-			node_warning = ""
-			return data
-		node_warning = "Remote POP '%s' not found or has no output" % remote_id
+	if remote_id.is_empty():
+		node_warning = "No node reference specified"
 		return null
-
-	node_warning = ""
-	if inputs.size() > 0 and inputs[0] is GNParticleData:
-		return inputs[0]
+	var data: GNData = _resolve_remote(remote_id, GNFamily.Type.POP)
+	if data is GNParticleData:
+		node_warning = ""
+		return data
+	node_warning = "Remote POP '%s' not found or has no output" % remote_id
 	return null
 
 

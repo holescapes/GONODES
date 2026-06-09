@@ -707,6 +707,25 @@
     ]
   },
   {
+    "class_name": "ChannelFilterCHOP",
+    "node_type": "channel_filter",
+    "family": "chop",
+    "file": "addons/gonodes/operators/chop/channel_filter_chop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "pattern",
+        "type": "string",
+        "default": "*"
+      },
+      {
+        "name": "rename",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  {
     "class_name": "ClipCHOP",
     "node_type": "clip",
     "family": "chop",
@@ -2434,18 +2453,7 @@
     "family": "chop",
     "file": "addons/gonodes/operators/chop/select_chop.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "pattern",
-        "type": "string",
-        "default": "*"
-      },
-      {
-        "name": "rename",
-        "type": "string",
-        "default": ""
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "SequenceCHOP",
@@ -5979,33 +5987,7 @@
     "family": "dat",
     "file": "addons/gonodes/operators/dat/select_dat.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "row_start",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "row_end",
-        "type": "int",
-        "default": -1
-      },
-      {
-        "name": "col_start",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "col_end",
-        "type": "int",
-        "default": -1
-      },
-      {
-        "name": "include_header",
-        "type": "bool",
-        "default": true
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "SerialDAT",
@@ -6150,6 +6132,40 @@
         "name": "sort_type",
         "type": "menu",
         "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "SubsetDAT",
+    "node_type": "subset",
+    "family": "dat",
+    "file": "addons/gonodes/operators/dat/subset_dat.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "row_start",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "row_end",
+        "type": "int",
+        "default": -1
+      },
+      {
+        "name": "col_start",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "col_end",
+        "type": "int",
+        "default": -1
+      },
+      {
+        "name": "include_header",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -10854,6 +10870,85 @@
     ]
   },
   {
+    "class_name": "FilterSOP",
+    "node_type": "filter",
+    "family": "sop",
+    "file": "addons/gonodes/operators/sop/filter_sop.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "entity",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "method",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "start",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "end",
+        "type": "int",
+        "default": 50
+      },
+      {
+        "name": "bmin_x",
+        "type": "float",
+        "default": -0.5
+      },
+      {
+        "name": "bmin_y",
+        "type": "float",
+        "default": -0.5
+      },
+      {
+        "name": "bmin_z",
+        "type": "float",
+        "default": -0.5
+      },
+      {
+        "name": "bmax_x",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "bmax_y",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "bmax_z",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "expression",
+        "type": "string",
+        "default": "i % 2 == 0"
+      },
+      {
+        "name": "step",
+        "type": "int",
+        "default": 2
+      },
+      {
+        "name": "offset",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "invert",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "FontSOP",
     "node_type": "font",
     "family": "sop",
@@ -12266,83 +12361,7 @@
     "family": "sop",
     "file": "addons/gonodes/operators/sop/select_sop.gd",
     "extension": null,
-    "params": [
-      {
-        "name": "entity",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "method",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "start",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "end",
-        "type": "int",
-        "default": 50
-      },
-      {
-        "name": "bmin_x",
-        "type": "float",
-        "default": -0.5
-      },
-      {
-        "name": "bmin_y",
-        "type": "float",
-        "default": -0.5
-      },
-      {
-        "name": "bmin_z",
-        "type": "float",
-        "default": -0.5
-      },
-      {
-        "name": "bmax_x",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "bmax_y",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "bmax_z",
-        "type": "float",
-        "default": 0.5
-      },
-      {
-        "name": "expression",
-        "type": "string",
-        "default": "i % 2 == 0"
-      },
-      {
-        "name": "step",
-        "type": "int",
-        "default": 2
-      },
-      {
-        "name": "offset",
-        "type": "int",
-        "default": 0
-      },
-      {
-        "name": "invert",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "apply_transform",
-        "type": "bool",
-        "default": false
-      }
-    ]
+    "params": []
   },
   {
     "class_name": "SkinSOP",

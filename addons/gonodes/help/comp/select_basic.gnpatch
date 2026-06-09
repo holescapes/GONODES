@@ -2,18 +2,10 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "geo1": {
-            "type": "GeometryCOMP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {}
-        },
-        "focus1": {
+        "select1": {
             "type": "SelectCOMP",
             "position": [
-                450,
+                400,
                 100
             ],
             "parameters": {}
@@ -21,7 +13,7 @@
         "render1": {
             "type": "RenderTOP",
             "position": [
-                800,
+                1150,
                 100
             ],
             "parameters": {
@@ -34,22 +26,10 @@
                 }
             }
         },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                800,
-                300
-            ],
-            "parameters": {
-                "tz": {
-                    "value": 5
-                }
-            }
-        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1150,
+                1550,
                 100
             ],
             "parameters": {
@@ -68,24 +48,6 @@
     },
     "connections": [
         {
-            "from": "geo1",
-            "from_port": 0,
-            "to": "focus1",
-            "to_port": 0
-        },
-        {
-            "from": "focus1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 0
-        },
-        {
-            "from": "cam1",
-            "from_port": 0,
-            "to": "render1",
-            "to_port": 1
-        },
-        {
             "from": "render1",
             "from_port": 0,
             "to": "window1",
@@ -96,14 +58,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Select COMP \u2014 Basic\n\nReference another COMP by name or wire.\nUseful for re-using a component without duplicating it.",
+            "text": "SelectCOMP \u2014 Basic\n\nDefault settings.",
             "position": [
-                -100,
-                -100
+                -100.0,
+                -100.0
             ],
             "size": [
-                500,
-                120
+                400.0,
+                100.0
             ],
             "color": [
                 1.0,

@@ -17,7 +17,7 @@
                 }
             }
         },
-        "focus1": {
+        "select1": {
             "type": "SelectSOP",
             "position": [
                 450,
@@ -28,7 +28,7 @@
         "geo_view": {
             "type": "GeometryCOMP",
             "position": [
-                800,
+                700,
                 100
             ],
             "parameters": {}
@@ -36,7 +36,7 @@
         "cam_view": {
             "type": "CameraCOMP",
             "position": [
-                800,
+                700,
                 300
             ],
             "parameters": {
@@ -54,7 +54,7 @@
         "render_view": {
             "type": "RenderTOP",
             "position": [
-                1100,
+                1000,
                 100
             ],
             "parameters": {
@@ -70,7 +70,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1450,
+                1550,
                 100
             ],
             "parameters": {
@@ -91,11 +91,11 @@
         {
             "from": "src_grid",
             "from_port": 0,
-            "to": "focus1",
+            "to": "select1",
             "to_port": 0
         },
         {
-            "from": "focus1",
+            "from": "select1",
             "from_port": 0,
             "to": "geo_view",
             "to_port": 0
@@ -123,14 +123,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Select SOP — Basic\n\nSelect geometry by wire or wireless name reference, with element filtering.",
+            "text": "SelectSOP \u2014 Basic\n\nDefault settings.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                500.0,
-                120.0
+                400.0,
+                100.0
             ],
             "color": [
                 1.0,

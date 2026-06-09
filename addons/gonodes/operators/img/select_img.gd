@@ -1,10 +1,9 @@
 class_name SelectIMG
 extends GNImgBase
-## References a remote IMG node by name — outputs that node's image
-## without requiring a wire connection.
+## Wireless reference — outputs a named remote IMG node's image data.
 ##
-## When the 'img' parameter names a remote IMG, its output is used.
-## When 'img' is empty, the wired input is used instead (pass-through).
+## The 'img' parameter holds the node id of the source IMG.
+## Rule: only Select nodes do wireless referencing — no wire input.
 
 var _network_cache: GNNetwork = null
 
@@ -14,29 +13,24 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	add_input("in", GNFamily.Type.IMG, false, "Input image (used when 'img' is empty)", "In")
 	add_output("out", GNFamily.Type.IMG, "Selected image", "Out")
 
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_node_ref("img", GNFamily.Type.IMG,
-		"IMG", "Name (id) of a remote IMG to reference (empty = use wired input)"))
+		"IMG", "Node id of the remote IMG to reference"))
 
 
-func _cook(inputs: Array[GNData]) -> GNData:
+func _cook(_inputs: Array[GNData]) -> GNData:
 	var remote_id: String = get_param_value("img")
-
-	if not remote_id.is_empty():
-		var data: GNData = _resolve_remote(remote_id, GNFamily.Type.IMG)
-		if data is GNImageData:
-			node_warning = ""
-			return data
-		node_warning = "Remote IMG '%s' not found or has no output" % remote_id
+	if remote_id.is_empty():
+		node_warning = "No node reference specified"
 		return null
-
-	node_warning = ""
-	if inputs.size() > 0 and inputs[0] is GNImageData:
-		return inputs[0]
+	var data: GNData = _resolve_remote(remote_id, GNFamily.Type.IMG)
+	if data is GNImageData:
+		node_warning = ""
+		return data
+	node_warning = "Remote IMG '%s' not found or has no output" % remote_id
 	return null
 
 

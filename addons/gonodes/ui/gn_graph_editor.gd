@@ -157,6 +157,12 @@ var _ghost_wire: Dictionary = {}  # { "node_id": String, "port": int, "release":
 ## Cached expression references: { from_node_id: [to_node_id, ...] }
 var _expr_refs: Dictionary = {}
 
+## Wireless node-reference hover state.
+## _wireless_refs: { consumer_id: [{"param_name": String, "target_id": String}, ...] }
+## Populated only while a node is hovered; cleared on mouse-out.
+var _wireless_refs: Dictionary = {}
+var _hovered_node_id: String = ""
+
 ## Per-edge expression detail text: { "consumer_id→source_id": [call_text, ...] }
 ## Used by the hover tooltip to show which references a dashed line represents.
 var _expr_ref_details: Dictionary = {}
@@ -562,6 +568,10 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and expr_refs_visible and not _expr_refs.is_empty():
 		_update_expr_ref_hover(get_local_mouse_position())
 
+	# Wireless node-ref hover detection (always active, independent of expr_refs_visible)
+	if event is InputEventMouseMotion:
+		_update_wireless_hover(get_local_mouse_position())
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Network Binding
@@ -608,6 +618,8 @@ func _unbind_network() -> void:
 
 	_clear_graph()
 	network = null
+	_hovered_node_id = ""
+	_wireless_refs.clear()
 	if _annotations != null:
 		_annotations.set_network(null)
 
@@ -678,8 +690,16 @@ func _create_node_view(node: GNNode) -> GNNodeView:
 	view.bypass_toggled.connect(_on_node_bypass_toggled)
 	view.lock_toggled.connect(_on_node_lock_toggled)
 	view.preview_toggled.connect(_on_node_preview_toggled)
-	node.parameters_changed.connect(func(_nid: String) -> void: _expr_refs_dirty = true)
-	node.parameter_changed.connect(func(_nid: String, _pname: String) -> void: _expr_refs_dirty = true)
+	node.parameters_changed.connect(func(_nid: String) -> void:
+		_expr_refs_dirty = true
+		if _nid == _hovered_node_id:
+			_rebuild_wireless_refs()
+			_expr_ref_overlay.queue_redraw())
+	node.parameter_changed.connect(func(_nid: String, _pname: String) -> void:
+		_expr_refs_dirty = true
+		if _nid == _hovered_node_id:
+			_rebuild_wireless_refs()
+			_expr_ref_overlay.queue_redraw())
 	add_child(view)
 	_node_views[node.id] = view
 
@@ -1683,6 +1703,45 @@ static func _point_to_segment_dist_sq(p: Vector2, a: Vector2, b: Vector2) -> flo
 
 
 ## Rescans expression references (if dirty) and triggers a redraw of the overlay.
+
+# ─── Wireless node-reference hover ───────────────────────────────────────────
+
+## Called every MouseMotion event. Converts screen pos to graph-content space,
+## finds which node (if any) the mouse is over, and rebuilds _wireless_refs.
+func _update_wireless_hover(local_mouse: Vector2) -> void:
+	var graph_pos := local_mouse / zoom + scroll_offset / zoom
+	var new_hovered := ""
+	for node_id in _node_views:
+		var view: GNNodeView = _node_views[node_id]
+		if Rect2(view.position_offset, view.size).has_point(graph_pos):
+			new_hovered = node_id
+			break
+	if new_hovered != _hovered_node_id:
+		_hovered_node_id = new_hovered
+		_rebuild_wireless_refs()
+		_expr_ref_overlay.queue_redraw()
+
+
+## Scans the hovered node's parameters for node_ref entries whose value
+## names an existing node in the network, and populates _wireless_refs.
+func _rebuild_wireless_refs() -> void:
+	_wireless_refs.clear()
+	if _hovered_node_id.is_empty() or network == null:
+		return
+	var node: GNNode = network.nodes.get(_hovered_node_id, null)
+	if node == null:
+		return
+	var entries: Array = []
+	for param_name in node.parameters:
+		var param: GNParameter = node.parameters[param_name]
+		if param.node_ref_family >= -1:
+			var val: String = str(param.value)
+			if not val.is_empty() and network.nodes.has(val):
+				entries.append({"param_name": param_name, "target_id": val})
+	if not entries.is_empty():
+		_wireless_refs[_hovered_node_id] = entries
+
+
 ## Called every cook frame — the dirty flag avoids redundant full regex rescans.
 func update_expr_refs() -> void:
 	if _expr_refs_dirty:
@@ -1705,9 +1764,50 @@ func _draw_expr_ref_lines() -> void:
 	# --- Ghost wire (pending connection drop) ---
 	_draw_ghost_wire()
 
-	# --- Expression reference lines ---
-	if not expr_refs_visible or _expr_refs.is_empty():
-		return
+	# --- Wireless node reference lines (amber, hover-only) ---
+	if not _wireless_refs.is_empty():
+		var wire_color := Color(1.0, 0.65, 0.1, 0.45)  # Amber, translucent
+		for consumer_id in _wireless_refs:
+			var from_view: GNNodeView = _node_views.get(consumer_id, null)
+			if from_view == null:
+				continue
+			var entries: Array = _wireless_refs[consumer_id]
+			for entry in entries:
+				var to_view: GNNodeView = _node_views.get(entry["target_id"], null)
+				if to_view == null:
+					continue
+				var consumer_center := from_view.position_offset + from_view.size / 2.0
+				var source_center := to_view.position_offset + to_view.size / 2.0
+				var p_src := (source_center - scroll_offset / zoom) * zoom
+				var p_dst := (consumer_center - scroll_offset / zoom) * zoom
+				_draw_dashed_line_on(_expr_ref_overlay, p_src, p_dst,
+						wire_color, 1.5, 6.0, 5.0)
+				# Arrow at midpoint
+				var src_rect := Rect2(
+					(to_view.position_offset - scroll_offset / zoom) * zoom,
+					to_view.size * zoom)
+				var dst_rect := Rect2(
+					(from_view.position_offset - scroll_offset / zoom) * zoom,
+					from_view.size * zoom)
+				var vis_start := _clip_line_to_rect_exit(p_src, p_dst, src_rect)
+				var vis_end   := _clip_line_to_rect_exit(p_dst, p_src, dst_rect)
+				var vis_mid := (vis_start + vis_end) * 0.5
+				var dir := (p_dst - p_src).normalized()
+				var perp := Vector2(-dir.y, dir.x)
+				var arrow_size := 10.0
+				var tip   := vis_mid + dir * arrow_size * 0.6
+				var left  := vis_mid - dir * arrow_size * 0.4 + perp * arrow_size * 0.5
+				var right := vis_mid - dir * arrow_size * 0.4 - perp * arrow_size * 0.5
+				_expr_ref_overlay.draw_colored_polygon(
+						PackedVector2Array([tip, left, right]), wire_color)
+				# Param name label near the source node
+				var label_pos := p_src + (p_dst - p_src).normalized() * 20.0 + Vector2(4, -4)
+				_expr_ref_overlay.draw_string(
+						ThemeDB.fallback_font, label_pos,
+						entry["param_name"],
+						HORIZONTAL_ALIGNMENT_LEFT, -1, 11, wire_color)
+
+
 
 	var line_color := Color(0.2, 0.85, 0.95, 0.55)  # Cyan, semi-transparent
 	var line_width := 1.5
@@ -1761,7 +1861,6 @@ func _draw_expr_ref_lines() -> void:
 
 
 ## Finds where the line from [param origin] to [param target] exits [param rect].
-## Returns the exit point on the rect edge, or [param origin] if it's outside.
 func _clip_line_to_rect_exit(origin: Vector2, target: Vector2, rect: Rect2) -> Vector2:
 	if not rect.has_point(origin):
 		return origin
