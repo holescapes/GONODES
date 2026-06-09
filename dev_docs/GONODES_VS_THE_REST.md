@@ -55,12 +55,12 @@
 |---|---|---|---|---|---|
 | **Primary domain** | Real-time AV, interactive media | Real-time patching, installations | Offline VFX, simulation, procedural modelling | Real-time 3D for live events, broadcast, XR | Real-time AV, VJing, generative art |
 | **Cook paradigm** | Pull-based, demand-driven per frame | Push-based (beta: everything runs; gamma: hybrid with .NET JIT) | Pull-based, demand-driven on dependency change | Full-scene push — entire graph evaluates every frame on GPU | Push-based, topo-sorted per frame with 3-tier guards |
-| **Engine language** | C++ (operators), Python (scripting) | C++ (beta) / .NET C# (gamma, VL) | C++ (HDK), VEX (LLVM JIT), Python/HScript | C++ (proprietary engine, DX11/12) | GDScript (operators) + 132 C++ GDExtension native ops |
+| **Engine language** | C++ (operators), Python (scripting) | C++ (beta) / .NET C# (gamma, VL) | C++ (HDK), VEX (LLVM JIT), Python/HScript | C++ (proprietary engine, DX11/12) | GDScript (operators) + 131 C++ GDExtension native variants |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan — multi-stream | DirectX 11 (beta); Stride/Vulkan (gamma) | Karma GPU (offline), OpenCL | **DirectX 11/12 — unified GPU-resident pipeline**, multi-GPU | Godot Vulkan/GLES3 SubViewport + RenderingDevice compute |
 | **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | Scene nodes (modifiers, generators, effects) — not family-typed | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
 | **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to low hundreds | Dozens to hundreds |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | £5,995+/yr (Builder); Playback bundled with media servers | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | ~200 nodes | **588 operators** across 14 families — 140 TOP, 106 CHOP, 81 SOP, 50 DAT, 37 IMG, 36 UI, 29 SDF, 27 COMP, 15 VOL, 15 NET, 13 POP, 12 MAT, 11 OUT, 3 SCRIPT |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | ~200 nodes | **588 operators** across 15 families -- 138 TOP, 108 CHOP, 85 SOP, 51 DAT, 41 IMG, 36 UI, 29 SDF, 27 COMP, 15 NET, 12 MAT, 12 POP, 12 VOL, 11 OUT, 8 FIX, 3 SCRIPT |
 
 ---
 
@@ -856,7 +856,7 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 - **27 improvement roadmap items:** 26 of 27 implemented. Only FLIP Fluid (hybrid particle-grid) remains as a deliberate future stretch goal (#23).
 - **TOP/IMG gaps:** 18 gap items resolved — 7 new operators built, 4 covered by existing ops, 7 implemented in `gn_ext_opencv`.
 - **COMP gaps:** 10 identified, all 10 implemented (ConstraintCOMP, BoneCOMP, LODCOMP, PathCOMP, VehicleCOMP, NavigationCOMP, FeedbackCOMP, TimeCOMP, AudioListenerCOMP, AudioSourceCOMP).
-- **Audio gaps:** All 13 audio operators implemented in `gn_ext_audio` extension — bringing GONODES to 21 audio operators, exceeding TD's 12.
+- **Audio gaps:** 13 audio operators in `gn_ext_audio`. 9 are fully functional (synthesis, EQ, effects). 4 (AudioMovieCHOP, AudioRenderCHOP, AudioStreamInCHOP, AudioStreamOutCHOP) are stubs awaiting native audio back-end implementation.
 - **CHOP non-audio gaps:** All 4 implemented (AreaCHOP, ReplaceCHOP, GestureCHOP, StateMachineCHOP).
 - **SOP gaps:** All 6 implemented (ResampleSOP, MeasureSOP, CreepSOP, ProjectSOP, HoleSOP, ConvertLineSOP).
 - **DAT gaps:** Both implemented (ParameterDAT, SystemDAT).
@@ -867,23 +867,24 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 
 | Family | Operators | Notes |
 |--------|-----------|-------|
-| **TOP** | 140 | 118 core + 4 native + 18 extension — exceeds TD's ~90 |
-| **IMG** | 37 | 16 core + 21 extension (gn_ext_opencv, gn_ext_blackmagic, gn_ext_depth_sensor) |
-| **CHOP** | 106 | 83 core + 23 extension (gn_ext_audio, gn_ext_midi) — exceeds TD's ~70 |
-| **SOP** | 81 | All core — exceeds TD's ~50 |
-| **DAT** | 50 | 42 core + 8 extension — exceeds TD's ~30 |
-| **COMP** | 27 | All core — physics, proxy fan-out, spatial audio, navigation |
+| **TOP** | 138 | 118 core + 20 extension (ISF, Shadertoy, HAP, NDI, Spout/Syphon, PixelMapper, WebRender, FFmpeg, GPUEncode) |
+| **IMG** | 41 | 17 core + 24 extension (gn_ext_opencv x17, gn_ext_blackmagic x2, gn_ext_depth_sensor x1, gn_ext_ml x3, gn_ext_video_capture x1) |
+| **CHOP** | 108 | 84 core + 24 extension (gn_ext_audio x13, gn_ext_midi x2, gn_ext_ndi x2, gn_ext_libpd x3, gn_ext_ml x3, gn_ext_pixel_mapper x1) |
+| **SOP** | 85 | All core -- exceeds TD's ~50 |
+| **DAT** | 51 | 43 core + 8 extension (gn_ext_opencv x3, gn_ext_ml x1, gn_ext_ndi x0, gn_ext_pixel_mapper x0, other x4) |
+| **COMP** | 27 | All core -- physics (Jolt), proxy fan-out, spatial audio, navigation, vehicle |
 | **MAT** | 12 | At parity with TD |
-| **POP** | 13 | GPU compute SSBO — exceeds all competitors |
-| **VOL** | 15 | Unique — no competitor has built-in 3D volumes |
-| **SDF** | 29 | Unique — no competitor has built-in SDF |
-| **UI** | 36 | 33 core + 3 extension — exceeds TD's ~25 |
-| **OUT** | 11 | 10 core + 1 extension |
-| **NET** | 15 | Host embedding + subnets |
-| **SCRIPT** | 3 | 3-tier scripting (GDScript/Python/C++) |
-| **TOTAL** | **578** | **100% coverage** vs TD/vvvv/Houdini/Jitter combined |
+| **POP** | 12 | GPU compute SSBO -- exceeds all competitors |
+| **VOL** | 12 | Unique -- no competitor has built-in 3D compute volumes |
+| **SDF** | 29 | Unique -- extension-defined family, pure GDScript |
+| **UI** | 36 | 33 core + 3 extension -- exceeds TD's ~25 |
+| **OUT** | 11 | 10 core + 1 extension (HapOUT) |
+| **NET** | 15 | Host embedding (LibGodot) + subnet tunnels |
+| **FIX** | 8 | Extension-defined family (PixelMapper) -- LED UV layout for DMX |
+| **SCRIPT** | 3 | 1 core (GDScriptSCRIPT) + 2 extension (PythonSCRIPT, NativeSCRIPT) |
+| **TOTAL** | **588** | 469 core + 119 from 23 extensions |
 
-**GONODES exceeds competitor coverage in:** TOP (140 vs TD's 90), CHOP (106 vs TD's 70), SOP (81 vs TD's 50), DAT (50 vs TD's 30), POP (13 vs 0), VOL (15 vs 0), SDF (29 vs 0), UI (36 vs TD's ~25).
+**GONODES exceeds competitor coverage in:** TOP (138 vs TD's ~90), CHOP (108 vs TD's ~70), SOP (85 vs TD's ~50), DAT (51 vs TD's ~30), POP (12 vs 0), VOL (12 vs 0), SDF (29 vs 0), UI (36 vs TD's ~25).
 
 **Remaining stretch goals (not operator gaps):**
 - FLIP Fluid (#23) — hybrid particle-grid simulation (very high effort, deliberate future)
@@ -948,7 +949,7 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 | Dimension | TouchDesigner | vvvv | Jitter (Max/MSP) | Notch | GONODES |
 |-----------|--------------|------|-------------------|-------|---------|
 | **Maturity** | 20+ years, industry standard | 25+ years (beta→gamma transition) | 25+ years, deep audio roots | ~10 years, dominant in live events | Alpha — 1 year of development |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | ~200 nodes | **588 operators** across 14 families |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | ~200 nodes | **588 operators** across 15 families |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) | $399 (perpetual) or $99/yr sub | £5,995+/yr (Builder) | **Free, open source (MIT)** |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan | DirectX 11 (beta) / Stride+Vulkan (gamma) | OpenGL (legacy) / Metal (modern) | **DirectX 11/12 — unified GPU-resident pipeline** | Vulkan + GLES3 via Godot 4.6 |
 | **Host embedding** | TouchEngine SDK | No | Max for Live; no general SDK | Notch Playback (disguise, Unreal, Unity) | **libgonodes — full C API, 9 data contexts** |

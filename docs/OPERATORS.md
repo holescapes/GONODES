@@ -1,6 +1,8 @@
 # GONODES — Operator Reference
 
-> **588 operators** across 15 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, FIX, SCRIPT, plus 93 native C++ acceleration variants and 24 extension addons.
+> **588 operators** across 15 families: TOP (138), CHOP (108), SOP (85), DAT (51), IMG (41), UI (36), SDF (29), COMP (27), NET (15), MAT (12), POP (12), VOL (12), OUT (11), FIX (8), SCRIPT (3).
+> 469 are pure GDScript core operators. 119 are from the 23 bundled extensions.
+> 131 of the core operators have native C++ accelerated equivalents in `gn_ext_native` that activate automatically when the native binary is present.
 
 ---
 

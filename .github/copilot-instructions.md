@@ -1,11 +1,11 @@
 # GONODES — Copilot Instructions
 
 > Node-based visual programming framework on Godot 4.6 for real-time visual art.
-> 588 operators, 14 families, GDScript + GDExtension C++.
+> 588 operators, 15 families (469 core + 119 extension), 131 native C++ accelerated variants, 23 extensions.
 
 ## Architecture
 
-- **Families:** TOP (GPU texture), IMG (CPU image), CHOP (channels), DAT (tables), SOP (geometry), POP (GPU particles), VOL (3D volumes), COMP (3D scene), MAT (materials), OUT (output sinks), UI (widgets), SDF (signed distance), SCRIPT (code), NET (subnets)
+- **Families:** TOP (138), IMG (41), CHOP (108), DAT (51), SOP (85), POP (12), VOL (12), COMP (27), MAT (12), OUT (11), UI (36), SDF (29 — extension-defined), FIX (8 — extension-defined), SCRIPT (3), NET (15)
 - **Cook engine:** Demand-driven DAG. Only nodes feeding active sinks cook. `time_dependent = true` means cook every frame.
 - **Data flow:** Each family has a `GNData` subclass (`GNTextureData`, `GNChannelData`, `GNGeoData`, `GNTableData`, `GNImageData`, etc.)
 - **Base classes:** `GNTopBase`, `GNImgBase`, `GNChopBase`, `GNDatBase`, `GNSopBase`, `GNCompBase`, `GNMatBase`, `GNPopBase`, `GNVolBase`, `GNUiBase`, `GNSdfBase`

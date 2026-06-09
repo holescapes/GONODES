@@ -19,29 +19,30 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**588 operators** across **14 families**, plus **93 native C++ accelerated variants** and **23 extensions**.  
+**588 operators** across **15 families**, plus **131 native C++ accelerated variants** and **23 extensions**.
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
 
-| Family | What It Processes | Examples |
-|--------|-------------------|----------|
-| **TOP** (139) | Textures & images | Noise, Composite, Blur, ChromaKey, Feedback, Render, Deform, Reorder |
-| **CHOP** (82) | Signals & channels | LFO, Keyframe, Sequence, Clip, Channel, Object, Skeleton, MIDI |
-| **SOP** (74) | 3D geometry | Grid, Boolean, Extrude, Smooth, PolyBevel, Remesh, PolySpline |
-| **DAT** (47) | Data tables & text | JSON, Web, WebSocket, Serial, DMX, RenderPick, PanelExecute |
-| **IMG** (37) | CPU image processing | Noise, EdgeDetect, PixelSort, Webcam, ScreenGrab, DepthSensor, Blackmagic |
-| **UI** (36) | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer |
-| **SDF** (29) | Signed distance fields | Box, Sphere, Torus, Boolean ops, Bend, Twist, Raymarch |
-| **COMP** (23) | 3D scene & sub-networks | Geometry, Camera, Light, RigidBody, Instance, Replicator |
-| **NET** (15) | Network I/O | OSC, WebSocket, HTTP, Spout, Syphon, NDI |
-| **VOL** (15) | Volumetric 3D textures | Noise, Fluid sim, Marching Cubes, Raymarch |
-| **POP** (13) | GPU particles | Source, Force, Turbulence, Collision, Attract, Advect |
-| **MAT** (12) | Materials & shaders | PBR, Custom Shader, Wireframe, PointSprite |
+| Family | Count | What It Processes | Examples |
+|--------|-------|-------------------|----------|
+| **TOP** | 138 | GPU texture processing | Noise, Composite, Blur, ChromaKey, Feedback, Render, GLSL, ISF, Shadertoy, Deform |
+| **CHOP** | 108 | Signals, channels & audio | LFO, Audio synthesis, DMX, MIDI, OSC, Gamepad, Keyboard, Skeleton, State machine |
+| **SOP** | 85 | 3D geometry | Grid, Boolean, Extrude, Subdivide, Remesh, ClothSim, L-System, PolyBevel, HeightField |
+| **DAT** | 51 | Tables, text & data | JSON, WebSocket, MQTT, HTTP, ArtNet, Serial, OSC, QR, RenderPick, PanelExecute |
+| **IMG** | 41 | CPU image processing | OpenCV detection, EdgeDetect, OpticalFlow, PixelSort, Webcam, ArUco, ML inference |
+| **UI** | 36 | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer, Bezier drag |
+| **SDF** | 29 | Signed distance fields | Box, Sphere, Torus, Union/Intersection/Subtract, Bend, Twist, Raymarch |
+| **COMP** | 27 | 3D scene composition | Geometry, Camera, Light, RigidBody, SoftBody, Animation, NavMesh, Vehicle |
+| **NET** | 15 | Subnets & host bridge | SubNetwork, InTunnel, OutTunnel, HostIn/Out for LibGodot embedding |
+| **MAT** | 12 | Materials & shaders | PBR, Custom GLSL, Wireframe, PointSprite, FluidSurface, NormalMap |
+| **POP** | 12 | GPU particles | Source, Force, Turbulence, Boids, Collision, Advect (VOL), Ribbon trail |
+| **VOL** | 12 | Volumetric 3D textures | Noise, Fluid sim (Navier-Stokes), Pyro, Marching Cubes, Raymarch |
+| **OUT** | 11 | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
+| **FIX** | 8 | LED fixture mapping | Strip, Grid, Matrix, Custom — define LED UV positions for GPU sampling and DMX routing |
+| **SCRIPT** | 3 | User scripting | GDScript, Python (NumPy), C++ — template-based, multi-family output |
 
-> **GPU/CPU boundary rule:** Operators that require GPU→CPU texture readback (histogram, blob detection, pixel sorting) are always IMG family — never TOP. This makes the performance cost visible in your graph. Use `TOPtoIMG` / `ImgToTOP` bridges to cross the boundary explicitly.
-| **OUT** (11) | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
-| **SCRIPT** (3) | User scripting | GDScript, Python, C++ — template-based multi-family output |
+> **GPU/CPU boundary rule:** Operators requiring GPU->CPU readback (histogram, blob detection, pixel sorting) always live in the IMG family, never TOP. The performance cost is visible in your graph. Cross the boundary explicitly with `TOPtoIMG` / `ImgToTOP`.
 
 ### Live Expression System
 
@@ -85,26 +86,33 @@ Physics simulation (Jolt), environment/post-processing, instancing, animation �
 
 ### Extensions
 
-| Extension | What It Does |
-|-----------|-------------|
-| **Shadertoy** | Paste any `mainImage` GLSL shader — auto-translated uniforms, URL fetch, 10 presets |
-| **ISF** | Interactive Shader Format v2 — auto-generated params from JSON headers, multi-pass |
-| **HAP** | GPU-direct video codec — S3TC/DXT frames uploaded to GPU with zero CPU decode |
-| **Spout** | Windows GPU texture sharing with Resolume, OBS, TouchDesigner |
-| **Syphon** | macOS GPU texture sharing with VDMX, MadMapper, CoGe |
-| **Video Capture** | Cross-platform webcam input (Media Foundation / AVFoundation / V4L2) |
-| **MIDI** | RtMidi I/O — notes, CC, pitch bend to controllers and DAWs |
-| **GPU Encode** | Hardware H.264 MP4 recording (Media Foundation / VideoToolbox) |
-| **Mapper** | Projection mapping toolkit — QuadMap, BezierMap, GridWarp, EdgeBlend, and more |
-| **SDF** | Signed distance field composition — 10 primitives, 5 booleans, 8 modifiers, raymarcher |
-| **Serial** | Serial port I/O for hardware communication (Arduino, DMX controllers, sensors) |
-| **NDI** | NDI video/audio I/O — send and receive over the network |
-| **ML** | ONNX Runtime ML inference — pose, hand, face, depth, style, segmentation, detection |
-| **Depth Sensor** | Azure Kinect + RealSense + Ultraleap — depth, color, skeleton, hand tracking |
-| **Blackmagic** | Blackmagic Design capture card input/output |
-| **User Native** | Write custom C++ operators in-editor with hot-reload |
-| **User Python** | Write custom Python operators with NumPy |
-| **Web Render** | Render web pages (HTML/CSS/JS/WebGL) to texture via Chromium CEF — URL or inline HTML mode, mouse/keyboard input forwarding, live JS execution |
+All 23 extensions are self-contained — delete a folder and it disappears cleanly, no core changes required.
+
+| Extension | Ops | What It Does | Requirements |
+|-----------|-----|--------------|--------------|
+| **SDF** | 29 | Signed distance field composition — 10 primitives, 5 booleans, 8 modifiers, raymarcher | Pure GDScript — no build needed |
+| **Audio** | 13 | Synthesis, EQ, reverb, delay, pitch shift, gate, envelope | Pure GDScript. **Note:** 4 operators (MovieCHOP, RenderCHOP, StreamIn/Out) are stubs awaiting native audio back-end |
+| **OpenCV** | 20 | 20 computer vision operators — contour, Hough, ArUco, optical flow, calibration | Windows binary shipped; other platforms: `build/SConstruct` |
+| **ML** | 7 | ONNX Runtime ML inference — pose, hand, face, depth, style, segmentation, detection | Run `python scripts/setup_ml.py` to download ONNX Runtime (~30 MB) |
+| **Mapper** | 10 | Projection mapping — QuadMap, BezierMap, GridWarp, EdgeBlend, calibration | Pure GDScript — no build needed |
+| **PixelMapper** | 10 | LED pixel mapping — define fixture layouts, GPU sample, DMX output | Pure GDScript — no build needed |
+| **Shadertoy** | 1 | Paste any `mainImage` GLSL — auto-translated uniforms, URL fetch, 10 presets | Pure GDScript — no build needed |
+| **ISF** | 1 | Interactive Shader Format v2 — auto-generated params from JSON headers, multi-pass | Pure GDScript — no build needed |
+| **LibPd** | 3 | Pure Data audio synthesis — send/receive messages, control patches | Requires compiled libpd binary (see extension README) |
+| **Serial** | 2 | Serial port I/O — Arduino, DMX controllers, sensors | Requires gn_ext_native binary for full functionality |
+| **HAP** | 2 | GPU-direct HAP/HAP-Q video codec — zero CPU decode, S3TC frames direct to GPU | Windows binary shipped |
+| **Spout** | 2 | Windows GPU texture sharing with Resolume, OBS, TouchDesigner | Windows only. Binary shipped |
+| **Syphon** | 2 | macOS GPU texture sharing with VDMX, MadMapper, CoGe | macOS only. Requires Syphon Framework build |
+| **Video Capture** | 1 | Webcam / capture device input (Media Foundation / AVFoundation / V4L2) | Binary shipped (Windows); other platforms: build from source |
+| **MIDI** | 2 | RtMidi I/O — notes, CC, pitch bend, clock | Binary shipped (Windows) |
+| **GPU Encode** | 1 | Hardware H.264/H.265 recording via OS encoder | Windows + macOS only. Binary shipped |
+| **FFmpeg** | 1 | H.264/H.265/VP9/AV1 video decode via FFmpeg | Requires [EIRTeam.FFmpeg](https://github.com/EIRTeam/EIRTeam.FFmpeg) GDExtension |
+| **NDI** | 4 | NDI video/audio I/O over the network | Requires proprietary NDI SDK. Disabled until SDK is present |
+| **Depth Sensor** | 2 | Azure Kinect + RealSense + Ultraleap — depth, skeleton, hand tracking | Requires device SDK (Azure Kinect SDK / RealSense SDK / Ultraleap SDK) |
+| **Blackmagic** | 3 | Blackmagic Design DeckLink capture/output | Requires DeckLink hardware and Blackmagic SDK |
+| **User Native** | 1 | Write custom C++ operators in-editor with hot-reload | Bundled godot-cpp + MSVC/Clang. Compiles on first use |
+| **User Python** | 1 | Write custom Python operators with NumPy | Python 3.10 + runtime DLLs shipped (Windows); other platforms: setup script |
+| **Web Render** | 1 | Render HTML/CSS/JS/WebGL to texture via Chromium CEF | Requires `python scripts/setup_cef.py` (~550 MB download) |
 
 Extensions can go far beyond adding operators — they can define **entirely new data families** with custom port types, wire colors, data classes, and palette sections. The SDF extension demonstrates this: it registers a new "SDF" family at runtime, complete with 40+ operators, custom data type (`GNSDFData`), and its own wire color. No core code modification is required to add a new family. See [CONTRIBUTING.md §5](dev_docs/CONTRIBUTING.md) for the full extension authoring guide.
 
