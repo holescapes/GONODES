@@ -443,7 +443,7 @@ func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, p
 					var fix: Dictionary = _overlay.fixtures[hit.x]
 					_overlay.fixture_tooltip = fix.get("name", "")
 					_overlay.tooltip_pos = _overlay._uv_to_px(uv)
-					else:
+				else:
 					_overlay.fixture_tooltip = ""
 				_overlay.queue_redraw()
 				return hit.x >= 0
