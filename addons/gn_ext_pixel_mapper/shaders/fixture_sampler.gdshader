@@ -28,36 +28,35 @@ void fragment() {
 
 	if (led_idx >= total_leds || channel_idx >= channels_per_led) {
 		COLOR = vec4(0.0);
-		return;
-	}
-
-	// Read LED position from packed texture (normalised index)
-	float led_u = (float(led_idx) + 0.5) / float(total_leds);
-	vec4 pos_data = texture(led_pos_tex, vec2(led_u, 0.5));
-	vec2 led_uv     = pos_data.rg;   // uv_x, uv_y
-	vec2 extent     = pos_data.ba;   // half-extents for box filter
-
-	vec4 sampled;
-	if (sample_mode == 1 && (extent.x > 0.0 || extent.y > 0.0)) {
-		// 3×3 tap box filter — cheap but effective for small extents
-		vec4 acc = vec4(0.0);
-		for (int dy = -1; dy <= 1; dy++) {
-			for (int dx = -1; dx <= 1; dx++) {
-				vec2 tap = led_uv + vec2(float(dx) * extent.x, float(dy) * extent.y);
-				acc += texture(source_tex, tap);
-			}
-		}
-		sampled = acc / 9.0;
 	} else {
-		sampled = texture(source_tex, led_uv);
+		// Read LED position from packed texture (normalised index)
+		float led_u = (float(led_idx) + 0.5) / float(total_leds);
+		vec4 pos_data = texture(led_pos_tex, vec2(led_u, 0.5));
+		vec2 led_uv   = pos_data.rg;   // uv_x, uv_y
+		vec2 extent   = pos_data.ba;   // half-extents for box filter
+
+		vec4 sampled;
+		if (sample_mode == 1 && (extent.x > 0.0 || extent.y > 0.0)) {
+			// 3x3 tap box filter -- cheap but effective for small extents
+			vec4 acc = vec4(0.0);
+			for (int dy = -1; dy <= 1; dy++) {
+				for (int dx = -1; dx <= 1; dx++) {
+					vec2 tap = led_uv + vec2(float(dx) * extent.x, float(dy) * extent.y);
+					acc += texture(source_tex, tap);
+				}
+			}
+			sampled = acc / 9.0;
+		} else {
+			sampled = texture(source_tex, led_uv);
+		}
+
+		// Route the requested channel into the red output component
+		float value = 0.0;
+		if (channel_idx == 0)      value = sampled.r;
+		else if (channel_idx == 1) value = sampled.g;
+		else if (channel_idx == 2) value = sampled.b;
+		else if (channel_idx == 3) value = sampled.a;
+
+		COLOR = vec4(value, value, value, 1.0);
 	}
-
-	// Route the requested channel into the red output component
-	float value = 0.0;
-	if (channel_idx == 0) value = sampled.r;
-	else if (channel_idx == 1) value = sampled.g;
-	else if (channel_idx == 2) value = sampled.b;
-	else if (channel_idx == 3) value = sampled.a;
-
-	COLOR = vec4(value, value, value, 1.0);
 }
