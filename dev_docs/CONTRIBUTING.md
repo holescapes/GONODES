@@ -953,49 +953,423 @@ func test_my_operator_basic_cook():
 
 ---
 
-## 10. Hard Rules — Non-Negotiable
+## 10. Hard Rules -- Non-Negotiable
 
-These rules are absolute constraints discovered during development. Violations will block acceptance. Full details in `GONODES_CONTEXT.md` §25.
+These rules are absolute constraints discovered during development. Violations will block acceptance.
+The machine-readable terse form lives in `.github/copilot-instructions.md` §25.
+**Rule 25.39:** Every rule in copilot-instructions.md must have a human-readable entry here.
 
-### Hard Rule 25.1: No CPU Roundtrips for Real-Time Texture Data
+---
 
-**NEVER** call `Texture2D.get_image()` or `Image.get_data()` in a per-frame code path. This triggers a GPU→CPU readback stalling the pipeline (5–15ms). Use `ViewportTexture` (live GPU reference) for all real-time texture routing.
+### 25.1 -- No CPU Roundtrips for Real-Time Texture Data
 
-### Hard Rule 25.11: COMP Nodes Return Null Output
+**NEVER** call `Texture2D.get_image()` or `Image.get_data()` in a per-frame code path.
+This triggers a GPU->CPU readback that stalls the render pipeline (5-15 ms per call).
+Use `ViewportTexture` (live GPU reference) for all real-time texture routing.
 
-COMPs return `null` from `_cook()`. Their output is a Godot `Node3D` accessed via API methods (`get_mesh_instance()`, `get_camera()`, etc.). The cook engine suppresses null-output warnings for COMP nodes.
+**Why it matters:** A single `get_image()` call in a time-dependent node running at 60 fps
+causes 300-900 ms of cumulative stalls per second.
 
-### Hard Rule 25.13: Lazy Cook / No Unnecessary Work
+---
 
-A node must NOT cook if nothing changed. Only cook when: `time_dependent = true`, a parameter changed, or upstream input changed. Never set `time_dependent = true` unless the operator genuinely changes every frame.
+### 25.2 -- Expression base_instance Architecture
 
-### Hard Rule 25.14: Tooltip Descriptions Mandatory
+Functions called inside a Godot `Expression` are method lookups on `base_instance`, not
+input variables. Passing `Callable` objects as input variables silently fails.
+Always implement expression-callable functions as real methods on the `base_instance` object.
 
-Every operator must provide: (1) a `description=` field in its `.cfg` entry (single source of truth, injected at runtime), (2) description string on every `add_input()`/`add_output()` call, (3) description string on every `GNParameter.create_*()` call.
+---
 
-### Hard Rule 25.20: Editor/Engine Separation
+### 25.3 -- GNFamily.get_name -> get_family_name
 
-`core/` and `operators/` must NEVER import or reference `ui/`. The cook engine and all operators must run headless without any editor present. No `preload()`/`load()` of any `ui/` path from engine code.
+Never define a method called `get_name()` on any GNFamily subclass or related object.
+`Object.get_name()` is a built-in that returns the Node's scene-tree name. Shadowing it
+breaks all code that calls `node.get_name()`. Use `get_family_name(family)` instead.
 
-### Hard Rule 25.21: Help Example Patches Required
+---
 
-Every new operator must ship with at least one `.gnpatch` example file in `addons/gonodes/help/<family>/`. See [§4.3](#43-help-example-patch-required--hard-rule-2521) for format details.
+### 25.4 -- WindowOUT Cook-Dirty vs Param-Dirty
 
-### Hard Rule 25.23: UTF-8 Encoding — No PowerShell String Manipulation
+Do NOT use `if dirty:` to gate window configuration code in WindowOUT. The `dirty` flag
+is true every single frame when upstream is time-dependent. Use a dedicated
+`_window_params_dirty` flag that is only set in `_on_parameter_changed()`.
 
-All text files (`.md`, `.gd`, `.cfg`, `.tscn`, `.gnpatch`) are UTF-8 without BOM. **NEVER** use PowerShell `Get-Content` / `Set-Content` on files with non-ASCII characters without `-Encoding UTF8` on **both** calls. PowerShell defaults to Windows-1252, causing compounding corruption. **Prefer Python** for text manipulation involving non-ASCII. Corruption signature: `Ã¢â‚¬â€` instead of `—`. See `GONODES_CONTEXT.md` §25.23 and `BUILD.md` → UTF-8 Encoding Safeguards for full details.
+---
 
-### Hard Rule 25.24: Multi-Output Nodes — Demand-Gated Per-Port Work
+### 25.5 -- Anchors: set_anchors_and_offsets_preset
 
-When an operator has 2+ output ports, its `_cook()` must split into **shared core** (unconditional) and **per-port work** (guarded by `is_output_demanded(N)`). Every non-trivial per-port code path — CPU data extraction, GPU readback, mesh building, data marshaling — MUST be inside an `is_output_demanded()` guard. Override `get_output_data(port_index)` to route each port to its cached data.
+`Control.anchors_preset = PRESET_FULL_RECT` only sets anchor ratios -- it does NOT update
+the offsets. Result: the control stays 0x0 pixels. Always call
+`set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` AFTER the control is added to
+the scene tree.
 
-Demand is detected from three sources: wire connections, wireless Select operators, and expression references. No port is auto-demanded.
+---
 
-**Exceptions** (must be commented in code with `# MULTI-OUTPUT EXCEPTION:`):
-- **Coupled simulations** (FluidVOL, PyroVOL) — mutually dependent physics fields; outputs are views into shared state that must compute fully.
-- **GPU MRT rendering** (GLSLMultiTOP MRT path) — single draw call writes all outputs simultaneously. The fallback path must still guard per-output renders.
+### 25.6 -- embed_subwindows = false for Real OS Windows
 
-See `GONODES_CONTEXT.md` §25.24 for full details and code examples.
+`project.godot` must have `window/subwindows/embed_subwindows=false` for `WindowOUT` to
+create real OS-level output windows. Without this setting, Godot embeds all sub-windows
+inside the main window and WindowOUT cannot produce independent output displays.
+
+---
+
+### 25.7 -- DisplayServer API
+
+Use `DisplayServer.screen_get_size()` / `DisplayServer.screen_get_position()`.
+The legacy `get_screen_size()` method does not exist in Godot 4.6.
+For per-window vsync: `DisplayServer.window_set_vsync_mode(mode, window_id)`.
+
+---
+
+### 25.8 -- GraphEdit Signal Naming
+
+`GraphEdit` has built-in signals named `node_selected` and `selection_cleared`.
+Custom signals with those names will conflict silently. Use distinct names
+(`operator_selected`, `operator_deselected`, etc.) for any custom selection signals.
+
+---
+
+### 25.9 -- Inspector Per-Cook Updates
+
+Never push text into a focused editor widget during cook -- it will clobber the user's
+in-progress edits at 60 Hz. Use a lightweight `update_expression_status()` call that
+only updates status indicators, and always check `_expr_edit.has_focus()` before
+touching text content.
+
+---
+
+### 25.10 -- Dynamic Input Ports (Auto-Grow)
+
+Variable-input operators (Merge*, Switch*, RenderTOP) must call `_enable_dynamic_inputs()`
+in `_init_ports()`. The system then auto-adds a trailing empty slot on connect and
+auto-removes it on disconnect. Operators must handle `null` inputs for disconnected ports.
+Do NOT use the old `num_inputs` parameter pattern.
+
+---
+
+### 25.11 -- COMP Nodes: Scene-Node Ownership, Proxy Fan-Out
+
+COMPs return `GNCompData` wrapping a reference to their singleton `_scene_node`.
+Scene-node resolution always uses `cached_output as GNCompData` (data-type check,
+never node-family check). When a COMP fans out to multiple consumers, the first adopts
+the original node; subsequent consumers get proxies via `GNProxyTree` that share GPU
+resources. See `COOK_ENGINE.md` for the proxy lifecycle.
+
+---
+
+### 25.12 -- SubViewport World3D Isolation
+
+`RenderTOP` must assign `SubViewport.world_3d = World3D.new()` before adding the viewport
+to the scene tree. Without this, 3D content bleeds into the Godot editor viewport.
+Do NOT use `own_world_3d = true` -- it causes a duplicate-World3D crash with Jolt physics.
+
+---
+
+### 25.13 -- Lazy Cook / No Unnecessary Work
+
+A node must not cook if nothing changed. Never set `time_dependent = true` unless the
+operator's output genuinely differs every frame (clocks, random with per-frame seed, live
+input). Unnecessary `time_dependent = true` forces every downstream node to cook every
+frame regardless of whether anything is connected to a sink.
+
+---
+
+### 25.14 -- Descriptions and Labels Mandatory
+
+Every operator needs:
+1. `description=` in its `.cfg` entry (shown in the palette tooltip and help docs)
+2. A description string on every `add_input()` / `add_output()` call
+3. Non-empty label AND description on every `GNParameter.create_*()` call
+
+Empty labels cause blank rows in the inspector. Empty descriptions leave tooltips and
+generated help pages incomplete.
+
+---
+
+### 25.15 -- Dynamic Port Counts
+
+Use `set_input_count(count, family, prefix, desc)` / `set_output_count(...)` to
+programmatically change port counts. These methods rebuild port arrays and emit
+`ports_changed(node_id)` so the graph editor prunes stale wires automatically.
+Prefer `_enable_dynamic_inputs()` for Switch/Merge-style operators (auto-grow).
+
+---
+
+### 25.16 -- Canvas Anchoring in TOP SubViewports
+
+After calling `add_child(_canvas)`, call
+`_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)`.
+In `_cook()`, only set `_viewport.size = res` -- the canvas follows via anchors.
+Applies to all 21 SubViewport-based TOP operators.
+
+---
+
+### 25.17 -- Viewer Panel Sizing
+
+Use `TextureRect.expand_mode = EXPAND_IGNORE_SIZE` (value 1) and
+`stretch_mode = KEEP_ASPECT_CENTERED` (value 5). Set `clip_contents = true` and a small
+`custom_minimum_size.y` so the viewer does not collapse to zero height.
+
+---
+
+### 25.18 -- Node Renaming Full Chain
+
+On rename: update the `nodes` dict key, `GNNode.id`, `GNNode.name`, all `GNConnection`
+references, and all expression strings (regex path-segment replacement in params,
+`component_expressions`, scripts, `CallbackDAT` slots). Emit `node_renamed` at the end.
+Node IDs must match `^[a-zA-Z_][a-zA-Z0-9_]*$`.
+
+---
+
+### 25.19 -- GNNode Lifecycle
+
+- `_init()` -- sets `node_type`, `family`, `node_description`. No ports, no parameters.
+- `initialize(id)` -- calls `_init_ports()` + `_init_parameters()`, wires param signals.
+  Use this for all live network nodes.
+- For palette/introspection only: call `node._init_ports()` explicitly after `.new()`.
+  Do NOT call `initialize()` for introspection nodes.
+- When an operator script is deleted or renamed, also delete the orphaned `.gd.uid`
+  sidecar file -- Godot does not clean these up.
+
+---
+
+### 25.20 -- Editor/Engine Separation
+
+`core/` and `operators/` must NEVER import or reference `ui/`. The cook engine and all
+operators must run headless. No `preload()` / `load()` of any `ui/` path from engine code.
+
+---
+
+### 25.21 -- Help Example Patches Required
+
+Every operator must ship at least one `.gnpatch` in `help/<family>/`.
+Naming: `<node_type>_<label>.gnpatch`. Must use `class_name` in the `type` field.
+Keep patches to 1-4 nodes, max ~3 patches per operator.
+See [HELP_PATCH_RULES.md](HELP_PATCH_RULES.md) for the complete format specification.
+
+---
+
+### 25.22 -- Help Patch Sink Rule (WindowOUT Chain by Family)
+
+Every help patch must terminate at `WindowOUT` (512x512, `open: true`) via:
+
+| Family | Chain to WindowOUT |
+|--------|--------------------|
+| TOP | direct |
+| IMG | ImgToTOP -> WindowOUT |
+| CHOP | CHOPtoTOP -> WindowOUT |
+| SOP | GeometryCOMP + CameraCOMP -> RenderTOP -> WindowOUT |
+| COMP (scene) | + CameraCOMP -> RenderTOP -> WindowOUT |
+| DAT | TextTOP -> WindowOUT |
+| MAT | GeometryCOMP (MAT port 1) + CameraCOMP -> RenderTOP -> WindowOUT |
+
+---
+
+### 25.23 -- UTF-8 Encoding: No PowerShell String Manipulation
+
+All text files are UTF-8 without BOM. Never use PowerShell `Get-Content` / `Set-Content`
+on files with non-ASCII characters without `-Encoding UTF8` on BOTH calls. PowerShell
+defaults to Windows-1252, causing double-encoding corruption (`--` becomes `Ã¢â‚¬â€`).
+**Prefer Python** for any text file manipulation involving non-ASCII characters.
+
+---
+
+### 25.24 -- Multi-Output Demand Gating
+
+When an operator has 2+ output ports:
+- **Shared core** (e.g., parsing, GPU dispatch) runs unconditionally.
+- **Per-port work** (extraction, readback, mesh building) is guarded by `is_output_demanded(N)`.
+- Override `get_output_data(port_index)` to route each port to its cached result.
+
+Demand sources: wire connections, wireless Select operators, expression references.
+No port is auto-demanded. Exceptions (comment with `# MULTI-OUTPUT EXCEPTION:`):
+coupled physics sims, GPU MRT. See [COOK_ENGINE.md](COOK_ENGINE.md) for code examples.
+
+---
+
+### 25.25 -- Shared Logic in Base Classes, Not Subclasses
+
+When 2+ operators share helper logic, move it to the family base class
+(`GNCompBase`, `GNTopBase`, etc.) or to `GNNode`. Never duplicate utility methods across
+operator subclasses. Check the base class first -- the method may already exist.
+
+---
+
+### 25.26 -- Check Data Types, Not Node Families
+
+When consuming upstream output, check the **data type**:
+
+```gdscript
+# Correct
+var tex: GNTextureData = inputs[0] as GNTextureData
+var chop: GNChannelData = data as GNChannelData
+
+# Wrong -- silently rejects valid data from SubNetworkNode, custom ops
+if node.family == GNFamily.Type.TOP: ...
+if node is GNTopBase: ...
+```
+
+Data-type checks work uniformly for `SubNetworkNode`, `GNCustomOperator`, and any future
+node that outputs the right data type regardless of its family. See [DATA_TYPES.md](DATA_TYPES.md).
+
+---
+
+### 25.27 -- COMP Proxy Bookkeeping for New Node Types
+
+When adding a new COMP that creates a visual `_scene_node`, check
+`GNProxyTree._create_proxy_node()` to add a typed proxy factory for it. Unknown types
+become plain `Node3D` placeholders. Currently proxied: MeshInstance3D, MultiMeshInstance3D,
+Camera3D, DirectionalLight3D, OmniLight3D, SpotLight3D. New visual types (GPUParticles3D,
+Decal, etc.) need a factory + sync method + test in `tests/unit/core/test_proxy_tree.gd`.
+
+---
+
+### 25.28 -- Family-Output Coherence (Port 0 = Family Identity)
+
+An operator's family must match its primary output (port 0) data type. A CHOP emits
+`GNChannelData`, a TOP emits `GNTextureData`, etc. If a node consumes family X but outputs
+family Y, it belongs to family Y and should be named to indicate the conversion
+(`CHOPtoTOP`, `MarchingCubesSOP`). Never embed a silent cross-family conversion in a
+non-bridge operator.
+
+Exceptions: explicit bridge operators, multi-output operators where only secondary ports
+(1+) emit a different family (guarded by Rule 25.24), NET host-bridge operators.
+
+---
+
+### 25.29 -- Native Extension Graceful Degradation
+
+Extensions with GDExtension binaries must degrade gracefully when binaries are missing:
+1. Ship `.gdextension.disabled` at extension root -- activated by `sync_native_extensions()` when binary exists.
+2. Declare `dependencies = ["MyNativeClass"]` in `gn_extension.cfg` -- registry skips if `ClassDB.class_exists()` fails.
+3. Never reference native class names directly in GDScript -- use `ClassDB.class_exists()` + `ClassDB.instantiate()` + `.call()`. Declare variables as `Object`, not the native type.
+
+See [EXTENSIONS.md](EXTENSIONS.md) and [BUILD.md](BUILD.md) for the full build system flow.
+
+---
+
+### 25.30 -- node_type Uniqueness
+
+Every operator's `node_type` must be a unique lowercase string. Never reuse the family
+name as the node_type. Collisions break operator registry keying, help patch generation,
+`op()` expression lookups, and palette search. Run `python scripts/check_node_types.py`
+to detect duplicates before submitting.
+
+---
+
+### 25.31 -- No Pre-Release Compatibility Code
+
+Before v1.0 ships, never add migration paths, compat shims, or fallback code for
+internal-only features. Backward compatibility is only meaningful after a public release.
+Code that says "kept for API compatibility" during development is dead weight -- remove it.
+
+---
+
+### 25.32 -- Stub API Functions Must Report Errors
+
+Any public API function -- GDScript or C -- that is declared but not yet implemented must
+set an error or warning, never return null/zero silently:
+- GDScript: `push_warning("not implemented")` or `node_warning = "..."`
+- libgonodes C API: `gn_set_error(inst, "...")` + appropriate error code
+
+Silent null returns trap integrators who test for success and never detect the failure.
+
+---
+
+### 25.33 -- Scripts Must Not Hardcode Family Lists
+
+Python build and utility scripts must never hardcode family name lists like
+`["chop", "top", "sop"]`. Always read families from `operator_registry.json` or parse
+`[family.*]` sections from config files. Hardcoded lists silently omit extension families
+(SDF, FIX, future user families). Affected scripts: `catalog_operators.py`,
+`extract_ports.py`, `fix_help_patches.py`, `generate_operator_tests.py`,
+`verify_new_operator.py`. See [SCRIPTS.md](SCRIPTS.md).
+
+---
+
+### 25.34 -- Runtime DLLs: gdignore and Pre-loading
+
+The `native/` subdirectory inside each extension has `.gdignore`, making any `res://` path
+inside it unresolvable by Godot. DLLs listed in `.gdextension [dependencies]` (Godot
+pre-loads them) and the main library itself must live outside `native/`. Use
+`runtime_dlls_dest` and `library_dest = ../bin` in `build.cfg` to copy them to a
+non-ignored location. DLLs loaded by Windows via `LOAD_WITH_ALTERED_SEARCH_PATH` (same
+directory as the loading DLL) do not need pre-loading and may stay in `native/bin/`.
+See [BUILD.md](BUILD.md).
+
+---
+
+### 25.35 -- Wireless Referencing: Only Select Nodes
+
+Only `Select*` operators (`SelectCHOP`, `SelectTOP`, etc.) do wireless node referencing
+via `create_node_ref` parameters. All other operators must use wired inputs. Select nodes
+return the source node's `cached_output` directly -- no filtering. For transformation after
+a wireless reference, wire into the corresponding filter operator (`ChannelFilterCHOP`,
+`SubsetDAT`, `FilterSOP`).
+
+---
+
+### 25.36 -- Every Extension Must Have a README
+
+Every `gn_ext_*` folder must contain a `README.md` with at minimum:
+1. **Overview** -- one-paragraph summary of what the extension does
+2. **Operators** -- table of `node_type`, class name, one-line description
+3. **Directory Layout** -- annotated file tree
+
+`scripts/verify_new_operator.py` warns about missing READMEs.
+
+---
+
+### 25.37 -- ConfigFile Must Be Pure ASCII, No Comments
+
+`gn_core.cfg` and all `gn_extension.cfg` files must contain only ASCII characters
+(U+0000-U+007F) and no comment lines (`# ...`). Godot 4.6's ConfigFile parser has two
+silent bugs:
+1. Any non-ASCII character anywhere in the file causes subsequent `[section]` headers to
+   be swallowed -- their keys merge into the previous section.
+2. Comment lines between sections cause the next `[section]` header to be skipped entirely.
+
+Use ASCII substitutes: `--` not `---`, `->` not an arrow character, `x` not a
+multiplication sign. Never use comments for documentation inside `.cfg` files.
+
+---
+
+### 25.38 -- Sideband Metadata via GNData.metadata, Not Graph Walking
+
+Never walk the scene tree or network connections during `_cook()` to find a specific
+upstream node type. During cook, nodes are reparented under `CookEngine` -- `get_parent()`
+returns `CookEngine`, not `GNNetwork` -- so any connection lookup will always return null.
+
+Use `GNData.metadata` instead:
+
+```gdscript
+# Producer (in _cook):
+_cached_tex_data.metadata["fixture_manifest"] = _fixture_manifest
+return _cached_tex_data
+
+# Consumer (in _cook):
+var manifest: Array = tex_data.metadata.get("fixture_manifest", [])
+if manifest.is_empty():
+    node_warning = "No manifest in input data."
+    return null
+```
+
+All `duplicate_data()` overrides copy `metadata.duplicate(true)`, so metadata flows
+through intermediate nodes (LevelTOP, subnets, SelectTOP) transparently.
+See [DATA_TYPES.md](DATA_TYPES.md) §Sideband Metadata.
+
+---
+
+### 25.39 -- Rules Must Be Reflected in CONTRIBUTING.md
+
+Every rule in `.github/copilot-instructions.md §25` must have a corresponding
+human-readable entry in this section (§10 of CONTRIBUTING.md). When adding a new rule:
+1. Add the terse imperative version to `copilot-instructions.md`.
+2. Add the human-readable entry here with rationale and, where helpful, a code example.
+3. Link to the relevant `dev_docs/` file for deeper context if one exists.
+
+The copilot file is the machine-readable contract; this section is the human-readable
+explanation. Both must stay in sync.
 
 ---
 
@@ -1033,7 +1407,8 @@ Before submitting, verify every item:
 - [ ] Unit tests covering the change
 - [ ] No regressions in existing tests
 - [ ] `GONODES_CONTEXT.md` updated if architecture changed
-- [ ] Hard rules respected (especially 25.13 lazy cook, 25.20 separation)
+- [ ] Hard rules respected (especially 25.13 lazy cook, 25.20 separation, 25.38 no graph walking)
+- [ ] If adding a new rule, CONTRIBUTING.md §10 updated with human-readable entry (Rule 25.39)
 
 ---
 

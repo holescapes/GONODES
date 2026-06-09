@@ -174,6 +174,9 @@ NEVER walk the scene tree or network connections to find a specific upstream nod
 ### .uid Files
 Do NOT generate `.uid` sidecar files. Godot creates them on project scan.
 
+### 25.39 --- Rules Must Be Reflected in CONTRIBUTING.md
+Every rule in this file's Hard Rules section must have a corresponding human-readable entry in `dev_docs/CONTRIBUTING.md` §10. When adding a new rule: (1) add the terse imperative version here, (2) add the human-readable entry in CONTRIBUTING.md §10 with rationale and a code example where helpful, (3) link to the relevant dev_doc if one exists. The copilot file is the machine-readable contract; CONTRIBUTING.md §10 is the human-readable explanation.
+
 ## Operator Structure
 
 ```gdscript
