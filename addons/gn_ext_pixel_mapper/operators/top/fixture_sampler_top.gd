@@ -441,10 +441,10 @@ func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, p
 				# Set tooltip
 				if hit.x >= 0 and hit.x < _overlay.fixtures.size():
 					var fix: Dictionary = _overlay.fixtures[hit.x]
-					_overlay.tooltip_text = fix.get("name", "")
+					_overlay.fixture_tooltip = fix.get("name", "")
 					_overlay.tooltip_pos = _overlay._uv_to_px(uv)
-				else:
-					_overlay.tooltip_text = ""
+					else:
+					_overlay.fixture_tooltip = ""
 				_overlay.queue_redraw()
 				return hit.x >= 0
 

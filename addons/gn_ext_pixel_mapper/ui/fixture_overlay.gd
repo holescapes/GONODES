@@ -41,8 +41,8 @@ var hovered: Vector2i = Vector2i(-1, -1)
 ## Currently dragged handle: [fixture_idx, handle_idx] or [-1, -1].
 var active: Vector2i = Vector2i(-1, -1)
 
-## Tooltip text (shown near mouse on hover).
-var tooltip_text: String = ""
+## Tooltip text (shown near mouse on hover). Named fixture_tooltip to avoid shadowing Control.tooltip_text.
+var fixture_tooltip: String = ""
 var tooltip_pos: Vector2 = Vector2.ZERO
 
 
@@ -89,13 +89,13 @@ func _draw() -> void:
 				draw_string(font, label_px, fix_name, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 
 	# Draw tooltip
-	if not tooltip_text.is_empty():
+	if not fixture_tooltip.is_empty():
 		var font: Font = ThemeDB.fallback_font
 		var fs: int = 12
-		var tw: float = font.get_string_size(tooltip_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var tw: float = font.get_string_size(fixture_tooltip, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var tp := tooltip_pos + Vector2(14, 0)
 		draw_rect(Rect2(tp + Vector2(-2, -fs), Vector2(tw + 4, fs + 4)), LABEL_BG)
-		draw_string(font, tp, tooltip_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, LABEL_COLOR)
+		draw_string(font, tp, fixture_tooltip, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, LABEL_COLOR)
 
 
 func _draw_rect_wireframe(corners: PackedVector2Array, col: Color) -> void:
