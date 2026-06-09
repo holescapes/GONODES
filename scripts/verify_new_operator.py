@@ -398,6 +398,19 @@ def verify_operator(class_name, verbose=True):
             print(f"        → Add [operator.{class_name}] to gn_core.cfg or gn_extension.cfg")
         fails += 1
 
+    # 3b. Extension README check (Rule 25.36) — only for gn_ext_* extensions
+    if cfg_label and cfg_label.startswith("gn_ext_"):
+        readme_path = ROOT / "addons" / cfg_label / "README.md"
+        if readme_path.exists():
+            if verbose:
+                print(f"  {PASS} README.md present in {cfg_label}")
+            passes += 1
+        else:
+            if verbose:
+                print(f"  {WARN} {cfg_label}/README.md missing (Rule 25.36)")
+                print(f"        → Add README.md with Overview, Operators table, Directory Layout")
+            warns += 1
+
     # 4. Help patches
     help_patches = find_help_patches(class_name, node_type or "")
     if len(help_patches) >= 3:

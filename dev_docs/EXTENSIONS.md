@@ -642,9 +642,13 @@ addons/gn_ext_myext/
     └── gdcef.gdextension.disabled
 ```
 
-**Key rule:** Everything lives inside the extension folder — including
+**Key rule (Rule 25.36):** Everything lives inside the extension folder — including
 third-party binary artifacts like CEF. Never place extension assets in
 `addons/gonodes/` or the project root.
+
+**README required (Rule 25.36):** Every `gn_ext_*` folder must contain a
+`README.md` with at minimum: Overview, Operators table, Directory Layout.
+This is the first document a contributor reads before touching any code.
 
 ### `.gdignore` Requirements
 

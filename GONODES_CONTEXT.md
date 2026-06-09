@@ -4111,6 +4111,16 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 ---
 
+### 25.36 Every Extension Must Have a README
+
+Every `gn_ext_*` folder **must** contain a `README.md`. Minimum required sections:
+1. **Overview** — one-paragraph summary of what the extension does and its family/data type (if any)
+2. **Operators** — table of all operators with `node_type`, class name, and one-line description
+3. **Directory Layout** — annotated file tree of the extension folder
+
+The README is the first thing a contributor reads before opening any code. Missing READMEs are caught by `scripts/verify_new_operator.py` (warns) and by the extension audit checklist.
+
+
 ## 26. Known Bugs
 
 ### 26.1 SoftBodyCOMP: Jolt SoftBody3D Incompatible with SubViewport — Replaced with CPU Verlet
