@@ -8,8 +8,7 @@
             "parameters": {
                 "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
                 "noise_type":  {"value": 0},
-                "scale":       {"value": 4.0},
-                "monochrome":  {"value": false}
+                "scale":       {"value": 4.0}
             }
         },
         "strip1": {
@@ -18,10 +17,9 @@
             "parameters": {
                 "fixture_name": {"value": "strip"},
                 "led_count":    {"value": 60},
-                "uv_start":     {"value": {"_type": "Vector2", "x": 0.1, "y": 0.5}},
-                "uv_end":       {"value": {"_type": "Vector2", "x": 0.9, "y": 0.5}},
                 "channel_layout": {"value": 0},
-                "dmx_start":    {"value": 1}
+                "universe":     {"value": 1},
+                "start_channel": {"value": 1}
             }
         },
         "sampler1": {

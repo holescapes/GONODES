@@ -2,7 +2,7 @@ extends Node
 ## Operator contract tests for the FIX family (gn_ext_pixel_mapper).
 ## Tests verify: instantiation, node_type, family, cook-null safety,
 ## fixture geometry correctness, data flow, parameter effects,
-## edge cases, and data type integrity.
+## edge cases, data type integrity, placement transforms, and multi-output.
 
 
 func _make_node(node: GNNode, id: String) -> GNNode:
@@ -23,14 +23,17 @@ func _cook_with(node: GNNode, data: Array[GNData]) -> GNData:
 
 ## Creates a simple GNFixtureData for testing downstream operators.
 func _make_fixture(p_name: String, p_count: int, p_layout: String = "rgb",
-		p_dmx: int = 1) -> GNFixtureData:
+		p_universe: int = 1, p_start_channel: int = 1,
+		p_shape: StringName = &"strip") -> GNFixtureData:
 	var fd := GNFixtureData.new()
 	fd.valid = true
 	fd.fixture_name = p_name
 	fd.led_count = p_count
 	fd.channel_layout = p_layout
 	fd.channels_per_led = GNFixtureData.channels_for_layout(p_layout)
-	fd.dmx_start = p_dmx
+	fd.universe = p_universe
+	fd.start_channel = p_start_channel
+	fd.shape = p_shape
 	fd.led_positions.resize(p_count)
 	for i in range(p_count):
 		var t: float = float(i) / maxf(float(p_count - 1), 1.0)
@@ -64,8 +67,9 @@ func test_fixture_data_duplicate() -> void:
 	fd.led_count = 10
 	fd.channel_layout = "rgbw"
 	fd.channels_per_led = 4
-	fd.dmx_start = 512
-	fd.sample_extent = Vector2(0.01, 0.02)
+	fd.universe = 2
+	fd.start_channel = 100
+	fd.shape = &"grid"
 	fd.led_positions.resize(10)
 	fd.led_positions[0] = Vector2(0.1, 0.2)
 	fd.led_positions[9] = Vector2(0.9, 0.8)
@@ -75,11 +79,12 @@ func test_fixture_data_duplicate() -> void:
 	GNTestAssert.assert_eq(copy.led_count, 10, "led_count copied")
 	GNTestAssert.assert_eq(copy.channel_layout, "rgbw", "channel_layout copied")
 	GNTestAssert.assert_eq(copy.channels_per_led, 4, "channels_per_led copied")
-	GNTestAssert.assert_eq(copy.dmx_start, 512, "dmx_start copied")
-	GNTestAssert.assert_eq(copy.sample_extent, Vector2(0.01, 0.02), "sample_extent copied")
+	GNTestAssert.assert_eq(copy.universe, 2, "universe copied")
+	GNTestAssert.assert_eq(copy.start_channel, 100, "start_channel copied")
+	GNTestAssert.assert_eq(copy.shape, &"grid", "shape copied")
 	GNTestAssert.assert_eq(copy.led_positions[0], Vector2(0.1, 0.2), "first pos copied")
 	GNTestAssert.assert_eq(copy.led_positions[9], Vector2(0.9, 0.8), "last pos copied")
-	# Verify deep copy -- modifying copy doesn't affect original
+	# Verify deep copy
 	copy.led_positions[0] = Vector2(0.99, 0.99)
 	GNTestAssert.assert_eq(fd.led_positions[0], Vector2(0.1, 0.2), "deep copy independent")
 
@@ -93,7 +98,7 @@ func test_fixture_data_invalidate() -> void:
 
 
 func test_fixture_data_preview_text() -> void:
-	var fd := _make_fixture("mystrip", 60, "rgb")
+	var fd := _make_fixture("mystrip", 60, "rgb", 1, 1)
 	GNTestAssert.assert_contains(fd.get_preview_text(), "mystrip", "preview has name")
 	GNTestAssert.assert_contains(fd.get_preview_text(), "60", "preview has led_count")
 	GNTestAssert.assert_contains(fd.get_preview_text(), "rgb", "preview has layout")
@@ -102,19 +107,21 @@ func test_fixture_data_preview_text() -> void:
 
 
 func test_fixture_data_expression_values() -> void:
-	var fd := _make_fixture("expr_test", 30, "rgbw", 100)
+	var fd := _make_fixture("expr_test", 30, "rgbw", 2, 100)
 	GNTestAssert.assert_eq(fd.get_expression_value("led_count"), 30.0, "expr led_count")
-	GNTestAssert.assert_eq(fd.get_expression_value("dmx_start"), 100.0, "expr dmx_start")
+	GNTestAssert.assert_eq(fd.get_expression_value("universe"), 2.0, "expr universe")
+	GNTestAssert.assert_eq(fd.get_expression_value("start_channel"), 100.0, "expr start_channel")
 	GNTestAssert.assert_eq(fd.get_expression_value("channels_per_led"), 4.0, "expr channels_per_led")
 	GNTestAssert.assert_eq(fd.get_expression_value("name"), "expr_test", "expr name")
 	GNTestAssert.assert_eq(fd.get_expression_value("nonexistent"), 0.0, "expr unknown key")
 
 
 func test_fixture_data_expression_info() -> void:
-	var fd := _make_fixture("info_test", 20, "rgb", 50)
+	var fd := _make_fixture("info_test", 20, "rgb", 1, 50)
 	var info: Dictionary = fd.get_expression_info()
 	GNTestAssert.assert_has_key(info, "led_count", "info has led_count")
-	GNTestAssert.assert_has_key(info, "dmx_start", "info has dmx_start")
+	GNTestAssert.assert_has_key(info, "universe", "info has universe")
+	GNTestAssert.assert_has_key(info, "start_channel", "info has start_channel")
 	GNTestAssert.assert_has_key(info, "channels_per_led", "info has channels_per_led")
 	GNTestAssert.assert_has_key(info, "name", "info has name")
 
@@ -124,6 +131,19 @@ func test_fixture_data_summary() -> void:
 	GNTestAssert.assert_not_empty(fd.get_data_summary(), "non-empty summary")
 	var empty := GNFixtureData.new()
 	GNTestAssert.assert_empty(empty.get_data_summary(), "empty fixture summary")
+
+
+func test_fixture_data_absolute_dmx() -> void:
+	var fd := GNFixtureData.new()
+	fd.universe = 1
+	fd.start_channel = 1
+	GNTestAssert.assert_eq(fd.get_absolute_dmx(), 0, "Uni 1 Ch 1 = absolute 0")
+	fd.universe = 2
+	fd.start_channel = 1
+	GNTestAssert.assert_eq(fd.get_absolute_dmx(), 512, "Uni 2 Ch 1 = absolute 512")
+	fd.universe = 1
+	fd.start_channel = 100
+	GNTestAssert.assert_eq(fd.get_absolute_dmx(), 99, "Uni 1 Ch 100 = absolute 99")
 
 
 # ============================================================================
@@ -168,7 +188,7 @@ func test_fixture_base_prepare_output() -> void:
 
 
 # ============================================================================
-# StripFIX -- linear LED strip
+# StripFIX -- linear LED strip (local space)
 # ============================================================================
 
 func test_strip_fix_instantiate() -> void:
@@ -187,25 +207,25 @@ func test_strip_fix_cook_defaults() -> void:
 	GNTestAssert.assert_eq(out.channel_layout, "rgb", "default rgb layout")
 	GNTestAssert.assert_eq(out.channels_per_led, 3, "rgb = 3 channels")
 	GNTestAssert.assert_eq(out.fixture_name, "strip", "default name")
-	GNTestAssert.assert_eq(out.dmx_start, 1, "default dmx_start")
+	GNTestAssert.assert_eq(out.universe, 1, "default universe")
+	GNTestAssert.assert_eq(out.start_channel, 1, "default start_channel")
+	GNTestAssert.assert_eq(out.shape, &"strip", "shape is strip")
 
 
-func test_strip_fix_endpoints() -> void:
+func test_strip_fix_local_positions() -> void:
 	var node := _make_node(StripFIX.new(), "strip1")
-	node.set_param_value("led_count", 10)
-	node.set_param_value("uv_start", Vector2(0.0, 0.5))
-	node.set_param_value("uv_end", Vector2(1.0, 0.5))
+	node.set_param_value("led_count", 5)
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
-	GNTestAssert.assert_not_null(out, "StripFIX produces output")
-	GNTestAssert.assert_eq(out.led_positions[0], Vector2(0.0, 0.5), "first LED at uv_start")
-	GNTestAssert.assert_eq(out.led_positions[9], Vector2(1.0, 0.5), "last LED at uv_end")
+	# Local space: x from 0 to 1, y = 0.5
+	GNTestAssert.assert_approx(out.led_positions[0].x, 0.0, 0.001, "LED 0 at x=0")
+	GNTestAssert.assert_approx(out.led_positions[0].y, 0.5, 0.001, "LED 0 at y=0.5")
+	GNTestAssert.assert_approx(out.led_positions[2].x, 0.5, 0.001, "LED 2 at x=0.5")
+	GNTestAssert.assert_approx(out.led_positions[4].x, 1.0, 0.001, "LED 4 at x=1.0")
 
 
 func test_strip_fix_single_led() -> void:
 	var node := _make_node(StripFIX.new(), "strip1")
 	node.set_param_value("led_count", 1)
-	node.set_param_value("uv_start", Vector2(0.2, 0.3))
-	node.set_param_value("uv_end", Vector2(0.8, 0.7))
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
 	GNTestAssert.assert_eq(out.led_count, 1, "single LED")
 	GNTestAssert.assert_eq(out.led_positions[0], Vector2(0.5, 0.5), "single LED at midpoint")
@@ -214,8 +234,6 @@ func test_strip_fix_single_led() -> void:
 func test_strip_fix_even_spacing() -> void:
 	var node := _make_node(StripFIX.new(), "strip1")
 	node.set_param_value("led_count", 5)
-	node.set_param_value("uv_start", Vector2(0.0, 0.0))
-	node.set_param_value("uv_end", Vector2(1.0, 0.0))
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
 	GNTestAssert.assert_approx(out.led_positions[0].x, 0.0, 0.001, "LED 0 at 0.0")
 	GNTestAssert.assert_approx(out.led_positions[1].x, 0.25, 0.001, "LED 1 at 0.25")
@@ -234,31 +252,25 @@ func test_strip_fix_rgbw_layout() -> void:
 
 func test_strip_fix_single_channel_layouts() -> void:
 	var node := _make_node(StripFIX.new(), "strip1")
-	# R=2, G=3, B=4, W=5
 	for idx in [2, 3, 4, 5]:
 		node.set_param_value("channel_layout", idx)
 		var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
 		GNTestAssert.assert_eq(out.channels_per_led, 1, "single channel layout idx=%d" % idx)
 
 
-func test_strip_fix_sample_extent() -> void:
-	var node := _make_node(StripFIX.new(), "strip1")
-	node.set_param_value("sample_extent", Vector2(0.05, 0.03))
-	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
-	GNTestAssert.assert_eq(out.sample_extent, Vector2(0.05, 0.03), "sample_extent set")
-
-
-func test_strip_fix_custom_name_and_dmx() -> void:
+func test_strip_fix_universe_and_channel() -> void:
 	var node := _make_node(StripFIX.new(), "strip1")
 	node.set_param_value("fixture_name", "front_bar")
-	node.set_param_value("dmx_start", 513)
+	node.set_param_value("universe", 2)
+	node.set_param_value("start_channel", 100)
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
 	GNTestAssert.assert_eq(out.fixture_name, "front_bar", "custom name")
-	GNTestAssert.assert_eq(out.dmx_start, 513, "custom dmx_start")
+	GNTestAssert.assert_eq(out.universe, 2, "universe 2")
+	GNTestAssert.assert_eq(out.start_channel, 100, "start_channel 100")
 
 
 # ============================================================================
-# GridFIX -- 2D LED grid
+# GridFIX -- 2D LED grid (local space)
 # ============================================================================
 
 func test_grid_fix_instantiate() -> void:
@@ -275,17 +287,15 @@ func test_grid_fix_cook_geometry() -> void:
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
 	GNTestAssert.assert_not_null(out, "GridFIX produces output")
 	GNTestAssert.assert_eq(out.led_count, 16, "4x4 = 16 LEDs")
-	GNTestAssert.assert_eq(out.led_positions.size(), 16, "positions array size")
+	GNTestAssert.assert_eq(out.shape, &"grid", "shape is grid")
 
 
 func test_grid_fix_corners() -> void:
 	var node := _make_node(GridFIX.new(), "grid1")
 	node.set_param_value("cols", 3)
 	node.set_param_value("rows", 3)
-	node.set_param_value("uv_min", Vector2(0.0, 0.0))
-	node.set_param_value("uv_max", Vector2(1.0, 1.0))
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
-	# Row-major: [0]=top-left, [2]=top-right, [6]=bottom-left, [8]=bottom-right
+	# Local unit square: TL=(0,0), TR=(1,0), BL=(0,1), BR=(1,1)
 	GNTestAssert.assert_eq(out.led_positions[0], Vector2(0.0, 0.0), "top-left corner")
 	GNTestAssert.assert_eq(out.led_positions[2], Vector2(1.0, 0.0), "top-right corner")
 	GNTestAssert.assert_eq(out.led_positions[6], Vector2(0.0, 1.0), "bottom-left corner")
@@ -296,28 +306,24 @@ func test_grid_fix_single_row() -> void:
 	var node := _make_node(GridFIX.new(), "grid1")
 	node.set_param_value("cols", 5)
 	node.set_param_value("rows", 1)
-	node.set_param_value("uv_min", Vector2(0.0, 0.5))
-	node.set_param_value("uv_max", Vector2(1.0, 0.5))
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
 	GNTestAssert.assert_eq(out.led_count, 5, "5x1 = 5 LEDs")
-	GNTestAssert.assert_approx(out.led_positions[0].y, 0.5, 0.001, "single row y=0.5")
-	GNTestAssert.assert_approx(out.led_positions[4].y, 0.5, 0.001, "last col y=0.5")
+	GNTestAssert.assert_approx(out.led_positions[0].y, 0.0, 0.001, "single row y=0")
+	GNTestAssert.assert_approx(out.led_positions[4].x, 1.0, 0.001, "last col x=1.0")
 
 
 func test_grid_fix_single_column() -> void:
 	var node := _make_node(GridFIX.new(), "grid1")
 	node.set_param_value("cols", 1)
 	node.set_param_value("rows", 5)
-	node.set_param_value("uv_min", Vector2(0.5, 0.0))
-	node.set_param_value("uv_max", Vector2(0.5, 1.0))
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
 	GNTestAssert.assert_eq(out.led_count, 5, "1x5 = 5 LEDs")
-	GNTestAssert.assert_approx(out.led_positions[0].x, 0.5, 0.001, "single col x=0.5")
-	GNTestAssert.assert_approx(out.led_positions[4].x, 0.5, 0.001, "last row x=0.5")
+	GNTestAssert.assert_approx(out.led_positions[0].x, 0.0, 0.001, "single col x=0")
+	GNTestAssert.assert_approx(out.led_positions[4].y, 1.0, 0.001, "last row y=1.0")
 
 
 # ============================================================================
-# MatrixFIX -- LED matrix with rotation/skew
+# MatrixFIX -- LED matrix with rotation/skew (local space)
 # ============================================================================
 
 func test_matrix_fix_instantiate() -> void:
@@ -331,13 +337,13 @@ func test_matrix_fix_no_rotation() -> void:
 	var node := _make_node(MatrixFIX.new(), "matrix1")
 	node.set_param_value("cols", 2)
 	node.set_param_value("rows", 2)
-	node.set_param_value("uv_origin", Vector2(0.0, 0.0))
-	node.set_param_value("uv_pitch", Vector2(0.5, 0.5))
+	node.set_param_value("pitch", Vector2(0.5, 0.5))
 	node.set_param_value("rotation_deg", 0.0)
 	node.set_param_value("skew_x", 0.0)
 	node.set_param_value("skew_y", 0.0)
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
 	GNTestAssert.assert_eq(out.led_count, 4, "2x2 = 4 LEDs")
+	GNTestAssert.assert_eq(out.shape, &"matrix", "shape is matrix")
 	GNTestAssert.assert_eq(out.led_positions[0], Vector2(0.0, 0.0), "origin LED")
 	GNTestAssert.assert_approx(out.led_positions[1].x, 0.5, 0.001, "col 1 x")
 	GNTestAssert.assert_approx(out.led_positions[2].y, 0.5, 0.001, "row 1 y")
@@ -347,29 +353,27 @@ func test_matrix_fix_90_degree_rotation() -> void:
 	var node := _make_node(MatrixFIX.new(), "matrix1")
 	node.set_param_value("cols", 2)
 	node.set_param_value("rows", 1)
-	node.set_param_value("uv_origin", Vector2(0.5, 0.5))
-	node.set_param_value("uv_pitch", Vector2(0.1, 0.1))
+	node.set_param_value("pitch", Vector2(0.1, 0.1))
 	node.set_param_value("rotation_deg", 90.0)
 	node.set_param_value("skew_x", 0.0)
 	node.set_param_value("skew_y", 0.0)
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
-	# LED 0 at origin (0.5, 0.5). LED 1: local (0.1, 0) rotated 90 deg -> (0, 0.1)
-	GNTestAssert.assert_eq(out.led_positions[0], Vector2(0.5, 0.5), "origin unchanged")
-	GNTestAssert.assert_approx(out.led_positions[1].x, 0.5, 0.01, "rotated x near origin")
-	GNTestAssert.assert_approx(out.led_positions[1].y, 0.6, 0.01, "rotated y offset")
+	# LED 0 at origin (0, 0). LED 1: local (0.1, 0) rotated 90 deg -> (0, 0.1)
+	GNTestAssert.assert_eq(out.led_positions[0], Vector2(0.0, 0.0), "origin unchanged")
+	GNTestAssert.assert_approx(out.led_positions[1].x, 0.0, 0.01, "rotated x near 0")
+	GNTestAssert.assert_approx(out.led_positions[1].y, 0.1, 0.01, "rotated y = 0.1")
 
 
 func test_matrix_fix_skew() -> void:
 	var node := _make_node(MatrixFIX.new(), "matrix1")
 	node.set_param_value("cols", 2)
 	node.set_param_value("rows", 2)
-	node.set_param_value("uv_origin", Vector2(0.0, 0.0))
-	node.set_param_value("uv_pitch", Vector2(0.5, 0.5))
+	node.set_param_value("pitch", Vector2(0.5, 0.5))
 	node.set_param_value("rotation_deg", 0.0)
 	node.set_param_value("skew_x", 0.1)
 	node.set_param_value("skew_y", 0.0)
 	var out: GNFixtureData = _cook_no_input(node) as GNFixtureData
-	# Row 1, col 0: lx = 0 * 0.5 + 1 * 0.1 = 0.1, ly = 1 * 0.5 + 0 * 0 = 0.5
+	# Row 1, col 0: lx = 0*0.5 + 1*0.1 = 0.1, ly = 1*0.5 + 0*0 = 0.5
 	GNTestAssert.assert_approx(out.led_positions[2].x, 0.1, 0.001, "skewed row 1 col 0 x")
 	GNTestAssert.assert_approx(out.led_positions[2].y, 0.5, 0.001, "skewed row 1 col 0 y")
 
@@ -395,9 +399,8 @@ func test_custom_fix_cook_with_dat() -> void:
 	var dat := GNTableData.new()
 	dat.valid = true
 	dat.has_header = true
-	# table row 0 = headers, rows 1-3 = data
 	dat.table = [
-		PackedStringArray(["uv_x", "uv_y"]),
+		PackedStringArray(["x", "y"]),
 		PackedStringArray(["0.1", "0.2"]),
 		PackedStringArray(["0.3", "0.4"]),
 		PackedStringArray(["0.5", "0.6"]),
@@ -405,10 +408,10 @@ func test_custom_fix_cook_with_dat() -> void:
 	var out: GNFixtureData = _cook_with(node, [dat]) as GNFixtureData
 	GNTestAssert.assert_not_null(out, "CustomFIX produces output from DAT")
 	GNTestAssert.assert_eq(out.led_count, 3, "3 rows = 3 LEDs")
+	GNTestAssert.assert_eq(out.shape, &"custom", "shape is custom")
 	GNTestAssert.assert_approx(out.led_positions[0].x, 0.1, 0.001, "LED 0 x")
 	GNTestAssert.assert_approx(out.led_positions[0].y, 0.2, 0.001, "LED 0 y")
 	GNTestAssert.assert_approx(out.led_positions[2].x, 0.5, 0.001, "LED 2 x")
-	GNTestAssert.assert_approx(out.led_positions[2].y, 0.6, 0.001, "LED 2 y")
 
 
 func test_custom_fix_missing_columns() -> void:
@@ -417,11 +420,11 @@ func test_custom_fix_missing_columns() -> void:
 	dat.valid = true
 	dat.has_header = true
 	dat.table = [
-		PackedStringArray(["x", "y"]),  # Wrong column names
+		PackedStringArray(["foo", "bar"]),
 		PackedStringArray(["0.1", "0.2"]),
 	]
 	_cook_with(node, [dat])
-	GNTestAssert.assert_not_empty(node.node_warning, "warning on missing uv_x/uv_y columns")
+	GNTestAssert.assert_not_empty(node.node_warning, "warning on missing x/y columns")
 
 
 # ============================================================================
@@ -469,8 +472,6 @@ func test_switch_fix_cook_null() -> void:
 
 func test_switch_fix_selects_by_index() -> void:
 	var node := _make_node(SwitchFIX.new(), "switch1")
-	# Simulate two connected ports so _switch_clamp_index raises max to 1.
-	# Dynamic inputs use a trailing empty slot, so port count = 3 with ports [0,1] connected.
 	node.update_dynamic_inputs(PackedInt32Array([0, 1]))
 	var fd0 := _make_fixture("first", 10)
 	var fd1 := _make_fixture("second", 20)
@@ -480,7 +481,7 @@ func test_switch_fix_selects_by_index() -> void:
 	GNTestAssert.assert_not_null(out0, "switch output non-null")
 	GNTestAssert.assert_eq(out0.fixture_name, "first", "index 0 selects first")
 	node.set_param_value("index", 1)
-	node.execute_cook([fd0, fd1], 2)  # different frame to avoid cache hit
+	node.execute_cook([fd0, fd1], 2)
 	var out1: GNFixtureData = node.cached_output as GNFixtureData
 	GNTestAssert.assert_not_null(out1, "switch output non-null at idx 1")
 	GNTestAssert.assert_eq(out1.fixture_name, "second", "index 1 selects second")
@@ -519,7 +520,7 @@ func test_file_in_fix_cook_null() -> void:
 
 
 # ============================================================================
-# FixtureSamplerTOP -- GPU LED sampler
+# FixtureSamplerTOP -- placement + multi-output
 # ============================================================================
 
 func test_fixture_sampler_instantiate() -> void:
@@ -537,7 +538,6 @@ func test_fixture_sampler_cook_null() -> void:
 
 func test_fixture_sampler_cook_no_fixtures() -> void:
 	var node := _make_node(FixtureSamplerTOP.new(), "sampler1")
-	# Provide a source TOP but no FIX inputs
 	var tex := GNTextureData.new()
 	tex.valid = true
 	tex.texture = ImageTexture.create_from_image(
@@ -547,130 +547,172 @@ func test_fixture_sampler_cook_no_fixtures() -> void:
 	GNTestAssert.assert_not_empty(node.node_warning, "warning when no fixtures")
 
 
-func test_fixture_sampler_rebuild_manifest() -> void:
-	var node := _make_node(FixtureSamplerTOP.new(), "sampler1")
-	var fd0 := _make_fixture("strip_a", 10, "rgb", 1)
-	var fd1 := _make_fixture("strip_b", 20, "rgbw", 100)
-	var fix_inputs: Array[GNFixtureData] = [fd0, fd1]
-	node._rebuild_led_pos_texture(fix_inputs)
-	GNTestAssert.assert_eq(node._total_leds, 30, "total LEDs = 10 + 20")
-	GNTestAssert.assert_eq(node._max_channels, 4, "max channels = rgbw = 4")
-	GNTestAssert.assert_size(node._fixture_manifest, 2, "2 fixture entries")
-	# Check manifest offsets
-	GNTestAssert.assert_eq(node._fixture_manifest[0]["offset"], 0, "first fixture offset 0")
-	GNTestAssert.assert_eq(node._fixture_manifest[1]["offset"], 10, "second fixture offset 10")
-	# Check manifest stores channel_layout
-	GNTestAssert.assert_eq(node._fixture_manifest[0]["channel_layout"], "rgb", "manifest has layout")
-	GNTestAssert.assert_eq(node._fixture_manifest[1]["channel_layout"], "rgbw", "manifest has layout")
-
-
-func test_fixture_sampler_led_pos_texture() -> void:
-	var node := _make_node(FixtureSamplerTOP.new(), "sampler1")
-	var fd := _make_fixture("test", 5)
-	fd.sample_extent = Vector2(0.02, 0.03)
-	var fix_inputs: Array[GNFixtureData] = [fd]
-	node._rebuild_led_pos_texture(fix_inputs)
-	GNTestAssert.assert_not_null(node._led_pos_image, "LED pos image created")
-	GNTestAssert.assert_eq(node._led_pos_image.get_width(), 5, "image width = total_leds")
-	GNTestAssert.assert_eq(node._led_pos_image.get_height(), 1, "image height = 1")
-	# Check first pixel stores UV + extent
-	var px: Color = node._led_pos_image.get_pixel(0, 0)
-	GNTestAssert.assert_approx(px.r, fd.led_positions[0].x, 0.001, "pixel r = uv_x")
-	GNTestAssert.assert_approx(px.g, fd.led_positions[0].y, 0.001, "pixel g = uv_y")
-	GNTestAssert.assert_approx(px.b, 0.02, 0.001, "pixel b = extent_x")
-	GNTestAssert.assert_approx(px.a, 0.03, 0.001, "pixel a = extent_y")
-
-
-func test_fixture_sampler_hash_changes() -> void:
-	var fd := _make_fixture("test", 5)
-	var h1: int = FixtureSamplerTOP._compute_fix_hash([fd])
-	fd.fixture_name = "changed"
-	var h2: int = FixtureSamplerTOP._compute_fix_hash([fd])
-	GNTestAssert.assert_ne(h1, h2, "hash changes on name change")
-	fd.fixture_name = "test"
-	fd.led_count = 10
-	fd.led_positions.resize(10)
-	var h3: int = FixtureSamplerTOP._compute_fix_hash([fd])
-	GNTestAssert.assert_ne(h1, h3, "hash changes on led_count change")
-
-
 func test_fixture_sampler_port_structure() -> void:
 	var node := _make_node(FixtureSamplerTOP.new(), "sampler1")
-	# Input: port 0 = TOP source, port 1+ = FIX (dynamic)
 	GNTestAssert.assert_gt(node.input_ports.size(), 0, "has input ports")
 	GNTestAssert.assert_eq(node.input_ports[0].family, GNFamily.Type.TOP, "input port 0 is TOP")
 	if node.input_ports.size() > 1:
 		GNTestAssert.assert_eq(node.input_ports[1].family,
 			GNFamily.string_to_type("FIX"), "input port 1 is FIX")
-	# Output: port 0 must exist and be TOP (the packed result texture)
-	GNTestAssert.assert_eq(node.output_ports.size(), 1, "has exactly 1 output port")
+	# Output: port 0 = TOP passthrough, port 1 = CHOP
+	GNTestAssert.assert_eq(node.output_ports.size(), 2, "has 2 output ports")
 	GNTestAssert.assert_eq(node.output_ports[0].family, GNFamily.Type.TOP, "output port 0 is TOP")
+	GNTestAssert.assert_eq(node.output_ports[1].family, GNFamily.Type.CHOP, "output port 1 is CHOP")
+
+
+func test_fixture_sampler_rebuild_manifest() -> void:
+	var node := _make_node(FixtureSamplerTOP.new(), "sampler1")
+	var fd0 := _make_fixture("strip_a", 10, "rgb", 1, 1, &"strip")
+	var fd1 := _make_fixture("strip_b", 20, "rgbw", 2, 100, &"strip")
+	var fix_inputs: Array[GNFixtureData] = [fd0, fd1]
+	var pos0: PackedVector2Array = PackedVector2Array()
+	pos0.resize(10)
+	for i in range(10): pos0[i] = Vector2(float(i) / 9.0, 0.5)
+	var pos1: PackedVector2Array = PackedVector2Array()
+	pos1.resize(20)
+	for i in range(20): pos1[i] = Vector2(float(i) / 19.0, 0.5)
+	node._rebuild_led_pos_texture(fix_inputs, [pos0, pos1], [1, 2])
+	GNTestAssert.assert_eq(node._total_leds, 30, "total LEDs = 10 + 20")
+	GNTestAssert.assert_eq(node._max_channels, 4, "max channels = rgbw = 4")
+	GNTestAssert.assert_size(node._fixture_manifest, 2, "2 fixture entries")
+	GNTestAssert.assert_eq(node._fixture_manifest[0]["offset"], 0, "first fixture offset 0")
+	GNTestAssert.assert_eq(node._fixture_manifest[1]["offset"], 10, "second fixture offset 10")
+	GNTestAssert.assert_eq(node._fixture_manifest[0]["channel_layout"], "rgb", "manifest has layout")
+	GNTestAssert.assert_eq(node._fixture_manifest[1]["universe"], 2, "manifest has universe")
+
+
+func test_fixture_sampler_led_pos_texture() -> void:
+	var node := _make_node(FixtureSamplerTOP.new(), "sampler1")
+	node.set_param_value("sample_extent", Vector2(0.02, 0.03))
+	var fd := _make_fixture("test", 5)
+	var final_pos := PackedVector2Array()
+	final_pos.resize(5)
+	for i in range(5):
+		final_pos[i] = Vector2(float(i) / 4.0, 0.5)
+	var fix_inputs: Array[GNFixtureData] = [fd]
+	node._rebuild_led_pos_texture(fix_inputs, [final_pos], [1])
+	GNTestAssert.assert_not_null(node._led_pos_image, "LED pos image created")
+	GNTestAssert.assert_eq(node._led_pos_image.get_width(), 5, "image width = total_leds")
+	GNTestAssert.assert_eq(node._led_pos_image.get_height(), 1, "image height = 1")
+	var px: Color = node._led_pos_image.get_pixel(0, 0)
+	GNTestAssert.assert_approx(px.r, 0.0, 0.001, "pixel r = uv_x")
+	GNTestAssert.assert_approx(px.g, 0.5, 0.001, "pixel g = uv_y")
+	GNTestAssert.assert_approx(px.b, 0.02, 0.001, "pixel b = extent_x")
+	GNTestAssert.assert_approx(px.a, 0.03, 0.001, "pixel a = extent_y")
 
 
 # ============================================================================
-# FixtureUnpackCHOP -- GPU readback to CHOP channels
+# Placement transforms -- _apply_placement
 # ============================================================================
 
-func test_fixture_unpack_instantiate() -> void:
-	var node := _make_node(FixtureUnpackCHOP.new(), "unpack1")
-	GNTestAssert.assert_not_null(node, "FixtureUnpackCHOP instantiates")
-	GNTestAssert.assert_eq(node.node_type, "fixture_unpack", "node_type")
-	GNTestAssert.assert_eq(node.family, GNFamily.Type.CHOP, "family is CHOP")
+func test_placement_strip() -> void:
+	var fd := _make_fixture("test", 5, "rgb", 1, 1, &"strip")
+	# fd has local positions: x from 0 to 1, y = 0.5
+	var placement := { "a": Vector2(0.2, 0.3), "b": Vector2(0.8, 0.7) }
+	var result: PackedVector2Array = FixtureSamplerTOP._apply_placement(fd, placement)
+	GNTestAssert.assert_eq(result.size(), 5, "5 LEDs mapped")
+	# LED 0: local x=0 -> lerp(a, b, 0) = a
+	GNTestAssert.assert_approx(result[0].x, 0.2, 0.001, "LED 0 at a.x")
+	GNTestAssert.assert_approx(result[0].y, 0.3, 0.001, "LED 0 at a.y")
+	# LED 4: local x=1 -> lerp(a, b, 1) = b
+	GNTestAssert.assert_approx(result[4].x, 0.8, 0.001, "LED 4 at b.x")
+	GNTestAssert.assert_approx(result[4].y, 0.7, 0.001, "LED 4 at b.y")
+	# LED 2: local x=0.5 -> midpoint
+	GNTestAssert.assert_approx(result[2].x, 0.5, 0.001, "LED 2 at mid x")
+	GNTestAssert.assert_approx(result[2].y, 0.5, 0.001, "LED 2 at mid y")
 
 
-func test_fixture_unpack_cook_null() -> void:
-	var node := _make_node(FixtureUnpackCHOP.new(), "unpack1")
-	_cook_no_input(node)
-	GNTestAssert.assert_not_empty(node.node_warning, "warning when no input")
+func test_placement_grid() -> void:
+	var fd := GNFixtureData.new()
+	fd.valid = true
+	fd.fixture_name = "grid"
+	fd.led_count = 4
+	fd.shape = &"grid"
+	fd.channel_layout = "rgb"
+	fd.channels_per_led = 3
+	fd.led_positions = PackedVector2Array([
+		Vector2(0, 0), Vector2(1, 0),  # row 0
+		Vector2(0, 1), Vector2(1, 1),  # row 1
+	])
+	var placement := {
+		"tl": Vector2(0.1, 0.1), "tr": Vector2(0.9, 0.1),
+		"bl": Vector2(0.1, 0.9), "br": Vector2(0.9, 0.9),
+	}
+	var result: PackedVector2Array = FixtureSamplerTOP._apply_placement(fd, placement)
+	GNTestAssert.assert_eq(result.size(), 4, "4 LEDs mapped")
+	GNTestAssert.assert_approx(result[0].x, 0.1, 0.001, "TL.x")
+	GNTestAssert.assert_approx(result[0].y, 0.1, 0.001, "TL.y")
+	GNTestAssert.assert_approx(result[1].x, 0.9, 0.001, "TR.x")
+	GNTestAssert.assert_approx(result[1].y, 0.1, 0.001, "TR.y")
+	GNTestAssert.assert_approx(result[2].x, 0.1, 0.001, "BL.x")
+	GNTestAssert.assert_approx(result[2].y, 0.9, 0.001, "BL.y")
+	GNTestAssert.assert_approx(result[3].x, 0.9, 0.001, "BR.x")
+	GNTestAssert.assert_approx(result[3].y, 0.9, 0.001, "BR.y")
 
 
-func test_fixture_unpack_no_manifest_metadata() -> void:
-	var node := _make_node(FixtureUnpackCHOP.new(), "unpack1")
-	# Texture with no fixture_manifest metadata should warn
-	var tex_data := GNTextureData.new()
-	tex_data.valid = true
-	tex_data.texture = PlaceholderTexture2D.new()
-	var result := _cook_with(node, [tex_data])
-	GNTestAssert.assert_null(result, "null when no manifest metadata")
-	GNTestAssert.assert_not_empty(node.node_warning, "warning about missing manifest")
+func test_placement_custom() -> void:
+	var fd := GNFixtureData.new()
+	fd.valid = true
+	fd.fixture_name = "custom"
+	fd.led_count = 2
+	fd.shape = &"custom"
+	fd.channel_layout = "rgb"
+	fd.channels_per_led = 3
+	fd.led_positions = PackedVector2Array([Vector2(0, 0), Vector2(0.5, 0.5)])
+	var placement := { "offset": Vector2(0.2, 0.2), "scale": Vector2(0.6, 0.6) }
+	var result: PackedVector2Array = FixtureSamplerTOP._apply_placement(fd, placement)
+	GNTestAssert.assert_eq(result.size(), 2, "2 LEDs mapped")
+	# LED 0: offset + (0,0)*scale = (0.2, 0.2)
+	GNTestAssert.assert_approx(result[0].x, 0.2, 0.001, "LED 0 x")
+	GNTestAssert.assert_approx(result[0].y, 0.2, 0.001, "LED 0 y")
+	# LED 1: offset + (0.5,0.5)*0.6 = (0.2+0.3, 0.2+0.3) = (0.5, 0.5)
+	GNTestAssert.assert_approx(result[1].x, 0.5, 0.001, "LED 1 x")
+	GNTestAssert.assert_approx(result[1].y, 0.5, 0.001, "LED 1 y")
 
 
-func test_fixture_unpack_reads_metadata() -> void:
-	var node := _make_node(FixtureUnpackCHOP.new(), "unpack1")
-	# Build a tiny 3x2 image (3 channels, 2 LEDs) with known values
-	var img := Image.create(3, 2, false, Image.FORMAT_RGBA8)
-	img.set_pixel(0, 0, Color(1.0, 0, 0))  # LED 0, ch R
-	img.set_pixel(1, 0, Color(0.5, 0, 0))  # LED 0, ch G
-	img.set_pixel(2, 0, Color(0.25, 0, 0)) # LED 0, ch B
-	img.set_pixel(0, 1, Color(0.8, 0, 0))  # LED 1, ch R
-	img.set_pixel(1, 1, Color(0.6, 0, 0))  # LED 1, ch G
-	img.set_pixel(2, 1, Color(0.4, 0, 0))  # LED 1, ch B
-	var tex := ImageTexture.create_from_image(img)
-	var tex_data := GNTextureData.new()
-	tex_data.valid = true
-	tex_data.texture = tex
-	tex_data.resolution = Vector2i(3, 2)
-	tex_data.metadata["fixture_manifest"] = [{
-		"name": "test_strip",
-		"led_count": 2,
-		"channels_per_led": 3,
-		"channel_layout": "rgb",
-		"dmx_start": 1,
-		"offset": 0,
-	}]
-	var result: GNChannelData = _cook_with(node, [tex_data]) as GNChannelData
-	GNTestAssert.assert_not_null(result, "unpack produces channel data")
-	GNTestAssert.assert_true(result.channels.has("test_strip.r"), "has r channel")
-	GNTestAssert.assert_true(result.channels.has("test_strip.g"), "has g channel")
-	GNTestAssert.assert_true(result.channels.has("test_strip.b"), "has b channel")
-	GNTestAssert.assert_eq(result.channels["test_strip.r"].size(), 2, "2 LEDs in r")
-	# Values read from pixel.r component
-	GNTestAssert.assert_approx(result.channels["test_strip.r"][0], 1.0, 0.01, "LED 0 R")
-	GNTestAssert.assert_approx(result.channels["test_strip.g"][0], 0.5, 0.01, "LED 0 G")
+func test_placement_default_strip() -> void:
+	var p: Dictionary = FixtureSamplerTOP._default_placement(&"strip")
+	GNTestAssert.assert_has_key(p, "a", "strip has 'a'")
+	GNTestAssert.assert_has_key(p, "b", "strip has 'b'")
+
+
+func test_placement_default_grid() -> void:
+	var p: Dictionary = FixtureSamplerTOP._default_placement(&"grid")
+	GNTestAssert.assert_has_key(p, "tl", "grid has 'tl'")
+	GNTestAssert.assert_has_key(p, "br", "grid has 'br'")
+
+
+func test_placement_default_custom() -> void:
+	var p: Dictionary = FixtureSamplerTOP._default_placement(&"custom")
+	GNTestAssert.assert_has_key(p, "offset", "custom has 'offset'")
+	GNTestAssert.assert_has_key(p, "scale", "custom has 'scale'")
 
 
 # ============================================================================
-# Cross-operator data flow (unit-level)
+# Serialization -- placement round-trip
+# ============================================================================
+
+func test_placement_serialization_round_trip() -> void:
+	var node := _make_node(FixtureSamplerTOP.new(), "sampler1")
+	node._placements = {
+		1: { "a": Vector2(0.1, 0.2), "b": Vector2(0.8, 0.9) },
+		2: { "tl": Vector2(0.0, 0.0), "tr": Vector2(1.0, 0.0),
+			"bl": Vector2(0.0, 1.0), "br": Vector2(1.0, 1.0) },
+	}
+	var d: Dictionary = node.to_dict()
+	GNTestAssert.assert_has_key(d, "fixture_placements", "serialized has placements")
+	# Deserialize
+	var node2 := _make_node(FixtureSamplerTOP.new(), "sampler2")
+	node2.from_dict(d)
+	GNTestAssert.assert_has_key(node2._placements, 1, "port 1 restored")
+	GNTestAssert.assert_has_key(node2._placements, 2, "port 2 restored")
+	var p1: Dictionary = node2._placements[1]
+	GNTestAssert.assert_approx(p1["a"].x, 0.1, 0.001, "a.x round-tripped")
+	GNTestAssert.assert_approx(p1["b"].y, 0.9, 0.001, "b.y round-tripped")
+
+
+# ============================================================================
+# Cross-operator data flow
 # ============================================================================
 
 func test_strip_into_null_fix() -> void:
@@ -683,21 +725,34 @@ func test_strip_into_null_fix() -> void:
 	GNTestAssert.assert_eq(through.led_count, 5, "led_count preserved through null")
 
 
-func test_multiple_fixtures_into_sampler_manifest() -> void:
-	var sampler := _make_node(FixtureSamplerTOP.new(), "sampler1")
-	var fd_rgb := _make_fixture("rgb_strip", 10, "rgb", 1)
-	var fd_w := _make_fixture("w_strip", 5, "w", 31)
-	var fix_inputs: Array[GNFixtureData] = [fd_rgb, fd_w]
-	sampler._rebuild_led_pos_texture(fix_inputs)
-	GNTestAssert.assert_eq(sampler._total_leds, 15, "total = 10 + 5")
-	GNTestAssert.assert_eq(sampler._max_channels, 3, "max = rgb = 3")
-	GNTestAssert.assert_eq(sampler._fixture_manifest[0]["name"], "rgb_strip", "first manifest name")
-	GNTestAssert.assert_eq(sampler._fixture_manifest[1]["name"], "w_strip", "second manifest name")
-	GNTestAssert.assert_eq(sampler._fixture_manifest[1]["channel_layout"], "w", "w layout preserved")
-
-
 func test_recook_reuses_cached_data() -> void:
 	var node := _make_node(StripFIX.new(), "strip1")
 	var out1: GNFixtureData = _cook_no_input(node) as GNFixtureData
 	var out2: GNFixtureData = _cook_no_input(node) as GNFixtureData
 	GNTestAssert.assert_true(out1 == out2, "recook reuses same GNFixtureData instance")
+
+
+# ============================================================================
+# FixtureOverlay -- hit testing
+# ============================================================================
+
+func test_overlay_hit_test() -> void:
+	var overlay := FixtureOverlay.new()
+	overlay.fixtures = [{
+		"shape": &"strip",
+		"name": "test",
+		"handles": PackedVector2Array([Vector2(0.2, 0.5), Vector2(0.8, 0.5)]),
+		"leds": PackedVector2Array(),
+		"color_index": 0,
+	}]
+	# Hit near handle 0
+	var hit: Vector2i = overlay.hit_test_uv(Vector2(0.21, 0.51), 0.05)
+	GNTestAssert.assert_eq(hit.x, 0, "hit fixture 0")
+	GNTestAssert.assert_eq(hit.y, 0, "hit handle 0")
+	# Hit near handle 1
+	hit = overlay.hit_test_uv(Vector2(0.79, 0.49), 0.05)
+	GNTestAssert.assert_eq(hit.x, 0, "hit fixture 0")
+	GNTestAssert.assert_eq(hit.y, 1, "hit handle 1")
+	# Miss
+	hit = overlay.hit_test_uv(Vector2(0.5, 0.5), 0.05)
+	GNTestAssert.assert_eq(hit.x, -1, "miss returns -1")

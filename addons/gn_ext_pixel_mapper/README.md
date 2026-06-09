@@ -1,120 +1,126 @@
-# gn_ext_pixel_mapper — LED Pixel Mapping Extension
+# gn_ext_pixel_mapper -- LED Pixel Mapping Extension
 
-LED pixel-mapping operators for GONODES. Define fixture layouts, sample a source image at every LED's UV position in a single GPU pass, and route the resulting colour values to DMX or downstream CHOP processing.
+MadMapper-style LED pixel mapping for GONODES. Define fixture shapes (strips, grids, matrices), place them visually on a source image using interactive handles in the viewer panel, and output sampled LED colour values as CHOP channels for DMX routing.
 
-**Pure GDScript + one GLSL shader — no native binaries or external dependencies required.**
+**Pure GDScript + one GLSL shader -- no native binaries or external dependencies required.**
 
 ---
 
 ## Overview
 
-The PixelMapper extension introduces its own **FIX family** — a data type that describes a set of LED positions in UV space. Fixture nodes produce `GNFixtureData` on a FIX wire. `FixtureSamplerTOP` accepts multiple FIX wires and one source image, and samples all LED positions in a single GPU shader dispatch. `FixtureUnpackCHOP` reads the compact result texture back to CPU (tiny — `channels_per_led × total_leds` pixels) and emits named CHOP channels for DMX routing.
+The PixelMapper extension introduces its own **FIX family** -- a data type that describes an LED fixture's shape, LED count, and DMX addressing. FIX nodes define fixtures in local space (a unit square); the **FixtureSamplerTOP** owns each fixture's placement on the source image and provides interactive drag handles in its viewer panel.
+
+FixtureSamplerTOP has two outputs:
+- **Port 0 (TOP):** Source texture passthrough -- connect to WindowOUT for preview
+- **Port 1 (CHOP):** Sampled LED colour values as named channels -- connect to ArtNetOutDAT or sACNOutDAT
 
 ```
-StripFIX ──┐
-GridFIX   ─┼──► FixtureSamplerTOP ──► FixtureUnpackCHOP ──► DmxOutCHOP
-MatrixFIX ─┘          ↑
-                  NoiseTOP / any TOP
+StripFIX --+
+GridFIX   -+---> FixtureSamplerTOP --port 0--> WindowOUT (preview)
+MatrixFIX -+          |
+                  NoiseTOP / any TOP ----port 1--> DMX CHOP output
 ```
+
+### Viewer Interaction
+
+When you view FixtureSamplerTOP, you see the source image with fixture handles overlaid:
+- **Strips:** Two draggable endpoints + connecting line + LED dots along the line
+- **Grids/Matrices:** Four draggable corner handles + bounding rect + LED dot grid
+- **Custom:** Draggable offset handle + LED dots
+- Fixtures are colour-coded for visual distinction (cyan, magenta, yellow, green, blue, orange)
+- Labels show fixture names; tooltips on hover
+
+When you view a FIX node, you see a visual LED layout with colour-coded dots. Hover over any LED to see its DMX address (Universe, Channel range).
 
 ---
 
 ## Architecture
 
-### FIX Wire Data — `GNFixtureData`
-
-`GNFixtureData` is the data type carried on FIX wires. Key fields:
+### FIX Wire Data -- GNFixtureData
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `fixture_name` | String | Label — used in CHOP channel names and the viewer overlay |
-| `led_positions` | PackedVector2Array | One UV coordinate per LED (0–1 on both axes) |
-| `led_count` | int | Total LEDs — always equals `led_positions.size()` |
-| `channel_layout` | String | `"rgb"`, `"rgbw"`, `"r"`, `"g"`, `"b"`, `"w"` |
-| `channels_per_led` | int | Derived from `channel_layout` (3 for rgb, 4 for rgbw, 1 for single) |
-| `dmx_start` | int | First DMX channel: `universe × 512 + channel_index` (0 = unassigned) |
-| `sample_extent` | Vector2 | UV half-size of box-filter area per LED — `Vector2.ZERO` = point sample |
+| led_positions | PackedVector2Array | Local-space LED positions (0-1 unit square) |
+| fixture_name | String | Label for CHOP channel names and viewer overlay |
+| led_count | int | Total LEDs (always = led_positions.size()) |
+| channel_layout | String | "rgb", "rgbw", "r", "g", "b", "w" |
+| channels_per_led | int | 3 for rgb, 4 for rgbw, 1 for single |
+| universe | int | DMX universe (1-based) |
+| start_channel | int | First DMX channel within the universe (1-512) |
+| shape | StringName | "strip", "grid", "matrix", "custom" (handle type hint) |
 
-### Base Class — `GNFixtureBase`
+### Placement Transforms (owned by FixtureSamplerTOP)
 
-All FIX operators extend `GNFixtureBase`, which:
-- Resolves the `FIX_FAMILY` id once from the extension registry (`GNFamily.string_to_type("FIX")`)
-- Provides `_prepare_output() -> GNFixtureData` (reuses cached data, clears LED arrays)
-- Provides `_get_input_fix(inputs, port) -> GNFixtureData` (type-safe input extraction)
-- Implements `render_for_viewer()` to show LED count and dmx_start in the viewer panel
+Each fixture connected to the sampler has a placement transform stored on the sampler node:
 
-### GPU Sampling — `FixtureSamplerTOP`
+| Shape | Placement Data | Interaction |
+|-------|---------------|-------------|
+| strip | Two endpoints (a, b) | Drag endpoints to position the line |
+| grid/matrix | Four corners (tl, tr, bl, br) | Drag corners to define a quad |
+| custom | Offset + scale | Drag to position the group |
 
-- Port 0: source image (any TOP, any resolution — no readback)
-- Ports 1+: dynamic auto-grow FIX inputs (same pattern as MergeCHOP, RenderTOP)
-- On cook:
-  1. Collects all connected `GNFixtureData` objects
-  2. If fixtures changed (hash mismatch), rebuilds the **LED-position texture**: an `RGBAf` image of size `(total_leds × 1)` where each pixel is `(uv_x, uv_y, extent_x, extent_y)` — CPU only, happens once per fixture change
-  3. Sets shader uniforms and dispatches a single render pass
-- Output texture size: `(max_channels_per_led × total_leds)` — compact, GPU-only, no readback of the source image (Rule 25.1 compliant)
+Local LED positions are mapped to source-image UV via:
+- **Strip:** `lerp(a, b, local_x)` -- each LED's x coordinate (0-1) interpolates along the line
+- **Grid/Matrix:** Bilinear interpolation across 4 corners using `(local_x, local_y)`
+- **Custom:** `offset + local_pos * scale`
 
-### Shader — `shaders/fixture_sampler.gdshader`
+Placements are serialized in .gnpatch files under "fixture_placements".
 
-A canvas-item shader. For each output pixel `(channel_col, led_row)`:
-1. Reads the LED's UV and sample extent from the LED-position texture
-2. Point-samples (or 3×3 box-filters) the source image at that UV
-3. Outputs the requested channel's value in the red component
+### GPU Sampling
 
-### CPU Unpack -- `FixtureUnpackCHOP`
+The sampler builds a LED-position texture (RGBAf, one pixel per LED: r=uv_x, g=uv_y, b=extent_x, a=extent_y) and dispatches a single GPU shader pass that samples the source image at all LED positions simultaneously. No source image readback occurs (Rule 25.1). The tiny result texture is read back to CPU only when the CHOP output (port 1) is demanded (Rule 25.24).
 
-- Reads the tiny packed result texture back to CPU (`tex.get_image()`)
-- Reads the fixture manifest from `tex_data.metadata["fixture_manifest"]` (set by FixtureSamplerTOP -- no graph walking needed, works through intermediate nodes)
-- Emits one CHOP channel per fixture x colour component: `"strip.r"`, `"strip.g"`, `"strip.b"` -- each channel is a `PackedFloat32Array` with one value per LED
-- `value_range` param: 0-1 float (for normalised math) or 0-255 int (for raw DMX)
-- Wire output to `DmxOutCHOP` to send to hardware
+### DMX Addressing
+
+Each fixture has a DMX universe (1-based) and start channel (1-512). The absolute address is computed as: `(universe - 1) * 512 + (start_channel - 1)`. A 60-LED RGB strip at Universe 1, Channel 1 occupies channels 1-180.
 
 ---
 
-## Operators (10)
+## Operators (9)
 
 ### FIX Primitives
 
-| Operator | Class | Description |
-|----------|-------|-------------|
-| `strip_fix` | `StripFIX` | N LEDs evenly spaced along a UV line (uv_start → uv_end) |
-| `grid_fix` | `GridFIX` | Cols × rows of LEDs within a UV bounding box |
-| `matrix_fix` | `MatrixFIX` | LED matrix with configurable pixel pitch, rotation (deg), and skew |
-| `custom_fix` | `CustomFIX` | LED positions loaded from a DAT input — columns `uv_x`, `uv_y` required |
-| `file_in_fix` | `FileInFIX` | Loads a `.fixture` JSON file (`{"name":..., "leds":[{"uv_x":f,"uv_y":f},...]}`) |
+| node_type | Class | Description |
+|-----------|-------|-------------|
+| strip_fix | StripFIX | N LEDs in a horizontal line (local space) |
+| grid_fix | GridFIX | Cols x rows LEDs filling a unit square (local space) |
+| matrix_fix | MatrixFIX | LED matrix with configurable pitch, rotation, and skew |
+| custom_fix | CustomFIX | LED positions from a DAT -- columns "x", "y" required |
+| file_in_fix | FileInFIX | Loads a .fixture JSON file |
 
 ### FIX Utilities
 
-| Operator | Class | Description |
-|----------|-------|-------------|
-| `null_fix` | `NullFIX` | Pass-through relay — useful as a labelled junction point |
-| `select_fix` | `SelectFIX` | Wireless FIX reference — re-emits a named node's output (Rule 25.35) |
-| `switch_fix` | `SwitchFIX` | Selects one of N FIX inputs by index; dynamic auto-grow inputs |
+| node_type | Class | Description |
+|-----------|-------|-------------|
+| null_fix | NullFIX | Pass-through relay |
+| select_fix | SelectFIX | Wireless FIX reference (Rule 25.35) |
+| switch_fix | SwitchFIX | Selects one of N FIX inputs by index |
 
-### Sampling & Output
+### Sampling
 
-| Operator | Family | Class | Description |
-|----------|--------|-------|-------------|
-| `fixture_sampler` | TOP | `FixtureSamplerTOP` | Single-pass GPU sampler — all fixtures, all LEDs |
-| `fixture_unpack` | CHOP | `FixtureUnpackCHOP` | Packed texture → named CHOP channels → DMX |
+| node_type | Family | Class | Description |
+|-----------|--------|-------|-------------|
+| fixture_sampler | TOP | FixtureSamplerTOP | MadMapper-style placement + GPU sampling. Port 0 = passthrough TOP, Port 1 = CHOP |
 
 ---
 
-## `.fixture` JSON Format
+## .fixture JSON Format
 
 ```json
 {
   "name": "my_strip",
+  "shape": "strip",
   "channel_layout": "rgb",
-  "dmx_start": 1,
+  "universe": 1,
+  "start_channel": 1,
   "leds": [
-    {"uv_x": 0.1, "uv_y": 0.5},
-    {"uv_x": 0.2, "uv_y": 0.5},
-    ...
+    {"x": 0.0, "y": 0.5},
+    {"x": 0.1, "y": 0.5}
   ]
 }
 ```
 
-Fields `channel_layout` and `dmx_start` can be overridden by the `FileInFIX` parameters at node level.
+FileInFIX also supports legacy "uv_x"/"uv_y" keys for backward compatibility.
 
 ---
 
@@ -122,10 +128,17 @@ Fields `channel_layout` and `dmx_start` can be overridden by the `FileInFIX` par
 
 | Patch | Demonstrates |
 |-------|-------------|
-| `help/fix/strip_fix_basic.gnpatch` | NoiseTOP → StripFIX → FixtureSamplerTOP → WindowOUT |
-| `help/fix/grid_fix_basic.gnpatch` | NoiseTOP → GridFIX → FixtureSamplerTOP → WindowOUT |
-| `help/top/fixture_sampler_top_multi.gnpatch` | Two strips + grid all sampled in one pass |
-| `help/chop/fixture_unpack_chop_basic.gnpatch` | Full chain with FixtureUnpackCHOP → CHOPtoTOP → WindowOUT |
+| help/fix/strip_fix_basic.gnpatch | StripFIX -> FixtureSamplerTOP -> WindowOUT |
+| help/fix/grid_fix_basic.gnpatch | GridFIX -> FixtureSamplerTOP -> WindowOUT |
+| help/top/fixture_sampler_top_multi.gnpatch | Two strips + grid, sampler CHOP output |
+
+---
+
+## Roadmap
+
+- [ ] **UI output port on FixtureSamplerTOP** -- a third output (UI family) providing the fixture overlay as a standalone interactive panel, so users can pop it out into a separate window and manipulate fixtures without the viewer panel
+- [ ] **Fixture library panel** -- a palette of common fixture profiles (WS2812B strips, APA102 rings, common LED panel sizes) that can be dragged into the network
+- [ ] **Zig-zag / serpentine scan order** -- a parameter on GridFIX to alternate row direction for LED panels wired in serpentine order
 
 ---
 
@@ -133,36 +146,24 @@ Fields `channel_layout` and `dmx_start` can be overridden by the `FileInFIX` par
 
 ```
 addons/gn_ext_pixel_mapper/
-├── gn_extension.cfg                          # Extension manifest — registers FIX family + 10 operators
-├── boot.gd                                   # Boot script (empty — no extra registration needed)
-├── README.md                                 # This file
-├── core/
-│   ├── gn_fixture_data.gd                    # GNFixtureData — FIX wire data type
-│   └── gn_fixture_base.gd                    # GNFixtureBase — shared base class
-├── operators/
-│   ├── fix/
-│   │   ├── strip_fix.gd                      # Linear LED strip
-│   │   ├── grid_fix.gd                       # 2D LED grid
-│   │   ├── matrix_fix.gd                     # LED matrix (pitch/rotation/skew)
-│   │   ├── custom_fix.gd                     # Custom positions from DAT
-│   │   ├── file_in_fix.gd                    # Load .fixture JSON
-│   │   ├── null_fix.gd                       # Pass-through
-│   │   ├── select_fix.gd                     # Wireless reference
-│   │   └── switch_fix.gd                     # Index selector
-│   ├── top/
-│   │   └── fixture_sampler_top.gd            # GPU sampler (TOP output)
-│   └── chop/
-│       └── fixture_unpack_chop.gd            # Packed texture → CHOP channels
-├── shaders/
-│   └── fixture_sampler.gdshader              # Point + box-filter sampling shader
-├── help/
-│   ├── fix/
-│   │   ├── strip_fix_basic.gnpatch
-│   │   └── grid_fix_basic.gnpatch
-│   ├── top/
-│   │   └── fixture_sampler_top_multi.gnpatch
-│   └── chop/
-│       └── fixture_unpack_chop_basic.gnpatch
-└── tests/
-    └── test_pixel_mapper_operators.gd        # 20 tests
+  gn_extension.cfg          # Extension manifest -- FIX family + 9 operators
+  boot.gd                   # Boot script (empty)
+  README.md
+  core/
+    gn_fixture_data.gd      # GNFixtureData -- FIX wire data type
+    gn_fixture_base.gd      # GNFixtureBase -- shared base class + LED viewer
+  operators/
+    fix/                     # 8 FIX operators (5 primitives + 3 utilities)
+    top/
+      fixture_sampler_top.gd # MadMapper-style placement + sampling
+  ui/
+    fixture_overlay.gd       # Interactive handles overlay for sampler viewer
+    fixture_viewer_overlay.gd # LED hover tooltip overlay for FIX viewer
+  shaders/
+    fixture_sampler.gdshader # Point + box-filter GPU sampling shader
+  help/
+    fix/                     # 2 FIX help patches
+    top/                     # 1 TOP help patch
+  tests/
+    test_pixel_mapper_operators.gd
 ```

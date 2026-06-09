@@ -1,58 +1,99 @@
 class_name FixtureSamplerTOP
 extends GNTopBase
-## Samples a source image at every LED UV position across all connected fixtures.
+## MadMapper-style fixture sampler with interactive placement.
 ##
-## Port 0  : source TOP (the image to sample — any resolution)
-## Ports 1+: FIX inputs (dynamic auto-grow — connect as many fixtures as needed)
+## Port 0 input : source TOP (the image to sample -- any resolution)
+## Ports 1+ input: FIX inputs (dynamic auto-grow -- connect as many fixtures as needed)
 ##
-## On cook, all connected GNFixtureData objects are merged into a single
-## "LED position texture" (one pixel per LED: rg=uv, ba=extent).  One shader
-## dispatch then samples the source image at all LED positions simultaneously.
+## Port 0 output: Source texture passthrough (for downstream preview/WindowOUT)
+## Port 1 output: CHOP with sampled LED colour values (for DMX output)
 ##
-## Output texture layout:
-##   width  = max channels_per_led across all fixtures (1–4)
-##   height = total_led_count
-##   pixel (channel_col, led_row).r = that channel value for that LED
+## Each connected fixture has a placement transform stored on this node:
+##   Strip: two endpoint UVs (draggable in viewer)
+##   Grid/Matrix: four corner UVs (TL, TR, BL, BR -- draggable in viewer)
+##   Custom: offset + scale (draggable group)
 ##
-## The LED position texture is only rebuilt when FIX inputs change (dirty).
-## The shader re-runs every frame that the source TOP is dirty.
+## Viewer shows source texture + interactive fixture handles overlay.
+## FIX nodes define shape/LED count/DMX address; this node owns UV placement.
 
 
-## Packed LED-position image (CPU-side, rebuilt when fixtures change).
-## Format: RGBAf — r=uv_x, g=uv_y, b=extent_x, a=extent_y
+# ── Placement state ──────────────────────────────────────────────────────────
+
+## Per-fixture placement, keyed by input port index (1-based).
+## Each entry is a Dictionary with shape-specific fields:
+##   strip:  { "a": Vector2, "b": Vector2 }
+##   grid/matrix: { "tl": Vector2, "tr": Vector2, "bl": Vector2, "br": Vector2 }
+##   custom: { "offset": Vector2, "scale": Vector2 }
+var _placements: Dictionary = {}
+
+## Default placement rectangles for new fixtures.
+const _DEFAULT_STRIP_A := Vector2(0.1, 0.5)
+const _DEFAULT_STRIP_B := Vector2(0.9, 0.5)
+const _DEFAULT_RECT_TL := Vector2(0.1, 0.1)
+const _DEFAULT_RECT_TR := Vector2(0.9, 0.1)
+const _DEFAULT_RECT_BL := Vector2(0.1, 0.9)
+const _DEFAULT_RECT_BR := Vector2(0.9, 0.9)
+const _DEFAULT_CUSTOM_OFFSET := Vector2(0.1, 0.1)
+const _DEFAULT_CUSTOM_SCALE := Vector2(0.8, 0.8)
+
+
+# ── LED position texture (GPU sampling) ──────────────────────────────────────
+
 var _led_pos_image: Image = null
 var _led_pos_texture: ImageTexture = null
-
-## Cached fixture metadata in cook-order, for FixtureUnpackCHOP.
-## Array of Dictionaries: {name, led_count, channels_per_led, dmx_start, offset}
-## offset = index of this fixture's first LED in the global LED array.
 var _fixture_manifest: Array = []
-
-## Hash of the last FIX inputs to detect changes without rebuilding every frame.
 var _last_fix_hash: int = -1
-
-## Total LED count across all connected fixtures.
 var _total_leds: int = 0
-
-## Max channels_per_led across all fixtures (determines output texture width).
 var _max_channels: int = 3
+
+## Source texture passed through on port 0.
+var _source_tex_data: GNTextureData = null
+
+## CHOP output for port 1 (demand-gated).
+var _cached_chop_data: GNChannelData = null
+
+# ── Viewer overlay ───────────────────────────────────────────────────────────
+
+var _overlay: FixtureOverlay = null
+var _dragging: Vector2i = Vector2i(-1, -1)  # fixture_idx, handle_idx
+var _viewer_ref: WeakRef = WeakRef.new()
+
+const GRAB_RADIUS_UV := 0.03
+
+## Channel names for CHOP unpack.
+const _LAYOUT_CHANNELS: Dictionary = {
+	"rgb":  ["r", "g", "b"],
+	"rgbw": ["r", "g", "b", "w"],
+	"r":    ["r"],
+	"g":    ["g"],
+	"b":    ["b"],
+	"w":    ["w"],
+}
 
 
 func _init() -> void:
 	node_type = "fixture_sampler"
-	node_description = "Samples a source image at all fixture LED positions in a single GPU pass."
+	node_description = "MadMapper-style fixture placement + sampling. Drag fixtures onto the source image."
 
 
 func _init_ports() -> void:
 	var fix_fam: int = GNFamily.string_to_type("FIX")
 	add_input("source", GNFamily.Type.TOP, true, "Source image to sample")
 	_enable_dynamic_inputs(fix_fam, "fix", "Fixture")
-	add_output("out", GNFamily.Type.TOP, "Packed result texture - one pixel per LED channel")
-	# Port 0 is "source" (fixed TOP). Dynamic FIX ports occupy indices 1..N.
-	# update_dynamic_inputs and from_dict are overridden below to preserve port 0.
+	add_output("out", GNFamily.Type.TOP, "Source texture passthrough")
+	add_output("chop", GNFamily.Type.CHOP, "Sampled LED values as CHOP channels")
 
 
-## Rebuilds input ports: source at index 0, then [param fix_count] FIX ports.
+func _init_parameters() -> void:
+	add_parameter(GNParameter.create_enum("sample_mode",
+		PackedStringArray(["Point", "Box Filter"]), 0,
+		"Sample Mode", "Point = single texel. Box Filter = 3x3 tap average."))
+	add_parameter(GNParameter.create_vector2("sample_extent", Vector2.ZERO,
+		"Sample Extent", "UV half-size for box-filter area per LED. (0,0) = point sample."))
+
+
+# ── Dynamic input port management (preserve fixed port 0) ────────────────────
+
 func _rebuild_input_ports(fix_count: int) -> void:
 	var fix_fam: int = GNFamily.string_to_type("FIX")
 	input_ports.clear()
@@ -63,12 +104,9 @@ func _rebuild_input_ports(fix_count: int) -> void:
 	ports_changed.emit(id)
 
 
-## Overrides GNNode.update_dynamic_inputs to preserve the fixed "source" port at
-## index 0.  The base implementation calls set_input_count() which clears ALL ports.
 func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
 	if not _dynamic_input:
 		return
-	# FIX ports are at absolute indices 1..N. Only consider p >= 1.
 	var max_fix: int = -1
 	for p in connected_ports:
 		if p >= 1 and p > max_fix:
@@ -79,10 +117,6 @@ func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
 	_rebuild_input_ports(desired_fix_count)
 
 
-## Overrides GNNode.from_dict to handle dynamic_input_count correctly.
-## The base implementation passes the saved count directly to set_input_count(),
-## which would overwrite port 0. We intercept, call super without that key,
-## then rebuild with the correct FIX count.
 func from_dict(d: Dictionary) -> void:
 	var saved_total: int = -1
 	if _dynamic_input and d.has("dynamic_input_count"):
@@ -91,14 +125,20 @@ func from_dict(d: Dictionary) -> void:
 		d.erase("dynamic_input_count")
 	super.from_dict(d)
 	if saved_total > 1:
-		_rebuild_input_ports(saved_total - 1)  # saved_total includes source port
+		_rebuild_input_ports(saved_total - 1)
+	# Restore placements
+	if d.has("fixture_placements"):
+		_placements = _deserialize_placements(d["fixture_placements"])
 
 
-func _init_parameters() -> void:
-	add_parameter(GNParameter.create_enum("sample_mode",
-		PackedStringArray(["Point", "Box Filter"]), 0,
-		"Sample Mode", "Point = single texel. Box Filter = 3×3 tap average over the LED's sample_extent area."))
+func to_dict() -> Dictionary:
+	var d: Dictionary = super.to_dict()
+	if not _placements.is_empty():
+		d["fixture_placements"] = _serialize_placements()
+	return d
 
+
+# ── Cook ─────────────────────────────────────────────────────────────────────
 
 func _cook(inputs: Array[GNData]) -> GNData:
 	# Port 0 = source TOP
@@ -107,62 +147,197 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		node_warning = "No source TOP connected."
 		return null
 
+	# Store source for port 0 passthrough
+	_source_tex_data = src_data
+
 	# Collect FIX inputs (ports 1+)
 	var fix_inputs: Array[GNFixtureData] = []
+	var fix_port_indices: Array[int] = []
 	for i in range(1, inputs.size()):
 		var fd: GNFixtureData = inputs[i] as GNFixtureData if inputs[i] is GNFixtureData else null
 		if fd != null and fd.led_count > 0:
 			fix_inputs.append(fd)
+			fix_port_indices.append(i)
 
 	if fix_inputs.is_empty():
 		node_warning = "No FIX inputs connected."
-		return null
+		_cached_tex_data.texture = src_data.texture
+		_cached_tex_data.resolution = src_data.resolution
+		return _cached_tex_data
 
 	node_warning = ""
 
-	# ── Rebuild LED-position texture if fixtures changed ──────────────────
-	var fix_hash: int = _compute_fix_hash(fix_inputs)
+	# Ensure placements exist for all connected fixtures
+	for idx in range(fix_inputs.size()):
+		var port: int = fix_port_indices[idx]
+		if not _placements.has(port):
+			_placements[port] = _default_placement(fix_inputs[idx].shape)
+
+	# Build final UV positions by mapping local -> world via placement transforms
+	var final_positions: Array[PackedVector2Array] = []
+	for idx in range(fix_inputs.size()):
+		var fd: GNFixtureData = fix_inputs[idx]
+		var port: int = fix_port_indices[idx]
+		var placement: Dictionary = _placements[port]
+		final_positions.append(_apply_placement(fd, placement))
+
+	# Rebuild LED-position texture if changed
+	var fix_hash: int = _compute_fix_hash(fix_inputs, final_positions)
 	if fix_hash != _last_fix_hash:
-		_rebuild_led_pos_texture(fix_inputs)
+		_rebuild_led_pos_texture(fix_inputs, final_positions, fix_port_indices)
 		_last_fix_hash = fix_hash
 
-	# ── Ensure shader viewport exists ─────────────────────────────────────
-	var out_size := Vector2i(_max_channels, _total_leds)
-	_init_shader_viewport(
-		"res://addons/gn_ext_pixel_mapper/shaders/fixture_sampler.gdshader",
-		false, false, out_size)
+	# GPU sampling pass
+	if is_output_demanded(1) or _total_leds > 0:
+		var sample_extent: Vector2 = get_param_value("sample_extent")
+		var out_size := Vector2i(_max_channels, _total_leds)
+		_init_shader_viewport(
+			"res://addons/gn_ext_pixel_mapper/shaders/fixture_sampler.gdshader",
+			false, false, out_size)
+		if _viewport.size != out_size:
+			_viewport.size = out_size
+		_material.set_shader_parameter("source_tex", src_data.texture)
+		_material.set_shader_parameter("led_pos_tex", _led_pos_texture)
+		_material.set_shader_parameter("total_leds", _total_leds)
+		_material.set_shader_parameter("channels_per_led", _max_channels)
+		_material.set_shader_parameter("sample_mode", get_param_value("sample_mode"))
 
-	# Resize if total_leds or max_channels changed
-	if _viewport.size != out_size:
-		_viewport.size = out_size
-
-	# ── Set shader uniforms ───────────────────────────────────────────────
-	_material.set_shader_parameter("source_tex", src_data.texture)
-	_material.set_shader_parameter("led_pos_tex", _led_pos_texture)
-	_material.set_shader_parameter("total_leds", _total_leds)
-	_material.set_shader_parameter("channels_per_led", _max_channels)
-	_material.set_shader_parameter("sample_mode", get_param_value("sample_mode"))
-
-	_cached_tex_data.resolution = out_size
+	# Port 0 returns source passthrough
+	_cached_tex_data.texture = src_data.texture
+	_cached_tex_data.resolution = src_data.resolution
 	_cached_tex_data.metadata["fixture_manifest"] = _fixture_manifest
 	return _cached_tex_data
 
 
-## Builds the LED-position ImageTexture from all active fixtures.
-## Also updates _fixture_manifest, _total_leds, _max_channels.
-func _rebuild_led_pos_texture(fix_inputs: Array[GNFixtureData]) -> void:
+# ── Multi-output (Rule 25.24) ────────────────────────────────────────────────
+
+func get_output_data(port_index: int) -> GNData:
+	if port_index == 1:
+		# CHOP output -- demand-gated
+		if not is_output_demanded(1):
+			return null
+		return _build_chop_output()
+	return cached_output
+
+
+func _build_chop_output() -> GNChannelData:
+	if _viewport == null or _fixture_manifest.is_empty():
+		return null
+
+	# CPU readback of the packed result texture (tiny: channels x total_leds)
+	var vp_tex: ViewportTexture = _viewport.get_texture()
+	if vp_tex == null:
+		return null
+	var img: Image = vp_tex.get_image()
+	if img == null:
+		return null
+
+	if _cached_chop_data == null:
+		_cached_chop_data = GNChannelData.new()
+	else:
+		_cached_chop_data.channels.clear()
+	_cached_chop_data.valid = true
+	_cached_chop_data.sample_rate = 60.0
+
+	var scale: float = 1.0
+	var max_w: int = img.get_width()
+
+	for entry in _fixture_manifest:
+		var fix_name: String = entry["name"]
+		var led_count: int = entry["led_count"]
+		var cpl: int = entry["channels_per_led"]
+		var layout: String = entry.get("channel_layout", "rgb")
+		var offset: int = entry["offset"]
+
+		var ch_names: Array = _LAYOUT_CHANNELS.get(layout, [])
+		if ch_names.is_empty():
+			ch_names = ["ch0", "ch1", "ch2", "ch3"].slice(0, cpl)
+
+		for ch_i in range(cpl):
+			if ch_i >= max_w:
+				continue
+			var ch_label: String = ch_names[ch_i] if ch_i < ch_names.size() else ("ch%d" % ch_i)
+			var values := PackedFloat32Array()
+			values.resize(led_count)
+			for led_i in range(led_count):
+				var pixel: Color = img.get_pixel(ch_i, offset + led_i)
+				values[led_i] = pixel.r * scale
+			_cached_chop_data.set_channel("%s.%s" % [fix_name, ch_label], values)
+
+	_cached_chop_data.length = _cached_chop_data.channels.values()[0].size() if not _cached_chop_data.channels.is_empty() else 1
+	return _cached_chop_data
+
+
+# ── Placement transforms ────────────────────────────────────────────────────
+
+## Maps local-space LED positions to source-image UV using the placement transform.
+static func _apply_placement(fd: GNFixtureData, placement: Dictionary) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	result.resize(fd.led_count)
+
+	var shape: StringName = fd.shape
+	if shape == &"strip":
+		var a: Vector2 = placement.get("a", Vector2(0.1, 0.5))
+		var b: Vector2 = placement.get("b", Vector2(0.9, 0.5))
+		# Strip local positions have x in 0-1, y=0.5. Map x -> lerp(a, b).
+		for i in range(fd.led_count):
+			result[i] = a.lerp(b, fd.led_positions[i].x)
+
+	elif shape == &"grid" or shape == &"matrix":
+		var tl: Vector2 = placement.get("tl", Vector2(0.1, 0.1))
+		var tr: Vector2 = placement.get("tr", Vector2(0.9, 0.1))
+		var bl: Vector2 = placement.get("bl", Vector2(0.1, 0.9))
+		var br: Vector2 = placement.get("br", Vector2(0.9, 0.9))
+		# Bilinear interpolation: local x,y in 0-1 -> quad corners
+		for i in range(fd.led_count):
+			var lp: Vector2 = fd.led_positions[i]
+			# Normalize to 0-1 range (matrix might have positions outside unit square)
+			var top: Vector2 = tl.lerp(tr, lp.x)
+			var bot: Vector2 = bl.lerp(br, lp.x)
+			result[i] = top.lerp(bot, lp.y)
+
+	else:
+		# custom: offset + scale
+		var offs: Vector2 = placement.get("offset", Vector2(0.1, 0.1))
+		var sc: Vector2 = placement.get("scale", Vector2(0.8, 0.8))
+		for i in range(fd.led_count):
+			result[i] = offs + fd.led_positions[i] * sc
+
+	return result
+
+
+static func _default_placement(shape: StringName) -> Dictionary:
+	if shape == &"strip":
+		return { "a": _DEFAULT_STRIP_A, "b": _DEFAULT_STRIP_B }
+	elif shape == &"grid" or shape == &"matrix":
+		return { "tl": _DEFAULT_RECT_TL, "tr": _DEFAULT_RECT_TR,
+				"bl": _DEFAULT_RECT_BL, "br": _DEFAULT_RECT_BR }
+	else:
+		return { "offset": _DEFAULT_CUSTOM_OFFSET, "scale": _DEFAULT_CUSTOM_SCALE }
+
+
+# ── LED position texture ────────────────────────────────────────────────────
+
+func _rebuild_led_pos_texture(fix_inputs: Array[GNFixtureData],
+		final_positions: Array[PackedVector2Array],
+		fix_port_indices: Array[int]) -> void:
 	_total_leds = 0
 	_max_channels = 1
 	_fixture_manifest = []
+	var sample_extent: Vector2 = get_param_value("sample_extent")
 
-	for fd in fix_inputs:
+	for idx in range(fix_inputs.size()):
+		var fd: GNFixtureData = fix_inputs[idx]
 		_fixture_manifest.append({
 			"name": fd.fixture_name,
 			"led_count": fd.led_count,
 			"channels_per_led": fd.channels_per_led,
 			"channel_layout": fd.channel_layout,
-			"dmx_start": fd.dmx_start,
+			"universe": fd.universe,
+			"start_channel": fd.start_channel,
 			"offset": _total_leds,
+			"port": fix_port_indices[idx],
+			"shape": String(fd.shape),
 		})
 		_total_leds += fd.led_count
 		_max_channels = maxi(_max_channels, fd.channels_per_led)
@@ -170,16 +345,15 @@ func _rebuild_led_pos_texture(fix_inputs: Array[GNFixtureData]) -> void:
 	if _total_leds == 0:
 		return
 
-	# RGBAf image: width=total_leds, height=1
-	# r=uv_x, g=uv_y, b=extent_x, a=extent_y
 	_led_pos_image = Image.create(_total_leds, 1, false, Image.FORMAT_RGBAF)
 
 	var led_idx: int = 0
-	for fd in fix_inputs:
-		for i in range(fd.led_count):
-			var uv: Vector2 = fd.led_positions[i]
+	for idx in range(fix_inputs.size()):
+		var positions: PackedVector2Array = final_positions[idx]
+		for i in range(positions.size()):
+			var uv: Vector2 = positions[i]
 			_led_pos_image.set_pixel(led_idx, 0,
-				Color(uv.x, uv.y, fd.sample_extent.x, fd.sample_extent.y))
+				Color(uv.x, uv.y, sample_extent.x, sample_extent.y))
 			led_idx += 1
 
 	if _led_pos_texture == null:
@@ -188,16 +362,203 @@ func _rebuild_led_pos_texture(fix_inputs: Array[GNFixtureData]) -> void:
 		_led_pos_texture.update(_led_pos_image)
 
 
-## Hash the fixture inputs for change detection (avoids rebuild every frame).
-## NOTE: Only samples first+last LED positions for speed. A middle-LED-only UV
-## change won't trigger rebuild until fixture_name/led_count/layout also changes.
-static func _compute_fix_hash(fix_inputs: Array[GNFixtureData]) -> int:
+static func _compute_fix_hash(fix_inputs: Array[GNFixtureData],
+		final_positions: Array[PackedVector2Array]) -> int:
 	var h: int = 0
-	for fd in fix_inputs:
+	for idx in range(fix_inputs.size()):
+		var fd: GNFixtureData = fix_inputs[idx]
 		h = hash(h ^ hash(fd.fixture_name) ^ hash(fd.led_count)
-			^ hash(fd.channel_layout) ^ hash(fd.dmx_start))
-		# Sample a few positions to detect UV changes
-		if fd.led_count > 0:
-			h = hash(h ^ hash(fd.led_positions[0]))
-			h = hash(h ^ hash(fd.led_positions[fd.led_count - 1]))
+			^ hash(fd.channel_layout) ^ hash(fd.universe) ^ hash(fd.start_channel))
+		var fp: PackedVector2Array = final_positions[idx]
+		if fp.size() > 0:
+			h = hash(h ^ hash(fp[0]))
+			h = hash(h ^ hash(fp[fp.size() - 1]))
 	return h
+
+
+# ── Viewer overlay + interaction ─────────────────────────────────────────────
+
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	if port_index == 1:
+		# Show CHOP output via default family renderer
+		var chop_data: GNData = get_output_data(1)
+		if chop_data != null:
+			var renderer = GNFamily.get_renderer(GNFamily.Type.CHOP)
+			if renderer != null:
+				renderer.render_for_viewer(chop_data, viewer)
+				return
+		viewer.set_info("No CHOP output", "")
+		return
+
+	# Port 0: show source texture + fixture overlay
+	if _source_tex_data != null and _source_tex_data.texture != null:
+		viewer.set_texture(_source_tex_data.texture,
+			"%dx%d" % [_source_tex_data.resolution.x, _source_tex_data.resolution.y])
+		_viewer_ref = weakref(viewer)
+		_ensure_overlay()
+		_sync_overlay()
+		viewer.set_texture_overlay(_overlay)
+	else:
+		viewer.set_info("No source texture", "")
+
+
+func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, port_index: int = 0) -> bool:
+	if port_index != 0 or viewer == null:
+		return false
+
+	var uv: Vector2 = viewer.local_pos_to_uv(local_pos)
+	_ensure_overlay()
+
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.button_index == MOUSE_BUTTON_LEFT:
+			if mb.pressed:
+				var hit: Vector2i = _overlay.hit_test_uv(uv, GRAB_RADIUS_UV)
+				if hit.x >= 0:
+					_dragging = hit
+					_overlay.active = hit
+					_overlay.queue_redraw()
+					return true
+			else:
+				if _dragging.x >= 0:
+					_dragging = Vector2i(-1, -1)
+					_overlay.active = Vector2i(-1, -1)
+					_overlay.queue_redraw()
+					return true
+
+	elif event is InputEventMouseMotion:
+		if _dragging.x >= 0:
+			_move_handle(_dragging, uv)
+			_sync_overlay()
+			_overlay.queue_redraw()
+			mark_dirty()
+			return true
+		else:
+			# Hover detection
+			var hit: Vector2i = _overlay.hit_test_uv(uv, GRAB_RADIUS_UV)
+			if hit != _overlay.hovered:
+				_overlay.hovered = hit
+				# Set tooltip
+				if hit.x >= 0 and hit.x < _overlay.fixtures.size():
+					var fix: Dictionary = _overlay.fixtures[hit.x]
+					_overlay.tooltip_text = fix.get("name", "")
+					_overlay.tooltip_pos = _overlay._uv_to_px(uv)
+				else:
+					_overlay.tooltip_text = ""
+				_overlay.queue_redraw()
+				return hit.x >= 0
+
+	return false
+
+
+func _move_handle(handle_id: Vector2i, uv: Vector2) -> void:
+	# Map from overlay fixture index back to port index
+	if handle_id.x >= _fixture_manifest.size():
+		return
+	var entry: Dictionary = _fixture_manifest[handle_id.x]
+	var port: int = entry.get("port", -1)
+	if port < 0 or not _placements.has(port):
+		return
+	var placement: Dictionary = _placements[port]
+	var shape: StringName = StringName(entry.get("shape", "custom"))
+	var hi: int = handle_id.y
+
+	if shape == &"strip":
+		if hi == 0:
+			placement["a"] = uv
+		elif hi == 1:
+			placement["b"] = uv
+	elif shape == &"grid" or shape == &"matrix":
+		var keys: Array = ["tl", "tr", "bl", "br"]
+		if hi < keys.size():
+			placement[keys[hi]] = uv
+	else:
+		# Custom: move the whole group
+		placement["offset"] = uv
+
+
+func _ensure_overlay() -> void:
+	if _overlay == null:
+		_overlay = FixtureOverlay.new()
+
+
+func _sync_overlay() -> void:
+	if _overlay == null:
+		return
+	_overlay.fixtures.clear()
+	for idx in range(_fixture_manifest.size()):
+		var entry: Dictionary = _fixture_manifest[idx]
+		var port: int = entry.get("port", -1)
+		var shape: StringName = StringName(entry.get("shape", "strip"))
+		var placement: Dictionary = _placements.get(port, {})
+		var handles := PackedVector2Array()
+
+		if shape == &"strip":
+			handles.append(placement.get("a", _DEFAULT_STRIP_A))
+			handles.append(placement.get("b", _DEFAULT_STRIP_B))
+		elif shape == &"grid" or shape == &"matrix":
+			handles.append(placement.get("tl", _DEFAULT_RECT_TL))
+			handles.append(placement.get("tr", _DEFAULT_RECT_TR))
+			handles.append(placement.get("bl", _DEFAULT_RECT_BL))
+			handles.append(placement.get("br", _DEFAULT_RECT_BR))
+		else:
+			handles.append(placement.get("offset", _DEFAULT_CUSTOM_OFFSET))
+
+		# Compute final LED UVs for dot drawing
+		var leds := PackedVector2Array()
+		if entry.has("offset") and _led_pos_image != null:
+			var led_offset: int = entry["offset"]
+			var led_count: int = entry["led_count"]
+			for li in range(led_count):
+				var px_idx: int = led_offset + li
+				if px_idx < _led_pos_image.get_width():
+					var c: Color = _led_pos_image.get_pixel(px_idx, 0)
+					leds.append(Vector2(c.r, c.g))
+
+		_overlay.fixtures.append({
+			"shape": shape,
+			"name": entry.get("name", ""),
+			"handles": handles,
+			"leds": leds,
+			"color_index": idx,
+			"cols": entry.get("cols", 0),
+			"rows": entry.get("rows", 0),
+		})
+
+
+# ── Serialization of placement transforms ────────────────────────────────────
+
+func _serialize_placements() -> Array:
+	var result: Array = []
+	for port in _placements:
+		var p: Dictionary = _placements[port]
+		var entry: Dictionary = { "port": port }
+		for key in p:
+			var val = p[key]
+			if val is Vector2:
+				entry[key] = { "_type": "Vector2", "x": val.x, "y": val.y }
+			else:
+				entry[key] = val
+		result.append(entry)
+	return result
+
+
+static func _deserialize_placements(arr: Variant) -> Dictionary:
+	var result: Dictionary = {}
+	if not (arr is Array):
+		return result
+	for entry in arr:
+		if not (entry is Dictionary) or not entry.has("port"):
+			continue
+		var port: int = int(entry["port"])
+		var p: Dictionary = {}
+		for key in entry:
+			if key == "port":
+				continue
+			var val = entry[key]
+			if val is Dictionary and val.get("_type", "") == "Vector2":
+				p[key] = Vector2(float(val.get("x", 0)), float(val.get("y", 0)))
+			else:
+				p[key] = val
+		result[port] = p
+	return result

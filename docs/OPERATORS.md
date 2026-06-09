@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **588 operators** across 15 families: TOP (138), CHOP (108), SOP (85), DAT (51), IMG (41), UI (36), SDF (29), COMP (27), NET (15), MAT (12), POP (12), VOL (12), OUT (11), FIX (8), SCRIPT (3).
+> **587 operators** across 15 families: TOP (138), CHOP (107), SOP (85), DAT (51), IMG (41), UI (36), SDF (29), COMP (27), NET (15), MAT (12), POP (12), VOL (12), OUT (11), FIX (8), SCRIPT (3).
 > 469 are pure GDScript core operators. 119 are from the 23 bundled extensions.
 > 131 of the core operators have native C++ accelerated equivalents in `gn_ext_native` that activate automatically when the native binary is present.
 
@@ -6603,8 +6603,8 @@ single GPU pass, and route the values to DMX or downstream CHOP processing.
 
 ```
 StripFIX ─┐
-GridFIX  ─┼──► FixtureSamplerTOP ──► FixtureUnpackCHOP ──► DmxOutCHOP
-MatrixFIX ─┘
+GridFIX  ─┼──► FixtureSamplerTOP ──port 0──► WindowOUT (preview)
+MatrixFIX ─┘          └──port 1──► CHOP (DMX output)
 ```
 
 ### FIX Primitives
@@ -6629,8 +6629,7 @@ MatrixFIX ─┘
 
 | Operator | Family | Class | Description |
 |----------|--------|-------|-------------|
-| `fixture_sampler` | TOP | `FixtureSamplerTOP` | Samples source image at all LED positions in one GPU pass. Port 0 = source TOP, ports 1+ = dynamic FIX inputs |
-| `fixture_unpack` | CHOP | `FixtureUnpackCHOP` | Unpacks result texture into named CHOP channels (`name.r.0`, `name.g.0`, ...) for DMX routing |
+| `fixture_sampler` | TOP | `FixtureSamplerTOP` | MadMapper-style placement + GPU sampling. Port 0 = source passthrough, Port 1 = CHOP DMX output |
 
 #### StripFIX Parameters
 
@@ -6676,12 +6675,6 @@ MatrixFIX ─┘
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `sample_mode` | Enum | Point | Point (single texel) or Box Filter (3×3 tap) |
-
-#### FixtureUnpackCHOP Parameters
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `value_range` | Enum | 0–1 Float | Output as 0–1 float or 0–255 integer |
 
 ---
 

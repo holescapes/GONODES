@@ -13156,26 +13156,6 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_opencv/operators/img/threshold_img.gd"
   },
-  "FixtureUnpackCHOP": {
-    "class_name": "FixtureUnpackCHOP",
-    "family": "CHOP",
-    "inputs": [
-      {
-        "port": 0,
-        "name": "sampler",
-        "type": "TOP"
-      }
-    ],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_pixel_mapper/operators/chop/fixture_unpack_chop.gd"
-  },
   "CustomFIX": {
     "class_name": "CustomFIX",
     "family": null,
@@ -13254,9 +13234,25 @@
         "port": 0,
         "name": "source",
         "type": "TOP"
+      },
+      {
+        "port": 1,
+        "name": "source",
+        "type": "TOP"
       }
     ],
-    "outputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      },
+      {
+        "port": 1,
+        "name": "chop",
+        "type": "CHOP"
+      }
+    ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_pixel_mapper/operators/top/fixture_sampler_top.gd"
   },

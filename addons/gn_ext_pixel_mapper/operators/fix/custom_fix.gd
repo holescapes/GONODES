@@ -1,18 +1,19 @@
 class_name CustomFIX
 extends GNFixtureBase
 ## Custom LED positions loaded from a DAT input.
-## Each row of the DAT provides one LED's UV coordinates.
-## Required columns: "uv_x", "uv_y". Detected by header name.
+## Each row of the DAT provides one LED's local coordinates.
+## Required columns: "x", "y". Detected by header name.
+## Placement on the source image is handled by FixtureSamplerTOP.
 
 
 func _init() -> void:
 	super._init()
 	node_type = "custom_fix"
-	node_description = "Custom LED positions from a DAT. Each row = one LED. Required columns: uv_x, uv_y."
+	node_description = "Custom LED positions from a DAT. Each row = one LED. Required columns: x, y."
 
 
 func _init_ports() -> void:
-	add_input("dat", GNFamily.Type.DAT, false, "DAT with uv_x/uv_y columns")
+	add_input("dat", GNFamily.Type.DAT, false, "DAT with x/y columns")
 	add_output("out", GNFixtureBase.FIX_FAMILY, "Fixture layout")
 
 
@@ -22,10 +23,10 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("channel_layout",
 		PackedStringArray(["RGB", "RGBW", "R", "G", "B", "W"]), 0,
 		"Channel Layout", "Colour channel order per LED."))
-	add_parameter(GNParameter.create_int("dmx_start", 1, 0, 32767,
-		"DMX Start", "First DMX channel (universe×512 + channel). 0 = unassigned."))
-	add_parameter(GNParameter.create_vector2("sample_extent", Vector2.ZERO,
-		"Sample Extent", "UV half-size of the box-filter area per LED. (0,0) = point sample."))
+	add_parameter(GNParameter.create_int("universe", 1, 1, 32767,
+		"Universe", "DMX universe (1-based)."))
+	add_parameter(GNParameter.create_int("start_channel", 1, 1, 512,
+		"Start Channel", "First DMX channel within the universe (1-512)."))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -34,12 +35,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		node_warning = "No DAT input connected."
 		return null
 
-	# Find uv_x / uv_y column indices from the header row
+	# Find x / y column indices from the header row
 	var hdrs: PackedStringArray = dat_data.get_headers()
-	var x_col: int = hdrs.find("uv_x")
-	var y_col: int = hdrs.find("uv_y")
+	var x_col: int = hdrs.find("x")
+	var y_col: int = hdrs.find("y")
 	if x_col < 0 or y_col < 0:
-		node_warning = "DAT must have 'uv_x' and 'uv_y' columns."
+		node_warning = "DAT must have 'x' and 'y' columns."
 		return null
 
 	node_warning = ""
@@ -47,14 +48,15 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	out.fixture_name = get_param_value("fixture_name")
 	out.channel_layout = ["rgb", "rgbw", "r", "g", "b", "w"][get_param_value("channel_layout")]
 	out.channels_per_led = GNFixtureData.channels_for_layout(out.channel_layout)
-	out.dmx_start = get_param_value("dmx_start")
-	out.sample_extent = get_param_value("sample_extent")
+	out.universe = get_param_value("universe")
+	out.start_channel = get_param_value("start_channel")
+	out.shape = &"custom"
 	out.led_count = dat_data.num_rows()
 	out.led_positions.resize(out.led_count)
 
 	for i in range(dat_data.num_rows()):
-		var ux: float = float(dat_data.cell(i, x_col))
-		var uy: float = float(dat_data.cell(i, y_col))
-		out.led_positions[i] = Vector2(ux, uy)
+		var px: float = float(dat_data.cell(i, x_col))
+		var py: float = float(dat_data.cell(i, y_col))
+		out.led_positions[i] = Vector2(px, py)
 
 	return out

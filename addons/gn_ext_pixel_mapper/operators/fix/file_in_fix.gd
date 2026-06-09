@@ -3,10 +3,11 @@ extends GNFixtureBase
 ## Loads fixture definitions from a JSON file.
 ##
 ## Supported formats:
-##   GONODES .fixture — {"name":..., "leds":[{"uv_x":f, "uv_y":f}, ...],
-##                       "channel_layout":"rgb", "dmx_start":N}
+##   GONODES .fixture -- {"name":..., "leds":[{"x":f, "y":f}, ...],
+##                        "channel_layout":"rgb", "universe":N, "start_channel":N}
 ##
 ## The file path supports project:// and absolute paths.
+## Placement on the source image is handled by FixtureSamplerTOP.
 
 
 func _init() -> void:
@@ -25,10 +26,10 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("channel_layout",
 		PackedStringArray(["From File", "RGB", "RGBW", "R", "G", "B", "W"]), 0,
 		"Channel Layout", "'From File' reads layout from the JSON. Others override it."))
-	add_parameter(GNParameter.create_int("dmx_start", 0, 0, 32767,
-		"DMX Start Override", "Overrides the file's dmx_start when non-zero."))
-	add_parameter(GNParameter.create_vector2("sample_extent", Vector2.ZERO,
-		"Sample Extent", "UV half-size of the box-filter area per LED. (0,0) = point sample."))
+	add_parameter(GNParameter.create_int("universe", 0, 0, 32767,
+		"Universe Override", "Overrides the file's universe when non-zero."))
+	add_parameter(GNParameter.create_int("start_channel", 0, 0, 512,
+		"Start Channel Override", "Overrides the file's start_channel when non-zero."))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
@@ -73,9 +74,12 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	for i in range(led_array.size()):
 		var entry: Dictionary = led_array[i] as Dictionary if led_array[i] is Dictionary else {}
-		out.led_positions[i] = Vector2(float(entry.get("uv_x", 0.0)), float(entry.get("uv_y", 0.0)))
+		# Support both "x"/"y" (new) and legacy "uv_x"/"uv_y" keys
+		var px: float = float(entry.get("x", entry.get("uv_x", 0.0)))
+		var py: float = float(entry.get("y", entry.get("uv_y", 0.0)))
+		out.led_positions[i] = Vector2(px, py)
 
-	# Channel layout — "From File" (0) reads from JSON, others override
+	# Channel layout
 	var layout_idx: int = get_param_value("channel_layout")
 	if layout_idx == 0:
 		out.channel_layout = doc.get("channel_layout", "rgb")
@@ -83,9 +87,13 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		out.channel_layout = ["rgb", "rgbw", "r", "g", "b", "w"][layout_idx - 1]
 	out.channels_per_led = GNFixtureData.channels_for_layout(out.channel_layout)
 
-	# DMX start — non-zero param overrides file value
-	var dmx_override: int = get_param_value("dmx_start")
-	out.dmx_start = dmx_override if dmx_override > 0 else int(doc.get("dmx_start", 0))
-	out.sample_extent = get_param_value("sample_extent")
+	# DMX addressing
+	var uni_override: int = get_param_value("universe")
+	out.universe = uni_override if uni_override > 0 else int(doc.get("universe", 1))
+	var ch_override: int = get_param_value("start_channel")
+	out.start_channel = ch_override if ch_override > 0 else int(doc.get("start_channel", 1))
+
+	# Detect shape from file or default to custom
+	out.shape = StringName(doc.get("shape", "custom"))
 
 	return out

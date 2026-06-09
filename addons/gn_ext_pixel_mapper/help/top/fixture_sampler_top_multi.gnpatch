@@ -1,7 +1,6 @@
 {
     "version": "1.0.0",
     "generator": "GONODES",
-    "notes": "Multi-fixture: two strips and a grid all sampled in one FixtureSamplerTOP pass.",
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
@@ -9,57 +8,55 @@
             "parameters": {
                 "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
                 "noise_type":  {"value": 0},
-                "scale":       {"value": 3.5},
-                "monochrome":  {"value": false}
+                "scale":       {"value": 3.0}
             }
         },
         "strip1": {
             "type": "StripFIX",
-            "position": [100, 360],
+            "position": [100, 400],
             "parameters": {
-                "fixture_name": {"value": "top_strip"},
-                "led_count":    {"value": 40},
-                "uv_start":     {"value": {"_type": "Vector2", "x": 0.05, "y": 0.1}},
-                "uv_end":       {"value": {"_type": "Vector2", "x": 0.95, "y": 0.1}},
-                "channel_layout": {"value": 0},
-                "dmx_start":    {"value": 1}
+                "fixture_name": {"value": "front"},
+                "led_count":    {"value": 30},
+                "universe":     {"value": 1},
+                "start_channel": {"value": 1}
             }
         },
         "strip2": {
             "type": "StripFIX",
-            "position": [100, 480],
+            "position": [100, 550],
             "parameters": {
-                "fixture_name": {"value": "bot_strip"},
-                "led_count":    {"value": 40},
-                "uv_start":     {"value": {"_type": "Vector2", "x": 0.05, "y": 0.9}},
-                "uv_end":       {"value": {"_type": "Vector2", "x": 0.95, "y": 0.9}},
-                "channel_layout": {"value": 0},
-                "dmx_start":    {"value": 121}
+                "fixture_name": {"value": "back"},
+                "led_count":    {"value": 30},
+                "universe":     {"value": 1},
+                "start_channel": {"value": 91}
             }
         },
         "grid1": {
             "type": "GridFIX",
-            "position": [100, 600],
+            "position": [100, 700],
             "parameters": {
-                "fixture_name": {"value": "back_wall"},
+                "fixture_name": {"value": "panel"},
                 "cols":         {"value": 8},
                 "rows":         {"value": 8},
-                "uv_min":       {"value": {"_type": "Vector2", "x": 0.3, "y": 0.3}},
-                "uv_max":       {"value": {"_type": "Vector2", "x": 0.7, "y": 0.7}},
-                "channel_layout": {"value": 0},
-                "dmx_start":    {"value": 241}
+                "universe":     {"value": 2},
+                "start_channel": {"value": 1}
             }
         },
         "sampler1": {
             "type": "FixtureSamplerTOP",
-            "position": [500, 420],
+            "position": [450, 400],
             "parameters": {
                 "sample_mode": {"value": 0}
             }
         },
+        "chop2top1": {
+            "type": "CHOPtoTOP",
+            "position": [800, 500],
+            "parameters": {}
+        },
         "out1": {
             "type": "WindowOUT",
-            "position": [850, 420],
+            "position": [800, 280],
             "parameters": {
                 "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
                 "open":       {"value": true}
@@ -67,10 +64,11 @@
         }
     },
     "connections": [
-        {"from": "noise1",   "from_port": 0, "to": "sampler1", "to_port": 0},
-        {"from": "strip1",   "from_port": 0, "to": "sampler1", "to_port": 1},
-        {"from": "strip2",   "from_port": 0, "to": "sampler1", "to_port": 2},
-        {"from": "grid1",    "from_port": 0, "to": "sampler1", "to_port": 3},
-        {"from": "sampler1", "from_port": 0, "to": "out1",     "to_port": 0}
+        {"from": "noise1",   "from_port": 0, "to": "sampler1",  "to_port": 0},
+        {"from": "strip1",   "from_port": 0, "to": "sampler1",  "to_port": 1},
+        {"from": "strip2",   "from_port": 0, "to": "sampler1",  "to_port": 2},
+        {"from": "grid1",    "from_port": 0, "to": "sampler1",  "to_port": 3},
+        {"from": "sampler1", "from_port": 0, "to": "out1",      "to_port": 0},
+        {"from": "sampler1", "from_port": 1, "to": "chop2top1", "to_port": 0}
     ]
 }
