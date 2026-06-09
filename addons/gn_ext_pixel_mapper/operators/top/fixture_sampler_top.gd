@@ -47,6 +47,7 @@ func _init_ports() -> void:
 	var fix_fam: int = GNFamily.string_to_type("FIX")
 	add_input("source", GNFamily.Type.TOP, true, "Source image to sample")
 	_enable_dynamic_inputs(fix_fam, "fix", "Fixture")
+	add_output("out", GNFamily.Type.TOP, "Packed result texture - one pixel per LED channel")
 	# Port 0 is "source" (fixed TOP). Dynamic FIX ports occupy indices 1..N.
 	# update_dynamic_inputs and from_dict are overridden below to preserve port 0.
 

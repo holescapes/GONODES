@@ -596,12 +596,15 @@ func test_fixture_sampler_hash_changes() -> void:
 
 func test_fixture_sampler_port_structure() -> void:
 	var node := _make_node(FixtureSamplerTOP.new(), "sampler1")
-	# Port 0 should be TOP (source), remaining should be FIX
+	# Input: port 0 = TOP source, port 1+ = FIX (dynamic)
 	GNTestAssert.assert_gt(node.input_ports.size(), 0, "has input ports")
-	GNTestAssert.assert_eq(node.input_ports[0].family, GNFamily.Type.TOP, "port 0 is TOP")
+	GNTestAssert.assert_eq(node.input_ports[0].family, GNFamily.Type.TOP, "input port 0 is TOP")
 	if node.input_ports.size() > 1:
 		GNTestAssert.assert_eq(node.input_ports[1].family,
-			GNFamily.string_to_type("FIX"), "port 1 is FIX")
+			GNFamily.string_to_type("FIX"), "input port 1 is FIX")
+	# Output: port 0 must exist and be TOP (the packed result texture)
+	GNTestAssert.assert_eq(node.output_ports.size(), 1, "has exactly 1 output port")
+	GNTestAssert.assert_eq(node.output_ports[0].family, GNFamily.Type.TOP, "output port 0 is TOP")
 
 
 # ============================================================================
