@@ -260,6 +260,7 @@ func duplicate_data() -> GNData:
 	var copy := GNTableData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.has_header = has_header
 	copy.is_table = is_table
 	copy.text = text

@@ -144,6 +144,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("sample_mode", get_param_value("sample_mode"))
 
 	_cached_tex_data.resolution = out_size
+	_cached_tex_data.metadata["fixture_manifest"] = _fixture_manifest
 	return _cached_tex_data
 
 

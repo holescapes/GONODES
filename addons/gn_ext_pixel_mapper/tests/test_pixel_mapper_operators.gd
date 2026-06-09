@@ -624,6 +624,51 @@ func test_fixture_unpack_cook_null() -> void:
 	GNTestAssert.assert_not_empty(node.node_warning, "warning when no input")
 
 
+func test_fixture_unpack_no_manifest_metadata() -> void:
+	var node := _make_node(FixtureUnpackCHOP.new(), "unpack1")
+	# Texture with no fixture_manifest metadata should warn
+	var tex_data := GNTextureData.new()
+	tex_data.valid = true
+	tex_data.texture = PlaceholderTexture2D.new()
+	var result := _cook_with(node, [tex_data])
+	GNTestAssert.assert_null(result, "null when no manifest metadata")
+	GNTestAssert.assert_not_empty(node.node_warning, "warning about missing manifest")
+
+
+func test_fixture_unpack_reads_metadata() -> void:
+	var node := _make_node(FixtureUnpackCHOP.new(), "unpack1")
+	# Build a tiny 3x2 image (3 channels, 2 LEDs) with known values
+	var img := Image.create(3, 2, false, Image.FORMAT_RGBA8)
+	img.set_pixel(0, 0, Color(1.0, 0, 0))  # LED 0, ch R
+	img.set_pixel(1, 0, Color(0.5, 0, 0))  # LED 0, ch G
+	img.set_pixel(2, 0, Color(0.25, 0, 0)) # LED 0, ch B
+	img.set_pixel(0, 1, Color(0.8, 0, 0))  # LED 1, ch R
+	img.set_pixel(1, 1, Color(0.6, 0, 0))  # LED 1, ch G
+	img.set_pixel(2, 1, Color(0.4, 0, 0))  # LED 1, ch B
+	var tex := ImageTexture.create_from_image(img)
+	var tex_data := GNTextureData.new()
+	tex_data.valid = true
+	tex_data.texture = tex
+	tex_data.resolution = Vector2i(3, 2)
+	tex_data.metadata["fixture_manifest"] = [{
+		"name": "test_strip",
+		"led_count": 2,
+		"channels_per_led": 3,
+		"channel_layout": "rgb",
+		"dmx_start": 1,
+		"offset": 0,
+	}]
+	var result: GNChannelData = _cook_with(node, [tex_data]) as GNChannelData
+	GNTestAssert.assert_not_null(result, "unpack produces channel data")
+	GNTestAssert.assert_true(result.channels.has("test_strip.r"), "has r channel")
+	GNTestAssert.assert_true(result.channels.has("test_strip.g"), "has g channel")
+	GNTestAssert.assert_true(result.channels.has("test_strip.b"), "has b channel")
+	GNTestAssert.assert_eq(result.channels["test_strip.r"].size(), 2, "2 LEDs in r")
+	# Values read from pixel.r component
+	GNTestAssert.assert_approx(result.channels["test_strip.r"][0], 1.0, 0.01, "LED 0 R")
+	GNTestAssert.assert_approx(result.channels["test_strip.g"][0], 0.5, 0.01, "LED 0 G")
+
+
 # ============================================================================
 # Cross-operator data flow (unit-level)
 # ============================================================================

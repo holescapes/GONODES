@@ -52,6 +52,7 @@ func duplicate_data() -> GNData:
 	var copy := GNSDFData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.sdf_tree = sdf_tree.duplicate(true)
 	copy.tree_hash = tree_hash
 	return copy

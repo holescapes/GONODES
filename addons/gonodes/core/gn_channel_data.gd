@@ -93,6 +93,7 @@ func duplicate_data() -> GNData:
 	var copy := GNChannelData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.sample_rate = sample_rate
 	copy.length = length
 	# Deep copy channel arrays

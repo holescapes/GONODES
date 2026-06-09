@@ -232,6 +232,7 @@ func duplicate_data() -> GNData:
 	var copy := GNGeoData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.transform = transform
 	copy.bounds = bounds
 	copy.vertex_count = vertex_count

@@ -49,6 +49,7 @@ func duplicate_data() -> GNData:
 	var copy := GNTextureData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.resolution = resolution
 	copy.format = format
 	# texture and viewport are NOT deep-copied — they are transient render resources

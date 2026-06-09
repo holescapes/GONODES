@@ -48,10 +48,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		node_warning = "No FixtureSamplerTOP connected."
 		return null
 
-	# Find the upstream FixtureSamplerTOP to get the fixture manifest
-	var sampler: FixtureSamplerTOP = _find_upstream_sampler(inputs[0])
-	if sampler == null or sampler._fixture_manifest.is_empty():
-		node_warning = "Upstream node is not a FixtureSamplerTOP or has no fixtures."
+	# Read the fixture manifest from input data metadata (set by FixtureSamplerTOP)
+	var manifest: Array = tex_data.metadata.get("fixture_manifest", [])
+	if manifest.is_empty():
+		node_warning = "Input texture has no fixture_manifest metadata. Wire from FixtureSamplerTOP."
 		return null
 
 	# CPU readback of the packed result texture
@@ -72,7 +72,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var max_w: int = img.get_width()
 
-	for entry in sampler._fixture_manifest:
+	for entry in manifest:
 		var fix_name: String = entry["name"]
 		var led_count: int = entry["led_count"]
 		var cpl: int = entry["channels_per_led"]
@@ -89,7 +89,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 				continue
 			var ch_label: String = ch_names[ch_i] if ch_i < ch_names.size() else ("ch%d" % ch_i)
 
-			# Build a PackedFloat32Array — one value per LED
+			# Build a PackedFloat32Array -- one value per LED
 			var values := PackedFloat32Array()
 			values.resize(led_count)
 			for led_i in range(led_count):
@@ -101,25 +101,3 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_cached_channel_data.length = _cached_channel_data.channels.values()[0].size() if not _cached_channel_data.channels.is_empty() else 1
 	return _cached_channel_data
-
-
-## Walks upstream to find the FixtureSamplerTOP that produced this texture.
-## Returns null if not found (fallback: manifest will be empty).
-func _find_upstream_sampler(_data: GNData) -> FixtureSamplerTOP:
-	var net: GNNetwork = _find_network()
-	if net == null:
-		return null
-	# Find which node is connected to our input port 0
-	for conn in net.connections:
-		if conn.to_node == id and conn.to_port == 0:
-			var src: GNNode = net.get_node_by_id(conn.from_node)
-			if src is FixtureSamplerTOP:
-				return src as FixtureSamplerTOP
-	return null
-
-
-func _find_network() -> GNNetwork:
-	var p = get_parent()
-	while p != null and not (p is GNNetwork):
-		p = p.get_parent()
-	return p as GNNetwork

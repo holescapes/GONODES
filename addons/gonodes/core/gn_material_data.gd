@@ -37,6 +37,7 @@ func duplicate_data() -> GNData:
 	var copy := GNMaterialData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.material_label = material_label
 	# Duplicate the material resource so downstream edits don't bleed back
 	if material != null:

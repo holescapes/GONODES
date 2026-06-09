@@ -17,6 +17,12 @@ var timestamp: int = -1
 ## when shared (copy-on-write).
 var _shared: bool = false
 
+## Generic sideband metadata dictionary for passing operator-specific info
+## alongside the main data payload.  Producers set keys; consumers read them.
+## Example: FixtureSamplerTOP sets metadata["fixture_manifest"] so downstream
+## nodes can read the manifest without walking the graph.
+var metadata: Dictionary = {}
+
 
 ## Returns the operator family this data type belongs to.
 ## Must be overridden by subclasses.
@@ -47,6 +53,7 @@ func duplicate_data() -> GNData:
 	var copy := GNData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	# _shared is NOT copied — the clone is a private copy, not shared.
 	return copy
 

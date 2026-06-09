@@ -58,6 +58,7 @@ func duplicate_data() -> GNData:
 	var copy := GNFixtureData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.led_positions = led_positions.duplicate()
 	copy.fixture_name = fixture_name
 	copy.led_count = led_count

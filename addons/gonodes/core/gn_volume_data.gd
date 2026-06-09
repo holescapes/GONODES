@@ -57,6 +57,7 @@ func duplicate_data() -> GNData:
 		var copy := GNVolumeData.new()
 		copy.valid = valid
 		copy.timestamp = timestamp
+		copy.metadata = metadata.duplicate(true)
 		copy.is_cpu = true
 		copy.rd_texture = RID()
 		copy.resolution = resolution
@@ -79,6 +80,7 @@ func duplicate_data() -> GNData:
 	var copy := GNVolumeData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.rd_texture = new_tex
 	copy.resolution = resolution
 	copy.bounds = bounds

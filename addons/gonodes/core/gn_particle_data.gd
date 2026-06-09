@@ -78,6 +78,7 @@ func duplicate_data() -> GNData:
 		var copy := GNParticleData.new()
 		copy.valid = valid
 		copy.timestamp = timestamp
+		copy.metadata = metadata.duplicate(true)
 		copy.is_cpu = true
 		copy.particle_count = particle_count
 		copy.max_particles = max_particles
@@ -103,6 +104,7 @@ func duplicate_data() -> GNData:
 	var copy := GNParticleData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.rd_buffer = new_buf
 	copy.particle_count = particle_count
 	copy.max_particles = max_particles

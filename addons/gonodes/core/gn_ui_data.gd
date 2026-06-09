@@ -50,6 +50,7 @@ func duplicate_data() -> GNData:
 	var copy := GNUIData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.control_label = control_label
 	# Control nodes are not duplicated — they're shared references managed by the operator.
 	copy.control_node = control_node

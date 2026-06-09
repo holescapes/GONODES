@@ -45,6 +45,7 @@ func duplicate_data() -> GNData:
 	var copy := GNCompData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.scene_label = scene_label
 	copy.environment = environment
 	# Scene nodes are not duplicated — they're shared references managed by the operator.

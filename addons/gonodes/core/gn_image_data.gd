@@ -57,6 +57,7 @@ func duplicate_data() -> GNData:
 	var copy := GNImageData.new()
 	copy.valid = valid
 	copy.timestamp = timestamp
+	copy.metadata = metadata.duplicate(true)
 	copy.resolution = resolution
 	copy.format = format
 	# Deep-copy the image so downstream nodes can't mutate our data
