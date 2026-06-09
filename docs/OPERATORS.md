@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **578 operators** across 14 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT, plus 93 native C++ acceleration variants and 23 extension addons.
+> **588 operators** across 15 families: TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, FIX, SCRIPT, plus 93 native C++ acceleration variants and 24 extension addons.
 
 ---
 
@@ -6585,6 +6585,101 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **gn_ext_audio** | AudioOscillatorCHOP, AudioFilterCHOP, AudioParaEQCHOP, AudioMixCHOP, AudioMovieCHOP, AudioRenderCHOP, AudioStreamInCHOP, AudioStreamOutCHOP, AudioReverbCHOP, AudioDelayCHOP, AudioPitchCHOP, AudioEnvelopeCHOP, AudioGateCHOP | Audio synthesis, effects, and processing — 13 pure-GDScript operators covering waveform generation, biquad filtering, parametric EQ, mixing, reverb, delay, pitch shift, envelope following |
 
 > **Note:** SDF operators (26 total — 10 primitives, 5 booleans, 8 domain modifiers, 2 materials, 1 renderer) were promoted from `gn_ext_sdf` to **core** as the 12th family type. See the SDF section above.
+
+---
+
+
+## FIX — Fixture (Pixel Mapper) Operators
+
+> Extension: `gn_ext_pixel_mapper` · Family color: teal · 8 operators
+
+LED pixel-mapping operators. Define fixture layouts (strips, grids, matrices,
+custom positions), sample a source TOP image at every LED's UV position in a
+single GPU pass, and route the values to DMX or downstream CHOP processing.
+
+**Typical chain:**
+
+```
+StripFIX ─┐
+GridFIX  ─┼──► FixtureSamplerTOP ──► FixtureUnpackCHOP ──► DmxOutCHOP
+MatrixFIX ─┘
+```
+
+### FIX Primitives
+
+| Operator | Class | Description |
+|----------|-------|-------------|
+| `strip_fix` | `StripFIX` | N LEDs evenly spaced along a UV line |
+| `grid_fix` | `GridFIX` | Cols × rows of LEDs within a UV bounding box |
+| `matrix_fix` | `MatrixFIX` | LED matrix with pixel pitch, rotation, and skew |
+| `custom_fix` | `CustomFIX` | LED positions loaded from a DAT (uv_x, uv_y columns) |
+| `file_in_fix` | `FileInFIX` | Loads fixture definition from a JSON file |
+
+### FIX Utilities
+
+| Operator | Class | Description |
+|----------|-------|-------------|
+| `select_fix` | `SelectFIX` | Wireless FIX reference (Rule 25.35) |
+| `null_fix` | `NullFIX` | Pass-through relay |
+| `switch_fix` | `SwitchFIX` | Selects one of N FIX inputs by index |
+
+### Sampling & Output
+
+| Operator | Family | Class | Description |
+|----------|--------|-------|-------------|
+| `fixture_sampler` | TOP | `FixtureSamplerTOP` | Samples source image at all LED positions in one GPU pass. Port 0 = source TOP, ports 1+ = dynamic FIX inputs |
+| `fixture_unpack` | CHOP | `FixtureUnpackCHOP` | Unpacks result texture into named CHOP channels (`name.r.0`, `name.g.0`, ...) for DMX routing |
+
+#### StripFIX Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `fixture_name` | String | `"strip"` | Label used in CHOP channel names |
+| `led_count` | Int | 60 | Total LEDs |
+| `uv_start` | Vector2 | (0.1, 0.5) | UV coordinate of first LED |
+| `uv_end` | Vector2 | (0.9, 0.5) | UV coordinate of last LED |
+| `channel_layout` | Enum | RGB | RGB / RGBW / R / G / B / W |
+| `dmx_start` | Int | 1 | First DMX channel (universe×512 + ch) |
+| `sample_extent` | Vector2 | (0, 0) | Box-filter half-extent per LED (0=point) |
+
+#### GridFIX Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `fixture_name` | String | `"grid"` | Label used in CHOP channel names |
+| `cols` | Int | 16 | Columns (horizontal) |
+| `rows` | Int | 16 | Rows (vertical) |
+| `uv_min` | Vector2 | (0.1, 0.1) | Top-left UV corner |
+| `uv_max` | Vector2 | (0.9, 0.9) | Bottom-right UV corner |
+| `channel_layout` | Enum | RGB | RGB / RGBW / R / G / B / W |
+| `dmx_start` | Int | 1 | First DMX channel |
+| `sample_extent` | Vector2 | (0, 0) | Box-filter half-extent per LED |
+
+#### MatrixFIX Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `fixture_name` | String | `"matrix"` | Label |
+| `cols` / `rows` | Int | 16 | Grid dimensions |
+| `uv_origin` | Vector2 | (0.1, 0.1) | Top-left LED UV position |
+| `uv_pitch` | Vector2 | (0.05, 0.05) | UV step between adjacent LEDs |
+| `rotation_deg` | Float | 0 | Panel rotation around origin (degrees) |
+| `skew_x` | Float | 0 | Horizontal shear per row |
+| `skew_y` | Float | 0 | Vertical shear per column |
+| `channel_layout` | Enum | RGB | RGB / RGBW / R / G / B / W |
+| `dmx_start` | Int | 1 | First DMX channel |
+
+#### FixtureSamplerTOP Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `sample_mode` | Enum | Point | Point (single texel) or Box Filter (3×3 tap) |
+
+#### FixtureUnpackCHOP Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `value_range` | Enum | 0–1 Float | Output as 0–1 float or 0–255 integer |
 
 ---
 

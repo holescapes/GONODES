@@ -1,0 +1,49 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [100, 200],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "noise_type":  {"value": 0},
+                "scale":       {"value": 3.0},
+                "monochrome":  {"value": false}
+            }
+        },
+        "grid1": {
+            "type": "GridFIX",
+            "position": [100, 420],
+            "parameters": {
+                "fixture_name": {"value": "panel"},
+                "cols":         {"value": 16},
+                "rows":         {"value": 16},
+                "uv_min":       {"value": {"_type": "Vector2", "x": 0.1, "y": 0.1}},
+                "uv_max":       {"value": {"_type": "Vector2", "x": 0.9, "y": 0.9}},
+                "channel_layout": {"value": 0},
+                "dmx_start":    {"value": 1}
+            }
+        },
+        "sampler1": {
+            "type": "FixtureSamplerTOP",
+            "position": [450, 300],
+            "parameters": {
+                "sample_mode": {"value": 0}
+            }
+        },
+        "out1": {
+            "type": "WindowOUT",
+            "position": [800, 300],
+            "parameters": {
+                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
+                "open":       {"value": true}
+            }
+        }
+    },
+    "connections": [
+        {"from": "noise1",   "from_port": 0, "to": "sampler1", "to_port": 0},
+        {"from": "grid1",    "from_port": 0, "to": "sampler1", "to_port": 1},
+        {"from": "sampler1", "from_port": 0, "to": "out1",     "to_port": 0}
+    ]
+}

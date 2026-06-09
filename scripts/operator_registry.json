@@ -1247,6 +1247,20 @@
     ]
   },
   {
+    "class_name": "FixtureUnpackCHOP",
+    "node_type": "fixture_unpack",
+    "family": "chop",
+    "file": "addons/gn_ext_pixel_mapper/operators/chop/fixture_unpack_chop.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": [
+      {
+        "name": "value_range",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "GamepadCHOP",
     "node_type": "gamepad",
     "family": "chop",
@@ -6450,6 +6464,190 @@
         "default": true
       }
     ]
+  },
+  {
+    "class_name": "CustomFIX",
+    "node_type": "custom_fix",
+    "family": "fix",
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/custom_fix.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": [
+      {
+        "name": "fixture_name",
+        "type": "string",
+        "default": "custom"
+      },
+      {
+        "name": "channel_layout",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "dmx_start",
+        "type": "int",
+        "default": 1
+      }
+    ]
+  },
+  {
+    "class_name": "FileInFIX",
+    "node_type": "file_in_fix",
+    "family": "fix",
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/file_in_fix.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": [
+      {
+        "name": "file",
+        "type": "file",
+        "default": null
+      },
+      {
+        "name": "channel_layout",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "dmx_start",
+        "type": "int",
+        "default": 0
+      }
+    ]
+  },
+  {
+    "class_name": "GridFIX",
+    "node_type": "grid_fix",
+    "family": "fix",
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/grid_fix.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": [
+      {
+        "name": "fixture_name",
+        "type": "string",
+        "default": "grid"
+      },
+      {
+        "name": "cols",
+        "type": "int",
+        "default": 16
+      },
+      {
+        "name": "rows",
+        "type": "int",
+        "default": 16
+      },
+      {
+        "name": "channel_layout",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "dmx_start",
+        "type": "int",
+        "default": 1
+      }
+    ]
+  },
+  {
+    "class_name": "MatrixFIX",
+    "node_type": "matrix_fix",
+    "family": "fix",
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/matrix_fix.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": [
+      {
+        "name": "fixture_name",
+        "type": "string",
+        "default": "matrix"
+      },
+      {
+        "name": "cols",
+        "type": "int",
+        "default": 16
+      },
+      {
+        "name": "rows",
+        "type": "int",
+        "default": 16
+      },
+      {
+        "name": "rotation_deg",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "skew_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "skew_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "channel_layout",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "dmx_start",
+        "type": "int",
+        "default": 1
+      }
+    ]
+  },
+  {
+    "class_name": "NullFIX",
+    "node_type": "null_fix",
+    "family": "fix",
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/null_fix.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": []
+  },
+  {
+    "class_name": "SelectFIX",
+    "node_type": "select_fix",
+    "family": "fix",
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/select_fix.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": []
+  },
+  {
+    "class_name": "StripFIX",
+    "node_type": "strip_fix",
+    "family": "fix",
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/strip_fix.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": [
+      {
+        "name": "fixture_name",
+        "type": "string",
+        "default": "strip"
+      },
+      {
+        "name": "led_count",
+        "type": "int",
+        "default": 60
+      },
+      {
+        "name": "channel_layout",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "dmx_start",
+        "type": "int",
+        "default": 1
+      }
+    ]
+  },
+  {
+    "class_name": "SwitchFIX",
+    "node_type": "switch_fix",
+    "family": "fix",
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/switch_fix.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": []
   },
   {
     "class_name": "ArucoDetectIMG",
@@ -14112,6 +14310,20 @@
       },
       {
         "name": "filter",
+        "type": "menu",
+        "default": null
+      }
+    ]
+  },
+  {
+    "class_name": "FixtureSamplerTOP",
+    "node_type": "fixture_sampler",
+    "family": "top",
+    "file": "addons/gn_ext_pixel_mapper/operators/top/fixture_sampler_top.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": [
+      {
+        "name": "sample_mode",
         "type": "menu",
         "default": null
       }

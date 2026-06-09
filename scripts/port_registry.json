@@ -13156,6 +13156,110 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_opencv/operators/img/threshold_img.gd"
   },
+  "FixtureUnpackCHOP": {
+    "class_name": "FixtureUnpackCHOP",
+    "family": "CHOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "sampler",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "CHOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/chop/fixture_unpack_chop.gd"
+  },
+  "CustomFIX": {
+    "class_name": "CustomFIX",
+    "family": null,
+    "inputs": [
+      {
+        "port": 0,
+        "name": "dat",
+        "type": "DAT"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/custom_fix.gd"
+  },
+  "FileInFIX": {
+    "class_name": "FileInFIX",
+    "family": null,
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/file_in_fix.gd"
+  },
+  "GridFIX": {
+    "class_name": "GridFIX",
+    "family": null,
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/grid_fix.gd"
+  },
+  "MatrixFIX": {
+    "class_name": "MatrixFIX",
+    "family": null,
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/matrix_fix.gd"
+  },
+  "NullFIX": {
+    "class_name": "NullFIX",
+    "family": null,
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/null_fix.gd"
+  },
+  "SelectFIX": {
+    "class_name": "SelectFIX",
+    "family": null,
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/select_fix.gd"
+  },
+  "StripFIX": {
+    "class_name": "StripFIX",
+    "family": null,
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/strip_fix.gd"
+  },
+  "SwitchFIX": {
+    "class_name": "SwitchFIX",
+    "family": null,
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/fix/switch_fix.gd"
+  },
+  "FixtureSamplerTOP": {
+    "class_name": "FixtureSamplerTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "source",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/top/fixture_sampler_top.gd"
+  },
   "BendSDF": {
     "class_name": "BendSDF",
     "family": null,

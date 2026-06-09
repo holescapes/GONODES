@@ -5211,7 +5211,7 @@ All 20 POP+VOL operators registered in `gn_extension_registry.gd`:
 
 - **528 operators** (143 TOP, 33 IMG, 85 CHOP, 48 DAT, 76 SOP, 13 POP, 15 VOL, 26 COMP, 11 MAT, 17 OUT, 31 UI, 27 SDF, 3 SCRIPT)
 - **13 operator families**: TOP, IMG, CHOP, SOP, POP, VOL, DAT, MAT, COMP, UI, OUT, SDF, SCRIPT
-- **21 GDExtension addons**: gn_ext_native (93 C++ operators), gn_ext_shadertoy, gn_ext_isf, gn_ext_ffmpeg, gn_ext_hap, gn_ext_spout, gn_ext_syphon, gn_ext_video_capture, gn_ext_midi, gn_ext_gpu_encode, gn_ext_mapper, gn_ext_ndi, gn_ext_ml, gn_ext_depth_sensor, gn_ext_sdf, gn_ext_serial, gn_ext_blackmagic, gn_ext_user_native, gn_ext_user_python, gn_ext_opencv, gn_ext_webrender
+- **22 GDExtension addons**: gn_ext_native (93 C++ operators), gn_ext_shadertoy, gn_ext_isf, gn_ext_ffmpeg, gn_ext_hap, gn_ext_spout, gn_ext_syphon, gn_ext_video_capture, gn_ext_midi, gn_ext_gpu_encode, gn_ext_mapper, gn_ext_ndi, gn_ext_ml, gn_ext_depth_sensor, gn_ext_sdf, gn_ext_serial, gn_ext_blackmagic, gn_ext_user_native, gn_ext_user_python, gn_ext_opencv, gn_ext_webrender
 - **1,547 help patches** (1,274 core + 273 extension) across all 13 families — 3+ per operator
 - **18 GLSL compute shaders** (7 POP + 11 VOL)
 
