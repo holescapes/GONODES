@@ -380,14 +380,23 @@ static func _compute_fix_hash(fix_inputs: Array[GNFixtureData],
 
 func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if port_index == 1:
-		# Show CHOP output via default family renderer
-		var chop_data: GNData = get_output_data(1)
-		if chop_data != null:
+		# Bypass demand check -- viewer is not a wired consumer.
+		# _build_chop_output() reads from the already-running sample viewport
+		# (_viewport runs whenever _total_leds > 0 in _cook).
+		var chop_data: GNChannelData = _build_chop_output()
+		if chop_data != null and not chop_data.channels.is_empty():
 			var renderer = GNFamily.get_renderer(GNFamily.Type.CHOP)
 			if renderer != null:
 				renderer.render_for_viewer(chop_data, viewer)
 				return
-		viewer.set_info("No CHOP output", "")
+			viewer.set_info("%d fixtures | %d LEDs | %d channels" % [
+				_fixture_manifest.size(), _total_leds, chop_data.channels.size()], "")
+			return
+		if _viewport == null:
+			viewer.set_info("No FIX inputs connected", "")
+		else:
+			# Viewport exists but no data yet (first frame) -- will be ready next frame
+			viewer.set_info("Sampling %d LEDs..." % _total_leds, "")
 		return
 
 	# Port 0: show source texture + fixture overlay
