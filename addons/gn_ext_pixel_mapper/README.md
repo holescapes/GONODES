@@ -60,12 +60,12 @@ A canvas-item shader. For each output pixel `(channel_col, led_row)`:
 2. Point-samples (or 3×3 box-filters) the source image at that UV
 3. Outputs the requested channel's value in the red component
 
-### CPU Unpack — `FixtureUnpackCHOP`
+### CPU Unpack -- `FixtureUnpackCHOP`
 
 - Reads the tiny packed result texture back to CPU (`tex.get_image()`)
-- Walks `FixtureSamplerTOP._fixture_manifest` for fixture metadata
-- Emits one CHOP channel per fixture × channel × LED: `"strip.r.0"`, `"strip.g.0"`, ...
-- `value_range` param: 0–1 float (for normalised math) or 0–255 int (for raw DMX)
+- Reads the fixture manifest from `tex_data.metadata["fixture_manifest"]` (set by FixtureSamplerTOP -- no graph walking needed, works through intermediate nodes)
+- Emits one CHOP channel per fixture x colour component: `"strip.r"`, `"strip.g"`, `"strip.b"` -- each channel is a `PackedFloat32Array` with one value per LED
+- `value_range` param: 0-1 float (for normalised math) or 0-255 int (for raw DMX)
 - Wire output to `DmxOutCHOP` to send to hardware
 
 ---

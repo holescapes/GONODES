@@ -130,9 +130,18 @@ Embedding Model (libgonodes — IMPLEMENTED):
 GNData (RefCounted)
 ├── valid: bool
 ├── timestamp: int (cook frame)
-├── _shared: bool (set by cook engine — true when output feeds 2+ consumers)
+├── _shared: bool (set by cook engine -- true when output feeds 2+ consumers)
+├── metadata: Dictionary (sideband data -- producers set keys, consumers read)
 └── type() -> GNFamily
 ```
+
+**Sideband metadata:** The `metadata` dictionary carries operator-specific
+info alongside the primary payload.  Producers set keys during `_cook()`;
+consumers read them from input data.  `duplicate_data()` deep-copies it.
+Example: `FixtureSamplerTOP` sets `metadata["fixture_manifest"]` so
+`FixtureUnpackCHOP` can read the manifest from the data itself instead of
+walking the scene tree (which fails -- during cook, nodes are reparented
+under CookEngine, not GNNetwork).
 
 **Copy-on-Write (COW) data sharing:** Node outputs are shared by reference. When a node's output feeds multiple downstream consumers (fan-out), the cook engine sets `_shared = true` on the output data. Operators that need to **mutate** input data must call `_mutable_input(data)` (on GNNode) which duplicates only when `_shared` is true — zero-copy for single-consumer chains. The `_consumer_counts` dictionary in GNCookEngine is rebuilt from connection topology only when wires or viewer targets change (not per-frame). **Viewer-aware consumer counts:** The viewer panel reads `cached_output` outside the data-flow graph — effectively an invisible consumer. `_rebuild_consumer_counts()` now also counts each viewer sink's upstream inputs as additional consumers, ensuring `_shared = true` when a node is being viewed *and* its output is consumed by a downstream in-place operator. Without this, operators like PixelSortIMG would mutate NoiseIMG's `cached_output` in-place (since the wire-only consumer count = 1), causing the viewer to show the same mutated image regardless of which node is selected.
 
@@ -150,7 +159,8 @@ GNTextureData extends GNData (RefCounted)
 ├── texture: Texture2D (result of SubViewport rendering)
 ├── viewport: SubViewport (owned by the TOP node)
 ├── resolution: Vector2i
-└── format: Image.Format
+├── format: Image.Format
+└── metadata: Dictionary (inherited -- e.g. fixture_manifest for PixelMapper)
 ```
 
 ### GNChannelData (CHOP output)

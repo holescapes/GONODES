@@ -52,17 +52,46 @@ extends RefCounted
 var valid: bool = false         # True after a successful cook
 var timestamp: int = -1         # Frame number when last produced
 
-## Set by the cook engine — true when this output feeds 2+ downstream
+## Set by the cook engine -- true when this output feeds 2+ downstream
 ## consumers. Operators must never set this directly.
 var _shared: bool = false
+
+## Generic sideband metadata dictionary for passing operator-specific info
+## alongside the main data payload.  Producers set keys; consumers read them.
+## Example: FixtureSamplerTOP sets metadata["fixture_manifest"] so downstream
+## nodes can read the manifest without walking the graph.
+var metadata: Dictionary = {}
 ```
 
 Every data subclass must implement:
 
 | Method | Purpose |
-|--------|---------|
-| `duplicate_data() -> GNData` | Deep copy for COW — copies all payload fields |
+|--------|---------||
+| `duplicate_data() -> GNData` | Deep copy for COW -- copies all payload fields, including `metadata.duplicate(true)` |
 | `get_preview_text() -> String` | Compact text for viewer info bar |
+
+### Sideband Metadata
+
+The `metadata` dictionary carries operator-specific information alongside the
+main payload without requiring graph-walking or upstream type checks. The
+producer sets keys during `_cook()`; downstream consumers read them from the
+input data. `duplicate_data()` always deep-copies the dictionary.
+
+Use metadata when an operator produces information that downstream nodes need
+but that does not belong in the primary data payload (texture, channels, etc.).
+Never use metadata as a substitute for wired connections or proper data fields.
+
+```gdscript
+# Producer (in _cook):
+_cached_tex_data.metadata["fixture_manifest"] = _fixture_manifest
+return _cached_tex_data
+
+# Consumer (in _cook):
+var manifest: Array = tex_data.metadata.get("fixture_manifest", [])
+if manifest.is_empty():
+    node_warning = "Input has no fixture_manifest metadata."
+    return null
+```
 
 ---
 
