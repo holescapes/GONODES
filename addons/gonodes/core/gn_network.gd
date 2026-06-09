@@ -80,10 +80,10 @@ func notify_state_changed(undoable: bool = true) -> void:
 ## Returns true on success, false if the ID is already taken.
 func add_node(node: GNNode) -> bool:
 	if node.id.is_empty():
-		push_error("GNNetwork.add_node: node has no ID")
+		GNLogger.error("Network", "add_node: node has no ID")
 		return false
 	if nodes.has(node.id):
-		push_warning("GNNetwork.add_node: duplicate ID '%s'" % node.id)
+		GNLogger.warn("Network", "add_node: duplicate ID '%s'" % node.id)
 		return false
 	nodes[node.id] = node
 	_invalidate_topo()
@@ -98,7 +98,7 @@ func add_node(node: GNNode) -> bool:
 ## and queues it for deletion.
 func remove_node(node_id: String) -> bool:
 	if not nodes.has(node_id):
-		push_warning("GNNetwork.remove_node: node '%s' not found" % node_id)
+		GNLogger.warn("Network", "remove_node: node '%s' not found" % node_id)
 		return false
 
 	var node: GNNode = nodes[node_id]
@@ -147,20 +147,20 @@ func rename_node(old_id: String, new_id: String) -> bool:
 	if old_id == new_id:
 		return true
 	if not nodes.has(old_id):
-		push_warning("GNNetwork.rename_node: node '%s' not found" % old_id)
+		GNLogger.warn("Network", "rename_node: node '%s' not found" % old_id)
 		return false
 	if new_id.is_empty():
-		push_warning("GNNetwork.rename_node: new ID is empty")
+		GNLogger.warn("Network", "rename_node: new ID is empty")
 		return false
 	if nodes.has(new_id):
-		push_warning("GNNetwork.rename_node: ID '%s' already taken" % new_id)
+		GNLogger.warn("Network", "rename_node: ID '%s' already taken" % new_id)
 		return false
 
 	# Validate: only allow alphanumeric + underscore
 	var valid_regex := RegEx.new()
 	valid_regex.compile("^[a-zA-Z_][a-zA-Z0-9_]*$")
 	if not valid_regex.search(new_id):
-		push_warning("GNNetwork.rename_node: invalid ID '%s' (must be alphanumeric/underscore, start with letter or _)" % new_id)
+		GNLogger.warn("Network", "rename_node: invalid ID '%s' (must be alphanumeric/underscore, start with letter or _)" % new_id)
 		return false
 
 	var node: GNNode = nodes[old_id]
@@ -347,25 +347,25 @@ func connect_nodes(from_id: String, from_port: int,
 	var from_node: GNNode = nodes.get(from_id, null)
 	var to_node: GNNode = nodes.get(to_id, null)
 	if from_node == null:
-		push_warning("GNNetwork.connect: source node '%s' not found" % from_id)
+		GNLogger.warn("Network", "connect: source node '%s' not found" % from_id)
 		return false
 	if to_node == null:
-		push_warning("GNNetwork.connect: target node '%s' not found" % to_id)
+		GNLogger.warn("Network", "connect: target node '%s' not found" % to_id)
 		return false
 
 	# Validate ports exist
 	var out_port: GNPort = from_node.get_output_port(from_port)
 	var in_port: GNPort = to_node.get_input_port(to_port)
 	if out_port == null:
-		push_warning("GNNetwork.connect: output port %d not found on '%s'" % [from_port, from_id])
+		GNLogger.warn("Network", "connect: output port %d not found on '%s'" % [from_port, from_id])
 		return false
 	if in_port == null:
-		push_warning("GNNetwork.connect: input port %d not found on '%s'" % [to_port, to_id])
+		GNLogger.warn("Network", "connect: input port %d not found on '%s'" % [to_port, to_id])
 		return false
 
 	# Type check
 	if not in_port.can_connect_from(out_port):
-		push_warning("GNNetwork.connect: port type mismatch (%s → %s)" % [
+		GNLogger.warn("Network", "connect: port type mismatch (%s → %s)" % [
 			GNFamily.get_family_name(out_port.family), GNFamily.get_family_name(in_port.family)])
 		return false
 
@@ -395,7 +395,7 @@ func connect_nodes(from_id: String, from_port: int,
 	# Check for duplicate connection
 	for conn in connections:
 		if conn.matches(from_id, from_port, to_id, to_port):
-			push_warning("GNNetwork.connect: connection already exists")
+			GNLogger.warn("Network", "connect: connection already exists")
 			return false
 
 	# Cycle check — temporarily add the edge and test
@@ -404,7 +404,7 @@ func connect_nodes(from_id: String, from_port: int,
 	if has_cycle():
 		connections.erase(test_conn)
 		GNLogger.warn("Network", "Connection %s:%d → %s:%d rejected — would create cycle" % [from_id, from_port, to_id, to_port])
-		push_warning("GNNetwork.connect: would create a cycle")
+		GNLogger.warn("Network", "connect: would create a cycle")
 		return false
 
 	# Connection is valid and already added
@@ -442,7 +442,7 @@ func disconnect_nodes(from_id: String, from_port: int,
 				_update_dynamic_node_inputs(to_id)
 
 			return true
-	push_warning("GNNetwork.disconnect: connection not found")
+	GNLogger.warn("Network", "disconnect: connection not found")
 	return false
 
 
@@ -597,7 +597,7 @@ func _compute_topological_order() -> Array[GNNode]:
 	# If sorted.size() < nodes.size(), there's a cycle — return partial order
 	if sorted.size() < nodes.size():
 		GNLogger.error("Network", "Topological sort incomplete: %d/%d nodes — cycle detected" % [sorted.size(), nodes.size()])
-		push_warning("GNNetwork: topological sort incomplete — possible cycle detected")
+		GNLogger.warn("Network", "topological sort incomplete — possible cycle detected")
 	else:
 		GNLogger.debug("Network", "Topo sort computed: %d node(s)" % sorted.size())
 	return sorted

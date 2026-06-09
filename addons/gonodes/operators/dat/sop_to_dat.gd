@@ -27,7 +27,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	out.has_header = true
 
 	if inputs.size() == 0 or not (inputs[0] is GNGeoData):
-		push_warning("SOPtoDAT: No valid SOP input connected.")
+		GNLogger.warn("SOPtoDAT", "No valid SOP input connected.")
 		return out
 
 	var geo: GNGeoData = inputs[0] as GNGeoData

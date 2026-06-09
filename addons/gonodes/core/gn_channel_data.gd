@@ -51,12 +51,12 @@ func get_channel(channel_name: String) -> PackedFloat32Array:
 func get_value(channel_name: String, index: int = -1) -> float:
 	var ch: PackedFloat32Array = channels.get(channel_name, PackedFloat32Array())
 	if ch.is_empty():
-		push_warning("GNChannelData: channel '%s' not found" % channel_name)
+		GNLogger.warn("ChannelData", "channel '%s' not found" % channel_name)
 		return 0.0
 	if index < 0:
 		return ch[ch.size() - 1]
 	if index >= ch.size():
-		push_warning("GNChannelData: index %d out of range for channel '%s' (size %d)" % [index, channel_name, ch.size()])
+		GNLogger.warn("ChannelData", "index %d out of range for channel '%s' (size %d)" % [index, channel_name, ch.size()])
 		return 0.0
 	return ch[index]
 

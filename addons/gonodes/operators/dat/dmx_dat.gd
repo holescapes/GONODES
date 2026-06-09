@@ -155,7 +155,7 @@ func _ensure_rx_bound() -> void:
 	_rx_udp = PacketPeerUDP.new()
 	var err := _rx_udp.bind(port)
 	if err != OK:
-		push_warning("DMXDAT: Could not bind to port %d (error %d). Another app may be using it." % [port, err])
+		GNLogger.warn("DmxDAT", "Could not bind to port %d (error %d). Another app may be using it." % [port, err])
 		_rx_udp = null
 
 

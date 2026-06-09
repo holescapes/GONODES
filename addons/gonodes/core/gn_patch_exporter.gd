@@ -469,9 +469,9 @@ func _dir_has_files(path: String) -> bool:
 	return false
 
 
-## Reports a failure via signal and push_error.
+## Reports a failure via GNLogger and emits the completed signal with failure state.
 func _fail(message: String) -> void:
-	push_error("[GNPatchExporter] %s" % message)
+	GNLogger.error("PatchExporter", message)
 	completed.emit(false, message)
 
 

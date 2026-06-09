@@ -27,7 +27,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	out.has_header = true
 
 	if inputs.size() == 0 or not (inputs[0] is GNTextureData):
-		push_warning("TOPtoDAT: No valid TOP input connected.")
+		GNLogger.warn("TOPtoDAT", "No valid TOP input connected.")
 		out.set_headers(PackedStringArray(["attribute", "value"]))
 		return out
 
@@ -62,12 +62,12 @@ func _extract_pixels(tex_data: GNTextureData, tbl: GNTableData) -> void:
 	tbl.set_headers(PackedStringArray(["x", "y", "r", "g", "b", "a"]))
 
 	if tex_data.texture == null:
-		push_warning("TOPtoDAT: No texture available for pixel extraction.")
+		GNLogger.warn("TOPtoDAT", "No texture available for pixel extraction.")
 		return
 
 	var image: Image = tex_data.texture.get_image()
 	if image == null:
-		push_warning("TOPtoDAT: Cannot get Image from texture.")
+		GNLogger.warn("TOPtoDAT", "Cannot get Image from texture.")
 		return
 
 	var max_px: int = get_param_value("max_pixels")

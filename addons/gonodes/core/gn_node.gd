@@ -775,7 +775,7 @@ func get_parameter(param_name: String) -> GNParameter:
 func get_param_value(param_name: String) -> Variant:
 	var param: GNParameter = get_parameter(param_name)
 	if param == null:
-		push_warning("GNNode '%s': unknown parameter '%s'" % [id, param_name])
+		GNLogger.warn("Node", "'%s': unknown parameter '%s'" % [id, param_name])
 		return null
 	return param.get_resolved_value()
 
@@ -785,7 +785,7 @@ func get_param_value(param_name: String) -> Variant:
 func set_param_value(p_name: String, new_value: Variant) -> void:
 	var param: GNParameter = get_parameter(p_name)
 	if param == null:
-		push_warning("GNNode '%s': unknown parameter '%s'" % [id, p_name])
+		GNLogger.warn("Node", "'%s': unknown parameter '%s'" % [id, p_name])
 		return
 	param.set_value(new_value)
 

@@ -73,7 +73,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		expr = Expression.new()
 		var err := expr.parse(expression_str, PackedStringArray(["x", "y", "z"]))
 		if err != OK:
-			push_warning("IsoSurfaceSOP: bad expression — %s" % expr.get_error_text())
+			GNLogger.warn("IsoSurfaceSOP", "bad expression — %s" % expr.get_error_text())
 			return null
 
 	for iz in range(gs):

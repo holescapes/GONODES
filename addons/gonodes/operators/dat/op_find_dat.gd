@@ -58,7 +58,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# Walk up the scene tree to find the network node holding a GNNetwork
 	var network: GNNetwork = _find_network()
 	if network == null:
-		push_warning("OPFindDAT: Cannot find parent GNNetwork.")
+		GNLogger.warn("OPFindDAT", "Cannot find parent GNNetwork.")
 		return out
 
 	# Iterate all nodes in the network

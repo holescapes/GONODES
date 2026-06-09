@@ -123,7 +123,7 @@ func _init_rd() -> void:
 	rd = RenderingServer.get_rendering_device()
 	main_rd = rd
 	if rd == null:
-		push_error("GNGpuContext: RenderingDevice unavailable — GPU compute disabled (Compatibility renderer?)")
+		GNLogger.error("GpuContext", "RenderingDevice unavailable — GPU compute disabled (Compatibility renderer?)")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -150,12 +150,12 @@ func get_shader(glsl_path: String) -> RID:
 	if spirv == null:
 		spirv = _compile_glsl_from_text(glsl_path)
 	if spirv == null:
-		push_error("GNGpuContext: Failed to compile shader '%s'" % glsl_path)
+		GNLogger.error("GpuContext", "Failed to compile shader '%s'" % glsl_path)
 		return RID()
 
 	var err_msg: String = spirv.get_stage_compile_error(RenderingDevice.SHADER_STAGE_COMPUTE)
 	if err_msg != "":
-		push_error("GNGpuContext: Shader compile error in '%s': %s" % [glsl_path, err_msg])
+		GNLogger.error("GpuContext", "Shader compile error in '%s': %s" % [glsl_path, err_msg])
 		return RID()
 	var shader_rid: RID = rd.shader_create_from_spirv(spirv)
 	_shader_cache[glsl_path] = shader_rid
@@ -167,12 +167,12 @@ func get_shader(glsl_path: String) -> RID:
 func _compile_glsl_from_text(glsl_path: String) -> RDShaderSPIRV:
 	var raw := FileAccess.get_file_as_string(glsl_path)
 	if raw.is_empty():
-		push_error("GNGpuContext: Cannot read shader file '%s'" % glsl_path)
+		GNLogger.error("GpuContext", "Cannot read shader file '%s'" % glsl_path)
 		return null
 	# Strip the [compute] section header — keep everything from #version onward.
 	var ver_pos := raw.find("#version")
 	if ver_pos < 0:
-		push_error("GNGpuContext: No #version directive in '%s'" % glsl_path)
+		GNLogger.error("GpuContext", "No #version directive in '%s'" % glsl_path)
 		return null
 	var glsl_code := raw.substr(ver_pos)
 	var src := RDShaderSource.new()
@@ -404,8 +404,8 @@ func create_texture_3d_from_native(handle: int, resolution: Vector3i,
 ## NOTE: Godot 4.6 does not expose storage_buffer_create_from_extension().
 ## Returns an invalid RID until Godot adds the API — POP falls back to CPU.
 func create_buffer_from_native(_handle: int, _byte_size: int) -> RID:
-	push_warning("GNGpuContext: create_buffer_from_native() not yet supported " +
-		"— Godot lacks storage_buffer_create_from_extension(). POP uses CPU fallback.")
+	GNLogger.warn("GpuContext", "create_buffer_from_native() not yet supported" +
+		" — Godot lacks storage_buffer_create_from_extension(). POP uses CPU fallback.")
 	return RID()
 
 

@@ -130,7 +130,7 @@ func _trigger_request(url: String) -> void:
 
 	var error: Error = _http_request.request(url, headers, http_method, body)
 	if error != OK:
-		push_warning("WebDAT: HTTP request failed to start: %s" % error_string(error))
+		GNLogger.warn("WebDAT", "HTTP request failed to start: %s" % error_string(error))
 		_request_pending = false
 
 
@@ -139,7 +139,7 @@ func _on_request_completed(result: int, response_code: int,
 		_headers: PackedStringArray, body: PackedByteArray) -> void:
 	_request_pending = false
 	if result != HTTPRequest.RESULT_SUCCESS:
-		push_warning("WebDAT: Request failed with result %d, HTTP %d" % [result, response_code])
+		GNLogger.warn("WebDAT", "Request failed with result %d, HTTP %d" % [result, response_code])
 		return
 	_last_response = body.get_string_from_utf8()
 	_cached_url = get_param_value("url")

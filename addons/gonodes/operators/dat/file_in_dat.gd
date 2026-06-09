@@ -36,11 +36,11 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# Resolve project:// and other path tiers
 	var resolved := GNResourceLoader.resolve(path, project_dir)
 	if resolved.is_empty() or not FileAccess.file_exists(resolved):
-		push_warning("FileInDAT: File not found: %s" % path)
+		GNLogger.warn("FileInDAT", "File not found: %s" % path)
 		return out
 	var file := FileAccess.open(resolved, FileAccess.READ)
 	if file == null:
-		push_warning("FileInDAT: Cannot open file: %s" % path)
+		GNLogger.warn("FileInDAT", "Cannot open file: %s" % path)
 		return out
 	var content := file.get_as_text()
 	file.close()

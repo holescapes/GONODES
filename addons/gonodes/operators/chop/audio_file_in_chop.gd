@@ -177,7 +177,7 @@ func _load_audio(file_path: String) -> void:
 		_apply_loop(_audio_stream, get_param_value("loop"))
 		_start_capture()
 	else:
-		push_warning("AudioFileInCHOP: '%s' is not a valid AudioStream" % file_path)
+		GNLogger.warn("AudioFileInCHOP", "'%s' is not a valid AudioStream" % file_path)
 
 
 func _apply_loop(stream: AudioStream, loop: bool) -> void:

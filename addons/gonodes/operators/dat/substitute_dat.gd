@@ -92,7 +92,7 @@ func _do_replace(text: String, find: String, replace_with: String,
 		var pattern: String = find if case_sensitive else "(?i)" + find
 		var err: Error = regex.compile(pattern)
 		if err != OK:
-			push_warning("SubstituteDAT: Invalid regex pattern: %s" % find)
+			GNLogger.warn("SubstituteDAT", "Invalid regex pattern: %s" % find)
 			return text
 		return regex.sub(text, replace_with, true)
 	else:

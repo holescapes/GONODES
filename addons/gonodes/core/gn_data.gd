@@ -21,7 +21,7 @@ var _shared: bool = false
 ## Returns the operator family this data type belongs to.
 ## Must be overridden by subclasses.
 func get_family() -> int:
-	push_error("GNData.get_family() called on base class — must override in subclass")
+	GNLogger.error("GNData", "get_family() called on base class — must override in subclass")
 	return GNFamily.Type.TOP  # Fallback
 
 

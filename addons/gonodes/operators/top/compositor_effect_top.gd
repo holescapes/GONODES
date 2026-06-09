@@ -194,7 +194,7 @@ class _GNCompositorEffect extends CompositorEffect:
 		src.source_compute = CompositorEffectTOP._EFFECT_GLSL
 		var spirv: RDShaderSPIRV = _rd.shader_compile_spirv_from_source(src)
 		if not spirv.compile_error_compute.is_empty():
-			push_error("CompositorEffectTOP shader error: %s" % spirv.compile_error_compute)
+			GNLogger.error("CompositorEffectTOP", "shader error: %s" % spirv.compile_error_compute)
 			return
 
 		_shader_rid   = _rd.shader_create_from_spirv(spirv)

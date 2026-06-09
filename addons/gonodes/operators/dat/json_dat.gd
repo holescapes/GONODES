@@ -41,7 +41,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			return out
 		var parsed = JSON.parse_string(json_str)
 		if parsed == null:
-			push_warning("JSONDAT: Failed to parse JSON string.")
+			GNLogger.warn("JsonDAT", "Failed to parse JSON string.")
 			return out
 		_json_to_table(parsed, out)
 		return out

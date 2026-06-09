@@ -136,7 +136,7 @@ func _ensure_udp(port: int) -> void:
 	_udp = PacketPeerUDP.new()
 	var err: Error = _udp.bind(port)
 	if err != OK:
-		push_warning("OscInCHOP: failed to bind UDP port %d — error %s" % [port, error_string(err)])
+		GNLogger.warn("OscInCHOP", "failed to bind UDP port %d — error %s" % [port, error_string(err)])
 		_udp = null
 		_bound_port = -1
 		return

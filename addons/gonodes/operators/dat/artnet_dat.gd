@@ -96,7 +96,7 @@ func _ensure_bound() -> void:
 	_udp = PacketPeerUDP.new()
 	var err := _udp.bind(port)
 	if err != OK:
-		push_warning("ArtnetDAT: Could not bind to port %d (error %d)." % [port, err])
+		GNLogger.warn("ArtnetDAT", "Could not bind to port %d (error %d)." % [port, err])
 		_udp = null
 		return
 	_bound_port = port

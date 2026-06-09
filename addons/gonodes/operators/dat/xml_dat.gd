@@ -51,7 +51,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 					xml_data = f.get_as_text()
 					f.close()
 			else:
-				push_warning("XMLDAT: file not found — '%s'" % path)
+				GNLogger.warn("XmlDAT", "file not found — '%s'" % path)
 
 	if xml_data.is_empty():
 		return out
@@ -68,7 +68,7 @@ func _parse_xml(text: String, tbl: GNTableData, include_text: bool) -> void:
 
 	var parser := XMLParser.new()
 	if parser.open_buffer(text.to_utf8_buffer()) != OK:
-		push_warning("XMLDAT: failed to open XML buffer")
+		GNLogger.warn("XmlDAT", "failed to open XML buffer")
 		return
 
 	# Stack tracks the current element path segments.

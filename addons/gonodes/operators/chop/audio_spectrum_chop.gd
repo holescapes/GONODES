@@ -167,7 +167,7 @@ func _ensure_spectrum(bus: String, fft_idx: int) -> void:
 			break
 	if target_idx < 0:
 		if _setup_done:
-			push_warning("AudioSpectrumCHOP: bus '%s' not found" % bus)
+			GNLogger.warn("AudioSpectrumCHOP", "bus '%s' not found" % bus)
 		_spectrum_instance = null
 		return
 
