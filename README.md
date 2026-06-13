@@ -19,7 +19,7 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**587 operators** across **15 families**, plus **131 native C++ accelerated variants** and **23 extensions**.
+**588 operators** across **15 families**, plus **131 native C++ accelerated variants** and **23 extensions**.
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
@@ -27,7 +27,7 @@ Parallel level-based cook engine, named output ports, dot routing nodes, and key
 | Family | Count | What It Processes | Examples |
 |--------|-------|-------------------|----------|
 | **TOP** | 138 | GPU texture processing | Noise, Composite, Blur, ChromaKey, Feedback, Render, GLSL, ISF, Shadertoy, Deform |
-| **CHOP** | 108 | Signals, channels & audio | LFO, Audio synthesis, DMX, MIDI, OSC, Gamepad, Keyboard, Skeleton, State machine |
+| **CHOP** | 107 | Signals, channels & audio | LFO, Audio synthesis, DMX, MIDI, OSC, Gamepad, Keyboard, Skeleton, State machine |
 | **SOP** | 85 | 3D geometry | Grid, Boolean, Extrude, Subdivide, Remesh, ClothSim, L-System, PolyBevel, HeightField |
 | **DAT** | 51 | Tables, text & data | JSON, WebSocket, MQTT, HTTP, ArtNet, Serial, OSC, QR, RenderPick, PanelExecute |
 | **IMG** | 41 | CPU image processing | OpenCV detection, EdgeDetect, OpticalFlow, PixelSort, Webcam, ArUco, ML inference |
@@ -38,7 +38,7 @@ Parallel level-based cook engine, named output ports, dot routing nodes, and key
 | **MAT** | 12 | Materials & shaders | PBR, Custom GLSL, Wireframe, PointSprite, FluidSurface, NormalMap |
 | **POP** | 12 | GPU particles | Source, Force, Turbulence, Boids, Collision, Advect (VOL), Ribbon trail |
 | **VOL** | 12 | Volumetric 3D textures | Noise, Fluid sim (Navier-Stokes), Pyro, Marching Cubes, Raymarch |
-| **OUT** | 11 | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT |
+| **OUT** | 12 | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT, PixelDmxOUT |
 | **FIX** | 8 | LED fixture mapping | Strip, Grid, Matrix, Custom — define LED UV positions for GPU sampling and DMX routing |
 | **SCRIPT** | 3 | User scripting | GDScript, Python (NumPy), C++ — template-based, multi-family output |
 

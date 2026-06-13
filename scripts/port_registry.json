@@ -13226,6 +13226,20 @@
     "dynamic_inputs": null,
     "file": "addons/gn_ext_pixel_mapper/operators/fix/switch_fix.gd"
   },
+  "PixelDmxOUT": {
+    "class_name": "PixelDmxOUT",
+    "family": "OUT",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "values",
+        "type": "CHOP"
+      }
+    ],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gn_ext_pixel_mapper/operators/output/pixel_dmx_out.gd"
+  },
   "FixtureSamplerTOP": {
     "class_name": "FixtureSamplerTOP",
     "family": "TOP",

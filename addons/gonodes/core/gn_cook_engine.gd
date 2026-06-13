@@ -443,7 +443,7 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 	# Lazy-init regex (same pattern as GNGraphEditor's overlay scanner)
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|pop|output|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
+		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|pop|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for param_name in node.parameters:
 		var param: GNParameter = node.parameters[param_name]
@@ -1414,6 +1414,36 @@ func sop(node_name: String, port = null) -> Variant:
 ##   dat("table1", "out")              → data by port name
 func dat(node_name: String, port = null) -> Variant:
 	return _resolve_output(node_name, port, GNFamily.Type.DAT)
+
+
+## Read a DAT table cell by row and column index.
+## Usage: cell("table1", 0, 1)  → string value at row 0, col 1
+func cell(node_name: String, row: int, col: int) -> String:
+	var data: Variant = _resolve_output(node_name, null, GNFamily.Type.DAT)
+	if data is GNTableData:
+		return data.cell(row, col)
+	return ""
+
+
+## Read a DAT table cell by row index and column header name.
+## Usage: cell_by_name("table1", 0, "speed")  → string value at row 0, column "speed"
+func cell_by_name(node_name: String, row: int, col_name: String) -> String:
+	var data: Variant = _resolve_output(node_name, null, GNFamily.Type.DAT)
+	if data is GNTableData:
+		return data.cell_by_name(row, col_name)
+	return ""
+
+
+## Read a DAT table cell as float by row and column index.
+## Usage: cellf("table1", 0, 1)
+func cellf(node_name: String, row: int, col: int) -> float:
+	return cell(node_name, row, col).to_float()
+
+
+## Read a DAT table cell as float by row index and column header name.
+## Usage: cellf_by_name("table1", 0, "speed")
+func cellf_by_name(node_name: String, row: int, col_name: String) -> float:
+	return cell_by_name(node_name, row, col_name).to_float()
 
 
 ## Read IMG data. Usage:

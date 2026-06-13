@@ -53,3 +53,12 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			_cached_table.append_row(row)
 
 	return _cached_table
+
+
+## Called by GNTableRenderer when the user edits a cell in the viewer.
+func table_cell_edited(row: int, col: int, value: String) -> void:
+	# Columns 0-3 map to r{row}c{col} params
+	if row < 0 or row > 3 or col < 0 or col > 3:
+		return
+	set_param_value("r%dc%d" % [row, col], value)
+	mark_dirty()

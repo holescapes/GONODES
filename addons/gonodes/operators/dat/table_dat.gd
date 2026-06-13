@@ -91,3 +91,36 @@ func _cook(inputs: Array[GNData]) -> GNData:
 				output.table.append(adjusted)
 
 	return output
+
+
+## Called by GNTableRenderer when the user edits a cell in the viewer.
+## row/col are 0-based data indices (excluding header). Rebuilds the data param.
+func table_cell_edited(row: int, col: int, value: String) -> void:
+	var num_cols: int = get_param_value("cols")
+	var data_str: String = get_param_value("data")
+	# Rebuild the cell grid from current data string
+	var lines: PackedStringArray
+	if data_str.strip_edges().is_empty():
+		lines = PackedStringArray()
+	else:
+		lines = data_str.split("\n")
+		# Strip empty trailing lines added by padding
+		while lines.size() > 0 and lines[-1].strip_edges().is_empty():
+			lines.resize(lines.size() - 1)
+	# Ensure enough rows
+	while lines.size() <= row:
+		var blank := PackedStringArray()
+		blank.resize(num_cols)
+		for i in range(num_cols):
+			blank[i] = ""
+		lines.append(",".join(blank))
+	# Parse, update, reassemble
+	var cells := PackedStringArray()
+	for part in lines[row].split(","):
+		cells.append(part.strip_edges())
+	while cells.size() < num_cols:
+		cells.append("")
+	cells[col] = value
+	lines[row] = ",".join(cells)
+	set_param_value("data", "\n".join(lines))
+	mark_dirty()

@@ -9069,6 +9069,30 @@
     ]
   },
   {
+    "class_name": "PixelDmxOUT",
+    "node_type": "pixel_dmx_out",
+    "family": "output",
+    "file": "addons/gn_ext_pixel_mapper/operators/output/pixel_dmx_out.gd",
+    "extension": "gn_ext_pixel_mapper",
+    "params": [
+      {
+        "name": "ip",
+        "type": "string",
+        "default": "255.255.255.255"
+      },
+      {
+        "name": "port",
+        "type": "int",
+        "default": 6454
+      },
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "RecordOUT",
     "node_type": "record",
     "family": "output",

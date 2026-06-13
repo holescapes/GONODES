@@ -25,3 +25,10 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_cached_table.set_text(content)
 
 	return _cached_table
+
+
+## Called by GNTableRenderer when the user edits text in the viewer.
+## row == -1 indicates full-text replacement (TextEdit mode).
+func table_cell_edited(_row: int, _col: int, value: String) -> void:
+	set_param_value("text", value)
+	mark_dirty()

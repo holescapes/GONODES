@@ -19,7 +19,8 @@ uniform sampler2D source_tex : filter_linear, repeat_disable;
 uniform sampler2D led_pos_tex : filter_nearest, repeat_disable;
 uniform int total_leds = 0;
 uniform int sample_mode = 0;          // 0=point, 1=box
-uniform int channels_per_led = 3;     // 1–4
+uniform int channels_per_led = 3;     // 1-4
+uniform bool rgbw_mode = false;       // true = derive W from min(R,G,B) instead of sampling alpha
 
 void fragment() {
 	// UV maps to: x = channel index (0..channels_per_led-1), y = led index (0..total_leds-1)
@@ -50,12 +51,21 @@ void fragment() {
 			sampled = texture(source_tex, led_uv);
 		}
 
-		// Route the requested channel into the red output component
+		// Route the requested channel into the red output component.
+		// RGBW mode: extract white = min(R,G,B), subtract from RGB channels.
 		float value = 0.0;
-		if (channel_idx == 0)      value = sampled.r;
-		else if (channel_idx == 1) value = sampled.g;
-		else if (channel_idx == 2) value = sampled.b;
-		else if (channel_idx == 3) value = sampled.a;
+		if (rgbw_mode) {
+			float w = min(sampled.r, min(sampled.g, sampled.b));
+			if (channel_idx == 0)      value = sampled.r - w;
+			else if (channel_idx == 1) value = sampled.g - w;
+			else if (channel_idx == 2) value = sampled.b - w;
+			else if (channel_idx == 3) value = w;
+		} else {
+			if (channel_idx == 0)      value = sampled.r;
+			else if (channel_idx == 1) value = sampled.g;
+			else if (channel_idx == 2) value = sampled.b;
+			else if (channel_idx == 3) value = sampled.a;
+		}
 
 		COLOR = vec4(value, value, value, 1.0);
 	}

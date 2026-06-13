@@ -1549,11 +1549,11 @@ func _scan_expr_references() -> void:
 	# Lazy-init regex — captures full call and first argument (node ID)
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("((?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par)\\s*\\([^)]*\\))")
+		_expr_ref_regex.compile("((?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\([^)]*\\))")
 
 	# Secondary regex to pull just the first string argument (node ID)
 	var _id_regex := RegEx.new()
-	_id_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par)\\s*\\(\\s*\"([^\"]+)\"")
+	_id_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for node_id in network.nodes:
 		var node: GNNode = network.nodes[node_id]

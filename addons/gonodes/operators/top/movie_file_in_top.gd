@@ -205,10 +205,13 @@ func _pull_audio() -> void:
 
 	if _capture_effect != null and is_playing:
 		var available: int = _capture_effect.get_frames_available()
-		var pull_count: int = mini(available, buf_size)
+		var excess: int = available - buf_size
+		if excess > 0:
+			_capture_effect.get_buffer(excess)  # discard stale samples
+			available = buf_size
 
-		if pull_count > 0:
-			var frames: PackedVector2Array = _capture_effect.get_buffer(pull_count)
+		if available > 0:
+			var frames: PackedVector2Array = _capture_effect.get_buffer(available)
 			_left_buf.resize(frames.size())
 			_right_buf.resize(frames.size())
 

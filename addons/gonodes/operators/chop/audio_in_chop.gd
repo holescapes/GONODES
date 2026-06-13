@@ -1,14 +1,16 @@
 class_name AudioInCHOP
 extends GNChopBase
-## Captures live microphone audio and outputs waveform samples as CHOP channels.
+## Captures live audio input and outputs waveform samples as CHOP channels.
 ##
-## Creates/manages an AudioServer bus with AudioEffectCapture + AudioStreamPlayer
-## using AudioStreamMicrophone. Pulls PCM frames each cook.
+## Selects the OS-level input device globally via AudioServer.input_device.
+## This affects all audio input in the project -- only one device can be active
+## at a time. For simultaneous multi-device capture, use the gn_ext_audio
+## extension which provides per-instance device binding.
 ##
 ## Output channels:
-##   left  — left channel waveform (or mono)
-##   right — right channel waveform (stereo only)
-##   level — RMS amplitude of the most recent buffer (0-1)
+##   left  -- left channel waveform (or mono)
+##   right -- right channel waveform (stereo only)
+##   level -- RMS amplitude of the most recent buffer (0-1)
 ##
 ## Buffer size is configurable. At 60 FPS, ~735 samples per frame at 44100 Hz.
 
@@ -40,14 +42,26 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
+	var dev_param := GNParameter.create_enum("device",
+		PackedStringArray(["Default"]), 0, "Device",
+		"Input device. Switches the global AudioServer input device -- only one device active at a time.")
+	dev_param.dynamic_enum_callback = Callable(self, "_get_device_menu")
+	add_parameter(dev_param)
 	add_parameter(GNParameter.create_bool("active", false, "Active",
-		"Enable/disable microphone capture"))
+		"Enable/disable audio input capture"))
 	add_parameter(GNParameter.create_int("buffer_size", 1024, 64, 8192, "Buffer",
 		"Number of samples to output per cook"))
 	add_parameter(GNParameter.create_bool("stereo", false, "Stereo",
 		"Output stereo (left+right) or mono (left only)"))
 	add_parameter(GNParameter.create_float("gain", 1.0, 0.0, 10.0, 0.01, "Gain",
 		"Input gain multiplier"))
+
+
+func _get_device_menu() -> PackedStringArray:
+	var devices := AudioServer.get_input_device_list()
+	if devices.is_empty():
+		return PackedStringArray(["Default"])
+	return devices
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -77,11 +91,14 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		out.set_single_value("level", 0.0)
 		return out
 
-	# Pull available frames from the capture effect
+	# Discard any backlog so we always read the freshest buf_size samples.
 	var available: int = _capture_effect.get_frames_available()
-	var pull_count: int = mini(available, buf_size)
+	var excess: int = available - buf_size
+	if excess > 0:
+		_capture_effect.get_buffer(excess)  # drain and discard stale samples
+		available = buf_size
 
-	if pull_count <= 0:
+	if available <= 0:
 		# No new frames — output zeros
 		_left_buf.resize(buf_size)
 		_left_buf.fill(0.0)
@@ -90,7 +107,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		return out
 
 	# get_buffer returns PackedVector2Array (left, right per frame)
-	var frames: PackedVector2Array = _capture_effect.get_buffer(pull_count)
+	var frames: PackedVector2Array = _capture_effect.get_buffer(available)
 
 	_left_buf.resize(frames.size())
 	if stereo:
@@ -121,6 +138,12 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 func _start_capture() -> void:
 	if _active:
 		return
+
+	# Switch global input device before starting capture
+	var dev_idx: int = get_param_value("device")
+	var devices := AudioServer.get_input_device_list()
+	if devices.size() > 0 and dev_idx < devices.size():
+		AudioServer.input_device = devices[dev_idx]
 
 	# Create a dedicated audio bus for this node
 	_bus_name = "GN_AudioIn_%s" % id
@@ -170,3 +193,9 @@ func _stop_capture() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_stop_capture()
+
+
+func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
+	if param_name == "device" and _active:
+		_stop_capture()
+		_start_capture()

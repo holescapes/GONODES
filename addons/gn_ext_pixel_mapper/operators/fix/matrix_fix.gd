@@ -34,8 +34,8 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("channel_layout",
 		PackedStringArray(["RGB", "RGBW", "R", "G", "B", "W"]), 0,
 		"Channel Layout", "Colour channel order per LED."))
-	add_parameter(GNParameter.create_int("universe", 1, 1, 32767,
-		"Universe", "DMX universe (1-based)."))
+	add_parameter(GNParameter.create_int("universe", 0, 0, 32767,
+		"Universe", "DMX universe (0-based)."))
 	add_parameter(GNParameter.create_int("start_channel", 1, 1, 512,
 		"Start Channel", "First DMX channel within the universe (1-512)."))
 

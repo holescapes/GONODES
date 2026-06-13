@@ -54,6 +54,13 @@
             "position": [800, 500],
             "parameters": {}
         },
+        "dmxout1": {
+            "type": "PixelDmxOUT",
+            "position": [800, 650],
+            "parameters": {
+                "active": {"value": false}
+            }
+        },
         "out1": {
             "type": "WindowOUT",
             "position": [800, 280],
@@ -69,6 +76,7 @@
         {"from": "strip2",   "from_port": 0, "to": "sampler1",  "to_port": 2},
         {"from": "grid1",    "from_port": 0, "to": "sampler1",  "to_port": 3},
         {"from": "sampler1", "from_port": 0, "to": "out1",      "to_port": 0},
-        {"from": "sampler1", "from_port": 1, "to": "chop2top1", "to_port": 0}
+        {"from": "sampler1", "from_port": 1, "to": "chop2top1", "to_port": 0},
+        {"from": "sampler1", "from_port": 1, "to": "dmxout1",   "to_port": 0}
     ]
 }

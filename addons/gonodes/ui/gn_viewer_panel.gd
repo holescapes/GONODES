@@ -78,6 +78,12 @@ var _info_overlay: Label = null
 # ─ Info bar (bottom) ─────────────────────────────────────────────────────────
 var _info_bar: Label = null
 
+# ─ Metadata popup ────────────────────────────────────────────────────────────
+var _meta_btn: Button = null
+var _meta_popup: PanelContainer = null
+var _meta_label: Label = null
+var _cached_metadata: Dictionary = {}
+
 # ─ Resize debounce ───────────────────────────────────────────────────────────
 var _resize_timer: Timer = null
 
@@ -158,6 +164,49 @@ func _ready() -> void:
 	_info_bar.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_info_bar.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(_info_bar)
+
+	# Metadata button (anchored bottom-right, left of info bar)
+	_meta_btn = Button.new()
+	_meta_btn.text = "meta"
+	_meta_btn.flat = true
+	_meta_btn.visible = false
+	_meta_btn.add_theme_font_size_override("font_size", 10)
+	_meta_btn.add_theme_color_override("font_color", Color(0.6, 0.75, 0.9))
+	_meta_btn.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
+	_meta_btn.offset_top = -20.0
+	_meta_btn.offset_left = -40.0
+	_meta_btn.mouse_filter = MOUSE_FILTER_STOP
+	_meta_btn.pressed.connect(_toggle_meta_popup)
+	add_child(_meta_btn)
+
+	# Metadata popup panel
+	_meta_popup = PanelContainer.new()
+	_meta_popup.visible = false
+	_meta_popup.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
+	_meta_popup.offset_top = -200.0
+	_meta_popup.offset_left = -320.0
+	_meta_popup.offset_bottom = -22.0
+	_meta_popup.offset_right = -4.0
+	_meta_popup.mouse_filter = MOUSE_FILTER_STOP
+	var meta_style := StyleBoxFlat.new()
+	meta_style.bg_color = Color(0.12, 0.12, 0.14, 0.95)
+	meta_style.border_color = Color(0.3, 0.3, 0.35)
+	meta_style.set_border_width_all(1)
+	meta_style.set_corner_radius_all(4)
+	meta_style.set_content_margin_all(8)
+	_meta_popup.add_theme_stylebox_override("panel", meta_style)
+	add_child(_meta_popup)
+
+	var meta_scroll := ScrollContainer.new()
+	meta_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	meta_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_meta_popup.add_child(meta_scroll)
+
+	_meta_label = Label.new()
+	_meta_label.add_theme_font_size_override("font_size", 11)
+	_meta_label.add_theme_color_override("font_color", Color(0.82, 0.85, 0.9))
+	_meta_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	meta_scroll.add_child(_meta_label)
 
 	# Info overlay (semi-transparent, over any display)
 	_info_overlay = Label.new()
@@ -679,6 +728,67 @@ func update_from_node(node: GNNode) -> void:
 	_update_port_selector(node)
 
 	node.render_for_viewer(self, _selected_port_index)
+	_append_metadata_info(node)
+
+
+## Shows/hides the metadata button based on output data metadata.
+func _append_metadata_info(node: GNNode) -> void:
+	var data: GNData = node.get_output_data(_selected_port_index)
+	if data == null or data.metadata.is_empty():
+		_meta_btn.visible = false
+		_meta_popup.visible = false
+		_cached_metadata = {}
+		return
+	_cached_metadata = data.metadata
+	# Build summary for button tooltip
+	var parts: PackedStringArray = []
+	for key in data.metadata:
+		var val = data.metadata[key]
+		if val is Array:
+			parts.append("%s[%d]" % [key, val.size()])
+		elif val is Dictionary:
+			parts.append("%s{%d}" % [key, val.size()])
+		else:
+			parts.append(str(key))
+	_meta_btn.tooltip_text = ", ".join(parts)
+	_meta_btn.visible = true
+	# Refresh popup content if open
+	if _meta_popup.visible:
+		_meta_label.text = _format_metadata(_cached_metadata)
+
+
+func _toggle_meta_popup() -> void:
+	_meta_popup.visible = not _meta_popup.visible
+	if _meta_popup.visible:
+		_meta_label.text = _format_metadata(_cached_metadata)
+
+
+func _format_metadata(meta: Dictionary) -> String:
+	var lines: PackedStringArray = []
+	for key in meta:
+		var val = meta[key]
+		if val is Array:
+			lines.append("%s: [%d entries]" % [key, val.size()])
+			for i in range(mini(val.size(), 64)):
+				lines.append("  %s" % _format_value(val[i]))
+			if val.size() > 64:
+				lines.append("  ... +%d more" % (val.size() - 64))
+		elif val is Dictionary:
+			lines.append("%s:" % key)
+			for k in val:
+				lines.append("  %s: %s" % [k, _format_value(val[k])])
+		else:
+			lines.append("%s: %s" % [key, str(val)])
+	return "\n".join(lines)
+
+
+static func _format_value(val) -> String:
+	if val is Dictionary:
+		var pairs: PackedStringArray = []
+		for k in val:
+			pairs.append("%s: %s" % [k, str(val[k])])
+		return "{ %s }" % ", ".join(pairs)
+	return str(val)
 
 
 func clear() -> void:
@@ -724,7 +834,9 @@ func _update_port_selector(node: GNNode) -> void:
 		# Clamp selection in case the node shrank its port count.
 		if _selected_port_index >= port_count:
 			_selected_port_index = 0
-		_port_selector.selected = _selected_port_index
+	# Always sync the widget to the internal state — needs_rebuild may be false
+	# but _selected_port_index could have been reset by set_target().
+	_port_selector.selected = _selected_port_index
 	_port_selector.visible = true
 
 

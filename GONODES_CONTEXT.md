@@ -5256,7 +5256,7 @@ Architecture: each native op is a C++ class in `gn_native/src/` compiled via SCo
 
 ### 36.2 Audit Methodology
 
-Every operator in the 587-operator codebase was evaluated for C++ migration candidacy using these criteria:
+Every operator in the 588-operator codebase was evaluated for C++ migration candidacy using these criteria:
 
 1. **Algorithmic complexity** — triple-nested loops, O(N²/N³) vertex/voxel scans, per-element interpreted expression calls
 2. **Data volume** — operations on 50K+ vertices, 128³+ voxels, 44.1K+ audio samples, or 512²+ pixels per frame

@@ -60,7 +60,7 @@
 | **Node families** | TOP, CHOP, SOP, DAT, COMP, MAT | Nodes are typeless (pins carry typed data) | SOP, DOP, VOP, COP, CHOP, ROP, LOP, TOP (PDG) | Scene nodes (modifiers, generators, effects) — not family-typed | TOP, IMG, CHOP, DAT, SOP, POP, VOL, COMP, MAT, OUT, UI, SDF, SCRIPT |
 | **Typical network size** | Dozens to hundreds | Dozens to hundreds | Hundreds to thousands | Dozens to low hundreds | Dozens to hundreds |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) / legacy (beta) | $4,495+ / free non-comm. | £5,995+/yr (Builder); Playback bundled with media servers | **Free, open source** (Godot 4.6 + GDScript) |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | ~200 nodes | **587 operators** across 15 families -- 138 TOP, 107 CHOP, 85 SOP, 51 DAT, 41 IMG, 36 UI, 29 SDF, 27 COMP, 15 NET, 12 MAT, 12 POP, 12 VOL, 11 OUT, 8 FIX, 3 SCRIPT |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~1,000+ | ~200 nodes | **588 operators** across 15 families -- 138 TOP, 107 CHOP, 85 SOP, 51 DAT, 41 IMG, 36 UI, 29 SDF, 27 COMP, 15 NET, 12 MAT, 12 POP, 12 VOL, 12 OUT, 8 FIX, 3 SCRIPT |
 
 ---
 
@@ -796,7 +796,7 @@ For the target domain (VJ, generative art, interactive installations at 30–200
 
 ## 18. Feature Parity — Coverage Complete
 
-> Covers TouchDesigner, vvvv, Houdini, Jitter/Max, and Notch. All operator gaps identified in the original audit have been resolved. 587 operators across 14 families — 100% coverage vs all competitors combined.
+> Covers TouchDesigner, vvvv, Houdini, Jitter/Max, and Notch. All operator gaps identified in the original audit have been resolved. 588 operators across 14 families — 100% coverage vs all competitors combined.
 
 ### 18.1 Feature Coverage Matrix
 
@@ -882,7 +882,7 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 | **NET** | 15 | Host embedding (LibGodot) + subnet tunnels |
 | **FIX** | 8 | Extension-defined family (PixelMapper) -- LED UV layout for DMX |
 | **SCRIPT** | 3 | 1 core (GDScriptSCRIPT) + 2 extension (PythonSCRIPT, NativeSCRIPT) |
-| **TOTAL** | **588** | 469 core + 118 from 23 extensions |
+| **TOTAL** | **588** | 469 core + 119 from 23 extensions |
 
 **GONODES exceeds competitor coverage in:** TOP (138 vs TD's ~90), CHOP (108 vs TD's ~70), SOP (85 vs TD's ~50), DAT (51 vs TD's ~30), POP (12 vs 0), VOL (12 vs 0), SDF (29 vs 0), UI (36 vs TD's ~25).
 
@@ -949,7 +949,7 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 | Dimension | TouchDesigner | vvvv | Jitter (Max/MSP) | Notch | GONODES |
 |-----------|--------------|------|-------------------|-------|---------|
 | **Maturity** | 20+ years, industry standard | 25+ years (beta→gamma transition) | 25+ years, deep audio roots | ~10 years, dominant in live events | Alpha — 1 year of development |
-| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | ~200 nodes | **587 operators** across 15 families |
+| **Operator count** | ~300+ built-in | ~700+ (gamma nodes) | ~200+ Jitter objects + 400+ Max objects | ~200 nodes | **588 operators** across 15 families |
 | **Cost** | $2,200+ / $600 non-comm. | Free (gamma) | $399 (perpetual) or $99/yr sub | £5,995+/yr (Builder) | **Free, open source (MIT)** |
 | **GPU pipeline** | DirectX 11/12, OpenGL, Vulkan | DirectX 11 (beta) / Stride+Vulkan (gamma) | OpenGL (legacy) / Metal (modern) | **DirectX 11/12 — unified GPU-resident pipeline** | Vulkan + GLES3 via Godot 4.6 |
 | **Host embedding** | TouchEngine SDK | No | Max for Live; no general SDK | Notch Playback (disguise, Unreal, Unity) | **libgonodes — full C API, 9 data contexts** |
@@ -1460,7 +1460,7 @@ GONODES has none of this yet. The 1,413 help patches provide excellent per-opera
 
 GONODES is a technically impressive alpha-stage tool that has achieved remarkable breadth in one year of development:
 
-- **587 operators** across 14 families — more than TD's ~300 or Notch's ~200, comparable to vvvv's ~700
+- **588 operators** across 14 families — more than TD's ~300 or Notch's ~200, comparable to vvvv's ~700
 - **Architecture** — push-based cook engine with 3-tier guard system achieves equivalent work-skipping to TD's mature pull engine. Notch's full-scene-every-frame approach trades this efficiency for unified GPU pipeline throughput
 - **GPU compute** — POP, VOL, and SDF pipelines exceed all four competitors in built-in compute capability. Notch has strong GPU sim (particles, fluids, cloth, hair) but within a closed, non-extensible pipeline
 - **Host embedding** — libgonodes offers the most comprehensive embeddable node-graph engine ever built (9 data contexts, bidirectional, graph editing). Notch Playback is limited to texture output + parameters

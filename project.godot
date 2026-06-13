@@ -28,6 +28,10 @@ enabled=PackedStringArray("res://addons/gonodes/plugin.cfg")
 
 3d/physics_engine="Jolt Physics"
 
+[audio]
+
+driver/enable_input=true
+
 [rendering]
 
 rendering_device/driver.windows="d3d12"

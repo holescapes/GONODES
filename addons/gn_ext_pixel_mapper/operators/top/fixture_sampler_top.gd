@@ -201,6 +201,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_material.set_shader_parameter("total_leds", _total_leds)
 		_material.set_shader_parameter("channels_per_led", _max_channels)
 		_material.set_shader_parameter("sample_mode", get_param_value("sample_mode"))
+		var has_rgbw: bool = _fixture_manifest.any(func(e): return e.get("channel_layout", "rgb") == "rgbw")
+		_material.set_shader_parameter("rgbw_mode", has_rgbw)
 
 	# Port 0 returns source passthrough
 	_cached_tex_data.texture = src_data.texture
@@ -239,8 +241,14 @@ func _build_chop_output() -> GNChannelData:
 	_cached_chop_data.valid = true
 	_cached_chop_data.sample_rate = 60.0
 
-	var scale: float = 1.0
+	# DMX-interleaved format: one channel per DMX slot, 1 sample each.
+	# Channel naming: "{fixture}.{led_index}.{component}" e.g. "strip.0.r", "strip.0.g"
+	# This maps directly onto DmxOutCHOP: channel[i] -> DMX slot i.
 	var max_w: int = img.get_width()
+
+	# Build DMX routing table alongside channels (Rule 25.38 sideband metadata).
+	# Maps each CHOP channel name -> { universe, slot } for DmxOutCHOP auto-routing.
+	var dmx_routing: Array[Dictionary] = []
 
 	for entry in _fixture_manifest:
 		var fix_name: String = entry["name"]
@@ -248,23 +256,37 @@ func _build_chop_output() -> GNChannelData:
 		var cpl: int = entry["channels_per_led"]
 		var layout: String = entry.get("channel_layout", "rgb")
 		var offset: int = entry["offset"]
+		var uni: int = entry.get("universe", 1)
+		var start_ch: int = entry.get("start_channel", 1)
 
 		var ch_names: Array = _LAYOUT_CHANNELS.get(layout, [])
 		if ch_names.is_empty():
 			ch_names = ["ch0", "ch1", "ch2", "ch3"].slice(0, cpl)
 
-		for ch_i in range(cpl):
-			if ch_i >= max_w:
-				continue
-			var ch_label: String = ch_names[ch_i] if ch_i < ch_names.size() else ("ch%d" % ch_i)
-			var values := PackedFloat32Array()
-			values.resize(led_count)
-			for led_i in range(led_count):
+		# Outer loop: LED first, then component -- preserves DMX wire order
+		var dmx_slot: int = start_ch  # 1-based within universe
+		for led_i in range(led_count):
+			for ch_i in range(cpl):
+				if ch_i >= max_w:
+					continue
+				var ch_label: String = ch_names[ch_i] if ch_i < ch_names.size() else ("ch%d" % ch_i)
 				var pixel: Color = img.get_pixel(ch_i, offset + led_i)
-				values[led_i] = pixel.r * scale
-			_cached_chop_data.set_channel("%s.%s" % [fix_name, ch_label], values)
+				var values := PackedFloat32Array([pixel.r])
+				var ch_full_name: String = "%s.%d.%s" % [fix_name, led_i, ch_label]
+				_cached_chop_data.set_channel(ch_full_name, values)
 
-	_cached_chop_data.length = _cached_chop_data.channels.values()[0].size() if not _cached_chop_data.channels.is_empty() else 1
+				# Compute universe/slot, wrapping across universe boundaries
+				var actual_uni: int = uni + (dmx_slot - 1) / 512
+				var actual_slot: int = ((dmx_slot - 1) % 512) + 1
+				dmx_routing.append({
+					"channel": ch_full_name,
+					"universe": actual_uni,
+					"slot": actual_slot,
+				})
+				dmx_slot += 1
+
+	_cached_chop_data.length = 1
+	_cached_chop_data.metadata["dmx_routing"] = dmx_routing
 	return _cached_chop_data
 
 

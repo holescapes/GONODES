@@ -117,13 +117,16 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		elif not want_play and _stream_player.playing:
 			_stream_player.stop()
 
-	# Pull captured audio
+	# Pull captured audio — discard backlog so output stays current.
 	if _capture_effect != null and _capture_active:
 		var available: int = _capture_effect.get_frames_available()
-		var pull_count: int = mini(available, buf_size)
+		var excess: int = available - buf_size
+		if excess > 0:
+			_capture_effect.get_buffer(excess)  # discard stale samples
+			available = buf_size
 
-		if pull_count > 0:
-			var frames: PackedVector2Array = _capture_effect.get_buffer(pull_count)
+		if available > 0:
+			var frames: PackedVector2Array = _capture_effect.get_buffer(available)
 			_left_buf.resize(frames.size())
 			if stereo:
 				_right_buf.resize(frames.size())

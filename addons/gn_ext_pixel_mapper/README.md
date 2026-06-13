@@ -12,13 +12,13 @@ The PixelMapper extension introduces its own **FIX family** -- a data type that 
 
 FixtureSamplerTOP has two outputs:
 - **Port 0 (TOP):** Source texture passthrough -- connect to WindowOUT for preview
-- **Port 1 (CHOP):** Sampled LED colour values as named channels -- connect to ArtNetOutDAT or sACNOutDAT
+- **Port 1 (CHOP):** Sampled LED colour values as named channels (0-1) with dmx_routing metadata -- connect to PixelDmxOUT
 
 ```
 StripFIX --+
 GridFIX   -+---> FixtureSamplerTOP --port 0--> WindowOUT (preview)
-MatrixFIX -+          |
-                  NoiseTOP / any TOP ----port 1--> DMX CHOP output
+MatrixFIX -+          |                \--port 1--> PixelDmxOUT (Art-Net)
+                  NoiseTOP / any TOP
 ```
 
 ### Viewer Interaction
@@ -76,7 +76,7 @@ Each fixture has a DMX universe (1-based) and start channel (1-512). The absolut
 
 ---
 
-## Operators (9)
+## Operators (10)
 
 ### FIX Primitives
 
@@ -96,11 +96,12 @@ Each fixture has a DMX universe (1-based) and start channel (1-512). The absolut
 | select_fix | SelectFIX | Wireless FIX reference (Rule 25.35) |
 | switch_fix | SwitchFIX | Selects one of N FIX inputs by index |
 
-### Sampling
+### Sampling & Output
 
 | node_type | Family | Class | Description |
 |-----------|--------|-------|-------------|
 | fixture_sampler | TOP | FixtureSamplerTOP | MadMapper-style placement + GPU sampling. Port 0 = passthrough TOP, Port 1 = CHOP |
+| pixel_dmx_out | OUT | PixelDmxOUT | Multi-universe Art-Net output. Reads dmx_routing metadata, scales 0-1 to 0-255 |
 
 ---
 
@@ -146,7 +147,7 @@ FileInFIX also supports legacy "uv_x"/"uv_y" keys for backward compatibility.
 
 ```
 addons/gn_ext_pixel_mapper/
-  gn_extension.cfg          # Extension manifest -- FIX family + 9 operators
+  gn_extension.cfg          # Extension manifest -- FIX family + 10 operators
   boot.gd                   # Boot script (empty)
   README.md
   core/
@@ -154,6 +155,8 @@ addons/gn_ext_pixel_mapper/
     gn_fixture_base.gd      # GNFixtureBase -- shared base class + LED viewer
   operators/
     fix/                     # 8 FIX operators (5 primitives + 3 utilities)
+    output/
+      pixel_dmx_out.gd       # Multi-universe Art-Net output (OUT family)
     top/
       fixture_sampler_top.gd # MadMapper-style placement + sampling
   ui/

@@ -1,6 +1,6 @@
 # GONODES — Operator Reference
 
-> **587 operators** across 15 families: TOP (138), CHOP (107), SOP (85), DAT (51), IMG (41), UI (36), SDF (29), COMP (27), NET (15), MAT (12), POP (12), VOL (12), OUT (11), FIX (8), SCRIPT (3).
+> **588 operators** across 15 families: TOP (138), CHOP (107), SOP (85), DAT (51), IMG (41), UI (36), SDF (29), COMP (27), NET (15), MAT (12), POP (12), VOL (12), OUT (12), FIX (8), SCRIPT (3).
 > 469 are pure GDScript core operators. 119 are from the 23 bundled extensions.
 > 131 of the core operators have native C++ accelerated equivalents in `gn_ext_native` that activate automatically when the native binary is present.
 
@@ -3369,6 +3369,8 @@ Send CHOP channel data as NDI audio to the network. Each CHOP channel is mapped 
 
 ### Signal Analysis & Audio
 
+> **Device selection note:** `AudioInCHOP` switches the global OS input device via Godot's `AudioServer.input_device`. Only one input device can be active project-wide at a time. Simultaneous multi-device capture (e.g. two USB audio interfaces) is not currently supported -- it is a planned feature for the `gn_ext_audio` extension, which will require a lower-level audio backend (WASAPI/CoreAudio) outside Godot's built-in audio server.
+
 ---
 
 #### AudioBandCHOP
@@ -3406,20 +3408,20 @@ Multi-band frequency analysis with per-band envelope followers. Takes an AudioSp
 
 #### DmxOutCHOP
 
-Sends input CHOP channel values as DMX-512 via Art-Net UDP broadcast. Channels are mapped to DMX slots in order (first channel → DMX 1, second → DMX 2, etc.). Values are clamped to 0–255. Passes the input through to the output unchanged.
+Sends input CHOP channel values as DMX-512 via Art-Net UDP broadcast. Channels are mapped to DMX slots sequentially (first channel -> DMX 1, second -> DMX 2, etc.). Values are clamped to 0-255. Passes the input through to the output unchanged.
+
+For pixel-mapper fixture routing (multi-universe, metadata-driven), use PixelDmxOUT from the gn_ext_pixel_mapper extension instead.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| universe | Int | 0 | 0–32767 | DMX universe number |
-| ip | String | 255.255.255.255 | — | Art-Net destination IP |
-| port | Int | 6454 | 1–65535 | Art-Net UDP port |
-| active | Bool | false | — | Enable Art-Net sending |
-| channels | Int | 512 | 1–512 | Number of active DMX channels to send |
+| universe | Int | 0 | 0-32767 | DMX universe number |
+| ip | String | 255.255.255.255 | -- | Art-Net destination IP |
+| port | Int | 6454 | 1-65535 | Art-Net UDP port |
+| active | Bool | false | -- | Enable Art-Net sending |
+| channels | Int | 512 | 1-512 | Number of active DMX channels to send |
 
-**Input:** `values` (CHOP — channel values to send as DMX).
-**Output:** `out` (CHOP — pass-through of input channels).
-
-**How it works:** Each cook, reads all input channels and packs them into an Art-Net OpDmx packet (protocol version 14, DMX-512 format). The packet is broadcast via `PacketPeerUDP`. The input data is passed through to the output, allowing downstream CHOP processing to continue. A new UDP socket is created per send (stateless — no persistent connection needed for broadcast).
+**Input:** `values` (CHOP -- channel values to send as DMX).
+**Output:** `out` (CHOP -- pass-through of input channels).
 
 ---
 
@@ -6593,18 +6595,18 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 
 ## FIX — Fixture (Pixel Mapper) Operators
 
-> Extension: `gn_ext_pixel_mapper` · Family color: teal · 8 operators
+> Extension: `gn_ext_pixel_mapper` · Family color: teal · 10 operators
 
 LED pixel-mapping operators. Define fixture layouts (strips, grids, matrices,
 custom positions), sample a source TOP image at every LED's UV position in a
-single GPU pass, and route the values to DMX or downstream CHOP processing.
+single GPU pass, and route the values to DMX via Art-Net.
 
 **Typical chain:**
 
 ```
 StripFIX ─┐
 GridFIX  ─┼──► FixtureSamplerTOP ──port 0──► WindowOUT (preview)
-MatrixFIX ─┘          └──port 1──► CHOP (DMX output)
+MatrixFIX ─┘          └──port 1──► PixelDmxOUT (Art-Net)
 ```
 
 ### FIX Primitives
@@ -6630,6 +6632,7 @@ MatrixFIX ─┘          └──port 1──► CHOP (DMX output)
 | Operator | Family | Class | Description |
 |----------|--------|-------|-------------|
 | `fixture_sampler` | TOP | `FixtureSamplerTOP` | MadMapper-style placement + GPU sampling. Port 0 = source passthrough, Port 1 = CHOP DMX output |
+| `pixel_dmx_out` | OUT | `PixelDmxOUT` | Multi-universe Art-Net output. Reads dmx_routing metadata, scales 0-1 to 0-255, sends one packet per universe |
 
 #### StripFIX Parameters
 
@@ -6637,11 +6640,9 @@ MatrixFIX ─┘          └──port 1──► CHOP (DMX output)
 |-----------|------|---------|-------------|
 | `fixture_name` | String | `"strip"` | Label used in CHOP channel names |
 | `led_count` | Int | 60 | Total LEDs |
-| `uv_start` | Vector2 | (0.1, 0.5) | UV coordinate of first LED |
-| `uv_end` | Vector2 | (0.9, 0.5) | UV coordinate of last LED |
 | `channel_layout` | Enum | RGB | RGB / RGBW / R / G / B / W |
-| `dmx_start` | Int | 1 | First DMX channel (universe×512 + ch) |
-| `sample_extent` | Vector2 | (0, 0) | Box-filter half-extent per LED (0=point) |
+| `universe` | Int | 1 | DMX universe (1-based) |
+| `start_channel` | Int | 1 | First DMX channel within universe (1-512) |
 
 #### GridFIX Parameters
 
@@ -6650,11 +6651,9 @@ MatrixFIX ─┘          └──port 1──► CHOP (DMX output)
 | `fixture_name` | String | `"grid"` | Label used in CHOP channel names |
 | `cols` | Int | 16 | Columns (horizontal) |
 | `rows` | Int | 16 | Rows (vertical) |
-| `uv_min` | Vector2 | (0.1, 0.1) | Top-left UV corner |
-| `uv_max` | Vector2 | (0.9, 0.9) | Bottom-right UV corner |
 | `channel_layout` | Enum | RGB | RGB / RGBW / R / G / B / W |
-| `dmx_start` | Int | 1 | First DMX channel |
-| `sample_extent` | Vector2 | (0, 0) | Box-filter half-extent per LED |
+| `universe` | Int | 1 | DMX universe (1-based) |
+| `start_channel` | Int | 1 | First DMX channel within universe (1-512) |
 
 #### MatrixFIX Parameters
 
@@ -6662,19 +6661,28 @@ MatrixFIX ─┘          └──port 1──► CHOP (DMX output)
 |-----------|------|---------|-------------|
 | `fixture_name` | String | `"matrix"` | Label |
 | `cols` / `rows` | Int | 16 | Grid dimensions |
-| `uv_origin` | Vector2 | (0.1, 0.1) | Top-left LED UV position |
-| `uv_pitch` | Vector2 | (0.05, 0.05) | UV step between adjacent LEDs |
+| `pitch` | Vector2 | (0.05, 0.05) | Step between adjacent LEDs in local space |
 | `rotation_deg` | Float | 0 | Panel rotation around origin (degrees) |
 | `skew_x` | Float | 0 | Horizontal shear per row |
 | `skew_y` | Float | 0 | Vertical shear per column |
 | `channel_layout` | Enum | RGB | RGB / RGBW / R / G / B / W |
-| `dmx_start` | Int | 1 | First DMX channel |
+| `universe` | Int | 1 | DMX universe (1-based) |
+| `start_channel` | Int | 1 | First DMX channel within universe (1-512) |
 
 #### FixtureSamplerTOP Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `sample_mode` | Enum | Point | Point (single texel) or Box Filter (3×3 tap) |
+| `sample_mode` | Enum | Point | Point (single texel) or Box Filter (3x3 tap) |
+| `sample_extent` | Vector2 | (0, 0) | UV half-size for box-filter area per LED |
+
+#### PixelDmxOUT Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `ip` | String | 255.255.255.255 | Art-Net destination IP |
+| `port` | Int | 6454 | Art-Net UDP port |
+| `active` | Bool | false | Enable Art-Net sending |
 
 ---
 
