@@ -29,6 +29,11 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("active", false, "Active",
 		"Enable/disable audio output"))
+	var dev_param := GNParameter.create_enum("device",
+		PackedStringArray(["Default"]), 0, "Device",
+		"Output audio device. Switches AudioServer.output_device -- one device active at a time.")
+	dev_param.dynamic_enum_callback = Callable(self, "_get_device_menu")
+	add_parameter(dev_param)
 	add_parameter(GNParameter.create_float("gain", 1.0, 0.0, 10.0, 0.01,
 		"Gain", "Output gain multiplier"))
 	add_parameter(GNParameter.create_float("mix_rate", 44100.0, 8000.0, 96000.0, 1.0,
@@ -98,6 +103,12 @@ func _start_output() -> void:
 	# Route to Master so it plays through speakers
 	AudioServer.set_bus_send(_bus_idx, &"Master")
 
+	# Set output device before starting
+	var dev_idx: int = get_param_value("device")
+	var devices := AudioServer.get_output_device_list()
+	if devices.size() > 0 and dev_idx < devices.size():
+		AudioServer.output_device = devices[dev_idx]
+
 	# Create AudioStreamGenerator
 	_generator = AudioStreamGenerator.new()
 	_generator.mix_rate = mix_rate
@@ -142,3 +153,16 @@ func _stop_output() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_stop_output()
+
+
+func _get_device_menu() -> PackedStringArray:
+	var devices := AudioServer.get_output_device_list()
+	if devices.is_empty():
+		return PackedStringArray(["Default"])
+	return devices
+
+
+func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
+	if param_name == "device" and _active:
+		_stop_output()
+		_start_output()

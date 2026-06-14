@@ -28,8 +28,11 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("port", "COM3",
-		"Port", "Serial port name (COM3, /dev/ttyUSB0, etc.)"))
+	var port_param := GNParameter.create_enum("port",
+		PackedStringArray(["COM3"]), 0, "Port",
+		"Serial port. Populated from available ports when native extension is loaded.")
+	port_param.dynamic_enum_callback = Callable(self, "_get_port_menu")
+	add_parameter(port_param)
 	add_parameter(GNParameter.create_int("baud_rate", 9600, 300, 115200,
 		"Baud Rate", "Communication speed"))
 	add_parameter(GNParameter.create_enum("delimiter", ["Newline", "Null", "None"],
@@ -85,3 +88,11 @@ func _add_message(msg: String) -> void:
 	_rows.append(PackedStringArray([ts, msg]))
 	while _rows.size() > _max_rows:
 		_rows.remove_at(0)
+
+
+func _get_port_menu() -> PackedStringArray:
+	if ClassDB.class_exists(&"GNNativeSerialPort"):
+		var ports: PackedStringArray = ClassDB.class_call_static(&"GNNativeSerialPort", &"list_ports")
+		if not ports.is_empty():
+			return ports
+	return PackedStringArray(["COM3"])

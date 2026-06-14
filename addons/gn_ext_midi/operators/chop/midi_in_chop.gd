@@ -38,8 +38,11 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("port", 0, 0, 63, "Port",
-		"MIDI input port index."))
+	var port_param := GNParameter.create_enum("port",
+		PackedStringArray(["Port 0"]), 0, "Port",
+		"MIDI input port. Populated from connected devices via RtMidi.")
+	port_param.dynamic_enum_callback = Callable(self, "_get_port_menu")
+	add_parameter(port_param)
 	add_parameter(GNParameter.create_int("channel_filter", -1, -1, 15, "Channel Filter",
 		"MIDI channel to listen to (-1 = all channels)."))
 	add_parameter(GNParameter.create_bool("notes", true, "Output Notes",
@@ -122,3 +125,18 @@ func _on_node_removed() -> void:
 	if _midi_in != null and _port_open:
 		_midi_in.close_port()
 		_port_open = false
+
+
+func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
+	if param_name == "port":
+		# Reset _prev_port so _cook() reopens on next frame.
+		_prev_port = -1
+
+
+func _get_port_menu() -> PackedStringArray:
+	if not ClassDB.class_exists(&"GNMidiIn"):
+		return PackedStringArray(["(no native MIDI)"])
+	var ports: PackedStringArray = ClassDB.class_call_static(&"GNMidiIn", &"get_port_list")
+	if ports.is_empty():
+		return PackedStringArray(["(no MIDI devices)"])
+	return ports

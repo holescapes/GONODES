@@ -34,8 +34,11 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("port", "COM3",
-		"Port", "Serial port name (COM3, /dev/ttyUSB0, etc.)"))
+	var port_param := GNParameter.create_enum("port",
+		PackedStringArray(["COM3"]), 0, "Port",
+		"Serial port. Populated from available ports when native extension is loaded.")
+	port_param.dynamic_enum_callback = Callable(self, "_get_port_menu")
+	add_parameter(port_param)
 	add_parameter(GNParameter.create_int("baud_rate", 9600, 300, 115200,
 		"Baud Rate", "Communication speed"))
 	add_parameter(GNParameter.create_enum("delimiter", ["Newline", "Null", "None"], 0,
@@ -130,10 +133,26 @@ func _add_message(msg: String) -> void:
 
 
 ## Opens the serial port via native extension.
+func _get_port_menu() -> PackedStringArray:
+	if ClassDB.class_exists(&"GNNativeSerialPort"):
+		var ports: PackedStringArray = ClassDB.class_call_static(&"GNNativeSerialPort", &"list_ports")
+		if not ports.is_empty():
+			return ports
+	return PackedStringArray(["COM3"])
+
+
+func _get_selected_port_name() -> String:
+	var idx: int = get_param_value("port")
+	var ports := _get_port_menu()
+	if idx < ports.size():
+		return ports[idx]
+	return ""
+
+
 func _open_port() -> void:
 	if not _has_native:
 		return
-	var port_name: String = get_param_value("port")
+	var port_name: String = _get_selected_port_name()
 	var baud: int = get_param_value("baud_rate")
 	# Reopen if port/baud changed
 	if _serial != null and _serial.is_open():
@@ -159,3 +178,10 @@ func _close_port() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_close_port()
+
+
+func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
+	if param_name == "port" or param_name == "baud_rate":
+		# Clear cache so _open_port() reconnects on next cook.
+		_last_port = ""
+		_last_baud = 0

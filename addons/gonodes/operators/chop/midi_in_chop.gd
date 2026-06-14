@@ -52,8 +52,11 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("active", true, "Active",
 		"Enable/disable MIDI input"))
-	add_parameter(GNParameter.create_int("device", -1, -1, 32, "Device",
-		"MIDI device index (-1 = all devices)"))
+	var dev_param := GNParameter.create_enum("device",
+		PackedStringArray(["All"]), 0, "Device",
+		"MIDI input device. 'All' receives from every connected device.")
+	dev_param.dynamic_enum_callback = Callable(self, "_get_device_menu")
+	add_parameter(dev_param)
 	add_parameter(GNParameter.create_int("channel_filter", -1, -1, 15, "Channel",
 		"MIDI channel filter (-1 = all channels, 0-15 = specific)"))
 	add_parameter(GNParameter.create_bool("normalize_velocity", true, "Normalize",
@@ -69,7 +72,9 @@ func _init_parameters() -> void:
 func _cook(_inputs: Array[GNData]) -> GNData:
 	var active: bool = get_param_value("active")
 	var normalize: bool = get_param_value("normalize_velocity")
-	_device_filter = get_param_value("device")
+	# Map dropdown: index 0 = All (-1), index N = device N-1
+	var dev_idx: int = get_param_value("device")
+	_device_filter = -1 if dev_idx == 0 else dev_idx - 1
 
 	# Handle reset pulse
 	if get_param_value("reset"):
@@ -171,3 +176,18 @@ func _close_midi() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_close_midi()
+
+
+func _get_device_menu() -> PackedStringArray:
+	OS.open_midi_inputs()
+	var devices := OS.get_connected_midi_inputs()
+	var menu := PackedStringArray(["All"])
+	menu.append_array(devices)
+	return menu
+
+
+func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
+	if param_name == "device":
+		# Reopen MIDI so InputEventMIDI.device indices stay valid.
+		_close_midi()
+		_ensure_midi_open()
