@@ -209,16 +209,22 @@ Building on Godot is not a constraint. It is the point.
 
 ## Getting Started
 
-```bash
-# Clone the repo
-git clone https://github.com/your-username/gonodes.git
+### Run the Editor (no build required)
 
-# Open in Godot 4.6+
-# File → Open Project → select the gonodes folder
-# Run the editor scene (scenes/gn_editor.tscn)
-```
+All core operators and most extensions are pure GDScript -- no compilation needed to get started.
 
-**Requirements:** Godot 4.6 or later. Windows, macOS, or Linux for the editor. Exported patches run on all Godot-supported platforms.
+1. Clone the repository:
+   ```bash
+   git clone https://gitlab.com/kino-dome/gonodes.git
+   cd gonodes
+   ```
+2. Install **[Godot 4.6.1 stable](https://godotengine.org/download)**
+3. Open Godot, click **Import**, select the `gonodes` folder
+4. Open and run `scenes/gn_editor.tscn`
+
+That is all. The editor is fully functional with pre-compiled Windows binaries already in the repo for: MIDI, HAP, Spout, VideoCapture, OpenCV, GPU Encode, and the User Native/Python script nodes.
+
+**Requirements:** Godot 4.6.1, Python 3.8+ (for utility scripts). Windows 10/11 (pre-built binaries ship for Windows); macOS and Linux require building extensions from source.
 
 ### Dependency Version Management
 
@@ -237,20 +243,28 @@ GODOTCPP_BRANCH=4.5
 GONODES works out of the box with pure GDScript. Native C++ extensions provide acceleration for CPU-heavy operators and hardware I/O. A unified build system compiles all extensions from a single entry point:
 
 ```bash
-# Prerequisites: Python 3, SCons, C++ compiler
+# Prerequisites: Python 3.8+, SCons, MSVC (Windows) or GCC/Clang (Linux/macOS)
 pip install scons
 
-# Fetch all dependencies (godot-cpp, Spout2 SDK, extension SDKs):
-# Dependency versions are centralized in versions.env at the project root.
+# 1. Fetch all dependencies (godot-cpp, Spout2 SDK, extension SDKs):
 python setup_deps.py
 
-# Build godot-cpp + native operators:
-cd addons/gn_ext_native/native
-scons platform=windows arch=x86_64 -j4
+# 2. Build godot-cpp (once per Godot version):
+cd addons/gn_ext_native/native/godot-cpp
+scons platform=windows arch=x86_64 target=template_release -j8
+cd ../../../..
 
-# Build all other extensions (HAP, MIDI, Spout, etc.):
-cd ../../../build
-scons platform=windows arch=x86_64 -j4      # Auto-discovers and builds all
+# 3. Build all native extensions (HAP, MIDI, Spout, OpenCV, etc.):
+cd build
+scons platform=windows arch=x86_64 target=template_release -j8
+cd ..
+# Extensions are auto-activated after build (sync_gdextensions.py runs post-build)
+
+# Or build a single extension:
+scons ext=gn_ext_hap platform=windows -j4
+scons ext=gn_ext_midi platform=linux -j4
+
+# List what's available:
 
 # Or build a single extension:
 scons ext=gn_ext_hap platform=windows -j4
