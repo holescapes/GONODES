@@ -829,10 +829,13 @@ func refresh_dynamic_enums() -> void:
 		var fresh: PackedStringArray = param.dynamic_enum_callback.call()
 		if fresh.is_empty():
 			continue
-		var prev_idx: int = int(param.value)
-		var prev_name: String = ""
-		if prev_idx >= 0 and prev_idx < param.enum_options.size():
-			prev_name = param.enum_options[prev_idx]
+		# Use saved_enum_label (from patch) for name-based resolution.
+		# Fallback to index-in-old-options only if no label was saved yet.
+		var prev_name: String = param.saved_enum_label
+		if prev_name.is_empty():
+			var prev_idx: int = int(param.value)
+			if prev_idx >= 0 and prev_idx < param.enum_options.size():
+				prev_name = param.enum_options[prev_idx]
 		param.enum_options = fresh
 		var new_idx: int = -1
 		if not prev_name.is_empty():
@@ -842,11 +845,27 @@ func refresh_dynamic_enums() -> void:
 					break
 		if new_idx >= 0:
 			param.value = new_idx
+			param.saved_enum_label = fresh[new_idx]
 		else:
 			# Device gone -- warn without redirecting to another device
 			if not prev_name.is_empty() and not prev_name.begins_with("(") and prev_name != "All":
 				node_warning = "Device '%s' not found. Reconnect or re-select." % prev_name
 
+
+
+## Returns the human-readable label for an ENUM parameter.
+## Returns saved_enum_label if set, else the current option text from enum_options,
+## else empty string. Use in expressions via par_label().
+func get_enum_label(param_name: String) -> String:
+	var p: GNParameter = get_parameter(param_name)
+	if p == null or p.value_type != GNParameter.ValueType.ENUM:
+		return ""
+	if not p.saved_enum_label.is_empty():
+		return p.saved_enum_label
+	var idx: int = int(p.get_resolved_value())
+	if idx >= 0 and idx < p.enum_options.size():
+		return p.enum_options[idx]
+	return ""
 
 ## Clears the dirty flag after a successful cook.
 func clear_dirty() -> void:

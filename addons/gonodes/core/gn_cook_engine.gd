@@ -1335,6 +1335,27 @@ func pars(name_or_node: String, param_name: String = "") -> String:
 	return str(v)
 
 
+## Read an ENUM parameter as its human-readable label string.
+## For device/mode enum params, this returns the name the user selected
+## (e.g., "Arturia MiniLab") rather than the raw integer index.
+## Usage:
+##   par_label("device")               -> own node's 'device' enum label
+##   par_label("audio_out1", "device") -> cross-node enum label
+func par_label(name_or_node: String, param_name: String = "") -> String:
+	var target_node: GNNode = null
+	var target_param_name: String = ""
+	if param_name.is_empty():
+		target_node = _current_eval_node
+		target_param_name = name_or_node
+	else:
+		target_node = resolve_node(name_or_node)
+		target_param_name = param_name
+	if target_node == null:
+		GNLogger.warn("CookEngine", "par_label() -- node not found: '%s'" % name_or_node)
+		return ""
+	return target_node.get_enum_label(target_param_name)
+
+
 ## Write a parameter value on another node (or self).  Returns true on success.
 ## Usage in scripts:
 ##   set_par("noise1", "scale", 2.5)    → set cross-node param

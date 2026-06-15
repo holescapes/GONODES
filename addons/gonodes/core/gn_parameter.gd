@@ -79,6 +79,11 @@ var fallback_value: Variant = 0.0
 ## Signature: func() -> PackedStringArray
 var dynamic_enum_callback: Callable = Callable()
 
+## For dynamic ENUM type: the human-readable label of the currently selected option,
+## saved in patches so name-based resolution works across sessions even when the
+## hardware device order changes. Empty for static enums.
+var saved_enum_label: String = ""
+
 ## For FILE type: array of file extension filters for the picker dialog.
 ## Each entry is a wildcard pattern, e.g., "*.ttf", "*.otf", "*.png".
 @export var file_filters: PackedStringArray = PackedStringArray()
@@ -881,6 +886,10 @@ func to_dict() -> Dictionary:
 			})
 		d["component_expressions"] = comp_data
 
+	# Persist enum label so name-based resolution works on reload (device order may change)
+	if not saved_enum_label.is_empty():
+		d["enum_label"] = saved_enum_label
+
 	# Persist the read-only flag so credit/metadata fields survive save/load
 	if read_only:
 		d["read_only"] = true
@@ -926,6 +935,10 @@ func from_dict(d: Dictionary) -> void:
 			component_expressions[i] = cd.get("expression", "")
 			if component_modes[i] == Mode.EXPRESSION and not component_expressions[i].is_empty():
 				_compile_component_expression(i)
+
+	# Restore enum label for name-based device resolution on reload
+	if d.has("enum_label"):
+		saved_enum_label = d["enum_label"]
 
 	# Restore read-only flag (credit / metadata params)
 	if d.has("read_only"):

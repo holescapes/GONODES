@@ -694,6 +694,7 @@ func _on_dynamic_enum_refresh(option: OptionButton) -> void:
 		option.selected = new_idx
 		if new_idx != int(param.value):
 			param.value = new_idx
+			param.saved_enum_label = fresh[new_idx]  # Keep label in sync
 			if owner_node != null:
 				owner_node.mark_dirty()
 	else:
@@ -1044,6 +1045,11 @@ func _on_string_focus_lost(edit: TextEdit) -> void:
 func _on_enum_changed(idx: int) -> void:
 	if _updating:
 		return
+	# Save the human-readable label alongside the index so patches can do
+	# name-based device resolution across sessions (device order may change).
+	if param != null and param.value_type == GNParameter.ValueType.ENUM \
+			and idx >= 0 and idx < param.enum_options.size():
+		param.saved_enum_label = param.enum_options[idx]
 	_set_value_with_undo(idx)
 
 
