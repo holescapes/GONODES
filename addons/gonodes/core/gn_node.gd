@@ -829,13 +829,7 @@ func refresh_dynamic_enums() -> void:
 		var fresh: PackedStringArray = param.dynamic_enum_callback.call()
 		if fresh.is_empty():
 			continue
-		# Use saved_enum_label (from patch) for name-based resolution.
-		# Fallback to index-in-old-options only if no label was saved yet.
 		var prev_name: String = param.saved_enum_label
-		if prev_name.is_empty():
-			var prev_idx: int = int(param.value)
-			if prev_idx >= 0 and prev_idx < param.enum_options.size():
-				prev_name = param.enum_options[prev_idx]
 		param.enum_options = fresh
 		var new_idx: int = -1
 		if not prev_name.is_empty():
