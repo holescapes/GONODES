@@ -19,6 +19,7 @@ var _rows: Array[PackedStringArray] = []
 var _max_rows: int = 100
 var _last_port: String = ""
 var _last_baud: int = 0
+var _devices_initialized: bool = false
 
 
 func _init() -> void:
@@ -52,6 +53,9 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
+	if not _devices_initialized:
+		refresh_dynamic_enums()
+		_devices_initialized = true
 	var active: bool = get_param_value("active")
 	var clear_pulse: bool = get_param_value("clear")
 	_max_rows = get_param_value("max_rows")

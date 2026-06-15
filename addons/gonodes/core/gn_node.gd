@@ -814,6 +814,40 @@ func mark_dirty() -> void:
 		node_dirty.emit(id)
 
 
+## Refreshes all dynamic enum params by calling their callbacks.
+## Resolves saved indices against the live device list using name matching.
+## If the saved name is no longer available, sets node_warning and keeps the
+## stale index — does NOT silently redirect to a different device.
+## Call once on first _cook() for any node with dynamic enum device params.
+func refresh_dynamic_enums() -> void:
+	for param_name in parameters:
+		var param: GNParameter = parameters[param_name]
+		if param.value_type != GNParameter.ValueType.ENUM:
+			continue
+		if not param.dynamic_enum_callback.is_valid():
+			continue
+		var fresh: PackedStringArray = param.dynamic_enum_callback.call()
+		if fresh.is_empty():
+			continue
+		var prev_idx: int = int(param.value)
+		var prev_name: String = ""
+		if prev_idx >= 0 and prev_idx < param.enum_options.size():
+			prev_name = param.enum_options[prev_idx]
+		param.enum_options = fresh
+		var new_idx: int = -1
+		if not prev_name.is_empty():
+			for i in range(fresh.size()):
+				if fresh[i] == prev_name:
+					new_idx = i
+					break
+		if new_idx >= 0:
+			param.value = new_idx
+		else:
+			# Device gone -- warn without redirecting to another device
+			if not prev_name.is_empty() and not prev_name.begins_with("(") and prev_name != "All":
+				node_warning = "Device '%s' not found. Reconnect or re-select." % prev_name
+
+
 ## Clears the dirty flag after a successful cook.
 func clear_dirty() -> void:
 	dirty = false

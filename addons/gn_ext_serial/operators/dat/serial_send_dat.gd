@@ -21,6 +21,7 @@ var _send_log: Array[PackedStringArray] = []
 var _max_log: int = 50
 var _last_port: String = ""
 var _last_baud: int = 0
+var _devices_initialized: bool = false
 
 
 func _init() -> void:
@@ -57,6 +58,9 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
+	if not _devices_initialized:
+		refresh_dynamic_enums()
+		_devices_initialized = true
 	var active: bool = get_param_value("active")
 	var send_pulse: bool = get_param_value("send_now")
 	var continuous: bool = get_param_value("continuous")

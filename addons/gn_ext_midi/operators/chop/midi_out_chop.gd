@@ -10,6 +10,7 @@ var _midi_out: RefCounted = null
 var _port_open := false
 var _prev_port := -1
 var _prev_note_states: PackedFloat32Array = PackedFloat32Array()
+var _devices_initialized: bool = false
 
 
 func _init() -> void:
@@ -49,6 +50,9 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
+	if not _devices_initialized:
+		refresh_dynamic_enums()
+		_devices_initialized = true
 	if _midi_out == null:
 		node_warning = "MIDI requires the native gn_ext_midi library."
 		return _get_input_chop(inputs)

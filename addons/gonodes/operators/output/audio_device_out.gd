@@ -15,6 +15,7 @@ var _stream_player: AudioStreamPlayer = null
 var _generator: AudioStreamGenerator = null
 var _playback: AudioStreamGeneratorPlayback = null
 var _active: bool = false
+var _devices_initialized: bool = false
 
 
 func _init() -> void:
@@ -43,6 +44,9 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
+	if not _devices_initialized:
+		refresh_dynamic_enums()
+		_devices_initialized = true
 	var in_data: GNChannelData = _get_input_chop(inputs, 0)
 	var want_active: bool = get_param_value("active")
 	var gain: float = get_param_value("gain")

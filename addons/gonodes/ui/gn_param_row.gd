@@ -660,12 +660,17 @@ func _create_enum_control() -> Control:
 	if param.dynamic_enum_callback.is_valid():
 		option.get_popup().about_to_popup.connect(
 			_on_dynamic_enum_refresh.bind(option))
+		# Also refresh immediately on build so the label is correct on first display
+		# and stale indices from a saved patch are resolved against the live device list.
+		_on_dynamic_enum_refresh(option)
 	return option
 
 
-## Called just before the OptionButton popup opens.  Queries the dynamic
-## callback for a fresh set of options and rebuilds the dropdown in-place,
-## preserving the current selection when possible.
+## Called just before the OptionButton popup opens, and also on initial build.
+## Queries the dynamic callback for a fresh set of options and rebuilds the
+## dropdown in-place. Preserves selection by device name when possible.
+## Does NOT silently redirect to a different device if the saved name is missing --
+## that is handled at the node level via refresh_dynamic_enums() on first cook.
 func _on_dynamic_enum_refresh(option: OptionButton) -> void:
 	if param == null or not param.dynamic_enum_callback.is_valid():
 		return
@@ -678,17 +683,23 @@ func _on_dynamic_enum_refresh(option: OptionButton) -> void:
 	option.clear()
 	for i in range(fresh.size()):
 		option.add_item(fresh[i], i)
-	# Try to preserve selection by matching text, fall back to clamping index
+	# Try to preserve selection by name match
 	var new_idx: int = -1
 	if not prev_text.is_empty():
 		for i in range(fresh.size()):
 			if fresh[i] == prev_text:
 				new_idx = i
 				break
-	if new_idx < 0:
-		new_idx = mini(prev_idx, fresh.size() - 1)
 	if new_idx >= 0:
 		option.selected = new_idx
+		if new_idx != int(param.value):
+			param.value = new_idx
+			if owner_node != null:
+				owner_node.mark_dirty()
+	else:
+		# Name not found -- keep index clamped to list bounds.
+		# Do NOT redirect to a different device; node_warning is set by refresh_dynamic_enums().
+		option.selected = mini(prev_idx, fresh.size() - 1)
 
 
 func _create_color_control() -> Control:

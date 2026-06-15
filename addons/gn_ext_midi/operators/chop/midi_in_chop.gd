@@ -8,6 +8,7 @@ extends GNChopBase
 var _midi_in: RefCounted = null
 var _port_open := false
 var _prev_port := -1
+var _devices_initialized: bool = false
 
 # State tracking for note velocities and CC values
 var _note_velocities: PackedFloat32Array = PackedFloat32Array()
@@ -54,6 +55,9 @@ func _init_parameters() -> void:
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
+	if not _devices_initialized:
+		refresh_dynamic_enums()
+		_devices_initialized = true
 	if _midi_in == null:
 		node_warning = "Native MIDI requires the gn_ext_midi library."
 		return null

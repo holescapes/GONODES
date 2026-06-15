@@ -16,6 +16,7 @@ var _max_messages: int = 100
 
 ## Whether MIDI has been opened this session.
 var _midi_opened: bool = false
+var _devices_initialized: bool = false
 
 ## Device filter (-1 = all).
 var _device_filter: int = -1
@@ -55,6 +56,9 @@ func _init_parameters() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _cook(_inputs: Array[GNData]) -> GNData:
+	if not _devices_initialized:
+		refresh_dynamic_enums()
+		_devices_initialized = true
 	var active: bool = get_param_value("active")
 	_max_messages = get_param_value("max_rows")
 	# Map dropdown: index 0 = All (-1), index N = device N-1
