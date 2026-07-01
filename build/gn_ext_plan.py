@@ -13,6 +13,7 @@ import platform as _platform
 ALL_PLATFORMS = ["windows", "macos", "linux"]
 
 VALID_TIERS = ("core", "extension", "optional")
+SHIPPED_TIERS = ("core", "extension")
 
 
 def detect_host_platform() -> str:
@@ -58,10 +59,12 @@ def parse_build_cfg(cfg_path: str) -> dict:
             default_build = True
 
     setup = ""
+    vendor_clone = ""
     if cp.has_section("library"):
         setup = cp.get("library", "setup", fallback="").strip()
         if not setup:
             setup = cp.get("library", "vendor_setup", fallback="").strip()
+        vendor_clone = cp.get("library", "vendor_clone", fallback="").strip()
 
     cfg = {
         "lib_name": cp.get("library", "name", fallback="") if cp.has_section("library") else "",
@@ -70,6 +73,7 @@ def parse_build_cfg(cfg_path: str) -> dict:
         "default": default_build,
         "optional": optional,
         "setup": setup,
+        "vendor_clone": vendor_clone,
         "platforms": get_list("library", "platforms") or list(ALL_PLATFORMS),
         "library_dest": cp.get("library", "library_dest", fallback="").strip() if cp.has_section("library") else "",
         "sources": get_list("sources", "cpp", "src/*.cpp"),
@@ -189,12 +193,16 @@ def should_build_extension(
     ext_tier = cfg.get("tier", "extension")
 
     if tier and tier != "all":
+        if tier == "shipped" and ext_tier not in ("core", "extension"):
+            return False, f"tier={ext_tier} (not in shipped set)"
         if tier == "core" and ext_tier != "core":
             return False, f"tier={ext_tier} (need core)"
         if tier == "extension" and ext_tier not in ("extension", "core"):
             return False, f"tier={ext_tier} (need extension)"
         if tier == "optional" and ext_tier != "optional":
             return False, f"tier={ext_tier} (need optional)"
+        if tier == "minimal" and not cfg.get("default", True):
+            return False, "default=false"
 
     if defaults_only and not ext and not exts and not tier:
         if not cfg.get("default", True):

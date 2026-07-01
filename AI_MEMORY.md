@@ -15,13 +15,20 @@
 
 <!-- Add new entries above this line, newest first -->
 
+### 2026-07-01 — Extension setup pipeline and Windows max build
+
+- `build/gn_ext_setup.py` runs `setup` / `vendor_clone` from each `native/build.cfg`
+- `scripts/run_extension_setups.py --for-build` matches the upcoming scons tier (default `all`)
+- `scripts/build_windows.ps1` default: `tier=all` after SDK fetch; `-Shipped` for core+extension only
+- Bare `scons` remains **shipped** (core + extension); use `scons tier=all` or `build_windows.ps1` for optional tier
+
 ### 2026-07-01 — Repo hygiene and novice build path
 
 - Repo is **source only**: SDKs (`opencv_sdk/`, `toolchain/python/`), `native/bin/`, and extension-root `bin/` are gitignored — never commit them
-- Fresh clone: `python scripts/check_env.py` → `python setup_deps.py` → `scripts/build_windows.ps1` (Windows) or manual steps in `dev_docs/BUILD.md`
-- `setup_deps.py` runs `setup_opencv.py`, `setup_python.py`, `setup_ml.py` (extension failures non-fatal for optional models)
-- NDI and OpenCV are **optional** extensions — use `tier=optional` or `scons tier=all`; skipped when SDK probes missing
-- Build planner: `build/gn_ext_plan.py` — `tier`, `default`, `optional`, `probe` in each `native/build.cfg`
+- Extension author checklist: `dev_docs/NEW_EXTENSION_CHECKLIST.md`
+- `setup_deps.py` reads `build.cfg` and runs extension SDK scripts (failures non-fatal)
+- NDI and OpenCV are **optional** extensions — included in `tier=all`; skipped when SDK probes missing
+- Build planner: `build/gn_ext_plan.py` — `tier`, `default`, `optional`, `probe`, `setup`, `vendor_clone` in each `native/build.cfg`
 - OpenCV: `addons/gn_ext_opencv/setup_opencv.py` (not bundled in git)
 
 ### 2026-07-01 — Windows dev environment setup

@@ -257,6 +257,9 @@ python addons/gn_ext_user_python/setup_python.py     # 5. PythonSCRIPT toolchain
 | `probe` | Per-platform file(s) that must exist; auto-derived from `lib_dirs`+`libs` |
 
 Planner: `build/gn_ext_plan.py` (shared by SConstruct, `check_env.py`, `list_extensions.py`).
+Setup runner: `build/gn_ext_setup.py` + `scripts/run_extension_setups.py` (reads `setup` / `vendor_clone` from `build.cfg`).
+Bare `scons` = **shipped** (core + extension). **`scripts/build_windows.ps1`** defaults to **`tier=all`** (setups run first, then max extensions). Use `-Shipped` for faster subset.
+Checklist: `dev_docs/NEW_EXTENSION_CHECKLIST.md`.
 - **`build.cfg`** in each extension's `native/` directory declares linking AND runtime deps
 - **`runtime_dlls`** field in platform sections (e.g., `[windows]`) lists DLLs that must be copied to `bin/` alongside the compiled library
 - **`gn_build.py`** auto-copies runtime DLLs during build step 3
@@ -265,13 +268,17 @@ Planner: `build/gn_ext_plan.py` (shared by SConstruct, `check_env.py`, `list_ext
 - **`[dependencies]`** section in `.gdextension` tells Godot to pre-load runtime DLLs (single-line format)
 - **Never rebuild** just to fix a missing runtime DLL — check if it needs copying from the SDK directory first
 
-### Extension SDK setup scripts:
+### Extension SDK setup scripts (declared in `native/build.cfg` `setup` field):
+
 | Extension | Script | What it does |
 |-----------|--------|-------------|
-| ML/ONNX | `scripts/setup_ml.py` | Downloads ONNX Runtime |
-| WebRender/CEF | `scripts/setup_cef.py` | Downloads gdCEF |
+| ML/ONNX | `addons/gn_ext_ml/setup_ml.py` | Downloads ONNX Runtime |
+| OpenCV | `addons/gn_ext_opencv/setup_opencv.py` | Downloads OpenCV SDK (Windows) |
 | Python | `addons/gn_ext_user_python/setup_python.py` | Downloads embeddable CPython + NumPy |
-| OpenCV | `addons/gn_ext_opencv/setup_opencv.py` | Downloads OpenCV SDK (Windows); system packages on Linux/macOS |
+| Spout | `vendor_clone` in build.cfg | Clones Spout2 SDK |
+| WebRender/CEF | `addons/gn_ext_webrender/setup_cef.py` | Downloads gdCEF (no build.cfg yet) |
+
+Run via `setup_deps.py` or `python scripts/run_extension_setups.py --for-build --tier all`.
 
 ## Key File Locations
 

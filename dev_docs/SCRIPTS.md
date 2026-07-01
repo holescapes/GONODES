@@ -16,7 +16,8 @@ All helper scripts live in `scripts/`.  They require **Python 3.10+** and no ext
 | `check_coverage.py` | Report operators with fewer than 3 help patches | Before release |
 | `check_versions.py` | Verify CI workflows agree with `versions.env` | Bumping Godot or extension versions |
 | `check_env.py` | Pre-flight build environment check (tools, SDKs) | Before first build or release |
-| `build_windows.ps1` | All-in-one Windows native build (MSVC env + setup_deps + scons) | Fresh Windows clone |
+| `build_windows.ps1` | All-in-one Windows native build (`setup_deps` → extension setups → `scons tier=all`) | Fresh Windows clone |
+| `run_extension_setups.py` | Run `build.cfg` `setup` / `vendor_clone` before compile | Before `scons` or via `build_windows.ps1` |
 | `list_extensions.py` | List extensions with tier/SDK status and build plan | Before choosing `tier` / `exts` |
 | `check_builds.py` | Verify native extension build outputs exist | After building native extensions |
 | `sync_gdextensions.py` | Activate/deactivate `.gdextension` files based on binary presence | After building (also runs automatically as SConstruct post-build) |

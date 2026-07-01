@@ -197,7 +197,7 @@ def check_extension_build_plan():
     addons = os.path.join(ROOT, "addons")
     extensions = discover_extensions(addons)
 
-    to_build, skipped = plan_extensions(extensions, plat, defaults_only=False, tier="all")
+    to_build, skipped = plan_extensions(extensions, plat, tier="all")
     build_names = {name for name, *_ in to_build}
 
     for ext_name, native_dir, cfg_path in extensions:
@@ -207,12 +207,14 @@ def check_extension_build_plan():
         label = f"{ext_name} [{tier}]"
         if ext_name in build_names:
             record(PASS, label, f"would build (sdk={sdk})")
-        elif cfg.get("optional"):
-            reason = next((r for n, r in skipped if n == ext_name), "skipped")
-            record(SKIP, label, reason)
         else:
             reason = next((r for n, r in skipped if n == ext_name), "skipped")
-            record(WARN, label, reason)
+            if cfg.get("optional") or cfg.get("tier") == "optional":
+                record(SKIP, label, reason)
+            elif "SDK missing" in reason or "not supported" in reason:
+                record(SKIP, label, reason)
+            else:
+                record(WARN, label, reason)
 
 
 def check_sdks():

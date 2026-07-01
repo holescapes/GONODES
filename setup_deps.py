@@ -4,22 +4,25 @@ GONODES — Dependency Setup
 
 Run after cloning the repository to fetch all external dependencies:
   - godot-cpp  (C++ bindings for GDExtension, required to build native operators)
-  - Spout2     (Windows-only texture sharing SDK)
-  - Extension-specific SDKs (ONNX Runtime, embedded CPython, etc.)
+  - Extension SDKs from native/build.cfg (`vendor_clone`, `setup`, or setup_*.py)
 
 Usage:
   python setup_deps.py            # fetch everything
-  python setup_deps.py --core     # godot-cpp + Spout2 only (skip extension SDKs)
+  python setup_deps.py --core     # godot-cpp only (skip extension SDKs)
   python setup_deps.py --list     # show what would be fetched, don't download
 """
 import argparse
-import glob
 import os
-import platform
 import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+BUILD_DIR = os.path.join(ROOT, "build")
+if BUILD_DIR not in sys.path:
+    sys.path.insert(0, BUILD_DIR)
+
+from gn_ext_plan import detect_host_platform  # noqa: E402
+from gn_ext_setup import configure_stdio_utf8, run_extension_setups  # noqa: E402
 
 
 def _load_versions_env() -> dict:
@@ -37,14 +40,12 @@ def _load_versions_env() -> dict:
                     vals[k.strip()] = v.strip()
     return vals
 
+
 _VERSIONS = _load_versions_env()
 
 GODOTCPP_BRANCH = _VERSIONS.get("GODOTCPP_BRANCH", "4.5")
 GODOTCPP_REPO = "https://github.com/godotengine/godot-cpp.git"
 GODOTCPP_DIR = os.path.join(ROOT, "addons", "gn_ext_native", "native", "godot-cpp")
-
-SPOUT2_REPO = "https://github.com/leadedge/Spout2.git"
-SPOUT2_DIR = os.path.join(ROOT, "addons", "gn_ext_spout", "native", "Spout2")
 
 
 def header(msg):
@@ -79,41 +80,13 @@ def clone_repo(name, repo_url, dest, branch=None):
     return True
 
 
-def find_extension_setup_scripts():
-    """Discover setup_*.py scripts inside extension directories."""
-    pattern = os.path.join(ROOT, "addons", "gn_ext_*", "setup_*.py")
-    scripts = sorted(glob.glob(pattern))
-    return scripts
-
-
-def run_extension_script(script_path):
-    """Run an extension's setup script with --no-enable flag."""
-    ext_name = os.path.basename(os.path.dirname(script_path))
-    script_name = os.path.basename(script_path)
-    print(f"  Running {ext_name}/{script_name} ...")
-    result = subprocess.run(
-        [sys.executable, script_path, "--no-enable"],
-        cwd=os.path.dirname(script_path),
-    )
-    if result.returncode != 0:
-        print(f"  [warn] {ext_name}/{script_name} exited {result.returncode} (non-fatal)")
-        return False
-    print(f"  [done] {ext_name}/{script_name}")
-    return True
-
-
 def main():
-    # Windows consoles default to cp1252 — force UTF-8 for Unicode log output.
-    if sys.platform == "win32":
-        if hasattr(sys.stdout, "reconfigure"):
-            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        if hasattr(sys.stderr, "reconfigure"):
-            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    configure_stdio_utf8()
 
     parser = argparse.ArgumentParser(description="GONODES dependency setup")
     parser.add_argument(
         "--core", action="store_true",
-        help="Only fetch core dependencies (godot-cpp, Spout2). Skip extension SDKs.",
+        help="Only fetch core dependencies (godot-cpp). Skip extension SDKs.",
     )
     parser.add_argument(
         "--list", action="store_true",
@@ -121,72 +94,44 @@ def main():
     )
     args = parser.parse_args()
 
-    # ── Gather tasks ───────────────────────────────────────────────────────
-    tasks = []
+    plat = detect_host_platform()
+    godot_exists = os.path.isdir(GODOTCPP_DIR) and os.listdir(GODOTCPP_DIR)
 
-    # Core: godot-cpp
-    exists = os.path.isdir(GODOTCPP_DIR) and os.listdir(GODOTCPP_DIR)
-    tasks.append({
-        "name": f"godot-cpp (branch {GODOTCPP_BRANCH})",
-        "target": os.path.relpath(GODOTCPP_DIR, ROOT),
-        "exists": exists,
-        "kind": "core",
-    })
-
-    # Core: Spout2 (Windows only, but clone on all platforms for completeness)
-    is_windows = platform.system() == "Windows"
-    spout_exists = os.path.isdir(SPOUT2_DIR) and os.listdir(SPOUT2_DIR)
-    tasks.append({
-        "name": "Spout2 SDK" + ("" if is_windows else " (Windows-only, skipped)"),
-        "target": os.path.relpath(SPOUT2_DIR, ROOT),
-        "exists": spout_exists,
-        "kind": "core",
-        "skip": not is_windows,
-    })
-
-    # Extension SDKs
-    ext_scripts = find_extension_setup_scripts()
-    for sp in ext_scripts:
-        ext_name = os.path.basename(os.path.dirname(sp))
-        script_name = os.path.basename(sp)
-        tasks.append({
-            "name": f"{ext_name}/{script_name}",
-            "target": os.path.relpath(os.path.dirname(sp), ROOT),
-            "exists": False,  # scripts are idempotent, always safe to run
-            "kind": "extension",
-            "script": sp,
-        })
-
-    # ── List mode ──────────────────────────────────────────────────────────
     if args.list:
         header("Dependencies")
-        for t in tasks:
-            status = "present" if t["exists"] else ("skip" if t.get("skip") else "needed")
-            scope = "CORE" if t["kind"] == "core" else "EXT "
-            print(f"  [{scope}] {t['name']:40s} -> {t['target']:50s} [{status}]")
+        status = "present" if godot_exists else "needed"
+        print(
+            f"  [CORE] {'godot-cpp (branch ' + GODOTCPP_BRANCH + ')':40s} "
+            f"-> {os.path.relpath(GODOTCPP_DIR, ROOT):50s} [{status}]"
+        )
+        print()
+        run_extension_setups(
+            ROOT, plat,
+            tier="all",
+            include_optional_setups=True,
+            dry_run=True,
+        )
         return
 
-    # ── Fetch core ─────────────────────────────────────────────────────────
     header("Core dependencies")
     clone_repo("godot-cpp", GODOTCPP_REPO, GODOTCPP_DIR, branch=GODOTCPP_BRANCH)
 
-    if is_windows:
-        clone_repo("Spout2", SPOUT2_REPO, SPOUT2_DIR)
+    if not args.core:
+        header("Extension SDKs (from build.cfg)")
+        run_extension_setups(
+            ROOT, plat,
+            tier="all",
+            include_optional_setups=True,
+            for_build=False,
+        )
     else:
-        print("  [skip] Spout2 — Windows-only dependency")
-
-    # ── Extension SDKs ─────────────────────────────────────────────────────
-    if not args.core and ext_scripts:
-        header("Extension SDKs")
-        for sp in ext_scripts:
-            run_extension_script(sp)
-    elif args.core:
         print("\n  --core flag: skipping extension SDKs")
 
-    # ── Summary ────────────────────────────────────────────────────────────
     header("Setup complete")
-    print("  You can now build extensions with:")
-    print("    cd build && scons ext=<name> platform=<plat> target=template_release")
+    print("  Next: run extension setups for your build tier, then compile:")
+    print("    python scripts/run_extension_setups.py --for-build --tier all")
+    print("    cd build && scons platform=<plat> target=template_release")
+    print("  Or use scripts/build_windows.ps1 for the full Windows pipeline.")
     print()
 
 

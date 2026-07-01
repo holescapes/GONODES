@@ -1,14 +1,18 @@
 # GONODES — Windows dev build from a fresh clone
 #
 # Runs the full native-extension pipeline inside the MSVC environment:
-#   check_env -> setup_deps -> godot-cpp -> unified scons -> sync summary
+#   setup_deps -> extension setups (build.cfg) -> check_env -> godot-cpp -> scons
+#
+# Default: tier=all — build every extension this platform can (optional tier included;
+# proprietary SDK misses are skipped, not fatal). Setups run first so user_python,
+# OpenCV, etc. download before compile.
 #
 # Usage (from repo root):
 #   .\scripts\build_windows.ps1
-#   .\scripts\build_windows.ps1 -SkipDeps        # skip setup_deps.py
+#   .\scripts\build_windows.ps1 -Shipped          # faster: core + extension only
+#   .\scripts\build_windows.ps1 -SkipDeps
 #   .\scripts\build_windows.ps1 -Jobs 8
 #   .\scripts\build_windows.ps1 -Tier core
-#   .\scripts\build_windows.ps1 -AllExtensions
 #   .\scripts\build_windows.ps1 -Exts "gn_ext_hap,gn_ext_midi"
 #
 # Prerequisites (first time only):
@@ -24,9 +28,9 @@ param(
     [string]$Ext = "",
     [string]$Exts = "",
     [string]$Tier = "",
+    [switch]$Shipped,
     [switch]$SkipDeps,
-    [switch]$SkipGodotCpp,
-    [switch]$AllExtensions
+    [switch]$SkipGodotCpp
 )
 
 $ErrorActionPreference = "Stop"
@@ -63,12 +67,20 @@ function Invoke-InVcEnv([string]$Command) {
     }
 }
 
-# ── Pre-flight ───────────────────────────────────────────────────────────────
-Write-Host ""
-Write-Host "-- Pre-flight: check_env.py --"
-python scripts/check_env.py
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "check_env.py reported failures. Fix prerequisites before building."
+# ── Resolve build tier ───────────────────────────────────────────────────────
+$buildTier = "all"
+if ($Tier) { $buildTier = $Tier }
+elseif ($Shipped) { $buildTier = "shipped" }
+
+if ($buildTier -eq "all") {
+    Write-Host ""
+    Write-Host "  Build mode: tier=all (core + extension + optional when SDK present)"
+} elseif ($buildTier -eq "shipped") {
+    Write-Host ""
+    Write-Host "  Build mode: tier=shipped (core + extension only)"
+} else {
+    Write-Host ""
+    Write-Host "  Build mode: tier=$buildTier"
 }
 
 # ── Dependencies ─────────────────────────────────────────────────────────────
@@ -79,6 +91,28 @@ if (-not $SkipDeps) {
     if ($LASTEXITCODE -ne 0) {
         Write-Error "setup_deps.py failed."
     }
+}
+
+# ── Extension SDKs (build.cfg setup / vendor_clone) ─────────────────────────
+Write-Host ""
+Write-Host "-- Extension SDKs: run_extension_setups.py (for-build) --"
+$setupArgs = @(
+    "scripts/run_extension_setups.py", "--for-build",
+    "--tier", $buildTier, "--platform", "windows"
+)
+if ($Ext) { $setupArgs += @("--ext", $Ext) }
+elseif ($Exts) { $setupArgs += @("--exts", $Exts) }
+python @setupArgs
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning "run_extension_setups.py reported errors (non-fatal; continuing build)."
+}
+
+# ── Pre-flight (after SDK fetch so probes reflect downloaded toolchains) ─────
+Write-Host ""
+Write-Host "-- Pre-flight: check_env.py --"
+python scripts/check_env.py
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "check_env.py reported failures. Fix prerequisites before building."
 }
 
 # ── godot-cpp ────────────────────────────────────────────────────────────────
@@ -94,8 +128,8 @@ Write-Host "-- Building native extensions --"
 $extArg = ""
 if ($Ext) { $extArg = "ext=$Ext " }
 elseif ($Exts) { $extArg = "exts=$Exts " }
-elseif ($Tier) { $extArg = "tier=$Tier " }
-elseif ($AllExtensions) { $extArg = "tier=all " }
+elseif ($Tier -or $Shipped) { $extArg = "tier=$buildTier " }
+else { $extArg = "tier=all " }
 Invoke-InVcEnv "cd build && scons ${extArg}platform=windows arch=$Arch target=template_release -j$Jobs"
 
 Write-Host ""

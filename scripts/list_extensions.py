@@ -32,14 +32,18 @@ def main() -> int:
     parser.add_argument("--platform", default="", help="windows | linux | macos")
     parser.add_argument("--tier", default="", help="core | extension | optional | all")
     parser.add_argument("--exts", default="", help="Comma-separated extension names")
+    parser.add_argument("--shipped", action="store_true",
+                        help="Show plan for fresh-clone shipped build (core + extension)")
     parser.add_argument("--defaults", action="store_true",
-                        help="Show plan for default=true extensions only")
+                        help="Show plan for tier=minimal (default=true only)")
     args = parser.parse_args()
 
     plat = args.platform or detect_host_platform()
     tier = args.tier
-    if args.defaults:
-        tier = ""
+    if args.shipped:
+        tier = "shipped"
+    elif args.defaults:
+        tier = "minimal"
 
     extensions = discover_extensions(os.path.join(ROOT, "addons"))
 
@@ -54,10 +58,14 @@ def main() -> int:
         cfg = parse_build_cfg(cfg_path)
         print(format_extension_table_row(ext_name, cfg, plat, native_dir))
 
-    defaults_only = args.defaults and not tier and not args.exts
+    if not tier and not args.shipped and not args.defaults:
+        tier = "shipped"
+
+    plan_tier = tier or "shipped"
+    defaults_only = plan_tier == "minimal"
     to_build, skipped = plan_extensions(
         extensions, plat,
-        tier=tier if tier != "all" else "all",
+        tier=plan_tier,
         exts=args.exts,
         defaults_only=defaults_only,
     )

@@ -250,7 +250,8 @@ GONODES works out of the box with pure GDScript. Native C++ extensions provide a
 ```powershell
 $env:PYTHONUTF8 = "1"
 pip install scons
-.\scripts\build_windows.ps1
+.\scripts\build_windows.ps1              # tier=all — builds every extension with SDK present
+.\scripts\build_windows.ps1 -Shipped     # faster: core + extension tiers only
 ```
 
 **Manual steps (all platforms):**
@@ -268,12 +269,12 @@ cd addons/gn_ext_native/native/godot-cpp
 scons platform=windows arch=x86_64 target=template_release -j8
 cd ../../../..
 
-# 3. Build all native extensions (HAP, MIDI, Spout, OpenCV, etc.):
+# 3. Build native extensions (optional tier included when SDK is present):
 cd build
-scons platform=windows arch=x86_64 target=template_release -j8
+scons tier=all platform=windows arch=x86_64 target=template_release -j8
 cd ..
 # Extensions are auto-activated after build (sync_gdextensions.py runs post-build)
-# Optional extensions (NDI, OpenCV without SDK) are skipped — not fatal.
+# Proprietary SDK misses (NDI, Blackmagic, …) are skipped — not fatal.
 
 # Or build a single extension:
 cd build

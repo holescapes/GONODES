@@ -63,8 +63,9 @@ $env:PYTHONUTF8 = "1"
 .\scripts\build_windows.ps1
 ```
 
-This runs `check_env.py`, `setup_deps.py`, godot-cpp, and the unified
-`build/scons` inside the MSVC environment.
+This runs `setup_deps.py`, extension setups from `build.cfg`, `check_env.py`,
+godot-cpp, and unified `build/scons tier=all` inside the MSVC environment.
+Use `-Shipped` for a faster core+extension-only build.
 
 ### Step-by-step (all platforms)
 
@@ -72,10 +73,15 @@ This runs `check_env.py`, `setup_deps.py`, godot-cpp, and the unified
 # 0. Pre-flight — verify tools, godot-cpp, and SDK presence
 python scripts/check_env.py
 
-# 1. Fetch all dependencies (godot-cpp + extension setup_*.py scripts)
-#    On Windows: includes setup_python.py, setup_opencv.py, setup_ml.py, etc.
+# 1. Fetch all dependencies (godot-cpp + extension build.cfg setups)
+#    Reads `setup` / `vendor_clone` from each native/build.cfg; also picks up
+#    setup_*.py in extension roots without a build.cfg entry (e.g. webrender).
 #    Extension script failures are non-fatal (e.g. optional ML models).
 python setup_deps.py
+
+# 1b. Before building, run setups for every extension you plan to compile
+#     (default Windows script uses tier=all; optional SDK downloaders included):
+python scripts/run_extension_setups.py --for-build --tier all
 
 # To fetch ONLY godot-cpp and skip extension SDKs (faster for CI/testing):
 # python setup_deps.py --core
@@ -123,14 +129,17 @@ Unified `build/scons` continues when optional extensions are skipped.
 
 | Command | Builds |
 |---------|--------|
-| `scons` | `default=true` extensions + `gn_ext_native` (SDK probes must pass) |
-| `scons tier=all` | All discovered extensions |
-| `scons tier=core` | `tier=core` extensions + `gn_ext_native` |
-| `scons tier=optional` | `tier=optional` extensions only |
+| `scons` | **Shipped:** `tier=core` + `tier=extension` + `gn_ext_native`. Skips optional tier, wrong platform, and missing SDKs |
+| `scons tier=all` | All tiers (optional included when SDK probes pass) |
+| `scons tier=core` | Core tier + `gn_ext_native` |
+| `scons tier=optional` | Optional tier only (NDI, OpenCV, depth backends, …) |
+| `scons tier=minimal` | `default=true` extensions only (fast subset) |
 | `scons exts=a,b,c` | Explicit list |
 | `scons ext=gn_ext_hap` | Single extension |
 
-Inspect before building: `python scripts/list_extensions.py` or `cd build && scons --list-extensions`.
+Inspect before building: `python scripts/list_extensions.py --tier all` or `cd build && scons --list-extensions`.
+
+See [NEW_EXTENSION_CHECKLIST.md](NEW_EXTENSION_CHECKLIST.md) for the extension author checklist.
 
 ### First test run (after build)
 
@@ -993,9 +1002,9 @@ defines = <linux defines if any>
 | | `tier` | `core` (default build set), `extension` (normal pack), or `optional` (proprietary/large SDK) |
 | | `default` | `true`/`false` — include in bare `scons` (default: `true` except when `optional=true`) |
 | | `optional` | `true` — missing SDK probe skips extension instead of failing unified build |
-| | `setup` | Pre-build setup script relative to extension root (e.g., `setup_ml.py --sdk-only --no-enable`). Also discovered by `setup_deps.py` via `setup_*.py` |
+| | `setup` | Pre-build setup script relative to extension root (e.g., `setup_ml.py --sdk-only --no-enable`). Run by `setup_deps.py` and `scripts/run_extension_setups.py` before compile |
 | | `vendor_setup` | Alias for `setup` (legacy) |
-| | `vendor_clone` | Git repo + destination dir for vendored source (e.g., `https://github.com/leadedge/Spout2.git Spout2`). CI auto-clones before build. |
+| | `vendor_clone` | Git repo + destination dir relative to `native/` (e.g., `https://github.com/leadedge/Spout2.git Spout2`). Cloned by `setup_deps.py` / `run_extension_setups.py` |
 | `[sources]` | `cpp` | Glob pattern for C++ sources (default: `src/*.cpp`) |
 | | `c` | Glob pattern for C sources |
 | | `objcxx` | Glob pattern for Objective-C++ sources (`.mm` files, macOS) |
@@ -1152,22 +1161,7 @@ addons/gn_ext_midi/native/bin/
 
 ### Adding a New Native Extension
 
-1. Create `addons/gn_ext_<name>/native/`
-2. Add a `build.cfg` with your library name, platforms, and sources
-3. Add a minimal `SConstruct` shim:
-   ```python
-   # gn_ext_<name> — Thin shim delegating to the shared GONODES build system.
-   import os, sys
-   sys.path.insert(0, os.path.normpath(os.path.join(Dir("#").abspath, "..", "..", "..", "build")))
-   from gn_build import build_extension
-   build_extension(native_dir=Dir("#").abspath)
-   ```
-4. Write your C++ source in `src/`
-5. If the extension needs a vendored SDK, add `vendor_setup` and/or
-   `vendor_clone` to `build.cfg` (see the build.cfg format table above).
-   CI will auto-discover and run them — no workflow edits needed.
-6. Build: `cd build && scons ext=gn_ext_<name> platform=windows -j4`
-7. The CI pipelines auto-discover the new extension — no workflow edits needed
+See **[NEW_EXTENSION_CHECKLIST.md](NEW_EXTENSION_CHECKLIST.md)** for the full step-by-step checklist (build.cfg policy, SDK setup, shipped-build verification, PR checklist).
 
 
 ## CI Pipelines
@@ -1381,11 +1375,13 @@ writing it back produces mojibake: `—` (em-dash) becomes `Ã¢â‚¬â€`,
 | `.github/workflows/release.yml`               | GitHub Actions — full release pipeline (build → test → export → publish) |
 | `.gitlab-ci.yml`                              | GitLab CI — unified native build (all extensions) |
 | **Dependency setup** | |
-| `setup_deps.py`                               | Root setup script — clones godot-cpp, Spout2, runs extension SDKs |
+| `setup_deps.py`                               | Root setup — clones godot-cpp; runs extension `setup` / `vendor_clone` from `build.cfg` |
+| `build/gn_ext_setup.py`                       | Shared setup planner/runner (used by `setup_deps.py` and `run_extension_setups.py`) |
+| `scripts/run_extension_setups.py`             | Targeted pre-build SDK fetch matching scons tier |
 | `addons/gn_ext_ml/setup_ml.py`                | Downloads ONNX Runtime SDK + pre-trained models |
 | `addons/gn_ext_opencv/setup_opencv.py`        | Downloads OpenCV SDK (Windows) |
 | `addons/gn_ext_user_python/setup_python.py`   | Downloads embeddable CPython + NumPy |
-| `scripts/build_windows.ps1`                   | All-in-one Windows native build (MSVC + scons) |
+| `scripts/build_windows.ps1`                   | All-in-one Windows build (`tier=all` default; `-Shipped` for subset) |
 | **Post-build / release** | |
 | `scripts/sync_gdextensions.py`                | Activate/deactivate `.gdextension` based on binary presence |
 | `scripts/clean_builds.py`                     | Remove all binaries + deactivate extensions (pre-release clean) |

@@ -6,10 +6,10 @@ requested platform/arch.  gn_ext_native is built separately (it uses
 godot-cpp's own SConstruct).
 
 Usage:
-  # Build default extensions (default=true in build.cfg, SDK probes pass):
+  # Build shipped extensions on a fresh clone (core + extension tiers; optional skipped):
   scons
 
-  # Build all discovered extensions (skip only when SDK probe fails):
+  # Build all discovered extensions (optional tier included when SDK present):
   scons tier=all
 
   # Build core tier only (+ gn_ext_native):
@@ -54,23 +54,22 @@ exts_filter = ARGUMENTS.get("exts", "")
 tier_filter = ARGUMENTS.get("tier", "")
 list_mode = "list-extensions" in ARGUMENTS or "--list-extensions" in sys.argv
 
-# Bare `scons` builds default=true extensions only.
-# `tier=all` builds everything; `ext` / `exts` override tier/defaults.
-defaults_only = (
-    not tier_filter
-    and not ext_filter
-    and not exts_filter
-)
+# Bare `scons` → shipped (core + extension). Optional tier skipped when SDK missing.
+defaults_only = tier_filter in ("minimal",)
+
+if not tier_filter and not ext_filter and not exts_filter:
+    tier_filter = "shipped"
 
 if tier_filter == "default":
-    tier_filter = ""
-    defaults_only = True
+    tier_filter = "shipped"
 
 print(f"GONODES unified build: platform={plat}  target={target}  arch={arch}")
-if tier_filter:
+if tier_filter == "shipped":
+    print("  mode: shipped (core + extension tiers; optional skipped)")
+elif tier_filter:
     print(f"  tier filter: {tier_filter}")
 elif defaults_only:
-    print("  mode: defaults (default=true extensions only)")
+    print("  mode: minimal (default=true extensions only)")
 if ext_filter:
     print(f"  ext filter: {ext_filter}")
 if exts_filter:
@@ -85,10 +84,12 @@ if ext_filter:
     _build_native = ext_filter == "gn_ext_native"
 elif exts_filter:
     _build_native = "gn_ext_native" in {e.strip() for e in exts_filter.split(",") if e.strip()}
-elif tier_filter == "optional" or tier_filter == "extension":
+elif tier_filter in ("optional", "extension"):
+    _build_native = False
+elif tier_filter == "minimal":
     _build_native = False
 else:
-    # tier=core, tier=all, defaults, or no filter
+    # shipped, core, all, or explicit tier=core
     _build_native = True
 
 if _build_native:
@@ -114,10 +115,11 @@ if list_mode:
     print(f"\n  gn_ext_native (godot-cpp SConstruct — tier=core, always built unless filtered)")
     print(f"\n  Total: {len(extensions) + 1} native extensions")
     print("\n  Build modes:")
-    print("    scons                  — default=true extensions")
-    print("    scons tier=all         — all extensions (SDK probe skip)")
+    print("    scons                  — shipped (core + extension tiers)")
+    print("    scons tier=all         — all tiers including optional")
     print("    scons tier=core        — core tier + gn_ext_native")
     print("    scons tier=optional    — optional tier only")
+    print("    scons tier=minimal     — default=true extensions only")
     print("    scons exts=a,b,c       — explicit list\n")
     Exit(0)
 

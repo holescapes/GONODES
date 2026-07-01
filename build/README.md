@@ -11,7 +11,7 @@ module handles everything else.
 ```powershell
 $env:PYTHONUTF8 = "1"
 python setup_deps.py
-.\scripts\build_windows.ps1
+.\scripts\build_windows.ps1   # default tier=all; use -Shipped for core+extension only
 ```
 
 **Manual:**
@@ -19,6 +19,7 @@ python setup_deps.py
 ```bash
 # First time: fetch godot-cpp and extension SDKs (from repo root)
 python setup_deps.py
+python scripts/run_extension_setups.py --for-build --tier all
 
 cd build
 
@@ -26,9 +27,11 @@ cd build
 scons -j4
 
 # Build tiers / subsets:
+scons -j4                  # shipped: core + extension (fresh-clone default)
+scons tier=all -j4           # all tiers including optional
 scons tier=core -j4          # core extensions + gn_ext_native
-scons tier=all -j4           # all extensions (SDK probe skip)
 scons tier=optional -j4      # optional extensions only
+scons tier=minimal -j4       # default=true extensions only
 scons exts=gn_ext_hap,gn_ext_midi -j4
 
 # Build a single extension:

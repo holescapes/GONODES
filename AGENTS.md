@@ -17,6 +17,7 @@
 | Testing | `dev_docs/TESTING.md` |
 | Contributing / rules | `dev_docs/CONTRIBUTING.md` |
 | New operator checklist | `dev_docs/NEW_OPERATOR_CHECKLIST.md` |
+| New native extension checklist | `dev_docs/NEW_EXTENSION_CHECKLIST.md` |
 | Curated memories | `AI_MEMORY.md` |
 
 ## Tool mapping
