@@ -21,18 +21,37 @@ Or from the root SConstruct:
 
 import os
 import sys
-import configparser
 import json
-import platform as _platform
 import subprocess
+
+from gn_ext_plan import (
+    ALL_PLATFORMS,
+    parse_build_cfg,
+    discover_extensions,
+    get_effective_probes,
+    check_probes,
+    plan_extensions,
+    should_build_extension,
+    detect_host_platform,
+)
 
 # SCons builtins needed: Environment, Glob, File, Default, Exit, ARGUMENTS, Dir
 from SCons.Script import *  # noqa: F403
 
 
-# ── Constants ──────────────────────────────────────────────────────────────────
-
-ALL_PLATFORMS = ["windows", "macos", "linux"]
+# Re-export for backwards compatibility
+__all__ = [
+    "ALL_PLATFORMS",
+    "parse_build_cfg",
+    "discover_extensions",
+    "plan_extensions",
+    "should_build_extension",
+    "detect_host_platform",
+    "detect_host_arch",
+    "make_env",
+    "collect_sources",
+    "build_extension",
+]
 ALL_ARCHS_BY_PLATFORM = {
     "windows": ["x86_64", "arm64"],
     "linux":   ["x86_64", "arm64"],
@@ -63,6 +82,7 @@ def detect_host_platform():
 
 
 def detect_host_arch():
+    import platform as _platform
     machine = _platform.machine().lower()
     if machine in ("aarch64", "arm64"):
         return "arm64"
@@ -73,74 +93,7 @@ def is_cross_compile(target_arch):
     return target_arch != detect_host_arch()
 
 
-# ── Config parsing ─────────────────────────────────────────────────────────────
-
-def parse_build_cfg(cfg_path):
-    """Parse a build.cfg into a dictionary with typed values."""
-    cp = configparser.ConfigParser()
-    cp.read(cfg_path)
-
-    def get_list(section, key, fallback=""):
-        raw = cp.get(section, key, fallback=fallback).strip()
-        if not raw:
-            return []
-        return [s.strip() for s in raw.split(",") if s.strip()]
-
-    cfg = {
-        "lib_name":      cp.get("library", "name", fallback=""),
-        "entry_symbol":  cp.get("library", "entry_symbol", fallback=""),
-        "platforms":     get_list("library", "platforms") or ALL_PLATFORMS,
-        # Optional extra destination for the built library (relative to extension
-        # root, NOT native/). Use when the main DLL must live outside native/
-        # (which has .gdignore) so Godot can resolve it via res:// paths.
-        # The platform bin subdir (e.g. win64/) is appended automatically.
-        # Example: library_dest = ../bin  -> extension_root/bin/win64/
-        "library_dest":  cp.get("library", "library_dest", fallback="").strip(),
-        "sources":       get_list("sources", "cpp", fallback="src/*.cpp"),
-        "c_sources":     get_list("sources", "c"),
-        "objcxx_sources": get_list("sources", "objcxx"),  # .mm files (macOS)
-        "thirdparty_cpp": get_list("sources", "thirdparty_cpp"),
-        "thirdparty_c":   get_list("sources", "thirdparty_c"),
-        "thirdparty_cc":  get_list("sources", "thirdparty_cc"),
-        "include_dirs":   get_list("sources", "include_dirs"),
-    }
-
-    # Per-platform sections: [windows], [macos], [linux]
-    # Also detects optional SDK entries via suffixed keys (e.g. libs_ultraleap).
-    BASE_KEYS = {"libs", "lib_dirs", "frameworks", "defines", "objcxx_sources",
-                 "include_dirs"}
-
-    for plat in ALL_PLATFORMS:
-        cfg[plat] = {
-            "libs":       get_list(plat, "libs") if cp.has_section(plat) else [],
-            "lib_dirs":   get_list(plat, "lib_dirs") if cp.has_section(plat) else [],
-            "include_dirs": get_list(plat, "include_dirs") if cp.has_section(plat) else [],
-            "frameworks": get_list(plat, "frameworks") if cp.has_section(plat) else [],
-            "defines":    get_list(plat, "defines") if cp.has_section(plat) else [],
-            "objcxx_sources": get_list(plat, "objcxx_sources") if cp.has_section(plat) else [],
-            "runtime_dlls": get_list(plat, "runtime_dlls") if cp.has_section(plat) else [],
-            # Optional dest dir for runtime DLLs (relative to extension root, not native/).
-            # Defaults to the compiled output dir (native/bin/<platform>/).
-            # Use this for DLLs that Godot must pre-load via [dependencies] — those must
-            # live outside native/ which has .gdignore and is invisible to res:// paths.
-            "runtime_dlls_dest": cp.get(plat, "runtime_dlls_dest", fallback="").strip(),
-            "optional_sdks": {},  # suffix → {key: [values]}
-        }
-
-        if not cp.has_section(plat):
-            continue
-
-        # Scan for suffixed keys like libs_ultraleap, defines_azure, etc.
-        for key, _raw in cp.items(plat):
-            for base in BASE_KEYS:
-                prefix = base + "_"
-                if key.startswith(prefix) and key != base:
-                    suffix = key[len(prefix):]
-                    sdk = cfg[plat]["optional_sdks"].setdefault(suffix, {})
-                    sdk[base] = get_list(plat, key)
-                    break
-
-    return cfg
+# parse_build_cfg, discover_extensions — see gn_ext_plan.py
 
 
 # ── Environment construction ───────────────────────────────────────────────────
@@ -152,6 +105,14 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
     """
     if plat not in cfg["platforms"]:
         print(f"  {cfg['lib_name']}: Skipping — platform '{plat}' not supported.")
+        return None
+
+    # SDK probe — skip when required files are missing.
+    probes = get_effective_probes(cfg, plat, native_dir)
+    missing = check_probes(probes, native_dir)
+    if missing:
+        label = "optional" if cfg.get("optional") else "required"
+        print(f"  {cfg['lib_name']}: Skipping ({label} SDK missing): {', '.join(missing)}")
         return None
 
     # Common godot-cpp include paths
@@ -177,7 +138,9 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
     if os.path.isfile(python_config_script):
         # Use GONODES_PYTHON_HOME or the toolchain embeddable if available
         _py_bin = "python.exe" if sys.platform == "win32" else "python3"
-        toolchain_python = os.path.join(native_dir, "..", "toolchain", "python", _py_bin)
+        toolchain_python = os.path.abspath(
+            os.path.join(native_dir, "..", "toolchain", "python", _py_bin)
+        )
         py_exe = os.environ.get("GONODES_PYTHON_HOME", "")
         if py_exe:
             py_exe = os.path.join(py_exe, _py_bin) if os.path.isdir(py_exe) else py_exe
@@ -185,11 +148,13 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
             py_exe = toolchain_python
         else:
             py_exe = sys.executable  # fallback to current Python
+        py_exe = os.path.abspath(py_exe)
 
         try:
             result = subprocess.run(
                 [py_exe, python_config_script, "--json"],
-                capture_output=True, text=True, timeout=15
+                capture_output=True, text=True, timeout=15,
+                cwd=os.path.dirname(py_exe),
             )
             if result.returncode == 0:
                 python_cfg = json.loads(result.stdout)
@@ -362,36 +327,7 @@ def collect_sources(env, cfg, native_dir, plat):
     return sources
 
 
-# ── Discovery ──────────────────────────────────────────────────────────────────
-
-def discover_extensions(addons_dir="addons"):
-    """
-    Scan addons/ for gn_ext_*/native/build.cfg files.
-    Returns a list of (ext_name, native_dir, cfg_path) tuples.
-    gn_ext_native is excluded — it uses godot-cpp's SConstruct directly.
-    """
-    extensions = []
-    if not os.path.isdir(addons_dir):
-        return extensions
-
-    for entry in sorted(os.listdir(addons_dir)):
-        if not entry.startswith("gn_ext_") or entry == "gn_ext_native":
-            continue
-        native_dir = os.path.join(addons_dir, entry, "native")
-        # Top-level build.cfg
-        cfg_path = os.path.join(native_dir, "build.cfg")
-        if os.path.isfile(cfg_path):
-            extensions.append((entry, native_dir, cfg_path))
-            continue
-        # Sub-directory build configs (e.g. native/azure_kinect/build.cfg)
-        if os.path.isdir(native_dir):
-            for sub in sorted(os.listdir(native_dir)):
-                sub_native = os.path.join(native_dir, sub)
-                sub_cfg = os.path.join(sub_native, "build.cfg")
-                if os.path.isfile(sub_cfg):
-                    extensions.append((f"{entry}/{sub}", sub_native, sub_cfg))
-
-    return extensions
+# discover_extensions — see gn_ext_plan.py
 
 
 # ── Build orchestration ────────────────────────────────────────────────────────

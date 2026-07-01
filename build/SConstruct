@@ -6,19 +6,26 @@ requested platform/arch.  gn_ext_native is built separately (it uses
 godot-cpp's own SConstruct).
 
 Usage:
-  # Build all extensions for the current platform/arch:
+  # Build default extensions (default=true in build.cfg, SDK probes pass):
   scons
 
-  # Build all extensions for a specific platform/arch:
-  scons platform=windows arch=x86_64
+  # Build all discovered extensions (skip only when SDK probe fails):
+  scons tier=all
 
-  # Build a single extension:
+  # Build core tier only (+ gn_ext_native):
+  scons tier=core
+
+  # Build optional tier only (NDI, OpenCV, depth backends, …):
+  scons tier=optional
+
+  # Build specific extensions:
   scons ext=gn_ext_hap platform=windows
+  scons exts=gn_ext_hap,gn_ext_midi,gn_ext_opencv platform=windows
 
   # Build gn_ext_native (delegates to its own SConstruct):
   scons ext=gn_ext_native platform=windows
 
-  # List discovered extensions:
+  # List discovered extensions with tier / SDK status:
   scons --list-extensions
 """
 
@@ -31,8 +38,9 @@ _workspace_root = os.path.normpath(os.path.join(_build_dir, ".."))
 
 # Make gn_build.py importable (it's in the same dir as this SConstruct)
 sys.path.insert(0, _build_dir)
-from gn_build import discover_extensions, parse_build_cfg, make_env, collect_sources, \
-    detect_host_platform, detect_host_arch, ALL_PLATFORMS, ALL_ARCHS_BY_PLATFORM
+from gn_build import discover_extensions, make_env, collect_sources, \
+    detect_host_platform, detect_host_arch, plan_extensions
+from gn_ext_plan import format_extension_table_row, parse_build_cfg
 
 _addons_dir = os.path.join(_workspace_root, "addons")
 
@@ -41,16 +49,49 @@ _addons_dir = os.path.join(_workspace_root, "addons")
 plat = ARGUMENTS.get("platform", "") or detect_host_platform()
 target = ARGUMENTS.get("target", "template_release")
 arch = ARGUMENTS.get("arch", "") or detect_host_arch()
-ext_filter = ARGUMENTS.get("ext", "")  # optional: build only one extension
+ext_filter = ARGUMENTS.get("ext", "")
+exts_filter = ARGUMENTS.get("exts", "")
+tier_filter = ARGUMENTS.get("tier", "")
 list_mode = "list-extensions" in ARGUMENTS or "--list-extensions" in sys.argv
 
+# Bare `scons` builds default=true extensions only.
+# `tier=all` builds everything; `ext` / `exts` override tier/defaults.
+defaults_only = (
+    not tier_filter
+    and not ext_filter
+    and not exts_filter
+)
+
+if tier_filter == "default":
+    tier_filter = ""
+    defaults_only = True
+
 print(f"GONODES unified build: platform={plat}  target={target}  arch={arch}")
+if tier_filter:
+    print(f"  tier filter: {tier_filter}")
+elif defaults_only:
+    print("  mode: defaults (default=true extensions only)")
+if ext_filter:
+    print(f"  ext filter: {ext_filter}")
+if exts_filter:
+    print(f"  exts filter: {exts_filter}")
 
 # ── gn_ext_native (special case — uses godot-cpp SConstruct) ──────────────────
 
 native_dir = os.path.join(_addons_dir, "gn_ext_native", "native")
 
-if ext_filter in ("", "gn_ext_native"):
+_build_native = False
+if ext_filter:
+    _build_native = ext_filter == "gn_ext_native"
+elif exts_filter:
+    _build_native = "gn_ext_native" in {e.strip() for e in exts_filter.split(",") if e.strip()}
+elif tier_filter == "optional" or tier_filter == "extension":
+    _build_native = False
+else:
+    # tier=core, tier=all, defaults, or no filter
+    _build_native = True
+
+if _build_native:
     native_sconstruct = os.path.join(native_dir, "SConstruct")
     if os.path.isfile(native_sconstruct):
         SConscript(native_sconstruct)
@@ -61,38 +102,43 @@ extensions = discover_extensions(_addons_dir)
 
 if list_mode:
     print("\n=== Discovered GONODES GDExtension addons ===\n")
-    print(f"  {'Extension':<30} {'Platforms':<30} {'Library'}")
-    print(f"  {'-'*30} {'-'*30} {'-'*20}")
+    hdr = (
+        f"  {'Extension':<30} {'Tier':<10} {'Default':<8} {'Opt':<8} "
+        f"{'SDK':<8} {'Library':<20} Platforms"
+    )
+    print(hdr)
+    print(f"  {'-'*30} {'-'*10} {'-'*8} {'-'*8} {'-'*8} {'-'*20} {'-'*20}")
     for ext_name, ext_native_dir, cfg_path in extensions:
         cfg = parse_build_cfg(cfg_path)
-        platforms = ", ".join(cfg["platforms"])
-        print(f"  {ext_name:<30} {platforms:<30} {cfg['lib_name']}")
-    print(f"\n  gn_ext_native (godot-cpp SConstruct -- always all platforms)")
-    print(f"\n  Total: {len(extensions) + 1} native extensions\n")
+        print(format_extension_table_row(ext_name, cfg, plat, ext_native_dir))
+    print(f"\n  gn_ext_native (godot-cpp SConstruct — tier=core, always built unless filtered)")
+    print(f"\n  Total: {len(extensions) + 1} native extensions")
+    print("\n  Build modes:")
+    print("    scons                  — default=true extensions")
+    print("    scons tier=all         — all extensions (SDK probe skip)")
+    print("    scons tier=core        — core tier + gn_ext_native")
+    print("    scons tier=optional    — optional tier only")
+    print("    scons exts=a,b,c       — explicit list\n")
     Exit(0)
 
-# ── Build each discovered extension ───────────────────────────────────────────
+to_build, skipped_plan = plan_extensions(
+    extensions, plat,
+    tier=tier_filter,
+    ext=ext_filter,
+    exts=exts_filter,
+    defaults_only=defaults_only,
+)
+
+# ── Build each planned extension ───────────────────────────────────────────────
 
 built = []
-skipped = []
+skipped = list(skipped_plan)
 
-for ext_name, ext_native_dir, cfg_path in extensions:
-    # Filter to a single extension if requested
-    if ext_filter and ext_filter != ext_name:
-        continue
-
-    cfg = parse_build_cfg(cfg_path)
-
-    if plat not in cfg["platforms"]:
-        skipped.append((ext_name, f"platform '{plat}' not in {cfg['platforms']}"))
-        continue
-
+for ext_name, ext_native_dir, cfg_path, cfg in to_build:
     print(f"\n{'='*60}")
     print(f"Building {ext_name} ({cfg['lib_name']})")
     print(f"{'='*60}")
 
-    # Walk upward from ext_native_dir to find the addons/ dir containing gn_ext_native.
-    # Handles both top-level (native/) and nested (native/azure_kinect/) layouts.
     godotcpp_root = None
     _search = ext_native_dir
     for _ in range(6):
@@ -147,8 +193,6 @@ def _post_build_sync(target, source, env):
         )
 
 if built:
-    # Create a pseudo-target that runs after all libraries are linked.
     _sync = Command("_gdext_sync", [], _post_build_sync)
     AlwaysBuild(_sync)
-    # Ensure sync runs after every library target.
     Depends(_sync, DEFAULT_TARGETS)

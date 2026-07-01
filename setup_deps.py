@@ -48,9 +48,9 @@ SPOUT2_DIR = os.path.join(ROOT, "addons", "gn_ext_spout", "native", "Spout2")
 
 
 def header(msg):
-    print(f"\n{'─' * 60}")
+    print(f"\n{'-' * 60}")
     print(f"  {msg}")
-    print(f"{'─' * 60}")
+    print(f"{'-' * 60}")
 
 
 def ensure_gdignore(directory):
@@ -91,15 +91,25 @@ def run_extension_script(script_path):
     ext_name = os.path.basename(os.path.dirname(script_path))
     script_name = os.path.basename(script_path)
     print(f"  Running {ext_name}/{script_name} ...")
-    subprocess.run(
+    result = subprocess.run(
         [sys.executable, script_path, "--no-enable"],
         cwd=os.path.dirname(script_path),
-        check=True,
     )
+    if result.returncode != 0:
+        print(f"  [warn] {ext_name}/{script_name} exited {result.returncode} (non-fatal)")
+        return False
     print(f"  [done] {ext_name}/{script_name}")
+    return True
 
 
 def main():
+    # Windows consoles default to cp1252 — force UTF-8 for Unicode log output.
+    if sys.platform == "win32":
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
     parser = argparse.ArgumentParser(description="GONODES dependency setup")
     parser.add_argument(
         "--core", action="store_true",

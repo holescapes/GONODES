@@ -843,15 +843,17 @@ func test_primitive_sop_modifies_geo() -> void:
 	GNTestAssert.assert_true(out.has_geometry(), "primitive produces geometry")
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# SelectSOP
+# FilterSOP (wired filtering; SelectSOP is wireless-only)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_select_sop_passthrough() -> void:
 	var box := _make_box_geo()
-	var node := _make_node(SelectSOP.new(), "sel1")
+	var node := _make_node(FilterSOP.new(), "filt1")
+	node.set_param_value("method", 0)  # By Range
+	node.set_param_value("start", 0)
+	node.set_param_value("end", 999999)
 	var out := _cook_with(node, [box] as Array[GNData]) as GNGeoData
-	# SelectSOP rebuilds via SurfaceTool which may change vertex count
-	GNTestAssert.assert_gt(_total_verts(out), 0, "select produces geometry")
+	GNTestAssert.assert_gt(_total_verts(out), 0, "filter passes geometry through")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CarvesSOP

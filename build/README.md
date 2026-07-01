@@ -6,19 +6,30 @@ module handles everything else.
 
 ## Quick Start
 
+**Windows (recommended):** from repo root after installing Python, SCons, and MSVC:
+
+```powershell
+$env:PYTHONUTF8 = "1"
+python setup_deps.py
+.\scripts\build_windows.ps1
+```
+
+**Manual:**
+
 ```bash
-# First time: fetch godot-cpp and other dependencies (from repo root)
-python setup_deps.py --core
+# First time: fetch godot-cpp and extension SDKs (from repo root)
+python setup_deps.py
 
 cd build
 
 # Build everything for the current platform:
 scons -j4
 
-# Build everything for a specific platform:
-scons platform=windows arch=x86_64 -j4
-scons platform=linux   arch=arm64  -j4
-scons platform=macos   arch=arm64  -j4
+# Build tiers / subsets:
+scons tier=core -j4          # core extensions + gn_ext_native
+scons tier=all -j4           # all extensions (SDK probe skip)
+scons tier=optional -j4      # optional extensions only
+scons exts=gn_ext_hap,gn_ext_midi -j4
 
 # Build a single extension:
 scons ext=gn_ext_hap   platform=windows -j4
@@ -68,6 +79,10 @@ scons platform=windows arch=x86_64 -j4
 | `gn_ext_user_python` | All | `gn_user_python` | User Python operator hot-reload |
 
 Extensions that don't support the target platform are auto-skipped.
+Extensions marked `optional = true` in `build.cfg` are skipped when SDK
+`probe` files are missing. Use `tier`, `ext`, and `exts` SCons arguments
+to select what to build — see `build/gn_ext_plan.py` and
+`python scripts/list_extensions.py`.
 
 ## Cross-Compilation
 

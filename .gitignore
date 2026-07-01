@@ -44,6 +44,10 @@ addons/gn_ext_syphon/native/.gdignore
 # ── Built native binaries (rebuilt by scons / CI) ────────────────────────────
 addons/gn_ext_*/native/bin/
 
+# Extension-root bin/ and runtime/ (library_dest, pre-load DLLs outside native/)
+addons/gn_ext_*/bin/
+addons/gn_ext_*/runtime/
+
 # ── Downloaded SDKs & vendor libraries (re-downloaded by setup scripts / CI) ──
 # gdCEF / Chromium Embedded Framework — downloaded/cloned at build time
 addons/gn_ext_webrender/cef_artifacts/
@@ -64,8 +68,11 @@ addons/gn_ext_depth_sensor/native/ultraleap_sdk/
 # Blackmagic DeckLink SDK — proprietary, manual download required
 addons/gn_ext_blackmagic/native/decklink_sdk/
 
-# OpenCV SDK — Apache 2.0, manual download required
+# OpenCV SDK — Apache 2.0, downloaded by setup_opencv.py
 addons/gn_ext_opencv/native/opencv_sdk/
+addons/gn_ext_opencv/native/opencv-*.exe
+addons/gn_ext_opencv/native/opencv_extract/
+addons/gn_ext_opencv/native/opencv_extract_*/
 
 # Syphon Framework — BSD, cloned at build time
 addons/gn_ext_syphon/native/Syphon-Framework/

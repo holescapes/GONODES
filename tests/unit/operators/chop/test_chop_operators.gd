@@ -388,11 +388,11 @@ func test_null_chop_passthrough() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  SelectCHOP
+#  ChannelFilterCHOP (channel filtering; SelectCHOP is wireless-only)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_select_chop_filter_channel() -> void:
-	var node := _make_node(SelectCHOP.new(), "select1")
+	var node := _make_node(ChannelFilterCHOP.new(), "filter1")
 	node.set_param_value("pattern", "a")
 	var input := _make_chop_data({
 		"a": PackedFloat32Array([1.0]),
@@ -400,7 +400,7 @@ func test_select_chop_filter_channel() -> void:
 		"c": PackedFloat32Array([3.0])
 	})
 	var out: GNChannelData = _cook_with(node, [input]) as GNChannelData
-	GNTestAssert.assert_not_null(out, "select output")
+	GNTestAssert.assert_not_null(out, "filter output")
 	GNTestAssert.assert_true(out.channels.has("a"), "has channel a")
 	GNTestAssert.assert_false(out.channels.has("b"), "no channel b")
 	GNTestAssert.assert_false(out.channels.has("c"), "no channel c")

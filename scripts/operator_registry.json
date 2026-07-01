@@ -323,6 +323,11 @@
     "extension": null,
     "params": [
       {
+        "name": "device",
+        "type": "menu",
+        "default": null
+      },
+      {
         "name": "active",
         "type": "bool",
         "default": false
@@ -1052,6 +1057,11 @@
         "default": false
       },
       {
+        "name": "bind_address",
+        "type": "string",
+        "default": ""
+      },
+      {
         "name": "channels",
         "type": "int",
         "default": 512
@@ -1718,8 +1728,8 @@
       },
       {
         "name": "device",
-        "type": "int",
-        "default": -1
+        "type": "menu",
+        "default": null
       },
       {
         "name": "channel_filter",
@@ -2374,8 +2384,8 @@
     "params": [
       {
         "name": "port",
-        "type": "int",
-        "default": 0
+        "type": "menu",
+        "default": null
       },
       {
         "name": "channel_filter",
@@ -2408,8 +2418,8 @@
     "params": [
       {
         "name": "port",
-        "type": "int",
-        "default": 0
+        "type": "menu",
+        "default": null
       },
       {
         "name": "channel",
@@ -5614,8 +5624,8 @@
       },
       {
         "name": "device",
-        "type": "int",
-        "default": -1
+        "type": "menu",
+        "default": null
       },
       {
         "name": "channel_filter",
@@ -5998,8 +6008,8 @@
     "params": [
       {
         "name": "port",
-        "type": "string",
-        "default": "COM3"
+        "type": "menu",
+        "default": null
       },
       {
         "name": "baud_rate",
@@ -6037,8 +6047,8 @@
     "params": [
       {
         "name": "port",
-        "type": "string",
-        "default": "COM3"
+        "type": "menu",
+        "default": null
       },
       {
         "name": "baud_rate",
@@ -6076,8 +6086,8 @@
     "params": [
       {
         "name": "port",
-        "type": "string",
-        "default": "COM3"
+        "type": "menu",
+        "default": null
       },
       {
         "name": "baud_rate",
@@ -6471,7 +6481,7 @@
       {
         "name": "universe",
         "type": "int",
-        "default": 1
+        "default": 0
       },
       {
         "name": "start_channel",
@@ -6539,7 +6549,7 @@
       {
         "name": "universe",
         "type": "int",
-        "default": 1
+        "default": 0
       },
       {
         "name": "start_channel",
@@ -6593,7 +6603,7 @@
       {
         "name": "universe",
         "type": "int",
-        "default": 1
+        "default": 0
       },
       {
         "name": "start_channel",
@@ -6643,7 +6653,7 @@
       {
         "name": "universe",
         "type": "int",
-        "default": 1
+        "default": 0
       },
       {
         "name": "start_channel",
@@ -8872,6 +8882,11 @@
         "default": false
       },
       {
+        "name": "device",
+        "type": "menu",
+        "default": null
+      },
+      {
         "name": "gain",
         "type": "float",
         "default": 1.0
@@ -9089,6 +9104,11 @@
         "name": "active",
         "type": "bool",
         "default": false
+      },
+      {
+        "name": "bind_address",
+        "type": "string",
+        "default": ""
       }
     ]
   },

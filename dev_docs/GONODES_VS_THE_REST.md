@@ -856,7 +856,7 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 - **27 improvement roadmap items:** 26 of 27 implemented. Only FLIP Fluid (hybrid particle-grid) remains as a deliberate future stretch goal (#23).
 - **TOP/IMG gaps:** 18 gap items resolved — 7 new operators built, 4 covered by existing ops, 7 implemented in `gn_ext_opencv`.
 - **COMP gaps:** 10 identified, all 10 implemented (ConstraintCOMP, BoneCOMP, LODCOMP, PathCOMP, VehicleCOMP, NavigationCOMP, FeedbackCOMP, TimeCOMP, AudioListenerCOMP, AudioSourceCOMP).
-- **Audio gaps:** 13 audio operators in `gn_ext_audio`. 9 are fully functional (synthesis, EQ, effects). 4 (AudioMovieCHOP, AudioRenderCHOP, AudioStreamInCHOP, AudioStreamOutCHOP) are stubs awaiting native audio back-end implementation.
+- **Audio gaps:** All 13 operators in `gn_ext_audio` are implemented (synthesis, EQ, effects, movie extract, UDP stream I/O, offline WAV bounce). Broader codec support for AudioMovieCHOP depends on `gn_ext_ffmpeg` for non-OGV formats.
 - **CHOP non-audio gaps:** All 4 implemented (AreaCHOP, ReplaceCHOP, GestureCHOP, StateMachineCHOP).
 - **SOP gaps:** All 6 implemented (ResampleSOP, MeasureSOP, CreepSOP, ProjectSOP, HoleSOP, ConvertLineSOP).
 - **DAT gaps:** Both implemented (ParameterDAT, SystemDAT).
@@ -882,7 +882,7 @@ All operator gaps identified in the original audit (§18.3–§18.13, removed Ap
 | **NET** | 15 | Host embedding (LibGodot) + subnet tunnels |
 | **FIX** | 8 | Extension-defined family (PixelMapper) -- LED UV layout for DMX |
 | **SCRIPT** | 3 | 1 core (GDScriptSCRIPT) + 2 extension (PythonSCRIPT, NativeSCRIPT) |
-| **TOTAL** | **588** | 469 core + 119 from 23 extensions |
+| **TOTAL** | **588** | 469 core + 119 from 25 extension folders |
 
 **GONODES exceeds competitor coverage in:** TOP (138 vs TD's ~90), CHOP (108 vs TD's ~70), SOP (85 vs TD's ~50), DAT (51 vs TD's ~30), POP (12 vs 0), VOL (12 vs 0), SDF (29 vs 0), UI (36 vs TD's ~25).
 

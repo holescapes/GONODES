@@ -2,6 +2,11 @@
 
 This guide covers building GONODES Player templates for all supported platforms and using the **Export Patch** dialog to package your patches for distribution.
 
+> **Native C++ extensions** (MIDI, Spout, OpenCV, etc.) are built separately from
+> the editor export flow. See [dev_docs/BUILD.md](../../dev_docs/BUILD.md) for the
+> full fresh-clone guide, or on Windows run `scripts/build_windows.ps1` from the
+> repo root after installing Python, SCons, and MSVC.
+
 
 ## Overview
 

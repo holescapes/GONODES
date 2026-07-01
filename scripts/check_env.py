@@ -180,60 +180,44 @@ def check_godotcpp():
         record(WARN, "godot-cpp libs", f"no template_release libs for {plat}")
 
 
-# ── SDK checks (scanned from build.cfg files) ─────────────────────────────────
+# ── SDK checks (via gn_ext_plan — same logic as build/SConstruct) ─────────────
 
-# Directories that are bundled thirdparty code (not external SDKs).
-_BUNDLED_DIRS = {"src", "hap", "snappy", "squish", "rtmidi", "Syphon-Framework"}
+def check_extension_build_plan():
+    """Report each discovered native extension's build plan for this host."""
+    sys.path.insert(0, os.path.join(ROOT, "build"))
+    from gn_ext_plan import (
+        discover_extensions,
+        plan_extensions,
+        parse_build_cfg,
+        probe_status,
+        detect_host_platform,
+    )
 
-# Directories cloned by setup_deps.py (auto-fetched, not manual SDKs).
-_AUTO_FETCHED = {"Spout2", "godot-cpp"}
+    plat = detect_host_platform()
+    addons = os.path.join(ROOT, "addons")
+    extensions = discover_extensions(addons)
 
+    to_build, skipped = plan_extensions(extensions, plat, defaults_only=False, tier="all")
+    build_names = {name for name, *_ in to_build}
 
-def _parse_sdk_dirs_from_build_cfg(cfg_path: str) -> list[tuple[str, str, bool]]:
-    """Parse a build.cfg and return SDK directories it references.
-
-    Returns list of (sdk_dir_relative_to_native, extension_name, is_optional).
-    Only returns dirs that look like external SDKs (not src/, not bundled thirdparty).
-    """
-    ext_dir = os.path.dirname(os.path.dirname(cfg_path))  # addons/gn_ext_foo
-    ext_name = os.path.basename(ext_dir)
-    native_dir = os.path.dirname(cfg_path)
-
-    cfg = configparser.ConfigParser(interpolation=None)
-    cfg.read(cfg_path, encoding="utf-8")
-
-    sdk_dirs: set[str] = set()
-
-    # Gather include_dirs and lib_dirs from all sections
-    for section in cfg.sections():
-        for key in cfg[section]:
-            if "include_dir" in key or "lib_dir" in key:
-                for part in cfg[section][key].split(","):
-                    part = part.strip()
-                    if not part:
-                        continue
-                    # Extract the top-level directory
-                    top = part.split("/")[0].split("\\")[0]
-                    if top and top not in _BUNDLED_DIRS and top not in _AUTO_FETCHED:
-                        sdk_dirs.add(top)
-
-    results = []
-    for sd in sorted(sdk_dirs):
-        # Check if this SDK is optional (common pattern: depth sensor sub-SDKs)
-        is_optional = "depth_sensor" in ext_name or "optional" in sd.lower()
-        full_path = os.path.join(native_dir, sd)
-        results.append((full_path, ext_name, is_optional))
-
-    return results
+    for ext_name, native_dir, cfg_path in extensions:
+        cfg = parse_build_cfg(cfg_path)
+        tier = cfg.get("tier", "extension")
+        sdk = probe_status(cfg, plat, native_dir)
+        label = f"{ext_name} [{tier}]"
+        if ext_name in build_names:
+            record(PASS, label, f"would build (sdk={sdk})")
+        elif cfg.get("optional"):
+            reason = next((r for n, r in skipped if n == ext_name), "skipped")
+            record(SKIP, label, reason)
+        else:
+            reason = next((r for n, r in skipped if n == ext_name), "skipped")
+            record(WARN, label, reason)
 
 
 def check_sdks():
-    """Scan all build.cfg files to discover SDK requirements programmatically."""
-    cfg_pattern = os.path.join(ROOT, "addons", "gn_ext_*", "native", "build.cfg")
-    cfg_files = sorted(glob.glob(cfg_pattern))
-
-    # Also check known SDK locations for extensions without build.cfg (e.g., FFmpeg)
-    # These use prebuilt shared libs with no native compile step.
+    """Scan extensions and prebuilt-only addons."""
+    # Prebuilt extensions without build.cfg (e.g., FFmpeg)
     system = platform.system().lower()
     plat_dirs = {
         "windows": "win64",
@@ -245,8 +229,7 @@ def check_sdks():
         ext_name = os.path.basename(os.path.dirname(native_dir))
         cfg_path = os.path.join(native_dir, "build.cfg")
         if os.path.isfile(cfg_path):
-            continue  # handled below
-        # Check if it has platform subdirectories with shared libs
+            continue
         plat_subdir = plat_dirs.get(system)
         if plat_subdir:
             plat_path = os.path.join(native_dir, plat_subdir)
@@ -260,33 +243,8 @@ def check_sdks():
                 else:
                     record(WARN, f"{ext_name} libs", f"{plat_subdir}/ exists but no shared libs found")
 
-    # Parse each build.cfg for SDK deps
-    for cfg_path in cfg_files:
-        ext_dir = os.path.dirname(os.path.dirname(cfg_path))
-        ext_name = os.path.basename(ext_dir)
+    check_extension_build_plan()
 
-        sdk_deps = _parse_sdk_dirs_from_build_cfg(cfg_path)
-        if not sdk_deps:
-            continue
-
-        for sdk_path, _, is_optional in sdk_deps:
-            sdk_name = os.path.basename(sdk_path)
-            label = f"{ext_name}/{sdk_name}"
-            if os.path.isdir(sdk_path):
-                record(PASS, label, "present")
-            elif is_optional:
-                record(SKIP, label, "optional — not installed")
-            else:
-                record(WARN, label, "missing — extension will not build")
-
-    # Check embeddable Python for gn_ext_user_python
-    py_toolchain = os.path.join(ROOT, "addons", "gn_ext_user_python", "toolchain", "python")
-    if os.path.isdir(py_toolchain):
-        record(PASS, "gn_ext_user_python/toolchain", "embeddable Python present")
-    else:
-        record(WARN, "gn_ext_user_python/toolchain", "missing — user Python operators won't work")
-
-    # Check Spout2 (auto-fetched, but verify)
     spout_dir = os.path.join(ROOT, "addons", "gn_ext_spout", "native", "Spout2")
     if platform.system() == "Windows":
         if os.path.isdir(spout_dir):

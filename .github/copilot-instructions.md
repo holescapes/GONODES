@@ -4,7 +4,7 @@
 > Cursor reads `.cursor/rules/gonodes.mdc`. Curated memories: `AI_MEMORY.md`.
 
 > Node-based visual programming framework on Godot 4.6 for real-time visual art.
-> 588 operators, 15 families (469 core + 119 extension), 131 native C++ accelerated variants, 23 extensions.
+> 588 operators, 15 families (469 core + 119 extension), 131 native C++ accelerated variants, 25 extension folders (`addons/gn_ext_*/`).
 
 ## Architecture
 
@@ -247,7 +247,16 @@ python scripts/bundle_toolchain.py                    # 4. NativeSCRIPT toolchai
 python addons/gn_ext_user_python/setup_python.py     # 5. PythonSCRIPT toolchain
 ```
 
-### Key build system rules:
+### Extension build policy (`build.cfg`)
+
+| Field | Purpose |
+|-------|---------|
+| `tier` | `core` / `extension` / `optional` — used by `scons tier=...` |
+| `default` | Include in bare `scons` when `true` |
+| `optional` | Skip (not fail) when SDK `probe` missing |
+| `probe` | Per-platform file(s) that must exist; auto-derived from `lib_dirs`+`libs` |
+
+Planner: `build/gn_ext_plan.py` (shared by SConstruct, `check_env.py`, `list_extensions.py`).
 - **`build.cfg`** in each extension's `native/` directory declares linking AND runtime deps
 - **`runtime_dlls`** field in platform sections (e.g., `[windows]`) lists DLLs that must be copied to `bin/` alongside the compiled library
 - **`gn_build.py`** auto-copies runtime DLLs during build step 3
@@ -262,7 +271,7 @@ python addons/gn_ext_user_python/setup_python.py     # 5. PythonSCRIPT toolchain
 | ML/ONNX | `scripts/setup_ml.py` | Downloads ONNX Runtime |
 | WebRender/CEF | `scripts/setup_cef.py` | Downloads gdCEF |
 | Python | `addons/gn_ext_user_python/setup_python.py` | Downloads embeddable CPython + NumPy |
-| OpenCV | (SDK bundled in `native/opencv_sdk/`) | Runtime DLL auto-copied via `build.cfg` |
+| OpenCV | `addons/gn_ext_opencv/setup_opencv.py` | Downloads OpenCV SDK (Windows); system packages on Linux/macOS |
 
 ## Key File Locations
 

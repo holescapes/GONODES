@@ -305,8 +305,10 @@ def setup_models():
         log("  yolo export model=yolov8n.pt format=onnx")
         log(f"  Then copy yolov8n.onnx to {MODELS_DIR}/")
 
-    log(f"Models: {success} downloaded, {skipped} already present, {failed} failed")
-    return failed == 0
+    log(f"Models: {success} downloaded, {skipped} already present, {failed} failed (optional)")
+    if failed:
+        log("Some optional models failed to download — ML operators using those models won't work.")
+    return True
 
 
 # ── Enable .gdextension ──────────────────────────────────────────────────────
@@ -355,8 +357,7 @@ def main():
     if not args.sdk_only:
         print()
         log("Phase 2: Pre-trained ONNX Models")
-        if not setup_models():
-            ok = False
+        setup_models()
 
     if not args.no_enable and not args.models_only:
         print()

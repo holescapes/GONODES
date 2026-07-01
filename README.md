@@ -19,7 +19,7 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**588 operators** across **15 families**, plus **131 native C++ accelerated variants** and **23 extensions**.
+**588 operators** across **15 families**, plus **131 native C++ accelerated variants** and **25 extension folders** (`addons/gn_ext_*/`; 23 distributable packs in the table below, plus `gn_ext_native` acceleration and internal `gn_ext_host_bridge` for LibGodot).
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
@@ -86,13 +86,13 @@ Physics simulation (Jolt), environment/post-processing, instancing, animation �
 
 ### Extensions
 
-All 23 extensions are self-contained — delete a folder and it disappears cleanly, no core changes required.
+All extensions are self-contained — delete a folder and it disappears cleanly, no core changes required.
 
 | Extension | Ops | What It Does | Requirements |
 |-----------|-----|--------------|--------------|
 | **SDF** | 29 | Signed distance field composition — 10 primitives, 5 booleans, 8 modifiers, raymarcher | Pure GDScript — no build needed |
-| **Audio** | 13 | Synthesis, EQ, reverb, delay, pitch shift, gate, envelope | Pure GDScript. **Note:** 4 operators (MovieCHOP, RenderCHOP, StreamIn/Out) are stubs awaiting native audio back-end |
-| **OpenCV** | 20 | 20 computer vision operators — contour, Hough, ArUco, optical flow, calibration | Windows binary shipped; other platforms: `build/SConstruct` |
+| **Audio** | 13 | Synthesis, EQ, reverb, delay, pitch shift, gate, envelope, movie extract, UDP stream, offline bounce | Pure GDScript — no native dependencies |
+| **OpenCV** | 20 | 20 computer vision operators — contour, Hough, ArUco, optical flow, calibration | `setup_opencv.py` + build `gn_ext_opencv` |
 | **ML** | 7 | ONNX Runtime ML inference — pose, hand, face, depth, style, segmentation, detection | Run `python scripts/setup_ml.py` to download ONNX Runtime (~30 MB) |
 | **Mapper** | 10 | Projection mapping — QuadMap, BezierMap, GridWarp, EdgeBlend, calibration | Pure GDScript — no build needed |
 | **PixelMapper** | 10 | LED pixel mapping — define fixture layouts, GPU sample, DMX output | Pure GDScript — no build needed |
@@ -100,18 +100,18 @@ All 23 extensions are self-contained — delete a folder and it disappears clean
 | **ISF** | 1 | Interactive Shader Format v2 — auto-generated params from JSON headers, multi-pass | Pure GDScript — no build needed |
 | **LibPd** | 3 | Pure Data audio synthesis — send/receive messages, control patches | Requires compiled libpd binary (see extension README) |
 | **Serial** | 2 | Serial port I/O — Arduino, DMX controllers, sensors | Requires gn_ext_native binary for full functionality |
-| **HAP** | 2 | GPU-direct HAP/HAP-Q video codec — zero CPU decode, S3TC frames direct to GPU | Windows binary shipped |
-| **Spout** | 2 | Windows GPU texture sharing with Resolume, OBS, TouchDesigner | Windows only. Binary shipped |
+| **HAP** | 2 | GPU-direct HAP/HAP-Q video codec — zero CPU decode, S3TC frames direct to GPU | Build `gn_ext_hap` |
+| **Spout** | 2 | Windows GPU texture sharing with Resolume, OBS, TouchDesigner | Windows only — build `gn_ext_spout` |
 | **Syphon** | 2 | macOS GPU texture sharing with VDMX, MadMapper, CoGe | macOS only. Requires Syphon Framework build |
-| **Video Capture** | 1 | Webcam / capture device input (Media Foundation / AVFoundation / V4L2) | Binary shipped (Windows); other platforms: build from source |
-| **MIDI** | 2 | RtMidi I/O — notes, CC, pitch bend, clock | Binary shipped (Windows) |
-| **GPU Encode** | 1 | Hardware H.264/H.265 recording via OS encoder | Windows + macOS only. Binary shipped |
+| **Video Capture** | 1 | Webcam / capture device input (Media Foundation / AVFoundation / V4L2) | Build `gn_ext_video_capture` |
+| **MIDI** | 2 | RtMidi I/O — notes, CC, pitch bend, clock | Build `gn_ext_midi` |
+| **GPU Encode** | 1 | Hardware H.264/H.265 recording via OS encoder | Windows + macOS — build `gn_ext_gpu_encode` |
 | **FFmpeg** | 1 | H.264/H.265/VP9/AV1 video decode via FFmpeg | Requires [EIRTeam.FFmpeg](https://github.com/EIRTeam/EIRTeam.FFmpeg) GDExtension |
 | **NDI** | 4 | NDI video/audio I/O over the network | Requires proprietary NDI SDK. Disabled until SDK is present |
 | **Depth Sensor** | 2 | Azure Kinect + RealSense + Ultraleap — depth, skeleton, hand tracking | Requires device SDK (Azure Kinect SDK / RealSense SDK / Ultraleap SDK) |
 | **Blackmagic** | 3 | Blackmagic Design DeckLink capture/output | Requires DeckLink hardware and Blackmagic SDK |
 | **User Native** | 1 | Write custom C++ operators in-editor with hot-reload | Bundled godot-cpp + MSVC/Clang. Compiles on first use |
-| **User Python** | 1 | Write custom Python operators with NumPy | Python 3.10 + runtime DLLs shipped (Windows); other platforms: setup script |
+| **User Python** | 1 | Write custom Python operators with NumPy | `setup_python.py` + build `gn_ext_user_python` |
 | **Web Render** | 1 | Render HTML/CSS/JS/WebGL to texture via Chromium CEF | Requires `python scripts/setup_cef.py` (~550 MB download) |
 
 Extensions can go far beyond adding operators — they can define **entirely new data families** with custom port types, wire colors, data classes, and palette sections. The SDF extension demonstrates this: it registers a new "SDF" family at runtime, complete with 40+ operators, custom data type (`GNSDFData`), and its own wire color. No core code modification is required to add a new family. See [CONTRIBUTING.md §5](dev_docs/CONTRIBUTING.md) for the full extension authoring guide.
@@ -222,9 +222,12 @@ All core operators and most extensions are pure GDScript -- no compilation neede
 3. Open Godot, click **Import**, select the `gonodes` folder
 4. Open and run `scenes/gn_editor.tscn`
 
-That is all. The editor is fully functional with pre-compiled Windows binaries already in the repo for: MIDI, HAP, Spout, VideoCapture, OpenCV, GPU Encode, and the User Native/Python script nodes.
+That is all. The editor runs immediately with **pure GDScript** operators — no
+build required. Native C++ extensions (MIDI, HAP, Spout, OpenCV, etc.) must
+be built locally; see [Building Native Extensions](#building-native-extensions-optional) below.
 
-**Requirements:** Godot 4.6.1, Python 3.8+ (for utility scripts). Windows 10/11 (pre-built binaries ship for Windows); macOS and Linux require building extensions from source.
+**Requirements:** Godot 4.6.1, Python 3.8+ (for build scripts). Windows 10/11,
+macOS, or Linux. The repo ships **source only** — no pre-built binaries in git.
 
 ### Dependency Version Management
 
@@ -240,13 +243,24 @@ GODOTCPP_BRANCH=4.5
 
 ### Building Native Extensions (optional)
 
-GONODES works out of the box with pure GDScript. Native C++ extensions provide acceleration for CPU-heavy operators and hardware I/O. A unified build system compiles all extensions from a single entry point:
+GONODES works out of the box with pure GDScript. Native C++ extensions provide acceleration for CPU-heavy operators and hardware I/O. A unified build system compiles all extensions from a single entry point.
+
+**Windows quick path:**
+
+```powershell
+$env:PYTHONUTF8 = "1"
+pip install scons
+.\scripts\build_windows.ps1
+```
+
+**Manual steps (all platforms):**
 
 ```bash
 # Prerequisites: Python 3.8+, SCons, MSVC (Windows) or GCC/Clang (Linux/macOS)
 pip install scons
+python scripts/check_env.py
 
-# 1. Fetch all dependencies (godot-cpp, Spout2 SDK, extension SDKs):
+# 1. Fetch dependencies (godot-cpp, Spout2, setup_python, setup_opencv, setup_ml, ...)
 python setup_deps.py
 
 # 2. Build godot-cpp (once per Godot version):
@@ -259,14 +273,10 @@ cd build
 scons platform=windows arch=x86_64 target=template_release -j8
 cd ..
 # Extensions are auto-activated after build (sync_gdextensions.py runs post-build)
+# Optional extensions (NDI, OpenCV without SDK) are skipped — not fatal.
 
 # Or build a single extension:
-scons ext=gn_ext_hap platform=windows -j4
-scons ext=gn_ext_midi platform=linux -j4
-
-# List what's available:
-
-# Or build a single extension:
+cd build
 scons ext=gn_ext_hap platform=windows -j4
 scons ext=gn_ext_midi platform=linux -j4
 

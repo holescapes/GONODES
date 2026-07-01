@@ -101,17 +101,25 @@ All assertions call `_fail(msg)` which increments `_failure_count` and stores th
 
 - Godot 4.6 editor binary on your system path (or specify the full path)
 - No additional plugins or packages required
+- **First run after a fresh clone:** Godot must import the project once so
+  `class_name` globals (e.g. `GNTestAssert`) are registered:
+
+```bash
+godot --headless --path /path/to/gonodes --import
+```
 
 ### Run all tests
 
 ```bash
-godot --headless --path /path/to/Gonodes -s tests/test_runner.gd
+godot --headless --path /path/to/gonodes -s res://tests/test_runner.gd
 ```
 
-On Windows with the project's Godot build:
+On Windows (replace with your Godot 4.6 path):
 
 ```powershell
-& "C:\Ford\Godot\godot\bin\godot.windows.editor.x86_64.console.exe" --headless --path "C:\MeOwn\Gonodes" -s tests/test_runner.gd
+$env:PYTHONUTF8 = "1"
+& "C:\path\to\Godot_v4.6.x-stable_win64.exe" --headless --path "C:\path\to\gonodes" --import
+& "C:\path\to\Godot_v4.6.x-stable_win64.exe" --headless --path "C:\path\to\gonodes" -s res://tests/test_runner.gd
 ```
 
 ### Filter by name

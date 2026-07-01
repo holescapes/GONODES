@@ -34,14 +34,54 @@ After cloning the repository, nothing is compiled. All native extension
 `.gdextension` files ship as `.gdextension.disabled` so Godot starts
 cleanly without missing-binary errors.
 
+The repo contains **source only** — SDKs, toolchains, and compiled binaries
+are downloaded or built locally (never committed). A fresh clone does not
+require any git cleanup.
+
+### Windows prerequisites (from zero)
+
+Install these once before the build steps below:
+
+1. **Python 3.10+** — [python.org](https://www.python.org/downloads/) or
+   `winget install Python.Python.3.12`
+2. **SCons** — `pip install scons`
+3. **MSVC** — Visual Studio 2022 Build Tools with **Desktop development with C++**
+   (`winget install Microsoft.VisualStudio.2022.BuildTools`)
+4. **Godot 4.6.x** — [godotengine.org/download](https://godotengine.org/download)
+
+On Windows, set UTF-8 before running any project Python script (avoids
+`UnicodeEncodeError` on the default cp1252 console):
+
+```powershell
+$env:PYTHONUTF8 = "1"
+```
+
+**Quick path (Windows):** run the all-in-one script from the repo root:
+
+```powershell
+$env:PYTHONUTF8 = "1"
+.\scripts\build_windows.ps1
+```
+
+This runs `check_env.py`, `setup_deps.py`, godot-cpp, and the unified
+`build/scons` inside the MSVC environment.
+
+### Step-by-step (all platforms)
+
 ```bash
-# 1. Fetch all dependencies (godot-cpp + ALL extension SDKs, runs setup_*.py per extension)
+# 0. Pre-flight — verify tools, godot-cpp, and SDK presence
+python scripts/check_env.py
+
+# 1. Fetch all dependencies (godot-cpp + extension setup_*.py scripts)
+#    On Windows: includes setup_python.py, setup_opencv.py, setup_ml.py, etc.
+#    Extension script failures are non-fatal (e.g. optional ML models).
 python setup_deps.py
 
 # To fetch ONLY godot-cpp and skip extension SDKs (faster for CI/testing):
 # python setup_deps.py --core
 
 # 2. Build godot-cpp (once per Godot version)
+#    Windows: run inside MSVC environment (Developer Command Prompt or build_windows.ps1)
 cd addons/gn_ext_native/native/godot-cpp
 scons platform=windows arch=x86_64 target=template_release -j8
 cd ../../../..
@@ -51,21 +91,57 @@ cd build
 scons platform=windows arch=x86_64 target=template_release -j8
 cd ..
 # Post-build hook automatically runs sync_gdextensions.py to activate extensions.
+# Extensions whose SDKs are missing are SKIPPED (not fatal) — e.g. NDI, OpenCV
+# on Windows if setup_opencv.py was not run or NDI SDK not installed.
 # Runtime DLLs declared in build.cfg (runtime_dlls field) are auto-copied to their
 # destination (bin/ for most; runtime/ for extensions that need Godot [dependencies]
 # pre-loading, since native/ is .gdignored and invisible to res:// paths).
 
 # 4. Bundle toolchains for user C++/Python nodes (optional)
 python scripts/bundle_toolchain.py
-python addons/gn_ext_user_python/setup_python.py
 
 # 5. Export Player templates (optional — only needed for Quick Build)
 .\scripts\build_templates.ps1 -Platforms all
 ```
 
-After step 3, open Godot — all native extensions will be loaded and
-functional. Steps 4–5 are only needed if you want NativeSCRIPT/PythonSCRIPT
-operators or the Quick Build export feature.
+> **Note:** `setup_deps.py` (step 1) already runs `setup_python.py` and
+> `setup_opencv.py` (Windows). You do **not** need a separate step before
+> building `gn_ext_user_python` or `gn_ext_opencv`.
+
+### Optional extensions (skipped when SDK missing)
+
+| Extension | SDK | Setup |
+|-----------|-----|-------|
+| `gn_ext_ndi` | NDI SDK (proprietary) | Manual — see `addons/gn_ext_ndi/README.md` |
+| `gn_ext_opencv` | OpenCV 4.10 (Windows) | `python addons/gn_ext_opencv/setup_opencv.py` (auto via `setup_deps.py`) |
+| `gn_ext_depth_sensor` | Azure Kinect / RealSense / Ultraleap | Manual per backend — see extension README |
+| `gn_ext_webrender` | CEF (~550 MB) | `python addons/gn_ext_webrender/setup_cef.py` |
+
+Unified `build/scons` continues when optional extensions are skipped.
+
+**Build selection** (see `build/gn_ext_plan.py`):
+
+| Command | Builds |
+|---------|--------|
+| `scons` | `default=true` extensions + `gn_ext_native` (SDK probes must pass) |
+| `scons tier=all` | All discovered extensions |
+| `scons tier=core` | `tier=core` extensions + `gn_ext_native` |
+| `scons tier=optional` | `tier=optional` extensions only |
+| `scons exts=a,b,c` | Explicit list |
+| `scons ext=gn_ext_hap` | Single extension |
+
+Inspect before building: `python scripts/list_extensions.py` or `cd build && scons --list-extensions`.
+
+### First test run (after build)
+
+Godot must import the project once to register `class_name` globals:
+
+```bash
+godot --headless --path . --import
+godot --headless --path . -s res://tests/test_runner.gd
+```
+
+See [dev_docs/TESTING.md](TESTING.md) for details.
 
 ### Runtime Dependencies
 
@@ -887,6 +963,8 @@ Each extension's `build.cfg` declares what to build and where:
 name = gn_hap_codec
 entry_symbol = gn_hap_codec_init
 platforms = windows, macos, linux
+tier = core
+default = true
 
 [sources]
 cpp = src/*.cpp
@@ -912,19 +990,23 @@ defines = <linux defines if any>
 | `[library]` | `name` | Output library name (e.g., `gn_hap_codec` produces `libgn_hap_codec.<platform>.<target>.<arch>.dll`) |
 | | `entry_symbol` | GDExtension init function name |
 | | `platforms` | Comma-separated list: `windows`, `macos`, `linux` (or omit for all) |
-| | `vendor_setup` | Pre-build setup script relative to extension root + flags (e.g., `setup_ml.py --sdk-only --no-enable`). CI auto-discovers and runs it. |
+| | `tier` | `core` (default build set), `extension` (normal pack), or `optional` (proprietary/large SDK) |
+| | `default` | `true`/`false` — include in bare `scons` (default: `true` except when `optional=true`) |
+| | `optional` | `true` — missing SDK probe skips extension instead of failing unified build |
+| | `setup` | Pre-build setup script relative to extension root (e.g., `setup_ml.py --sdk-only --no-enable`). Also discovered by `setup_deps.py` via `setup_*.py` |
+| | `vendor_setup` | Alias for `setup` (legacy) |
 | | `vendor_clone` | Git repo + destination dir for vendored source (e.g., `https://github.com/leadedge/Spout2.git Spout2`). CI auto-clones before build. |
 | `[sources]` | `cpp` | Glob pattern for C++ sources (default: `src/*.cpp`) |
 | | `c` | Glob pattern for C sources |
 | | `objcxx` | Glob pattern for Objective-C++ sources (`.mm` files, macOS) |
 | | `thirdparty_cpp/c/cc` | Glob patterns for bundled third-party code |
 | | `include_dirs` | Comma-separated include directories |
-| `[windows]` | `libs` | System libraries to link (e.g., `opengl32, d3d11, dxgi`) |
-| | `defines` | Preprocessor defines (e.g., `__WINDOWS_MM__`) |
-| `[macos]` | `frameworks` | macOS frameworks to link (e.g., `Cocoa, OpenGL, Metal`) |
-| | `objcxx_sources` | Platform-specific ObjC++ sources |
-| `[linux]` | `libs` | Linux libraries to link (e.g., `asound, pthread`) |
-| | `defines` | Preprocessor defines (e.g., `__LINUX_ALSA__`) |
+| `[windows]` / `[linux]` / `[macos]` | `libs` | Libraries to link |
+| | `lib_dirs` | Library search paths (used to auto-derive `probe` if not set) |
+| | `probe` | Comma-separated files that must exist before compile (relative to `native/`). Auto-derived as `{lib_dirs}/{libs}.lib` on Windows when omitted |
+| | `defines` | Preprocessor defines |
+| | `frameworks` | macOS frameworks (macOS section only) |
+| | `libs_<suffix>` / `lib_dirs_<suffix>` | Optional partial SDK backends (see depth_sensor) |
 
 #### All Native Extensions
 
@@ -1301,7 +1383,9 @@ writing it back produces mojibake: `—` (em-dash) becomes `Ã¢â‚¬â€`,
 | **Dependency setup** | |
 | `setup_deps.py`                               | Root setup script — clones godot-cpp, Spout2, runs extension SDKs |
 | `addons/gn_ext_ml/setup_ml.py`                | Downloads ONNX Runtime SDK + pre-trained models |
+| `addons/gn_ext_opencv/setup_opencv.py`        | Downloads OpenCV SDK (Windows) |
 | `addons/gn_ext_user_python/setup_python.py`   | Downloads embeddable CPython + NumPy |
+| `scripts/build_windows.ps1`                   | All-in-one Windows native build (MSVC + scons) |
 | **Post-build / release** | |
 | `scripts/sync_gdextensions.py`                | Activate/deactivate `.gdextension` based on binary presence |
 | `scripts/clean_builds.py`                     | Remove all binaries + deactivate extensions (pre-release clean) |

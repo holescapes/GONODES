@@ -29,10 +29,10 @@ All operators are pure GDScript — no native dependencies.
 |----------|------|-------------|
 | AudioMovieCHOP | CHOP | Extract audio track from video file |
 | AudioRenderCHOP | CHOP | Offline render of CHOP audio chain to buffer |
-| AudioStreamInCHOP | CHOP | Receive audio over network (UDP/RTP) |
-| AudioStreamOutCHOP | CHOP | Send audio over network (UDP/RTP) |
+| AudioStreamInCHOP | CHOP | Receive audio over UDP (GNAU packet protocol; pairs with AudioStreamOutCHOP) |
+| AudioStreamOutCHOP | CHOP | Send audio over UDP (GNAU packet protocol; pairs with AudioStreamInCHOP) |
 
-### Tier 2 operators require network or media infrastructure — currently stubs awaiting native implementation.
+Tier 2 operators are pure GDScript. AudioMovieCHOP uses Godot's audio bus capture (OGV natively; MP4/MOV via `gn_ext_ffmpeg`). AudioRenderCHOP bounces a CHOP chain to WAV on demand.
 
 ### Tier 3 — Effects & Processing
 

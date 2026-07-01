@@ -82,9 +82,30 @@ Requires the `GNOpenCV` GDExtension (`native/` directory).
 ## OpenCV SDK Setup
 
 The OpenCV library is licensed under **Apache 2.0** and is **not** bundled in
-GONODES. You must obtain it separately.
+GONODES. It is downloaded locally by the setup script (never committed to git).
 
-### Windows
+### Automated setup (recommended)
+
+```bash
+python addons/gn_ext_opencv/setup_opencv.py
+```
+
+On Windows this downloads OpenCV 4.10.0, extracts it to `native/opencv_sdk/`,
+and verifies the import library is present. The script also runs automatically
+when you execute `python setup_deps.py` from the repo root.
+
+Options:
+- `--version 4.10.0` — use a specific OpenCV release
+- `--verify` — check SDK presence only (exit 1 if missing on Windows)
+- `--no-enable` — skip renaming `.gdextension.disabled`
+
+After setup, build:
+
+```bash
+cd build && scons ext=gn_ext_opencv platform=windows -j8
+```
+
+### Manual setup (Windows fallback)
 
 1. Download **OpenCV 4.10.0** (or compatible 4.x) from
    <https://opencv.org/releases/>

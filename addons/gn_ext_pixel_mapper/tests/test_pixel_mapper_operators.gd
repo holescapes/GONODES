@@ -207,7 +207,7 @@ func test_strip_fix_cook_defaults() -> void:
 	GNTestAssert.assert_eq(out.channel_layout, "rgb", "default rgb layout")
 	GNTestAssert.assert_eq(out.channels_per_led, 3, "rgb = 3 channels")
 	GNTestAssert.assert_eq(out.fixture_name, "strip", "default name")
-	GNTestAssert.assert_eq(out.universe, 1, "default universe")
+	GNTestAssert.assert_eq(out.universe, 0, "default universe (0-based)")
 	GNTestAssert.assert_eq(out.start_channel, 1, "default start_channel")
 	GNTestAssert.assert_eq(out.shape, &"strip", "shape is strip")
 

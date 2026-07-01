@@ -25,7 +25,8 @@ The C++ GDExtension embeds CPython via `Py_Initialize()` and provides:
 
 ## Quick Setup (Recommended)
 
-Run the automated setup script to download CPython + NumPy:
+Run the automated setup script **before** building the native extension
+(`setup_deps.py` runs this automatically on a fresh clone):
 
 ```bash
 python addons/gn_ext_user_python/setup_python.py
@@ -39,7 +40,11 @@ Options:
 - `--python-version 3.12.8` — use a specific Python version
 - `--skip-numpy` — skip NumPy installation
 
-After setup, build: `scons ext=gn_ext_user_python platform=<your_platform>`
+Then build:
+
+```bash
+cd build && scons ext=gn_ext_user_python platform=<your_platform> -j8
+```
 
 ## Requirements (Manual Setup)
 

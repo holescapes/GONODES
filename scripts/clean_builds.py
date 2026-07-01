@@ -34,7 +34,37 @@ def clean_all(workspace_root: str, dry_run: bool) -> dict:
         if not os.path.isdir(ext_path):
             continue
 
-        # ── Remove bin/ directories inside native/ subdirectories ──
+        # ── Deactivate .gdextension at extension root ──
+        for fname in os.listdir(ext_path):
+            if fname.endswith(".gdextension") and not fname.endswith(".disabled"):
+                old_path = os.path.join(ext_path, fname)
+                new_name = fname + ".disabled"
+                new_path = os.path.join(ext_path, new_name)
+                if dry_run:
+                    print(f"  [DRY RUN] Would deactivate {ext_name}/{fname}")
+                else:
+                    if os.path.isfile(new_path):
+                        os.remove(old_path)
+                    else:
+                        os.rename(old_path, new_path)
+                    print(f"  [-] Deactivated {ext_name}/{fname} -> {new_name}")
+                stats["extensions_deactivated"] += 1
+
+        # ── Remove extension-root bin/ and runtime/ (build outputs) ──
+        for root_out in ("bin", "runtime"):
+            out_dir = os.path.join(ext_path, root_out)
+            if os.path.isdir(out_dir):
+                file_count = sum(len(files) for _, _, files in os.walk(out_dir))
+                if dry_run:
+                    print(f"  [DRY RUN] Would remove {ext_name}/{root_out}/ "
+                          f"({file_count} files)")
+                else:
+                    shutil.rmtree(out_dir)
+                    print(f"  [-] Removed {ext_name}/{root_out}/ ({file_count} files)")
+                stats["binaries_removed"] += file_count
+                stats["dirs_removed"].append(f"{ext_name}/{root_out}/")
+
+        # ── Walk native/ subdirectories ──
         for sub_name in sorted(os.listdir(ext_path)):
             sub_path = os.path.join(ext_path, sub_name)
             if not os.path.isdir(sub_path):
