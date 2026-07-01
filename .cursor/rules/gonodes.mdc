@@ -1,0 +1,22 @@
+---
+description: GONODES project context and hard rules
+alwaysApply: true
+---
+
+# GONODES
+
+This is a Godot 4.6 node-based visual programming framework (588 operators).
+
+## Required reading (in order)
+
+1. `AGENTS.md` — cross-tool entry point
+2. `.github/copilot-instructions.md` — **canonical rules** (hard rules, operator structure, build)
+3. `AI_MEMORY.md` — curated project memories
+4. `GONODES_CONTEXT.md` — deep architecture (read specific sections on demand)
+
+## Behavior
+
+- Follow all Hard Rules in copilot-instructions (§25.x). Violations break the engine.
+- Never import `ui/` from `core/` or `operators/`.
+- Check family base classes before duplicating helper logic.
+- Run verification scripts after adding/modifying operators (`verify_new_operator.py`).

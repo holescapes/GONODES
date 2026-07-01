@@ -1,5 +1,8 @@
 # GONODES — Copilot Instructions
 
+> **Cross-tool:** `AGENTS.md` is the shared entry point. Copilot reads this file;
+> Cursor reads `.cursor/rules/gonodes.mdc`. Curated memories: `AI_MEMORY.md`.
+
 > Node-based visual programming framework on Godot 4.6 for real-time visual art.
 > 588 operators, 15 families (469 core + 119 extension), 131 native C++ accelerated variants, 23 extensions.
 
