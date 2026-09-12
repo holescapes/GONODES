@@ -17,17 +17,24 @@ All operators are pure GDScript + GPU shaders — no native library compilation 
 | ProjectionMaskTOP | Polygon/rectangle mask for selective projection |
 | ProjectorBlendTOP | Multi-projector compositing with overlap compensation |
 
-### UIs
+### Interactive panel output
 
-| Operator | Description |
-|----------|-------------|
-| CornerDragUI | 4-corner drag pad — outputs positions as CHOP channels |
-| BezierDragUI | 4×4 control point grid — outputs positions as CHOP channels |
-| GridDragUI | NxM grid drag pad — outputs per-point offsets as CHOP channels |
+QuadMapTOP, StonerTOP, BezierMapTOP, and GridWarpTOP expose a **panel** UI
+output port (via `GNTopInteractiveBase`). The same `GNInteractivePanel` used
+in the viewer can wire to WindowOUT's panel port for pop-out editing:
+
+```
+ContentTOP → QuadMapTOP ─┬─ out (TOP)  → WindowOUT in
+                         └─ panel (UI) → WindowOUT panel
+```
+
+Drag handles in the viewer or in WindowOUT update the node's parameters directly.
+(LED fixture handles use the same pattern on **FixtureSamplerTOP** in
+`gn_ext_pixel_mapper` — not this extension.)
 
 ## Interactive Viewer Overlays
 
-QuadMapTOP, StonerTOP, BezierMapTOP and GridWarpTOP all support **interactive
+QuadMapTOP, StonerTOP, BezierMapTOP and GridWarpTOP support **interactive
 viewer overlays**. When you view one of these TOPs in the viewer, draggable
 control point handles appear directly on the output texture:
 
@@ -36,15 +43,8 @@ control point handles appear directly on the output texture:
 - Corner outlines / grid wireframe drawn for visual reference
 - Param values update in real-time, triggering a re-cook
 
-This uses the viewer's `set_texture_overlay()` API — a transparent Control
-layer that draws in texture pixel space, automatically tracking pan/zoom.
-
-## Standalone UI Operators
-
-For use in PanelTOP or other UI-driven workflows, the extension provides
-standalone drag widgets (CornerDragUI, BezierDragUI, GridDragUI). Each
-outputs its state as CHOP channels with names matching the corresponding
-mapping TOP's parameters — wire them via CHOP-to-param expressions.
+Implementation: `GNInteractivePanel` + `GNTopInteractiveBase` in core;
+`set_interactive_texture_overlay()` on the viewer routes pointer events in UV space.
 
 ## SubNetwork Presets
 

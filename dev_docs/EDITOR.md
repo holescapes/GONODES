@@ -342,11 +342,33 @@ resets all state when switching nodes.
 
 `viewer.set_texture_overlay(control)` attaches a transparent Control that
 draws in texture pixel space.  The overlay tracks pan/zoom automatically.
-Pass `null` to remove. All input still routes through
-`handle_viewer_input()` — the overlay has `MOUSE_FILTER_IGNORE`.
-Helper: `viewer.local_pos_to_uv(local_pos)` converts mouse position
-to 0–1 texture UV coordinates; `viewer.uv_to_local_pos(uv)` does
-the reverse.  Used by projection mapping TOPs for interactive handles.
+Pass `null` to remove.
+
+**Non-interactive overlays:** `mouse_filter = IGNORE`; input routes through
+`handle_viewer_input()` on the node when the overlay does not implement
+`GNInteractivePanel`.
+
+**Interactive overlays** (`GNInteractivePanel` — preferred for handle-driven TOPs):
+call `viewer.set_interactive_texture_overlay(panel)` — pointer events are
+forwarded to `panel.handle_pointer(uv, event)` in normalized UV space.
+Used by mapping TOPs and FixtureSamplerTOP.
+
+Helper: `viewer.local_pos_to_uv(local_pos)` converts mouse position to 0–1
+texture UV; `viewer.uv_to_local_pos(uv)` does the reverse.
+
+### Interactive Panel Export (WindowOUT)
+
+TOPs extending `GNTopInteractiveBase` add a **panel** UI output port. The same
+`GNInteractivePanel` instance is wrapped in `GNUIData` for WindowOUT:
+
+```
+MyMapTOP out   → WindowOUT in (texture background)
+MyMapTOP panel → WindowOUT panel (interactive handles, fill_parent)
+```
+
+When the panel port is wired to WindowOUT, the viewer shows the texture only
+(duplicate read-only preview on the panel port). Parameters remain the source
+of truth on the node.
 
 ### Multi-Output Nodes
 

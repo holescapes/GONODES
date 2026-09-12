@@ -9578,7 +9578,7 @@
   },
   "BezierMapTOP": {
     "class_name": "BezierMapTOP",
-    "family": "TOP",
+    "family": null,
     "inputs": [
       {
         "port": 0,
@@ -9618,7 +9618,7 @@
   },
   "GridWarpTOP": {
     "class_name": "GridWarpTOP",
-    "family": "TOP",
+    "family": null,
     "inputs": [
       {
         "port": 0,
@@ -9688,7 +9688,7 @@
   },
   "QuadMapTOP": {
     "class_name": "QuadMapTOP",
-    "family": "TOP",
+    "family": null,
     "inputs": [
       {
         "port": 0,
@@ -9708,7 +9708,7 @@
   },
   "StonerTOP": {
     "class_name": "StonerTOP",
-    "family": "TOP",
+    "family": null,
     "inputs": [
       {
         "port": 0,
@@ -9725,63 +9725,6 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gn_ext_mapper/operators/top/stoner_top.gd"
-  },
-  "BezierDragUI": {
-    "class_name": "BezierDragUI",
-    "family": "UI",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "UI"
-      },
-      {
-        "port": 1,
-        "name": "state",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_mapper/operators/ui/bezier_drag_ui.gd"
-  },
-  "CornerDragUI": {
-    "class_name": "CornerDragUI",
-    "family": "UI",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "UI"
-      },
-      {
-        "port": 1,
-        "name": "state",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_mapper/operators/ui/corner_drag_ui.gd"
-  },
-  "GridDragUI": {
-    "class_name": "GridDragUI",
-    "family": "UI",
-    "inputs": [],
-    "outputs": [
-      {
-        "port": 0,
-        "name": "out",
-        "type": "UI"
-      },
-      {
-        "port": 1,
-        "name": "state",
-        "type": "CHOP"
-      }
-    ],
-    "dynamic_inputs": null,
-    "file": "addons/gn_ext_mapper/operators/ui/grid_drag_ui.gd"
   },
   "RtMidiInCHOP": {
     "class_name": "RtMidiInCHOP",
@@ -13242,7 +13185,7 @@
   },
   "FixtureSamplerTOP": {
     "class_name": "FixtureSamplerTOP",
-    "family": "TOP",
+    "family": null,
     "inputs": [
       {
         "port": 0,

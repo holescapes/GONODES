@@ -1,7 +1,7 @@
 # GONODES — Operator Reference
 
-> **588 operators** across 15 families: TOP (138), CHOP (107), SOP (85), DAT (51), IMG (41), UI (36), SDF (29), COMP (27), NET (15), MAT (12), POP (12), VOL (12), OUT (12), FIX (8), SCRIPT (3).
-> 469 are pure GDScript core operators. 119 are from the 23 bundled extensions.
+> **585 operators** across 15 families: TOP (138), CHOP (107), SOP (85), DAT (51), IMG (41), UI (33), SDF (29), COMP (27), NET (15), MAT (12), POP (12), VOL (12), OUT (12), FIX (8), SCRIPT (3).
+> 469 are pure GDScript core operators. 116 are from the 23 bundled extensions.
 > 131 of the core operators have native C++ accelerated equivalents in `gn_ext_native` that activate automatically when the native binary is present.
 
 ---
@@ -6235,21 +6235,6 @@ Textured progress bar with TOP layers and CHOP driver.
 - **Parameters:** `min_val` (FLOAT), `max_val` (FLOAT), `default_val` (FLOAT), `chop_channel` (STRING), `fill_mode` (INT: 0-5), `min_size` (VECTOR2I)
 - **State channels:** `value`, `ratio`
 
-### CornerDragUI *(ext: mapper)*
-Interactive 4-corner drag pad for projection mapping. Drag handles to position quad corners.
-- **Parameters:** `label` (STRING), `size` (INT, 200), `bg_color` (COLOR), `handle_color` (COLOR), `wire_color` (COLOR)
-- **State channels:** `tl_x`, `tl_y`, `tr_x`, `tr_y`, `bl_x`, `bl_y`, `br_x`, `br_y`
-
-### BezierDragUI *(ext: mapper)*
-Interactive 4×4 Bezier control point grid for curved surface mapping.
-- **Parameters:** `label` (STRING), `size` (INT, 200), `bg_color` (COLOR), `handle_color` (COLOR), `wire_color` (COLOR)
-- **State channels:** `top_left_x`, `top_left_y` ... `bot_right_x`, `bot_right_y` (32 channels)
-
-### GridDragUI *(ext: mapper)*
-Interactive NxM grid drag pad for grid warp control.
-- **Parameters:** `label` (STRING), `size` (INT, 200), `grid_cols` (INT, 4), `grid_rows` (INT, 4), `bg_color` (COLOR), `handle_color` (COLOR), `wire_color` (COLOR)
-- **State channels:** `pt_X_Y_x`, `pt_X_Y_y` per grid point (offsets from base grid position)
-
 ---
 
 ## POP — Point Operators
@@ -6581,7 +6566,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **gn_ext_video_capture** | VideoDeviceInIMG | Cross-platform webcam/capture device input (MF/AVFoundation/V4L2) |
 | **gn_ext_midi** | RtMidiInCHOP, RtMidiOutCHOP | Cross-platform MIDI I/O via RtMidi (notes, CC, pitch bend) |
 | **gn_ext_gpu_encode** | MovieFileOutTOP | Hardware GPU video encoding to H.264 MP4 (MF/VideoToolbox) |
-| **gn_ext_mapper** | QuadMapTOP, BezierMapTOP, GridWarpTOP, EdgeBlendTOP, ProjectionMaskTOP, StonerTOP, ProjectorBlendTOP | GPU projection mapping — bezier/quad/grid warp, edge blend, masking |
+| **gn_ext_mapper** | QuadMapTOP, BezierMapTOP, GridWarpTOP, EdgeBlendTOP, ProjectionMaskTOP, StonerTOP, ProjectorBlendTOP | GPU projection mapping — bezier/quad/grid warp, edge blend, masking. QuadMapTOP, BezierMapTOP, GridWarpTOP, and StonerTOP expose a **panel** UI output for WindowOUT interactive handles |
 | **gn_ext_hap** | HapInTOP, HapOUT | GPU-direct HAP video codec — DXT-compressed frames upload to GPU with zero CPU decode. Supports HAP, HAP Alpha, HAP Q variants in QuickTime MOV containers |
 | **gn_ext_ndi** | NDIInTOP, NDIOutTOP, NDIAudioInCHOP, NDIAudioOutCHOP | NDI video & audio I/O over the network via NewTek/Vizrt NDI SDK (cross-platform) |
 | **gn_ext_blackmagic** | BlackmagicInIMG, BlackmagicOutIMG, BlackmagicDAT | Professional SDI/HDMI video I/O via DeckLink SDK. Capture and output with timecode, device enum. Windows COM-based |
@@ -6605,8 +6590,9 @@ single GPU pass, and route the values to DMX via Art-Net.
 
 ```
 StripFIX ─┐
-GridFIX  ─┼──► FixtureSamplerTOP ──port 0──► WindowOUT (preview)
-MatrixFIX ─┘          └──port 1──► PixelDmxOUT (Art-Net)
+GridFIX  ─┼──► FixtureSamplerTOP ──port 0──► WindowOUT (texture)
+MatrixFIX ─┘          ├──port 1──► PixelDmxOUT (Art-Net)
+                      └──port 2──► WindowOUT (panel — draggable handles)
 ```
 
 ### FIX Primitives
@@ -6631,7 +6617,7 @@ MatrixFIX ─┘          └──port 1──► PixelDmxOUT (Art-Net)
 
 | Operator | Family | Class | Description |
 |----------|--------|-------|-------------|
-| `fixture_sampler` | TOP | `FixtureSamplerTOP` | MadMapper-style placement + GPU sampling. Port 0 = source passthrough, Port 1 = CHOP DMX output |
+| `fixture_sampler` | TOP | `FixtureSamplerTOP` | MadMapper-style placement + GPU sampling. Port 0 = source passthrough, Port 1 = CHOP DMX output, Port 2 = interactive panel for WindowOUT |
 | `pixel_dmx_out` | OUT | `PixelDmxOUT` | Multi-universe Art-Net output. Reads dmx_routing metadata, scales 0-1 to 0-255, sends one packet per universe |
 
 #### StripFIX Parameters

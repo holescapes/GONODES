@@ -1,22 +1,12 @@
 class_name GridWarpTOP
-extends GNTopBase
+extends GNTopInteractiveBase
 ## NxM bilinear grid warp with per-point control parameters.
-## Grid offsets are passed as a vec2 uniform array — displacement texture
-## sampling and amplitude scaling happen entirely on the GPU.
-## All point params are pre-allocated for MAX_GRID×MAX_GRID; inactive ones
-## are hidden in the inspector.  Changing grid size never loses offset values.
-## Interactive overlay: drag grid control points directly in the viewer.
 
-const MAX_GRID := 8  # Max cols/rows (8×8 = 64 control points)
+const MAX_GRID := 8
 
 var _last_cols: int = -1
 var _last_rows: int = -1
-
-var _overlay: MapperOverlay = null
-var _dragging_index: int = -1
-var _viewer_ref: WeakRef = WeakRef.new()
-
-const GRAB_RADIUS_UV := 0.04
+var _grid_panel: GridWarpPanel = null
 
 
 func _init() -> void:
@@ -28,6 +18,7 @@ func _init_ports() -> void:
 	add_input("in", GNFamily.Type.TOP, false, "Input texture", "In")
 	add_input("disp", GNFamily.Type.TOP, true, "Displacement map (RG = XY offset, optional)", "Disp")
 	add_output("out", GNFamily.Type.TOP, "Grid-warped texture", "Out")
+	add_panel_output()
 
 
 func _init_parameters() -> void:
@@ -35,8 +26,6 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_int("grid_rows", 4, 2, MAX_GRID, "Grid Rows", "Number of control point rows"))
 	add_parameter(GNParameter.create_float("amplitude", 1.0, -2.0, 2.0, 0.001, "Amplitude",
 		"Global displacement multiplier applied to per-point offsets"))
-	# Pre-allocate ALL possible per-point offset parameters.
-	# Points outside the current grid_cols × grid_rows are hidden in the UI.
 	for y in range(MAX_GRID):
 		for x in range(MAX_GRID):
 			var pt_key := "pt_%d_%d" % [x, y]
@@ -92,14 +81,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if disp_tex != null:
 		_material.set_shader_parameter("disp_tex", disp_tex.texture)
 
-	var overlay_pts := _build_overlay_points(cols, rows)
-	_sync_overlay_points(cols, rows, overlay_pts)
-
+	_sync_panel_from_params()
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
 
-## Returns raw per-point offsets from parameters.  Layout: [y * cols + x].
 func _build_grid_offsets(cols: int, rows: int) -> PackedVector2Array:
 	var offsets := PackedVector2Array()
 	offsets.resize(cols * rows)
@@ -112,8 +98,6 @@ func _build_grid_offsets(cols: int, rows: int) -> PackedVector2Array:
 	return offsets
 
 
-## Returns UV positions for overlay drawing (base + raw offset).
-## Amplitude is shader-only and does not affect handle positions.
 func _build_overlay_points(cols: int, rows: int) -> PackedVector2Array:
 	var points := PackedVector2Array()
 	points.resize(cols * rows)
@@ -129,7 +113,6 @@ func _build_overlay_points(cols: int, rows: int) -> PackedVector2Array:
 	return points
 
 
-## Shows/hides per-point params based on active grid dimensions.
 func _update_point_visibility(cols: int, rows: int) -> void:
 	for y in range(MAX_GRID):
 		for x in range(MAX_GRID):
@@ -140,89 +123,47 @@ func _update_point_visibility(cols: int, rows: int) -> void:
 	parameters_changed.emit(id)
 
 
-# ═════════════════════════════════════════════════════════════════════════════
-# Viewer Overlay
-# ═════════════════════════════════════════════════════════════════════════════
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	var data: GNData = get_output_data(port_index)
-	if data is GNTextureData:
-		var tex_data: GNTextureData = data as GNTextureData
-		if tex_data.texture:
-			viewer.set_texture(tex_data.texture,
-				"%dx%d" % [tex_data.resolution.x, tex_data.resolution.y])
-			_viewer_ref = weakref(viewer)
-			var cols: int = get_param_value("grid_cols")
-			var rows: int = get_param_value("grid_rows")
-			var points := _build_overlay_points(cols, rows)
-			_ensure_overlay(cols, rows)
-			_sync_overlay_points(cols, rows, points)
-			viewer.set_texture_overlay(_overlay)
-			return
-	viewer.set_info("No texture output", "")
+func _create_interactive_panel() -> GNInteractivePanel:
+	_grid_panel = GridWarpPanel.new()
+	_grid_panel.grab_radius_uv = 0.04
+	if not _grid_panel.point_offset_changed.is_connected(_on_grid_point_offset_changed):
+		_grid_panel.point_offset_changed.connect(_on_grid_point_offset_changed)
+	return _grid_panel
 
 
-func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, port_index: int = 0) -> bool:
-	if viewer == null:
-		viewer = _viewer_ref.get_ref()
-	if viewer == null or _overlay == null:
-		return false
+func _on_grid_point_offset_changed(grid_x: int, grid_y: int, offset: Vector2) -> void:
+	var pt_key := "pt_%d_%d" % [grid_x, grid_y]
+	set_param_value(pt_key + "_x", offset.x)
+	set_param_value(pt_key + "_y", offset.y)
 
-	var uv: Vector2 = viewer.local_pos_to_uv(local_pos)
 
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_LEFT:
-			if mb.pressed:
-				var hit := _overlay.hit_test_uv(uv, GRAB_RADIUS_UV)
-				if hit >= 0:
-					_dragging_index = hit
-					_overlay.active_index = hit
-					_overlay.queue_redraw()
-					return true
-			else:
-				if _dragging_index >= 0:
-					_dragging_index = -1
-					_overlay.active_index = -1
-					_overlay.queue_redraw()
-					return true
+func _sync_panel_from_params() -> void:
+	var panel: GridWarpPanel = _interactive_panel as GridWarpPanel
+	if panel == null:
+		return
+	var cols: int = get_param_value("grid_cols")
+	var rows: int = get_param_value("grid_rows")
+	panel.grid_cols = cols
+	panel.grid_rows = rows
+	var points := _build_overlay_points(cols, rows)
+	panel.points = points
+	panel.queue_redraw()
 
-	elif event is InputEventMouseMotion:
-		if _dragging_index >= 0:
-			var cols: int = get_param_value("grid_cols")
-			var x: int = _dragging_index % cols
-			var y: int = _dragging_index / cols
-			# Compute base UV for this grid point
+
+func _sync_params_from_panel() -> void:
+	var panel: GridWarpPanel = _interactive_panel as GridWarpPanel
+	if panel == null:
+		return
+	var cols: int = get_param_value("grid_cols")
+	var rows: int = get_param_value("grid_rows")
+	for y in range(rows):
+		for x in range(cols):
+			var idx := y * cols + x
+			if idx >= panel.points.size():
+				continue
 			var base_u: float = float(x) / float(cols - 1)
-			var base_v: float = float(y) / float(get_param_value("grid_rows") - 1)
-			# Offset = desired_uv - base_uv (amplitude only affects shader)
-			var offset := Vector2(uv.x - base_u, uv.y - base_v)
+			var base_v: float = float(y) / float(rows - 1)
+			var offset := panel.points[idx] - Vector2(base_u, base_v)
 			var pt_key := "pt_%d_%d" % [x, y]
 			set_param_value(pt_key + "_x", clampf(offset.x, -1.0, 1.0))
 			set_param_value(pt_key + "_y", clampf(offset.y, -1.0, 1.0))
-			mark_dirty()
-			return true
-		else:
-			var hit := _overlay.hit_test_uv(uv, GRAB_RADIUS_UV)
-			if hit != _overlay.hovered_index:
-				_overlay.hovered_index = hit
-				_overlay.queue_redraw()
-				return hit >= 0
-
-	return false
-
-
-func _ensure_overlay(cols: int, rows: int) -> void:
-	if _overlay == null:
-		_overlay = MapperOverlay.new()
-	_overlay.grid_cols = cols
-	_overlay.grid_rows = rows
-	var total: int = cols * rows
-	if _overlay.points.size() != total:
-		_overlay.points.resize(total)
-
-
-func _sync_overlay_points(cols: int, rows: int, points: PackedVector2Array) -> void:
-	_ensure_overlay(cols, rows)
-	for i in range(mini(points.size(), _overlay.points.size())):
-		_overlay.points[i] = points[i]

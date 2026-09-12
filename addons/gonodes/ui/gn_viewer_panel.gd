@@ -45,6 +45,7 @@ var _tex_clip: Control = null
 var _tex_display: TextureRect = null
 var _tex_overlay: Control = null  # Node-supplied overlay drawing in texture pixel space
 var _current_overlay: Control = null  # Ref to the overlay currently parented
+var _interactive_overlay: bool = false
 var _zoom: float = 1.0
 var _pan: Vector2 = Vector2.ZERO
 var _panning: bool = false
@@ -280,6 +281,14 @@ func _on_tex_gui_input(event: InputEvent) -> void:
 		var local_pos := Vector2.ZERO
 		if event is InputEventMouse:
 			local_pos = (event as InputEventMouse).position
+
+		# Interactive GNInteractivePanel overlay — pointer routed in UV space.
+		if _interactive_overlay and _current_overlay is GNInteractivePanel:
+			var uv: Vector2 = local_pos_to_uv(local_pos)
+			if (_current_overlay as GNInteractivePanel).handle_pointer(uv, event):
+				node.render_for_viewer(self, _selected_port_index)
+				return
+
 		if node.handle_viewer_input(event, local_pos, self, _selected_port_index):
 			node.render_for_viewer(self, _selected_port_index)
 			return
@@ -530,19 +539,29 @@ func set_info_bar(text: String) -> void:
 ## Attaches a node-supplied overlay Control that draws in texture pixel space.
 ## The overlay is positioned/sized to match the texture rect and participates
 ## in pan/zoom automatically.  Pass [code]null[/code] to remove the overlay.
-## The overlay's [code]mouse_filter[/code] is forced to IGNORE — all input
-## routes through [method GNNode.handle_viewer_input] as before.
-func set_texture_overlay(overlay: Control) -> void:
+## Non-interactive overlays use [code]MOUSE_FILTER_IGNORE[/code] — input routes
+## through [method GNNode.handle_viewer_input].  Interactive overlays
+## ([GNInteractivePanel]) receive pointer events directly in UV space.
+func set_texture_overlay(overlay: Control, interactive: bool = false) -> void:
 	_clear_texture_overlay()
 	if overlay == null:
 		return
 	_current_overlay = overlay
-	overlay.mouse_filter = MOUSE_FILTER_IGNORE
+	_interactive_overlay = interactive and overlay is GNInteractivePanel
+	if _interactive_overlay:
+		overlay.mouse_filter = MOUSE_FILTER_STOP
+	else:
+		overlay.mouse_filter = MOUSE_FILTER_IGNORE
 	if overlay.get_parent() != null:
 		overlay.get_parent().remove_child(overlay)
 	_tex_overlay.add_child(overlay)
 	overlay.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	_tex_overlay.visible = true
+
+
+## Attaches a [GNInteractivePanel] that handles pointer input in UV space.
+func set_interactive_texture_overlay(panel: GNInteractivePanel) -> void:
+	set_texture_overlay(panel, true)
 
 
 func _clear_texture_overlay() -> void:
@@ -552,6 +571,7 @@ func _clear_texture_overlay() -> void:
 		if _current_overlay.get_parent() == _tex_overlay:
 			_tex_overlay.remove_child(_current_overlay)
 		_current_overlay = null
+	_interactive_overlay = false
 	_tex_overlay.visible = false
 
 

@@ -1,18 +1,9 @@
 class_name QuadMapTOP
-extends GNTopBase
+extends GNTopInteractiveBase
 ## Four-corner pin perspective warp using DLT homography.
-## Maps input texture onto an arbitrary quadrilateral defined by four corner points.
-## Interactive overlay: drag corner handles directly in the viewer.
+## Interactive handles in the viewer or via the panel output → WindowOUT.
 
-# Corner param keys in order: TL, TR, BL, BR
 const _CORNER_KEYS: PackedStringArray = ["tl", "tr", "bl", "br"]
-
-var _overlay: MapperOverlay = null
-var _dragging_index: int = -1
-var _viewer_ref: WeakRef = WeakRef.new()
-
-# ─ Grab radius in UV space (how close mouse must be to grab a handle) ────────
-const GRAB_RADIUS_UV := 0.04
 
 
 func _init() -> void:
@@ -23,6 +14,7 @@ func _init() -> void:
 func _init_ports() -> void:
 	add_input("in", GNFamily.Type.TOP, false, "Input texture", "In")
 	add_output("out", GNFamily.Type.TOP, "Warped texture", "Out")
+	add_panel_output()
 
 
 func _init_parameters() -> void:
@@ -55,90 +47,35 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("bl", Vector2(get_param_value("bl_x"), get_param_value("bl_y")))
 	_material.set_shader_parameter("br", Vector2(get_param_value("br_x"), get_param_value("br_y")))
 
-	# Sync overlay points if it exists
-	_sync_overlay_points()
-
+	_sync_panel_from_params()
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
 
-# ═════════════════════════════════════════════════════════════════════════════
-# Viewer Overlay
-# ═════════════════════════════════════════════════════════════════════════════
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	var data: GNData = get_output_data(port_index)
-	if data is GNTextureData:
-		var tex_data: GNTextureData = data as GNTextureData
-		if tex_data.texture:
-			viewer.set_texture(tex_data.texture,
-				"%dx%d" % [tex_data.resolution.x, tex_data.resolution.y])
-			_viewer_ref = weakref(viewer)
-			_ensure_overlay()
-			_sync_overlay_points()
-			viewer.set_texture_overlay(_overlay)
-			return
-	viewer.set_info("No texture output", "")
+func _create_interactive_panel() -> GNInteractivePanel:
+	var panel := MapperOverlay.new()
+	panel.draw_quad_outline = true
+	panel.points.resize(4)
+	panel.grab_radius_uv = 0.04
+	return panel
 
 
-func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, port_index: int = 0) -> bool:
-	if viewer == null:
-		viewer = _viewer_ref.get_ref()
-	if viewer == null:
-		return false
-
-	var uv: Vector2 = viewer.local_pos_to_uv(local_pos)
-
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_LEFT:
-			if mb.pressed:
-				var hit := _overlay.hit_test_uv(uv, GRAB_RADIUS_UV)
-				if hit >= 0:
-					_dragging_index = hit
-					_overlay.active_index = hit
-					_overlay.queue_redraw()
-					return true
-			else:
-				if _dragging_index >= 0:
-					_dragging_index = -1
-					_overlay.active_index = -1
-					_overlay.queue_redraw()
-					return true
-
-	elif event is InputEventMouseMotion:
-		if _dragging_index >= 0:
-			# Update the param values for the dragged corner
-			var key: String = _CORNER_KEYS[_dragging_index]
-			set_param_value(key + "_x", uv.x)
-			set_param_value(key + "_y", uv.y)
-			_sync_overlay_points()
-			_overlay.queue_redraw()
-			mark_dirty()
-			return true
-		else:
-			# Hover detection
-			var hit := _overlay.hit_test_uv(uv, GRAB_RADIUS_UV)
-			if hit != _overlay.hovered_index:
-				_overlay.hovered_index = hit
-				_overlay.queue_redraw()
-				return hit >= 0
-
-	return false
-
-
-func _ensure_overlay() -> void:
-	if _overlay != null:
-		return
-	_overlay = MapperOverlay.new()
-	_overlay.draw_quad_outline = true
-	_overlay.points.resize(4)
-
-
-func _sync_overlay_points() -> void:
-	if _overlay == null:
+func _sync_panel_from_params() -> void:
+	var panel: MapperOverlay = _interactive_panel as MapperOverlay
+	if panel == null:
 		return
 	for i in range(4):
 		var key: String = _CORNER_KEYS[i]
-		_overlay.points[i] = Vector2(get_param_value(key + "_x"), get_param_value(key + "_y"))
+		panel.points[i] = Vector2(get_param_value(key + "_x"), get_param_value(key + "_y"))
+	panel.queue_redraw()
 
+
+func _sync_params_from_panel() -> void:
+	var panel: MapperOverlay = _interactive_panel as MapperOverlay
+	if panel == null:
+		return
+	for i in range(4):
+		var key: String = _CORNER_KEYS[i]
+		if i < panel.points.size():
+			set_param_value(key + "_x", panel.points[i].x)
+			set_param_value(key + "_y", panel.points[i].y)

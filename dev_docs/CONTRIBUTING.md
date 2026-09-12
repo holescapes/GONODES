@@ -844,7 +844,7 @@ batch while still running safe operators in parallel.
 
 ---
 
-## 7. Documentation Requirements
+## 8. Documentation Requirements
 
 ### What to Update
 
@@ -875,7 +875,7 @@ One-sentence description of the operator.
 
 ---
 
-## 8. Help System Integration
+## 9. Help System Integration
 
 The in-editor Help window discovers `.gnpatch` files by scanning `addons/gonodes/help/<family>/` (core) **and** each extension's `help/<family>/` directory at runtime. No manifest or registration is needed — just drop the file in the right folder (following the Extension Self-Containment Rule above).
 
@@ -902,7 +902,7 @@ User-facing guides live in `addons/gonodes/help/*.md`. These are rendered in the
 
 ---
 
-## 9. Testing Requirements
+## 10. Testing Requirements
 
 ### Running the Suite
 
@@ -953,7 +953,7 @@ func test_my_operator_basic_cook():
 
 ---
 
-## 10. Hard Rules -- Non-Negotiable
+## 11. Hard Rules -- Non-Negotiable
 
 These rules are absolute constraints discovered during development. Violations will block acceptance.
 The machine-readable terse form lives in `.github/copilot-instructions.md` §25.
@@ -1363,7 +1363,7 @@ See [DATA_TYPES.md](DATA_TYPES.md) §Sideband Metadata.
 ### 25.39 -- Rules Must Be Reflected in CONTRIBUTING.md
 
 Every rule in `.github/copilot-instructions.md §25` must have a corresponding
-human-readable entry in this section (§10 of CONTRIBUTING.md). When adding a new rule:
+human-readable entry in this section (§11 of CONTRIBUTING.md). When adding a new rule:
 1. Add the terse imperative version to `copilot-instructions.md`.
 2. Add the human-readable entry here with rationale and, where helpful, a code example.
 3. Link to the relevant `dev_docs/` file for deeper context if one exists.
@@ -1373,7 +1373,55 @@ explanation. Both must stay in sync.
 
 ---
 
-## 11. Pull Request Checklist
+### 25.40 -- Single Source of Operator Counts
+
+Operator totals and per-family counts must come from `python scripts/scan_operators.py`
+(and `scripts/operator_registry.json`). Do not hand-edit marketing totals in README,
+TESTING, competitor audits, or the copilot header without re-running the scanner.
+After adding or removing operators, update all count surfaces in one pass. Canonical
+human-facing totals live in the `docs/OPERATORS.md` header.
+
+---
+
+### 25.41 -- Core Must Not Type `ui/` class_names
+
+Rule 25.20 forbids importing `ui/` from `core/` / `operators/`. Godot `class_name`
+globals can still couple layers when core scripts type `GNInteractivePanel` (defined
+under `ui/`). Prefer a core-owned protocol or untyped `Control`, with the concrete
+interactive Control living in `ui/`. See `GNTopInteractiveBase` and
+[EDITOR.md](EDITOR.md) (Interactive Panel Export).
+
+---
+
+### 25.42 -- Panel-Export Demand Gating
+
+Secondary `panel` UI outputs on TOPs must:
+1. Be demand-gated with `is_output_demanded(panel_port)`.
+2. Share one live Control instance between the viewer overlay and WindowOUT.
+3. Clear the viewer overlay when WindowOUT adopts the live panel.
+
+Prefer `GNTopInteractiveBase` + `add_panel_output()` over hand-rolled panel ports.
+See [EDITOR.md](EDITOR.md) and [EXTENSIONS.md](EXTENSIONS.md).
+
+---
+
+### 25.43 -- Extension README Operator Tables Match `gn_extension.cfg`
+
+Each `gn_ext_*/README.md` Operators table must list exactly the operators in that
+extension's `gn_extension.cfg` (same class names; no operators from other
+extensions). Top-level README extension op counts must match the same source.
+
+---
+
+### 25.44 -- GPU/CPU Family Boundary (TOP vs IMG)
+
+Operators that require GPU-to-CPU readback belong in **IMG**, never TOP. Cross
+the boundary only with explicit bridges (`TOPtoIMG` / `ImgToTOP`). Never call
+`Texture2D.get_image()` inside a TOP `_cook()` for algorithm work (also 25.1).
+
+---
+
+## 12. Pull Request Checklist
 
 Before submitting, verify every item:
 
@@ -1408,11 +1456,11 @@ Before submitting, verify every item:
 - [ ] No regressions in existing tests
 - [ ] `GONODES_CONTEXT.md` updated if architecture changed
 - [ ] Hard rules respected (especially 25.13 lazy cook, 25.20 separation, 25.38 no graph walking)
-- [ ] If adding a new rule, CONTRIBUTING.md §10 updated with human-readable entry (Rule 25.39)
+- [ ] If adding a new rule, CONTRIBUTING.md §11 updated with human-readable entry (Rule 25.39)
 
 ---
 
-## 12. Architecture Guidelines
+## 13. Architecture Guidelines
 
 ### Cook Engine Flow
 
@@ -1509,7 +1557,7 @@ SubNetworks can be promoted to reusable custom operators via right-click → "Pr
 
 ---
 
-## 13. Common Pitfalls
+## 14. Common Pitfalls
 
 | Pitfall | Solution |
 |---------|----------|

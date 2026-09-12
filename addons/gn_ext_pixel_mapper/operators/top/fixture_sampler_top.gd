@@ -1,5 +1,5 @@
 class_name FixtureSamplerTOP
-extends GNTopBase
+extends GNTopInteractiveBase
 ## MadMapper-style fixture sampler with interactive placement.
 ##
 ## Port 0 input : source TOP (the image to sample -- any resolution)
@@ -7,6 +7,7 @@ extends GNTopBase
 ##
 ## Port 0 output: Source texture passthrough (for downstream preview/WindowOUT)
 ## Port 1 output: CHOP with sampled LED colour values (for DMX output)
+## Port 2 output: Interactive panel (fixture handles for WindowOUT)
 ##
 ## Each connected fixture has a placement transform stored on this node:
 ##   Strip: two endpoint UVs (draggable in viewer)
@@ -52,14 +53,6 @@ var _source_tex_data: GNTextureData = null
 ## CHOP output for port 1 (demand-gated).
 var _cached_chop_data: GNChannelData = null
 
-# ── Viewer overlay ───────────────────────────────────────────────────────────
-
-var _overlay: FixtureOverlay = null
-var _dragging: Vector2i = Vector2i(-1, -1)  # fixture_idx, handle_idx
-var _viewer_ref: WeakRef = WeakRef.new()
-
-const GRAB_RADIUS_UV := 0.03
-
 ## Channel names for CHOP unpack.
 const _LAYOUT_CHANNELS: Dictionary = {
 	"rgb":  ["r", "g", "b"],
@@ -82,6 +75,7 @@ func _init_ports() -> void:
 	_enable_dynamic_inputs(fix_fam, "fix", "Fixture")
 	add_output("out", GNFamily.Type.TOP, "Source texture passthrough")
 	add_output("chop", GNFamily.Type.CHOP, "Sampled LED values as CHOP channels")
+	add_panel_output("Fixture placement handles")
 
 
 func _init_parameters() -> void:
@@ -208,6 +202,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_cached_tex_data.texture = src_data.texture
 	_cached_tex_data.resolution = src_data.resolution
 	_cached_tex_data.metadata["fixture_manifest"] = _fixture_manifest
+	_sync_panel_from_params()
 	return _cached_tex_data
 
 
@@ -215,11 +210,87 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 func get_output_data(port_index: int) -> GNData:
 	if port_index == 1:
-		# CHOP output -- demand-gated
 		if not is_output_demanded(1):
 			return null
 		return _build_chop_output()
-	return cached_output
+	return super.get_output_data(port_index)
+
+
+func render_for_viewer(viewer, port_index: int = 0) -> void:
+	if port_index == 1:
+		var chop_data: GNChannelData = _build_chop_output()
+		if chop_data != null and not chop_data.channels.is_empty():
+			var renderer = GNFamily.get_renderer(GNFamily.Type.CHOP)
+			if renderer != null:
+				renderer.render_for_viewer(chop_data, viewer)
+				return
+			viewer.set_info("%d fixtures | %d LEDs | %d channels" % [
+				_fixture_manifest.size(), _total_leds, chop_data.channels.size()], "")
+			return
+		if _viewport == null:
+			viewer.set_info("No FIX inputs connected", "")
+		else:
+			viewer.set_info("Sampling %d LEDs..." % _total_leds, "")
+		return
+	super.render_for_viewer(viewer, port_index)
+
+
+func _create_interactive_panel() -> GNInteractivePanel:
+	var panel := FixtureOverlay.new()
+	panel.grab_radius_uv = 0.03
+	panel.handle_moved.connect(_on_fixture_handle_moved)
+	return panel
+
+
+func _on_fixture_handle_moved(fixture_idx: int, handle_idx: int, uv: Vector2) -> void:
+	_move_handle(Vector2i(fixture_idx, handle_idx), uv)
+	_sync_panel_from_params()
+	mark_dirty()
+
+
+func _sync_panel_from_params() -> void:
+	var panel: FixtureOverlay = _interactive_panel as FixtureOverlay
+	if panel == null:
+		return
+	panel.fixtures.clear()
+	for idx in range(_fixture_manifest.size()):
+		var entry: Dictionary = _fixture_manifest[idx]
+		var port: int = entry.get("port", -1)
+		var shape: StringName = StringName(entry.get("shape", "strip"))
+		var placement: Dictionary = _placements.get(port, {})
+		var handles := PackedVector2Array()
+
+		if shape == &"strip":
+			handles.append(placement.get("a", _DEFAULT_STRIP_A))
+			handles.append(placement.get("b", _DEFAULT_STRIP_B))
+		elif shape == &"grid" or shape == &"matrix":
+			handles.append(placement.get("tl", _DEFAULT_RECT_TL))
+			handles.append(placement.get("tr", _DEFAULT_RECT_TR))
+			handles.append(placement.get("bl", _DEFAULT_RECT_BL))
+			handles.append(placement.get("br", _DEFAULT_RECT_BR))
+		else:
+			handles.append(placement.get("offset", _DEFAULT_CUSTOM_OFFSET))
+
+		var leds := PackedVector2Array()
+		if entry.has("offset") and _led_pos_image != null:
+			var led_offset: int = entry["offset"]
+			var led_count: int = entry["led_count"]
+			for li in range(led_count):
+				var px_idx: int = led_offset + li
+				if px_idx < _led_pos_image.get_width():
+					var c: Color = _led_pos_image.get_pixel(px_idx, 0)
+					leds.append(Vector2(c.r, c.g))
+
+		panel.fixtures.append({
+			"shape": shape,
+			"name": entry.get("name", ""),
+			"handles": handles,
+			"leds": leds,
+			"color_index": idx,
+			"cols": entry.get("cols", 0),
+			"rows": entry.get("rows", 0),
+		})
+	panel.queue_redraw()
 
 
 func _build_chop_output() -> GNChannelData:
@@ -398,90 +469,6 @@ static func _compute_fix_hash(fix_inputs: Array[GNFixtureData],
 	return h
 
 
-# ── Viewer overlay + interaction ─────────────────────────────────────────────
-
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-	if port_index == 1:
-		# Bypass demand check -- viewer is not a wired consumer.
-		# _build_chop_output() reads from the already-running sample viewport
-		# (_viewport runs whenever _total_leds > 0 in _cook).
-		var chop_data: GNChannelData = _build_chop_output()
-		if chop_data != null and not chop_data.channels.is_empty():
-			var renderer = GNFamily.get_renderer(GNFamily.Type.CHOP)
-			if renderer != null:
-				renderer.render_for_viewer(chop_data, viewer)
-				return
-			viewer.set_info("%d fixtures | %d LEDs | %d channels" % [
-				_fixture_manifest.size(), _total_leds, chop_data.channels.size()], "")
-			return
-		if _viewport == null:
-			viewer.set_info("No FIX inputs connected", "")
-		else:
-			# Viewport exists but no data yet (first frame) -- will be ready next frame
-			viewer.set_info("Sampling %d LEDs..." % _total_leds, "")
-		return
-
-	# Port 0: show source texture + fixture overlay
-	if _source_tex_data != null and _source_tex_data.texture != null:
-		viewer.set_texture(_source_tex_data.texture,
-			"%dx%d" % [_source_tex_data.resolution.x, _source_tex_data.resolution.y])
-		_viewer_ref = weakref(viewer)
-		_ensure_overlay()
-		_sync_overlay()
-		viewer.set_texture_overlay(_overlay)
-	else:
-		viewer.set_info("No source texture", "")
-
-
-func handle_viewer_input(event: InputEvent, local_pos: Vector2, viewer = null, port_index: int = 0) -> bool:
-	if port_index != 0 or viewer == null:
-		return false
-
-	var uv: Vector2 = viewer.local_pos_to_uv(local_pos)
-	_ensure_overlay()
-
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_LEFT:
-			if mb.pressed:
-				var hit: Vector2i = _overlay.hit_test_uv(uv, GRAB_RADIUS_UV)
-				if hit.x >= 0:
-					_dragging = hit
-					_overlay.active = hit
-					_overlay.queue_redraw()
-					return true
-			else:
-				if _dragging.x >= 0:
-					_dragging = Vector2i(-1, -1)
-					_overlay.active = Vector2i(-1, -1)
-					_overlay.queue_redraw()
-					return true
-
-	elif event is InputEventMouseMotion:
-		if _dragging.x >= 0:
-			_move_handle(_dragging, uv)
-			_sync_overlay()
-			_overlay.queue_redraw()
-			mark_dirty()
-			return true
-		else:
-			# Hover detection
-			var hit: Vector2i = _overlay.hit_test_uv(uv, GRAB_RADIUS_UV)
-			if hit != _overlay.hovered:
-				_overlay.hovered = hit
-				# Set tooltip
-				if hit.x >= 0 and hit.x < _overlay.fixtures.size():
-					var fix: Dictionary = _overlay.fixtures[hit.x]
-					_overlay.fixture_tooltip = fix.get("name", "")
-					_overlay.tooltip_pos = _overlay._uv_to_px(uv)
-				else:
-					_overlay.fixture_tooltip = ""
-				_overlay.queue_redraw()
-				return hit.x >= 0
-
-	return false
-
-
 func _move_handle(handle_id: Vector2i, uv: Vector2) -> void:
 	# Map from overlay fixture index back to port index
 	if handle_id.x >= _fixture_manifest.size():
@@ -506,55 +493,6 @@ func _move_handle(handle_id: Vector2i, uv: Vector2) -> void:
 	else:
 		# Custom: move the whole group
 		placement["offset"] = uv
-
-
-func _ensure_overlay() -> void:
-	if _overlay == null:
-		_overlay = FixtureOverlay.new()
-
-
-func _sync_overlay() -> void:
-	if _overlay == null:
-		return
-	_overlay.fixtures.clear()
-	for idx in range(_fixture_manifest.size()):
-		var entry: Dictionary = _fixture_manifest[idx]
-		var port: int = entry.get("port", -1)
-		var shape: StringName = StringName(entry.get("shape", "strip"))
-		var placement: Dictionary = _placements.get(port, {})
-		var handles := PackedVector2Array()
-
-		if shape == &"strip":
-			handles.append(placement.get("a", _DEFAULT_STRIP_A))
-			handles.append(placement.get("b", _DEFAULT_STRIP_B))
-		elif shape == &"grid" or shape == &"matrix":
-			handles.append(placement.get("tl", _DEFAULT_RECT_TL))
-			handles.append(placement.get("tr", _DEFAULT_RECT_TR))
-			handles.append(placement.get("bl", _DEFAULT_RECT_BL))
-			handles.append(placement.get("br", _DEFAULT_RECT_BR))
-		else:
-			handles.append(placement.get("offset", _DEFAULT_CUSTOM_OFFSET))
-
-		# Compute final LED UVs for dot drawing
-		var leds := PackedVector2Array()
-		if entry.has("offset") and _led_pos_image != null:
-			var led_offset: int = entry["offset"]
-			var led_count: int = entry["led_count"]
-			for li in range(led_count):
-				var px_idx: int = led_offset + li
-				if px_idx < _led_pos_image.get_width():
-					var c: Color = _led_pos_image.get_pixel(px_idx, 0)
-					leds.append(Vector2(c.r, c.g))
-
-		_overlay.fixtures.append({
-			"shape": shape,
-			"name": entry.get("name", ""),
-			"handles": handles,
-			"leds": leds,
-			"color_index": idx,
-			"cols": entry.get("cols", 0),
-			"rows": entry.get("rows", 0),
-		})
 
 
 # ── Serialization of placement transforms ────────────────────────────────────

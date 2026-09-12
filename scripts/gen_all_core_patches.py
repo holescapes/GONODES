@@ -1084,22 +1084,19 @@ def build_ui_patch():
     b.add_node(out_id6, "NullTOP", SWITCH_X + 200, chain_y)
     b.connect(panel6, 0, out_id6, 0)
 
-    # Chain 7: Drag controls — BezierDrag + CornerDrag + GridDrag
+    # Chain 7: Interactive panel export — QuadMapTOP panel → ContainerUI
     b.chain_idx += 1
     chain_y = b.chain_idx * ROW_H
-    widgets7 = [
-        ("BezierDragUI", "bezierdrag", None),
-        ("CornerDragUI", "cornerdrag", None),
-        ("GridDragUI", "griddrag", None),
-    ]
+    const7 = b._uid("constant")
+    b.add_node(const7, "ConstantTOP", CHAIN_START_X, chain_y)
+    quad7 = b._uid("quadmap")
+    b.add_node(quad7, "QuadMapTOP", CHAIN_START_X + COL_W, chain_y)
+    b.connect(const7, 0, quad7, 0)
     container7 = b._uid("container")
-    b.add_node(container7, "ContainerUI", CHAIN_START_X + len(widgets7) * COL_W, chain_y)
-    for i, (cls, prefix, params) in enumerate(widgets7):
-        nid = b._uid(prefix)
-        b.add_node(nid, cls, CHAIN_START_X + i * COL_W, chain_y, params)
-        b.connect(nid, 0, container7, i)
+    b.add_node(container7, "ContainerUI", CHAIN_START_X + 2 * COL_W, chain_y)
+    b.connect(quad7, 1, container7, 0)
     panel7 = b._uid("paneltop")
-    b.add_node(panel7, "PanelTOP", CHAIN_START_X + (len(widgets7) + 1) * COL_W, chain_y)
+    b.add_node(panel7, "PanelTOP", CHAIN_START_X + 3 * COL_W, chain_y)
     b.connect(container7, 0, panel7, 0)
     out_id7 = f"OUTChain{b.chain_idx}"
     b.add_node(out_id7, "NullTOP", SWITCH_X + 200, chain_y)

@@ -4,11 +4,11 @@
 > Cursor reads `.cursor/rules/gonodes.mdc`. Curated memories: `AI_MEMORY.md`.
 
 > Node-based visual programming framework on Godot 4.6 for real-time visual art.
-> 588 operators, 15 families (469 core + 119 extension), 131 native C++ accelerated variants, 25 extension folders (`addons/gn_ext_*/`).
+> 585 operators, 15 families (469 core + 116 extension), 131 native C++ accelerated variants, 25 extension folders (`addons/gn_ext_*/`).
 
 ## Architecture
 
-- **Families:** TOP (138), IMG (41), CHOP (107), DAT (51), SOP (85), POP (12), VOL (12), COMP (27), MAT (12), OUT (12), UI (36), SDF (29 — extension-defined), FIX (8 — extension-defined), SCRIPT (3), NET (15)
+- **Families:** TOP (138), IMG (41), CHOP (107), DAT (51), SOP (85), POP (12), VOL (12), COMP (27), MAT (12), OUT (12), UI (33), SDF (29 — extension-defined), FIX (8 — extension-defined), SCRIPT (3), NET (15)
 - **Cook engine:** Demand-driven DAG. Only nodes feeding active sinks cook. `time_dependent = true` means cook every frame.
 - **Data flow:** Each family has a `GNData` subclass (`GNTextureData`, `GNChannelData`, `GNGeoData`, `GNTableData`, `GNImageData`, etc.)
 - **Base classes:** `GNTopBase`, `GNImgBase`, `GNChopBase`, `GNDatBase`, `GNSopBase`, `GNCompBase`, `GNMatBase`, `GNPopBase`, `GNVolBase`, `GNUiBase`, `GNSdfBase`
@@ -165,20 +165,35 @@ Every `gn_ext_*` folder **must** contain a `README.md`. Minimum required section
 
 The README is the first thing a contributor reads before opening any code. Missing READMEs are caught by `scripts/verify_new_operator.py` (warns) and by the extension audit checklist.
 
-### File Encoding
+### 25.23 — UTF-8 Encoding (No BOM)
 All text files are UTF-8 without BOM. NEVER use PowerShell `Get-Content`/`Set-Content` without `-Encoding UTF8` on BOTH calls. Prefer Python for non-ASCII text manipulation.
 
-### 25.38 --- Sideband Metadata via GNData.metadata, Not Graph Walking
-NEVER walk the scene tree or network connections to find a specific upstream node type during `_cook()`. During cook, nodes are reparented under `CookEngine` -- `get_parent()` returns `CookEngine`, not `GNNetwork`, so connection lookups always fail. Instead, use `GNData.metadata`: the producer sets keys in its output data's `metadata` dict, and the consumer reads them from the input data. This also works through intermediate nodes (LevelTOP, subnets, SelectTOP) as long as they preserve metadata (all `duplicate_data()` overrides copy it). Example: `FixtureSamplerTOP` sets `metadata["fixture_manifest"]`; `downstream CHOP consumers` reads it from `tex_data.metadata.get("fixture_manifest", [])`.
+### 25.23b — Do Not Hand-Author `.uid` Files
+Do NOT generate `.uid` sidecar files. Godot creates them on project scan. When an operator script is deleted or renamed, delete its orphaned `.gd.uid` (see also 25.19).
 
 ### 25.37 --- ConfigFile Must Be Pure ASCII, No Comments
 `gn_core.cfg` and all `gn_extension.cfg` files MUST contain **only ASCII characters** (codepoints U+0000-U+007F) and **NO comment lines** (`#`). Godot 4.6's `ConfigFile` parser has two bugs that silently corrupt section parsing: (1) Non-ASCII anywhere in the file (including description values) causes subsequent `[section]` headers to be swallowed, merging their keys into the previous section. (2) Comment lines (`# ...`) between sections cause the next `[section]` header to be skipped entirely, merging its keys into the previous section and losing the swallowed section from `get_sections()`. Use ASCII substitutes: `--` not `---`, `->` not arrow, `x` not multiplication sign. Never use comments for phase markers, separators, or documentation inside `.cfg` files. The class_name safety check in `_load_extension()` catches mismatches at runtime, but prevention is better.
 
-### .uid Files
-Do NOT generate `.uid` sidecar files. Godot creates them on project scan.
+### 25.38 --- Sideband Metadata via GNData.metadata, Not Graph Walking
+NEVER walk the scene tree or network connections to find a specific upstream node type during `_cook()`. During cook, nodes are reparented under `CookEngine` -- `get_parent()` returns `CookEngine`, not `GNNetwork`, so connection lookups always fail. Instead, use `GNData.metadata`: the producer sets keys in its output data's `metadata` dict, and the consumer reads them from the input data. This also works through intermediate nodes (LevelTOP, subnets, SelectTOP) as long as they preserve metadata (all `duplicate_data()` overrides copy it). Example: `FixtureSamplerTOP` sets `metadata["fixture_manifest"]`; `downstream CHOP consumers` reads it from `tex_data.metadata.get("fixture_manifest", [])`.
 
 ### 25.39 --- Rules Must Be Reflected in CONTRIBUTING.md
-Every rule in this file's Hard Rules section must have a corresponding human-readable entry in `dev_docs/CONTRIBUTING.md` §10. When adding a new rule: (1) add the terse imperative version here, (2) add the human-readable entry in CONTRIBUTING.md §10 with rationale and a code example where helpful, (3) link to the relevant dev_doc if one exists. The copilot file is the machine-readable contract; CONTRIBUTING.md §10 is the human-readable explanation.
+Every rule in this file's Hard Rules section must have a corresponding human-readable entry in `dev_docs/CONTRIBUTING.md` §11 (Hard Rules). When adding a new rule: (1) add the terse imperative version here, (2) add the human-readable entry in CONTRIBUTING.md §11 with rationale and a code example where helpful, (3) link to the relevant dev_doc if one exists. The copilot file is the machine-readable contract; CONTRIBUTING.md §11 is the human-readable explanation.
+
+### 25.40 — Single Source of Operator Counts
+Operator totals and per-family counts MUST come from `python scripts/scan_operators.py` / `scripts/operator_registry.json` (and `docs/OPERATORS.md` header regenerated from that). Do NOT hand-edit totals in README, TESTING, competitor audits, or this file's header without re-running the scanner. After adding/removing operators, update all marketing/count surfaces in one pass.
+
+### 25.41 — Core Must Not Type `ui/` class_names
+`core/` and `operators/` must not declare typed references to classes defined under `ui/` (e.g. `var x: GNInteractivePanel`). Prefer a core-owned protocol/base (or untyped `Control`) with the concrete interactive Control living in `ui/`. Softens 25.20 for class_name globals that still couple layers at parse time. See `GNTopInteractiveBase` / `GNInteractivePanel`.
+
+### 25.42 — Panel-Export Demand Gating
+Any secondary `panel` UI output on a TOP MUST be demand-gated via `is_output_demanded(panel_port)` and share one live `Control` instance between the viewer overlay and WindowOUT (never duplicate a live interactive tree). Prefer extending `GNTopInteractiveBase` + `add_panel_output()` rather than hand-rolling. When the panel port is demanded, the viewer must not keep the live panel as an overlay.
+
+### 25.43 — Extension README Operator Tables Match `gn_extension.cfg`
+Every `gn_ext_*/README.md` Operators table MUST list exactly the operators declared in that extension's `gn_extension.cfg` (same class names, no extras from other extensions). Counts in the top-level README extension table must match.
+
+### 25.44 — GPU/CPU Family Boundary (TOP vs IMG)
+Operators that require GPU→CPU readback (histogram, blob detect, pixel sort, etc.) belong in **IMG**, never TOP. Cross the boundary only via explicit bridges (`TOPtoIMG` / `ImgToTOP`). Do not silently read back textures inside a TOP `_cook()`.
 
 ## Operator Structure
 
@@ -258,6 +273,7 @@ python addons/gn_ext_user_python/setup_python.py     # 5. PythonSCRIPT toolchain
 
 Planner: `build/gn_ext_plan.py` (shared by SConstruct, `check_env.py`, `list_extensions.py`).
 Setup runner: `build/gn_ext_setup.py` + `scripts/run_extension_setups.py` (reads `setup` / `vendor_clone` from `build.cfg`).
+Interactive panels: `GNInteractivePanel` + `GNTopInteractiveBase` — shared viewer overlay + `panel` UI port for WindowOUT.
 Bare `scons` = **shipped** (core + extension). **`scripts/build_windows.ps1`** defaults to **`tier=all`** (setups run first, then max extensions). Use `-Shipped` for faster subset.
 Checklist: `dev_docs/NEW_EXTENSION_CHECKLIST.md`.
 - **`build.cfg`** in each extension's `native/` directory declares linking AND runtime deps

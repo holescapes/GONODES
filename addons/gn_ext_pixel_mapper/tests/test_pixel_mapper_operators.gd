@@ -554,10 +554,11 @@ func test_fixture_sampler_port_structure() -> void:
 	if node.input_ports.size() > 1:
 		GNTestAssert.assert_eq(node.input_ports[1].family,
 			GNFamily.string_to_type("FIX"), "input port 1 is FIX")
-	# Output: port 0 = TOP passthrough, port 1 = CHOP
-	GNTestAssert.assert_eq(node.output_ports.size(), 2, "has 2 output ports")
+	# Output: port 0 = TOP passthrough, port 1 = CHOP, port 2 = panel UI
+	GNTestAssert.assert_eq(node.output_ports.size(), 3, "has 3 output ports")
 	GNTestAssert.assert_eq(node.output_ports[0].family, GNFamily.Type.TOP, "output port 0 is TOP")
 	GNTestAssert.assert_eq(node.output_ports[1].family, GNFamily.Type.CHOP, "output port 1 is CHOP")
+	GNTestAssert.assert_eq(node.output_ports[2].family, GNFamily.Type.UI, "output port 2 is panel UI")
 
 
 func test_fixture_sampler_rebuild_manifest() -> void:

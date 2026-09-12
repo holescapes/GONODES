@@ -17578,45 +17578,6 @@
     ]
   },
   {
-    "class_name": "BezierDragUI",
-    "node_type": "bezier_drag",
-    "family": "ui",
-    "file": "addons/gn_ext_mapper/operators/ui/bezier_drag_ui.gd",
-    "extension": "gn_ext_mapper",
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": "Bezier Drag"
-      },
-      {
-        "name": "size",
-        "type": "int",
-        "default": 200
-      },
-      {
-        "name": "fill_parent",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "bg_color",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "handle_color",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "wire_color",
-        "type": "color",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "ButtonUI",
     "node_type": "button",
     "family": "ui",
@@ -17742,45 +17703,6 @@
     ]
   },
   {
-    "class_name": "CornerDragUI",
-    "node_type": "corner_drag",
-    "family": "ui",
-    "file": "addons/gn_ext_mapper/operators/ui/corner_drag_ui.gd",
-    "extension": "gn_ext_mapper",
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": "Corner Drag"
-      },
-      {
-        "name": "size",
-        "type": "int",
-        "default": 200
-      },
-      {
-        "name": "fill_parent",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "bg_color",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "handle_color",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "wire_color",
-        "type": "color",
-        "default": null
-      }
-    ]
-  },
-  {
     "class_name": "DropdownUI",
     "node_type": "dropdown",
     "family": "ui",
@@ -17805,55 +17727,6 @@
       {
         "name": "min_size",
         "type": "vector2i",
-        "default": null
-      }
-    ]
-  },
-  {
-    "class_name": "GridDragUI",
-    "node_type": "grid_drag",
-    "family": "ui",
-    "file": "addons/gn_ext_mapper/operators/ui/grid_drag_ui.gd",
-    "extension": "gn_ext_mapper",
-    "params": [
-      {
-        "name": "label",
-        "type": "string",
-        "default": "Grid Drag"
-      },
-      {
-        "name": "size",
-        "type": "int",
-        "default": 200
-      },
-      {
-        "name": "grid_cols",
-        "type": "int",
-        "default": 4
-      },
-      {
-        "name": "grid_rows",
-        "type": "int",
-        "default": 4
-      },
-      {
-        "name": "fill_parent",
-        "type": "bool",
-        "default": false
-      },
-      {
-        "name": "bg_color",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "handle_color",
-        "type": "color",
-        "default": null
-      },
-      {
-        "name": "wire_color",
-        "type": "color",
         "default": null
       }
     ]

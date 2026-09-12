@@ -1,8 +1,7 @@
 class_name MapperOverlay
-extends Control
-## Shared overlay drawing for projection mapping TOPs.
-## Draws control point handles + wireframe in texture pixel space.
-## Owned by the TOP node, reparented into the viewer via set_texture_overlay().
+extends GNInteractivePanel
+## Shared interactive overlay for projection mapping TOPs.
+## Draws control point handles + wireframe in normalized UV space.
 
 const HANDLE_RADIUS := 6.0
 const HANDLE_COLOR := Color(1.0, 0.35, 0.15, 0.9)
@@ -11,30 +10,58 @@ const HANDLE_ACTIVE_COLOR := Color(1.0, 1.0, 0.3, 1.0)
 const WIRE_COLOR := Color(0.6, 0.85, 1.0, 0.5)
 const WIRE_WIDTH := 1.5
 
-## Points in normalized UV space (0-1). Updated by the owning TOP.
+## Points in normalized UV space (0-1). Synced from owning TOP parameters.
 var points: PackedVector2Array = PackedVector2Array()
 
-## Index of the currently hovered / dragged handle (-1 = none).
 var hovered_index: int = -1
 var active_index: int = -1
+var _dragging_index: int = -1
 
-## Optional edge connections for wireframe drawing.
-## Each entry is [from_idx, to_idx].
+## Optional edge connections for wireframe drawing — each [from_idx, to_idx].
 var edges: Array[Vector2i] = []
 
-## If true, draw a closed quad outline connecting the first 4 points.
 var draw_quad_outline: bool = false
-
-## Grid dimensions for grid-mode wireframe (draws NxM grid lines).
 var grid_cols: int = 0
 var grid_rows: int = 0
+
+
+func handle_pointer(uv: Vector2, event: InputEvent) -> bool:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.button_index == MOUSE_BUTTON_LEFT:
+			if mb.pressed:
+				var hit := hit_test_uv(uv, grab_radius_uv)
+				if hit >= 0:
+					_dragging_index = hit
+					active_index = hit
+					queue_redraw()
+					return true
+			elif _dragging_index >= 0:
+				_dragging_index = -1
+				active_index = -1
+				queue_redraw()
+				return true
+
+	elif event is InputEventMouseMotion:
+		if _dragging_index >= 0:
+			if _dragging_index < points.size():
+				points[_dragging_index] = uv
+			queue_redraw()
+			_emit_interaction_changed()
+			return true
+		var hit := hit_test_uv(uv, grab_radius_uv)
+		if hit != hovered_index:
+			hovered_index = hit
+			queue_redraw()
+			return hit >= 0
+
+	return false
 
 
 func _draw() -> void:
 	if points.is_empty():
 		return
 
-	# Draw edge wireframe
 	if draw_quad_outline and points.size() >= 4:
 		_draw_quad_wireframe()
 	elif grid_cols > 0 and grid_rows > 0:
@@ -42,12 +69,11 @@ func _draw() -> void:
 	else:
 		for edge in edges:
 			if edge.x < points.size() and edge.y < points.size():
-				draw_line(_uv_to_px(points[edge.x]), _uv_to_px(points[edge.y]),
+				draw_line(uv_to_px(points[edge.x]), uv_to_px(points[edge.y]),
 					WIRE_COLOR, WIRE_WIDTH, true)
 
-	# Draw handles
 	for i in range(points.size()):
-		var px := _uv_to_px(points[i])
+		var px := uv_to_px(points[i])
 		var color: Color
 		if i == active_index:
 			color = HANDLE_ACTIVE_COLOR
@@ -60,42 +86,33 @@ func _draw() -> void:
 
 
 func _draw_quad_wireframe() -> void:
-	var order := [0, 1, 3, 2]  # TL → TR → BR → BL
+	var order := [0, 1, 3, 2]
 	for i in range(4):
-		var a := _uv_to_px(points[order[i]])
-		var b := _uv_to_px(points[order[(i + 1) % 4]])
+		var a := uv_to_px(points[order[i]])
+		var b := uv_to_px(points[order[(i + 1) % 4]])
 		draw_line(a, b, WIRE_COLOR, WIRE_WIDTH, true)
 
 
 func _draw_grid_wireframe() -> void:
-	# Draw horizontal lines
 	for row in range(grid_rows):
 		for col in range(grid_cols - 1):
 			var idx_a: int = row * grid_cols + col
 			var idx_b: int = row * grid_cols + col + 1
 			if idx_a < points.size() and idx_b < points.size():
-				draw_line(_uv_to_px(points[idx_a]), _uv_to_px(points[idx_b]),
+				draw_line(uv_to_px(points[idx_a]), uv_to_px(points[idx_b]),
 					WIRE_COLOR, WIRE_WIDTH, true)
-	# Draw vertical lines
 	for col in range(grid_cols):
 		for row in range(grid_rows - 1):
 			var idx_a: int = row * grid_cols + col
 			var idx_b: int = (row + 1) * grid_cols + col
 			if idx_a < points.size() and idx_b < points.size():
-				draw_line(_uv_to_px(points[idx_a]), _uv_to_px(points[idx_b]),
+				draw_line(uv_to_px(points[idx_a]), uv_to_px(points[idx_b]),
 					WIRE_COLOR, WIRE_WIDTH, true)
 
 
-## Converts normalized UV (0-1) to pixel position within this Control's rect.
-func _uv_to_px(uv: Vector2) -> Vector2:
-	return Vector2(uv.x * size.x, uv.y * size.y)
-
-
-## Returns the index of the point nearest to [param uv] if within grab radius,
-## or -1 if nothing is close enough.
-func hit_test_uv(uv: Vector2, grab_radius_uv: float) -> int:
+func hit_test_uv(uv: Vector2, radius_uv: float) -> int:
 	var best_idx := -1
-	var best_dist := grab_radius_uv
+	var best_dist := radius_uv
 	for i in range(points.size()):
 		var d: float = uv.distance_to(points[i])
 		if d < best_dist:

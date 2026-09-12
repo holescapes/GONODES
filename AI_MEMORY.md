@@ -13,6 +13,13 @@
 
 ## Entries
 
+### 2026-09-12 — Interactive panels + hard rules 25.40–25.44
+
+- Interactive TOPs use `GNInteractivePanel` + `GNTopInteractiveBase` (panel UI port → WindowOUT)
+- DragUI ops removed; operator total **585** (UI 33; extension ops 116)
+- New rules: 25.40 counts from scanner, 25.41 core≠ui class_names, 25.42 panel demand gating, 25.43 README=cfg, 25.44 TOP/IMG boundary
+- Canonical Godot for this repo remains `versions.env` → **4.6.1**; set `$env:GONODES_GODOT` to the console .exe for tests
+
 <!-- Add new entries above this line, newest first -->
 
 ### 2026-07-01 — Extension setup pipeline and Windows max build

@@ -10,17 +10,17 @@ MadMapper-style LED pixel mapping for GONODES. Define fixture shapes (strips, gr
 
 The PixelMapper extension introduces its own **FIX family** -- a data type that describes an LED fixture's shape, LED count, and DMX addressing. FIX nodes define fixtures in local space (a unit square); the **FixtureSamplerTOP** owns each fixture's placement on the source image and provides interactive drag handles in its viewer panel.
 
-FixtureSamplerTOP has two outputs:
+FixtureSamplerTOP has three outputs:
 - **Port 0 (TOP):** Source texture passthrough -- connect to WindowOUT for preview
 - **Port 1 (CHOP):** Sampled LED colour values as named channels (0-1) with dmx_routing metadata -- connect to PixelDmxOUT
+- **Port 2 (UI panel):** Interactive fixture handles -- connect to WindowOUT panel for pop-out editing (`GNTopInteractiveBase`)
 
 ```
 StripFIX --+
-GridFIX   -+---> FixtureSamplerTOP --port 0--> WindowOUT (preview)
-MatrixFIX -+          |                \--port 1--> PixelDmxOUT (Art-Net)
-                  NoiseTOP / any TOP
+GridFIX   -+---> FixtureSamplerTOP --port 0--> WindowOUT (texture)
+MatrixFIX -+          |                |--port 1--> PixelDmxOUT (Art-Net)
+                  NoiseTOP / any TOP    \--port 2--> WindowOUT (panel)
 ```
-
 ### Viewer Interaction
 
 When you view FixtureSamplerTOP, you see the source image with fixture handles overlaid:
@@ -137,7 +137,6 @@ FileInFIX also supports legacy "uv_x"/"uv_y" keys for backward compatibility.
 
 ## Roadmap
 
-- [ ] **UI output port on FixtureSamplerTOP** -- a third output (UI family) providing the fixture overlay as a standalone interactive panel, so users can pop it out into a separate window and manipulate fixtures without the viewer panel
 - [ ] **Fixture library panel** -- a palette of common fixture profiles (WS2812B strips, APA102 rings, common LED panel sizes) that can be dragged into the network
 - [ ] **Zig-zag / serpentine scan order** -- a parameter on GridFIX to alternate row direction for LED panels wired in serpentine order
 

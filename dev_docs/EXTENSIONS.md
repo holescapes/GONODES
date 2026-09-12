@@ -307,20 +307,20 @@ keyboard events to the Chromium browser.
 
 ### Texture Overlay
 
-TOPs that need interactive handles drawn on top of their output texture
-use `viewer.set_texture_overlay(control)` inside `render_for_viewer()`.
-The overlay Control draws in texture pixel space (0,0 = top-left,
-size = texture dimensions) and automatically tracks pan/zoom.
+TOPs that need interactive handles use `GNInteractivePanel` via
+`GNTopInteractiveBase`. In the viewer, call
+`viewer.set_interactive_texture_overlay(panel)`; for WindowOUT, wire the
+node's **panel** UI output port.
 
 ```gdscript
-func render_for_viewer(viewer, port_index: int = 0) -> void:
-    viewer.set_texture(my_texture, "1920x1080")
-    viewer.set_texture_overlay(my_overlay_control)  # or null to remove
+# GNTopInteractiveBase provides panel port + viewer integration automatically.
+func _create_interactive_panel() -> GNInteractivePanel:
+    return MapperOverlay.new()
 ```
 
-Use `viewer.local_pos_to_uv(local_pos)` inside `handle_viewer_input()`
-to convert mouse coordinates to 0–1 UV space. The mapper extension's
-QuadMapTOP, StonerTOP, BezierMapTOP and GridWarpTOP all use this pattern.
+Use `viewer.local_pos_to_uv(local_pos)` for manual UV conversion when not
+using `GNInteractivePanel`. QuadMapTOP, StonerTOP, BezierMapTOP, GridWarpTOP,
+and FixtureSamplerTOP use this framework.
 
 ### Headless Guard
 

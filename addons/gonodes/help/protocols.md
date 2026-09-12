@@ -1,16 +1,25 @@
 # Protocols — MIDI, OSC & DMX
 
 GONODES can send and receive MIDI, OSC, and DMX data for live performance
-control, lighting, and hardware integration. MIDI requires the `gn_ext_midi`
-extension; OSC and DMX are built-in.
+control, lighting, and hardware integration. OSC and DMX are built-in. MIDI
+has two paths (see below).
 
 ---
 
 ## MIDI
 
-### Requirements
+### Which MIDI path?
 
-MIDI support requires the **gn_ext_midi** extension, which uses the RtMidi
+| Operator | Where | When to use |
+|----------|-------|-------------|
+| **MidiInCHOP** / **MidiInDAT** | Core (`addons/gonodes`) | Built-in Godot MIDI; no native build. Good default for desktop editor work. |
+| **RtMidiInCHOP** / **RtMidiOutCHOP** | Extension `gn_ext_midi` | Cross-platform RtMidi (incl. output, mobile). Requires the extension native binary. |
+
+Prefer **one path per patch** — do not wire both core MidiIn and RtMidiIn to the same device.
+
+### Requirements (RtMidi extension)
+
+Full RtMidi I/O requires the **gn_ext_midi** extension, which uses the RtMidi
 native library for low-latency communication. Available on Windows, macOS,
 Linux, Android, and iOS. Not available on Web.
 

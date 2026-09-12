@@ -8,317 +8,42 @@
 			"name": "show_panel",
 			"step": 1.0,
 			"value_type": 2.0
-		},
-		{
-			"default_value": 250.0,
-			"label": "Pad Size",
-			"max_value": 512.0,
-			"min_value": 64.0,
-			"name": "pad_size",
-			"step": 1.0,
-			"value_type": 1.0
 		}
 	],
 	"identity": {
-		"description": "Bezier warp with interactive 4x4 control point drag panel — connect both outputs to WindowOUT for live curved surface adjustment.",
+		"description": "Bezier warp with built-in 4x4 interactive panel — wire TOP + panel to WindowOUT.",
 		"family": "TOP",
 		"op_name": "InteractiveBezierMap"
 	},
 	"inner_network": {
 		"connections": [
-			{
-				"from": "in1",
-				"from_port": 0,
-				"to": "map1",
-				"to_port": 0
-			},
-			{
-				"from": "map1",
-				"from_port": 0,
-				"to": "out_tex",
-				"to_port": 0
-			},
-			{
-				"from": "drag1",
-				"from_port": 0,
-				"to": "out_panel",
-				"to_port": 0
-			}
+			{ "from": "in1", "from_port": 0, "to": "map1", "to_port": 0 },
+			{ "from": "map1", "from_port": 0, "to": "out_tex", "to_port": 0 },
+			{ "from": "map1", "from_port": 1, "to": "out_panel", "to_port": 0 }
 		],
 		"generator": "GONODES",
 		"nodes": {
-			"drag1": {
-				"parameters": {
-					"bg_color": {
-						"value": {
-							"_type": "Color",
-							"a": 1.0,
-							"b": 0.150000005960464,
-							"g": 0.119999997317791,
-							"r": 0.119999997317791
-						}
-					},
-					"handle_color": {
-						"value": {
-							"_type": "Color",
-							"a": 1.0,
-							"b": 0.150000005960464,
-							"g": 0.349999994039536,
-							"r": 1.0
-						}
-					},
-					"label": {
-						"value": "Bezier Grid"
-					},
-					"size": {
-						"value": 250
-					},
-					"wire_color": {
-						"value": {
-							"_type": "Color",
-							"a": 0.5,
-							"b": 1.0,
-							"g": 0.850000023841858,
-							"r": 0.600000023841858
-						}
-					}
-				},
-				"position": [
-					200.0,
-					300.0
-				],
-				"type": "BezierDragUI"
-			},
 			"in1": {
-				"parameters": {
-					"family": {
-						"value": 0
-					},
-					"index": {
-						"value": 0
-					},
-					"label": {
-						"value": "texture"
-					}
-				},
-				"position": [
-					0.0,
-					100.0
-				],
-				"tunnel_family": 0,
-				"tunnel_index": 0,
-				"tunnel_label": "in",
+				"parameters": { "family": { "value": 0 }, "index": { "value": 0 }, "label": { "value": "texture" } },
+				"position": [0.0, 100.0],
+				"tunnel_family": 0, "tunnel_index": 0, "tunnel_label": "in",
 				"type": "InTunnel"
 			},
 			"map1": {
-				"parameters": {
-					"top_left_x": {
-						"expression": "chop(\"drag1\", \"top_left_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.0
-					},
-					"top_left_y": {
-						"expression": "chop(\"drag1\", \"top_left_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.0
-					},
-					"umid_left_x": {
-						"expression": "chop(\"drag1\", \"umid_left_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.0
-					},
-					"umid_left_y": {
-						"expression": "chop(\"drag1\", \"umid_left_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.333
-					},
-					"lmid_left_x": {
-						"expression": "chop(\"drag1\", \"lmid_left_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.0
-					},
-					"lmid_left_y": {
-						"expression": "chop(\"drag1\", \"lmid_left_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.667
-					},
-					"bot_left_x": {
-						"expression": "chop(\"drag1\", \"bot_left_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.0
-					},
-					"bot_left_y": {
-						"expression": "chop(\"drag1\", \"bot_left_y\")",
-						"mode": "EXPRESSION",
-						"value": 1.0
-					},
-					"top_cleft_x": {
-						"expression": "chop(\"drag1\", \"top_cleft_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.333
-					},
-					"top_cleft_y": {
-						"expression": "chop(\"drag1\", \"top_cleft_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.0
-					},
-					"umid_cleft_x": {
-						"expression": "chop(\"drag1\", \"umid_cleft_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.333
-					},
-					"umid_cleft_y": {
-						"expression": "chop(\"drag1\", \"umid_cleft_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.333
-					},
-					"lmid_cleft_x": {
-						"expression": "chop(\"drag1\", \"lmid_cleft_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.333
-					},
-					"lmid_cleft_y": {
-						"expression": "chop(\"drag1\", \"lmid_cleft_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.667
-					},
-					"bot_cleft_x": {
-						"expression": "chop(\"drag1\", \"bot_cleft_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.333
-					},
-					"bot_cleft_y": {
-						"expression": "chop(\"drag1\", \"bot_cleft_y\")",
-						"mode": "EXPRESSION",
-						"value": 1.0
-					},
-					"top_cright_x": {
-						"expression": "chop(\"drag1\", \"top_cright_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.667
-					},
-					"top_cright_y": {
-						"expression": "chop(\"drag1\", \"top_cright_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.0
-					},
-					"umid_cright_x": {
-						"expression": "chop(\"drag1\", \"umid_cright_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.667
-					},
-					"umid_cright_y": {
-						"expression": "chop(\"drag1\", \"umid_cright_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.333
-					},
-					"lmid_cright_x": {
-						"expression": "chop(\"drag1\", \"lmid_cright_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.667
-					},
-					"lmid_cright_y": {
-						"expression": "chop(\"drag1\", \"lmid_cright_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.667
-					},
-					"bot_cright_x": {
-						"expression": "chop(\"drag1\", \"bot_cright_x\")",
-						"mode": "EXPRESSION",
-						"value": 0.667
-					},
-					"bot_cright_y": {
-						"expression": "chop(\"drag1\", \"bot_cright_y\")",
-						"mode": "EXPRESSION",
-						"value": 1.0
-					},
-					"top_right_x": {
-						"expression": "chop(\"drag1\", \"top_right_x\")",
-						"mode": "EXPRESSION",
-						"value": 1.0
-					},
-					"top_right_y": {
-						"expression": "chop(\"drag1\", \"top_right_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.0
-					},
-					"umid_right_x": {
-						"expression": "chop(\"drag1\", \"umid_right_x\")",
-						"mode": "EXPRESSION",
-						"value": 1.0
-					},
-					"umid_right_y": {
-						"expression": "chop(\"drag1\", \"umid_right_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.333
-					},
-					"lmid_right_x": {
-						"expression": "chop(\"drag1\", \"lmid_right_x\")",
-						"mode": "EXPRESSION",
-						"value": 1.0
-					},
-					"lmid_right_y": {
-						"expression": "chop(\"drag1\", \"lmid_right_y\")",
-						"mode": "EXPRESSION",
-						"value": 0.667
-					},
-					"bot_right_x": {
-						"expression": "chop(\"drag1\", \"bot_right_x\")",
-						"mode": "EXPRESSION",
-						"value": 1.0
-					},
-					"bot_right_y": {
-						"expression": "chop(\"drag1\", \"bot_right_y\")",
-						"mode": "EXPRESSION",
-						"value": 1.0
-					}
-				},
-				"position": [
-					500.0,
-					100.0
-				],
+				"parameters": {},
+				"position": [400.0, 100.0],
 				"type": "BezierMapTOP"
 			},
 			"out_panel": {
-				"parameters": {
-					"family": {
-						"value": 9
-					},
-					"index": {
-						"value": 1
-					},
-					"label": {
-						"value": "panel"
-					}
-				},
-				"position": [
-					850.0,
-					300.0
-				],
-				"tunnel_family": 9,
-				"tunnel_index": 1,
-				"tunnel_label": "panel",
+				"parameters": { "family": { "value": 9 }, "index": { "value": 1 }, "label": { "value": "panel" } },
+				"position": [750.0, 280.0],
+				"tunnel_family": 9, "tunnel_index": 1, "tunnel_label": "panel",
 				"type": "OutTunnel"
 			},
 			"out_tex": {
-				"parameters": {
-					"family": {
-						"value": 0
-					},
-					"index": {
-						"value": 0
-					},
-					"label": {
-						"value": "warped"
-					}
-				},
-				"position": [
-					850.0,
-					100.0
-				],
-				"tunnel_family": 0,
-				"tunnel_index": 0,
-				"tunnel_label": "warped",
+				"parameters": { "family": { "value": 0 }, "index": { "value": 0 }, "label": { "value": "warped" } },
+				"position": [750.0, 100.0],
+				"tunnel_family": 0, "tunnel_index": 0, "tunnel_label": "warped",
 				"type": "OutTunnel"
 			}
 		},

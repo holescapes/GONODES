@@ -64,7 +64,7 @@ using the interactive mapper assets shipped with `gn_ext_mapper`.
 ### 2.4 — Interactive adjustment
 1. In the output window, drag the corners of the quad pad.
 2. The noise texture should warp in real-time as you move corners.
-3. This confirms: CornerDragUI → CHOP widget_state → QuadMapTOP
+3. This confirms: QuadMapTOP panel output → WindowOUT (interactive handles on the mapping TOP itself)
    expression wiring is working.
 
 ### 2.5 — Disconnect panel (hide UI)

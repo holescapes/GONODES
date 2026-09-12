@@ -884,7 +884,7 @@
 			]
 		},
 		"styletransfer1": {
-			"type": "StyleTransferIMG",
+			"type": "StyleTransferTOP",
 			"position": [
 				1800,
 				2200
@@ -982,14 +982,14 @@
 			]
 		},
 		"depthestie1": {
-			"type": "DepthEstimateIMG",
+			"type": "DepthEstimateTOP",
 			"position": [
 				1500,
 				2600
 			]
 		},
 		"segmentation1": {
-			"type": "SegmentationIMG",
+			"type": "SegmentationTOP",
 			"position": [
 				1800,
 				2600

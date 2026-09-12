@@ -440,29 +440,22 @@
 				1200
 			]
 		},
-		"container6": {
-			"type": "ContainerUI",
-			"position": [
-				900,
-				1400
-			]
-		},
-		"bezierdrag1": {
-			"type": "BezierDragUI",
+		"constant1": {
+			"type": "ConstantTOP",
 			"position": [
 				0,
 				1400
 			]
 		},
-		"cornerdrag1": {
-			"type": "CornerDragUI",
+		"quadmap1": {
+			"type": "QuadMapTOP",
 			"position": [
 				300,
 				1400
 			]
 		},
-		"griddrag1": {
-			"type": "GridDragUI",
+		"container6": {
+			"type": "ContainerUI",
 			"position": [
 				600,
 				1400
@@ -471,7 +464,7 @@
 		"paneltop7": {
 			"type": "PanelTOP",
 			"position": [
-				1200,
+				900,
 				1400
 			]
 		},
@@ -797,22 +790,16 @@
 			"to_port": 0
 		},
 		{
-			"from": "bezierdrag1",
+			"from": "constant1",
 			"from_port": 0,
-			"to": "container6",
+			"to": "quadmap1",
 			"to_port": 0
 		},
 		{
-			"from": "cornerdrag1",
-			"from_port": 0,
+			"from": "quadmap1",
+			"from_port": 1,
 			"to": "container6",
-			"to_port": 1
-		},
-		{
-			"from": "griddrag1",
-			"from_port": 0,
-			"to": "container6",
-			"to_port": 2
+			"to_port": 0
 		},
 		{
 			"from": "container6",

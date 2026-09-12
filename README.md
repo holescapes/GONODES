@@ -19,7 +19,7 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**588 operators** across **15 families**, plus **131 native C++ accelerated variants** and **25 extension folders** (`addons/gn_ext_*/`; 23 distributable packs in the table below, plus `gn_ext_native` acceleration and internal `gn_ext_host_bridge` for LibGodot).
+**585 operators** across **15 families**, plus **131 native C++ accelerated variants** and **25 extension folders** (`addons/gn_ext_*/`; 23 distributable packs in the table below, plus `gn_ext_native` acceleration and internal `gn_ext_host_bridge` for LibGodot).
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
@@ -31,7 +31,7 @@ Parallel level-based cook engine, named output ports, dot routing nodes, and key
 | **SOP** | 85 | 3D geometry | Grid, Boolean, Extrude, Subdivide, Remesh, ClothSim, L-System, PolyBevel, HeightField |
 | **DAT** | 51 | Tables, text & data | JSON, WebSocket, MQTT, HTTP, ArtNet, Serial, OSC, QR, RenderPick, PanelExecute |
 | **IMG** | 41 | CPU image processing | OpenCV detection, EdgeDetect, OpticalFlow, PixelSort, Webcam, ArUco, ML inference |
-| **UI** | 36 | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer, Bezier drag |
+| **UI** | 33 | Interactive 2D widgets | Button, Slider, Knob, XYPad, ColorPicker, Tree, TabContainer, Container |
 | **SDF** | 29 | Signed distance fields | Box, Sphere, Torus, Union/Intersection/Subtract, Bend, Twist, Raymarch |
 | **COMP** | 27 | 3D scene composition | Geometry, Camera, Light, RigidBody, SoftBody, Animation, NavMesh, Vehicle |
 | **NET** | 15 | Subnets & host bridge | SubNetwork, InTunnel, OutTunnel, HostIn/Out for LibGodot embedding |
@@ -94,7 +94,7 @@ All extensions are self-contained — delete a folder and it disappears cleanly,
 | **Audio** | 13 | Synthesis, EQ, reverb, delay, pitch shift, gate, envelope, movie extract, UDP stream, offline bounce | Pure GDScript — no native dependencies |
 | **OpenCV** | 20 | 20 computer vision operators — contour, Hough, ArUco, optical flow, calibration | `setup_opencv.py` + build `gn_ext_opencv` |
 | **ML** | 7 | ONNX Runtime ML inference — pose, hand, face, depth, style, segmentation, detection | Run `python scripts/setup_ml.py` to download ONNX Runtime (~30 MB) |
-| **Mapper** | 10 | Projection mapping — QuadMap, BezierMap, GridWarp, EdgeBlend, calibration | Pure GDScript — no build needed |
+| **Mapper** | 7 | Projection mapping — QuadMap, BezierMap, GridWarp, EdgeBlend, Stoner, Mask, ProjectorBlend | Pure GDScript — no build needed |
 | **PixelMapper** | 10 | LED pixel mapping — define fixture layouts, GPU sample, DMX output | Pure GDScript — no build needed |
 | **Shadertoy** | 1 | Paste any `mainImage` GLSL — auto-translated uniforms, URL fetch, 10 presets | Pure GDScript — no build needed |
 | **ISF** | 1 | Interactive Shader Format v2 — auto-generated params from JSON headers, multi-pass | Pure GDScript — no build needed |
