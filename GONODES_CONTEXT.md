@@ -1471,7 +1471,7 @@ GONODES/
     - Logarithmic frequency distribution, configurable band count/range/FFT size.
     - Temporal smoothing. Convenience bass/mid/treble aggregate channels.
     - Can analyze any audio bus (Master, or AudioInCHOP's capture bus).
-  - `AudioFileInCHOP` — audio file playback (WAV/OGG) with waveform capture.
+  - `AudioFileInCHOP` — audio file playback (8/16-bit WAV, OGG, MP3) with Load Mode Auto/Memory/Stream; waveform + transport CHOPs. 24-bit WAV refused.
     - Transport: play, stop, seek, loop. Volume (dB), mute toggle.
     - Output channels: left, right, level, pos, length, playing.
     - Dedicated AudioServer bus with capture effect for PCM extraction.

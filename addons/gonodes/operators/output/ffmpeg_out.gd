@@ -2,14 +2,16 @@ class_name FFmpegOUT
 extends GNOutBase
 ## Encodes an IMG image sequence into a video file using the FFmpeg CLI.
 ##
-## **Requires `ffmpeg` on the system PATH.**  If FFmpeg is not found, the
-## operator logs a warning and does nothing.
+## **Requires `ffmpeg` on the system PATH**, or set the **FFmpeg Path**
+## parameter to a full path to `ffmpeg.exe`.
 ##
 ## Workflow:
-##   1. Set output path, codec, framerate, quality.
+##   1. Set output path, codec, framerate, quality (and optional FFmpeg Path).
 ##   2. Toggle "active" ON → frames accumulate to a temp folder.
 ##   3. Toggle "active" OFF → FFmpeg encodes the temp frames into a video.
 ##   4. Temp frames are cleaned up after a successful encode.
+##
+## Output resolution = input IMG pixel size (set upstream with FitTOP etc.).
 ##
 ## Supported codecs:
 ##   - H.264 (.mp4) — best compatibility
@@ -34,9 +36,10 @@ var _total_captured: int = 0
 ## Whether we're currently encoding (for preview status).
 var _encoding: bool = false
 
-## Whether ffmpeg was found on PATH.
+## Whether ffmpeg was found on PATH / custom path.
 var _ffmpeg_available: bool = false
 var _ffmpeg_checked: bool = false
+var _last_ffmpeg_exe: String = ""
 
 
 func _init() -> void:
@@ -57,6 +60,10 @@ func _init_parameters() -> void:
 		"Active", "When ON, captures frames. When turned OFF, encodes to video."))
 	add_parameter(GNParameter.create_string("output_file", "user://output/video",
 		"Output File", "Output video path (without extension — set by codec)"))
+	add_parameter(GNParameter.create_file("ffmpeg_path", "",
+		PackedStringArray(["*.exe"]),
+		"FFmpeg Path",
+		"Full path to ffmpeg.exe. Leave empty to use `ffmpeg` from system PATH."))
 	add_parameter(GNParameter.create_enum("codec",
 		PackedStringArray(["H.264 (.mp4)", "H.265 (.mp4)", "VP9 (.webm)", "AV1 (.mp4)", "ProRes (.mov)"]), 0,
 		"Codec", "Video codec for encoding"))
@@ -71,13 +78,15 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if img_in == null or img_in.image == null:
 		return null
 
-	# Check FFmpeg availability (once)
-	if not _ffmpeg_checked:
+	# Check FFmpeg availability (re-check if path parameter changes)
+	var exe_now: String = _ffmpeg_exe()
+	if not _ffmpeg_checked or exe_now != _last_ffmpeg_exe:
 		_ffmpeg_checked = true
+		_last_ffmpeg_exe = exe_now
 		_ffmpeg_available = _check_ffmpeg()
 		if not _ffmpeg_available:
 			GNLogger.warn("FFmpegOUT",
-				"'%s': ffmpeg not found on PATH. Video encoding unavailable." % id)
+				"'%s': ffmpeg not found (%s). Video encoding unavailable." % [id, exe_now])
 
 	var active: bool = get_param_value("active")
 
@@ -122,10 +131,18 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 # ─── FFmpeg Helpers ────────────────────────────────────────────────────────────
 
-## Check if ffmpeg is available on the system PATH.
+## Resolve ffmpeg executable: parameter path wins, else `ffmpeg` on PATH.
+func _ffmpeg_exe() -> String:
+	var custom: String = str(get_param_value("ffmpeg_path")).strip_edges()
+	if not custom.is_empty():
+		return ProjectSettings.globalize_path(custom)
+	return "ffmpeg"
+
+
+## Check if ffmpeg is available (custom path or system PATH).
 func _check_ffmpeg() -> bool:
 	var output: Array = []
-	var exit_code: int = OS.execute("ffmpeg", ["-version"], output, true)
+	var exit_code: int = OS.execute(_ffmpeg_exe(), ["-version"], output, true)
 	return exit_code == 0
 
 
@@ -195,7 +212,7 @@ func _encode_video() -> void:
 		"'%s': Encoding %d frames → '%s'" % [id, _total_captured, output_path])
 
 	var output: Array = []
-	var exit_code: int = OS.execute("ffmpeg", args, output, true)
+	var exit_code: int = OS.execute(_ffmpeg_exe(), args, output, true)
 
 	if exit_code == 0:
 		GNLogger.info("FFmpegOUT",

@@ -13,7 +13,9 @@ extends RefCounted
 ## Supported resource types and their filesystem loading strategies:
 ##   • Image/Texture  — Image.load_from_file() → ImageTexture.create_from_image()
 ##   • Font           — FontFile.new() + load_dynamic_font()
-##   • Audio          — FileAccess raw bytes → AudioStreamWAV / AudioStreamOGGVorbis
+##   • Audio          — AudioStreamWAV/Ogg/MP3.load_from_file (filesystem);
+##                      8/16-bit PCM WAV only (24-bit/float refused).
+##                      Call load_audio from a worker thread for large Memory loads.
 ##   • Shader         — FileAccess.get_as_text() → Shader.new() + set code
 ##   • Video          — ResourceLoader (Godot-imported only; raw .ogv not loadable)
 ##
@@ -253,24 +255,207 @@ static func load_audio(path: String, project_dir: String = "") -> AudioStream:
 		return null
 	var ext := resolved.get_extension().to_lower()
 	if ext == "ogg":
+		# Prefer static loaders when available (Godot 4.3+).
+		if ClassDB.class_has_method(&"AudioStreamOggVorbis", &"load_from_file"):
+			var ogg_file: AudioStream = AudioStreamOggVorbis.load_from_file(resolved)
+			if ogg_file != null:
+				return ogg_file
 		var file := FileAccess.open(resolved, FileAccess.READ)
 		if file == null:
 			return null
 		var data := file.get_buffer(file.get_length())
 		file.close()
-		var stream := AudioStreamOggVorbis.load_from_buffer(data)
-		return stream
+		return AudioStreamOggVorbis.load_from_buffer(data)
 	if ext == "wav":
-		# WAV loading from raw filesystem requires reading bytes and parsing
-		# For now, WAV files from the filesystem are loaded via ResourceLoader
-		# if they happen to be in a scanned resource path.  Full raw WAV parsing
-		# can be added later if needed.
-		GNLogger.warn("ResourceLoader",
-			"Raw .wav loading from filesystem not yet supported: %s" % path)
-		return null
+		return _load_wav_stream(resolved, path)
+	if ext == "mp3":
+		if ClassDB.class_exists(&"AudioStreamMP3") and ClassDB.class_has_method(&"AudioStreamMP3", &"load_from_file"):
+			var mp3_stream: AudioStream = AudioStreamMP3.load_from_file(resolved)
+			if mp3_stream != null:
+				return mp3_stream
 	GNLogger.warn("ResourceLoader",
 		"Unsupported audio format: %s" % path)
 	return null
+
+
+## Load a WAV for playback. Godot only plays 8/16-bit PCM natively.
+## 24-bit / float / other formats are refused (convert externally to 16-bit WAV or OGG).
+static func _load_wav_stream(resolved: String, original_path: String) -> AudioStream:
+	var info: Dictionary = _peek_wav_header(resolved)
+	if info.is_empty():
+		GNLogger.warn("ResourceLoader", "Not a valid WAV: %s" % original_path)
+		return null
+
+	var bits: int = int(info.get("bits", 0))
+	var fmt: int = int(info.get("format", 0))
+	var native_pcm: bool = fmt == 1 and (bits == 8 or bits == 16)
+
+	if not native_pcm:
+		GNLogger.warn("ResourceLoader",
+			"Unsupported WAV (%d-bit, format %d). Use 8/16-bit PCM WAV or OGG. File: %s" % [
+				bits, fmt, original_path])
+		return null
+
+	if ClassDB.class_has_method(&"AudioStreamWAV", &"load_from_file"):
+		var wav_stream: AudioStreamWAV = AudioStreamWAV.load_from_file(resolved)
+		if wav_stream != null and wav_stream.data.size() > 0:
+			return wav_stream
+	var parsed: AudioStreamWAV = _load_wav_pcm_slice(resolved)
+	if parsed != null:
+		return parsed
+
+	GNLogger.warn("ResourceLoader", "Failed to load WAV: %s" % original_path)
+	return null
+
+
+## Public WAV layout for disk streaming (header only — does not load PCM).
+## Keys: format, channels, sample_rate, bits, data_offset, data_size, resolved.
+## Empty Dictionary on failure.
+static func peek_wav_layout(path: String, project_dir: String = "") -> Dictionary:
+	if path.is_empty():
+		return {}
+	var resolved := resolve(path, project_dir)
+	if resolved.is_empty() or not FileAccess.file_exists(resolved):
+		return {}
+	var layout := _peek_wav_layout_resolved(resolved)
+	if not layout.is_empty():
+		layout["resolved"] = resolved
+	return layout
+
+
+## True when layout is 8/16-bit PCM (disk-streamable + Godot-native).
+static func wav_layout_is_streamable(layout: Dictionary) -> bool:
+	if layout.is_empty():
+		return false
+	var fmt: int = int(layout.get("format", 0))
+	var bits: int = int(layout.get("bits", 0))
+	return fmt == 1 and (bits == 8 or bits == 16) and int(layout.get("data_size", 0)) > 0
+
+
+## Read fmt chunk only (does not load the audio payload).
+static func _peek_wav_header(resolved_path: String) -> Dictionary:
+	var layout := _peek_wav_layout_resolved(resolved_path)
+	if layout.is_empty():
+		return {}
+	return {
+		"format": layout.get("format", 0),
+		"channels": layout.get("channels", 1),
+		"sample_rate": layout.get("sample_rate", 44100),
+		"bits": layout.get("bits", 16),
+	}
+
+
+## Walk RIFF chunks for fmt + data offsets without reading the PCM body.
+static func _peek_wav_layout_resolved(resolved_path: String) -> Dictionary:
+	var file := FileAccess.open(resolved_path, FileAccess.READ)
+	if file == null:
+		return {}
+	var file_len: int = file.get_length()
+	if file_len < 44:
+		file.close()
+		return {}
+	var riff: PackedByteArray = file.get_buffer(12)
+	if riff.size() < 12 \
+			or riff.slice(0, 4).get_string_from_ascii() != "RIFF" \
+			or riff.slice(8, 12).get_string_from_ascii() != "WAVE":
+		file.close()
+		return {}
+
+	var fmt_info: Dictionary = {}
+	var data_offset: int = -1
+	var data_size: int = 0
+	var offset: int = 12
+	while offset + 8 <= file_len:
+		file.seek(offset)
+		var chunk_hdr: PackedByteArray = file.get_buffer(8)
+		if chunk_hdr.size() < 8:
+			break
+		var chunk_id: String = chunk_hdr.slice(0, 4).get_string_from_ascii()
+		var chunk_size: int = chunk_hdr.decode_u32(4)
+		var chunk_data: int = offset + 8
+		if chunk_id == "fmt ":
+			file.seek(chunk_data)
+			var fmt_bytes: PackedByteArray = file.get_buffer(mini(chunk_size, 64))
+			fmt_info = _parse_wav_fmt(fmt_bytes)
+		elif chunk_id == "data":
+			data_offset = chunk_data
+			data_size = mini(chunk_size, file_len - chunk_data)
+			break
+		offset = chunk_data + chunk_size + (chunk_size & 1)
+
+	file.close()
+	if fmt_info.is_empty() or data_offset < 0 or data_size <= 0:
+		return {}
+	fmt_info["data_offset"] = data_offset
+	fmt_info["data_size"] = data_size
+	return fmt_info
+
+
+static func _parse_wav_fmt(fmt: PackedByteArray) -> Dictionary:
+	if fmt.size() < 16:
+		return {}
+	var audio_format: int = fmt.decode_u16(0)
+	var channels: int = fmt.decode_u16(2)
+	var sample_rate: int = fmt.decode_u32(4)
+	var bits_per_sample: int = fmt.decode_u16(14)
+	if audio_format == 0xFFFE and fmt.size() >= 40:
+		audio_format = fmt.decode_u16(24)
+	return {
+		"format": audio_format,
+		"channels": channels,
+		"sample_rate": sample_rate,
+		"bits": bits_per_sample,
+	}
+
+
+## Fast path for already-playable 8/16-bit PCM (no per-sample loops).
+static func _load_wav_pcm_slice(resolved_path: String) -> AudioStreamWAV:
+	var file := FileAccess.open(resolved_path, FileAccess.READ)
+	if file == null:
+		return null
+	var bytes: PackedByteArray = file.get_buffer(file.get_length())
+	file.close()
+	if bytes.size() < 44:
+		return null
+
+	var offset: int = 12
+	var audio_format: int = 1
+	var channels: int = 1
+	var sample_rate: int = 44100
+	var bits_per_sample: int = 16
+	var data_offset: int = -1
+	var data_size: int = 0
+
+	while offset + 8 <= bytes.size():
+		var chunk_id: String = bytes.slice(offset, offset + 4).get_string_from_ascii()
+		var chunk_size: int = bytes.decode_u32(offset + 4)
+		var chunk_data: int = offset + 8
+		if chunk_id == "fmt ":
+			if chunk_data + 16 > bytes.size():
+				return null
+			audio_format = bytes.decode_u16(chunk_data)
+			channels = bytes.decode_u16(chunk_data + 2)
+			sample_rate = bytes.decode_u32(chunk_data + 4)
+			bits_per_sample = bytes.decode_u16(chunk_data + 14)
+		elif chunk_id == "data":
+			data_offset = chunk_data
+			data_size = mini(chunk_size, bytes.size() - chunk_data)
+			break
+		offset = chunk_data + chunk_size + (chunk_size & 1)
+
+	if data_offset < 0 or data_size <= 0:
+		return null
+	if audio_format != 1 or bits_per_sample not in [8, 16]:
+		return null
+
+	var stream := AudioStreamWAV.new()
+	stream.format = (
+		AudioStreamWAV.FORMAT_16_BITS if bits_per_sample == 16
+		else AudioStreamWAV.FORMAT_8_BITS)
+	stream.mix_rate = sample_rate
+	stream.stereo = channels >= 2
+	stream.data = bytes.slice(data_offset, data_offset + data_size)
+	return stream
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

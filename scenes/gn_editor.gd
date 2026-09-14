@@ -142,6 +142,12 @@ func _ready() -> void:
 	# show the unsaved-changes dialog first.
 	get_tree().auto_accept_quit = false
 
+	# Root Control fills the viewport via full-rect anchors (see gn_editor.tscn).
+	# If maximize leaves a letterboxed 1280×720 UI, that is Godot 4.4+ Game
+	# embedding "Fixed Size" — switch the Game bar to "Stretch to Fit", or
+	# uncheck "Embed Game on Next Play". Project code cannot override that.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
 	# Wire log toggle early so extension scan results are visible
 	log_toggle.toggled.connect(_on_log_toggled)
 	GNLogger.enabled = log_toggle.button_pressed
@@ -165,12 +171,26 @@ func _ready() -> void:
 	_setup_compat_panel()
 	_setup_take_panel()
 
+	# Keep HSplit above the dynamic InfoBar (toolbar rows grow past the scene's -98px).
+	var info_bar := $InfoBar as Control
+	if info_bar and not info_bar.resized.is_connected(_sync_hsplit_to_infobar):
+		info_bar.resized.connect(_sync_hsplit_to_infobar)
+	_sync_hsplit_to_infobar()
+
 	# Persist split-container sizes when the user drags them
 	hsplit.dragged.connect(func(offset: int): _save_setting("hsplit_offset", offset))
 	right_panel.dragged.connect(func(offset: int): _save_setting("vsplit_offset", offset))
 
 	# Restore all persisted UI state (toggles, panel sizes)
 	_restore_ui_state()
+
+	# Apply preferred audio output (helps after OS speaker hot-plug).
+	GNAudioDevices.apply_output_device(str(GNSettings.get_value("audio_output_device", "Default")))
+	# Remember ffmpeg if on PATH (FFmpegOUT encode only — not used for audio playback).
+	if str(GNSettings.get_value("ffmpeg_path", "")).is_empty():
+		var probe: Array = []
+		if OS.execute("ffmpeg", PackedStringArray(["-version"]), probe, true) == 0:
+			GNSettings.set_value("ffmpeg_path", "ffmpeg")
 
 	# Bind graph editor to network
 	graph_editor.bind_network(network)
@@ -1549,6 +1569,32 @@ func _clear_modified() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		_guard_unsaved(func(): get_tree().quit())
+	elif what == NOTIFICATION_RESIZED:
+		_sync_hsplit_to_infobar()
+
+
+## Guard against resized ↔ sync re-entrancy (preset/offset changes emit resized).
+var _syncing_hsplit_infobar: bool = false
+
+
+## Match HSplit bottom inset to the live InfoBar height (toolbar is built at runtime).
+func _sync_hsplit_to_infobar() -> void:
+	if _syncing_hsplit_infobar:
+		return
+	var info_bar := get_node_or_null("InfoBar") as Control
+	if info_bar == null or hsplit == null:
+		return
+	var bar_h: float = maxf(info_bar.size.y, info_bar.get_combined_minimum_size().y)
+	if bar_h <= 0.0:
+		bar_h = 98.0
+	# Skip no-op updates so we don't bounce on every parent resize.
+	if is_equal_approx(hsplit.offset_bottom, -bar_h) and is_equal_approx(info_bar.offset_top, -bar_h):
+		return
+	_syncing_hsplit_infobar = true
+	# Offsets only — re-applying anchor presets emits resized and can recurse.
+	hsplit.offset_bottom = -bar_h
+	info_bar.offset_top = -bar_h
+	_syncing_hsplit_infobar = false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

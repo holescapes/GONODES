@@ -27,6 +27,7 @@ var _max_cooks_spin: SpinBox = null
 var _recent_count_spin: SpinBox = null
 var _auto_save_spin: SpinBox = null
 var _renderer_option: OptionButton = null
+var _audio_out_option: OptionButton = null
 
 
 func _init() -> void:
@@ -79,6 +80,9 @@ func _ready() -> void:
 
 	_build_section_header("Logging")
 	_build_log_settings()
+
+	_build_section_header("Audio")
+	_build_audio_settings()
 
 	_build_section_header("Performance")
 	_build_performance_settings()
@@ -364,6 +368,68 @@ func _build_performance_settings() -> void:
 		GNSettings.set_value("max_cooks_per_frame", int(v)))
 	row2.add_child(_max_cooks_spin)
 	_content.add_child(row2)
+
+
+func _build_audio_settings() -> void:
+	var row := _make_row("Output device",
+		"Global speaker/headphones for GONODES. Re-select after plugging a new device — restart is rarely needed if you refresh here.")
+	_audio_out_option = OptionButton.new()
+	_audio_out_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_populate_audio_out_option()
+	_audio_out_option.item_selected.connect(_on_audio_out_selected)
+	row.add_child(_audio_out_option)
+	_content.add_child(row)
+
+	var row2 := HBoxContainer.new()
+	row2.add_theme_constant_override("separation", 8)
+	var tip := Label.new()
+	tip.text = "Tip: switching OS default speakers while Godot runs can mute audio until you re-pick the device."
+	tip.add_theme_font_size_override("font_size", 11)
+	tip.add_theme_color_override("font_color", Color(0.65, 0.65, 0.7))
+	tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row2.add_child(tip)
+	var refresh_btn := Button.new()
+	refresh_btn.text = "Refresh"
+	refresh_btn.tooltip_text = "Re-scan devices and re-apply the selected output"
+	refresh_btn.pressed.connect(_on_audio_refresh_pressed)
+	row2.add_child(refresh_btn)
+	_content.add_child(row2)
+
+
+func _populate_audio_out_option() -> void:
+	if _audio_out_option == null:
+		return
+	_audio_out_option.clear()
+	var menu := GNAudioDevices.output_menu()
+	for i in menu.size():
+		_audio_out_option.add_item(menu[i], i)
+	var pref: String = str(GNSettings.get_value("audio_output_device", "Default"))
+	var sel := 0
+	for i in menu.size():
+		if menu[i] == pref:
+			sel = i
+			break
+	_audio_out_option.select(sel)
+
+
+func _on_audio_out_selected(idx: int) -> void:
+	var menu := GNAudioDevices.output_menu()
+	if idx < 0 or idx >= menu.size():
+		return
+	GNAudioDevices.set_preferred_output(menu[idx])
+
+
+func _on_audio_refresh_pressed() -> void:
+	_populate_audio_out_option()
+	var idx: int = _audio_out_option.selected if _audio_out_option != null else 0
+	_on_audio_out_selected(idx)
+
+
+func _notification(what: int) -> void:
+	# Refresh device list whenever the dialog is shown (devices may have changed).
+	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
+		_populate_audio_out_option()
 
 
 func _make_spacer(height: int) -> Control:

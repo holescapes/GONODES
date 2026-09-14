@@ -3373,6 +3373,31 @@ Send CHOP channel data as NDI audio to the network. Each CHOP channel is mapped 
 
 ---
 
+#### AudioFileInCHOP
+
+Play an audio file and output waveform / transport channels. Supports **8/16-bit PCM WAV**, **OGG Vorbis**, and **MP3**. **24-bit / float WAV is not supported** — convert to 16-bit PCM WAV or OGG/MP3 first.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| file | File | "" | `*.wav`, `*.ogg`, `*.mp3` | Audio path (also accepts `project://` and HTTP(S) URLs via cache) |
+| load_mode | Enum | Auto | Auto, Memory, Stream | Auto: disk-stream 8/16-bit WAV, Memory for OGG/MP3. Memory: full RAM decode. Stream: force disk stream (8/16-bit WAV only; large WAV forced off Memory) |
+| play | Bool | false | — | Start / stop playback |
+| loop | Bool | true | — | Loop playback |
+| volume | Float | 0.0 | −60–6 dB | Playback volume |
+| seek_pos | Float | 0.0 | 0–duration | Scrubber (seconds); follows playhead while playing |
+| buffer_size | Int | 1024 | 64–8192 | Samples per cook for CHOP waveform |
+| stereo | Bool | true | — | Output left/right channels |
+| mute_output | Bool | false | — | Mute speakers (waveform still captured) |
+| output_device | Enum | Default | (dynamic) | Global Godot output device (one at a time) |
+| refresh_devices | Bool | false | pulse | Re-scan OS audio devices |
+
+**No inputs** — source operator.
+**Output:** `out` (CHOP) — `left`, `right` (optional), `level`, `pos`, `length`, `playing`. Sets `source_bus` for spectrum routing.
+
+**How it works:** Auto/Stream opens 8/16-bit PCM WAV with `FileAccess` + `AudioStreamGenerator` (low RAM). OGG/MP3 (and small WAVs in Memory mode) decode via `GNResourceLoader.load_audio` on a worker thread. Typical chain: `AudioFileInCHOP → AudioSpectrumCHOP → AudioBandCHOP → chop() into shaders`.
+
+---
+
 #### AudioBandCHOP
 
 Multi-band frequency analysis with per-band envelope followers. Takes an AudioSpectrumCHOP (or any CHOP with `band:N` channels) and groups frequencies into configurable ranges — essential for music-reactive VJ visuals.

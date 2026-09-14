@@ -178,6 +178,9 @@ func from_dict(d: Dictionary) -> void:
 	super.from_dict(d)
 	if d.has("widget_state"):
 		widget_state = d["widget_state"].duplicate()
+	# Rebuild CHOP state immediately so expressions like chop("toggle", "value")
+	# work on the first cook (before this widget itself has cooked).
+	_build_state_chop()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

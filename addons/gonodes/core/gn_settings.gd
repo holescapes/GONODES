@@ -96,4 +96,6 @@ const DEFAULTS: Dictionary = {
 	"auto_save_interval": 0,  # seconds, 0=disabled
 	"default_resolution_x": 512,
 	"default_resolution_y": 512,
+	"audio_output_device": "Default",
+	"ffmpeg_path": "",
 }
