@@ -211,6 +211,11 @@
         "default": null
       },
       {
+        "name": "load_mode",
+        "type": "menu",
+        "default": null
+      },
+      {
         "name": "play",
         "type": "bool",
         "default": false
@@ -242,6 +247,16 @@
       },
       {
         "name": "mute_output",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "output_device",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "refresh_devices",
         "type": "bool",
         "default": false
       }
@@ -8919,6 +8934,11 @@
         "name": "output_file",
         "type": "string",
         "default": "user://output/video"
+      },
+      {
+        "name": "ffmpeg_path",
+        "type": "file",
+        "default": null
       },
       {
         "name": "codec",

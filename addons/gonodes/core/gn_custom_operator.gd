@@ -85,6 +85,10 @@ func load_from_asset(path: String) -> bool:
 	_promoted_map.clear()
 	var promoted: Array = data.get("promoted_parameters", [])
 	for entry in promoted:
+		if typeof(entry) != TYPE_DICTIONARY:
+			GNLogger.warn("CustomOperator",
+				"Skipping invalid promoted_parameters entry (expected Dictionary): %s" % str(entry))
+			continue
 		var pdef: Dictionary = {
 			"inner_node_id": entry.get("inner_node_id", ""),
 			"inner_param_name": entry.get("inner_param_name", ""),

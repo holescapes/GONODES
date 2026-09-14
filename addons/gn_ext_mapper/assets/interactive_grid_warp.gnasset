@@ -8,28 +8,10 @@
 			"name": "show_panel",
 			"step": 1.0,
 			"value_type": 2.0
-		},
-		{
-			"default_value": 4.0,
-			"label": "Grid Columns",
-			"max_value": 8.0,
-			"min_value": 2.0,
-			"name": "grid_cols",
-			"step": 1.0,
-			"value_type": 1.0
-		},
-		{
-			"default_value": 4.0,
-			"label": "Grid Rows",
-			"max_value": 8.0,
-			"min_value": 2.0,
-			"name": "grid_rows",
-			"step": 1.0,
-			"value_type": 1.0
 		}
 	],
 	"identity": {
-		"description": "Grid warp with built-in interactive panel — wire TOP + panel to WindowOUT.",
+		"description": "Grid warp with built-in interactive panel -- wire TOP + panel to WindowOUT.",
 		"family": "TOP",
 		"op_name": "InteractiveGridWarp"
 	},
@@ -70,5 +52,18 @@
 		},
 		"version": "1.0.0"
 	},
-	"promoted_parameters": ["grid_cols", "grid_rows"]
+	"promoted_parameters": [
+		{
+			"inner_node_id": "map1",
+			"inner_param_name": "grid_cols",
+			"promoted_name": "grid_cols",
+			"promoted_order": 0
+		},
+		{
+			"inner_node_id": "map1",
+			"inner_param_name": "grid_rows",
+			"promoted_name": "grid_rows",
+			"promoted_order": 1
+		}
+	]
 }

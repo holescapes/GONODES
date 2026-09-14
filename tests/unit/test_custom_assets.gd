@@ -131,17 +131,23 @@ func test_quad_map_inner_network_structure() -> void:
 	var net: GNNetwork = node.inner_network
 	GNTestAssert.assert_true(net != null, "inner_network should exist")
 	if net:
-		# Should have 5 nodes: in1, drag1, map1, out_tex, out_panel
-		GNTestAssert.assert_eq(net.nodes.size(), 5,
-			"Should have 5 inner nodes, got %d" % net.nodes.size())
+		# Panel lives on the mapping TOP — no separate drag UI node.
+		GNTestAssert.assert_eq(net.nodes.size(), 4,
+			"Should have 4 inner nodes, got %d" % net.nodes.size())
 		GNTestAssert.assert_true(net.nodes.has("in1"), "Should have InTunnel 'in1'")
-		GNTestAssert.assert_true(net.nodes.has("drag1"), "Should have drag UI 'drag1'")
 		GNTestAssert.assert_true(net.nodes.has("map1"), "Should have mapping TOP 'map1'")
 		GNTestAssert.assert_true(net.nodes.has("out_tex"), "Should have OutTunnel 'out_tex'")
 		GNTestAssert.assert_true(net.nodes.has("out_panel"), "Should have OutTunnel 'out_panel'")
-		# Check connections count
+		GNTestAssert.assert_false(net.nodes.has("drag1"), "Should not have legacy drag UI")
 		GNTestAssert.assert_eq(net.connections.size(), 3,
 			"Should have 3 connections, got %d" % net.connections.size())
+		# map1 panel port (1) → out_panel
+		var has_panel_wire := false
+		for c in net.connections:
+			if c.from_node == "map1" and c.from_port == 1 and c.to_node == "out_panel":
+				has_panel_wire = true
+				break
+		GNTestAssert.assert_true(has_panel_wire, "map1 panel should wire to out_panel")
 	node.free()
 
 
@@ -183,16 +189,12 @@ func test_quad_map_has_custom_params() -> void:
 		return
 	GNTestAssert.assert_true(node.parameters.has("show_panel"),
 		"Should have 'show_panel' custom param")
-	GNTestAssert.assert_true(node.parameters.has("pad_size"),
-		"Should have 'pad_size' custom param")
+	GNTestAssert.assert_false(node.parameters.has("pad_size"),
+		"Legacy pad_size custom param should be gone")
 	if node.parameters.has("show_panel"):
 		var sp: GNParameter = node.parameters["show_panel"]
 		GNTestAssert.assert_eq(sp.value_type, GNParameter.ValueType.BOOL, "show_panel type")
 		GNTestAssert.assert_eq(sp.value, true, "show_panel default")
-	if node.parameters.has("pad_size"):
-		var ps: GNParameter = node.parameters["pad_size"]
-		GNTestAssert.assert_eq(ps.value_type, GNParameter.ValueType.INT, "pad_size type")
-		GNTestAssert.assert_eq(ps.value, 250, "pad_size default")
 	node.free()
 
 
@@ -201,14 +203,16 @@ func test_stoner_map_has_extra_params() -> void:
 	if node == null:
 		GNTestAssert.assert_true(false, "Failed to create InteractiveStonerMap")
 		return
-	# Stoner has softedge and test_pattern custom params
-	GNTestAssert.assert_true(node.parameters.has("softedge_left"),
-		"Should have 'softedge_left' custom param")
-	GNTestAssert.assert_true(node.parameters.has("test_pattern"),
-		"Should have 'test_pattern' custom param")
-	if node.parameters.has("test_pattern"):
-		var tp: GNParameter = node.parameters["test_pattern"]
-		GNTestAssert.assert_eq(tp.value_type, GNParameter.ValueType.ENUM, "test_pattern type")
+	GNTestAssert.assert_true(node.parameters.has("show_panel"),
+		"Should have 'show_panel' custom param")
+	# Softedge / test_pattern live on StonerTOP itself (edit via Make Editable or inspector on map1).
+	var map_node: GNNode = node.inner_network.nodes.get("map1", null)
+	GNTestAssert.assert_true(map_node != null, "map1 should exist")
+	if map_node:
+		GNTestAssert.assert_true(map_node.parameters.has("softedge_left")
+			or map_node.parameters.has("test_pattern")
+			or map_node.parameters.has("tl_x"),
+			"StonerTOP should expose mapping/softedge params")
 	node.free()
 
 
@@ -230,10 +234,10 @@ func test_grid_warp_has_grid_params() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Expression Wiring
+# Panel export (no DragUI / CHOP expression wiring)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-func test_quad_map_expressions_reference_drag_ui() -> void:
+func test_quad_map_uses_panel_port_not_drag_ui() -> void:
 	var node := _create_asset_instance("InteractiveQuadMap")
 	if node == null:
 		GNTestAssert.assert_true(false, "Failed to create InteractiveQuadMap")
@@ -241,21 +245,25 @@ func test_quad_map_expressions_reference_drag_ui() -> void:
 	var map_node: GNNode = node.inner_network.nodes.get("map1", null)
 	GNTestAssert.assert_true(map_node != null, "map1 should exist in inner network")
 	if map_node:
+		GNTestAssert.assert_true(map_node is GNTopInteractiveBase
+			or map_node.has_method("has_panel_output"),
+			"map1 should be an interactive TOP with panel output")
+		if map_node is GNTopInteractiveBase:
+			GNTestAssert.assert_true((map_node as GNTopInteractiveBase).has_panel_output(),
+				"map1 should declare panel output")
+		# Corner params are constant (edited via panel), not CHOP expressions.
 		for corner in ["tl", "tr", "bl", "br"]:
 			for axis in ["x", "y"]:
 				var pname := "%s_%s" % [corner, axis]
 				var param: GNParameter = map_node.parameters.get(pname, null)
-				GNTestAssert.assert_true(param != null,
-					"map1 should have param '%s'" % pname)
+				GNTestAssert.assert_true(param != null, "map1 should have param '%s'" % pname)
 				if param:
-					GNTestAssert.assert_eq(param.mode, GNParameter.Mode.EXPRESSION,
-						"'%s' should be in EXPRESSION mode" % pname)
-					GNTestAssert.assert_true(param.expression.contains("drag1"),
-						"'%s' expression should reference 'drag1'" % pname)
+					GNTestAssert.assert_eq(param.mode, GNParameter.Mode.CONSTANT,
+						"'%s' should be CONSTANT (panel-driven)" % pname)
 	node.free()
 
 
-func test_bezier_map_expressions_cover_all_16_points() -> void:
+func test_bezier_map_params_are_constant_not_expressions() -> void:
 	var node := _create_asset_instance("InteractiveBezierMap")
 	if node == null:
 		GNTestAssert.assert_true(false, "Failed to create InteractiveBezierMap")
@@ -263,26 +271,25 @@ func test_bezier_map_expressions_cover_all_16_points() -> void:
 	var map_node: GNNode = node.inner_network.nodes.get("map1", null)
 	GNTestAssert.assert_true(map_node != null, "map1 should exist")
 	if map_node:
-		# BezierMapTOP uses human-readable names (top_left, top_cleft, etc.)
 		var cp_names: Array[String] = [
 			"top_left", "top_cleft", "top_cright", "top_right",
 			"umid_left", "umid_cleft", "umid_cright", "umid_right",
 			"lmid_left", "lmid_cleft", "lmid_cright", "lmid_right",
 			"bot_left", "bot_cleft", "bot_cright", "bot_right",
 		]
-		var expr_count := 0
+		var const_count := 0
 		for cp_name in cp_names:
 			for axis in ["x", "y"]:
 				var pname := "%s_%s" % [cp_name, axis]
 				var param: GNParameter = map_node.parameters.get(pname, null)
-				if param and param.mode == GNParameter.Mode.EXPRESSION:
-					expr_count += 1
-		GNTestAssert.assert_eq(expr_count, 32,
-			"BezierMapTOP should have 32 expression-driven params (16 points × 2 axes)")
+				if param and param.mode == GNParameter.Mode.CONSTANT:
+					const_count += 1
+		GNTestAssert.assert_eq(const_count, 32,
+			"BezierMapTOP should have 32 constant params (panel-driven, not expressions)")
 	node.free()
 
 
-func test_grid_warp_expressions_cover_4x4_grid() -> void:
+func test_grid_warp_params_are_constant_not_expressions() -> void:
 	var node := _create_asset_instance("InteractiveGridWarp")
 	if node == null:
 		GNTestAssert.assert_true(false, "Failed to create InteractiveGridWarp")
@@ -290,16 +297,16 @@ func test_grid_warp_expressions_cover_4x4_grid() -> void:
 	var map_node: GNNode = node.inner_network.nodes.get("map1", null)
 	GNTestAssert.assert_true(map_node != null, "map1 should exist")
 	if map_node:
-		var expr_count := 0
+		var const_count := 0
 		for col in range(4):
 			for row in range(4):
 				for axis in ["x", "y"]:
 					var pname := "pt_%d_%d_%s" % [col, row, axis]
 					var param: GNParameter = map_node.parameters.get(pname, null)
-					if param and param.mode == GNParameter.Mode.EXPRESSION:
-						expr_count += 1
-		GNTestAssert.assert_eq(expr_count, 32,
-			"GridWarpTOP should have 32 expression-driven params (4x4 grid × 2 axes)")
+					if param and param.mode == GNParameter.Mode.CONSTANT:
+						const_count += 1
+		GNTestAssert.assert_eq(const_count, 32,
+			"GridWarpTOP should have 32 constant grid offset params (panel-driven)")
 	node.free()
 
 
@@ -331,8 +338,8 @@ func test_asset_from_dict_restores_correctly() -> void:
 		return
 	node.id = "quad_asset_1"
 	# Change a custom param
-	if node.parameters.has("pad_size"):
-		node.parameters["pad_size"].set_value(300)
+	if node.parameters.has("show_panel"):
+		node.parameters["show_panel"].set_value(false)
 	var d: Dictionary = node.to_dict()
 	# Restore into a new instance
 	var node2 := GNCustomOperator.new()
@@ -342,9 +349,9 @@ func test_asset_from_dict_restores_correctly() -> void:
 	GNTestAssert.assert_eq(node2.family, GNFamily.Type.TOP,
 		"Restored family")
 	# Check param override was preserved
-	if node2.parameters.has("pad_size"):
-		GNTestAssert.assert_eq(node2.parameters["pad_size"].value, 300,
-			"pad_size override should be 300")
+	if node2.parameters.has("show_panel"):
+		GNTestAssert.assert_eq(node2.parameters["show_panel"].value, false,
+			"show_panel override should be false")
 	node.free()
 	node2.free()
 
