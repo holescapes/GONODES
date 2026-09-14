@@ -1,7 +1,7 @@
 # Contributing to GONODES
 
 > **Last updated:** 2026-03-27  
-> **Godot version:** 4.6.1 stable  
+> **Godot version:** 4.7.2 stable  
 > **GDScript only** — no C++/GDExtension contributions to core (extensions may use GDExtension)
 
 ---
@@ -89,7 +89,7 @@ tests/              # Automated test suite
    - Use `python setup_deps.py --core` for just godot-cpp and Spout2 (skip ONNX, Python SDKs).
    - Use `python setup_deps.py --list` to see what would be fetched.
    - Run `python scripts/check_versions.py` to verify CI workflows match `versions.env`.
-3. Open the project in **Godot 4.6.1** (stable).
+3. Open the project in **Godot 4.7.2** (stable).
 4. The editor scene is `scenes/gn_editor.tscn` — run it to launch the GONODES editor.
 5. Run tests:
    ```powershell
@@ -1421,6 +1421,27 @@ the boundary only with explicit bridges (`TOPtoIMG` / `ImgToTOP`). Never call
 
 ---
 
+### 25.45 -- Docs Must Stay In Sync With Code
+
+Changing an operator's parameters, ports, behavior, supported formats, or public
+APIs is incomplete until the docs match — in the **same** change, not later.
+
+**Update at least:**
+1. `docs/OPERATORS.md` — parameter table, I/O, and "How it works" for that operator
+2. The operator's `.cfg` `description=` if the summary is now wrong
+3. `GONODES_CONTEXT.md` / `AI_MEMORY.md` when the change is architectural
+
+This applies to **modifying** existing operators (e.g. adding `load_mode`), not
+only creating new ones. Verify with:
+
+```bash
+python scripts/verify_new_operator.py AudioFileInCHOP
+```
+
+See also §4.4 Documentation Update and the PR checklist below.
+
+---
+
 ## 12. Pull Request Checklist
 
 Before submitting, verify every item:
@@ -1448,7 +1469,14 @@ Before submitting, verify every item:
 
 - [ ] Regression test added proving the fix
 - [ ] Test suite passes
-- [ ] Relevant docs updated if behavior changed
+- [ ] Relevant docs updated if behavior changed (Rule 25.45)
+
+### Operator Modify PR (params / ports / formats / behavior)
+
+- [ ] `docs/OPERATORS.md` parameter table and "How it works" updated
+- [ ] `.cfg` `description=` still accurate
+- [ ] `python scripts/verify_new_operator.py <ClassName>` passes
+- [ ] Help patches still valid if ports/params changed meaningfully
 
 ### Core Engine PR
 

@@ -3,7 +3,7 @@
 > **Cross-tool:** `AGENTS.md` is the shared entry point. Copilot reads this file;
 > Cursor reads `.cursor/rules/gonodes.mdc`. Curated memories: `AI_MEMORY.md`.
 
-> Node-based visual programming framework on Godot 4.6 for real-time visual art.
+> Node-based visual programming framework on Godot 4.7 for real-time visual art.
 > 585 operators, 15 families (469 core + 116 extension), 131 native C++ accelerated variants, 25 extension folders (`addons/gn_ext_*/`).
 
 ## Architecture
@@ -195,6 +195,9 @@ Every `gn_ext_*/README.md` Operators table MUST list exactly the operators decla
 ### 25.44 — GPU/CPU Family Boundary (TOP vs IMG)
 Operators that require GPU→CPU readback (histogram, blob detect, pixel sort, etc.) belong in **IMG**, never TOP. Cross the boundary only via explicit bridges (`TOPtoIMG` / `ImgToTOP`). Do not silently read back textures inside a TOP `_cook()`.
 
+### 25.45 — Docs Must Stay In Sync With Code
+Any change that alters operator **parameters**, ports, behavior, supported formats, or public APIs MUST update the matching docs in the **same change** (not a follow-up). Minimum surfaces: `docs/OPERATORS.md` parameter table / "How it works", the operator's `.cfg` `description=`, and any stale notes in `GONODES_CONTEXT.md` / `AI_MEMORY.md` when architecture changed. New operators still follow the full checklist below; **modifying** an existing operator is not exempt. Run `python scripts/verify_new_operator.py <ClassName>` after doc edits. Leaving docs stale is a Hard Rule violation.
+
 ## Operator Structure
 
 ```gdscript
@@ -240,11 +243,11 @@ Signature: `func get_device_menu() -> PackedStringArray`. Used by: BlackmagicInI
 
 ## After Adding/Modifying an Operator
 
-1. Register in `.cfg` file (`[operator.ClassName]` with family, script, description)
+1. Register in `.cfg` file (`[operator.ClassName]` with family, script, description) — keep `description=` accurate when behavior/formats change
 2. Run `python scripts/scan_operators.py` and `python scripts/build_port_registry.py`
-3. Run `python scripts/generate_help_patches.py --operator <node_type>`
-4. Add entry in `docs/OPERATORS.md`
-5. Update operator counts in: README.md, docs/OPERATORS.md, dev_docs/TESTING.md, dev_docs/GONODES_VS_THE_REST.md
+3. Run `python scripts/generate_help_patches.py --operator <node_type>` (new ops; refresh if ports/params change meaningfully)
+4. Add or **update** the entry in `docs/OPERATORS.md` (parameter table, I/O, "How it works") — **required for param/behavior changes, not only new operators** (Rule 25.45)
+5. Update operator counts in: README.md, docs/OPERATORS.md, dev_docs/TESTING.md, dev_docs/GONODES_VS_THE_REST.md (when adding/removing ops)
 6. Run `python scripts/verify_new_operator.py <ClassName>`
 
 ## Build System

@@ -13,12 +13,56 @@
 
 ## Entries
 
+### 2026-09-12 — Hard Rule 25.45: docs sync with code
+
+- Param/port/behavior/format changes must update `docs/OPERATORS.md` + `.cfg` description in the **same** change
+- Cursor rule + CONTRIBUTING §11 + copilot-instructions updated
+
+### 2026-09-12 — AudioFileIn seek scrubber + refuse 24-bit
+
+- Seek was unusable: cook reset `seek_pos` to 0 after every jump (`if seek_pos > 0`). Now a real scrubber (ranged 0…duration, follows playhead)
+- 24-bit / float WAV **refused** with a clear warning — use 16-bit PCM WAV or OGG (no in-engine convert)
+
+### 2026-09-12 — AudioFileIn Load Mode Auto|Memory|Stream
+
+- Default **Auto**: disk-stream 8/16/24-bit PCM WAV (no full-file RAM decode); OGG/MP3 use Memory
+- Large/24-bit WAV never full-decodes even if Memory is selected (forces Stream) — avoids editor freeze
+- Memory decode uses a worker thread and **awaits** completion (never `wait_to_finish` while alive)
+- Keep `_current_load_mode` as the UI enum value so cook() does not reload every frame
+
+### 2026-09-12 — AudioFileIn Load Mode Memory|Stream
+
+- Param `load_mode`: **Memory** (default, all formats, threaded full decode) or **Stream** (disk-stream 8/16-bit PCM WAV via `AudioStreamGenerator` + `FileAccess`)
+- Stream unsupported formats (OGG/MP3/24-bit) log a warning and fall back to Memory
+- `GNResourceLoader.peek_wav_layout()` / `wav_layout_is_streamable()` for header-only probes
+- FFmpeg still not used for playback
+
+### 2026-09-12 — Audio playback: thread load, no FFmpeg
+
+- Godot `ResourceLoader.load_threaded_*` only works for imported `res://` assets — project/filesystem WAVs use `AudioStreamWAV.load_from_file` (sync)
+- `AudioFileInCHOP` loads on a **background Thread**; main thread only attaches `AudioStreamPlayer`
+- Godot plays 8/16-bit PCM WAV natively; 24-bit/float convert **in-process** (no FFmpeg). Prefer 16-bit WAV or OGG for large songs
+- FFmpeg remains for **FFmpegOUT** encode only, not playback
+
+### 2026-09-12 — Windows build gotchas fixed
+
+- `check_env.py` must use `vswhere -products *` or VS **Build Tools** is missed
+- Depth backends use `libs_<sdk>` optional_sdks; probes now require `.lib` files (empty SDK dirs used to pass then LNK1181)
+- First-time path: `check_env.py` → `build_windows.ps1` → `check_builds.py`; docs in `dev_docs/BUILD.md`
+
+### 2026-09-12 — Godot 4.7.2 bump
+
+- Engine: `versions.env` → **GODOT_VERSION=4.7.2** (`GODOTCPP_BRANCH` still **4.5** — no 4.7 godot-cpp branch yet)
+- Editor + console: `C:\Users\hesam\OneDrive\Documents\Godot\Godot_v4.7.2-stable_win64.exe\`
+- Export templates installed to `%APPDATA%\Godot\export_templates\4.7.2.stable\` from the `.tpz`
+- Set `$env:GONODES_GODOT` to the `*_console.exe` for headless tests
+
 ### 2026-09-12 — Interactive panels + hard rules 25.40–25.44
 
 - Interactive TOPs use `GNInteractivePanel` + `GNTopInteractiveBase` (panel UI port → WindowOUT)
 - DragUI ops removed; operator total **585** (UI 33; extension ops 116)
 - New rules: 25.40 counts from scanner, 25.41 core≠ui class_names, 25.42 panel demand gating, 25.43 README=cfg, 25.44 TOP/IMG boundary
-- Canonical Godot for this repo remains `versions.env` → **4.6.1**; set `$env:GONODES_GODOT` to the console .exe for tests
+- Canonical Godot for this repo: `versions.env` → **4.7.2**; set `$env:GONODES_GODOT` to the console .exe for tests
 
 <!-- Add new entries above this line, newest first -->
 

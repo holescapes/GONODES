@@ -9,15 +9,19 @@ This checklist is a verification and packaging guide, not a build tutorial. Each
 
 ## Phase 0: Version & Branch
 
-- [ ] Confirm Godot version matches `versions.env` → `GODOT_VERSION` (currently **4.6.1**)
-- [ ] Confirm godot-cpp branch matches `versions.env` → `GODOTCPP_BRANCH` (currently **4.5**)
+- [ ] Confirm Godot version matches `versions.env` → `GODOT_VERSION` (currently **4.7.2**)
+- [ ] Confirm godot-cpp branch matches `versions.env` → `GODOTCPP_BRANCH` (currently **4.5** — no dedicated 4.7 godot-cpp branch yet)
 - [ ] Run `python scripts/check_versions.py` — CI workflows match `versions.env`
 - [ ] Update version string in `project.godot` → `config/version`
-- [ ] Tag release branch (e.g., `release/v1.2.0`)
+- [ ] Tag release branch (e.g., `release/v0.1.0-beta`)
+
+> **Canonical versions:** edit only `versions.env`. Do not hardcode Godot minors in this checklist beyond the parenthetical “currently” hints above.
 
 ---
 
 ## Phase 1: Build Everything
+
+> **Beta default (this release):** validate and package **Windows x64** first. Linux/macOS/ARM templates and multi-platform godot-cpp builds are deferred until Windows Phases 0–2 pass, unless the release explicitly expands scope.
 
 Follow [BUILD.md](BUILD.md) for detailed commands. This phase ensures all binaries are compiled from clean source.
 
@@ -131,7 +135,8 @@ all currently registered operators:
 python scripts/gen_all_core_patches.py
 ```
 
-This creates 13 `.gnpatch` files covering **all 578 operators** across every family,
+This creates family `ALL_CORE_*.gnpatch` files covering **all registered operators**
+(currently **585** — re-run `python scripts/scan_operators.py` and refresh this number if stale),
 organized into logical chains with a SwitchTOP → WindowOUT for visual inspection.
 Use the chain slider to step through each operator group.
 
@@ -221,6 +226,12 @@ nodes cook without errors, and visual output looks correct.
 ---
 
 ## Phase 3: Clean for Release
+
+> **Do not run this before packaging a downloadable beta zip.** Phase 3 puts the
+> **git tree** into source-only state for tagging/cloning. The Phase 4 distribution
+> still needs built binaries, toolchains, and Player templates. Typical order for a
+> Windows beta: finish Phase 1–2 → build Phase 4 package from the working tree →
+> then Phase 3 clean before pushing a source-only tag (or clean on a separate clone).
 
 The repository must be in **source-only state** before tagging. All compiled binaries and bundled toolchains are build artifacts — they get rebuilt by users or CI after cloning.
 
@@ -313,10 +324,9 @@ The initial public release of GONODES is **Beta**, not Alpha. This is a delibera
 
 Alpha implies incomplete core functionality, frequent crashes, and missing fundamental features. GONODES has none of these issues:
 
-- **578 operators** across 14 families — complete creative toolkit covering textures, geometry, channels, particles, volumes, compositing, materials, data tables, ISF shaders, SDF, and network I/O
-- **1764 automated tests**, 1763 passing (99.94%) — the single failure is a smoke test for extension patches that require compiled native binaries, not a code defect
-- **100% operator test coverage** — every operator has at least instantiation + output type verification
-- **100% help file coverage** — 1,588 help .gnpatch files covering all 578 unique node types
+- **585 operators** across 15 families — complete creative toolkit covering textures, geometry, channels, particles, volumes, compositing, materials, data tables, UI, SDF, FIX, NET, and I/O (re-verify with `python scripts/scan_operators.py` at cut time)
+- **Automated test suite** with near-full operator coverage — instantiation + output type verification for operators; run `godot --headless -s tests/test_runner.gd` at cut time and record pass/fail
+- **Help example patches** for operators (see `addons/gonodes/help/` and extension help trees) — regenerate/count before release
 - **Cook engine is stable** — expression system, dirty propagation, timeline, and multi-family data flow all verified
 - **GPU zero-copy discipline** — audit confirmed zero unjustified CPU-GPU roundtrips across the entire codebase
 - **Cross-platform build system** — SCons-based native builds, player export templates, and CI pipeline all functional on Windows, macOS, and Linux
@@ -332,6 +342,7 @@ Beta indicates the software is feature-complete and functional but needs real-wo
 - **GPU context sharing** — zero-copy paths exist but require matching GPU drivers and shared device setup that varies across hardware
 - **Custom operator asset format (.gnasset)** — functional but serialization format may evolve based on user feedback before being locked for 1.0
 - **Timeline system** — complete but performance under complex multi-track compositions needs real-world validation
+- **First public betas may ship Windows x64 first** — expand desktop platforms after Windows Phases 0–2 pass
 
 ### Graduation criteria (Beta → Stable 1.0)
 
