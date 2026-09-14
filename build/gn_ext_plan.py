@@ -121,26 +121,36 @@ def _resolve_path(native_dir: str, rel: str) -> str:
 
 
 def get_effective_probes(cfg: dict, plat: str, native_dir: str) -> list[str]:
-    """Return probe paths (relative to native_dir), explicit or auto-derived."""
+    """Return probe paths (relative to native_dir), explicit or auto-derived.
+
+    Top-level ``lib_dirs`` / ``libs`` are preferred. When those are empty but
+    ``optional_sdks`` are declared (e.g. depth backends: ``libs_azure``), derive
+    probes from every optional SDK so ``tier=all`` skips builds when .lib files
+    are missing — not only when the SDK folder is absent.
+    """
     explicit = cfg.get(plat, {}).get("probe", [])
     if explicit:
         return explicit
 
     plat_cfg = cfg.get(plat, {})
-    lib_dirs = plat_cfg.get("lib_dirs", [])
-    libs = plat_cfg.get("libs", [])
-    if not lib_dirs or not libs:
-        return []
-
     probes: list[str] = []
-    for lib_dir in lib_dirs:
-        for lib in libs:
-            if plat == "windows":
-                probes.append(f"{lib_dir}/{lib}.lib")
-            elif plat == "linux":
-                probes.append(f"{lib_dir}/lib{lib}.so")
-            else:
-                probes.append(f"{lib_dir}/lib{lib}.dylib")
+
+    def _add_lib_probes(lib_dirs: list[str], libs: list[str]) -> None:
+        for lib_dir in lib_dirs:
+            for lib in libs:
+                if plat == "windows":
+                    probes.append(f"{lib_dir}/{lib}.lib")
+                elif plat == "linux":
+                    probes.append(f"{lib_dir}/lib{lib}.so")
+                else:
+                    probes.append(f"{lib_dir}/lib{lib}.dylib")
+
+    _add_lib_probes(plat_cfg.get("lib_dirs", []), plat_cfg.get("libs", []))
+
+    if not probes:
+        for _sdk_name, sdk in plat_cfg.get("optional_sdks", {}).items():
+            _add_lib_probes(sdk.get("lib_dirs", []), sdk.get("libs", []))
+
     return probes
 
 

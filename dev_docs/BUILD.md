@@ -45,9 +45,27 @@ Install these once before the build steps below:
 1. **Python 3.10+** — [python.org](https://www.python.org/downloads/) or
    `winget install Python.Python.3.12`
 2. **SCons** — `pip install scons`
-3. **MSVC** — Visual Studio 2022 Build Tools with **Desktop development with C++**
-   (`winget install Microsoft.VisualStudio.2022.BuildTools`)
-4. **Godot 4.6.x** — [godotengine.org/download](https://godotengine.org/download)
+3. **MSVC** — Visual Studio 2022 **Build Tools** with the C++ workload
+   (not just the installer shell). Example:
+
+   ```powershell
+   winget install Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+   ```
+
+   `check_env.py` / `build_windows.ps1` locate Build Tools via `vswhere -products *`
+   (the IDE-only default miss Build Tools).
+4. **Godot** matching `versions.env` → `GODOT_VERSION` (currently **4.7.2**) —
+   [godotengine.org/download](https://godotengine.org/download). Prefer the
+   `*_console.exe` for scripts. Point the build/test tooling at it:
+
+   ```powershell
+   $env:GONODES_GODOT = "C:\path\to\Godot_v4.7.2-stable_win64_console.exe"
+   ```
+
+5. **Export templates** (only needed for Player/editor export, not for compiling
+   GDExtensions) — install the matching `.tpz` for your Godot version under
+   `%APPDATA%\Godot\export_templates\<version>.stable\` (Editor → Manage Export
+   Templates, or unzip the downloaded `.tpz` so `version.txt` sits in that folder).
 
 On Windows, set UTF-8 before running any project Python script (avoids
 `UnicodeEncodeError` on the default cp1252 console):
@@ -56,16 +74,36 @@ On Windows, set UTF-8 before running any project Python script (avoids
 $env:PYTHONUTF8 = "1"
 ```
 
-**Quick path (Windows):** run the all-in-one script from the repo root:
+### First-time Windows checklist (scripts for each step)
+
+| Step | Script / command | What it does |
+|------|------------------|--------------|
+| 0. Pre-flight | `python scripts/check_env.py` | Python, SCons, MSVC (Build Tools), Godot, godot-cpp, SDK probes |
+| 1. Fetch deps | `python setup_deps.py` | Clones godot-cpp; runs extension `setup` / `vendor_clone` from `build.cfg` |
+| 1b. Setups for build tier | `python scripts/run_extension_setups.py --for-build --tier all` | Same setups scoped to the tier you will compile (also run by `build_windows.ps1`) |
+| 2–3. Compile | `.\scripts\build_windows.ps1` | Injects MSVC env, builds godot-cpp + `build/scons tier=all` |
+| 2–3. Faster subset | `.\scripts\build_windows.ps1 -Shipped` | Core + extension tiers only (skips optional OpenCV/depth/NDI/…) |
+| 4. Verify DLLs | `python scripts/check_builds.py` | Lists which native libs exist |
+| 5. Activate | `python scripts/sync_gdextensions.py` | Renames `.gdextension.disabled` ↔ `.gdextension` when binaries exist (also runs post-`scons`) |
+| 6. Import + test | `& $env:GONODES_GODOT --headless --path . --import` then `-s res://tests/test_runner.gd` | Register `class_name`s; run suite |
+| 7. Player templates (optional) | `.\scripts\build_templates.ps1` | Godot export → `templates/` for Quick Build |
+
+**Quick path (Windows):** one script covers steps 1–3:
 
 ```powershell
 $env:PYTHONUTF8 = "1"
+$env:GONODES_GODOT = "C:\path\to\Godot_v4.7.2-stable_win64_console.exe"
+python scripts/check_env.py
 .\scripts\build_windows.ps1
+python scripts/check_builds.py
 ```
 
-This runs `setup_deps.py`, extension setups from `build.cfg`, `check_env.py`,
-godot-cpp, and unified `build/scons tier=all` inside the MSVC environment.
-Use `-Shipped` for a faster core+extension-only build.
+`build_windows.ps1` defaults to `tier=all`. Optional proprietary SDKs (NDI,
+Blackmagic, Azure Kinect, RealSense, …) are **skipped** when probe files are
+missing — not fatal. Use `-Shipped` for a faster first compile (no optional tier).
+
+> **Note:** Empty SDK folders that contain headers but no `.lib` files are treated
+> as missing (link would otherwise fail with LNK1181).
 
 ### Step-by-step (all platforms)
 
@@ -143,14 +181,15 @@ See [NEW_EXTENSION_CHECKLIST.md](NEW_EXTENSION_CHECKLIST.md) for the extension a
 
 ### First test run (after build)
 
-Godot must import the project once to register `class_name` globals:
+Godot must import the project once to register `class_name` globals. Use the
+console binary and set `GONODES_GODOT` (see prerequisites):
 
-```bash
-godot --headless --path . --import
-godot --headless --path . -s res://tests/test_runner.gd
+```powershell
+& $env:GONODES_GODOT --headless --path . --import
+& $env:GONODES_GODOT --headless --path . -s res://tests/test_runner.gd
 ```
 
-See [dev_docs/TESTING.md](TESTING.md) for details.
+See [dev_docs/TESTING.md](TESTING.md) for filters and tags.
 
 ### Runtime Dependencies
 
@@ -199,13 +238,13 @@ If you get "Could not find module ... (or one of its dependencies)" errors, veri
 Rebuild the templates whenever you:
 
 - **Upgrade Godot** — export templates are version-locked.  A Player built
-  with Godot 4.6.1 won't load a `.pck` from 4.7.  Always rebuild after
-  updating the Godot engine.
+  with an older Godot won't load a `.pck` from a newer editor.  Always rebuild
+  templates after updating the engine (`versions.env` → `GODOT_VERSION`).
 - **Make a GONODES release** — ensures the Player binaries include any new
   operators, cook engine changes, or scene modifications.
 - **Add or change export presets** — new architecture, code-signing, etc.
 
-> **Current Godot version: 4.6.1 stable**
+> **Current Godot version: 4.7.2 stable**
 >
 > When you upgrade Godot, also update the Godot export templates:
 > **Editor → Manage Export Templates → Download for Current Version**.
@@ -220,7 +259,7 @@ CI workflows, and the release checklist all read from it.
 
 ```bash
 # versions.env
-GODOT_VERSION=4.6.1
+GODOT_VERSION=4.7.2
 GODOTCPP_BRANCH=4.5
 ```
 

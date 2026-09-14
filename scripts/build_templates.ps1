@@ -144,7 +144,17 @@ if (-not (Get-Variable -Name IsLinux -Scope Global -ErrorAction SilentlyContinue
 # --- Constants ----------------------------------------------------------------
 
 $SCRIPT_DIR             = Split-Path -Parent $MyInvocation.MyCommand.Path
-$GODOT_VERSION_EXPECTED = "4.6"
+# Read expected major.minor from versions.env (fallback 4.7)
+$GODOT_VERSION_EXPECTED = "4.7"
+$versionsEnv = Join-Path (Split-Path -Parent $SCRIPT_DIR) "versions.env"
+if (Test-Path $versionsEnv) {
+    foreach ($line in Get-Content $versionsEnv) {
+        if ($line -match '^\s*GODOT_VERSION\s*=\s*([0-9]+)\.([0-9]+)') {
+            $GODOT_VERSION_EXPECTED = "$($Matches[1]).$($Matches[2])"
+            break
+        }
+    }
+}
 $EDITOR_MAIN_SCENE      = 'res://scenes/gn_editor.tscn'
 $PLAYER_MAIN_SCENE      = 'res://scenes/player_main.tscn'
 
@@ -206,6 +216,10 @@ function Find-Godot {
     if ($IsWindows -or ($env:OS -eq "Windows_NT")) {
         $winPaths = @(
             "$env:LOCALAPPDATA\Godot\godot.exe",
+            "$env:USERPROFILE\OneDrive\Documents\Godot\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64_console.exe",
+            "$env:USERPROFILE\OneDrive\Documents\Godot\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64.exe",
+            "C:\Godot\Godot_v4.7.2-stable_win64_console.exe",
+            "C:\Godot\Godot_v4.7.2-stable_win64.exe",
             "C:\Godot\Godot_v4.6.1-stable_win64.exe",
             "C:\Godot\Godot_v4.6.1-stable_win64_console.exe"
         )

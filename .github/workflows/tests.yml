@@ -18,7 +18,7 @@ on:
 env:
   SCONS_FLAGS: "target=template_release -j4"
   # Keep in sync with versions.env — run `python scripts/check_versions.py` to verify
-  GODOT_VERSION: "4.6.1"
+  GODOT_VERSION: "4.7.2"
   GODOTCPP_BRANCH: "4.5"
 
 jobs:

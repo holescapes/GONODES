@@ -13,7 +13,7 @@ config_version=5
 config/name="GONODES"
 config/version="0.1.0-beta"
 run/main_scene="res://scenes/gn_editor.tscn"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
 [audio]
@@ -22,6 +22,8 @@ driver/enable_input=true
 
 [display]
 
+window/size/viewport_width=1280
+window/size/viewport_height=720
 window/subwindows/embed_subwindows=false
 
 [editor_plugins]

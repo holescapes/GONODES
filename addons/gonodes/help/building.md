@@ -4,8 +4,18 @@ This guide covers building GONODES Player templates for all supported platforms 
 
 > **Native C++ extensions** (MIDI, Spout, OpenCV, etc.) are built separately from
 > the editor export flow. See [dev_docs/BUILD.md](../../dev_docs/BUILD.md) for the
-> full fresh-clone guide. On Windows, run `scripts/build_windows.ps1` from the repo
-> root (defaults to `tier=all` after fetching SDKs). Install Python, SCons, and MSVC first.
+> full fresh-clone guide (checklist + script per step). On Windows:
+>
+> ```powershell
+> $env:PYTHONUTF8 = "1"
+> $env:GONODES_GODOT = "C:\path\to\Godot_v4.7.2-stable_win64_console.exe"
+> python scripts/check_env.py
+> .\scripts\build_windows.ps1          # tier=all; use -Shipped for a faster subset
+> python scripts/check_builds.py
+> ```
+>
+> Prerequisites: Python 3.10+, SCons, VS 2022 Build Tools **with C++ workload**,
+> and Godot matching `versions.env`.
 
 
 ## Overview

@@ -1,6 +1,6 @@
 # GONODES
 
-**Real-time node-based visual programming, built on [Godot 4.6](https://godotengine.org). Inspired by [TouchDesigner](https://derivative.ca) and [Houdini](https://www.sidefx.com).**
+**Real-time node-based visual programming, built on [Godot 4.7](https://godotengine.org). Inspired by [TouchDesigner](https://derivative.ca) and [Houdini](https://www.sidefx.com).**
 
 Wire operators together, tweak parameters live, see results instantly — then export your patch as a standalone app on any platform Godot supports.
 
@@ -218,7 +218,8 @@ All core operators and most extensions are pure GDScript -- no compilation neede
    git clone https://gitlab.com/kino-dome/gonodes.git
    cd gonodes
    ```
-2. Install **[Godot 4.6.1 stable](https://godotengine.org/download)**
+2. Install **[Godot 4.7.2 stable](https://godotengine.org/download)**
+   (and matching export templates when you need Player/editor exports)
 3. Open Godot, click **Import**, select the `gonodes` folder
 4. Open and run `scenes/gn_editor.tscn`
 
@@ -226,7 +227,7 @@ That is all. The editor runs immediately with **pure GDScript** operators — no
 build required. Native C++ extensions (MIDI, HAP, Spout, OpenCV, etc.) must
 be built locally; see [Building Native Extensions](#building-native-extensions-optional) below.
 
-**Requirements:** Godot 4.6.1, Python 3.8+ (for build scripts). Windows 10/11,
+**Requirements:** Godot 4.7.2, Python 3.8+ (for build scripts). Windows 10/11,
 macOS, or Linux. The repo ships **source only** — no pre-built binaries in git.
 
 ### Dependency Version Management
@@ -235,7 +236,7 @@ All external dependency versions (Godot, godot-cpp branch) are centralized in a 
 
 ```bash
 # versions.env — single source of truth
-GODOT_VERSION=4.6.1
+GODOT_VERSION=4.7.2
 GODOTCPP_BRANCH=4.5
 ```
 
@@ -249,9 +250,13 @@ GONODES works out of the box with pure GDScript. Native C++ extensions provide a
 
 ```powershell
 $env:PYTHONUTF8 = "1"
+$env:GONODES_GODOT = "C:\path\to\Godot_v4.7.2-stable_win64_console.exe"
 pip install scons
-.\scripts\build_windows.ps1              # tier=all — builds every extension with SDK present
+# VS 2022 Build Tools with C++ workload required (see dev_docs/BUILD.md)
+python scripts/check_env.py
+.\scripts\build_windows.ps1              # tier=all — skips optional SDKs that are missing
 .\scripts\build_windows.ps1 -Shipped     # faster: core + extension tiers only
+python scripts/check_builds.py
 ```
 
 **Manual steps (all platforms):**

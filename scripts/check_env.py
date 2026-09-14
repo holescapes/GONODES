@@ -94,13 +94,19 @@ def check_cpp_compiler():
             out = _run_quiet(["cl"])
             record(PASS, "C++ compiler (MSVC)", "cl.exe in PATH")
             return
-        # Fall back to vswhere
+        # Fall back to vswhere (include Build Tools via -products *)
         vswhere = os.path.join(
             os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
             "Microsoft Visual Studio", "Installer", "vswhere.exe",
         )
         if os.path.isfile(vswhere):
-            out = _run_quiet([vswhere, "-latest", "-property", "displayName"])
+            out = _run_quiet([
+                vswhere, "-latest", "-products", "*",
+                "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+                "-property", "displayName",
+            ])
+            if not out:
+                out = _run_quiet([vswhere, "-latest", "-products", "*", "-property", "displayName"])
             if out:
                 record(PASS, "C++ compiler (MSVC)", f"{out} (cl.exe not in PATH — use Developer Command Prompt for builds)")
                 return

@@ -4,8 +4,8 @@
 #   setup_deps -> extension setups (build.cfg) -> check_env -> godot-cpp -> scons
 #
 # Default: tier=all — build every extension this platform can (optional tier included;
-# proprietary SDK misses are skipped, not fatal). Setups run first so user_python,
-# OpenCV, etc. download before compile.
+# proprietary SDK misses / empty SDK folders are skipped, not fatal). Setups run first
+# so user_python, OpenCV, etc. download before compile.
 #
 # Usage (from repo root):
 #   .\scripts\build_windows.ps1
@@ -18,9 +18,9 @@
 # Prerequisites (first time only):
 #   winget install Python.Python.3.12
 #   pip install scons
-#   winget install Microsoft.VisualStudio.2022.BuildTools
-#     (select "Desktop development with C++" / MSVC v143)
-#   Install Godot 4.6.x from https://godotengine.org/download
+#   winget install Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+#   Install Godot matching versions.env (currently 4.7.2) + export templates
+#   Optional: $env:GONODES_GODOT = "C:\path\to\Godot_*_console.exe"
 
 param(
     [int]$Jobs = 8,

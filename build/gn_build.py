@@ -254,26 +254,47 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
 
     # ── Inject optional SDK paths (probe for presence) ──
     for sdk_name, sdk_cfg in cfg[plat].get("optional_sdks", {}).items():
-        # Probe: an optional SDK is available when at least one of its
-        # include_dirs or lib_dirs actually exists on disk.
+        # An optional SDK is available only when its include/lib dirs exist AND
+        # (when libs are declared) at least one expected library file is present.
+        # Empty SDK folders used to pass a dir-only check and then fail at link.
         inc_dirs = sdk_cfg.get("include_dirs", [])
         lib_dirs = sdk_cfg.get("lib_dirs", [])
+        libs = sdk_cfg.get("libs", [])
 
-        # Resolve relative paths against native_dir; absolute paths used as-is.
         def _resolve(d):
             return d if os.path.isabs(d) else os.path.join(native_dir, d)
 
-        found = any(os.path.isdir(_resolve(d)) for d in inc_dirs + lib_dirs)
-        if not found:
+        dirs_ok = any(os.path.isdir(_resolve(d)) for d in inc_dirs + lib_dirs)
+        if not dirs_ok:
             print(f"  Optional SDK '{sdk_name}': NOT FOUND — skipping")
             continue
+
+        if libs and lib_dirs:
+            lib_ok = False
+            for lib_dir in lib_dirs:
+                root = _resolve(lib_dir)
+                for lib in libs:
+                    if plat == "windows":
+                        candidate = os.path.join(root, f"{lib}.lib")
+                    elif plat == "linux":
+                        candidate = os.path.join(root, f"lib{lib}.so")
+                    else:
+                        candidate = os.path.join(root, f"lib{lib}.dylib")
+                    if os.path.isfile(candidate):
+                        lib_ok = True
+                        break
+                if lib_ok:
+                    break
+            if not lib_ok:
+                print(f"  Optional SDK '{sdk_name}': libs missing — skipping")
+                continue
 
         print(f"  Optional SDK '{sdk_name}': FOUND — enabling")
         for d in inc_dirs:
             env.Append(CPPPATH=[_resolve(d)])
         for d in lib_dirs:
             env.Append(LIBPATH=[_resolve(d)])
-        for lib in sdk_cfg.get("libs", []):
+        for lib in libs:
             env.Append(LIBS=[lib])
         for define in sdk_cfg.get("defines", []):
             env.Append(CPPDEFINES=[define])
