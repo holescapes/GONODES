@@ -1,0 +1,116 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "box": {
+      "type": "BoxSOP",
+      "position": [
+        0,
+        200
+      ]
+    },
+    "geo": {
+      "type": "GeometryCOMP",
+      "position": [
+        280,
+        200
+      ]
+    },
+    "cam": {
+      "type": "CameraCOMP",
+      "position": [
+        280,
+        400
+      ]
+    },
+    "light": {
+      "type": "LightCOMP",
+      "position": [
+        280,
+        600
+      ]
+    },
+    "render": {
+      "type": "RenderTOP",
+      "position": [
+        560,
+        300
+      ]
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        880,
+        300
+      ],
+      "parameters": {
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "VA: 3D Render"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 640,
+            "y": 360
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "box",
+      "from_port": 0,
+      "to_node": "geo",
+      "to_port": 0
+    },
+    {
+      "from_node": "geo",
+      "from_port": 0,
+      "to_node": "render",
+      "to_port": 0
+    },
+    {
+      "from_node": "cam",
+      "from_port": 0,
+      "to_node": "render",
+      "to_port": 0
+    },
+    {
+      "from_node": "light",
+      "from_port": 0,
+      "to_node": "render",
+      "to_port": 0
+    },
+    {
+      "from_node": "render",
+      "from_port": 0,
+      "to_node": "win",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_4599452",
+      "type": "note",
+      "text": "VISUAL AUDIT 05 \u2014 3D RenderTOP\n\u25a1 Cube visible in window\n\u25a1 Orbit camera / move light\n\u25a1 Post-FX NOT on RenderTOP \u2014 use EnvironmentCOMP\n\u25a1 cook_every_frame toggle",
+      "position": [
+        -100,
+        20
+      ],
+      "size": [
+        520,
+        160
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

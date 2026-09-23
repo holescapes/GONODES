@@ -1,0 +1,103 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "noise": {
+      "type": "NoiseTOP",
+      "position": [
+        0,
+        200
+      ]
+    },
+    "btn": {
+      "type": "ButtonUI",
+      "position": [
+        0,
+        450
+      ]
+    },
+    "slider": {
+      "type": "SliderUI",
+      "position": [
+        0,
+        600
+      ]
+    },
+    "container": {
+      "type": "ContainerUI",
+      "position": [
+        350,
+        500
+      ]
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "VA: UI Panel"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 640,
+            "y": 480
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "win",
+      "to_port": 0
+    },
+    {
+      "from_node": "btn",
+      "from_port": 0,
+      "to_node": "container",
+      "to_port": 0
+    },
+    {
+      "from_node": "slider",
+      "from_port": 0,
+      "to_node": "container",
+      "to_port": 0
+    },
+    {
+      "from_node": "container",
+      "from_port": 0,
+      "to_node": "win",
+      "to_port": 1
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_6407435",
+      "type": "note",
+      "text": "VISUAL AUDIT 06 \u2014 UI \u2192 WindowOUT panel\n\u25a1 Open window: texture + UI widgets\n\u25a1 Button / Slider clickable in window\n\u25a1 Viewer can pin UI state CHOPs",
+      "position": [
+        -100,
+        20
+      ],
+      "size": [
+        520,
+        160
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

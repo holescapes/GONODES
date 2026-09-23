@@ -308,12 +308,13 @@ keyboard events to the Chromium browser.
 ### Texture Overlay
 
 TOPs that need interactive handles use `GNInteractivePanel` via
-`GNTopInteractiveBase`. In the viewer, call
-`viewer.set_interactive_texture_overlay(panel)`; for WindowOUT, wire the
-node's **panel** UI output port.
+`GNTopInteractiveBase`. **Params are the source of truth.** The viewer and
+WindowOUT each get their own panel instance; both stay interactive and synced.
+Wire the node's **panel** UI output to WindowOUT — the viewer Out overlay is
+not cleared when that port is demanded.
 
 ```gdscript
-# GNTopInteractiveBase provides panel port + viewer integration automatically.
+# GNTopInteractiveBase provides panel port + dual-view sync automatically.
 func _create_interactive_panel() -> GNInteractivePanel:
     return MapperOverlay.new()
 ```

@@ -81,7 +81,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if disp_tex != null:
 		_material.set_shader_parameter("disp_tex", disp_tex.texture)
 
-	_sync_panel_from_params()
+	_sync_panel_from_params_if_live()
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
@@ -138,6 +138,8 @@ func _on_grid_point_offset_changed(grid_x: int, grid_y: int, offset: Vector2) ->
 
 
 func _sync_panel_from_params() -> void:
+	if not is_instance_valid(_interactive_panel):
+		return
 	var panel: GridWarpPanel = _interactive_panel as GridWarpPanel
 	if panel == null:
 		return
@@ -151,6 +153,8 @@ func _sync_panel_from_params() -> void:
 
 
 func _sync_params_from_panel() -> void:
+	if not is_instance_valid(_interactive_panel):
+		return
 	var panel: GridWarpPanel = _interactive_panel as GridWarpPanel
 	if panel == null:
 		return

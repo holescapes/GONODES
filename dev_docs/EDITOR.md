@@ -358,17 +358,22 @@ texture UV; `viewer.uv_to_local_pos(uv)` does the reverse.
 
 ### Interactive Panel Export (WindowOUT)
 
-TOPs extending `GNTopInteractiveBase` add a **panel** UI output port. The same
-`GNInteractivePanel` instance is wrapped in `GNUIData` for WindowOUT:
+TOPs extending `GNTopInteractiveBase` add a **panel** UI output port. **Params
+are the source of truth.** The viewer and WindowOUT each get their own
+`GNInteractivePanel` instance (synced through params):
 
 ```
 MyMapTOP out   → WindowOUT in (texture background)
 MyMapTOP panel → WindowOUT panel (interactive handles, fill_parent)
+MyMapTOP out   → viewer Out (texture + interactive overlay — still live)
 ```
 
-When the panel port is wired to WindowOUT, the viewer shows the texture only
-(duplicate read-only preview on the panel port). Parameters remain the source
-of truth on the node.
+Dragging handles in the viewer or in WindowOUT writes node params, then both
+views refresh from those params. Wiring the panel port no longer steals the
+viewer overlay. Prefer this over disconnect/reconnect to edit in one host.
+
+The viewer **Panel** port shows a non-interactive inspection duplicate of the
+export view (so it does not reparent WindowOUT's live Control).
 
 ### Multi-Output Nodes
 

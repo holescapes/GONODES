@@ -1,0 +1,623 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "n0": {
+      "type": "AttributeSOP",
+      "position": [
+        0.0,
+        0.0
+      ]
+    },
+    "n1": {
+      "type": "BendSOP",
+      "position": [
+        280.0,
+        0.0
+      ]
+    },
+    "n2": {
+      "type": "BlendSOP",
+      "position": [
+        560.0,
+        0.0
+      ]
+    },
+    "n3": {
+      "type": "BooleanSOP",
+      "position": [
+        840.0,
+        0.0
+      ]
+    },
+    "n4": {
+      "type": "BoxSOP",
+      "position": [
+        1120.0,
+        0.0
+      ]
+    },
+    "n5": {
+      "type": "CHOPtoSOP",
+      "position": [
+        1400.0,
+        0.0
+      ]
+    },
+    "n6": {
+      "type": "CapSOP",
+      "position": [
+        1680.0,
+        0.0
+      ]
+    },
+    "n7": {
+      "type": "CarveSOP",
+      "position": [
+        1960.0,
+        0.0
+      ]
+    },
+    "n8": {
+      "type": "CircleSOP",
+      "position": [
+        0.0,
+        200.0
+      ]
+    },
+    "n9": {
+      "type": "ClipSOP",
+      "position": [
+        280.0,
+        200.0
+      ]
+    },
+    "n10": {
+      "type": "ClothSOP",
+      "position": [
+        560.0,
+        200.0
+      ]
+    },
+    "n11": {
+      "type": "ConvertLineSOP",
+      "position": [
+        840.0,
+        200.0
+      ]
+    },
+    "n12": {
+      "type": "CopySOP",
+      "position": [
+        1120.0,
+        200.0
+      ]
+    },
+    "n13": {
+      "type": "CreepSOP",
+      "position": [
+        1400.0,
+        200.0
+      ]
+    },
+    "n14": {
+      "type": "CylinderSOP",
+      "position": [
+        1680.0,
+        200.0
+      ]
+    },
+    "n15": {
+      "type": "DATtoSOP",
+      "position": [
+        1960.0,
+        200.0
+      ]
+    },
+    "n16": {
+      "type": "DeleteSOP",
+      "position": [
+        0.0,
+        400.0
+      ]
+    },
+    "n17": {
+      "type": "DivideSOP",
+      "position": [
+        280.0,
+        400.0
+      ]
+    },
+    "n18": {
+      "type": "ExtrudeSOP",
+      "position": [
+        560.0,
+        400.0
+      ]
+    },
+    "n19": {
+      "type": "FacetSOP",
+      "position": [
+        840.0,
+        400.0
+      ]
+    },
+    "n20": {
+      "type": "FileInSOP",
+      "position": [
+        1120.0,
+        400.0
+      ]
+    },
+    "n21": {
+      "type": "FileOutSOP",
+      "position": [
+        1400.0,
+        400.0
+      ]
+    },
+    "n22": {
+      "type": "FilterSOP",
+      "position": [
+        1680.0,
+        400.0
+      ]
+    },
+    "n23": {
+      "type": "FontSOP",
+      "position": [
+        1960.0,
+        400.0
+      ]
+    },
+    "n24": {
+      "type": "FuseSOP",
+      "position": [
+        0.0,
+        600.0
+      ]
+    },
+    "n25": {
+      "type": "GPUMarchingCubesSOP",
+      "position": [
+        280.0,
+        600.0
+      ]
+    },
+    "n26": {
+      "type": "GridSOP",
+      "position": [
+        560.0,
+        600.0
+      ]
+    },
+    "n27": {
+      "type": "GroupSOP",
+      "position": [
+        840.0,
+        600.0
+      ]
+    },
+    "n28": {
+      "type": "HeightfieldSOP",
+      "position": [
+        1120.0,
+        600.0
+      ]
+    },
+    "n29": {
+      "type": "HoleSOP",
+      "position": [
+        1400.0,
+        600.0
+      ]
+    },
+    "n30": {
+      "type": "InstanceSOP",
+      "position": [
+        1680.0,
+        600.0
+      ]
+    },
+    "n31": {
+      "type": "IsoSurfaceSOP",
+      "position": [
+        1960.0,
+        600.0
+      ]
+    },
+    "n32": {
+      "type": "LSystemSOP",
+      "position": [
+        0.0,
+        800.0
+      ]
+    },
+    "n33": {
+      "type": "LatticeSOP",
+      "position": [
+        280.0,
+        800.0
+      ]
+    },
+    "n34": {
+      "type": "LineSOP",
+      "position": [
+        560.0,
+        800.0
+      ]
+    },
+    "n35": {
+      "type": "MagnetSOP",
+      "position": [
+        840.0,
+        800.0
+      ]
+    },
+    "n36": {
+      "type": "MarchingCubesSOP",
+      "position": [
+        1120.0,
+        800.0
+      ]
+    },
+    "n37": {
+      "type": "MeasureSOP",
+      "position": [
+        1400.0,
+        800.0
+      ]
+    },
+    "n38": {
+      "type": "MergeSOP",
+      "position": [
+        1680.0,
+        800.0
+      ]
+    },
+    "n39": {
+      "type": "MetaballSOP",
+      "position": [
+        1960.0,
+        800.0
+      ]
+    },
+    "n40": {
+      "type": "MirrorSOP",
+      "position": [
+        0.0,
+        1000.0
+      ]
+    },
+    "n41": {
+      "type": "MountainSOP",
+      "position": [
+        280.0,
+        1000.0
+      ]
+    },
+    "n42": {
+      "type": "NoiseSOP",
+      "position": [
+        560.0,
+        1000.0
+      ]
+    },
+    "n43": {
+      "type": "NormalSOP",
+      "position": [
+        840.0,
+        1000.0
+      ]
+    },
+    "n44": {
+      "type": "NullSOP",
+      "position": [
+        1120.0,
+        1000.0
+      ]
+    },
+    "n45": {
+      "type": "ObjectMergeSOP",
+      "position": [
+        1400.0,
+        1000.0
+      ]
+    },
+    "n46": {
+      "type": "ParticleSOP",
+      "position": [
+        1680.0,
+        1000.0
+      ]
+    },
+    "n47": {
+      "type": "PeakSOP",
+      "position": [
+        1960.0,
+        1000.0
+      ]
+    },
+    "n48": {
+      "type": "PointSOP",
+      "position": [
+        0.0,
+        1200.0
+      ]
+    },
+    "n49": {
+      "type": "PolyBevelSOP",
+      "position": [
+        280.0,
+        1200.0
+      ]
+    },
+    "n50": {
+      "type": "PolyBridgeSOP",
+      "position": [
+        560.0,
+        1200.0
+      ]
+    },
+    "n51": {
+      "type": "PolyLoftSOP",
+      "position": [
+        840.0,
+        1200.0
+      ]
+    },
+    "n52": {
+      "type": "PolyPatchSOP",
+      "position": [
+        1120.0,
+        1200.0
+      ]
+    },
+    "n53": {
+      "type": "PolyReduceSOP",
+      "position": [
+        1400.0,
+        1200.0
+      ]
+    },
+    "n54": {
+      "type": "PolySplineSOP",
+      "position": [
+        1680.0,
+        1200.0
+      ]
+    },
+    "n55": {
+      "type": "PolyStitchSOP",
+      "position": [
+        1960.0,
+        1200.0
+      ]
+    },
+    "n56": {
+      "type": "PrimitiveSOP",
+      "position": [
+        0.0,
+        1400.0
+      ]
+    },
+    "n57": {
+      "type": "ProjectSOP",
+      "position": [
+        280.0,
+        1400.0
+      ]
+    },
+    "n58": {
+      "type": "RaySOP",
+      "position": [
+        560.0,
+        1400.0
+      ]
+    },
+    "n59": {
+      "type": "RemeshSOP",
+      "position": [
+        840.0,
+        1400.0
+      ]
+    },
+    "n60": {
+      "type": "ResampleSOP",
+      "position": [
+        1120.0,
+        1400.0
+      ]
+    },
+    "n61": {
+      "type": "ReverseSOP",
+      "position": [
+        1400.0,
+        1400.0
+      ]
+    },
+    "n62": {
+      "type": "SampleGeometrySOP",
+      "position": [
+        1680.0,
+        1400.0
+      ]
+    },
+    "n63": {
+      "type": "ScatterSOP",
+      "position": [
+        1960.0,
+        1400.0
+      ]
+    },
+    "n64": {
+      "type": "SelectSOP",
+      "position": [
+        0.0,
+        1600.0
+      ]
+    },
+    "n65": {
+      "type": "SkinSOP",
+      "position": [
+        280.0,
+        1600.0
+      ]
+    },
+    "n66": {
+      "type": "SmoothSOP",
+      "position": [
+        560.0,
+        1600.0
+      ]
+    },
+    "n67": {
+      "type": "SortSOP",
+      "position": [
+        840.0,
+        1600.0
+      ]
+    },
+    "n68": {
+      "type": "SphereSOP",
+      "position": [
+        1120.0,
+        1600.0
+      ]
+    },
+    "n69": {
+      "type": "SpringSOP",
+      "position": [
+        1400.0,
+        1600.0
+      ]
+    },
+    "n70": {
+      "type": "SubdivideSOP",
+      "position": [
+        1680.0,
+        1600.0
+      ]
+    },
+    "n71": {
+      "type": "SweepSOP",
+      "position": [
+        1960.0,
+        1600.0
+      ]
+    },
+    "n72": {
+      "type": "SwitchSOP",
+      "position": [
+        0.0,
+        1800.0
+      ]
+    },
+    "n73": {
+      "type": "TOPtoSOP",
+      "position": [
+        280.0,
+        1800.0
+      ]
+    },
+    "n74": {
+      "type": "TaperSOP",
+      "position": [
+        560.0,
+        1800.0
+      ]
+    },
+    "n75": {
+      "type": "TextureSOP",
+      "position": [
+        840.0,
+        1800.0
+      ]
+    },
+    "n76": {
+      "type": "TorusSOP",
+      "position": [
+        1120.0,
+        1800.0
+      ]
+    },
+    "n77": {
+      "type": "TrailRibbonSOP",
+      "position": [
+        1400.0,
+        1800.0
+      ]
+    },
+    "n78": {
+      "type": "TrailSOP",
+      "position": [
+        1680.0,
+        1800.0
+      ]
+    },
+    "n79": {
+      "type": "TransformSOP",
+      "position": [
+        1960.0,
+        1800.0
+      ]
+    },
+    "n80": {
+      "type": "TubeSOP",
+      "position": [
+        0.0,
+        2000.0
+      ]
+    },
+    "n81": {
+      "type": "TwistSOP",
+      "position": [
+        280.0,
+        2000.0
+      ]
+    },
+    "n82": {
+      "type": "UVProjectSOP",
+      "position": [
+        560.0,
+        2000.0
+      ]
+    },
+    "n83": {
+      "type": "VoronoiShatterSOP",
+      "position": [
+        840.0,
+        2000.0
+      ]
+    },
+    "n84": {
+      "type": "WireframeSOP",
+      "position": [
+        1120.0,
+        2000.0
+      ]
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "ann_8095163",
+      "type": "note",
+      "text": "VISUAL AUDIT \u2014 SOP inventory (85 ops)\n\u25a1 Click each node; check viewer / params match docs\n\u25a1 Wire into a Null/Window as needed\n\u25a1 Mark CHECKLIST.md when done",
+      "position": [
+        -200,
+        -160
+      ],
+      "size": [
+        640,
+        140
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

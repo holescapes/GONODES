@@ -1,0 +1,64 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "noise": {
+      "type": "NoiseTOP",
+      "position": [
+        0,
+        200
+      ]
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        400,
+        200
+      ],
+      "parameters": {
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "VA: Window Basics"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 640,
+            "y": 360
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "win",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1470034",
+      "type": "note",
+      "text": "VISUAL AUDIT 01 \u2014 WindowOUT\n\u25a1 Open is ON \u2192 window appears\n\u25a1 Toggle Open OFF \u2192 window hides\n\u25a1 Default res was 512; this pack uses 640\u00d7360\n\u25a1 Change monitor / always_on_top / vsync",
+      "position": [
+        -100,
+        20
+      ],
+      "size": [
+        520,
+        160
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

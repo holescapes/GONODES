@@ -131,7 +131,8 @@ static func split_patterns(csv: String) -> Dictionary:
 ## [param count] is the total number of elements (defines upper bound).
 static func parse_index_range(range_str: String, count: int) -> PackedInt32Array:
 	var result_set: Dictionary = {}  # index → true, used as a set
-	var parts := range_str.split(",")
+	# Commas separate ranges, except the comma inside `:take,period`.
+	var parts := _split_index_clauses(range_str)
 
 	# Two-pass: first collect all includes, then apply excludes
 	var includes: Array[String] = []
@@ -146,11 +147,15 @@ static func parse_index_range(range_str: String, count: int) -> PackedInt32Array
 		else:
 			includes.append(trimmed)
 
-	# Parse include ranges
-	for inc in includes:
-		var indices := _parse_single_range(inc, count)
-		for idx in indices:
-			result_set[idx] = true
+	# Exclude-only (`!5-10`) means all indices except those ranges.
+	if includes.is_empty() and not excludes.is_empty():
+		for i in range(count):
+			result_set[i] = true
+	else:
+		for inc in includes:
+			var indices := _parse_single_range(inc, count)
+			for idx in indices:
+				result_set[idx] = true
 
 	# Parse exclude ranges and remove
 	for exc in excludes:
@@ -165,6 +170,51 @@ static func parse_index_range(range_str: String, count: int) -> PackedInt32Array
 	for k in keys:
 		result.append(int(k))
 	return result
+
+
+## Splits an index expression on range commas.
+## The comma in `:take,period` stays inside the clause (`0-19:2,5`).
+static func _split_index_clauses(range_str: String) -> PackedStringArray:
+	var clauses := PackedStringArray()
+	var buf := ""
+	var i := 0
+	var n := range_str.length()
+	while i < n:
+		var code := range_str.unicode_at(i)
+		if code == 58: # ':'
+			buf += ":"
+			i += 1
+			while i < n and (range_str.unicode_at(i) == 32 or _is_ascii_digit(range_str.unicode_at(i))):
+				buf += range_str[i]
+				i += 1
+			if i < n and range_str.unicode_at(i) == 44:
+				var j := i + 1
+				while j < n and range_str.unicode_at(j) == 32:
+					j += 1
+				if j < n and _is_ascii_digit(range_str.unicode_at(j)):
+					buf += ","
+					i += 1
+					while i < n and (range_str.unicode_at(i) == 32 or _is_ascii_digit(range_str.unicode_at(i))):
+						buf += range_str[i]
+						i += 1
+			continue
+		if code == 44: # ','
+			var trimmed := buf.strip_edges()
+			if not trimmed.is_empty():
+				clauses.append(trimmed)
+			buf = ""
+			i += 1
+			continue
+		buf += range_str[i]
+		i += 1
+	var tail := buf.strip_edges()
+	if not tail.is_empty():
+		clauses.append(tail)
+	return clauses
+
+
+static func _is_ascii_digit(code: int) -> bool:
+	return code >= 48 and code <= 57
 
 
 ## Parses a single range token (no comma, no ! prefix).

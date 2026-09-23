@@ -723,28 +723,27 @@ void fragment() {
 
     if (!hit) {
         COLOR = u_bg_color;
-        return;
+    } else {
+        vec3 p = ro + rd * t;
+        vec3 n = calc_normal(p);
+        vec3 albedo = get_material(p, t);
+        vec3 l = normalize(u_light_dir);
+
+        // Diffuse + specular
+        float diff = max(dot(n, l), 0.0);
+        vec3 h = normalize(l - rd);
+        float spec = pow(max(dot(n, h), 0.0), 32.0) * 0.3;
+
+        float ao = u_show_ao ? calc_ao(p, n) : 1.0;
+        float shadow = u_soft_shadows ? calc_shadow(p + n * 0.01, l, 0.02, 10.0) : 1.0;
+
+        vec3 col = albedo * (u_ambient + diff * shadow) * ao + vec3(spec * shadow);
+
+        // Tone mapping + gamma
+        col = col / (col + vec3(1.0));
+        col = pow(col, vec3(1.0 / 2.2));
+
+        COLOR = vec4(col, 1.0);
     }
-
-    vec3 p = ro + rd * t;
-    vec3 n = calc_normal(p);
-    vec3 albedo = get_material(p, t);
-    vec3 l = normalize(u_light_dir);
-
-    // Diffuse + specular
-    float diff = max(dot(n, l), 0.0);
-    vec3 h = normalize(l - rd);
-    float spec = pow(max(dot(n, h), 0.0), 32.0) * 0.3;
-
-    float ao = u_show_ao ? calc_ao(p, n) : 1.0;
-    float shadow = u_soft_shadows ? calc_shadow(p + n * 0.01, l, 0.02, 10.0) : 1.0;
-
-    vec3 col = albedo * (u_ambient + diff * shadow) * ao + vec3(spec * shadow);
-
-    // Tone mapping + gamma
-    col = col / (col + vec3(1.0));
-    col = pow(col, vec3(1.0 / 2.2));
-
-    COLOR = vec4(col, 1.0);
 }
 """

@@ -28,8 +28,8 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.IMG, "Segmentation mask", "Out")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("model_path",
-		"res://addons/gn_ext_ml/models/selfie_segmentation.onnx",
+	add_parameter(GNParameter.create_file("model_path", "res://addons/gn_ext_ml/models/selfie_segmentation.onnx",
+		PackedStringArray(["*.onnx"]),
 		"Model", "Path to segmentation ONNX model"))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output mask resolution"))

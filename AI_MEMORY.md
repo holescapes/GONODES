@@ -11,7 +11,18 @@
 - **Cursor:** `.cursor/rules/gonodes.mdc` instructs the agent to read this file.
 - **You:** edit this file directly — it lives in git and syncs across machines.
 
+## Active long-running work
+
+- **Pre-Beta Audit — WRITTEN, remediation started.** B-12, B-13, and B-8 are fixed (see `PRE-BETA_AUDIT.md`
+  Resume). 4n and live audio/MIDI/OSC/DMX are still UNVERIFIED. Do not duplicate findings here.
+
 ## Entries
+
+### 2026-09-23 — Hard Rule 25.46: multi-stage work must be resumable
+
+- Stage isn't done until findings + honest progress status + `## Resume here` block are written
+- Resume block must carry environment state that cost real time (built extensions, templates) so a fresh agent never repeats an expensive build
+- Task doc holds the log; `AI_MEMORY.md` holds only a one-line pointer
 
 ### 2026-09-12 — Hard Rule 25.45: docs sync with code
 
@@ -59,9 +70,9 @@
 
 ### 2026-09-12 — Interactive panels + hard rules 25.40–25.44
 
-- Interactive TOPs use `GNInteractivePanel` + `GNTopInteractiveBase` (panel UI port → WindowOUT)
+- Interactive TOPs use `GNInteractivePanel` + `GNTopInteractiveBase` (params SoT; viewer + WindowOUT each own a panel view)
 - DragUI ops removed; operator total **585** (UI 33; extension ops 116)
-- New rules: 25.40 counts from scanner, 25.41 core≠ui class_names, 25.42 panel demand gating, 25.43 README=cfg, 25.44 TOP/IMG boundary
+- New rules: 25.40 counts from scanner, 25.41 core≠ui class_names, 25.42 N panel views / params SoT, 25.43 README=cfg, 25.44 TOP/IMG boundary
 - Canonical Godot for this repo: `versions.env` → **4.7.2**; set `$env:GONODES_GODOT` to the console .exe for tests
 
 <!-- Add new entries above this line, newest first -->

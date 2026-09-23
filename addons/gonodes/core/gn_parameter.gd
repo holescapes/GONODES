@@ -88,6 +88,16 @@ var saved_enum_label: String = ""
 ## Each entry is a wildcard pattern, e.g., "*.ttf", "*.otf", "*.png".
 @export var file_filters: PackedStringArray = PackedStringArray()
 
+## For FILE type: how the native browse dialog behaves.
+enum FileBrowseMode {
+	OPEN_FILE = 0,  ## Pick an existing file (inputs)
+	SAVE_FILE = 1,  ## Pick/create an output path (exports)
+	OPEN_DIR = 2,   ## Pick a directory / folder
+}
+
+## Browse dialog mode for FILE parameters ([enum FileBrowseMode]).
+var file_browse_mode: int = FileBrowseMode.OPEN_FILE
+
 ## When true, the parameter is displayed in the inspector but cannot be edited
 ## by the user.  Useful for metadata fields (URLs, credits, etc.).
 @export var read_only: bool = false
@@ -369,21 +379,32 @@ static func create_node_ref(p_name: String, p_ref_family: int,
 ## Factory method to create a FILE parameter (project resource picker).
 ## [param p_filters] is an array of wildcard patterns, e.g.
 ## [code]PackedStringArray(["*.ttf", "*.otf"])[/code].
+## [param p_browse_mode] selects open-file / save-file / open-directory dialog.
 static func create_file(p_name: String, p_default: String,
 		p_filters: PackedStringArray = PackedStringArray(),
 		p_label: String = "",
-		p_description: String = "") -> GNParameter:
+		p_description: String = "",
+		p_browse_mode: int = FileBrowseMode.OPEN_FILE) -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
 	param.description = p_description
 	param.value_type = ValueType.FILE
 	param.file_filters = p_filters
+	param.file_browse_mode = p_browse_mode
 	param.default_value = p_default
 	param.value = p_default
 	param.fallback_value = p_default
 	param.resolved_value = p_default
 	return param
+
+
+## Factory for a directory/folder FILE parameter (browse opens a folder picker).
+static func create_folder(p_name: String, p_default: String,
+		p_label: String = "",
+		p_description: String = "") -> GNParameter:
+	return create_file(p_name, p_default, PackedStringArray(), p_label, p_description,
+		FileBrowseMode.OPEN_DIR)
 
 
 ## Factory method to create a RAMP parameter (curve/gradient editor).

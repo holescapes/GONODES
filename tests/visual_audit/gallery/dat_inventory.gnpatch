@@ -1,0 +1,385 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "n0": {
+      "type": "ArtnetDAT",
+      "position": [
+        0.0,
+        0.0
+      ]
+    },
+    "n1": {
+      "type": "ArucoPoseDAT",
+      "position": [
+        280.0,
+        0.0
+      ]
+    },
+    "n2": {
+      "type": "BlackmagicDAT",
+      "position": [
+        560.0,
+        0.0
+      ]
+    },
+    "n3": {
+      "type": "CHOPDAT",
+      "position": [
+        840.0,
+        0.0
+      ]
+    },
+    "n4": {
+      "type": "CallbackDAT",
+      "position": [
+        1120.0,
+        0.0
+      ]
+    },
+    "n5": {
+      "type": "CameraCalibDAT",
+      "position": [
+        1400.0,
+        0.0
+      ]
+    },
+    "n6": {
+      "type": "ConstantDAT",
+      "position": [
+        1680.0,
+        0.0
+      ]
+    },
+    "n7": {
+      "type": "CueDAT",
+      "position": [
+        1960.0,
+        0.0
+      ]
+    },
+    "n8": {
+      "type": "DATtoCHOP",
+      "position": [
+        0.0,
+        200.0
+      ]
+    },
+    "n9": {
+      "type": "DMXDAT",
+      "position": [
+        280.0,
+        200.0
+      ]
+    },
+    "n10": {
+      "type": "DeleteDAT",
+      "position": [
+        560.0,
+        200.0
+      ]
+    },
+    "n11": {
+      "type": "DepthSensorDAT",
+      "position": [
+        840.0,
+        200.0
+      ]
+    },
+    "n12": {
+      "type": "ErrorDAT",
+      "position": [
+        1120.0,
+        200.0
+      ]
+    },
+    "n13": {
+      "type": "EvaluateDAT",
+      "position": [
+        1400.0,
+        200.0
+      ]
+    },
+    "n14": {
+      "type": "FIFODAT",
+      "position": [
+        1680.0,
+        200.0
+      ]
+    },
+    "n15": {
+      "type": "FileInDAT",
+      "position": [
+        1960.0,
+        200.0
+      ]
+    },
+    "n16": {
+      "type": "FolderDAT",
+      "position": [
+        0.0,
+        400.0
+      ]
+    },
+    "n17": {
+      "type": "InfoDAT",
+      "position": [
+        280.0,
+        400.0
+      ]
+    },
+    "n18": {
+      "type": "InsertDAT",
+      "position": [
+        560.0,
+        400.0
+      ]
+    },
+    "n19": {
+      "type": "JSONDAT",
+      "position": [
+        840.0,
+        400.0
+      ]
+    },
+    "n20": {
+      "type": "MergeDAT",
+      "position": [
+        1120.0,
+        400.0
+      ]
+    },
+    "n21": {
+      "type": "MidiInDAT",
+      "position": [
+        1400.0,
+        400.0
+      ]
+    },
+    "n22": {
+      "type": "MqttDAT",
+      "position": [
+        1680.0,
+        400.0
+      ]
+    },
+    "n23": {
+      "type": "MultiTouchInDAT",
+      "position": [
+        1960.0,
+        400.0
+      ]
+    },
+    "n24": {
+      "type": "NetworkDAT",
+      "position": [
+        0.0,
+        600.0
+      ]
+    },
+    "n25": {
+      "type": "NullDAT",
+      "position": [
+        280.0,
+        600.0
+      ]
+    },
+    "n26": {
+      "type": "OPFindDAT",
+      "position": [
+        560.0,
+        600.0
+      ]
+    },
+    "n27": {
+      "type": "ObjectDetectDAT",
+      "position": [
+        840.0,
+        600.0
+      ]
+    },
+    "n28": {
+      "type": "OscInDAT",
+      "position": [
+        1120.0,
+        600.0
+      ]
+    },
+    "n29": {
+      "type": "PanelExecuteDAT",
+      "position": [
+        1400.0,
+        600.0
+      ]
+    },
+    "n30": {
+      "type": "ParameterDAT",
+      "position": [
+        1680.0,
+        600.0
+      ]
+    },
+    "n31": {
+      "type": "QRCodeDAT",
+      "position": [
+        1960.0,
+        600.0
+      ]
+    },
+    "n32": {
+      "type": "RenderPickDAT",
+      "position": [
+        0.0,
+        800.0
+      ]
+    },
+    "n33": {
+      "type": "SOPtoDAT",
+      "position": [
+        280.0,
+        800.0
+      ]
+    },
+    "n34": {
+      "type": "SelectDAT",
+      "position": [
+        560.0,
+        800.0
+      ]
+    },
+    "n35": {
+      "type": "SerialDAT",
+      "position": [
+        840.0,
+        800.0
+      ]
+    },
+    "n36": {
+      "type": "SerialReceiveDAT",
+      "position": [
+        1120.0,
+        800.0
+      ]
+    },
+    "n37": {
+      "type": "SerialSendDAT",
+      "position": [
+        1400.0,
+        800.0
+      ]
+    },
+    "n38": {
+      "type": "SortDAT",
+      "position": [
+        1680.0,
+        800.0
+      ]
+    },
+    "n39": {
+      "type": "SubsetDAT",
+      "position": [
+        1960.0,
+        800.0
+      ]
+    },
+    "n40": {
+      "type": "SubstituteDAT",
+      "position": [
+        0.0,
+        1000.0
+      ]
+    },
+    "n41": {
+      "type": "SwitchDAT",
+      "position": [
+        280.0,
+        1000.0
+      ]
+    },
+    "n42": {
+      "type": "SystemDAT",
+      "position": [
+        560.0,
+        1000.0
+      ]
+    },
+    "n43": {
+      "type": "TOPtoDAT",
+      "position": [
+        840.0,
+        1000.0
+      ]
+    },
+    "n44": {
+      "type": "TableDAT",
+      "position": [
+        1120.0,
+        1000.0
+      ]
+    },
+    "n45": {
+      "type": "TextDAT",
+      "position": [
+        1400.0,
+        1000.0
+      ]
+    },
+    "n46": {
+      "type": "TransposeDAT",
+      "position": [
+        1680.0,
+        1000.0
+      ]
+    },
+    "n47": {
+      "type": "WebDAT",
+      "position": [
+        1960.0,
+        1000.0
+      ]
+    },
+    "n48": {
+      "type": "WebServerDAT",
+      "position": [
+        0.0,
+        1200.0
+      ]
+    },
+    "n49": {
+      "type": "WebSocketDAT",
+      "position": [
+        280.0,
+        1200.0
+      ]
+    },
+    "n50": {
+      "type": "XMLDAT",
+      "position": [
+        560.0,
+        1200.0
+      ]
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "ann_8313421",
+      "type": "note",
+      "text": "VISUAL AUDIT \u2014 DAT inventory (51 ops)\n\u25a1 Click each node; check viewer / params match docs\n\u25a1 Wire into a Null/Window as needed\n\u25a1 Mark CHECKLIST.md when done",
+      "position": [
+        -200,
+        -160
+      ],
+      "size": [
+        640,
+        140
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

@@ -9,7 +9,8 @@ extends GNChopBase
 ##
 ## 24-bit / float WAV is not supported — convert to 16-bit PCM or OGG.
 ##
-## Transport: play, pause, seek scrubber, loop. URLs fetch via GNUrlCache.
+## Transport: play, pause, start cue, seek scrubber, loop, volume, gain.
+## URLs fetch via GNUrlCache.
 ##
 ## Output channels:
 ##   left, right, level, pos, length, playing
@@ -47,6 +48,8 @@ var _memory_load_busy: bool = false
 var _seek_user_dirty: bool = false
 var _syncing_seek: bool = false
 var _known_duration: float = 0.0
+var _was_playing: bool = false
+var _last_applied_cue: float = -1.0
 
 # Stream-from-disk (8/16-bit PCM WAV)
 var _is_stream_mode: bool = false
@@ -97,20 +100,27 @@ func _init_parameters() -> void:
 		PackedStringArray(["Auto", "Memory", "Stream"]), 0, "Load Mode",
 		"Auto: stream 8/16-bit PCM WAV, Memory for OGG/MP3. Memory: full RAM decode. Stream: force disk stream."))
 	add_parameter(GNParameter.create_bool("play", false, "Play",
-		"Start/stop playback"))
+		"Start/stop playback (starts from Start Position)"))
 	add_parameter(GNParameter.create_bool("loop", true, "Loop",
-		"Loop playback"))
+		"Loop playback (returns to Start Position)"))
 	add_parameter(GNParameter.create_float("volume", 0.0, -60.0, 6.0, 0.1, "Volume (dB)",
-		"Playback volume in decibels"))
-	# min+max required for a ranged scrubber; max is updated to file duration on load.
-	add_parameter(GNParameter.create_float("seek_pos", 0.0, 0.0, 1.0, 0.01, "Seek",
-		"Playback position in seconds. Drag to scrub — follows playhead while playing."))
+		"Speaker / bus playback level in decibels (before Gain)"))
+	add_parameter(GNParameter.create_float("gain", 1.0, 0.0, 16.0, 0.05, "Gain",
+		"Linear amplitude for CHOP waveform + analysis bus (1 = unity). Raise if spectrum/bands look weak on loud masters."))
+	# Cue point — Play starts here; Loop returns here. Independent of Seek scrubber.
+	# Max must stay large until duration is known — a tiny max (e.g. 1.0) clamps
+	# saved values on patch load via GNParameter.from_dict → _clamp_value.
+	add_parameter(GNParameter.create_float("start_pos", 0.0, 0.0, 86400.0, 0.01, "Start Position",
+		"Cue time in seconds. Play begins here; Loop wraps here. Use for export in-point."))
+	# Live scrubber — follows playhead while playing.
+	add_parameter(GNParameter.create_float("seek_pos", 0.0, 0.0, 86400.0, 0.01, "Seek",
+		"Live playback position in seconds. Drag to scrub — follows playhead while playing."))
 	add_parameter(GNParameter.create_int("buffer_size", 1024, 64, 8192, "Buffer",
 		"Number of samples to output per cook"))
 	add_parameter(GNParameter.create_bool("stereo", true, "Stereo",
 		"Output stereo channels"))
 	add_parameter(GNParameter.create_bool("mute_output", false, "Mute",
-		"Mute audio output (still captures waveform)"))
+		"Mute speakers (waveform + spectrum still captured)"))
 	var dev_param := GNParameter.create_enum("output_device",
 		PackedStringArray(["Default"]), 0, "Output Device",
 		"Speaker / headphones. Godot has one global output device — change this after swapping hardware. Prefer Preferences → Audio for editor-wide default.")
@@ -140,9 +150,13 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var want_play: bool = get_param_value("play")
 	var want_loop: bool = get_param_value("loop")
 	var volume_db: float = get_param_value("volume")
+	var gain_lin: float = maxf(float(get_param_value("gain")), 0.0)
 	var buf_size: int = get_param_value("buffer_size")
 	var stereo: bool = get_param_value("stereo")
 	var mute: bool = get_param_value("mute_output")
+	var effective_db: float = _effective_volume_db(volume_db, gain_lin)
+
+	var play_rising: bool = want_play and not _was_playing
 
 	var dev_idx: int = int(get_param_value("output_device"))
 	if dev_idx != _last_device_idx:
@@ -186,23 +200,31 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		out.set_single_value("playing", 0.0)
 		return out
 
+	if play_rising:
+		_cue_to_start(want_play)
+	elif absf(_clamped_cue_seconds() - _last_applied_cue) > 0.02:
+		# Expression-driven Start Cue (and inspector edits) — jump when cue moves.
+		_cue_to_start(want_play)
+	_was_playing = want_play
+	_last_applied_cue = _clamped_cue_seconds()
+
 	if _is_stream_mode:
-		_cook_stream_transport(want_play, want_loop, volume_db, mute)
+		_cook_stream_transport(want_play, want_loop, effective_db, mute)
 	elif _stream_player != null and _audio_stream != null:
-		_cook_memory_transport(want_play, want_loop, volume_db, mute)
+		_cook_memory_transport(want_play, want_loop, effective_db, mute)
 
 	# Waveform / CHOP channels
 	var filled := false
 	if _is_stream_mode and want_play:
-		filled = _fill_channels_from_stream_file(buf_size, stereo, out)
+		filled = _fill_channels_from_stream_file(buf_size, stereo, out, gain_lin)
 	elif _stream_player != null and _audio_stream is AudioStreamWAV and _stream_player.playing:
 		filled = _fill_channels_from_wav(
 			_audio_stream as AudioStreamWAV,
 			_stream_player.get_playback_position(),
-			buf_size, stereo, out)
+			buf_size, stereo, out, gain_lin)
 
 	if not filled and _capture_effect != null and _capture_active:
-		filled = _fill_channels_from_capture(buf_size, stereo, out)
+		filled = _fill_channels_from_capture(buf_size, stereo, out, gain_lin)
 
 	if not filled:
 		_left_buf.resize(buf_size)
@@ -249,9 +271,9 @@ func _cook_memory_transport(want_play: bool, want_loop: bool, volume_db: float, 
 	_apply_seek_scrub(want_play)
 
 	if want_play and not _stream_player.playing:
-		var scrub: float = float(get_param_value("seek_pos"))
 		_stream_player.play()
-		_stream_player.seek(scrub)
+		_stream_player.seek(_clamped_cue_seconds())
+		_sync_seek_display(_clamped_cue_seconds())
 	elif not want_play and _stream_player.playing:
 		_stream_player.stop()
 
@@ -277,6 +299,33 @@ func _cook_stream_transport(want_play: bool, want_loop: bool, volume_db: float, 
 		_gen_playback = null
 
 
+## Volume (dB) plus linear Gain → effective bus level for speakers + spectrum.
+func _effective_volume_db(volume_db: float, gain_lin: float) -> float:
+	if gain_lin <= 0.0001:
+		return -80.0
+	return volume_db + linear_to_db(gain_lin)
+
+
+func _clamped_cue_seconds() -> float:
+	var t: float = maxf(float(get_param_value("start_pos")), 0.0)
+	if _known_duration > 0.0:
+		t = minf(t, _known_duration)
+	return t
+
+
+## Jump playhead to Start Position (Play rising edge / loop wrap).
+func _cue_to_start(want_play: bool) -> void:
+	var t: float = _clamped_cue_seconds()
+	_seek_to_seconds(t, want_play)
+	_sync_seek_display(t)
+
+
+func _sync_seek_display(pos_sec: float) -> void:
+	_syncing_seek = true
+	set_param_value("seek_pos", pos_sec)
+	_syncing_seek = false
+
+
 ## Scrubber: user drag seeks; while playing the param follows the playhead.
 ## (Old behavior reset seek_pos to 0 every cook, which fought the inspector slider.)
 func _apply_seek_scrub(want_play: bool) -> void:
@@ -290,9 +339,7 @@ func _apply_seek_scrub(want_play: bool) -> void:
 	var pos: float = _current_playhead_seconds()
 	if absf(pos - float(get_param_value("seek_pos"))) < 0.02:
 		return
-	_syncing_seek = true
-	set_param_value("seek_pos", pos)
-	_syncing_seek = false
+	_sync_seek_display(pos)
 
 
 func _seek_to_seconds(pos_sec: float, want_play: bool) -> void:
@@ -317,17 +364,25 @@ func _current_playhead_seconds() -> float:
 
 func _update_seek_param_range(duration: float) -> void:
 	_known_duration = maxf(duration, 0.0)
-	var p: GNParameter = get_parameter("seek_pos")
-	if p == null:
-		return
+	# Keep max at least the clip length, never shrink below the current value
+	# (avoids re-clamping a restored cue when duration is still unknown/0).
 	var d: float = maxf(_known_duration, 0.01)
-	if p.max_value != null and is_equal_approx(float(p.max_value), d):
-		return
-	p.max_value = d
-	# Refresh inspector range fill without treating it as a user scrub.
-	_syncing_seek = true
-	p.value_changed.emit(p.param_name, p.value)
-	_syncing_seek = false
+	for pname in ["seek_pos", "start_pos"]:
+		var p: GNParameter = get_parameter(pname)
+		if p == null:
+			continue
+		var cur: float = float(p.value) if p.value != null else 0.0
+		var new_max: float = maxf(d, cur)
+		# Prefer clip duration once known, but never below the stored value.
+		if _known_duration > 0.0:
+			new_max = maxf(_known_duration, cur)
+		if p.max_value != null and is_equal_approx(float(p.max_value), new_max):
+			continue
+		p.max_value = new_max
+		# Refresh inspector range fill without treating it as a user scrub.
+		_syncing_seek = true
+		p.value_changed.emit(p.param_name, p.value)
+		_syncing_seek = false
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -335,7 +390,7 @@ func _update_seek_param_range(duration: float) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _fill_channels_from_wav(wav: AudioStreamWAV, pos_sec: float,
-		buf_size: int, stereo: bool, out: GNChannelData) -> bool:
+		buf_size: int, stereo: bool, out: GNChannelData, gain_lin: float = 1.0) -> bool:
 	if wav.data.is_empty() or wav.mix_rate <= 0:
 		return false
 	var bytes_per_sample: int = 2 if wav.format == AudioStreamWAV.FORMAT_16_BITS else 1
@@ -356,6 +411,7 @@ func _fill_channels_from_wav(wav: AudioStreamWAV, pos_sec: float,
 	if stereo:
 		_right_buf.resize(count)
 
+	var g: float = maxf(gain_lin, 0.0)
 	var rms_sum: float = 0.0
 	for i in range(count):
 		var frame_i: int = start_frame + i
@@ -370,6 +426,8 @@ func _fill_channels_from_wav(wav: AudioStreamWAV, pos_sec: float,
 			l = float(wav.data[base] - 128) / 128.0
 			if ch > 1:
 				r = float(wav.data[base + 1] - 128) / 128.0
+		l *= g
+		r *= g
 		_left_buf[i] = l
 		if stereo:
 			_right_buf[i] = r if ch > 1 else l
@@ -383,7 +441,8 @@ func _fill_channels_from_wav(wav: AudioStreamWAV, pos_sec: float,
 	return true
 
 
-func _fill_channels_from_stream_file(buf_size: int, stereo: bool, out: GNChannelData) -> bool:
+func _fill_channels_from_stream_file(buf_size: int, stereo: bool, out: GNChannelData,
+		gain_lin: float = 1.0) -> bool:
 	if _stream_file == null or _stream_total_frames <= 0 or _stream_frame_bytes <= 0:
 		return false
 	var start_frame: int = clampi(_stream_frame, 0, _stream_total_frames - 1)
@@ -402,11 +461,12 @@ func _fill_channels_from_stream_file(buf_size: int, stereo: bool, out: GNChannel
 	_left_buf.resize(count)
 	if stereo:
 		_right_buf.resize(count)
+	var g: float = maxf(gain_lin, 0.0)
 	var rms_sum: float = 0.0
 	var ch: int = _stream_channels
 	for i in range(count):
 		var base: int = i * _stream_frame_bytes
-		var lr: Vector2 = _decode_stream_frame(_stream_read_buf, base)
+		var lr: Vector2 = _decode_stream_frame(_stream_read_buf, base) * g
 		_left_buf[i] = lr.x
 		if stereo:
 			_right_buf[i] = lr.y if ch > 1 else lr.x
@@ -431,7 +491,8 @@ func _decode_stream_frame(buf: PackedByteArray, base: int) -> Vector2:
 	return Vector2(l, r)
 
 
-func _fill_channels_from_capture(buf_size: int, stereo: bool, out: GNChannelData) -> bool:
+func _fill_channels_from_capture(buf_size: int, stereo: bool, out: GNChannelData,
+		_gain_lin: float = 1.0) -> bool:
 	var available: int = _capture_effect.get_frames_available()
 	if available <= 0:
 		return false
@@ -443,6 +504,7 @@ func _fill_channels_from_capture(buf_size: int, stereo: bool, out: GNChannelData
 	if frames.is_empty():
 		return false
 
+	# Capture already includes bus Volume+Gain; don't double-apply gain here.
 	_left_buf.resize(frames.size())
 	if stereo:
 		_right_buf.resize(frames.size())
@@ -642,20 +704,28 @@ func _join_load_thread() -> void:
 
 
 func _apply_loop(stream: AudioStream, loop: bool) -> void:
+	var cue: float = _clamped_cue_seconds()
 	if stream is AudioStreamWAV:
 		var wav := stream as AudioStreamWAV
 		if loop:
 			# LOOP_FORWARD with loop_end==0 is an empty region → playback ends
 			# immediately (looks like "won't play until Loop is unchecked").
-			wav.loop_begin = 0
+			var rate: int = maxi(wav.mix_rate, 1)
+			wav.loop_begin = clampi(int(cue * float(rate)), 0, maxi(_wav_frame_count(wav) - 1, 0))
 			wav.loop_end = _wav_frame_count(wav)
 			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
 		else:
 			wav.loop_mode = AudioStreamWAV.LOOP_DISABLED
 	elif stream is AudioStreamOggVorbis:
-		(stream as AudioStreamOggVorbis).loop = loop
+		var ogg := stream as AudioStreamOggVorbis
+		ogg.loop = loop
+		if "loop_offset" in ogg:
+			ogg.loop_offset = cue if loop else 0.0
 	elif stream is AudioStreamMP3:
-		(stream as AudioStreamMP3).loop = loop
+		var mp3 := stream as AudioStreamMP3
+		mp3.loop = loop
+		if "loop_offset" in mp3:
+			mp3.loop_offset = cue if loop else 0.0
 
 
 func _wav_frame_count(wav: AudioStreamWAV) -> int:
@@ -740,7 +810,8 @@ func _feed_stream_generator(want_loop: bool) -> void:
 	while avail > 0:
 		if _stream_frame >= _stream_total_frames:
 			if want_loop and _stream_total_frames > 0:
-				_stream_seek_seconds(0.0)
+				_stream_seek_seconds(_clamped_cue_seconds())
+				_sync_seek_display(_clamped_cue_seconds())
 			else:
 				set_param_value("play", false)
 				_stream_player.stop()
@@ -820,6 +891,15 @@ func _on_parameter_changed(param_name: String, new_value: Variant) -> void:
 		_apply_selected_output_device(true)
 	elif param_name == "loop":
 		_loop_applied = false
+	elif param_name == "start_pos":
+		# Cue change: refresh loop region and jump playhead to the new cue
+		# (WindowOUT Start Cue slider / inspector). Seek remains the live scrubber.
+		_loop_applied = false
+		if not _syncing_seek:
+			var t: float = _clamped_cue_seconds()
+			_sync_seek_display(t)
+			_seek_to_seconds(t, bool(get_param_value("play")))
+		mark_dirty()
 	elif param_name == "seek_pos":
 		if not _syncing_seek:
 			_seek_user_dirty = true
@@ -827,4 +907,6 @@ func _on_parameter_changed(param_name: String, new_value: Variant) -> void:
 	elif param_name == "load_mode":
 		# Force reload under the new mode on next cook.
 		_current_load_mode = -1
+		mark_dirty()
+	elif param_name == "gain" or param_name == "volume":
 		mark_dirty()

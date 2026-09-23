@@ -1,0 +1,217 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "n0": {
+      "type": "AnimationCOMP",
+      "position": [
+        0.0,
+        0.0
+      ]
+    },
+    "n1": {
+      "type": "AreaCOMP",
+      "position": [
+        280.0,
+        0.0
+      ]
+    },
+    "n2": {
+      "type": "AudioListenerCOMP",
+      "position": [
+        560.0,
+        0.0
+      ]
+    },
+    "n3": {
+      "type": "AudioSourceCOMP",
+      "position": [
+        840.0,
+        0.0
+      ]
+    },
+    "n4": {
+      "type": "BoneCOMP",
+      "position": [
+        1120.0,
+        0.0
+      ]
+    },
+    "n5": {
+      "type": "CameraCOMP",
+      "position": [
+        1400.0,
+        0.0
+      ]
+    },
+    "n6": {
+      "type": "ConstraintCOMP",
+      "position": [
+        1680.0,
+        0.0
+      ]
+    },
+    "n7": {
+      "type": "EnginesCOMP",
+      "position": [
+        1960.0,
+        0.0
+      ]
+    },
+    "n8": {
+      "type": "EnvironmentCOMP",
+      "position": [
+        0.0,
+        200.0
+      ]
+    },
+    "n9": {
+      "type": "FeedbackCOMP",
+      "position": [
+        280.0,
+        200.0
+      ]
+    },
+    "n10": {
+      "type": "GeometryCOMP",
+      "position": [
+        560.0,
+        200.0
+      ]
+    },
+    "n11": {
+      "type": "InstanceCOMP",
+      "position": [
+        840.0,
+        200.0
+      ]
+    },
+    "n12": {
+      "type": "JointCOMP",
+      "position": [
+        1120.0,
+        200.0
+      ]
+    },
+    "n13": {
+      "type": "LODCOMP",
+      "position": [
+        1400.0,
+        200.0
+      ]
+    },
+    "n14": {
+      "type": "LightCOMP",
+      "position": [
+        1680.0,
+        200.0
+      ]
+    },
+    "n15": {
+      "type": "MergeCOMP",
+      "position": [
+        1960.0,
+        200.0
+      ]
+    },
+    "n16": {
+      "type": "NavigationCOMP",
+      "position": [
+        0.0,
+        400.0
+      ]
+    },
+    "n17": {
+      "type": "NullCOMP",
+      "position": [
+        280.0,
+        400.0
+      ]
+    },
+    "n18": {
+      "type": "PathCOMP",
+      "position": [
+        560.0,
+        400.0
+      ]
+    },
+    "n19": {
+      "type": "ReplicatorCOMP",
+      "position": [
+        840.0,
+        400.0
+      ]
+    },
+    "n20": {
+      "type": "RigidBodyCOMP",
+      "position": [
+        1120.0,
+        400.0
+      ]
+    },
+    "n21": {
+      "type": "SelectCOMP",
+      "position": [
+        1400.0,
+        400.0
+      ]
+    },
+    "n22": {
+      "type": "SoftBodyCOMP",
+      "position": [
+        1680.0,
+        400.0
+      ]
+    },
+    "n23": {
+      "type": "StaticBodyCOMP",
+      "position": [
+        1960.0,
+        400.0
+      ]
+    },
+    "n24": {
+      "type": "SwitchCOMP",
+      "position": [
+        0.0,
+        600.0
+      ]
+    },
+    "n25": {
+      "type": "TimeCOMP",
+      "position": [
+        280.0,
+        600.0
+      ]
+    },
+    "n26": {
+      "type": "VehicleCOMP",
+      "position": [
+        560.0,
+        600.0
+      ]
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "ann_8946808",
+      "type": "note",
+      "text": "VISUAL AUDIT \u2014 COMP inventory (27 ops)\n\u25a1 Click each node; check viewer / params match docs\n\u25a1 Wire into a Null/Window as needed\n\u25a1 Mark CHECKLIST.md when done",
+      "position": [
+        -200,
+        -160
+      ],
+      "size": [
+        640,
+        140
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

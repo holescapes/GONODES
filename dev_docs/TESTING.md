@@ -61,7 +61,7 @@ A SceneTree-based runner that:
 3. **Instantiates** each test script as a Node and adds it to `root` so the scene tree is available.
 4. **Collects** all methods starting with `test_` via `get_method_list()`, sorts them alphabetically, and runs them in sequence.
 5. **Invokes lifecycle hooks** if present: `before_all()`, `after_all()`, `before_each()`, `after_each()`.
-6. **Checks** `GNTestAssert._failure_count` after each test method to determine pass/fail.
+6. **Checks** `GNTestAssert._failure_count` after each test method, and also any script error printed during the call (a bare `assert()` or a runtime error). A test script that fails to compile, or whose source declares `func test_` but registers no methods, is a suite failure rather than an empty pass.
 7. **Prints** a summary and exits with code 0 (all passed) or 1 (any failures).
 
 ### GNTestAssert (`tests/test_assert.gd`)

@@ -30,6 +30,17 @@ var _current_suite: String = ""
 var _current_test: String = ""
 var _filter: String = ""  # Optional test name filter from CLI
 var _tag: String = ""     # Optional tag filter: core, extension, integration, patch
+var _error_counter: _ScriptErrorCounter
+
+
+## Counts script errors printed during a test, including bare assert().
+class _ScriptErrorCounter extends Logger:
+	var count: int = 0
+
+	func _log_error(_function: String, _file: String, _line: int, _code: String,
+			_rationale: String, _editor_notify: bool, _error_type: int,
+			_script_backtraces: Array[ScriptBacktrace]) -> void:
+		count += 1
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -46,6 +57,8 @@ func _init() -> void:
 
 
 func _initialize() -> void:
+	_error_counter = _ScriptErrorCounter.new()
+	OS.add_logger(_error_counter)
 	_print_header()
 	var test_scripts := _discover_test_scripts()
 
@@ -143,9 +156,10 @@ func _scan_dir(dir_path: String, results: Array[String]) -> void:
 
 func _run_suite(script_path: String) -> void:
 	var script: GDScript = load(script_path) as GDScript
-	if script == null:
-		print("  ✗ Failed to load: %s" % script_path)
+	if script == null or not script.can_instantiate():
+		print("  ✗ Failed to compile: %s" % script_path)
 		_failed += 1
+		_errors.append("%s — script failed to compile" % script_path.get_file())
 		return
 
 	_current_suite = script_path.get_file().get_basename()
@@ -171,7 +185,13 @@ func _run_suite(script_path: String) -> void:
 	test_methods.sort()
 
 	if test_methods.is_empty():
-		print("  (no test methods found)")
+		var src := FileAccess.get_file_as_string(script_path)
+		if _filter.is_empty() and src.contains("func test_"):
+			print("  ✗ %s declares tests but none were registered (compile error)" % script_path.get_file())
+			_failed += 1
+			_errors.append("%s — tests failed to register" % script_path.get_file())
+		else:
+			print("  (no test methods found)")
 		instance.queue_free()
 		return
 
@@ -189,12 +209,16 @@ func _run_suite(script_path: String) -> void:
 
 		var success := true
 		var error_msg := ""
-		# Run test — catch assertion failures via GNTestAssert
+		# Run test — GNTestAssert plus any script error (bare assert, runtime).
 		GNTestAssert._reset()
+		var errors_before := _error_counter.count
 		instance.call(method_name)
 		if GNTestAssert._failure_count > 0:
 			success = false
 			error_msg = GNTestAssert._last_failure
+		elif _error_counter.count > errors_before:
+			success = false
+			error_msg = "script error during test (bare assert or runtime error)"
 
 		if success:
 			_passed += 1

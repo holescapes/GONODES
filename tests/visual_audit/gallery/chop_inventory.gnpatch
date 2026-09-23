@@ -1,0 +1,777 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "n0": {
+      "type": "AnalyzeCHOP",
+      "position": [
+        0.0,
+        0.0
+      ]
+    },
+    "n1": {
+      "type": "AreaCHOP",
+      "position": [
+        280.0,
+        0.0
+      ]
+    },
+    "n2": {
+      "type": "AudioBandCHOP",
+      "position": [
+        560.0,
+        0.0
+      ]
+    },
+    "n3": {
+      "type": "AudioDelayCHOP",
+      "position": [
+        840.0,
+        0.0
+      ]
+    },
+    "n4": {
+      "type": "AudioDynamicsCHOP",
+      "position": [
+        1120.0,
+        0.0
+      ]
+    },
+    "n5": {
+      "type": "AudioEnvelopeCHOP",
+      "position": [
+        1400.0,
+        0.0
+      ]
+    },
+    "n6": {
+      "type": "AudioFileInCHOP",
+      "position": [
+        1680.0,
+        0.0
+      ]
+    },
+    "n7": {
+      "type": "AudioFilterCHOP",
+      "position": [
+        1960.0,
+        0.0
+      ]
+    },
+    "n8": {
+      "type": "AudioGateCHOP",
+      "position": [
+        0.0,
+        200.0
+      ]
+    },
+    "n9": {
+      "type": "AudioInCHOP",
+      "position": [
+        280.0,
+        200.0
+      ]
+    },
+    "n10": {
+      "type": "AudioMixCHOP",
+      "position": [
+        560.0,
+        200.0
+      ]
+    },
+    "n11": {
+      "type": "AudioMovieCHOP",
+      "position": [
+        840.0,
+        200.0
+      ]
+    },
+    "n12": {
+      "type": "AudioOscillatorCHOP",
+      "position": [
+        1120.0,
+        200.0
+      ]
+    },
+    "n13": {
+      "type": "AudioParaEQCHOP",
+      "position": [
+        1400.0,
+        200.0
+      ]
+    },
+    "n14": {
+      "type": "AudioPitchCHOP",
+      "position": [
+        1680.0,
+        200.0
+      ]
+    },
+    "n15": {
+      "type": "AudioRenderCHOP",
+      "position": [
+        1960.0,
+        200.0
+      ]
+    },
+    "n16": {
+      "type": "AudioReverbCHOP",
+      "position": [
+        0.0,
+        400.0
+      ]
+    },
+    "n17": {
+      "type": "AudioSpectrumCHOP",
+      "position": [
+        280.0,
+        400.0
+      ]
+    },
+    "n18": {
+      "type": "AudioStreamInCHOP",
+      "position": [
+        560.0,
+        400.0
+      ]
+    },
+    "n19": {
+      "type": "AudioStreamOutCHOP",
+      "position": [
+        840.0,
+        400.0
+      ]
+    },
+    "n20": {
+      "type": "BeatCHOP",
+      "position": [
+        1120.0,
+        400.0
+      ]
+    },
+    "n21": {
+      "type": "BlendCHOP",
+      "position": [
+        1400.0,
+        400.0
+      ]
+    },
+    "n22": {
+      "type": "ChannelCHOP",
+      "position": [
+        1680.0,
+        400.0
+      ]
+    },
+    "n23": {
+      "type": "ChannelFilterCHOP",
+      "position": [
+        1960.0,
+        400.0
+      ]
+    },
+    "n24": {
+      "type": "ClipCHOP",
+      "position": [
+        0.0,
+        600.0
+      ]
+    },
+    "n25": {
+      "type": "ClockCHOP",
+      "position": [
+        280.0,
+        600.0
+      ]
+    },
+    "n26": {
+      "type": "CompositeCHOP",
+      "position": [
+        560.0,
+        600.0
+      ]
+    },
+    "n27": {
+      "type": "ConstantCHOP",
+      "position": [
+        840.0,
+        600.0
+      ]
+    },
+    "n28": {
+      "type": "CopyCHOP",
+      "position": [
+        1120.0,
+        600.0
+      ]
+    },
+    "n29": {
+      "type": "CountCHOP",
+      "position": [
+        1400.0,
+        600.0
+      ]
+    },
+    "n30": {
+      "type": "CrossCHOP",
+      "position": [
+        1680.0,
+        600.0
+      ]
+    },
+    "n31": {
+      "type": "CueCHOP",
+      "position": [
+        1960.0,
+        600.0
+      ]
+    },
+    "n32": {
+      "type": "DelayCHOP",
+      "position": [
+        0.0,
+        800.0
+      ]
+    },
+    "n33": {
+      "type": "DeleteCHOP",
+      "position": [
+        280.0,
+        800.0
+      ]
+    },
+    "n34": {
+      "type": "DmxInCHOP",
+      "position": [
+        560.0,
+        800.0
+      ]
+    },
+    "n35": {
+      "type": "DmxOutCHOP",
+      "position": [
+        840.0,
+        800.0
+      ]
+    },
+    "n36": {
+      "type": "EnvelopeCHOP",
+      "position": [
+        1120.0,
+        800.0
+      ]
+    },
+    "n37": {
+      "type": "ExpressionCHOP",
+      "position": [
+        1400.0,
+        800.0
+      ]
+    },
+    "n38": {
+      "type": "ExtendCHOP",
+      "position": [
+        1680.0,
+        800.0
+      ]
+    },
+    "n39": {
+      "type": "FaceDetectCHOP",
+      "position": [
+        1960.0,
+        800.0
+      ]
+    },
+    "n40": {
+      "type": "FanCHOP",
+      "position": [
+        0.0,
+        1000.0
+      ]
+    },
+    "n41": {
+      "type": "FeedbackCHOP",
+      "position": [
+        280.0,
+        1000.0
+      ]
+    },
+    "n42": {
+      "type": "FilterCHOP",
+      "position": [
+        560.0,
+        1000.0
+      ]
+    },
+    "n43": {
+      "type": "GamepadCHOP",
+      "position": [
+        840.0,
+        1000.0
+      ]
+    },
+    "n44": {
+      "type": "GestureCHOP",
+      "position": [
+        1120.0,
+        1000.0
+      ]
+    },
+    "n45": {
+      "type": "HandDetectCHOP",
+      "position": [
+        1400.0,
+        1000.0
+      ]
+    },
+    "n46": {
+      "type": "HoldCHOP",
+      "position": [
+        1680.0,
+        1000.0
+      ]
+    },
+    "n47": {
+      "type": "IKCHOP",
+      "position": [
+        1960.0,
+        1000.0
+      ]
+    },
+    "n48": {
+      "type": "InterpolateCHOP",
+      "position": [
+        0.0,
+        1200.0
+      ]
+    },
+    "n49": {
+      "type": "JoinCHOP",
+      "position": [
+        280.0,
+        1200.0
+      ]
+    },
+    "n50": {
+      "type": "KeyboardInCHOP",
+      "position": [
+        560.0,
+        1200.0
+      ]
+    },
+    "n51": {
+      "type": "KeyframeCHOP",
+      "position": [
+        840.0,
+        1200.0
+      ]
+    },
+    "n52": {
+      "type": "LFO_CHOP",
+      "position": [
+        1120.0,
+        1200.0
+      ]
+    },
+    "n53": {
+      "type": "LagCHOP",
+      "position": [
+        1400.0,
+        1200.0
+      ]
+    },
+    "n54": {
+      "type": "LaserCHOP",
+      "position": [
+        1680.0,
+        1200.0
+      ]
+    },
+    "n55": {
+      "type": "LimitCHOP",
+      "position": [
+        1960.0,
+        1200.0
+      ]
+    },
+    "n56": {
+      "type": "LogicCHOP",
+      "position": [
+        0.0,
+        1400.0
+      ]
+    },
+    "n57": {
+      "type": "LookupCHOP",
+      "position": [
+        280.0,
+        1400.0
+      ]
+    },
+    "n58": {
+      "type": "MathCHOP",
+      "position": [
+        560.0,
+        1400.0
+      ]
+    },
+    "n59": {
+      "type": "MergeCHOP",
+      "position": [
+        840.0,
+        1400.0
+      ]
+    },
+    "n60": {
+      "type": "MidiInCHOP",
+      "position": [
+        1120.0,
+        1400.0
+      ]
+    },
+    "n61": {
+      "type": "MouseInCHOP",
+      "position": [
+        1400.0,
+        1400.0
+      ]
+    },
+    "n62": {
+      "type": "NDIAudioInCHOP",
+      "position": [
+        1680.0,
+        1400.0
+      ]
+    },
+    "n63": {
+      "type": "NDIAudioOutCHOP",
+      "position": [
+        1960.0,
+        1400.0
+      ]
+    },
+    "n64": {
+      "type": "NoiseCHOP",
+      "position": [
+        0.0,
+        1600.0
+      ]
+    },
+    "n65": {
+      "type": "NullCHOP",
+      "position": [
+        280.0,
+        1600.0
+      ]
+    },
+    "n66": {
+      "type": "ObjectCHOP",
+      "position": [
+        560.0,
+        1600.0
+      ]
+    },
+    "n67": {
+      "type": "OscInCHOP",
+      "position": [
+        840.0,
+        1600.0
+      ]
+    },
+    "n68": {
+      "type": "ParameterCHOP",
+      "position": [
+        1120.0,
+        1600.0
+      ]
+    },
+    "n69": {
+      "type": "PatternCHOP",
+      "position": [
+        1400.0,
+        1600.0
+      ]
+    },
+    "n70": {
+      "type": "PdControlCHOP",
+      "position": [
+        1680.0,
+        1600.0
+      ]
+    },
+    "n71": {
+      "type": "PdFilterCHOP",
+      "position": [
+        1960.0,
+        1600.0
+      ]
+    },
+    "n72": {
+      "type": "PdSynthCHOP",
+      "position": [
+        0.0,
+        1800.0
+      ]
+    },
+    "n73": {
+      "type": "PerformCHOP",
+      "position": [
+        280.0,
+        1800.0
+      ]
+    },
+    "n74": {
+      "type": "PhysicsCHOP",
+      "position": [
+        560.0,
+        1800.0
+      ]
+    },
+    "n75": {
+      "type": "PoseDetectCHOP",
+      "position": [
+        840.0,
+        1800.0
+      ]
+    },
+    "n76": {
+      "type": "PulseCHOP",
+      "position": [
+        1120.0,
+        1800.0
+      ]
+    },
+    "n77": {
+      "type": "RampCHOP",
+      "position": [
+        1400.0,
+        1800.0
+      ]
+    },
+    "n78": {
+      "type": "RecordCHOP",
+      "position": [
+        1680.0,
+        1800.0
+      ]
+    },
+    "n79": {
+      "type": "RenameCHOP",
+      "position": [
+        1960.0,
+        1800.0
+      ]
+    },
+    "n80": {
+      "type": "ReplaceCHOP",
+      "position": [
+        0.0,
+        2000.0
+      ]
+    },
+    "n81": {
+      "type": "ResampleCHOP",
+      "position": [
+        280.0,
+        2000.0
+      ]
+    },
+    "n82": {
+      "type": "RtMidiInCHOP",
+      "position": [
+        560.0,
+        2000.0
+      ]
+    },
+    "n83": {
+      "type": "RtMidiOutCHOP",
+      "position": [
+        840.0,
+        2000.0
+      ]
+    },
+    "n84": {
+      "type": "SOPtoCHOP",
+      "position": [
+        1120.0,
+        2000.0
+      ]
+    },
+    "n85": {
+      "type": "SelectCHOP",
+      "position": [
+        1400.0,
+        2000.0
+      ]
+    },
+    "n86": {
+      "type": "SequenceCHOP",
+      "position": [
+        1680.0,
+        2000.0
+      ]
+    },
+    "n87": {
+      "type": "ShuffleCHOP",
+      "position": [
+        1960.0,
+        2000.0
+      ]
+    },
+    "n88": {
+      "type": "SkeletonCHOP",
+      "position": [
+        0.0,
+        2200.0
+      ]
+    },
+    "n89": {
+      "type": "SlopeCHOP",
+      "position": [
+        280.0,
+        2200.0
+      ]
+    },
+    "n90": {
+      "type": "SmoothCHOP",
+      "position": [
+        560.0,
+        2200.0
+      ]
+    },
+    "n91": {
+      "type": "SpeedCHOP",
+      "position": [
+        840.0,
+        2200.0
+      ]
+    },
+    "n92": {
+      "type": "SplitCHOP",
+      "position": [
+        1120.0,
+        2200.0
+      ]
+    },
+    "n93": {
+      "type": "SpringCHOP",
+      "position": [
+        1400.0,
+        2200.0
+      ]
+    },
+    "n94": {
+      "type": "StateMachineCHOP",
+      "position": [
+        1680.0,
+        2200.0
+      ]
+    },
+    "n95": {
+      "type": "StretchCHOP",
+      "position": [
+        1960.0,
+        2200.0
+      ]
+    },
+    "n96": {
+      "type": "SwitchCHOP",
+      "position": [
+        0.0,
+        2400.0
+      ]
+    },
+    "n97": {
+      "type": "TOPtoCHOP",
+      "position": [
+        280.0,
+        2400.0
+      ]
+    },
+    "n98": {
+      "type": "TabletInCHOP",
+      "position": [
+        560.0,
+        2400.0
+      ]
+    },
+    "n99": {
+      "type": "TimelineCHOP",
+      "position": [
+        840.0,
+        2400.0
+      ]
+    },
+    "n100": {
+      "type": "TimerCHOP",
+      "position": [
+        1120.0,
+        2400.0
+      ]
+    },
+    "n101": {
+      "type": "TrailCHOP",
+      "position": [
+        1400.0,
+        2400.0
+      ]
+    },
+    "n102": {
+      "type": "TransformCHOP",
+      "position": [
+        1680.0,
+        2400.0
+      ]
+    },
+    "n103": {
+      "type": "TriggerCHOP",
+      "position": [
+        1960.0,
+        2400.0
+      ]
+    },
+    "n104": {
+      "type": "TrimCHOP",
+      "position": [
+        0.0,
+        2600.0
+      ]
+    },
+    "n105": {
+      "type": "WarpCHOP",
+      "position": [
+        280.0,
+        2600.0
+      ]
+    },
+    "n106": {
+      "type": "WaveCHOP",
+      "position": [
+        560.0,
+        2600.0
+      ]
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "ann_8562470",
+      "type": "note",
+      "text": "VISUAL AUDIT \u2014 CHOP inventory (107 ops)\n\u25a1 Click each node; check viewer / params match docs\n\u25a1 Wire into a Null/Window as needed\n\u25a1 Mark CHECKLIST.md when done",
+      "position": [
+        -200,
+        -160
+      ],
+      "size": [
+        640,
+        140
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

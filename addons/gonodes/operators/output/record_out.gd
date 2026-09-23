@@ -4,7 +4,7 @@ extends GNOutBase
 ##
 ## When "active" is on, each cook appends the current input channel values
 ## as a new row.  When stopped, the buffer can be saved to CSV or JSON
-## via the "save" pulse, or cleared via the "reset" pulse.
+## via the "save" rising-edge bool, or cleared via the "reset" rising-edge bool.
 
 ## Internal recording buffer: channel_name → PackedFloat32Array of samples.
 var _buffer: Dictionary = {}
@@ -44,8 +44,11 @@ func _init_parameters() -> void:
 		"Save", "Toggle on to save the buffer to disk (rising-edge triggered)"))
 	add_parameter(GNParameter.create_bool("reset", false,
 		"Reset", "Toggle on to clear the buffer (rising-edge triggered)"))
-	add_parameter(GNParameter.create_string("file_path", "user://output/recording",
-		"File Path", "Save file path (without extension)"))
+	add_parameter(GNParameter.create_file("file_path", "user://output/recording",
+		PackedStringArray(["*.csv", "*.json"]),
+		"File Path",
+		"Save path (format extension is appended; existing extension is stripped).",
+		GNParameter.FileBrowseMode.SAVE_FILE))
 	add_parameter(GNParameter.create_enum("format",
 		PackedStringArray(["CSV", "JSON"]), 0,
 		"Format", "File format for saving"))
@@ -108,7 +111,7 @@ func _save_to_disk() -> void:
 		GNLogger.warn("RecordOUT", "'%s': Nothing to save (buffer empty)" % id)
 		return
 
-	var base_path: String = get_param_value("file_path")
+	var base_path: String = str(get_param_value("file_path")).get_basename()
 	var fmt: int = get_param_value("format")
 
 	var content: String = ""

@@ -2,9 +2,10 @@ class_name ImageSaveOUT
 extends GNOutBase
 ## Saves a CPU-side Image to disk as PNG, WebP, or EXR.
 ##
-## Activate the "active" toggle to start writing.
-## Supports optional auto-numbering for image sequences
-## (e.g. frame_0001.png, frame_0002.png).
+## Activate the "active" toggle to start writing (sync on the cook thread).
+## Supports optional auto-numbering (e.g. frame_0001.png).
+## For long numbered sequences prefer MovieOUT; for video containers use FFmpegOUT.
+## For GPU textures use TextureSaveOUT.
 
 enum Format { PNG, WEBP, EXR }
 
@@ -30,18 +31,23 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("active", false,
-		"Active", "When enabled, saves the image to disk every cook"))
-	add_parameter(GNParameter.create_string("file_path", "user://output/frame",
-		"File Path", "Base file path (without extension). Directory is created automatically."))
+		"Active",
+		"When enabled, saves the image to disk every cook (sync write — use MovieOUT for long sequences)"))
+	add_parameter(GNParameter.create_file("file_path", "user://output/frame",
+		PackedStringArray(["*.png", "*.webp", "*.exr"]),
+		"File Path",
+		"Base output path (Format extension is appended; existing extension is stripped).",
+		GNParameter.FileBrowseMode.SAVE_FILE))
 	add_parameter(GNParameter.create_enum("format",
 		PackedStringArray(["PNG", "WebP", "EXR"]), 0,
-		"Format", "Output image format"))
+		"Format", "Output image format (PNG, WebP, or EXR)"))
 	add_parameter(GNParameter.create_float("quality", 0.75, 0.0, 1.0, 0.01,
 		"Quality", "WebP lossy quality (0-1). Ignored for PNG/EXR."))
 	add_parameter(GNParameter.create_bool("auto_number", true,
-		"Auto Number", "Append _NNNN frame counter to filename"))
+		"Auto Number",
+		"Append _NNNN frame counter. OFF = overwrite the same path each cook."))
 	add_parameter(GNParameter.create_int("start_frame", 0, 0, null,
-		"Start Frame", "Starting frame number for auto-numbering"))
+		"Start Frame", "Starting frame number when Auto Number is on (resets on re-activation)"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -59,8 +65,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if not active:
 		return null
 
-	# Build the full save path
-	var base_path: String = get_param_value("file_path")
+	# Build the full save path (strip any picked extension so Format can append)
+	var base_path: String = str(get_param_value("file_path")).get_basename()
 	var fmt: int = get_param_value("format")
 	var auto_num: bool = get_param_value("auto_number")
 

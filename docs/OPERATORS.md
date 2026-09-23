@@ -214,8 +214,10 @@ Plays a video file as a live texture stream. Similar to TouchDesigner's Movie Fi
 | speed | Float | 1.0 | 0.0–4.0 | Playback speed multiplier |
 | seek | Float | -1.0 | -1.0–→ | Seek to time in seconds (-1 = disabled) |
 | bg_color | Color | Black | — | Background color when no video loaded |
+| mute | Bool | false | — | Mute video audio bus |
+| audio_buffer | Int | 1024 | 64–8192 | AudioStreamGenerator buffer size (samples) |
 
-**How it works:** Uses Godot's native `VideoStreamPlayer` inside a SubViewport. Supports Theora (.ogv) format out of the box. The video player renders frames directly as a Control filling the viewport. Additional codecs can be added via GDExtensions.
+**How it works:** Uses Godot's native `VideoStreamPlayer` inside a SubViewport. Supports Theora (.ogv) format out of the box. The video player renders frames directly as a Control filling the viewport. Audio plays on a dedicated bus (`mute` silences it). Additional codecs can be added via GDExtensions.
 
 **Codec notes:**
 - **Theora (.ogv):** Built-in. CPU-decoded. No alpha channel support in Godot's decoder.
@@ -225,9 +227,11 @@ Plays a video file as a live texture stream. Similar to TouchDesigner's Movie Fi
 
 ---
 
-#### ImageSequenceTOP
+#### ImageSequenceIMG
 
-Plays a numbered image sequence as animated texture frames. Supports PNG, WebP, JPG, and other Godot-importable formats.
+*(Formerly documented as ImageSequenceTOP — this operator is IMG family.)*
+
+Plays a numbered image sequence as animated frames. Supports PNG, WebP, JPG, and other Godot-importable formats.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -613,34 +617,20 @@ Resize a texture to a different resolution.
 
 #### RenderTOP
 
-Renders a 3D scene from COMPs into a 2D texture with integrated post-processing. This is the bridge between the COMP/SOP pipeline and the TOP pipeline.
+Renders a 3D scene from COMPs into a 2D texture. Bridge between the COMP/SOP pipeline and the TOP pipeline. **Tonemap, glow, SSAO, SSR, fog, and color adjustments live on EnvironmentCOMP** — wire one into this node's COMP input (with `use_environment` ON). RenderTOP itself only owns scene, shadow, DOF, and cook controls.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| **Scene** | | | | |
 | resolution | Vector2i | 1280×720 | — | Render resolution |
-| bg_color | Color | (0.1, 0.1, 0.12) | — | Background color |
+| bg_color | Color | (0.1, 0.1, 0.12) | — | Background clear color |
 | transparent_bg | Bool | false | — | Transparent background |
-| use_environment | Bool | true | — | Enable environment lighting |
-| ambient_energy | Float | 0.3 | 0.0–4.0 | Ambient light intensity |
-| ambient_color | Color | (0.3, 0.3, 0.4) | — | Ambient light color |
+| use_environment | Bool | true | — | Use EnvironmentCOMP lighting / post-FX when connected |
+| ambient_energy | Float | 0.3 | 0.0–4.0 | Ambient light intensity (fallback when no EnvironmentCOMP) |
+| ambient_color | Color | (0.3, 0.3, 0.4) | — | Ambient light color (fallback) |
 | anti_aliasing | Enum | 4x MSAA | Off, 2x, 4x, 8x | MSAA quality |
-| **Shadows** | | | | |
-| shadow_atlas_size | Enum | 4096 | 1024, 2048, 4096, 8192 | Positional shadow atlas resolution |
-| dir_shadow_size | Enum | 4096 | 1024, 2048, 4096, 8192 | Directional shadow map resolution |
+| shadow_atlas_size | Enum | 4096 | 1024–8192 | Positional shadow atlas resolution |
+| dir_shadow_size | Enum | 4096 | 1024–8192 | Directional shadow map resolution |
 | shadow_filter | Enum | Soft Medium | Hard, Soft Low/Med/High/Ultra | Shadow filter quality (PCF) |
-| **Tonemap** | | | | |
-| tonemap_mode | Enum | ACES | Linear, Reinhard, Filmic, ACES | Tone mapping algorithm |
-| tonemap_exposure | Float | 1.0 | 0.1–8.0 | Exposure multiplier |
-| tonemap_white | Float | 1.0 | 0.1–16.0 | White reference point |
-| **Glow (Bloom)** | | | | |
-| glow_enabled | Bool | false | — | Enable glow/bloom |
-| glow_intensity | Float | 0.8 | 0.0–4.0 | Overall glow strength |
-| glow_strength | Float | 1.0 | 0.0–2.0 | Per-level glow contribution |
-| glow_bloom | Float | 0.0 | 0.0–1.0 | Screen-wide bloom amount |
-| glow_hdr_threshold | Float | 1.0 | 0.0–4.0 | Brightness threshold for glow |
-| glow_blend_mode | Enum | Additive | Additive, Screen, Softlight, Replace, Mix | Glow compositing mode |
-| **Depth of Field** | | | | |
 | dof_far_enabled | Bool | false | — | Enable far DOF blur |
 | dof_far_distance | Float | 10.0 | 0.1–200.0 | Far focus distance |
 | dof_far_transition | Float | 5.0 | 0.1–50.0 | Far transition width |
@@ -649,43 +639,13 @@ Renders a 3D scene from COMPs into a 2D texture with integrated post-processing.
 | dof_near_transition | Float | 1.0 | 0.1–20.0 | Near transition width |
 | dof_bokeh_size | Float | 4.0 | 0.5–10.0 | Blur disc radius |
 | dof_bokeh_shape | Enum | Circle | Box, Hexagon, Circle | Bokeh shape |
-| **SSAO** | | | | |
-| ssao_enabled | Bool | false | — | Enable ambient occlusion |
-| ssao_radius | Float | 1.0 | 0.01–16.0 | Sampling radius |
-| ssao_intensity | Float | 2.0 | 0.0–10.0 | Darkening strength |
-| ssao_power | Float | 1.5 | 0.1–10.0 | Falloff exponent |
-| **SSIL** | | | | |
-| ssil_enabled | Bool | false | — | Enable indirect lighting |
-| ssil_radius | Float | 5.0 | 0.01–16.0 | Sampling radius |
-| ssil_intensity | Float | 1.0 | 0.0–10.0 | Contribution strength |
-| ssil_sharpness | Float | 0.98 | 0.0–1.0 | Edge-aware blur sharpness |
-| ssil_normal_rejection | Float | 1.0 | 0.0–1.0 | Normal rejection factor |
-| **SSR** | | | | |
-| ssr_enabled | Bool | false | — | Enable screen-space reflections |
-| ssr_max_steps | Int | 64 | 1–512 | Ray march steps |
-| ssr_fade_in | Float | 0.15 | 0.0–2.0 | Reflection fade-in distance |
-| ssr_fade_out | Float | 2.0 | 0.0–8.0 | Reflection fade-out distance |
-| ssr_depth_tolerance | Float | 0.2 | 0.01–4.0 | Depth comparison tolerance |
-| **Adjustments** | | | | |
-| adj_enabled | Bool | false | — | Enable color adjustments |
-| adj_brightness | Float | 1.0 | 0.01–4.0 | Brightness multiplier |
-| adj_contrast | Float | 1.0 | 0.01–4.0 | Contrast |
-| adj_saturation | Float | 1.0 | 0.0–4.0 | Color saturation |
-| **Volumetric Fog** | | | | |
-| fog_enabled | Bool | false | — | Enable volumetric fog |
-| fog_density | Float | 0.05 | 0.0–1.0 | Base fog density |
-| fog_albedo | Color | (1, 1, 1) | — | Fog scatter color |
-| fog_emission | Color | (0, 0, 0) | — | Fog self-emission color |
-| fog_emission_energy | Float | 1.0 | 0.0–16.0 | Fog emission intensity |
-| fog_length | Float | 64.0 | 1.0–1024.0 | Volumetric fog distance |
+| cook_every_frame | Bool | true | — | Re-cook every frame (disable for static scenes) |
 
 **Inputs:** `comp_in` — accepts multiple COMP connections (multi-input port).
 
-**How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks network input connections to discover GeometryCOMP, CameraCOMP, LightCOMP, and MergeCOMP nodes and adopts their 3D nodes into the viewport's scene tree. Creates a `WorldEnvironment` with configurable ambient lighting and post-processing via Godot's `Environment` resource. If no CameraCOMP is connected, a default perspective camera is placed at (0, 1.5, 3). DOF is applied to the active camera (from CameraCOMP or default). Time-dependent — re-populates the scene each frame.
+**How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks network input connections to discover GeometryCOMP, CameraCOMP, LightCOMP, EnvironmentCOMP, and MergeCOMP and adopts their 3D nodes into the viewport. Without an EnvironmentCOMP, ambient params apply and advanced post-FX are cleared. If no CameraCOMP is connected, a default perspective camera is placed at (0, 1.5, 3). DOF is applied to the active camera. Time-dependent when `cook_every_frame` is on.
 
-**Limitation:** COMP fan-out is fully supported via the GNProxyTree proxy architecture. When multiple RenderTOPs wire to the same COMP, the first consumer adopts the original scene node and subsequent consumers receive lightweight proxies that share GPU resources (Mesh, Material, MultiMesh).
-
-**Performance:** When all post-processing toggles are off and tonemap is at defaults, the post-processing path early-exits with a single boolean check — zero overhead for vanilla 3D renders.
+**Limitation:** COMP fan-out is supported via GNProxyTree — first consumer adopts the original scene node; later consumers get lightweight proxies sharing GPU resources.
 
 ---
 
@@ -3373,6 +3333,41 @@ Send CHOP channel data as NDI audio to the network. Each CHOP channel is mapped 
 
 ---
 
+#### AudioInCHOP
+
+Capture live OS microphone / line-in as CHOP waveform. Switches global `AudioServer.input_device` (one device project-wide).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| device | Enum | Default | Input device |
+| active | Bool | false | Enable capture |
+| buffer_size | Int | 1024 | Samples per cook |
+| stereo | Bool | false | Stereo channels |
+| gain | Float | 1.0 | Input gain |
+
+**Output:** waveform channels + sets `source_bus` for spectrum routing.
+
+---
+
+#### AudioSpectrumCHOP
+
+FFT analysis of an audio bus (typically from AudioFileInCHOP / AudioInCHOP `source_bus`). Outputs `band:N` plus bass/mid/treble helpers for AudioBandCHOP.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| bus | String | Master | AudioServer bus name (or follow upstream `source_bus`) |
+| active | Bool | true | Enable analysis |
+| bands | Int | 16 | Number of FFT bands |
+| freq_min | Float | 20 | Min Hz |
+| freq_max | Float | 20000 | Max Hz |
+| smoothing | Float | 0.8 | Temporal smoothing |
+| fft_size | Enum | — | FFT window size |
+
+**Input:** optional CHOP with `source_bus` metadata; otherwise uses `bus` param.
+**Output:** `band:0..N-1` and summary channels.
+
+---
+
 #### AudioFileInCHOP
 
 Play an audio file and output waveform / transport channels. Supports **8/16-bit PCM WAV**, **OGG Vorbis**, and **MP3**. **24-bit / float WAV is not supported** — convert to 16-bit PCM WAV or OGG/MP3 first.
@@ -3381,20 +3376,22 @@ Play an audio file and output waveform / transport channels. Supports **8/16-bit
 |-----------|------|---------|-------|-------------|
 | file | File | "" | `*.wav`, `*.ogg`, `*.mp3` | Audio path (also accepts `project://` and HTTP(S) URLs via cache) |
 | load_mode | Enum | Auto | Auto, Memory, Stream | Auto: disk-stream 8/16-bit WAV, Memory for OGG/MP3. Memory: full RAM decode. Stream: force disk stream (8/16-bit WAV only; large WAV forced off Memory) |
-| play | Bool | false | — | Start / stop playback |
-| loop | Bool | true | — | Loop playback |
-| volume | Float | 0.0 | −60–6 dB | Playback volume |
-| seek_pos | Float | 0.0 | 0–duration | Scrubber (seconds); follows playhead while playing |
+| play | Bool | false | — | Start / stop playback (begins at Start Position) |
+| loop | Bool | true | — | Loop playback (wraps to Start Position) |
+| volume | Float | 0.0 | −60–6 dB | Speaker / bus level before Gain |
+| gain | Float | 1.0 | 0–16 | Linear boost for CHOP waveform + analysis bus (raise if spectrum/bands look weak) |
+| start_pos | Float | 0.0 | 0–86400 (then clip length) | Cue time (seconds) — Play starts here; Loop returns here. Range widens to clip length after load (initial max is large so patch reload does not clamp saved cues). |
+| seek_pos | Float | 0.0 | 0–86400 (then clip length) | Live scrubber (seconds); follows playhead while playing |
 | buffer_size | Int | 1024 | 64–8192 | Samples per cook for CHOP waveform |
 | stereo | Bool | true | — | Output left/right channels |
-| mute_output | Bool | false | — | Mute speakers (waveform still captured) |
+| mute_output | Bool | false | — | Mute speakers (waveform + spectrum still captured) |
 | output_device | Enum | Default | (dynamic) | Global Godot output device (one at a time) |
 | refresh_devices | Bool | false | pulse | Re-scan OS audio devices |
 
 **No inputs** — source operator.
 **Output:** `out` (CHOP) — `left`, `right` (optional), `level`, `pos`, `length`, `playing`. Sets `source_bus` for spectrum routing.
 
-**How it works:** Auto/Stream opens 8/16-bit PCM WAV with `FileAccess` + `AudioStreamGenerator` (low RAM). OGG/MP3 (and small WAVs in Memory mode) decode via `GNResourceLoader.load_audio` on a worker thread. Typical chain: `AudioFileInCHOP → AudioSpectrumCHOP → AudioBandCHOP → chop() into shaders`.
+**How it works:** Auto/Stream opens 8/16-bit PCM WAV with `FileAccess` + `AudioStreamGenerator` (low RAM). OGG/MP3 (and small WAVs in Memory mode) decode via `GNResourceLoader.load_audio` on a worker thread. Effective bus level is `volume_db + 20·log10(gain)` so Gain lifts both speakers and `AudioSpectrumCHOP` analysis. Typical chain: `AudioFileInCHOP → AudioSpectrumCHOP → AudioBandCHOP → chop() into shaders`. AudioBandCHOP also has its own `gain` for post-FFT shaping.
 
 ---
 
@@ -3652,16 +3649,11 @@ OSC message receiver. **Currently a stub** — UDP/OSC networking is not yet imp
 
 #### SelectDAT
 
-Wireless reference — returns a named remote DAT node's output directly. Use SubsetDAT after this node to filter rows/columns. When the `dat` parameter names a remote DAT, its output is used (no wire needed). When empty, the wired input is used. Row/column range filtering applies in both modes.
+Wireless reference — returns a named remote DAT node's table output. **No wire input.** Use **SubsetDAT** after this node to filter rows/columns.
 
-| Parameter | Type | Default | Range | Description |
-|-----------|------|---------|-------|-------------|
-| dat | String | "" | — | Remote DAT node name (empty = use wired input) |
-| row_start | Int | 0 | 0+ | First row (inclusive) |
-| row_end | Int | -1 | -1+ | Last row (-1 = all) |
-| col_start | Int | 0 | 0+ | First column (inclusive) |
-| col_end | Int | -1 | -1+ | Last column (-1 = all) |
-| include_header | Bool | true | — | Include header row in output |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| dat | NodeRef (DAT) | "" | Remote DAT node id |
 
 ---
 
@@ -5864,6 +5856,7 @@ Wraps Godot's `AudioStreamPlayer3D` for positional audio playback in 3D scenes.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | tx/ty/tz | Float | 0.0 | — | Position |
+| file | File | "" | `*.wav`, `*.ogg`, `*.mp3` | Audio file path |
 | volume_db | Float | 0.0 | -80.0–24.0 | Volume in decibels |
 | max_distance | Float | 10.0 | 0.0–100.0 | Maximum audible distance |
 | bus | String | Master | — | Audio bus name |
@@ -6055,14 +6048,15 @@ Export geometry data to a host application via the C API (`libgonodes`). Flatten
 
 #### WindowOUT
 
-Displays a TOP texture in a standalone OS window. Essential for VJ output — each WindowOUT creates a separate window that can be placed on any connected monitor.
+Displays a TOP texture in a standalone OS window. Essential for VJ output — each WindowOUT creates a separate window that can be placed on any connected monitor. The window stays **hidden until Open is enabled**.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
+| open | Bool | false | — | Show/hide the output window (must be ON to see anything) |
 | title | String | "GONODES Output" | — | Window title |
 | monitor | Int | 0 | 0–8 | Target display index |
 | window_mode | Enum | Windowed | Windowed, Fullscreen, Borderless | Window mode |
-| resolution | Vector2i | 1920×1080 | — | Window resolution |
+| resolution | Vector2i | 512×512 | — | Window resolution in pixels |
 | position | Vector2i | (-1, -1) | — | Window position (-1,-1 = auto center) |
 | always_on_top | Bool | false | — | Keep window above others |
 | vsync | Bool | true | — | V-sync |
@@ -6070,7 +6064,7 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 **Input 0:** `in` (TOP — background texture).
 **Input 1:** `panel` (UI — interactive panel with native Godot input routing).
 
-**How it works:** Creates a Godot `Window` node with a `TextureRect` (`mouse_filter = IGNORE`, z=0) for the background texture and a `VBoxContainer` "UIRoot" (`mouse_filter = PASS`, z=1) for the interactive panel layer. The TextureRect is assigned the input TOP's `ViewportTexture` — a live GPU reference with zero copy overhead. UI controls from ContainerUI are adopted directly into the UIRoot container — no SubViewport indirection — so Godot's native input dispatch (mouse, keyboard, focus) works automatically. An overlay system (CanvasLayer at layer 100) supports dropdowns, color pickers, and popup menus above the panel layer. Window configuration (mode, position, monitor, vsync) is only applied when the WindowOUT's own parameters change, NOT when upstream textures update (preventing per-frame window reconfiguration). Multiple WindowOUT instances create multiple independent windows.
+**How it works:** When Open is ON, creates a Godot `Window` with a `TextureRect` (`mouse_filter = IGNORE`, z=0) for the background texture and a `VBoxContainer` "UIRoot" (`mouse_filter = PASS`, z=1) for the interactive panel layer. The TextureRect is assigned the input TOP's `ViewportTexture` — a live GPU reference with zero copy overhead. UI controls from ContainerUI are adopted directly into the UIRoot container — no SubViewport indirection — so Godot's native input dispatch (mouse, keyboard, focus) works automatically. An overlay system (CanvasLayer at layer 100) supports dropdowns, color pickers, and popup menus above the panel layer. Window configuration (mode, position, monitor, vsync) is only applied when the WindowOUT's own parameters change, NOT when upstream textures update (preventing per-frame window reconfiguration). Multiple WindowOUT instances create multiple independent windows.
 
 > **Architecture note — process_mode:** GNNode sets `process_mode = PROCESS_MODE_DISABLED` during `initialize()` so operators don't run Godot's `_process()` (all cooking is driven by GNCookEngine). However, Godot propagates process_mode to child nodes, so the Window would also become DISABLED — blocking GUI event dispatch entirely (buttons, sliders, etc. stop responding). The fix: WindowOUT explicitly sets `_window.process_mode = Node.PROCESS_MODE_ALWAYS` in `_ensure_window()`. This has zero performance cost — it simply re-enables standard Godot GUI dispatch for the Window subtree.
 
@@ -6079,6 +6073,151 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 **DPI:** Godot's DisplayServer reports screen positions and sizes in logical (DPI-scaled) coordinates, so multi-monitor setups with mixed DPI scales work correctly without manual compensation.
 
 **Keyboard shortcut:** Press **ESC** inside the output window to revert Fullscreen or Borderless mode back to Windowed.
+
+---
+
+#### TableSaveOUT
+
+Export a DAT table or text to disk (CSV, TSV, JSON, or plain text). **Sync write every cook** while Active is ON.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | false | ON = write every cook |
+| file_path | File | user://output/data | Base path (format extension appended) |
+| format | Enum | CSV | CSV, TSV, JSON, Text |
+| include_header | Bool | true | Include header row for CSV/TSV |
+
+**Input 0:** `in` (DAT).
+
+---
+
+#### RecordOUT
+
+Accumulate CHOP samples into a buffer; save or reset on rising-edge bool toggles (not Pulse params).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | false | ON = append input each cook |
+| max_samples | Int | 10000 | Cap; oldest dropped when exceeded |
+| save | Bool | false | Rising edge → write buffer to disk |
+| reset | Bool | false | Rising edge → clear buffer |
+| file_path | File | user://output/recording | Save path |
+| format | Enum | CSV | CSV or JSON |
+
+**Input 0:** `in` (CHOP).
+
+---
+
+#### OscOUT
+
+Send CHOP channel values as OSC over UDP (`prefix/channel_name`).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| host | String | 127.0.0.1 | Target host |
+| port | Int | 9001 | UDP port |
+| active | Bool | true | Enable sending |
+| prefix | String | /gonodes | OSC address prefix |
+| send_mode | Enum | Individual | Individual messages or one Bundle |
+
+**Input 0:** `in` (CHOP).
+
+---
+
+#### AudioDeviceOUT
+
+Push CHOP samples to speakers via AudioStreamGenerator (`left`/`right` or first 1–2 channels).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | false | Enable output |
+| device | Enum | Default | Output device (one at a time project-wide) |
+| gain | Float | 1.0 | Output gain |
+| mix_rate | Float | 44100 | Sample rate Hz |
+| buffer_length | Float | 0.1 | Generator buffer seconds |
+
+**Input 0:** `in` (CHOP).
+
+---
+
+#### TextureSaveOUT
+
+Read a GPU texture back to CPU and save as PNG, WebP, or EXR (optional auto-numbered sequence).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | false | ON = queue a save every cook; OFF flushes the disk writer |
+| file_path | File | user://output/frame | Base path (format extension appended; existing ext stripped) |
+| format | Enum | PNG | PNG, WebP, or EXR |
+| quality | Float | 0.75 | WebP lossy quality (ignored for PNG/EXR) |
+| auto_number | Bool | true | Append `_NNNN` frame counter |
+| start_frame | Int | 0 | Starting frame number when auto-numbering |
+
+**Input 0:** `in` (TOP — texture to save).
+
+**How it works:** `get_image()` stays on the cook thread (GPU readback). Compress + disk write run on a **background thread** so sync `save_*` does not stutter the graph. Turning Active OFF waits for the queue to drain. For CPU-side Images use ImageSaveOUT; for a dedicated numbered sequence folder use MovieOUT; for a video container use FFmpegOUT.
+
+---
+
+#### ImageSaveOUT
+
+Save a CPU-side Image to disk as PNG, WebP, or EXR (optional auto-numbered sequence).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | false | ON = save every cook (sync write on the cook thread) |
+| file_path | File | user://output/frame | Base path (format extension appended; existing ext stripped) |
+| format | Enum | PNG | PNG, WebP, or EXR |
+| quality | Float | 0.75 | WebP lossy quality (ignored for PNG/EXR) |
+| auto_number | Bool | true | Append `_NNNN` frame counter; OFF overwrites the same path each cook |
+| start_frame | Int | 0 | Starting frame number when auto-numbering |
+
+**Input 0:** `in` (IMG — image to save).
+
+**How it works:** While Active is ON, each cook writes the input Image with Godot `save_png` / `save_webp` / `save_exr` (currently **synchronous** — long sequences may stutter; prefer MovieOUT for heavy sequences or FFmpegOUT for video). `file_path` is a save-file picker; Format replaces any picked extension. Same role as TextureSaveOUT but for IMG (no GPU readback). Use MovieOUT when you want a folder + prefix + padding sequence UI; use this for a single path, EXR, or occasional frames.
+
+---
+
+#### MovieOUT
+
+Save an IMG stream as a numbered PNG/WebP image sequence (no video container).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | false | ON = queue each input as a numbered frame; OFF flushes the disk writer |
+| output_folder | Folder | user://output/sequence | Folder for frame files (created if missing) |
+| file_prefix | String | frame | Filename prefix before the frame number |
+| format | Enum | PNG | PNG or WebP |
+| quality | Float | 0.9 | WebP quality (ignored for PNG) |
+| start_frame | Int | 0 | Starting frame number on re-activation |
+| frame_padding | Int | 4 | Zero-padded digits (e.g. 4 → `frame_0001.png`) |
+
+**Input 0:** `in` (IMG — frame to save).
+
+**How it works:** While Active is ON, each cook **queues** a PNG/WebP write on a background disk thread (same pattern as FFmpegOUT capture). Preview may show `(disk N)` if the writer is catching up. Turning Active OFF flushes pending writes. This node does **not** encode a video file — use **FFmpegOUT** for `.mp4` / `.webm` / `.mov` via the system FFmpeg CLI.
+
+---
+
+#### FFmpegOUT
+
+Encode an IMG image sequence to a video file via the system FFmpeg CLI.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | false | **Capture** — ON = write frames. OFF / Duration clears it and starts **background** encode (no separate bg toggle) |
+| cancel | Pulse | — | Stop capture, or kill a background encode |
+| duration | Float | 0 | Auto-stop capture after this many seconds of frames (0 = unlimited) |
+| output_file | File | user://output/video | Save path (`.mp4` / `.webm` / `.mov`); codec extension is applied (existing ext stripped) |
+| ffmpeg_path | File | "" | Full path to `ffmpeg.exe`; empty = use PATH |
+| codec | Enum | H.264 | H.264, H.265, VP9, AV1, ProRes |
+| framerate | Int | 30 | Output FPS (also used for Duration → frame count) |
+| crf | Int | 23 | Quality (lower = better); ignored for some codecs |
+| status | String | Idle | Read-only: Idle / Capturing / Encoding (background) / Done / Failed / Cancelled |
+| progress | Float | 0 | Read-only 0–1 capture or background-encode progress |
+
+**Input 0:** `in` (IMG — frames to encode; set size upstream with FitTOP).
+
+**How it works:** While Capture is ON, each cook **queues** a PNG write on a background disk thread (so the graph does not stutter on sync `save_png`). Status may show `(disk N)` if the writer is catching up. When Capture turns OFF (or Duration × Framerate frames are reached), pending writes are flushed, Capture clears, and FFmpeg runs on a **worker thread**. Progress parses ffmpeg `frame=` stats. Temp frames are removed after a successful encode. Use NRT mode so wall-clock time matches Framerate. Resolution comes from the input IMG, not from this node.
 
 ---
 
@@ -6451,7 +6590,7 @@ This means **cross-family nodes** automatically get the correct preview. For exa
 
 COMP, UI, and OUT families override `update_preview_control()` because they display non-data state (`_scene_node`, `_control_node`, sink status).
 
-**Multi-output nodes** (GDScriptSCRIPT Generic template, MultiBufferRenderTOP) preview output port 0 (`cached_output`). To inspect other outputs, wire them into a **Null node** of the matching family and select that Null in the viewer. Every family has a Null pass-through: NullTOP, NullCHOP, NullSOP, NullDAT, NullIMG, NullPOP, NullVOL, NullMAT, NullCOMP.
+**Multi-output nodes** (MovieFileInTOP, mapper TOPs with a panel port, MultiBufferRenderTOP, GDScriptSCRIPT Generic, etc.) show a **port dropdown** in the viewer toolbar. Pick which output to preview (e.g. Out vs Audio, Out vs Panel). The cook engine demands the selected viewer port. Null pass-through nodes of each family remain useful for wiring a secondary port into another chain.
 
 ### Node Palette Keyboard Navigation
 

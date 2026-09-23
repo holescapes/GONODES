@@ -45,8 +45,8 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.DAT, "Detection table", "Out")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("model_path",
-		"res://addons/gn_ext_ml/models/yolov8n.onnx",
+	add_parameter(GNParameter.create_file("model_path", "res://addons/gn_ext_ml/models/yolov8n.onnx",
+		PackedStringArray(["*.onnx"]),
 		"Model", "Path to YOLO/SSD ONNX model"))
 	add_parameter(GNParameter.create_float("confidence", 0.25, 0.0, 1.0,
 		0.01, "Confidence", "Minimum detection confidence threshold"))

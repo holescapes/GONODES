@@ -1,0 +1,133 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "n0": {
+      "type": "HostInCHOP",
+      "position": [
+        0.0,
+        0.0
+      ]
+    },
+    "n1": {
+      "type": "HostInDAT",
+      "position": [
+        280.0,
+        0.0
+      ]
+    },
+    "n2": {
+      "type": "HostInPOP",
+      "position": [
+        560.0,
+        0.0
+      ]
+    },
+    "n3": {
+      "type": "HostInSOP",
+      "position": [
+        840.0,
+        0.0
+      ]
+    },
+    "n4": {
+      "type": "HostInTOP",
+      "position": [
+        1120.0,
+        0.0
+      ]
+    },
+    "n5": {
+      "type": "HostInVOL",
+      "position": [
+        1400.0,
+        0.0
+      ]
+    },
+    "n6": {
+      "type": "HostOutCHOP",
+      "position": [
+        1680.0,
+        0.0
+      ]
+    },
+    "n7": {
+      "type": "HostOutDAT",
+      "position": [
+        1960.0,
+        0.0
+      ]
+    },
+    "n8": {
+      "type": "HostOutPOP",
+      "position": [
+        0.0,
+        200.0
+      ]
+    },
+    "n9": {
+      "type": "HostOutSOP",
+      "position": [
+        280.0,
+        200.0
+      ]
+    },
+    "n10": {
+      "type": "HostOutTOP",
+      "position": [
+        560.0,
+        200.0
+      ]
+    },
+    "n11": {
+      "type": "HostOutVOL",
+      "position": [
+        840.0,
+        200.0
+      ]
+    },
+    "n12": {
+      "type": "InTunnel",
+      "position": [
+        1120.0,
+        200.0
+      ]
+    },
+    "n13": {
+      "type": "OutTunnel",
+      "position": [
+        1400.0,
+        200.0
+      ]
+    },
+    "n14": {
+      "type": "SubNetworkNode",
+      "position": [
+        1680.0,
+        200.0
+      ]
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "ann_8824265",
+      "type": "note",
+      "text": "VISUAL AUDIT \u2014 NET inventory (15 ops)\n\u25a1 Click each node; check viewer / params match docs\n\u25a1 Wire into a Null/Window as needed\n\u25a1 Mark CHECKLIST.md when done",
+      "position": [
+        -200,
+        -160
+      ],
+      "size": [
+        640,
+        140
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

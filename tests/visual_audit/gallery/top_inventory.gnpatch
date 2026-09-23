@@ -1,0 +1,1035 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "n0": {
+      "type": "ASCIIArtTOP",
+      "position": [
+        0.0,
+        0.0
+      ]
+    },
+    "n1": {
+      "type": "AnalyzeTOP",
+      "position": [
+        280.0,
+        0.0
+      ]
+    },
+    "n2": {
+      "type": "AntiAliasTOP",
+      "position": [
+        560.0,
+        0.0
+      ]
+    },
+    "n3": {
+      "type": "BezierMapTOP",
+      "position": [
+        840.0,
+        0.0
+      ]
+    },
+    "n4": {
+      "type": "BilateralBlurTOP",
+      "position": [
+        1120.0,
+        0.0
+      ]
+    },
+    "n5": {
+      "type": "BloomTOP",
+      "position": [
+        1400.0,
+        0.0
+      ]
+    },
+    "n6": {
+      "type": "BlurTOP",
+      "position": [
+        1680.0,
+        0.0
+      ]
+    },
+    "n7": {
+      "type": "BokehBlurTOP",
+      "position": [
+        1960.0,
+        0.0
+      ]
+    },
+    "n8": {
+      "type": "CHOPtoTOP",
+      "position": [
+        0.0,
+        200.0
+      ]
+    },
+    "n9": {
+      "type": "CacheTOP",
+      "position": [
+        280.0,
+        200.0
+      ]
+    },
+    "n10": {
+      "type": "CellularAutomataTOP",
+      "position": [
+        560.0,
+        200.0
+      ]
+    },
+    "n11": {
+      "type": "ChannelMixTOP",
+      "position": [
+        840.0,
+        200.0
+      ]
+    },
+    "n12": {
+      "type": "ChromaKeyTOP",
+      "position": [
+        1120.0,
+        200.0
+      ]
+    },
+    "n13": {
+      "type": "ChromaticAberrationTOP",
+      "position": [
+        1400.0,
+        200.0
+      ]
+    },
+    "n14": {
+      "type": "CircleTOP",
+      "position": [
+        1680.0,
+        200.0
+      ]
+    },
+    "n15": {
+      "type": "ColorBalanceTOP",
+      "position": [
+        1960.0,
+        200.0
+      ]
+    },
+    "n16": {
+      "type": "ColorMapTOP",
+      "position": [
+        0.0,
+        400.0
+      ]
+    },
+    "n17": {
+      "type": "ColorSpaceTOP",
+      "position": [
+        280.0,
+        400.0
+      ]
+    },
+    "n18": {
+      "type": "CompositeTOP",
+      "position": [
+        560.0,
+        400.0
+      ]
+    },
+    "n19": {
+      "type": "CompositorEffectTOP",
+      "position": [
+        840.0,
+        400.0
+      ]
+    },
+    "n20": {
+      "type": "ComputeShaderTOP",
+      "position": [
+        1120.0,
+        400.0
+      ]
+    },
+    "n21": {
+      "type": "ConstantTOP",
+      "position": [
+        1400.0,
+        400.0
+      ]
+    },
+    "n22": {
+      "type": "ConvolutionTOP",
+      "position": [
+        1680.0,
+        400.0
+      ]
+    },
+    "n23": {
+      "type": "CornerPinTOP",
+      "position": [
+        1960.0,
+        400.0
+      ]
+    },
+    "n24": {
+      "type": "CropTOP",
+      "position": [
+        0.0,
+        600.0
+      ]
+    },
+    "n25": {
+      "type": "CrossTOP",
+      "position": [
+        280.0,
+        600.0
+      ]
+    },
+    "n26": {
+      "type": "CurlNoiseTOP",
+      "position": [
+        560.0,
+        600.0
+      ]
+    },
+    "n27": {
+      "type": "CustomShaderTOP",
+      "position": [
+        840.0,
+        600.0
+      ]
+    },
+    "n28": {
+      "type": "DeformTOP",
+      "position": [
+        1120.0,
+        600.0
+      ]
+    },
+    "n29": {
+      "type": "DepthOfFieldTOP",
+      "position": [
+        1400.0,
+        600.0
+      ]
+    },
+    "n30": {
+      "type": "DepthTOP",
+      "position": [
+        1680.0,
+        600.0
+      ]
+    },
+    "n31": {
+      "type": "DilateErodeTOP",
+      "position": [
+        1960.0,
+        600.0
+      ]
+    },
+    "n32": {
+      "type": "DirectionalBlurTOP",
+      "position": [
+        0.0,
+        800.0
+      ]
+    },
+    "n33": {
+      "type": "DisplaceTOP",
+      "position": [
+        280.0,
+        800.0
+      ]
+    },
+    "n34": {
+      "type": "DitherTOP",
+      "position": [
+        560.0,
+        800.0
+      ]
+    },
+    "n35": {
+      "type": "EdgeBlendTOP",
+      "position": [
+        840.0,
+        800.0
+      ]
+    },
+    "n36": {
+      "type": "EdgeTOP",
+      "position": [
+        1120.0,
+        800.0
+      ]
+    },
+    "n37": {
+      "type": "EmbossTOP",
+      "position": [
+        1400.0,
+        800.0
+      ]
+    },
+    "n38": {
+      "type": "FFmpegInTOP",
+      "position": [
+        1680.0,
+        800.0
+      ]
+    },
+    "n39": {
+      "type": "FeedbackTOP",
+      "position": [
+        1960.0,
+        800.0
+      ]
+    },
+    "n40": {
+      "type": "FilmGrainTOP",
+      "position": [
+        0.0,
+        1000.0
+      ]
+    },
+    "n41": {
+      "type": "FilterTOP",
+      "position": [
+        280.0,
+        1000.0
+      ]
+    },
+    "n42": {
+      "type": "FitTOP",
+      "position": [
+        560.0,
+        1000.0
+      ]
+    },
+    "n43": {
+      "type": "FixtureSamplerTOP",
+      "position": [
+        840.0,
+        1000.0
+      ]
+    },
+    "n44": {
+      "type": "FlipTOP",
+      "position": [
+        1120.0,
+        1000.0
+      ]
+    },
+    "n45": {
+      "type": "FlowVisTOP",
+      "position": [
+        1400.0,
+        1000.0
+      ]
+    },
+    "n46": {
+      "type": "Fluid2DTOP",
+      "position": [
+        1680.0,
+        1000.0
+      ]
+    },
+    "n47": {
+      "type": "FrameDifferenceTOP",
+      "position": [
+        1960.0,
+        1000.0
+      ]
+    },
+    "n48": {
+      "type": "GLSLMultiTOP",
+      "position": [
+        0.0,
+        1200.0
+      ]
+    },
+    "n49": {
+      "type": "GeometryBufferTOP",
+      "position": [
+        280.0,
+        1200.0
+      ]
+    },
+    "n50": {
+      "type": "GlitchTOP",
+      "position": [
+        560.0,
+        1200.0
+      ]
+    },
+    "n51": {
+      "type": "GlueTOP",
+      "position": [
+        840.0,
+        1200.0
+      ]
+    },
+    "n52": {
+      "type": "GodRaysTOP",
+      "position": [
+        1120.0,
+        1200.0
+      ]
+    },
+    "n53": {
+      "type": "GradientMapTOP",
+      "position": [
+        1400.0,
+        1200.0
+      ]
+    },
+    "n54": {
+      "type": "GridWarpTOP",
+      "position": [
+        1680.0,
+        1200.0
+      ]
+    },
+    "n55": {
+      "type": "HSVAdjustTOP",
+      "position": [
+        1960.0,
+        1200.0
+      ]
+    },
+    "n56": {
+      "type": "HalftoneTOP",
+      "position": [
+        0.0,
+        1400.0
+      ]
+    },
+    "n57": {
+      "type": "HapInTOP",
+      "position": [
+        280.0,
+        1400.0
+      ]
+    },
+    "n58": {
+      "type": "HighPassTOP",
+      "position": [
+        560.0,
+        1400.0
+      ]
+    },
+    "n59": {
+      "type": "ISFTOP",
+      "position": [
+        840.0,
+        1400.0
+      ]
+    },
+    "n60": {
+      "type": "KaleidoscopeTOP",
+      "position": [
+        1120.0,
+        1400.0
+      ]
+    },
+    "n61": {
+      "type": "KeyMixTOP",
+      "position": [
+        1400.0,
+        1400.0
+      ]
+    },
+    "n62": {
+      "type": "KuwaharaTOP",
+      "position": [
+        1680.0,
+        1400.0
+      ]
+    },
+    "n63": {
+      "type": "LUTTOP",
+      "position": [
+        1960.0,
+        1400.0
+      ]
+    },
+    "n64": {
+      "type": "LayoutTOP",
+      "position": [
+        0.0,
+        1600.0
+      ]
+    },
+    "n65": {
+      "type": "LensDistortTOP",
+      "position": [
+        280.0,
+        1600.0
+      ]
+    },
+    "n66": {
+      "type": "LensFlareTOP",
+      "position": [
+        560.0,
+        1600.0
+      ]
+    },
+    "n67": {
+      "type": "LevelTOP",
+      "position": [
+        840.0,
+        1600.0
+      ]
+    },
+    "n68": {
+      "type": "LimitTOP",
+      "position": [
+        1120.0,
+        1600.0
+      ]
+    },
+    "n69": {
+      "type": "LookupTOP",
+      "position": [
+        1400.0,
+        1600.0
+      ]
+    },
+    "n70": {
+      "type": "LumaBlurTOP",
+      "position": [
+        1680.0,
+        1600.0
+      ]
+    },
+    "n71": {
+      "type": "MatteTOP",
+      "position": [
+        1960.0,
+        1600.0
+      ]
+    },
+    "n72": {
+      "type": "MedianTOP",
+      "position": [
+        0.0,
+        1800.0
+      ]
+    },
+    "n73": {
+      "type": "MirrorTOP",
+      "position": [
+        280.0,
+        1800.0
+      ]
+    },
+    "n74": {
+      "type": "MonoTOP",
+      "position": [
+        560.0,
+        1800.0
+      ]
+    },
+    "n75": {
+      "type": "MotionBlurTOP",
+      "position": [
+        840.0,
+        1800.0
+      ]
+    },
+    "n76": {
+      "type": "MovieFileInTOP",
+      "position": [
+        1120.0,
+        1800.0
+      ]
+    },
+    "n77": {
+      "type": "MovieFileOutTOP",
+      "position": [
+        1400.0,
+        1800.0
+      ]
+    },
+    "n78": {
+      "type": "MultiBufferRenderTOP",
+      "position": [
+        1680.0,
+        1800.0
+      ]
+    },
+    "n79": {
+      "type": "NDIInTOP",
+      "position": [
+        1960.0,
+        1800.0
+      ]
+    },
+    "n80": {
+      "type": "NDIOutTOP",
+      "position": [
+        0.0,
+        2000.0
+      ]
+    },
+    "n81": {
+      "type": "NoiseTOP",
+      "position": [
+        280.0,
+        2000.0
+      ]
+    },
+    "n82": {
+      "type": "NormalMapTOP",
+      "position": [
+        560.0,
+        2000.0
+      ]
+    },
+    "n83": {
+      "type": "NullTOP",
+      "position": [
+        840.0,
+        2000.0
+      ]
+    },
+    "n84": {
+      "type": "OpticalFlowTOP",
+      "position": [
+        1120.0,
+        2000.0
+      ]
+    },
+    "n85": {
+      "type": "PaletteTOP",
+      "position": [
+        1400.0,
+        2000.0
+      ]
+    },
+    "n86": {
+      "type": "PanelTOP",
+      "position": [
+        1680.0,
+        2000.0
+      ]
+    },
+    "n87": {
+      "type": "ParticleStateTOP",
+      "position": [
+        1960.0,
+        2000.0
+      ]
+    },
+    "n88": {
+      "type": "PatternTOP",
+      "position": [
+        0.0,
+        2200.0
+      ]
+    },
+    "n89": {
+      "type": "PixelateTOP",
+      "position": [
+        280.0,
+        2200.0
+      ]
+    },
+    "n90": {
+      "type": "PointCloudRenderTOP",
+      "position": [
+        560.0,
+        2200.0
+      ]
+    },
+    "n91": {
+      "type": "PolarTOP",
+      "position": [
+        840.0,
+        2200.0
+      ]
+    },
+    "n92": {
+      "type": "PosterizeTOP",
+      "position": [
+        1120.0,
+        2200.0
+      ]
+    },
+    "n93": {
+      "type": "PremultiplyTOP",
+      "position": [
+        1400.0,
+        2200.0
+      ]
+    },
+    "n94": {
+      "type": "ProjectionMaskTOP",
+      "position": [
+        1680.0,
+        2200.0
+      ]
+    },
+    "n95": {
+      "type": "ProjectionTOP",
+      "position": [
+        1960.0,
+        2200.0
+      ]
+    },
+    "n96": {
+      "type": "ProjectorBlendTOP",
+      "position": [
+        0.0,
+        2400.0
+      ]
+    },
+    "n97": {
+      "type": "QuadMapTOP",
+      "position": [
+        280.0,
+        2400.0
+      ]
+    },
+    "n98": {
+      "type": "RadialBlurTOP",
+      "position": [
+        560.0,
+        2400.0
+      ]
+    },
+    "n99": {
+      "type": "RampTOP",
+      "position": [
+        840.0,
+        2400.0
+      ]
+    },
+    "n100": {
+      "type": "RaymarchTOP",
+      "position": [
+        1120.0,
+        2400.0
+      ]
+    },
+    "n101": {
+      "type": "ReactionDiffusionTOP",
+      "position": [
+        1400.0,
+        2400.0
+      ]
+    },
+    "n102": {
+      "type": "RectangleTOP",
+      "position": [
+        1680.0,
+        2400.0
+      ]
+    },
+    "n103": {
+      "type": "RemapTOP",
+      "position": [
+        1960.0,
+        2400.0
+      ]
+    },
+    "n104": {
+      "type": "RenderTOP",
+      "position": [
+        0.0,
+        2600.0
+      ]
+    },
+    "n105": {
+      "type": "ReorderTOP",
+      "position": [
+        280.0,
+        2600.0
+      ]
+    },
+    "n106": {
+      "type": "ResolutionTOP",
+      "position": [
+        560.0,
+        2600.0
+      ]
+    },
+    "n107": {
+      "type": "RippleTOP",
+      "position": [
+        840.0,
+        2600.0
+      ]
+    },
+    "n108": {
+      "type": "SVGTOP",
+      "position": [
+        1120.0,
+        2600.0
+      ]
+    },
+    "n109": {
+      "type": "ScanLineTOP",
+      "position": [
+        1400.0,
+        2600.0
+      ]
+    },
+    "n110": {
+      "type": "SelectTOP",
+      "position": [
+        1680.0,
+        2600.0
+      ]
+    },
+    "n111": {
+      "type": "ShadertoyTOP",
+      "position": [
+        1960.0,
+        2600.0
+      ]
+    },
+    "n112": {
+      "type": "SharpenTOP",
+      "position": [
+        0.0,
+        2800.0
+      ]
+    },
+    "n113": {
+      "type": "SlopeTOP",
+      "position": [
+        280.0,
+        2800.0
+      ]
+    },
+    "n114": {
+      "type": "SnapshotTOP",
+      "position": [
+        560.0,
+        2800.0
+      ]
+    },
+    "n115": {
+      "type": "SpherizeTOP",
+      "position": [
+        840.0,
+        2800.0
+      ]
+    },
+    "n116": {
+      "type": "SpoutInTOP",
+      "position": [
+        1120.0,
+        2800.0
+      ]
+    },
+    "n117": {
+      "type": "SpoutOutTOP",
+      "position": [
+        1400.0,
+        2800.0
+      ]
+    },
+    "n118": {
+      "type": "StonerTOP",
+      "position": [
+        1680.0,
+        2800.0
+      ]
+    },
+    "n119": {
+      "type": "SwitchTOP",
+      "position": [
+        1960.0,
+        2800.0
+      ]
+    },
+    "n120": {
+      "type": "SyphonInTOP",
+      "position": [
+        0.0,
+        3000.0
+      ]
+    },
+    "n121": {
+      "type": "SyphonOutTOP",
+      "position": [
+        280.0,
+        3000.0
+      ]
+    },
+    "n122": {
+      "type": "TemporalDenoiseTOP",
+      "position": [
+        560.0,
+        3000.0
+      ]
+    },
+    "n123": {
+      "type": "TestCardTOP",
+      "position": [
+        840.0,
+        3000.0
+      ]
+    },
+    "n124": {
+      "type": "TextTOP",
+      "position": [
+        1120.0,
+        3000.0
+      ]
+    },
+    "n125": {
+      "type": "ThresholdTOP",
+      "position": [
+        1400.0,
+        3000.0
+      ]
+    },
+    "n126": {
+      "type": "TileTOP",
+      "position": [
+        1680.0,
+        3000.0
+      ]
+    },
+    "n127": {
+      "type": "TimeMachineTOP",
+      "position": [
+        1960.0,
+        3000.0
+      ]
+    },
+    "n128": {
+      "type": "ToonShadeTOP",
+      "position": [
+        0.0,
+        3200.0
+      ]
+    },
+    "n129": {
+      "type": "TrailTOP",
+      "position": [
+        280.0,
+        3200.0
+      ]
+    },
+    "n130": {
+      "type": "TransformTOP",
+      "position": [
+        560.0,
+        3200.0
+      ]
+    },
+    "n131": {
+      "type": "TriangleTOP",
+      "position": [
+        840.0,
+        3200.0
+      ]
+    },
+    "n132": {
+      "type": "TwirlTOP",
+      "position": [
+        1120.0,
+        3200.0
+      ]
+    },
+    "n133": {
+      "type": "VectorPathTOP",
+      "position": [
+        1400.0,
+        3200.0
+      ]
+    },
+    "n134": {
+      "type": "VignetteTOP",
+      "position": [
+        1680.0,
+        3200.0
+      ]
+    },
+    "n135": {
+      "type": "VoronoiTOP",
+      "position": [
+        1960.0,
+        3200.0
+      ]
+    },
+    "n136": {
+      "type": "WebRenderTOP",
+      "position": [
+        0.0,
+        3400.0
+      ]
+    },
+    "n137": {
+      "type": "ZCompositeTOP",
+      "position": [
+        280.0,
+        3400.0
+      ]
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        2340.0,
+        0.0
+      ],
+      "parameters": {
+        "open": {
+          "value": false
+        },
+        "title": {
+          "value": "VA: top"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 288
+          }
+        }
+      }
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "ann_6987016",
+      "type": "note",
+      "text": "VISUAL AUDIT \u2014 TOP inventory (138 ops)\n\u25a1 Click each node; check viewer / params match docs\n\u25a1 Wire into a Null/Window as needed\n\u25a1 Mark CHECKLIST.md when done",
+      "position": [
+        -200,
+        -160
+      ],
+      "size": [
+        640,
+        140
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    },
+    {
+      "id": "ann_6913446",
+      "type": "note",
+      "text": "WindowOUT included (Open OFF).\nWire any TOP/IMG \u2192 win when ready to fullscreen-check.",
+      "position": [
+        -200,
+        -20
+      ],
+      "size": [
+        400,
+        100
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

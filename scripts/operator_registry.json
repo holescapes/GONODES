@@ -231,6 +231,16 @@
         "default": 0.0
       },
       {
+        "name": "gain",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "start_pos",
+        "type": "float",
+        "default": 0.0
+      },
+      {
         "name": "seek_pos",
         "type": "float",
         "default": 0.0
@@ -387,8 +397,8 @@
     "params": [
       {
         "name": "file",
-        "type": "string",
-        "default": "Path to the file"
+        "type": "file",
+        "default": null
       },
       {
         "name": "play",
@@ -523,8 +533,8 @@
       },
       {
         "name": "export_path",
-        "type": "string",
-        "default": "user://render.wav"
+        "type": "file",
+        "default": null
       },
       {
         "name": "export_now",
@@ -1174,7 +1184,7 @@
     "params": [
       {
         "name": "model_path",
-        "type": "string",
+        "type": "file",
         "default": null
       },
       {
@@ -1333,7 +1343,7 @@
     "params": [
       {
         "name": "model_path",
-        "type": "string",
+        "type": "file",
         "default": null
       },
       {
@@ -2006,8 +2016,8 @@
     "params": [
       {
         "name": "patch",
-        "type": "string",
-        "default": "The patch string"
+        "type": "file",
+        "default": null
       },
       {
         "name": "send_prefix",
@@ -2040,8 +2050,8 @@
     "params": [
       {
         "name": "patch",
-        "type": "string",
-        "default": "The patch string"
+        "type": "file",
+        "default": null
       },
       {
         "name": "param1",
@@ -2074,8 +2084,8 @@
     "params": [
       {
         "name": "patch",
-        "type": "string",
-        "default": "The patch string"
+        "type": "file",
+        "default": null
       },
       {
         "name": "buffer_size",
@@ -2196,7 +2206,7 @@
     "params": [
       {
         "name": "model_path",
-        "type": "string",
+        "type": "file",
         "default": null
       },
       {
@@ -3429,8 +3439,8 @@
       },
       {
         "name": "file",
-        "type": "string",
-        "default": "Path to the file"
+        "type": "file",
+        "default": null
       },
       {
         "name": "volume_db",
@@ -5529,11 +5539,6 @@
     "extension": null,
     "params": [
       {
-        "name": "path",
-        "type": "string",
-        "default": "res://"
-      },
-      {
         "name": "recursive",
         "type": "bool",
         "default": false
@@ -5827,7 +5832,7 @@
     "params": [
       {
         "name": "model_path",
-        "type": "string",
+        "type": "file",
         "default": null
       },
       {
@@ -6466,8 +6471,8 @@
       },
       {
         "name": "file_path",
-        "type": "string",
-        "default": "The file path string"
+        "type": "file",
+        "default": null
       },
       {
         "name": "include_text",
@@ -7142,7 +7147,7 @@
     "params": [
       {
         "name": "model_path",
-        "type": "string",
+        "type": "file",
         "default": null
       },
       {
@@ -7951,7 +7956,7 @@
     "params": [
       {
         "name": "model_path",
-        "type": "string",
+        "type": "file",
         "default": null
       },
       {
@@ -8081,7 +8086,7 @@
     "params": [
       {
         "name": "model_path",
-        "type": "string",
+        "type": "file",
         "default": null
       },
       {
@@ -8931,9 +8936,19 @@
         "default": false
       },
       {
+        "name": "cancel",
+        "type": "pulse",
+        "default": null
+      },
+      {
+        "name": "duration",
+        "type": "float",
+        "default": 0.0
+      },
+      {
         "name": "output_file",
-        "type": "string",
-        "default": "user://output/video"
+        "type": "file",
+        "default": null
       },
       {
         "name": "ffmpeg_path",
@@ -8954,6 +8969,16 @@
         "name": "crf",
         "type": "int",
         "default": 23
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "default": "Idle"
+      },
+      {
+        "name": "progress",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -8966,8 +8991,8 @@
     "params": [
       {
         "name": "file_path",
-        "type": "string",
-        "default": "user://output/video.mov"
+        "type": "file",
+        "default": null
       },
       {
         "name": "variant",
@@ -8980,9 +9005,24 @@
         "default": 30
       },
       {
+        "name": "duration",
+        "type": "float",
+        "default": 0.0
+      },
+      {
         "name": "record",
         "type": "bool",
         "default": false
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "default": "Idle"
+      },
+      {
+        "name": "progress",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },
@@ -9000,8 +9040,8 @@
       },
       {
         "name": "file_path",
-        "type": "string",
-        "default": "user://output/frame"
+        "type": "file",
+        "default": null
       },
       {
         "name": "format",
@@ -9036,11 +9076,6 @@
         "name": "active",
         "type": "bool",
         "default": false
-      },
-      {
-        "name": "output_folder",
-        "type": "string",
-        "default": "user://output/sequence"
       },
       {
         "name": "file_prefix",
@@ -9161,8 +9196,8 @@
       },
       {
         "name": "file_path",
-        "type": "string",
-        "default": "user://output/recording"
+        "type": "file",
+        "default": null
       },
       {
         "name": "format",
@@ -9199,8 +9234,8 @@
       },
       {
         "name": "file_path",
-        "type": "string",
-        "default": "user://output/data"
+        "type": "file",
+        "default": null
       },
       {
         "name": "format",
@@ -9228,8 +9263,8 @@
       },
       {
         "name": "file_path",
-        "type": "string",
-        "default": "user://output/frame"
+        "type": "file",
+        "default": null
       },
       {
         "name": "format",
@@ -15425,8 +15460,8 @@
     "params": [
       {
         "name": "file_path",
-        "type": "string",
-        "default": "output.mp4"
+        "type": "file",
+        "default": null
       },
       {
         "name": "bitrate",
@@ -15439,9 +15474,24 @@
         "default": 30
       },
       {
+        "name": "duration",
+        "type": "float",
+        "default": 0.0
+      },
+      {
         "name": "record",
         "type": "bool",
         "default": false
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "default": "Idle"
+      },
+      {
+        "name": "progress",
+        "type": "float",
+        "default": 0.0
       }
     ]
   },

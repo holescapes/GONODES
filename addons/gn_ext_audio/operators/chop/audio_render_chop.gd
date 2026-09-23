@@ -29,8 +29,10 @@ func _init_parameters() -> void:
 		"Record", "Start/stop recording"))
 	add_parameter(GNParameter.create_bool("clear", false,
 		"Clear", "Clear the recording buffer"))
-	add_parameter(GNParameter.create_string("export_path", "user://render.wav",
-		"Export Path", "File path for WAV export"))
+	add_parameter(GNParameter.create_file("export_path", "user://render.wav",
+		PackedStringArray(["*.wav"]),
+		"Export Path", "File path for WAV export",
+		GNParameter.FileBrowseMode.SAVE_FILE))
 	add_parameter(GNParameter.create_bool("export_now", false,
 		"Export", "Write buffer to WAV file"))
 	add_parameter(GNParameter.create_float("max_seconds", 300.0, 1.0, 3600.0, 1.0,

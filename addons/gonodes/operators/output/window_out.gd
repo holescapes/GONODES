@@ -1,6 +1,7 @@
 class_name WindowOUT
 extends GNOutBase
 ## Displays a TOP texture and/or interactive UI panel in a standalone OS window.
+## Toggle [code]open[/code] to show/hide the window (default OFF).
 ## Supports multiple monitors, fullscreen/borderless/windowed modes,
 ## and positioning on any connected display.
 ##

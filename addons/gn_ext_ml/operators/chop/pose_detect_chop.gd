@@ -44,8 +44,8 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.CHOP, "Pose keypoint channels", "Out")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("model_path",
-		"res://addons/gn_ext_ml/models/pose_landmark_lite.onnx",
+	add_parameter(GNParameter.create_file("model_path", "res://addons/gn_ext_ml/models/pose_landmark_lite.onnx",
+		PackedStringArray(["*.onnx"]),
 		"Model", "Path to BlazePose ONNX model"))
 	add_parameter(GNParameter.create_float("min_confidence", 0.5, 0.0, 1.0,
 		0.01, "Min Confidence", "Minimum detection confidence threshold"))

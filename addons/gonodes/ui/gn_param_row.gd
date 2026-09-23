@@ -806,7 +806,7 @@ func _create_file_control() -> Control:
 	var browse_btn := Button.new()
 	browse_btn.text = "…"
 	browse_btn.custom_minimum_size = Vector2(28, 0)
-	browse_btn.tooltip_text = "Browse filesystem for a file"
+	browse_btn.tooltip_text = "Browse filesystem" if param.file_browse_mode != GNParameter.FileBrowseMode.OPEN_DIR else "Browse for folder"
 	browse_btn.pressed.connect(func() -> void:
 		_open_file_browse_dialog(option)
 	)
@@ -855,16 +855,28 @@ func _populate_file_dropdown(option: OptionButton) -> void:
 	option.add_item("(none)", 0)
 	option.set_item_metadata(0, "")
 
+	var item_idx := 1
+	var current_path: String = str(param.value)
+	var selected_idx := 0
+
+	# Folder picker — no file scan; show current directory only.
+	if param.file_browse_mode == GNParameter.FileBrowseMode.OPEN_DIR:
+		if not current_path.is_empty():
+			option.add_separator("── Folder ──")
+			item_idx += 1
+			option.add_item(current_path, item_idx)
+			option.set_item_metadata(item_idx, current_path)
+			option.set_item_tooltip(item_idx, current_path)
+			selected_idx = item_idx
+		option.selected = selected_idx
+		return
+
 	# Collect matching extensions
 	var extensions: Array[String] = []
 	for f in param.file_filters:
 		var ext := f.trim_prefix("*.")
 		if not ext.is_empty():
 			extensions.append(ext.to_lower())
-
-	var item_idx := 1
-	var current_path: String = str(param.value)
-	var selected_idx := 0
 
 	# ── Patch Local: project folder beside the .gnpatch ──
 	var proj_dir: String = owner_node.project_dir if owner_node != null else ""
@@ -916,16 +928,20 @@ func _populate_file_dropdown(option: OptionButton) -> void:
 				selected_idx = item_idx
 			item_idx += 1
 
-	# ── External: absolute path not in either list above ──
+	# ── External / save path not in either list above ──
 	if selected_idx == 0 and not current_path.is_empty():
 		var tier := GNResourceLoader.classify(current_path)
-		if tier == GNResourceLoader.PathTier.ABSOLUTE:
+		if tier == GNResourceLoader.PathTier.ABSOLUTE \
+				or param.file_browse_mode == GNParameter.FileBrowseMode.SAVE_FILE \
+				or current_path.begins_with("user://"):
 			option.add_separator("── External ──")
 			item_idx += 1
 			var display := current_path.get_file()
+			if display.is_empty():
+				display = current_path
 			option.add_item("⚠ " + display, item_idx)
 			option.set_item_metadata(item_idx, current_path)
-			option.set_item_tooltip(item_idx, "Absolute path (not portable): " + current_path)
+			option.set_item_tooltip(item_idx, "Path: " + current_path)
 			selected_idx = item_idx
 
 	option.selected = selected_idx
@@ -935,20 +951,28 @@ func _populate_file_dropdown(option: OptionButton) -> void:
 func _open_file_browse_dialog(option: OptionButton) -> void:
 	var dialog := FileDialog.new()
 	dialog.title = "Browse for %s" % param.label
-	dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	match param.file_browse_mode:
+		GNParameter.FileBrowseMode.SAVE_FILE:
+			dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+		GNParameter.FileBrowseMode.OPEN_DIR:
+			dialog.file_mode = FileDialog.FILE_MODE_OPEN_DIR
+		_:
+			dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
 	dialog.access = FileDialog.ACCESS_FILESYSTEM
-	if not param.file_filters.is_empty():
+	if not param.file_filters.is_empty() \
+			and param.file_browse_mode != GNParameter.FileBrowseMode.OPEN_DIR:
 		dialog.filters = param.file_filters
 	dialog.min_size = Vector2i(700, 500)
 
-	dialog.file_selected.connect(func(path: String) -> void:
-		# Convert to project-relative if inside project folder
+	var _apply_picked := func(path: String) -> void:
 		var proj_dir: String = owner_node.project_dir if owner_node != null else ""
 		var saveable := GNResourceLoader.to_saveable(path, proj_dir)
 		_set_value_with_undo(saveable)
 		_populate_file_dropdown(option)
 		dialog.queue_free()
-	)
+
+	dialog.file_selected.connect(_apply_picked)
+	dialog.dir_selected.connect(_apply_picked)
 	dialog.canceled.connect(func() -> void:
 		dialog.queue_free()
 	)

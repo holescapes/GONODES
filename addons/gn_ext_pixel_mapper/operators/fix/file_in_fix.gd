@@ -21,7 +21,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_file("file", "", PackedStringArray(["*.fixture,*.json"]),
+	add_parameter(GNParameter.create_file("file", "", PackedStringArray(["*.fixture", "*.json"]),
 		"File", "Path to a .fixture JSON file."))
 	add_parameter(GNParameter.create_enum("channel_layout",
 		PackedStringArray(["From File", "RGB", "RGBW", "R", "G", "B", "W"]), 0,

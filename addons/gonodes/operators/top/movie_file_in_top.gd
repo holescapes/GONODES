@@ -263,6 +263,20 @@ func _notification(what: int) -> void:
 		_cleanup_audio_bus()
 
 
+## Video needs continuous SubViewport updates while playing — UPDATE_ONCE
+## from GNTopBase is not enough for VideoStreamPlayer frame advance when
+## this node is only demanded by the viewer (no WindowOUT).
+func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
+	var result := super.execute_cook(inputs, frame)
+	if _viewport != null:
+		var playing: bool = is_active and get_param_value("play") and _video_player != null \
+			and _video_player.stream != null
+		_viewport.render_target_update_mode = (
+			SubViewport.UPDATE_ALWAYS if playing else SubViewport.UPDATE_DISABLED
+		)
+	return result
+
+
 ## Pause / resume the VideoStreamPlayer when the node enters or leaves the
 ## active cooking chain.  Without this, Godot's _process() keeps decoding
 ## and rendering video frames (and playing audio) even when the cook engine
@@ -272,10 +286,15 @@ func _on_active_changed(active: bool) -> void:
 		return
 	if active:
 		if get_param_value("play") and _video_player.stream != null:
+			if not _video_player.is_playing():
+				_video_player.play()
 			_video_player.paused = false
+		mark_dirty()
 	else:
 		if _video_player.is_playing():
 			_video_player.paused = true
+		if _viewport != null:
+			_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		# Drain capture buffer so stale audio doesn't burst on resume
 		if _capture_effect != null:
 			_capture_effect.clear_buffer()

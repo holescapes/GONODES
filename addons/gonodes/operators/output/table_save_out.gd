@@ -23,8 +23,11 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("active", false,
 		"Active", "When enabled, saves the table/text to disk every cook"))
-	add_parameter(GNParameter.create_string("file_path", "user://output/data",
-		"File Path", "Output file path (without extension). Directory is created automatically."))
+	add_parameter(GNParameter.create_file("file_path", "user://output/data",
+		PackedStringArray(["*.csv", "*.tsv", "*.json", "*.txt"]),
+		"File Path",
+		"Base output path (format extension is appended; existing extension is stripped).",
+		GNParameter.FileBrowseMode.SAVE_FILE))
 	add_parameter(GNParameter.create_enum("format",
 		PackedStringArray(["CSV", "TSV", "JSON", "Text"]), 0,
 		"Format", "Output file format"))
@@ -41,7 +44,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if not active:
 		return null
 
-	var base_path: String = get_param_value("file_path")
+	var base_path: String = str(get_param_value("file_path")).get_basename()
 	var fmt: int = get_param_value("format")
 	var include_header: bool = get_param_value("include_header")
 

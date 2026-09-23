@@ -20,15 +20,16 @@ All operators are pure GDScript + GPU shaders — no native library compilation 
 ### Interactive panel output
 
 QuadMapTOP, StonerTOP, BezierMapTOP, and GridWarpTOP expose a **panel** UI
-output port (via `GNTopInteractiveBase`). The same `GNInteractivePanel` used
-in the viewer can wire to WindowOUT's panel port for pop-out editing:
+output port (via `GNTopInteractiveBase`). Node params are the source of truth.
+The viewer and WindowOUT each get their own interactive panel instance; both
+stay in sync when you drag handles in either place:
 
 ```
-ContentTOP → QuadMapTOP ─┬─ out (TOP)  → WindowOUT in
+ContentTOP → QuadMapTOP ─┬─ out (TOP)  → WindowOUT in  (+ viewer Out still interactive)
                          └─ panel (UI) → WindowOUT panel
 ```
 
-Drag handles in the viewer or in WindowOUT update the node's parameters directly.
+Drag handles in the viewer **or** in WindowOUT — both update the same params.
 (LED fixture handles use the same pattern on **FixtureSamplerTOP** in
 `gn_ext_pixel_mapper` — not this extension.)
 

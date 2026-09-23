@@ -298,6 +298,7 @@ func _setup_viewer_panel() -> void:
 	viewer_panel.eager_3d = true  # Pre-create 3D SubViewports to avoid first-click hitch
 	viewer_panel.size_flags_horizontal = SIZE_EXPAND_FILL
 	viewer_panel.size_flags_vertical = SIZE_EXPAND_FILL
+	viewer_panel.port_selection_changed.connect(_on_viewer_port_selected)
 	viewer_container.add_child(viewer_panel)
 
 
@@ -452,6 +453,33 @@ func _push_active_sinks() -> void:
 				sinks.append(vw.node_id)
 
 	cook_engine.set_active_sinks(sinks)
+	_push_viewer_port_demands()
+
+
+## Pushes which output port each viewer is displaying so multi-output nodes
+## demand-cook that port (e.g. MovieFileIn audio, mapper panel).
+func _push_viewer_port_demands() -> void:
+	if cook_engine == null:
+		return
+	var ports: Dictionary = {}
+	if not _viewer_node_id.is_empty() and viewer_panel != null:
+		ports[_viewer_node_id] = viewer_panel.get_selected_port_index()
+	for vw in _viewer_windows:
+		if is_instance_valid(vw) and not vw.node_id.is_empty():
+			ports[vw.node_id] = vw.get_selected_port_index()
+	cook_engine.set_viewer_port_demands(ports)
+
+
+func _on_viewer_port_selected(_port_index: int) -> void:
+	_push_viewer_port_demands()
+	if network != null and not _viewer_node_id.is_empty():
+		var node: GNNode = network.get_node_by_id(_viewer_node_id)
+		if node != null:
+			node.mark_dirty()
+
+
+func _on_floating_viewer_port_selected(_port_index: int) -> void:
+	_push_viewer_port_demands()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -865,8 +893,21 @@ func open_viewer_window(target_node_id: String = "") -> void:
 	vw.closed.connect(_on_viewer_window_closed)
 	add_child(vw)
 	_viewer_windows.append(vw)
+	# Wire port dropdown after the embedded panel exists (_ready).
+	if vw.is_node_ready():
+		_connect_floating_viewer_ports(vw)
+	else:
+		vw.ready.connect(_connect_floating_viewer_ports.bind(vw), CONNECT_ONE_SHOT)
 	_push_active_sinks()
 	GNLogger.info("Editor", "Opened viewer window for '%s'" % nid)
+
+
+func _connect_floating_viewer_ports(vw: GNViewerWindow) -> void:
+	if not is_instance_valid(vw):
+		return
+	var panel: GNViewerPanel = vw.get_viewer_panel()
+	if panel != null and not panel.port_selection_changed.is_connected(_on_floating_viewer_port_selected):
+		panel.port_selection_changed.connect(_on_floating_viewer_port_selected)
 
 
 ## Called when a floating viewer window is closed by the user.

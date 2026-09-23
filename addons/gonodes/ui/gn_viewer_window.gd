@@ -53,6 +53,18 @@ func update_from_node(node: GNNode) -> void:
 	_viewer_panel.update_from_node(node)
 
 
+## Output port currently selected in the embedded viewer dropdown.
+func get_selected_port_index() -> int:
+	if _viewer_panel == null:
+		return 0
+	return _viewer_panel.get_selected_port_index()
+
+
+## Forward port-selection changes so the editor can update cook demand.
+func get_viewer_panel() -> GNViewerPanel:
+	return _viewer_panel
+
+
 ## Legacy compat — update with a texture (for backward compatibility).
 func update_texture(texture: Texture2D) -> void:
 	# Kept for minimal backward compat; prefer update_from_node().

@@ -210,37 +210,30 @@ Consumer counts are rebuilt when:
 ### Viewer-Aware Counting
 
 The viewer panel reads `cached_output` outside the normal data-flow graph —
-it's an invisible consumer. The rebuild logic counts each viewer sink's
-upstream inputs as additional consumers:
+it's an invisible consumer. The rebuild counts the viewed node itself, and
+also that node's immediate upstream (a passthrough viewer is showing the
+upstream buffer):
 
 ```gdscript
-func _rebuild_consumer_counts() -> void:
-    _consumer_counts.clear()
-    # Count wire connections
-    for conn in network.connections:
-        var from_id: String = conn.from_node
-        _consumer_counts[from_id] = _consumer_counts.get(from_id, 0) + 1
-    # Count viewer sinks as additional consumers
-    for sink_id in active_sinks:
-        var in_conns: Array = network.get_input_connections(sink_id)
-        for conn in in_conns:
-            _consumer_counts[conn.from_node] = _consumer_counts.get(conn.from_node, 0) + 1
-    _consumer_counts_dirty = false
+for sink_id in active_sinks:
+    _consumer_counts[sink_id] = _consumer_counts.get(sink_id, 0) + 1
+    for conn in network.get_input_connections(sink_id):
+        _consumer_counts[conn.from_node] = _consumer_counts.get(conn.from_node, 0) + 1
 ```
 
-Without viewer-aware counting, operators like PixelSortIMG would mutate
-NoiseIMG's `cached_output` in-place (wire-only count = 1, but the viewer
-is also reading it), causing the viewer to show corrupted data.
+Without the self-count, a viewer on NoiseIMG plus one wire into PixelSortIMG
+is only one consumer. PixelSort then mutates the image the viewer is showing.
+
+`_shared` is stamped only on an object the cooking node created. A node that
+returns an input (`NullCHOP`, bypass) must not write `_shared` onto that
+object — doing so clears the producer's flag from the passthrough's own
+consumer count.
 
 ### Shared Flag Propagation
 
-Before each node cooks, the engine checks the consumer count for its
-upstream producers and sets `_shared` accordingly on their output data:
-
-```
-if _consumer_counts.get(producer_id, 0) > 1:
-    producer.cached_output._shared = true
-```
+After a node cooks, the engine sets `_shared` on the object that cook
+created, from that node's consumer count. It does not write the flag onto
+an input object the cook returned unchanged.
 
 ---
 

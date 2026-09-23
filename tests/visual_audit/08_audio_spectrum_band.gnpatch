@@ -1,0 +1,105 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "audio": {
+      "type": "AudioFileInCHOP",
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "play": {
+          "value": false
+        },
+        "gain": {
+          "value": 2.0
+        }
+      }
+    },
+    "spec": {
+      "type": "AudioSpectrumCHOP",
+      "position": [
+        320,
+        200
+      ]
+    },
+    "band": {
+      "type": "AudioBandCHOP",
+      "position": [
+        640,
+        200
+      ]
+    },
+    "noise": {
+      "type": "NoiseTOP",
+      "position": [
+        0,
+        450
+      ]
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        640,
+        450
+      ],
+      "parameters": {
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "VA: Audio Chain"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 288
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "audio",
+      "from_port": 0,
+      "to_node": "spec",
+      "to_port": 0
+    },
+    {
+      "from_node": "spec",
+      "from_port": 0,
+      "to_node": "band",
+      "to_port": 0
+    },
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "win",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_3981830",
+      "type": "note",
+      "text": "VISUAL AUDIT 08 \u2014 audio analysis\n1. Set AudioFileIn file to a WAV/OGG\n2. Play ON, raise Gain if bands weak\n3. Viewer on Spectrum / Band \u2014 channels move\n\u25a1 start_pos cues playhead\n\u25a1 load_mode Auto/Memory/Stream",
+      "position": [
+        -100,
+        20
+      ],
+      "size": [
+        520,
+        180
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

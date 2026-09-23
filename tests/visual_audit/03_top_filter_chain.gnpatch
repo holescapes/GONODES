@@ -1,0 +1,121 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "noise": {
+      "type": "NoiseTOP",
+      "position": [
+        0,
+        200
+      ]
+    },
+    "blur": {
+      "type": "BlurTOP",
+      "position": [
+        280,
+        200
+      ],
+      "parameters": {
+        "size": {
+          "value": 4.0
+        }
+      }
+    },
+    "level": {
+      "type": "LevelTOP",
+      "position": [
+        560,
+        200
+      ]
+    },
+    "hsv": {
+      "type": "HSVAdjustTOP",
+      "position": [
+        840,
+        200
+      ]
+    },
+    "edge": {
+      "type": "EdgeTOP",
+      "position": [
+        1120,
+        200
+      ]
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        1400,
+        200
+      ],
+      "parameters": {
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "VA: TOP Filters"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 640,
+            "y": 360
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "blur",
+      "to_port": 0
+    },
+    {
+      "from_node": "blur",
+      "from_port": 0,
+      "to_node": "level",
+      "to_port": 0
+    },
+    {
+      "from_node": "level",
+      "from_port": 0,
+      "to_node": "hsv",
+      "to_port": 0
+    },
+    {
+      "from_node": "hsv",
+      "from_port": 0,
+      "to_node": "edge",
+      "to_port": 0
+    },
+    {
+      "from_node": "edge",
+      "from_port": 0,
+      "to_node": "win",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_587553",
+      "type": "note",
+      "text": "VISUAL AUDIT 03 \u2014 filter chain\nNoise \u2192 Blur \u2192 Level \u2192 HSV \u2192 Edge \u2192 Window\n\u25a1 Tweak Blur size\n\u25a1 Level / HSV change look\n\u25a1 Edge outlines visible",
+      "position": [
+        -100,
+        20
+      ],
+      "size": [
+        520,
+        160
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

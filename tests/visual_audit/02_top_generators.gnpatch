@@ -1,0 +1,168 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "noise": {
+      "type": "NoiseTOP",
+      "position": [
+        0,
+        0
+      ]
+    },
+    "ramp": {
+      "type": "RampTOP",
+      "position": [
+        0,
+        180
+      ]
+    },
+    "circle": {
+      "type": "CircleTOP",
+      "position": [
+        0,
+        360
+      ]
+    },
+    "rect": {
+      "type": "RectangleTOP",
+      "position": [
+        0,
+        540
+      ]
+    },
+    "const": {
+      "type": "ConstantTOP",
+      "position": [
+        0,
+        720
+      ]
+    },
+    "pattern": {
+      "type": "PatternTOP",
+      "position": [
+        0,
+        900
+      ]
+    },
+    "text": {
+      "type": "TextTOP",
+      "position": [
+        0,
+        1080
+      ]
+    },
+    "card": {
+      "type": "TestCardTOP",
+      "position": [
+        0,
+        1260
+      ]
+    },
+    "switch": {
+      "type": "SwitchTOP",
+      "position": [
+        400,
+        400
+      ]
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        800,
+        400
+      ],
+      "parameters": {
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "VA: TOP Generators"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 640,
+            "y": 360
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "switch",
+      "to_port": 0
+    },
+    {
+      "from_node": "ramp",
+      "from_port": 0,
+      "to_node": "switch",
+      "to_port": 1
+    },
+    {
+      "from_node": "circle",
+      "from_port": 0,
+      "to_node": "switch",
+      "to_port": 2
+    },
+    {
+      "from_node": "rect",
+      "from_port": 0,
+      "to_node": "switch",
+      "to_port": 3
+    },
+    {
+      "from_node": "const",
+      "from_port": 0,
+      "to_node": "switch",
+      "to_port": 4
+    },
+    {
+      "from_node": "pattern",
+      "from_port": 0,
+      "to_node": "switch",
+      "to_port": 5
+    },
+    {
+      "from_node": "text",
+      "from_port": 0,
+      "to_node": "switch",
+      "to_port": 6
+    },
+    {
+      "from_node": "card",
+      "from_port": 0,
+      "to_node": "switch",
+      "to_port": 7
+    },
+    {
+      "from_node": "switch",
+      "from_port": 0,
+      "to_node": "win",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_2471957",
+      "type": "note",
+      "text": "VISUAL AUDIT 02 \u2014 TOP generators\n\u25a1 Select SwitchTOP index to flip sources\n\u25a1 Noise animates with time\n\u25a1 Text / TestCard readable\n\u25a1 Constant solid color",
+      "position": [
+        -120,
+        -80
+      ],
+      "size": [
+        480,
+        140
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "noise": {
+      "type": "NoiseTOP",
+      "position": [
+        0,
+        200
+      ]
+    },
+    "bezier": {
+      "type": "BezierMapTOP",
+      "position": [
+        350,
+        200
+      ]
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        700,
+        200
+      ],
+      "parameters": {
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "VA: Mapper Dual Panel"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 800,
+            "y": 450
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "bezier",
+      "to_port": 0
+    },
+    {
+      "from_node": "bezier",
+      "from_port": 0,
+      "to_node": "win",
+      "to_port": 0
+    },
+    {
+      "from_node": "bezier",
+      "from_port": 1,
+      "to_node": "win",
+      "to_port": 1
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_2119022",
+      "type": "note",
+      "text": "VISUAL AUDIT 04 \u2014 dual interactive panel (Rule 25.42)\n\u25a1 Viewer on BezierMap Out: handles ON texture\n\u25a1 WindowOUT Open: handles ALSO in pop-out\n\u25a1 Drag either \u2192 both stay in sync\n\u25a1 No crash when wiring panel",
+      "position": [
+        -120,
+        20
+      ],
+      "size": [
+        520,
+        160
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

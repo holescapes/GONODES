@@ -72,7 +72,7 @@ Given channels: `tx, ty, tz, rx, ry, rz, scale_x, scale_y, scale_z, blend1, blen
 | `[tr]?` | `tx`, `ty`, `tz`, `rx`, `ry`, `rz` |
 | `scale_*` | `scale_x`, `scale_y`, `scale_z` |
 | `blend*` | `blend1`, `blend2` |
-| `*_z` | `scale_z`, `tz` |
+| `*_z` | `scale_z` (`_` is literal, so `tz` does not match) |
 | `[!t]*` | Everything except `tx`, `ty`, `tz`, `temp` |
 
 ---

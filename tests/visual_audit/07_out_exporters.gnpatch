@@ -1,0 +1,149 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "noise": {
+      "type": "NoiseTOP",
+      "position": [
+        0,
+        200
+      ]
+    },
+    "to_img": {
+      "type": "TOPtoIMG",
+      "position": [
+        280,
+        200
+      ]
+    },
+    "img_save": {
+      "type": "ImageSaveOUT",
+      "position": [
+        560,
+        50
+      ],
+      "parameters": {
+        "active": {
+          "value": false
+        }
+      }
+    },
+    "tex_save": {
+      "type": "TextureSaveOUT",
+      "position": [
+        560,
+        200
+      ],
+      "parameters": {
+        "active": {
+          "value": false
+        }
+      }
+    },
+    "movie": {
+      "type": "MovieOUT",
+      "position": [
+        560,
+        350
+      ],
+      "parameters": {
+        "active": {
+          "value": false
+        }
+      }
+    },
+    "ffmpeg": {
+      "type": "FFmpegOUT",
+      "position": [
+        560,
+        500
+      ],
+      "parameters": {
+        "active": {
+          "value": false
+        }
+      }
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        900,
+        200
+      ],
+      "parameters": {
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "VA: Exporters (preview)"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 288
+          }
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "to_img",
+      "to_port": 0
+    },
+    {
+      "from_node": "to_img",
+      "from_port": 0,
+      "to_node": "img_save",
+      "to_port": 0
+    },
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "tex_save",
+      "to_port": 0
+    },
+    {
+      "from_node": "to_img",
+      "from_port": 0,
+      "to_node": "movie",
+      "to_port": 0
+    },
+    {
+      "from_node": "to_img",
+      "from_port": 0,
+      "to_node": "ffmpeg",
+      "to_port": 0
+    },
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "win",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "ann_4294160",
+      "type": "note",
+      "text": "VISUAL AUDIT 07 \u2014 exporters (KEEP Active OFF unless intentional)\n\u25a1 ImageSave = sync still/sequence\n\u25a1 TextureSave = GPU readback + async write\n\u25a1 MovieOUT = numbered frames folder\n\u25a1 FFmpegOUT = Capture then background encode\n\u25a1 Confirm file pickers open (not plain strings)",
+      "position": [
+        -120,
+        -40
+      ],
+      "size": [
+        560,
+        180
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

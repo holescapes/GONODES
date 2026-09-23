@@ -1,0 +1,356 @@
+{
+  "version": "1.0.0",
+  "generator": "visual_audit",
+  "nodes": {
+    "n0": {
+      "type": "ArucoDetectIMG",
+      "position": [
+        0.0,
+        0.0
+      ]
+    },
+    "n1": {
+      "type": "BackgroundSubtractIMG",
+      "position": [
+        280.0,
+        0.0
+      ]
+    },
+    "n2": {
+      "type": "BlackmagicInIMG",
+      "position": [
+        560.0,
+        0.0
+      ]
+    },
+    "n3": {
+      "type": "BlackmagicOutIMG",
+      "position": [
+        840.0,
+        0.0
+      ]
+    },
+    "n4": {
+      "type": "BlobTrackIMG",
+      "position": [
+        1120.0,
+        0.0
+      ]
+    },
+    "n5": {
+      "type": "BlurIMG",
+      "position": [
+        1400.0,
+        0.0
+      ]
+    },
+    "n6": {
+      "type": "CameraUndistortIMG",
+      "position": [
+        1680.0,
+        0.0
+      ]
+    },
+    "n7": {
+      "type": "CheckerboardIMG",
+      "position": [
+        1960.0,
+        0.0
+      ]
+    },
+    "n8": {
+      "type": "ColorTrackIMG",
+      "position": [
+        0.0,
+        200.0
+      ]
+    },
+    "n9": {
+      "type": "ContourIMG",
+      "position": [
+        280.0,
+        200.0
+      ]
+    },
+    "n10": {
+      "type": "ConvolveIMG",
+      "position": [
+        560.0,
+        200.0
+      ]
+    },
+    "n11": {
+      "type": "CubeMapIMG",
+      "position": [
+        840.0,
+        200.0
+      ]
+    },
+    "n12": {
+      "type": "DepthEstimateIMG",
+      "position": [
+        1120.0,
+        200.0
+      ]
+    },
+    "n13": {
+      "type": "DepthSensorIMG",
+      "position": [
+        1400.0,
+        200.0
+      ]
+    },
+    "n14": {
+      "type": "DrawOverlayIMG",
+      "position": [
+        1680.0,
+        200.0
+      ]
+    },
+    "n15": {
+      "type": "EdgeDetectIMG",
+      "position": [
+        1960.0,
+        200.0
+      ]
+    },
+    "n16": {
+      "type": "FeatureMatchIMG",
+      "position": [
+        0.0,
+        400.0
+      ]
+    },
+    "n17": {
+      "type": "HistogramIMG",
+      "position": [
+        280.0,
+        400.0
+      ]
+    },
+    "n18": {
+      "type": "HoughCirclesIMG",
+      "position": [
+        560.0,
+        400.0
+      ]
+    },
+    "n19": {
+      "type": "HoughLinesIMG",
+      "position": [
+        840.0,
+        400.0
+      ]
+    },
+    "n20": {
+      "type": "ImageFileInIMG",
+      "position": [
+        1120.0,
+        400.0
+      ]
+    },
+    "n21": {
+      "type": "ImageSequenceIMG",
+      "position": [
+        1400.0,
+        400.0
+      ]
+    },
+    "n22": {
+      "type": "ImgToTOP",
+      "position": [
+        1680.0,
+        400.0
+      ]
+    },
+    "n23": {
+      "type": "MorphIMG",
+      "position": [
+        1960.0,
+        400.0
+      ]
+    },
+    "n24": {
+      "type": "NoiseIMG",
+      "position": [
+        0.0,
+        600.0
+      ]
+    },
+    "n25": {
+      "type": "NullIMG",
+      "position": [
+        280.0,
+        600.0
+      ]
+    },
+    "n26": {
+      "type": "ObjectTrackIMG",
+      "position": [
+        560.0,
+        600.0
+      ]
+    },
+    "n27": {
+      "type": "OpticalFlowIMG",
+      "position": [
+        840.0,
+        600.0
+      ]
+    },
+    "n28": {
+      "type": "PerspectiveWarpIMG",
+      "position": [
+        1120.0,
+        600.0
+      ]
+    },
+    "n29": {
+      "type": "PixelSortIMG",
+      "position": [
+        1400.0,
+        600.0
+      ]
+    },
+    "n30": {
+      "type": "ScreenGrabIMG",
+      "position": [
+        1680.0,
+        600.0
+      ]
+    },
+    "n31": {
+      "type": "SegmentationIMG",
+      "position": [
+        1960.0,
+        600.0
+      ]
+    },
+    "n32": {
+      "type": "SelectIMG",
+      "position": [
+        0.0,
+        800.0
+      ]
+    },
+    "n33": {
+      "type": "StereoDepthIMG",
+      "position": [
+        280.0,
+        800.0
+      ]
+    },
+    "n34": {
+      "type": "StereogramIMG",
+      "position": [
+        560.0,
+        800.0
+      ]
+    },
+    "n35": {
+      "type": "StyleTransferIMG",
+      "position": [
+        840.0,
+        800.0
+      ]
+    },
+    "n36": {
+      "type": "SwitchIMG",
+      "position": [
+        1120.0,
+        800.0
+      ]
+    },
+    "n37": {
+      "type": "TOPtoIMG",
+      "position": [
+        1400.0,
+        800.0
+      ]
+    },
+    "n38": {
+      "type": "ThresholdIMG",
+      "position": [
+        1680.0,
+        800.0
+      ]
+    },
+    "n39": {
+      "type": "VideoDeviceInIMG",
+      "position": [
+        1960.0,
+        800.0
+      ]
+    },
+    "n40": {
+      "type": "WebcamIMG",
+      "position": [
+        0.0,
+        1000.0
+      ]
+    },
+    "win": {
+      "type": "WindowOUT",
+      "position": [
+        2340.0,
+        0.0
+      ],
+      "parameters": {
+        "open": {
+          "value": false
+        },
+        "title": {
+          "value": "VA: img"
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 512,
+            "y": 288
+          }
+        }
+      }
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "ann_2002424",
+      "type": "note",
+      "text": "VISUAL AUDIT \u2014 IMG inventory (41 ops)\n\u25a1 Click each node; check viewer / params match docs\n\u25a1 Wire into a Null/Window as needed\n\u25a1 Mark CHECKLIST.md when done",
+      "position": [
+        -200,
+        -160
+      ],
+      "size": [
+        640,
+        140
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    },
+    {
+      "id": "ann_6913446",
+      "type": "note",
+      "text": "WindowOUT included (Open OFF).\nWire any TOP/IMG \u2192 win when ready to fullscreen-check.",
+      "position": [
+        -200,
+        -20
+      ],
+      "size": [
+        400,
+        100
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

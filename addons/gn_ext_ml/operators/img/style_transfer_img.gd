@@ -27,8 +27,8 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.IMG, "Stylized image", "Out")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("model_path",
-		"res://addons/gn_ext_ml/models/style_mosaic.onnx",
+	add_parameter(GNParameter.create_file("model_path", "res://addons/gn_ext_ml/models/style_mosaic.onnx",
+		PackedStringArray(["*.onnx"]),
 		"Model", "Path to style transfer ONNX model"))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output resolution"))

@@ -37,6 +37,9 @@ var _wireframe_btn: Button = null
 var _port_selector: OptionButton = null
 var _selected_port_index: int = 0
 
+## Emitted when the user picks a different output port in the toolbar dropdown.
+signal port_selection_changed(port_index: int)
+
 # ─ Background ───────────────────────────────────────────────────────────────
 var _bg: ColorRect = null
 
@@ -118,11 +121,22 @@ func _ready() -> void:
 	_family_label.text = ""
 	_toolbar.add_child(_family_label)
 
+	# Port selector before the expanding node label so it stays visible.
+	_port_selector = OptionButton.new()
+	_port_selector.flat = true
+	_port_selector.add_theme_font_size_override("font_size", 10)
+	_port_selector.custom_minimum_size = Vector2(96, 0)
+	_port_selector.tooltip_text = "Select output port to preview"
+	_port_selector.visible = false
+	_port_selector.item_selected.connect(_on_port_selected)
+	_toolbar.add_child(_port_selector)
+
 	_node_label = Label.new()
 	_node_label.add_theme_font_size_override("font_size", 11)
 	_node_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	_node_label.text = ""
 	_node_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	_node_label.clip_text = true
 	_toolbar.add_child(_node_label)
 
 	_fit_btn = Button.new()
@@ -142,13 +156,6 @@ func _ready() -> void:
 	_wireframe_btn.toggled.connect(_on_wireframe_toggled)
 	_wireframe_btn.visible = false
 	_toolbar.add_child(_wireframe_btn)
-
-	_port_selector = OptionButton.new()
-	_port_selector.flat = true
-	_port_selector.add_theme_font_size_override("font_size", 10)
-	_port_selector.visible = false
-	_port_selector.item_selected.connect(_on_port_selected)
-	_toolbar.add_child(_port_selector)
 
 	_zoom_label = Label.new()
 	_zoom_label.add_theme_font_size_override("font_size", 10)
@@ -838,30 +845,39 @@ func _update_port_selector(node: GNNode) -> void:
 	var needs_rebuild: bool = _port_selector.item_count != port_count
 	if not needs_rebuild:
 		for i in range(port_count):
-			var expected: String = "%d: %s" % [i, node.output_ports[i].label \
-				if not node.output_ports[i].label.is_empty() \
-				else node.output_ports[i].port_name]
+			var expected: String = _port_selector_item_text(node, i)
 			if _port_selector.get_item_text(i) != expected:
 				needs_rebuild = true
 				break
 	if needs_rebuild:
 		_port_selector.clear()
 		for i in range(port_count):
-			var port: GNPort = node.output_ports[i]
-			var label: String = port.label if not port.label.is_empty() else port.port_name
-			var family_tag: String = GNFamily.get_family_name(port.family)
-			_port_selector.add_item("%d: %s" % [i, label], i)
+			_port_selector.add_item(_port_selector_item_text(node, i), i)
 		# Clamp selection in case the node shrank its port count.
 		if _selected_port_index >= port_count:
 			_selected_port_index = 0
 	# Always sync the widget to the internal state — needs_rebuild may be false
 	# but _selected_port_index could have been reset by set_target().
+	_port_selector.set_block_signals(true)
 	_port_selector.selected = _selected_port_index
+	_port_selector.set_block_signals(false)
 	_port_selector.visible = true
+
+
+func _port_selector_item_text(node: GNNode, i: int) -> String:
+	var port: GNPort = node.output_ports[i]
+	var label: String = port.label if not port.label.is_empty() else port.port_name
+	var family_tag: String = GNFamily.get_family_name(port.family)
+	return "%d: %s (%s)" % [i, label, family_tag]
+
+
+func get_selected_port_index() -> int:
+	return _selected_port_index
 
 
 func _on_port_selected(index: int) -> void:
 	_selected_port_index = index
+	port_selection_changed.emit(index)
 	var node: GNNode = _displayed_node.get_ref() as GNNode
 	if node != null:
 		node.render_for_viewer(self, _selected_port_index)

@@ -202,7 +202,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_cached_tex_data.texture = src_data.texture
 	_cached_tex_data.resolution = src_data.resolution
 	_cached_tex_data.metadata["fixture_manifest"] = _fixture_manifest
-	_sync_panel_from_params()
+	_sync_panel_from_params_if_live()
 	return _cached_tex_data
 
 
@@ -244,11 +244,13 @@ func _create_interactive_panel() -> GNInteractivePanel:
 
 func _on_fixture_handle_moved(fixture_idx: int, handle_idx: int, uv: Vector2) -> void:
 	_move_handle(Vector2i(fixture_idx, handle_idx), uv)
-	_sync_panel_from_params()
+	_sync_panel_from_params_if_live()
 	mark_dirty()
 
 
 func _sync_panel_from_params() -> void:
+	if not is_instance_valid(_interactive_panel):
+		return
 	var panel: FixtureOverlay = _interactive_panel as FixtureOverlay
 	if panel == null:
 		return

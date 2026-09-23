@@ -27,8 +27,8 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.IMG, "Depth map image", "Out")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("model_path",
-		"res://addons/gn_ext_ml/models/midas_v21_small_256.onnx",
+	add_parameter(GNParameter.create_file("model_path", "res://addons/gn_ext_ml/models/midas_v21_small_256.onnx",
+		PackedStringArray(["*.onnx"]),
 		"Model", "Path to MiDaS depth estimation ONNX model"))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output depth map resolution"))

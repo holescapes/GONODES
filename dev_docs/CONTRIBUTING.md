@@ -1393,12 +1393,17 @@ interactive Control living in `ui/`. See `GNTopInteractiveBase` and
 
 ---
 
-### 25.42 -- Panel-Export Demand Gating
+### 25.42 -- Interactive Panel Views (Params as Source of Truth)
 
 Secondary `panel` UI outputs on TOPs must:
 1. Be demand-gated with `is_output_demanded(panel_port)`.
-2. Share one live Control instance between the viewer overlay and WindowOUT.
-3. Clear the viewer overlay when WindowOUT adopts the live panel.
+2. Treat **node params** as the sole source of truth.
+3. Give the viewer overlay and WindowOUT each their own `GNInteractivePanel`
+   instance (N interactive views, one model) — do not reparent a single Control
+   between hosts, and do not clear the viewer overlay just because the panel
+   port is demanded.
+4. On drag: write params from the interacting view, then refresh all live views
+   from params.
 
 Prefer `GNTopInteractiveBase` + `add_panel_output()` over hand-rolled panel ports.
 See [EDITOR.md](EDITOR.md) and [EXTENSIONS.md](EXTENSIONS.md).
@@ -1439,6 +1444,37 @@ python scripts/verify_new_operator.py AudioFileInCHOP
 ```
 
 See also §4.4 Documentation Update and the PR checklist below.
+
+### 25.46 -- Multi-Stage Work Must Be Resumable At Every Stage
+
+Any task spanning more than one working session — audits, migrations, family-wide
+refactors, build campaigns — carries a resume record. **A stage is not complete
+until that record is written**, including when the stage fails or stops early.
+
+**Each stage closes with three writes:**
+
+1. **Findings** appended to the task's own doc, every claim citing a file path or
+   command output.
+2. **Progress table** row set to the honest status: `DONE`, `PARTIAL`, `BLOCKED`,
+   or `UNVERIFIED`. Never `DONE` for a stage whose evidence is incomplete.
+3. **`## Resume here`** block, overwritten each time, holding:
+   - last completed stage, and next stage with its first concrete action
+   - exact commands to run, with working directory and shell caveats
+   - files created and modified so far
+   - **environment state that cost real time to reach** — which extensions are
+     built, which templates exist, any long-running process
+   - open questions awaiting the user
+   - any deviation from the plan, with the reason
+
+Keep the log in the task doc. Put only a **one-line pointer** in `AI_MEMORY.md` —
+that file loads into every future session and must stay compact, so duplicating
+task detail there taxes every unrelated piece of work.
+
+**Acceptance test:** a fresh agent given only the task doc and the repo must be
+able to resume without re-deriving prior findings or repeating an expensive build.
+If the resume block does not meet that bar, the stage is not finished.
+
+Current instance: `PRE-BETA_AUDIT.md`.
 
 ---
 

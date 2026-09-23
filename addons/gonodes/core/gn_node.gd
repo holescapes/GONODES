@@ -867,10 +867,11 @@ func clear_dirty() -> void:
 
 
 ## Returns true if the given output port has demand from an active consumer
-## this frame.  Demand is detected from three sources:
+## this frame.  Demand is detected from four sources:
 ##   1. Wire connections to active downstream nodes
 ##   2. Wireless Select operators referencing this node by name
 ##   3. Expression references (chop(), top(), dat(), etc.) in other nodes
+##   4. Viewer sinks displaying a specific output port
 ##
 ## Each port is evaluated independently — no port is auto-demanded.
 ## The operator's [method _cook] unconditional code IS the shared core.

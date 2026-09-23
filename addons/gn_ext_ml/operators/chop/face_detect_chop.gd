@@ -53,8 +53,8 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.CHOP, "Face landmark channels", "Out")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("model_path",
-		"res://addons/gn_ext_ml/models/face_landmark.onnx",
+	add_parameter(GNParameter.create_file("model_path", "res://addons/gn_ext_ml/models/face_landmark.onnx",
+		PackedStringArray(["*.onnx"]),
 		"Model", "Path to face mesh ONNX model"))
 	add_parameter(GNParameter.create_enum("detail",
 		PackedStringArray(["Key Points Only", "All 468 Points"]), 0,

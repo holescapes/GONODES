@@ -154,6 +154,11 @@ var _threads_available: bool = true
 ## Set by the editor via [method set_active_sinks] when viewer targets change.
 var active_sinks: Array[String] = []
 
+## Per-viewer sink: node_id → selected output port index.
+## Set by the editor via [method set_viewer_port_demands] so multi-output
+## nodes cook the port the viewer is actually displaying.
+var _viewer_port_by_sink: Dictionary = {}
+
 ## Cached set of node IDs in the active chain (fed from active_sinks).
 ## Rebuilt only when topology or sinks change (event-driven, not per-frame).
 var _active_set: Dictionary = {}
@@ -350,9 +355,27 @@ func _reorder_children_to_topo(topo_order: Array[GNNode]) -> void:
 func set_active_sinks(sinks: Array[String]) -> void:
 	if sinks == active_sinks:
 		return
-	active_sinks = sinks
+	active_sinks = sinks.duplicate()
 	_active_set_dirty = true
 	_consumer_counts_dirty = true
+
+
+## Sets which output port each viewer sink is displaying.
+## [param port_by_sink] maps node_id → port index (0-based).
+func set_viewer_port_demands(port_by_sink: Dictionary) -> void:
+	if _viewer_port_by_sink == port_by_sink:
+		return
+	_viewer_port_by_sink = port_by_sink.duplicate()
+	# Demand flags are stamped per cook — no active-set rebuild needed.
+	# Mark viewed multi-output nodes dirty so secondary ports re-cook.
+	if network == null:
+		return
+	engine_propagating = true
+	for sink_id in _viewer_port_by_sink:
+		var node: GNNode = network.nodes.get(sink_id, null)
+		if node != null and node.output_ports.size() > 1:
+			node.mark_dirty()
+	engine_propagating = false
 
 
 ## Computes the set of node IDs that feed into any active sink.
@@ -600,21 +623,48 @@ func cook_frame(delta: float) -> void:
 	if not _nodes_adopted:
 		_adopt_network_nodes()
 
-	# Step 1: Pre-cook pass — let time-dependent nodes mark themselves dirty
-	_pre_cook_pass(delta)
-
-	# Step 2: Get topological order
+	# Step 1: Get topological order (needed for active-set stamping).
 	var topo_order: Array[GNNode] = network.get_topological_order()
 	last_topo_order = topo_order
 
-	# Step 3: Incremental parameter-level dirty propagation (Tier 2).
+	# Step 2: Recompute active chain BEFORE pre-cook.
+	# Newly activated time-dependent nodes (e.g. MovieFileIn selected in the
+	# viewer) must see is_active=true during _pre_cook, otherwise they stay
+	# clean and never cook until something else dirties them / WindowOUT
+	# pulls them into the chain.
+	if _active_set_dirty:
+		var prev_active: Dictionary = _active_set
+		_active_set = _compute_active_set()
+		_build_wireless_demand_map()
+		for node in topo_order:
+			var now_active: bool = _active_set.has(node.id)
+			var was_active: bool = prev_active.has(node.id)
+			if now_active and not was_active:
+				# First cook after activation — force a cook even if the node
+				# was left clean while inactive (stale/null cached_output).
+				if node.time_dependent or node.cached_output == null:
+					node.mark_dirty()
+			node.is_active = now_active
+		# Reorder scene-tree children to match topological order so that
+		# upstream TOPs' SubViewports render before downstream ones within
+		# the same frame.  Without this, viewports read stale/blank textures
+		# when the creation order doesn't match the dependency order.
+		_reorder_children_to_topo(topo_order)
+		# Rebuild the expression consumer map (upstream → expression readers)
+		_rebuild_expr_consumer_map()
+		_active_set_dirty = false
+
+	# Step 3: Pre-cook pass — let time-dependent nodes mark themselves dirty
+	_pre_cook_pass(delta)
+
+	# Step 4: Incremental parameter-level dirty propagation (Tier 2).
 	# Instead of upfront BFS that eagerly dirties everything downstream,
 	# each node checks whether its cook inputs (parameter values + upstream
 	# data timestamps) actually changed.  If unchanged, the cook is skipped
 	# entirely and downstream stays clean.  Propagation cascades in topo
 	# order: when a node does cook, only its direct successors are dirtied.
 
-	# Step 3a: Snapshot initially-dirty nodes for debug overlay.
+	# Step 4a: Snapshot initially-dirty nodes for debug overlay.
 	# Nodes dirtied by incremental propagation during the cook loop are
 	# added to last_dirty_ids as they trigger.
 	# Gated behind editor_mode — the debug overlay only exists in the editor;
@@ -625,26 +675,11 @@ func cook_frame(delta: float) -> void:
 			if node.dirty and _active_set.has(node.id):
 				last_dirty_ids[node.id] = true
 
-	# Step 3b: Recompute active chain only when topology or sinks changed.
-	if _active_set_dirty:
-		_active_set = _compute_active_set()
-		_build_wireless_demand_map()
-		for node in topo_order:
-			node.is_active = _active_set.has(node.id)
-		# Reorder scene-tree children to match topological order so that
-		# upstream TOPs' SubViewports render before downstream ones within
-		# the same frame.  Without this, viewports read stale/blank textures
-		# when the creation order doesn't match the dependency order.
-		_reorder_children_to_topo(topo_order)
-		# Rebuild the expression consumer map (upstream → expression readers)
-		_rebuild_expr_consumer_map()
-		_active_set_dirty = false
-
-	# Step 3c: Rebuild consumer counts when topology changed.
+	# Step 4b: Rebuild consumer counts when topology changed.
 	if _consumer_counts_dirty:
 		_rebuild_consumer_counts()
 
-	# Step 4: Cook dirty + active nodes in topo order
+	# Step 5: Cook dirty + active nodes in topo order
 	var cooked_count := 0
 	var skipped_count := 0
 	_expr_resolved_this_frame.clear()
@@ -740,7 +775,7 @@ func cook_frame(delta: float) -> void:
 			if max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame:
 				break
 
-	# Step 5: Frame bookkeeping
+	# Step 6: Frame bookkeeping
 	frame_count += 1
 	var frame_end := Time.get_ticks_usec()
 	frame_cook_time_ms = (frame_end - frame_start) / 1000.0
@@ -922,10 +957,11 @@ func _rebuild_consumer_counts() -> void:
 	for conn in network.connections:
 		var from_id: String = conn.from_node
 		_consumer_counts[from_id] = _consumer_counts.get(from_id, 0) + 1
-	# Count viewer sinks as additional consumers so that operators viewing
-	# a node's output via the UI cause _shared = true, preventing in-place
-	# mutation of upstream cached_output by downstream _mutable_input() calls.
+	# A viewer reads cached_output outside the wire graph. Count the viewed
+	# node itself, and also its immediate upstream: a passthrough viewer is
+	# showing that upstream buffer.
 	for sink_id in active_sinks:
+		_consumer_counts[sink_id] = _consumer_counts.get(sink_id, 0) + 1
 		var in_conns: Array = network.get_input_connections(sink_id)
 		for conn in in_conns:
 			var from_id: String = conn.from_node
@@ -933,11 +969,25 @@ func _rebuild_consumer_counts() -> void:
 	_consumer_counts_dirty = false
 
 
+## Sets [member GNData._shared] on an object this node created.
+## A cook that returns an input object does not own it. Stamping that
+## object from this node's consumer count clears the producer's flag
+## and lets a later in-place filter mutate a shared buffer.
+func _stamp_owned_output(node: GNNode, result: GNData, inputs: Array) -> void:
+	if result == null:
+		return
+	for inp in inputs:
+		if inp == result:
+			return
+	result._shared = _consumer_counts.get(node.id, 0) > 1
+
+
 ## Stamps the [member GNNode._demanded_outputs] array on a multi-output node.
-## Demand is detected from three sources:
+## Demand is detected from four sources:
 ##   1. Wire connections — outgoing wires to active downstream nodes
 ##   2. Wireless Select operators — node_ref parameters targeting this node
 ##   3. Expression references — chop(), top(), dat(), etc. calls in other nodes
+##   4. Viewer sinks — the output port currently selected in a viewer panel
 ##
 ## Each port is evaluated independently — no port is auto-demanded.
 ## The operator's _cook() unconditional code handles shared prerequisites;
@@ -965,6 +1015,14 @@ func _stamp_demanded_outputs(node: GNNode) -> void:
 			var port_family: int = node.output_ports[i].family
 			if -1 in wireless_families or port_family in wireless_families:
 				node._demanded_outputs[i] = true
+
+	# Source 4: Viewer / floating-viewer sink port selection
+	if node.id in active_sinks:
+		var vport: int = int(_viewer_port_by_sink.get(node.id, 0))
+		if vport >= 0 and vport < pcount:
+			node._demanded_outputs[vport] = true
+		elif pcount > 0:
+			node._demanded_outputs[0] = true
 
 
 ## Gathers input data for a node from upstream nodes' cached outputs.
@@ -2134,8 +2192,7 @@ func _cook_single_node(node: GNNode) -> int:
 				passthrough = inp
 				break
 		node.cached_output = passthrough
-		if passthrough != null:
-			passthrough._shared = _consumer_counts.get(node.id, 0) > 1
+		_stamp_owned_output(node, passthrough, inputs)
 		node.cook_valid = passthrough != null
 		node.cook_time_ms = 0.0
 		node.clear_dirty()
@@ -2156,6 +2213,7 @@ func _cook_single_node(node: GNNode) -> int:
 				cpu_result.valid = true
 				cpu_result.timestamp = frame_count
 			node.cached_output = cpu_result
+			_stamp_owned_output(node, cpu_result, inputs)
 			node.cook_valid = cpu_result != null
 			node.clear_dirty()
 			node.node_cooked.emit(node.id)
@@ -2215,9 +2273,9 @@ func _cook_single_node(node: GNNode) -> int:
 	var result := node.execute_cook(inputs, frame_count)
 	_cooked_this_frame[node.id] = true
 
-	# Tag shared output
-	if result != null:
-		result._shared = _consumer_counts.get(node.id, 0) > 1
+	# Tag shared output on objects this node owns. Passthrough keeps
+	# the producer's flag.
+	_stamp_owned_output(node, result, inputs)
 
 	if result == null and node.output_ports.size() > 0:
 		# Null is expected when a filter node has no connected input — don't flag
@@ -2308,14 +2366,12 @@ func _cook_cpu_batch_parallel(batch: Array) -> void:
 		var n: GNNode = entry["node"]
 		n.node_cooked.emit(n.id)
 		_cooked_this_frame[n.id] = true
-		if n.cached_output != null:
-			n.cached_output._shared = _consumer_counts.get(n.id, 0) > 1
+		_stamp_owned_output(n, n.cached_output, entry["inputs"])
 	for entry in sequential_prepared:
 		var n: GNNode = entry["node"]
 		n.node_cooked.emit(n.id)
 		_cooked_this_frame[n.id] = true
-		if n.cached_output != null:
-			n.cached_output._shared = _consumer_counts.get(n.id, 0) > 1
+		_stamp_owned_output(n, n.cached_output, entry["inputs"])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

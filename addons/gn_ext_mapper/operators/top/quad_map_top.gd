@@ -47,7 +47,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("bl", Vector2(get_param_value("bl_x"), get_param_value("bl_y")))
 	_material.set_shader_parameter("br", Vector2(get_param_value("br_x"), get_param_value("br_y")))
 
-	_sync_panel_from_params()
+	_sync_panel_from_params_if_live()
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
@@ -61,6 +61,8 @@ func _create_interactive_panel() -> GNInteractivePanel:
 
 
 func _sync_panel_from_params() -> void:
+	if not is_instance_valid(_interactive_panel):
+		return
 	var panel: MapperOverlay = _interactive_panel as MapperOverlay
 	if panel == null:
 		return
@@ -71,6 +73,8 @@ func _sync_panel_from_params() -> void:
 
 
 func _sync_params_from_panel() -> void:
+	if not is_instance_valid(_interactive_panel):
+		return
 	var panel: MapperOverlay = _interactive_panel as MapperOverlay
 	if panel == null:
 		return

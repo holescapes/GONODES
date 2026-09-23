@@ -17,7 +17,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("path", "res://", "Path",
+	add_parameter(GNParameter.create_folder("path", "res://", "Path",
 		"Directory path to list"))
 	add_parameter(GNParameter.create_bool("recursive", false, "Recursive",
 		"Include sub-directories recursively"))

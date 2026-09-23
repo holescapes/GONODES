@@ -39,8 +39,8 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.CHOP, "Hand landmark channels", "Out")
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("model_path",
-		"res://addons/gn_ext_ml/models/hand_landmark_lite.onnx",
+	add_parameter(GNParameter.create_file("model_path", "res://addons/gn_ext_ml/models/hand_landmark_lite.onnx",
+		PackedStringArray(["*.onnx"]),
 		"Model", "Path to hand landmark ONNX model"))
 	add_parameter(GNParameter.create_int("max_hands", 2, 1, 4,
 		"Max Hands", "Maximum number of hands to detect"))
