@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "usernativechop1": {
-            "type": "UserNativeCHOP",
+            "type": "NativeSCRIPT",
             "position": [
                 100,
                 100
@@ -74,7 +74,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserNativeCHOP — Basic C++ Signal\n\nWrite custom CHOP operators in C++ with hot-reload.\nThe default example generates phase-offset sine channels.\n\nClick the node, then 'Edit C++ ↗' in the inspector.\nUse the Templates menu for CHOP-specific starters,\nor load a full example like Signal Generator.",
+            "text": "NativeSCRIPT — Basic C++ Signal\n\nWrite custom CHOP operators in C++ with hot-reload.\nThe default example generates phase-offset sine channels.\n\nClick the node, then 'Edit C++ ↗' in the inspector.\nUse the Templates menu for CHOP-specific starters,\nor load a full example like Signal Generator.",
             "position": [
                 -100.0,
                 -100.0

@@ -95,14 +95,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioParaEQCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
+            "text": "AudioParaEQCHOP — Advanced\n\nAdds six EQ bands including low and high shelves on a wave input.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

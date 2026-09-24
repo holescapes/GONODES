@@ -112,5 +112,26 @@
 			"to": "window1",
 			"to_port": 0
 		}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"position": [
+				-100.0,
+				-100.0
+			],
+			"size": [
+				500.0,
+				120.0
+			],
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.8
+			],
+			"text": "CHOP to VOL — Resolution (Native)\n\nRasterizes Noise CHOP data into a low 16×16×16 volume via CHOPtoVOLNative."
+		}
 	]
 }

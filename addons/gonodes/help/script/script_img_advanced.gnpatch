@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "scriptimg1": {
-            "type": "GDScriptSCRIPT (IMG template)",
+            "type": "GDScriptSCRIPT",
             "position": [
                 100,
                 100
@@ -24,14 +24,6 @@
                 }
             }
         },
-        "imgtotop1": {
-            "type": "ImgToTOP",
-            "position": [
-                1150,
-                100
-            ],
-            "parameters": {}
-        },
         "window1": {
             "type": "WindowOUT",
             "position": [
@@ -50,17 +42,47 @@
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "GDScriptSCRIPT output is CHOP"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "font_size": {
+                    "value": 24
+                }
+            }
         }
     },
     "connections": [
         {
             "from": "scriptimg1",
             "from_port": 0,
-            "to": "imgtotop1",
+            "to": "null1",
             "to_port": 0
         },
         {
-            "from": "imgtotop1",
+            "from": "texttop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -70,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GDScript IMG Template — Advanced\n\nUser-authored GDScript for advanced image processing.\nDemonstrates combining multiple inputs, parameter access, and custom pixel operations.",
+            "text": "GDScript IMG Template \u2014 Advanced\n\nUser-authored GDScript for advanced image processing.\nDemonstrates combining multiple inputs, parameter access, and custom pixel operations.",
             "position": [
                 -100.0,
                 -100.0

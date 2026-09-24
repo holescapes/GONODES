@@ -89,14 +89,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioSourceCOMP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "AudioSourceCOMP — Advanced\n\nConfigures Audio Source COMP with volume_db=1, max_distance=20, unit_size=2, attenuation=2, autoplay=false.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

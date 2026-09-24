@@ -771,3 +771,16 @@ func test_system_dat_has_os_info() -> void:
 				has_os = true
 				break
 		GNTestAssert.assert_true(has_os, "contains OS info")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ArtnetDAT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_artnet_dat_is_sink_when_active() -> void:
+	var node := _make_node(ArtnetDAT.new(), "artnet1")
+	GNTestAssert.assert_false(node.is_sink, "Active off → not is_sink")
+	node.set_param_value("active", true)
+	GNTestAssert.assert_true(node.is_sink, "Active on → is_sink")
+	node.set_param_value("active", false)
+	GNTestAssert.assert_false(node.is_sink, "Active off again → not is_sink")

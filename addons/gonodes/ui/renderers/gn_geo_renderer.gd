@@ -14,6 +14,33 @@ func supports_wireframe() -> bool:
 	return true
 
 
+static func _static_init() -> void:
+	GNViewerRenderHelpers.register_geo_viewer(GNGeoRenderer)
+
+
+static func ensure_scene() -> void:
+	_ensure_viewer_scene()
+
+
+static func reparent_scene(vp: SubViewport) -> void:
+	_reparent_viewer_nodes(vp)
+
+
+static func shared_mesh() -> MeshInstance3D:
+	_ensure_viewer_scene()
+	return _viewer_mesh_instance
+
+
+static func shared_camera() -> Camera3D:
+	_ensure_viewer_scene()
+	return _viewer_camera
+
+
+static func shared_gizmo() -> Node3D:
+	_ensure_viewer_scene()
+	return _viewer_gizmo
+
+
 static func _ensure_viewer_scene() -> void:
 	if _viewer_camera != null:
 		return

@@ -140,12 +140,16 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	gizmo_mat.albedo_color.a = 0.9
 	gizmo_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 
-	GNGeoRenderer._ensure_viewer_scene()
+	GNViewerRenderHelpers.ensure_shared_geo_viewer()
 	var vp: SubViewport = viewer.get_3d_viewport()
-	GNGeoRenderer._reparent_viewer_nodes(vp)
-	GNGeoRenderer._viewer_mesh_instance.mesh = gizmo_mesh
-	GNGeoRenderer._viewer_mesh_instance.material_override = gizmo_mat
-	GNViewerRenderHelpers.apply_orbit_camera(GNGeoRenderer._viewer_camera, 45.0, -20.0, 5.0)
+	GNViewerRenderHelpers.reparent_shared_geo_viewer(vp)
+	var mesh_inst := GNViewerRenderHelpers.shared_geo_mesh()
+	var cam := GNViewerRenderHelpers.shared_geo_camera()
+	if mesh_inst == null or cam == null:
+		return
+	mesh_inst.mesh = gizmo_mesh
+	mesh_inst.material_override = gizmo_mat
+	GNViewerRenderHelpers.apply_orbit_camera(cam, 45.0, -20.0, 5.0)
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	viewer.set_info_bar("LightCOMP")
 

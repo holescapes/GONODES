@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectMAT \u2014 Basic\n\nDefault settings.",
+            "text": "SelectMAT — Basic\n\nShows Select MAT in a minimal setup.",
             "position": [
                 -100.0,
                 -100.0

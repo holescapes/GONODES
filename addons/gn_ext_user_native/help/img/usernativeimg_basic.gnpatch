@@ -25,7 +25,7 @@
             }
         },
         "usernativeimg1": {
-            "type": "UserNativeIMG",
+            "type": "NativeSCRIPT",
             "position": [
                 500,
                 100
@@ -68,6 +68,14 @@
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
@@ -79,6 +87,12 @@
         },
         {
             "from": "usernativeimg1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
             "from_port": 0,
             "to": "imgtotop1",
             "to_port": 0
@@ -94,7 +108,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserNativeIMG — Basic C++ Pixel Processing\n\nWrite custom IMG operators in C++ for per-pixel work.\nThe default example adjusts brightness.\nTry loading the Edge Detect example for Sobel filtering.\n\nC++ pixel loops run 20-50× faster than GDScript\nwith full WorkerThreadPool parallelism.",
+            "text": "NativeSCRIPT \u2014 Basic C++ Pixel Processing\n\nWrite custom IMG operators in C++ for per-pixel work.\nThe default example adjusts brightness.\nTry loading the Edge Detect example for Sobel filtering.\n\nC++ pixel loops run 20-50\u00d7 faster than GDScript\nwith full WorkerThreadPool parallelism.",
             "position": [
                 -100.0,
                 -100.0

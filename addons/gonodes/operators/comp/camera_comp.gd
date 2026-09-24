@@ -106,11 +106,15 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	body_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	body_mat.albedo_color = Color(0.6, 0.6, 0.7)
 
-	GNGeoRenderer._ensure_viewer_scene()
+	GNViewerRenderHelpers.ensure_shared_geo_viewer()
 	var vp: SubViewport = viewer.get_3d_viewport()
-	GNGeoRenderer._reparent_viewer_nodes(vp)
-	GNGeoRenderer._viewer_mesh_instance.mesh = body_mesh
-	GNGeoRenderer._viewer_mesh_instance.material_override = body_mat
+	GNViewerRenderHelpers.reparent_shared_geo_viewer(vp)
+	var mesh_inst := GNViewerRenderHelpers.shared_geo_mesh()
+	var cam := GNViewerRenderHelpers.shared_geo_camera()
+	if mesh_inst == null or cam == null:
+		return
+	mesh_inst.mesh = body_mesh
+	mesh_inst.material_override = body_mat
 
 	# Add frustum as extra mesh
 	var frustum_mi := MeshInstance3D.new()
@@ -118,7 +122,7 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	frustum_mi.material_override = mat
 	vp.add_child(frustum_mi)
 
-	GNViewerRenderHelpers.apply_orbit_camera(GNGeoRenderer._viewer_camera, 45.0, -20.0, 5.0)
+	GNViewerRenderHelpers.apply_orbit_camera(cam, 45.0, -20.0, 5.0)
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	viewer.set_info_bar("CameraCOMP")
 

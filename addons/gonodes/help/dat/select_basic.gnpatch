@@ -81,7 +81,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectDAT \u2014 Basic\n\nDefault settings.",
+            "text": "SelectDAT — Basic\n\nRuns Constant DAT through Select DAT.",
             "position": [
                 -100.0,
                 -100.0

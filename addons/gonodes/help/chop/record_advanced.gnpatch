@@ -98,7 +98,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RecordCHOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "RecordCHOP — Advanced\n\nRuns Wave CHOP through Record CHOP with record=true, max_length=3602, loop=true, sample_rate=120.",
             "position": [
                 -100.0,
                 -100.0

@@ -95,7 +95,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioMovieCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+            "text": "AudioMovieCHOP — Basic\n\nExtracts and loops audio from a video file at normal volume.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

@@ -92,7 +92,7 @@ def vol_render_chain(vol_name="raymarch1", x=700, y=100):
     """Returns (nodes_dict, connections_list) for VOL→Raymarch→Window"""
     nodes = {}
     nodes[vol_name] = {
-        "type": "RaymarchVOL",
+        "type": "RaymarchTOP",
         "position": [x, y],
         "parameters": {}
     }
@@ -337,13 +337,13 @@ def build_pop_chain(focus_node_name, focus_node, extra_nodes=None, extra_conns=N
 
 
 def build_vol_chain(focus_node_name, focus_node, extra_nodes=None, extra_conns=None, annotation_text="", win_x=1550):
-    """VOL → RaymarchVOL → WindowOUT (Raymarch outputs a TOP)"""
+    """VOL → RaymarchTOP → WindowOUT (Raymarch outputs a TOP)"""
     nodes = {}
     if extra_nodes:
         nodes.update(extra_nodes)
     nodes[focus_node_name] = focus_node
     nodes["raymarch1"] = {
-        "type": "RaymarchVOL",
+        "type": "RaymarchTOP",
         "position": [win_x - 400, 100],
         "parameters": {
             "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}}

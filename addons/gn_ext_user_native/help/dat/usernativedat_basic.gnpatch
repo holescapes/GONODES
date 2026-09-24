@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "usernativedat1": {
-            "type": "UserNativeDAT",
+            "type": "NativeSCRIPT",
             "position": [
                 100,
                 100
@@ -21,7 +21,7 @@
             }
         },
         "null1": {
-            "type": "NullDAT",
+            "type": "NullCHOP",
             "position": [
                 500,
                 100
@@ -85,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserNativeDAT — Basic C++ Table Generator\n\nWrite custom DAT operators in C++ for table/text processing.\nThe default example generates a table with sine values.\nTry loading the CSV Parser example for high-performance\nCSV parsing.\n\nC++ string operations run much faster than GDScript\nfor large datasets (10k+ rows).",
+            "text": "NativeSCRIPT \u2014 Basic C++ Table Generator\n\nWrite custom DAT operators in C++ for table/text processing.\nThe default example generates a table with sine values.\nTry loading the CSV Parser example for high-performance\nCSV parsing.\n\nC++ string operations run much faster than GDScript\nfor large datasets (10k+ rows).",
             "position": [
                 -100.0,
                 -100.0

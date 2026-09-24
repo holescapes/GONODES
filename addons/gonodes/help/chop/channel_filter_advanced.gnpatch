@@ -85,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ChannelFilterCHOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "ChannelFilterCHOP — Advanced\n\nRuns Wave CHOP through Channel Filter CHOP.",
             "position": [
                 -100.0,
                 -100.0

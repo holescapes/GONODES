@@ -78,13 +78,13 @@ Each backend declares which features it supports. Operators check capabilities a
 | Floor Plane | yes | **no** | **no** | `CAP_FLOOR_PLANE` (64) |
 | Hand Tracking | **no** | **no** | yes | `CAP_HAND_TRACK` (128) |
 
-**RealSense skeleton fallback:** Chain `DepthSensorTOP` (color stream) → `PoseDetectCHOP` from gn_ext_ml for ML-based body tracking from the camera image.
+**RealSense skeleton fallback:** Chain `DepthSensorIMG` (color stream) → `PoseDetectCHOP` from gn_ext_ml for ML-based body tracking from the camera image.
 
 ## Operators
 
 | Operator | Family | Purpose |
 |----------|--------|---------|
-| **DepthSensorTOP** | TOP | Depth / color / IR / player index image streams |
+| **DepthSensorIMG** | IMG | Depth / color / IR / player index image streams |
 | **DepthSkeletonCHOP** | CHOP | Hardware skeleton joint tracking (positions, rotations, confidence) |
 | **DepthHandCHOP** | CHOP | Hand and finger bone tracking (positions, rotations, grab/pinch) |
 | **DepthPointCloudSOP** | SOP | Dense 3D point cloud mesh with optional color |
@@ -152,7 +152,7 @@ The build system uses `GN_DEPTH_HAS_AZURE_KINECT`, `GN_DEPTH_HAS_REALSENSE`, and
 Multiple sensors can run simultaneously. Each operator instance manages its own device connection via the Device dropdown:
 
 ```
-[DepthSensorTOP]              [DepthSensorTOP]
+[DepthSensorIMG]              [DepthSensorIMG]
  Device: Azure Kinect (000123)  Device: RealSense D435 (847212)
  Stream: depth                  Stream: color
 ```

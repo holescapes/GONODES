@@ -91,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SystemDAT \u2014 Basic\n\nDefault settings.",
+            "text": "SystemDAT — Basic\n\nRuns Constant DAT through System DAT with hardware=true, memory=true, display=true.",
             "position": [
                 -100.0,
                 -100.0

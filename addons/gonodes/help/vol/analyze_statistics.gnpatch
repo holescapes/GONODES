@@ -3,19 +3,12 @@
     "generator": "GONODES",
     "nodes": {
         "src_grid": {
-            "type": "GridSOP",
+            "type": "NoiseVOL",
             "position": [
                 100,
                 100
             ],
-            "parameters": {
-                "rows": {
-                    "value": 20
-                },
-                "cols": {
-                    "value": 20
-                }
-            }
+            "parameters": {}
         },
         "focus1": {
             "type": "AnalyzeVOL",
@@ -61,15 +54,15 @@
             "to_port": 0
         },
         {
-            "from": "focus1",
-            "from_port": 0,
-            "to": "raymarch1",
-            "to_port": 0
-        },
-        {
             "from": "raymarch1",
             "from_port": 0,
             "to": "window1",
+            "to_port": 0
+        },
+        {
+            "from": "src_grid",
+            "from_port": 0,
+            "to": "raymarch1",
             "to_port": 0
         }
     ],

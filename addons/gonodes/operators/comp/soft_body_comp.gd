@@ -379,13 +379,17 @@ func destroy_scene_node() -> void:
 
 func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _mesh_inst != null and _mesh_inst.mesh != null and _mesh_inst.mesh is ArrayMesh:
-		GNGeoRenderer._ensure_viewer_scene()
+		GNViewerRenderHelpers.ensure_shared_geo_viewer()
 		var vp: SubViewport = viewer.get_3d_viewport()
-		GNGeoRenderer._reparent_viewer_nodes(vp)
-		GNGeoRenderer._viewer_mesh_instance.mesh = _mesh_inst.mesh
-		GNGeoRenderer._viewer_mesh_instance.material_override = _mesh_inst.material_override
+		GNViewerRenderHelpers.reparent_shared_geo_viewer(vp)
+		var mesh_inst := GNViewerRenderHelpers.shared_geo_mesh()
+		var cam := GNViewerRenderHelpers.shared_geo_camera()
+		if mesh_inst == null or cam == null:
+			return
+		mesh_inst.mesh = _mesh_inst.mesh
+		mesh_inst.material_override = _mesh_inst.material_override
 		GNViewerRenderHelpers.apply_orbit_camera(
-			GNGeoRenderer._viewer_camera, 45.0, -30.0, 3.0)
+			cam, 45.0, -30.0, 3.0)
 		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 		viewer.set_info_bar("SoftBodyCOMP")
 		var verts: int = _positions.size() if _positions != null else 0

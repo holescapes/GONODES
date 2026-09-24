@@ -80,7 +80,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TimeCOMP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "TimeCOMP — Advanced\n\nConfigures Time COMP with play=false, speed=2, range_start=1, range_end=20, loop=false.",
             "position": [
                 -100.0,
                 -100.0

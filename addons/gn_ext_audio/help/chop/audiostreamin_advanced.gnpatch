@@ -92,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioStreamInCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
+            "text": "AudioStreamInCHOP — Advanced\n\nShows alternate port configuration with streaming paused.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

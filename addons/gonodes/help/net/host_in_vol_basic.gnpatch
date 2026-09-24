@@ -1,0 +1,83 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "host1": {
+            "type": "HostInVOL",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "density_field"
+                },
+                "field_name": {
+                    "value": "density"
+                }
+            }
+        },
+        "ray1": {
+            "type": "RaymarchTOP",
+            "position": [
+                600,
+                100
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "host1",
+            "from_port": 0,
+            "to": "ray1",
+            "to_port": 0
+        },
+        {
+            "from": "ray1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostInVOL imports volumetric field data from the host into the VOL network.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

@@ -3,12 +3,16 @@
     "generator": "GONODES",
     "nodes": {
         "src_box": {
-            "type": "BoxSOP",
+            "type": "SourcePOP",
             "position": [
                 100,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "emit_rate": {
+                    "value": 100
+                }
+            }
         },
         "trail_ribbon1": {
             "type": "TrailRibbonSOP",
@@ -135,14 +139,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TrailRibbonSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "TrailRibbonSOP — Advanced\n\nRuns Source POP through Trail Ribbon SOP with trail_length=32, taper=1.6, max_particles=1002, fade_alpha=false, active=false.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

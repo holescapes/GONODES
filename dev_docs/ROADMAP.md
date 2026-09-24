@@ -1,6 +1,6 @@
 # GONODES Roadmap — v1.1
 
-> Single source of truth for planned work. Items verified against the actual codebase as of June 2025.
+> Single source of truth for planned work. The list was last checked against the actual codebase in June 2025 and has not been re-checked since.
 > Completed items have been removed — see CHANGELOG.md and commit history.
 
 ---
@@ -141,7 +141,7 @@ These were listed as pending in various docs but are actually implemented:
 | Phase 9 native SOPs (7/8) | ✅ Done | smooth, remesh, polybevel, wireframe, polystitch, blur_vol, fluid_vol all native |
 | Phase 9 boolean_sop native | ✅ Done | BSP-tree CSG in `gn_native_boolean_sop.cpp` — no scene tree dependency |
 | LibGONODES v1.1 gaps (10 functions) | ✅ Done | All implemented in `gonodes_host.cpp` |
-| Parameter-level dirty tracking | ✅ Done | Input hash guard (`_compute_cook_input_hash`) |
+| Parameter-level dirty tracking | ✅ Done | Input hash computed/stored per cook (`_compute_cook_input_hash`); hash-based skip arm present but unreachable from dirty-only cook loop (see COOK_ENGINE.md §3.3) |
 | In-memory SPIR-V shader cache | ✅ Done | `_shader_cache` dict in `gn_gpu_context.gd` |
 | Hot-reloadable C++ user nodes | ✅ Done | `gn_ext_user_native` |
 | Embedded Python + NumPy | ✅ Done | `gn_ext_user_python` |

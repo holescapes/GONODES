@@ -88,7 +88,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ParameterDAT \u2014 Basic\n\nDefault settings.",
+            "text": "ParameterDAT — Basic\n\nRuns Constant DAT through Parameter DAT with show_defaults=true, show_ranges=true.",
             "position": [
                 -100.0,
                 -100.0

@@ -924,7 +924,7 @@ def main():
 
     for op in registry:
         existing = find_existing_patches(op)
-        all_existing[op["node_type"]] = existing
+        all_existing[(op["family"], op["node_type"])] = existing
         for patch_path in existing:
             ok, issues = audit_patch(str(patch_path), op["family"])
             if ok:
@@ -950,7 +950,7 @@ def main():
         nt = op["node_type"]
         family = op["family"]
         help_dir = get_help_dir(op)
-        existing = all_existing.get(nt, [])
+        existing = all_existing.get((family, nt), [])
         existing_names = {p.stem for p in existing}
 
         # Generate all 3 patches

@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "script1": {
-            "type": "ScriptCHOP",
+            "type": "GDScriptSCRIPT",
             "position": [200, 100],
             "parameters": {
                 "time_dependent": { "value": true },
@@ -39,7 +39,7 @@
             "position": [200, 600],
             "parameters": {
                 "text": {
-                    "value": "log() Function Reference\n========================\n\nScript operators (ScriptCHOP, ScriptDAT, etc.):\n  log(msg)        -> INFO level\n  log_debug(msg)  -> DEBUG level\n  log_warn(msg)   -> WARN level\n  log_error(msg)  -> ERROR level\n\nExpression parameters:\n  log(msg)        -> INFO level (returns 0)\n\nAll messages appear in the Textport log panel.\nThe node ID is used as the log category.\nNo-op in exported player builds."
+                    "value": "log() Function Reference\n========================\n\nGDScriptSCRIPT operators:\n  log(msg)        -> INFO level\n  log_debug(msg)  -> DEBUG level\n  log_warn(msg)   -> WARN level\n  log_error(msg)  -> ERROR level\n\nExpression parameters:\n  log(msg)        -> INFO level (returns 0)\n\nAll messages appear in the Textport log panel.\nThe node ID is used as the log category.\nNo-op in exported player builds."
                 }
             }
         },
@@ -75,7 +75,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "log() Bridge — Script & Expression Demo\n\nOpen the Textport (Log button in toolbar) to see\nlive log output from both the ScriptCHOP and the\nexpression parameter on constant1.\n\nscript1: uses log(), log_warn(), log_debug()\nconstant1: expression calls log() (returns 0, side-effect)\ncheat_sheet: TextDAT with function reference",
+            "text": "log() Bridge — Script & Expression Demo\n\nOpen the Textport (Log button in toolbar) to see\nlive log output from both the GDScriptSCRIPT and the\nexpression parameter on constant1.\n\nscript1: uses log(), log_warn(), log_debug()\nconstant1: expression calls log() (returns 0, side-effect)\ncheat_sheet: TextDAT with function reference",
             "position": [-150.0, -200.0],
             "size": [500.0, 120.0],
             "color": [0.2, 0.7, 0.9, 0.8]

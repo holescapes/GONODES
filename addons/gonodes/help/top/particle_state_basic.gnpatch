@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "emit1": {
-            "type": "EmitterPOP",
+            "type": "SourcePOP",
             "position": [
                 100,
                 100

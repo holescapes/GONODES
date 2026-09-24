@@ -80,7 +80,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TimeCOMP \u2014 Basic\n\nDefault settings.",
+            "text": "TimeCOMP — Basic\n\nConfigures Time COMP with play=true, speed=1, range_start=0, range_end=10, loop=true.",
             "position": [
                 -100.0,
                 -100.0

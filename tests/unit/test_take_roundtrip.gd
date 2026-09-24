@@ -1,7 +1,5 @@
 extends Node
 ## Phase 4d — GNTakeManager capture / apply / revert / file round-trip.
-## Spare parameters are intentionally NOT asserted here; the manager only
-## walks node.parameters (see PRE-BETA_AUDIT.md F4d).
 
 
 func test_take_apply_revert_and_file() -> void:
@@ -35,11 +33,16 @@ func test_take_apply_revert_and_file() -> void:
 	loaded.apply_take("Intense")
 	GNTestAssert.assert_approx(float(node.get_param_value("value0")), 9.0, 0.001, "loaded take applies")
 
-	# Spare params are outside the take snapshot.
 	var spare := GNParameter.create_float("gain", 0.25)
 	node.add_spare_parameter(spare)
 	node.set_param_value("gain", 3.0)
 	mgr.capture_base()
 	node.set_param_value("gain", 8.0)
 	mgr.capture_take("SpareCheck")
-	GNTestAssert.assert_eq(mgr.get_take_override_count("SpareCheck"), 0, "spare param is not captured")
+	GNTestAssert.assert_eq(mgr.get_take_override_count("SpareCheck"), 1, "spare param captured in take delta")
+
+	mgr.revert_to_base()
+	GNTestAssert.assert_approx(float(node.get_param_value("gain")), 3.0, 0.001, "revert restores spare base")
+
+	mgr.apply_take("SpareCheck")
+	GNTestAssert.assert_approx(float(node.get_param_value("gain")), 8.0, 0.001, "apply restores spare take")

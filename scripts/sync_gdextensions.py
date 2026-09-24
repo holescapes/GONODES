@@ -16,6 +16,7 @@ import argparse
 import configparser
 import os
 import platform
+import shutil
 import struct
 import sys
 
@@ -36,14 +37,14 @@ def detect_arch() -> str:
     return mapping.get(machine, machine)
 
 
-def gdextension_has_binary(gdext_path: str, workspace_root: str,
-                           plat: str, arch: str) -> bool:
-    """Parse a .gdextension file and check if the library binary exists."""
+def gdextension_library_path(gdext_path: str, workspace_root: str,
+                             plat: str, arch: str) -> str | None:
+    """Parse a .gdextension file and return the resolved library path if it exists."""
     cfg = configparser.ConfigParser()
     cfg.read(gdext_path, encoding="utf-8")
 
     if "libraries" not in cfg:
-        return False
+        return None
 
     # Try keys from most specific to least, matching Godot's resolution order.
     # Godot uses: platform.arch.target (e.g. windows.x86_64.release)
@@ -69,9 +70,55 @@ def gdextension_has_binary(gdext_path: str, workspace_root: str,
             lib_path = os.path.join(workspace_root, lib_path[len("res://"):])
         lib_path = os.path.normpath(lib_path)
         if os.path.isfile(lib_path):
-            return True
+            return lib_path
 
-    return False
+    return None
+
+
+def gdextension_has_binary(gdext_path: str, workspace_root: str,
+                           plat: str, arch: str) -> bool:
+    """Parse a .gdextension file and check if the library binary exists."""
+    return gdextension_library_path(gdext_path, workspace_root, plat, arch) is not None
+
+
+def is_ultraleap_gdextension(fname: str) -> bool:
+    base = fname.replace(".gdextension.disabled", ".gdextension")
+    return base == "gn_depth_ultraleap.gdextension"
+
+
+def leapc_runtime_present(lib_path: str, plat: str) -> bool:
+    """LeapC must sit next to the built library or be on the OS search path."""
+    vendor = "LeapC.dll" if plat == "windows" else "libLeapC.so"
+    lib_dir = os.path.dirname(lib_path)
+    if os.path.isfile(os.path.join(lib_dir, vendor)):
+        return True
+    return shutil.which(vendor) is not None
+
+
+def gdextension_should_activate(gdext_path: str, workspace_root: str,
+                                plat: str, arch: str, fname: str) -> bool:
+    lib_path = gdextension_library_path(gdext_path, workspace_root, plat, arch)
+    if not lib_path:
+        return False
+    if is_ultraleap_gdextension(fname):
+        return leapc_runtime_present(lib_path, plat)
+    return True
+
+
+def _apply_gdextension_rename(source_path: str, dest_path: str,
+                              dry_run: bool) -> str:
+    """Rename source to dest, or remove source if dest already exists.
+
+    Returns 'renamed' when the rename succeeds, 'deduped' when the
+    destination was kept and the source duplicate was removed.
+    """
+    if os.path.isfile(dest_path):
+        if not dry_run:
+            os.remove(source_path)
+        return "deduped"
+    if not dry_run:
+        os.rename(source_path, dest_path)
+    return "renamed"
 
 
 def sync_dir(native_dir: str, workspace_root: str, plat: str, arch: str,
@@ -92,24 +139,23 @@ def sync_dir(native_dir: str, workspace_root: str, plat: str, arch: str,
         if not (is_active or is_disabled):
             continue
 
-        has_binary = gdextension_has_binary(fpath, workspace_root, plat, arch)
+        should_activate = gdextension_should_activate(
+            fpath, workspace_root, plat, arch, fname)
 
-        if has_binary and is_disabled:
+        if should_activate and is_disabled:
             new_name = fname.replace(".gdextension.disabled", ".gdextension")
             new_path = os.path.join(native_dir, new_name)
-            if dry_run:
-                changes.append(("activate", fname, new_name, "[DRY RUN]"))
-            else:
-                os.rename(fpath, new_path)
-                changes.append(("activate", fname, new_name, "OK"))
-        elif not has_binary and is_active:
+            result = _apply_gdextension_rename(fpath, new_path, dry_run)
+            action = "activate" if result == "renamed" else "dedupe"
+            status = "[DRY RUN]" if dry_run else "OK"
+            changes.append((action, fname, new_name, status))
+        elif not should_activate and is_active:
             new_name = fname + ".disabled"
             new_path = os.path.join(native_dir, new_name)
-            if dry_run:
-                changes.append(("deactivate", fname, new_name, "[DRY RUN]"))
-            else:
-                os.rename(fpath, new_path)
-                changes.append(("deactivate", fname, new_name, "OK"))
+            result = _apply_gdextension_rename(fpath, new_path, dry_run)
+            action = "deactivate" if result == "renamed" else "dedupe"
+            status = "[DRY RUN]" if dry_run else "OK"
+            changes.append((action, fname, new_name, status))
 
     return changes
 
@@ -184,7 +230,7 @@ def main():
         print("[sync_gdextensions] All .gdextension files already in sync.")
     else:
         for ext_name, action, old, new, status in changes:
-            symbol = "+" if action == "activate" else "-"
+            symbol = {"activate": "+", "deactivate": "-", "dedupe": "="}.get(action, "?")
             print(f"  [{symbol}] {ext_name}: {old} -> {new}  {status}")
         print(f"\n[sync_gdextensions] {len(changes)} change(s).")
         if not args.dry_run:

@@ -92,14 +92,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PdControlCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_libpd extension.",
+            "text": "PdControlCHOP — Advanced\n\nSends bang and float messages into a Pure Data patch from a wave input.\nRequires gn_ext_libpd extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

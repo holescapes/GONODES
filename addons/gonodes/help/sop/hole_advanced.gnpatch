@@ -126,7 +126,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "HoleSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "HoleSOP — Advanced\n\nRuns Box SOP through Hole SOP with plane=2, tolerance=0.002, invert=true.",
             "position": [
                 -100.0,
                 -100.0

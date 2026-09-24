@@ -15,6 +15,9 @@
 - [SOP — Surface Operators](#sop--surface-operators)
 - [COMP — Component Operators](#comp--component-operators)
 - [MAT — Material Operators](#mat--material-operators)
+- [SDF — Signed Distance Field Operators](#sdf--signed-distance-field-operators)
+- [NET — Network Operators](#net--network-operators)
+- [SCRIPT — Script Operators](#script--script-operators)
 - [OUT — Output Operators](#out--output-operators)
 - [UI — User Interface Operators](#ui--user-interface-operators)
 - [POP — Point Operators](#pop--point-operators)
@@ -44,7 +47,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 72 operators** — 15 generators, 37 filters, 8 combiners, 3 temporal/buffer, 2 simulation/generative, 3 utility, 3 bridge, 1 host input.
+**Total: 138 operators.**
 
 ### Generators
 
@@ -2198,7 +2201,7 @@ IMGs process CPU-side `Image` data. Unlike TOPs (GPU textures via SubViewport), 
 
 Use `ImgToTOP` to bridge IMG output into the GPU TOP pipeline.
 
-**Total: 15 operators** — 2 generators, 6 filters, 2 I/O, 2 bridges, 1 capture, 1 script, 1 utility, 1 analysis.
+**Total: 41 operators.**
 
 ---
 
@@ -2260,7 +2263,7 @@ CHOPs process named float arrays (channels). Each channel is a `PackedFloat32Arr
 
 All CHOP data flows as `GNChannelData` — a lightweight RefCounted wrapper around a `Dictionary` of named float arrays.
 
-**Total: 67 operators** — 8 generators, 19 filters, 7 combiners, 7 utility, 5 channel management, 3 input devices, 4 bridge, 4 animation/sequencing, 2 object/skeleton, 1 tablet, 7 signal analysis & audio.
+**Total: 107 operators.**
 
 ### Generators
 
@@ -3579,7 +3582,7 @@ Send/receive control messages to/from a Pure Data patch.
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
 
-**Total: 34 operators** — 3 generators, 5 filters, 1 combiner, 2 utility, 2 bridges, 3 I/O, 4 new filters, 4 new bridges, 4 protocol/event, 5 networking, 1 discovery (Artnet).
+**Total: 51 operators.**
 
 ### Generators
 
@@ -4189,7 +4192,7 @@ Outputs system information (OS, CPU, GPU, memory, display) as a DAT table.
 
 SOPs produce and manipulate 3D geometry. The output type is `GNGeoData`, which wraps Godot's native `ArrayMesh`. SOPs leverage Godot's built-in mesh primitives (`BoxMesh`, `SphereMesh`, etc.) and `SurfaceTool` for procedural generation. Geometry flows through SOP chains and ultimately reaches a GeometryCOMP for 3D scene placement.
 
-**Total: 64 operators** — 13 generators, 20 filters, 6 combiners, 2 utility, 5 deformers, 3 bridge, 1 decimation, 3 smoothing/remesh, 2 merge/texture, 4 poly construction, 5 new.
+**Total: 85 operators.**
 
 ### Generators
 
@@ -5224,7 +5227,9 @@ Retopologize to uniform triangle density. Edge-length-based midpoint subdivision
 
 ---
 
-#### Object Merge SOP
+#### Object Merge SOP *(deprecated)*
+
+> **Deprecated** — use **SelectSOP** for remote geometry fetch; use **FilterSOP** for geometry filtering. Remains for backward compatibility with old patches that reference this node type.
 
 Fetch geometry from another SOP by path reference, optionally applying the source's transform.
 
@@ -5451,7 +5456,7 @@ COMPs are the bridge between procedural data (SOP geometry, TOP textures) and Go
 
 COMP fan-out is fully supported via the GNProxyTree proxy architecture — when a COMP fans out to multiple consumers (RenderTOP, MergeCOMP), the first consumer adopts the original scene node and subsequent consumers receive lightweight proxies sharing GPU resources.
 
-**Total: 12 operators.**
+**Total: 27 operators.**
 
 > Note: SubNetworkNode, InTunnel, OutTunnel are internal system nodes.
 > NullCOMP, SwitchCOMP, and EnvironmentCOMP are utility nodes.
@@ -5871,7 +5876,7 @@ Wraps Godot's `AudioStreamPlayer3D` for positional audio playback in 3D scenes.
 
 MATs produce materials for COMP use. Output type is `GNMaterialData`, wrapping Godot's `Material` base class. MATs connect to GeometryCOMP's material input to override the default PBR.
 
-**Total: 8 operators** — 1 PBR, 1 shader, 1 constant, 1 wireframe, 1 point sprite, 1 depth, 1 null, 1 utility.
+**Total: 12 operators.**
 
 ---
 
@@ -6110,7 +6115,7 @@ Accumulate CHOP samples into a buffer; save or reset on rising-edge bool toggles
 
 #### OscOUT
 
-Send CHOP channel values as OSC over UDP (`prefix/channel_name`).
+Send CHOP channel values as OSC over UDP (`prefix/channel_name`). Active turns the transmission on and off; the node remains a sink, so upstream still cooks while Active is off.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -6126,7 +6131,7 @@ Send CHOP channel values as OSC over UDP (`prefix/channel_name`).
 
 #### AudioDeviceOUT
 
-Push CHOP samples to speakers via AudioStreamGenerator (`left`/`right` or first 1–2 channels).
+Push CHOP samples to speakers via AudioStreamGenerator (`left`/`right` or first 1–2 channels). Active turns the transmission on and off; the node remains a sink, so upstream still cooks while Active is off.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -6488,13 +6493,13 @@ Generates a 3D FBM noise density volume.
 - **Parameters:** `res_x/y/z` (INT, 64), `frequency` (FLOAT, 4.0), `amplitude` (FLOAT, 1.0), `octaves` (INT, 4), `lacunarity` (FLOAT, 2.0), `gain` (FLOAT, 0.5), `offset_x/y/z` (FLOAT, 0), `speed` (FLOAT, 0.0 — animate over time), `format` (STRING, "R32F")
 
 ### FluidVOL
-Navier-Stokes fluid simulation. Time-dependent: maintains velocity + density fields across frames. Includes vorticity confinement and obstacle support.
+Navier-Stokes fluid simulation. Time-dependent: maintains velocity + density fields across frames. Includes vorticity confinement and obstacle support. **`velocity_out` is always written** each step because density advection reads velocity and pressure projection updates it — both are coupled internal state, not optional export work.
 - **Inputs:** `density_in` (VOL, optional — injected each frame), `vel_in` (VOL, optional — external force), `obstacle` (VOL — mask, R>0.5=solid)
 - **Outputs:** `density_out` (VOL), `velocity_out` (VOL)
 - **Parameters:** `res_x/y/z` (INT, 64), `dissipation` (FLOAT, 0.98), `pressure_iters` (INT, 20), `density_add` (FLOAT, 1.0), `vorticity` (FLOAT, 0.3), `reset` (PULSE)
 
 ### PyroVOL
-Fire/smoke simulation extending FluidVOL with combustion: fuel burns → temperature rises → buoyancy → smoke density.
+Fire/smoke simulation extending FluidVOL with combustion: fuel burns → temperature rises → buoyancy → smoke density. **`temp_out` and `velocity_out` are always written** each step because combustion, buoyancy, and advection couple smoke density, temperature, and velocity as internal simulation state.
 - **Inputs:** `fuel_in` (VOL, optional), `vel_in` (VOL, optional), `obstacle` (VOL — mask)
 - **Outputs:** `density_out` (VOL — smoke), `temp_out` (VOL — temperature), `velocity_out` (VOL)
 - **Parameters:** `res_x/y/z` (INT, 64), `burn_rate` (FLOAT, 1.5), `heat_output` (FLOAT, 3.0), `smoke_output` (FLOAT, 1.0), `ignition_temp` (FLOAT, 0.2), `fuel_inject` (FLOAT, 1.0), `buoyancy` (FLOAT, 2.0), `cooling` (FLOAT, 0.96), `dissipation` (FLOAT, 0.985), `pressure_iters` (INT, 20), `vorticity` (FLOAT, 0.5), `reset` (PULSE)
@@ -6699,26 +6704,92 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 3. The warning self-clears next frame if the conflict is resolved
 
 ---
+
+## SDF — Signed Distance Field Operators
+
+**Total: 29 operators.**
+
+**BendSDF** — SDF domain bend - bends the child SDF around a selected axis.
+**BoxSDF** — SDF box primitive. Outputs an SDF tree node with position and size (half-extents).
+**CapsuleSDF** — SDF capsule primitive. Outputs an SDF tree node with position, radius, and height.
+**ConeSDF** — SDF cone primitive. Outputs an SDF tree node with position, angle, and height.
+**CylinderSDF** — SDF cylinder primitive. Outputs an SDF tree node with position, radius, and height.
+**DisplaceSDF** — SDF sine displacement - adds procedural sine-based surface detail to the child SDF.
+**ElongateSDF** — SDF domain elongation - stretches the child SDF along each axis.
+**GradientSDF** — SDF gradient material - maps distance to a near/far color gradient on the child SDF.
+**GyroidSDF** — SDF gyroid (triply periodic minimal surface) primitive. Outputs an SDF tree node with position, scale, and thickness.
+**IntersectionSDF** — SDF boolean intersection - keeps only the overlapping volume of two SDF inputs (max).
+**MaterialSDF** — SDF material assignment - attaches albedo, roughness, metallic, and emission to a child SDF tree.
+**MirrorSDF** — SDF domain mirror - mirrors the child SDF across selected axes using abs().
+**NullSDF** — Pass-through for organization, references, and gating.
+**OctahedronSDF** — SDF octahedron primitive. Outputs an SDF tree node with position and size.
+**OnionSDF** — SDF onion skinning - hollows the child SDF with configurable thickness and layers.
+**PlaneSDF** — SDF infinite plane primitive. Outputs an SDF tree node with normal direction and offset.
+**PyramidSDF** — SDF pyramid primitive. Outputs an SDF tree node with position, base size, and height.
+**RaymarchSDF** — SDF raymarcher - compiles the SDF tree into a GLSL shader and renders it to a texture with orbit camera, AO, and soft shadows.
+**RepeatSDF** — SDF domain repetition - repeats the child SDF along each axis with configurable spacing and optional limit.
+**RoundSDF** — SDF rounding - rounds the edges of the child SDF by subtracting a radius.
+**SelectSDF** — Reference a remote SDF by name - wireless SDF tree routing.
+**SmoothSubtractSDF** — SDF smooth boolean subtraction - carves B from A with a smooth blend radius.
+**SmoothUnionSDF** — SDF smooth boolean union - blends two SDF inputs with adjustable smoothness.
+**SphereSDF** — SDF sphere primitive. Outputs an SDF tree node with position and radius.
+**SubtractSDF** — SDF boolean subtraction - carves input B from input A.
+**SwitchSDF** — Switches between multiple SDF inputs by index.
+**TorusSDF** — SDF torus primitive. Outputs an SDF tree node with position, major and minor radii.
+**TwistSDF** — SDF domain twist - twists the child SDF around a selected axis.
+**UnionSDF** — SDF boolean union - combines two SDF inputs, keeping the closest surface (min).
+
+---
+
+## NET — Network Operators
+
+**Total: 15 operators.**
+
+**HostInCHOP** — Receive channel data from host application (LibGodot embedding).
+**HostInDAT** — Receive table/text data from host application (LibGodot embedding).
+**HostInPOP** — Receive particle data from host application (LibGodot embedding).
+**HostInVOL** — Receive volumetric voxel data from host application (LibGodot embedding).
+**HostOutCHOP** — Export channel data to host application (LibGodot embedding).
+**HostOutDAT** — Export table/text data to host application (LibGodot embedding).
+**HostOutPOP** — Export particle data to host application (LibGodot embedding).
+**HostOutTOP** — Export texture to host application (LibGodot embedding). Zero-copy shared GPU.
+**HostOutVOL** — Export volumetric voxel data to host application (LibGodot embedding).
+**InTunnel** — Input tunnel - bridges data from parent sub-network into inner graph.
+**OutTunnel** — Output tunnel - bridges data from inner graph to parent sub-network.
+**SubNetworkNode** — Sub-network - contains a nested node graph with InTunnel/OutTunnel ports.
+
+---
+
+## SCRIPT — Script Operators
+
+**Total: 3 operators.**
+
+**NativeSCRIPT** — User Native SCRIPT - hot-reloadable C++ processing at native speed. Template dropdown selects CHOP/SOP/DAT/IMG/TOP context.
+**PythonSCRIPT** — User Python SCRIPT - NumPy-powered processing with hot-reload. Template dropdown selects CHOP/SOP/DAT/IMG/TOP context.
+
+---
 ## Quick Reference
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 74 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, GLSLMulti, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Select, Limit, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion, PointCloudRender |
-*(Note: 17 additional TOPs via extensions — see Extension Operators below)* |
-| **CHOP** | 76 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn, DmxOut, DmxIn |
-| **DAT** | 38 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX (deprecated), Artnet, RenderPick, PanelExecute |
-| **SOP** | 75 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, TrailRibbon, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge, Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch, VoronoiShatter, SampleGeometry |
-| **COMP** | 21 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Select, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
-| **MAT** | 11 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, FluidSurface, Null, Select |
-| **IMG** | 14 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab, Null, Select |
-| **OUT** | 9 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
-| **UI** | 31 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
+| **TOP** | 138 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, GLSLMulti, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Select, Limit, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion, PointCloudRender |
+| **CHOP** | 107 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn, DmxOut, DmxIn |
+| **SOP** | 85 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, TrailRibbon, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge (deprecated), Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch, VoronoiShatter, SampleGeometry |
+| **DAT** | 51 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX (deprecated), Artnet, RenderPick, PanelExecute |
+| **IMG** | 41 | Noise, Checkerboard, ImageFileIn, ImageSequence, Webcam, Blur, EdgeDetect, PixelSort, Script, ImgToTOP, TOPtoIMG, ScreenGrab, Null, Select |
+| **UI** | 33 | Button, Slider, Toggle, Label, Knob, XYPad, Dropdown, Container, TextureRect, ColorRect, LineEdit, TextEdit, ProgressBar, SpinBox, ColorPicker, RichTextLabel, ScrollContainer, TabContainer, SplitContainer, MarginContainer, PanelContainer, Tree, ItemList, TabBar, MenuButton, CheckBox, TextureButton, Separator, NinePatchRect, LinkButton, TextureProgressBar |
+| **SDF** | 29 | Bend, Box, Capsule, Cone, Cylinder, Displace, Elongate, Gradient, Gyroid, Intersection, Material, Mirror, Null, Octahedron, Onion, Plane, Pyramid, Raymarch, Repeat, Round, Select, SmoothSubtract, SmoothUnion, Sphere, Subtract, Switch, Torus, Twist, Union |
+| **COMP** | 27 | Geometry, Camera, Light, Merge, RigidBody, StaticBody, SoftBody, Area, Joint, Null, Select, Switch, Environment, GenericScript, Instance, Replicator, Animation, SubNetwork, InTunnel, OutTunnel, Engines |
+| **NET** | 15 | HostInCHOP, HostInDAT, HostInPOP, HostInSOP, HostInTOP, HostInVOL, HostOutCHOP, HostOutDAT, HostOutPOP, HostOutSOP, HostOutTOP, HostOutVOL, InTunnel, OutTunnel, SubNetwork |
+| **MAT** | 12 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, FluidSurface, Null, Select |
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
-| **VOL** | 14 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
-| **Generic** | 1 | Dot |
-| **Total** | **394** | *Core operators only. With extensions (109), SDF (29), SCRIPT (3), and native variants, total reaches 578.* |
+| **VOL** | 12 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
+| **OUT** | 12 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
+| **FIX** | 8 | StripFIX, GridFIX, MatrixFIX, CustomFIX, FileInFIX, SelectFIX, NullFIX, SwitchFIX |
+| **SCRIPT** | 3 | GDScriptSCRIPT, NativeSCRIPT, PythonSCRIPT |
+| **Total** | **585** | |
 
-### Extension Operators (not included in count above)
+### Extension Operators
 
 | Extension | Operators | Description |
 |-----------|-----------|-------------|
@@ -6737,7 +6808,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **gn_ext_depth_sensor** | DepthSensorIMG, DepthSensorDAT | Unified depth sensor: image + skeleton + hands + point cloud. Azure Kinect, RealSense, Ultraleap backends |
 | **gn_ext_audio** | AudioOscillatorCHOP, AudioFilterCHOP, AudioParaEQCHOP, AudioMixCHOP, AudioMovieCHOP, AudioRenderCHOP, AudioStreamInCHOP, AudioStreamOutCHOP, AudioReverbCHOP, AudioDelayCHOP, AudioPitchCHOP, AudioEnvelopeCHOP, AudioGateCHOP | Audio synthesis, effects, and processing — 13 pure-GDScript operators covering waveform generation, biquad filtering, parametric EQ, mixing, reverb, delay, pitch shift, envelope following |
 
-> **Note:** SDF operators (26 total — 10 primitives, 5 booleans, 8 domain modifiers, 2 materials, 1 renderer) were promoted from `gn_ext_sdf` to **core** as the 12th family type. See the SDF section above.
+> **Note:** SDF (29), NET (15), and SCRIPT (3) are core families. See the SDF, NET, and SCRIPT sections above.
 
 ---
 

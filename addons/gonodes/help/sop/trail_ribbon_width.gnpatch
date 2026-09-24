@@ -3,12 +3,16 @@
     "generator": "GONODES",
     "nodes": {
         "src_sphere": {
-            "type": "SphereSOP",
+            "type": "SourcePOP",
             "position": [
                 100,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "emit_rate": {
+                    "value": 100
+                }
+            }
         },
         "trail_ribbon1": {
             "type": "TrailRibbonSOP",

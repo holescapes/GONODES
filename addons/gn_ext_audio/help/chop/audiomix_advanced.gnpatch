@@ -89,7 +89,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioMixCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
+            "text": "AudioMixCHOP — Advanced\n\nMixes a wave input at full master gain.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "userpythontop1": {
-            "type": "UserPythonTOP",
+            "type": "PythonSCRIPT",
             "position": [
                 100,
                 100
@@ -35,11 +35,44 @@
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "Script output is CHOP \u2014 visual placeholder"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         }
     },
     "connections": [
         {
             "from": "userpythontop1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -49,7 +82,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserPythonTOP — Python Texture Generation\n\nWrite TOP operators in Python using NumPy.\nThe default example generates an animated gradient.\nLoad the Gradient example for radial/angular patterns.\n\nPixels are generated CPU-side as (H, W, 4) uint8 arrays\nand uploaded to a texture each frame.",
+            "text": "PythonSCRIPT \u2014 Python Texture Generation\n\nWrite TOP operators in Python using NumPy.\nThe default example generates an animated gradient.\nLoad the Gradient example for radial/angular patterns.\n\nPixels are generated CPU-side as (H, W, 4) uint8 arrays\nand uploaded to a texture each frame.",
             "position": [
                 -100.0,
                 -100.0

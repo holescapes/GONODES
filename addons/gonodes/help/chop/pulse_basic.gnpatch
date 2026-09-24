@@ -104,7 +104,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PulseCHOP \u2014 Basic\n\nDefault settings.",
+            "text": "PulseCHOP — Basic\n\nRuns LFO_ CHOP through Pulse CHOP with frequency=1, duty_cycle=0.5, amplitude=1, offset=0, jitter=0.",
             "position": [
                 -100.0,
                 -100.0

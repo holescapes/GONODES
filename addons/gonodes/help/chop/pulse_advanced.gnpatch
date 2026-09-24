@@ -104,7 +104,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PulseCHOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "PulseCHOP — Advanced\n\nRuns Wave CHOP through Pulse CHOP with frequency=2, duty_cycle=1, amplitude=2, offset=1, jitter=1.",
             "position": [
                 -100.0,
                 -100.0

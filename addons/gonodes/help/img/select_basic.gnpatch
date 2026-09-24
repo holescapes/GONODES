@@ -70,7 +70,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectIMG \u2014 Basic\n\nDefault settings.",
+            "text": "SelectIMG — Basic\n\nRuns Noise IMG through Select IMG.",
             "position": [
                 -100.0,
                 -100.0

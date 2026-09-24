@@ -105,10 +105,10 @@ Export) in GONODES_CONTEXT.md for details.
 
 > Full toolbar reference with controls and descriptions is in `help/editor.md`.
 
-The bottom toolbar is split into **three rows** (two button rows plus a timeline scrubber):
-- **Row 1** — File & Project (New, Open, Save, Build, NRT, FPS, InfoLabel, Debug Log, **Debug**)
-- **Timeline** — Time label + scrubber slider
-- **Row 2** — View & Graph (Previews, Perf, VRAM, Viewer, Stress Test, Minimap, Wire Style, Layout, Help)
+The bottom toolbar is split into **three scroll rows**:
+- **Row 1 — File & View** — New, Open, Recent, Save, Save As, Build, Host I/O, Refresh; graph view controls (Previews, Minimap, wire style, Layout, + Viewer, Help, Prefs)
+- **Row 2 — Transport & Timeline** — Pause/Resume, Reset, step back/forward, speed multiplier, Loop mode, NRT toggle and FPS, time label, and timeline scrubber
+- **Row 3 — Debug & Status** — Perf, VRAM, Debug; Logs, Compat, Takes; and InfoLabel aligned to the right
 
 Each row is wrapped in a `ScrollContainer` with `SCROLL_MODE_SHOW_NEVER`
 horizontal scrolling and vertical scrolling disabled.  When the window is
@@ -117,11 +117,11 @@ narrower than the row's content, items remain accessible via
 off-screen.  The scrollbar itself is hidden so row height stays fixed and
 the 98 px InfoBar budget is not exceeded.
 
-The **Debug** toggle (CheckButton) activates the debug panel and graph overlay.
-When enabled, four sub-toggles appear beside it: **#Order**, **Dim**,
+The **Debug** toggle activates the debug panel and graph overlay.
+When enabled, five sub-toggles appear beside it: **#Order**, **Dim**,
 **Dirty**, **Sinks**, **Flow** — each controlling one overlay layer independently.
 
-Implementation: `gn_editor.gd::_setup_toolbar()` builds both rows. Each
+Implementation: `gn_editor.gd::_setup_toolbar()` builds all three rows. Each
 control stores its state via `_save_setting()` / `_load_setting()` for
 persistence across sessions.
 
@@ -130,11 +130,25 @@ persistence across sessions.
 
 > Full shortcut table is in `help/editor.md`.
 
-Shortcuts are handled in `gn_editor.gd::_unhandled_key_input()`.  Node-level
-shortcuts (B=bypass, L=lock, H=help, V=viewer) are forwarded from the
-GraphEdit's key handler.  The Tab key is handled by `gn_graph_editor.gd`
-to open the operator palette.  **F2** toggles the Debug panel and overlay
-(equivalent to clicking the Debug toolbar button).
+Graph-level shortcuts are routed through `gn_graph_editor.gd::_handle_key_input()`
+(via `_unhandled_key_input()` on the same node):
+
+- **Alt+A** — open Add Node palette at cursor
+- **Ctrl+F** — open node search
+- **Ctrl+Z** / **Ctrl+Shift+Z** / **Ctrl+Y** — undo / redo
+- **Ctrl+L** — auto-layout
+- **Ctrl+1–9** — set bookmark on selected node
+- **Enter** — dive into selected sub-network
+- **B** — toggle bypass on selected nodes
+- **L** — toggle lock on selected nodes
+- **F** — fit view to selection
+- **H** — align selected nodes horizontally
+- **V** — align selected nodes vertically
+- **M** — toggle minimap
+- **W** — cycle wire style
+- **Shift+/** — toggle shortcut overlay
+- **Escape** — close search bar or shortcut overlay (when open)
+- **1–9** — jump to bookmark
 
 
 ## Expression Value Preview — Implementation
@@ -268,6 +282,9 @@ Concrete renderers (10 total):
 3D renderers (GNGeoRenderer, GNParticleRenderer, GNMaterialRenderer) own
 static scene nodes (`_viewer_camera`, `_viewer_light`, `_viewer_mesh_instance`)
 that are reparented into the viewer's shared 3D SubViewport on each render.
+COMP operators that override `render_for_viewer` reach that shared geo scene
+through `GNViewerRenderHelpers.register_geo_viewer` (registered by
+`GNGeoRenderer` at load time), so operators never name the UI class.
 
 ### Shared Rendering via GNViewerRenderHelpers
 
@@ -767,7 +784,7 @@ disconnects all its wires.  Implemented in `gn_graph_editor.gd`.
 
 | Variable | Type | Purpose |
 |----------|------|---------|
-| `_shake_last_dir` | `int` | Last horizontal direction detected (-1 or 1) |
+| `_shake_last_dir` | `Vector2` | Last movement direction signs (`signf` per axis) |
 | `_shake_reversals` | `int` | Count of direction reversals in the current window |
 | `_shake_timer` | `float` | Countdown timer for the detection window |
 | `_shake_triggered` | `bool` | Guard: true once shake fires to prevent re-triggering |
@@ -786,7 +803,8 @@ In `_process()`, while `_node_drag_active`:
 1. Track velocity on the **dominant movement axis** (whichever of X/Y has
    the larger cumulative displacement during the drag).
 2. If speed ≥ `_SHAKE_MIN_SPEED` on the dominant axis and direction
-   reversed, increment `_shake_reversals` and reset `_shake_timer`.
+   reversed, increment `_shake_reversals`; clear `_shake_timer` only on
+   the first reversal, then let the 0.5 s window run.
 3. When `_shake_reversals` ≥ `_SHAKE_REVERSAL_THRESHOLD` within the time
    window → trigger.
 

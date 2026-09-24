@@ -4,79 +4,207 @@
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
-            "position": [100, 200],
+            "position": [
+                100,
+                200
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "noise_type":  {"value": 0},
-                "scale":       {"value": 3.0}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "noise_type": {
+                    "value": 0
+                },
+                "scale": {
+                    "value": 3.0
+                }
             }
         },
         "strip1": {
             "type": "StripFIX",
-            "position": [100, 400],
+            "position": [
+                100,
+                400
+            ],
             "parameters": {
-                "fixture_name": {"value": "front"},
-                "led_count":    {"value": 30},
-                "universe":     {"value": 1},
-                "start_channel": {"value": 1}
+                "fixture_name": {
+                    "value": "front"
+                },
+                "led_count": {
+                    "value": 30
+                },
+                "universe": {
+                    "value": 1
+                },
+                "start_channel": {
+                    "value": 1
+                }
             }
         },
         "strip2": {
             "type": "StripFIX",
-            "position": [100, 550],
+            "position": [
+                100,
+                550
+            ],
             "parameters": {
-                "fixture_name": {"value": "back"},
-                "led_count":    {"value": 30},
-                "universe":     {"value": 1},
-                "start_channel": {"value": 91}
+                "fixture_name": {
+                    "value": "back"
+                },
+                "led_count": {
+                    "value": 30
+                },
+                "universe": {
+                    "value": 1
+                },
+                "start_channel": {
+                    "value": 91
+                }
             }
         },
         "grid1": {
             "type": "GridFIX",
-            "position": [100, 700],
+            "position": [
+                100,
+                700
+            ],
             "parameters": {
-                "fixture_name": {"value": "panel"},
-                "cols":         {"value": 8},
-                "rows":         {"value": 8},
-                "universe":     {"value": 2},
-                "start_channel": {"value": 1}
+                "fixture_name": {
+                    "value": "panel"
+                },
+                "cols": {
+                    "value": 8
+                },
+                "rows": {
+                    "value": 8
+                },
+                "universe": {
+                    "value": 2
+                },
+                "start_channel": {
+                    "value": 1
+                }
             }
         },
         "sampler1": {
             "type": "FixtureSamplerTOP",
-            "position": [450, 400],
+            "position": [
+                450,
+                400
+            ],
             "parameters": {
-                "sample_mode": {"value": 0}
+                "sample_mode": {
+                    "value": 0
+                }
             }
         },
         "chop2top1": {
             "type": "CHOPtoTOP",
-            "position": [800, 500],
+            "position": [
+                800,
+                500
+            ],
             "parameters": {}
         },
         "dmxout1": {
             "type": "PixelDmxOUT",
-            "position": [800, 650],
+            "position": [
+                800,
+                650
+            ],
             "parameters": {
-                "active": {"value": false}
+                "active": {
+                    "value": false
+                }
             }
         },
         "out1": {
             "type": "WindowOUT",
-            "position": [800, 280],
+            "position": [
+                800,
+                280
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open":       {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1",   "from_port": 0, "to": "sampler1",  "to_port": 0},
-        {"from": "strip1",   "from_port": 0, "to": "sampler1",  "to_port": 1},
-        {"from": "strip2",   "from_port": 0, "to": "sampler1",  "to_port": 2},
-        {"from": "grid1",    "from_port": 0, "to": "sampler1",  "to_port": 3},
-        {"from": "sampler1", "from_port": 0, "to": "out1",      "to_port": 0},
-        {"from": "sampler1", "from_port": 1, "to": "chop2top1", "to_port": 0},
-        {"from": "sampler1", "from_port": 1, "to": "dmxout1",   "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "sampler1",
+            "to_port": 0
+        },
+        {
+            "from": "strip1",
+            "from_port": 0,
+            "to": "sampler1",
+            "to_port": 1
+        },
+        {
+            "from": "strip2",
+            "from_port": 0,
+            "to": "sampler1",
+            "to_port": 2
+        },
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "sampler1",
+            "to_port": 3
+        },
+        {
+            "from": "sampler1",
+            "from_port": 0,
+            "to": "out1",
+            "to_port": 0
+        },
+        {
+            "from": "sampler1",
+            "from_port": 1,
+            "to": "chop2top1",
+            "to_port": 0
+        },
+        {
+            "from": "sampler1",
+            "from_port": 1,
+            "to": "dmxout1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ],
+            "text": "Fixture Sampler TOP — Multi\n\nSamples NoiseTOP color across two StripFIX fixtures and one GridFIX panel."
+        }
     ]
 }

@@ -24,7 +24,7 @@
             "parameters": {}
         },
         "lfo_progress": {
-            "type": "LFOCHOP",
+            "type": "LFO_CHOP",
             "position": [
                 0,
                 200
@@ -39,7 +39,7 @@
             }
         },
         "lfo_bounce": {
-            "type": "LFOCHOP",
+            "type": "LFO_CHOP",
             "position": [
                 0,
                 400

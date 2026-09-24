@@ -91,7 +91,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SystemDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "SystemDAT — Advanced\n\nRuns Constant DAT through System DAT with hardware=false, memory=false, display=false.",
             "position": [
                 -100.0,
                 -100.0

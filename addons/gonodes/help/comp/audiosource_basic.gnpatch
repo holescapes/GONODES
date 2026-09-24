@@ -89,14 +89,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioSourceCOMP \u2014 Basic\n\nDefault settings.",
+            "text": "AudioSourceCOMP — Basic\n\nConfigures Audio Source COMP with volume_db=0, max_distance=10, unit_size=1, attenuation=0, autoplay=true.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

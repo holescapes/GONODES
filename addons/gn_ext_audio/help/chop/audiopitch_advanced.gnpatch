@@ -98,14 +98,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioPitchCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
+            "text": "AudioPitchCHOP — Advanced\n\nShifts a wave input up one semitone with granular processing.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

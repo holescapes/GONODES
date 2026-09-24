@@ -219,13 +219,17 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if _scene_node != null and _scene_node is MeshInstance3D:
 		var mi: MeshInstance3D = _scene_node as MeshInstance3D
 		if mi.mesh != null and mi.mesh is ArrayMesh:
-			GNGeoRenderer._ensure_viewer_scene()
+			GNViewerRenderHelpers.ensure_shared_geo_viewer()
 			var vp: SubViewport = viewer.get_3d_viewport()
-			GNGeoRenderer._reparent_viewer_nodes(vp)
-			GNGeoRenderer._viewer_mesh_instance.mesh = mi.mesh
-			GNGeoRenderer._viewer_mesh_instance.material_override = mi.material_override
+			GNViewerRenderHelpers.reparent_shared_geo_viewer(vp)
+			var mesh_inst := GNViewerRenderHelpers.shared_geo_mesh()
+			var cam := GNViewerRenderHelpers.shared_geo_camera()
+			if mesh_inst == null or cam == null:
+				return
+			mesh_inst.mesh = mi.mesh
+			mesh_inst.material_override = mi.material_override
 			GNViewerRenderHelpers.apply_orbit_camera(
-				GNGeoRenderer._viewer_camera, 45.0, -30.0, 3.0)
+				cam, 45.0, -30.0, 3.0)
 			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 			var active: String = "Playing" if get_param_value("active") else "Paused"
 			viewer.set_info_bar("AnimationCOMP")

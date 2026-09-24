@@ -22,7 +22,7 @@
             }
         },
         "userpythonimg1": {
-            "type": "UserPythonIMG",
+            "type": "PythonSCRIPT",
             "position": [
                 500,
                 100
@@ -62,6 +62,14 @@
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
@@ -73,6 +81,12 @@
         },
         {
             "from": "userpythonimg1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "noise1",
             "from_port": 0,
             "to": "imgtotop1",
             "to_port": 0
@@ -88,7 +102,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserPythonIMG — Python Pixel Processing\n\nWrite IMG operators in Python using NumPy arrays.\nThe default example adjusts brightness.\nLoad the Edge Detect example for Sobel filtering.\n\nImage pixels arrive as (H, W, 4) uint8 numpy arrays.\nReturn via make_img_result(pixels, width, height).",
+            "text": "PythonSCRIPT \u2014 Python Pixel Processing\n\nWrite IMG operators in Python using NumPy arrays.\nThe default example adjusts brightness.\nLoad the Edge Detect example for Sobel filtering.\n\nImage pixels arrive as (H, W, 4) uint8 numpy arrays.\nReturn via make_img_result(pixels, width, height).",
             "position": [
                 -100.0,
                 -100.0

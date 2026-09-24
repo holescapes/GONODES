@@ -39,7 +39,7 @@ _workspace_root = os.path.normpath(os.path.join(_build_dir, ".."))
 # Make gn_build.py importable (it's in the same dir as this SConstruct)
 sys.path.insert(0, _build_dir)
 from gn_build import discover_extensions, make_env, collect_sources, \
-    detect_host_platform, detect_host_arch, plan_extensions
+    detect_host_platform, detect_host_arch, plan_extensions, copy_runtime_dlls
 from gn_ext_plan import format_extension_table_row, parse_build_cfg
 
 _addons_dir = os.path.join(_workspace_root, "addons")
@@ -95,6 +95,8 @@ else:
 if _build_native:
     native_sconstruct = os.path.join(native_dir, "SConstruct")
     if os.path.isfile(native_sconstruct):
+        for _k in ("tier", "ext", "exts"):
+            ARGUMENTS.pop(_k, None)
         SConscript(native_sconstruct)
 
 # ── Auto-discover extensions with build.cfg ────────────────────────────────────
@@ -169,6 +171,7 @@ for ext_name, ext_native_dir, cfg_path, cfg in to_build:
     lib_target = os.path.join(out_dir, f"lib{cfg['lib_name']}{suffix}{lib_ext}")
     library = env.SharedLibrary(target=lib_target, source=sources)
     Default(library)
+    copy_runtime_dlls(cfg, plat, ext_native_dir, out_dir)
     built.append(ext_name)
 
 # ── Summary ────────────────────────────────────────────────────────────────────

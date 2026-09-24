@@ -15,7 +15,7 @@
             }
         },
         "userpythondat1": {
-            "type": "UserPythonDAT",
+            "type": "PythonSCRIPT",
             "position": [
                 100,
                 100
@@ -30,7 +30,7 @@
             }
         },
         "null1": {
-            "type": "NullDAT",
+            "type": "NullCHOP",
             "position": [
                 500,
                 100
@@ -100,7 +100,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserPythonDAT — Python Data Processing\n\nWrite DAT operators in Python for table/text manipulation.\nThe default example filters rows by string match.\nLoad the CSV Parser example for structured CSV parsing.\n\nPython's stdlib (csv, json, re, etc.) is available —\nno need to pip install anything for basic data work.",
+            "text": "PythonSCRIPT \u2014 Python Data Processing\n\nWrite DAT operators in Python for table/text manipulation.\nThe default example filters rows by string match.\nLoad the CSV Parser example for structured CSV parsing.\n\nPython's stdlib (csv, json, re, etc.) is available \u2014\nno need to pip install anything for basic data work.",
             "position": [
                 -100.0,
                 -100.0

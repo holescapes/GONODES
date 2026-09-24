@@ -126,7 +126,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MeasureSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "MeasureSOP — Advanced\n\nRuns Box SOP through Measure SOP with area=false, perimeter=false, curvature=true.",
             "position": [
                 -100.0,
                 -100.0

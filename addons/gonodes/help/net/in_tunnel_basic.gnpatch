@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "in1": {
+            "type": "InTunnel",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "index": {
+                    "value": 0
+                },
+                "family": {
+                    "value": 0
+                }
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "InTunnel defines an input port on a SubNetworkNode by forwarding parent data inward.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

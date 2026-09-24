@@ -101,14 +101,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GestureCHOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "GestureCHOP — Advanced\n\nRuns Wave CHOP through Gesture CHOP with pinch=false, swipe=false, rotate=false, decay=1.7, reset=true.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

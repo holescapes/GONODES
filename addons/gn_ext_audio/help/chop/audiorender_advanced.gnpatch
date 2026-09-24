@@ -98,14 +98,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioRenderCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
+            "text": "AudioRenderCHOP — Advanced\n\nRecords and exports an offline bounce of the incoming wave signal.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

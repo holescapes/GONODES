@@ -9,9 +9,9 @@
 | **PoseDetectCHOP** | CHOP | Body pose estimation (BlazePose) — 33 keypoints as x/y/z/visibility channels |
 | **HandDetectCHOP** | CHOP | Hand landmark tracking — 21 points per hand |
 | **FaceDetectCHOP** | CHOP | Face mesh landmarks — 468 points (or key subset) |
-| **DepthEstimateTOP** | TOP | Monocular depth estimation (MiDaS) — grayscale depth map |
-| **StyleTransferTOP** | TOP | Neural style transfer — apply artistic styles to textures |
-| **SegmentationTOP** | TOP | Person/background segmentation — binary/soft mask |
+| **DepthEstimateIMG** | IMG | Monocular depth estimation (MiDaS) — grayscale depth map |
+| **StyleTransferIMG** | IMG | Neural style transfer — apply artistic styles to textures |
+| **SegmentationIMG** | IMG | Person/background segmentation — binary/soft mask |
 | **ObjectDetectDAT** | DAT | Object detection (YOLOv8) — table of bounding boxes + labels |
 
 ## Quick Setup (Recommended)
@@ -66,11 +66,11 @@ Download pre-trained ONNX models and place them in `addons/gn_ext_ml/models/`:
 | `pose_landmark_lite.onnx` | PoseDetectCHOP | MediaPipe BlazePose | ~12 MB |
 | `hand_landmark_lite.onnx` | HandDetectCHOP | MediaPipe Hands | ~4 MB |
 | `face_landmark.onnx` | FaceDetectCHOP | MediaPipe Face Mesh | ~4 MB |
-| `midas_v21_small_256.onnx` | DepthEstimateTOP | MiDaS v2.1 Small | ~25 MB |
-| `style_mosaic.onnx` | StyleTransferTOP | Fast Neural Style | ~7 MB |
-| `style_candy.onnx` | StyleTransferTOP | Fast Neural Style | ~7 MB |
-| `style_udnie.onnx` | StyleTransferTOP | Fast Neural Style | ~7 MB |
-| `selfie_segmentation.onnx` | SegmentationTOP | MediaPipe Selfie | ~2 MB |
+| `midas_v21_small_256.onnx` | DepthEstimateIMG | MiDaS v2.1 Small | ~25 MB |
+| `style_mosaic.onnx` | StyleTransferIMG | Fast Neural Style | ~7 MB |
+| `style_candy.onnx` | StyleTransferIMG | Fast Neural Style | ~7 MB |
+| `style_udnie.onnx` | StyleTransferIMG | Fast Neural Style | ~7 MB |
+| `selfie_segmentation.onnx` | SegmentationIMG | MediaPipe Selfie | ~2 MB |
 | `yolov8n.onnx` | ObjectDetectDAT | Ultralytics YOLOv8n | ~12 MB |
 
 **Model sources:**
@@ -117,9 +117,9 @@ GDScript Operators (model-specific pre/post processing)
     ├── PoseDetectCHOP    — BlazePose → 33 keypoint channels
     ├── HandDetectCHOP    — Hand landmarks → 21 point channels
     ├── FaceDetectCHOP    — Face mesh → 468 landmark channels
-    ├── DepthEstimateTOP  — MiDaS → depth map texture
-    ├── StyleTransferTOP  — Style model → stylized texture
-    ├── SegmentationTOP   — Selfie seg → mask texture
+    ├── DepthEstimateIMG  — MiDaS → depth map texture
+    ├── StyleTransferIMG  — Style model → stylized texture
+    ├── SegmentationIMG   — Selfie seg → mask texture
     └── ObjectDetectDAT   — YOLOv8 → detection table
 ```
 

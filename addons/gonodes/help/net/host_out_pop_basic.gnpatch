@@ -1,0 +1,105 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "emitter1": {
+            "type": "SourcePOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "rate": {
+                    "value": 200
+                }
+            }
+        },
+        "hout1": {
+            "type": "HostOutPOP",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "particles"
+                }
+            }
+        },
+        "pstate1": {
+            "type": "ParticleStateTOP",
+            "position": [
+                500,
+                250
+            ],
+            "parameters": {
+                "width": {
+                    "value": 512
+                },
+                "attribute": {
+                    "value": 0
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                175
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "emitter1",
+            "from_port": 0,
+            "to": "hout1",
+            "to_port": 0
+        },
+        {
+            "from": "emitter1",
+            "from_port": 0,
+            "to": "pstate1",
+            "to_port": 0
+        },
+        {
+            "from": "pstate1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostOutPOP exposes particle positions and attributes to the host each frame.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

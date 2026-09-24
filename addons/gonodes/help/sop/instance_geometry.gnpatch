@@ -22,26 +22,10 @@
             ],
             "parameters": {}
         },
-        "pop_render": {
-            "type": "RenderPOP",
-            "position": [
-                800,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                }
-            }
-        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1150,
+                1300,
                 100
             ],
             "parameters": {
@@ -56,6 +40,48 @@
                     "value": true
                 }
             }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                950,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                950,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
+            }
         }
     },
     "connections": [
@@ -68,11 +94,23 @@
         {
             "from": "focus1",
             "from_port": 0,
-            "to": "pop_render",
+            "to": "geo1",
             "to_port": 0
         },
         {
-            "from": "pop_render",
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -82,7 +120,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Instance POP — Geometry\n\nCopy SOP geometry onto each particle position as instances.",
+            "text": "Instance POP \u2014 Geometry\n\nCopy SOP geometry onto each particle position as instances.",
             "position": [
                 -100.0,
                 -100.0

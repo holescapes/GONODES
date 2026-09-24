@@ -44,6 +44,11 @@ var _takes: Dictionary = {}
 var active_take: String = ""
 
 
+func _init(network: GNNetwork = null) -> void:
+	if network != null:
+		self.network = network
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Base Snapshot
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -58,6 +63,11 @@ func capture_base() -> void:
 		for p_name in node.parameters:
 			var key := "%s/%s" % [nid, p_name]
 			_base[key] = node.parameters[p_name].to_dict()
+		for p_name in node.spare_parameters:
+			if node.parameters.has(p_name):
+				continue
+			var key := "%s/%s" % [nid, p_name]
+			_base[key] = node.spare_parameters[p_name].to_dict()
 	GNLogger.info("TakeManager", "Captured base state (%d params)" % _base.size())
 
 
@@ -88,6 +98,14 @@ func capture_take(take_name: String, node_ids: PackedStringArray = PackedStringA
 		for p_name in node.parameters:
 			var key := "%s/%s" % [nid, p_name]
 			var current_dict: Dictionary = node.parameters[p_name].to_dict()
+			var base_dict: Dictionary = _base.get(key, {})
+			if _dicts_differ(current_dict, base_dict):
+				delta[key] = current_dict
+		for p_name in node.spare_parameters:
+			if node.parameters.has(p_name):
+				continue
+			var key := "%s/%s" % [nid, p_name]
+			var current_dict: Dictionary = node.spare_parameters[p_name].to_dict()
 			var base_dict: Dictionary = _base.get(key, {})
 			if _dicts_differ(current_dict, base_dict):
 				delta[key] = current_dict
@@ -262,6 +280,8 @@ func _apply_snapshot(snapshot: Dictionary) -> void:
 		if node == null:
 			continue
 		var param: GNParameter = node.parameters.get(parts[1], null)
+		if param == null:
+			param = node.spare_parameters.get(parts[1], null)
 		if param == null:
 			continue
 		param.from_dict(snapshot[key])

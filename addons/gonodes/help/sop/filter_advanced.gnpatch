@@ -2,20 +2,13 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_grid": {
-            "type": "GridSOP",
+        "src_box": {
+            "type": "BoxSOP",
             "position": [
                 100,
                 100
             ],
-            "parameters": {
-                "rows": {
-                    "value": 10
-                },
-                "cols": {
-                    "value": 10
-                }
-            }
+            "parameters": {}
         },
         "filter1": {
             "type": "FilterSOP",
@@ -25,46 +18,43 @@
             ],
             "parameters": {
                 "entity": {
-                    "value": 0
-                },
-                "method": {
-                    "value": 0
-                },
-                "start": {
-                    "value": 0
-                },
-                "end": {
-                    "value": 50
-                },
-                "bmin_x": {
-                    "value": -0.5
-                },
-                "bmin_y": {
-                    "value": -0.5
-                },
-                "bmin_z": {
-                    "value": -0.5
-                },
-                "bmax_x": {
-                    "value": 0.5
-                },
-                "bmax_y": {
-                    "value": 0.5
-                },
-                "bmax_z": {
-                    "value": 0.5
-                },
-                "expression": {
-                    "value": "i % 2 == 0"
-                },
-                "step": {
                     "value": 2
                 },
+                "method": {
+                    "value": 2
+                },
+                "start": {
+                    "value": 2
+                },
+                "end": {
+                    "value": 52
+                },
+                "bmin_x": {
+                    "value": -1.0
+                },
+                "bmin_y": {
+                    "value": -1.0
+                },
+                "bmin_z": {
+                    "value": -1.0
+                },
+                "bmax_x": {
+                    "value": 1.0
+                },
+                "bmax_y": {
+                    "value": 1.0
+                },
+                "bmax_z": {
+                    "value": 1.0
+                },
+                "step": {
+                    "value": 4
+                },
                 "offset": {
-                    "value": 0
+                    "value": 2
                 },
                 "invert": {
-                    "value": false
+                    "value": true
                 }
             }
         },
@@ -132,7 +122,7 @@
     },
     "connections": [
         {
-            "from": "src_grid",
+            "from": "src_box",
             "from_port": 0,
             "to": "filter1",
             "to_port": 0
@@ -166,7 +156,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FilterSOP \u2014 Basic\n\nDefault settings.",
+            "text": "FilterSOP — Advanced\n\nRuns Box SOP through Filter SOP with entity=2, method=2, start=2, end=52, bmin_x=-1.",
             "position": [
                 -100.0,
                 -100.0

@@ -41,7 +41,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1150,
+                1300,
                 100
             ],
             "parameters": {
@@ -54,6 +54,40 @@
                 },
                 "open": {
                     "value": true
+                }
+            }
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                950,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                950,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
                 }
             }
         }
@@ -74,6 +108,18 @@
         {
             "from": "pop_render",
             "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
+            "from_port": 0,
             "to": "window1",
             "to_port": 0
         }
@@ -82,7 +128,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Limit POP — Advanced\n\nKill particles by age, bounds, or speed threshold.",
+            "text": "Limit POP \u2014 Advanced\n\nKill particles by age, bounds, or speed threshold.",
             "position": [
                 -100.0,
                 -100.0

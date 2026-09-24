@@ -490,15 +490,23 @@ static func _sync_native_dir(native_dir_path: String) -> bool:
 				if has_binary and is_disabled:
 					# Binary exists — activate
 					var new_name := file_name.replace(".gdextension.disabled", ".gdextension")
-					var err := nd.rename(file_name, new_name)
-					if err == OK:
+					var dest_path := native_dir_path + "/" + new_name
+					if FileAccess.file_exists(dest_path):
+						if nd.remove(file_name) == OK:
+							print("[ExtRegistry] Removed duplicate disabled extension: %s" % file_name)
+							changed = true
+					elif nd.rename(file_name, new_name) == OK:
 						print("[ExtRegistry] Activated native extension: %s" % new_name)
 						changed = true
 				elif not has_binary and is_active:
 					# Binary missing — deactivate
 					var new_name := file_name + ".disabled"
-					var err := nd.rename(file_name, new_name)
-					if err == OK:
+					var dest_path := native_dir_path + "/" + new_name
+					if FileAccess.file_exists(dest_path):
+						if nd.remove(file_name) == OK:
+							print("[ExtRegistry] Removed duplicate active extension: %s" % file_name)
+							changed = true
+					elif nd.rename(file_name, new_name) == OK:
 						print("[ExtRegistry] Deactivated native extension (binary missing): %s → %s" % [file_name, new_name])
 						changed = true
 		file_name = nd.get_next()
@@ -532,16 +540,23 @@ static func _gdextension_has_platform_binary(gdext_path: String) -> bool:
 
 	var lib_found := false
 	var matched_key := ""
+	var lib_path := ""
 	for key in keys_to_try:
 		if cfg.has_section_key("libraries", key):
-			var lib_path: String = cfg.get_value("libraries", key, "")
-			if not lib_path.is_empty() and FileAccess.file_exists(lib_path):
+			var candidate: String = cfg.get_value("libraries", key, "")
+			if not candidate.is_empty() and FileAccess.file_exists(candidate):
 				lib_found = true
 				matched_key = key
+				lib_path = candidate
 				break
 
 	if not lib_found:
 		return false
+
+	# Ultraleap also needs LeapC next to the built library or on PATH.
+	if gdext_path.get_file().begins_with("gn_depth_ultraleap"):
+		if not _ultraleap_leapc_present(lib_path):
+			return false
 
 	# Also verify [dependencies] entries exist (co-located DLLs like python312.dll).
 	if cfg.has_section("dependencies"):
@@ -577,6 +592,23 @@ static func _gdextension_has_platform_binary(gdext_path: String) -> bool:
 						return false
 
 	return true
+
+
+## Ultraleap vendor runtime: LeapC.dll (Windows) or libLeapC.so (Linux) must be
+## co-located with the built GDExtension library or discoverable on PATH.
+static func _ultraleap_leapc_present(lib_path: String) -> bool:
+	var os_name := OS.get_name().to_lower()
+	var vendor := "LeapC.dll" if os_name == "windows" else "libLeapC.so"
+	var lib_dir := lib_path.get_base_dir()
+	if FileAccess.file_exists(lib_dir.path_join(vendor)):
+		return true
+	var output: Array = []
+	var exit_code: int
+	if os_name == "windows":
+		exit_code = OS.execute("where.exe", [vendor], output)
+	else:
+		exit_code = OS.execute("which", [vendor], output)
+	return exit_code == 0
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

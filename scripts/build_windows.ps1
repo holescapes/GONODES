@@ -46,6 +46,9 @@ Write-Host "  Root: $Root"
 Write-Host "============================================================"
 
 # ── Locate MSVC environment ──────────────────────────────────────────────────
+if (-not ${env:ProgramFiles(x86)}) {
+    ${env:ProgramFiles(x86)} = 'C:\Program Files (x86)'
+}
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path $vswhere)) {
     Write-Error "vswhere.exe not found. Install Visual Studio 2022 Build Tools with C++ workload."

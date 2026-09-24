@@ -131,7 +131,7 @@ def copy_tools():
     print(f"  [+] tools/ → {file_count} files")
 
 
-def verify(platforms: list[str]) -> bool:
+def verify(platforms: list[str], host_platform: str) -> bool:
     """Check that the toolchain has all required files."""
     ok = True
 
@@ -145,22 +145,41 @@ def verify(platforms: list[str]) -> bool:
             print(f"  [X] {header_dir}/ — MISSING")
             ok = False
 
-    # Libs
+    # Libs — split host vs foreign platforms
     bin_dir = os.path.join(TOOLCHAIN_DST, "bin")
-    if not os.path.isdir(bin_dir):
-        print(f"  [X] bin/ — MISSING")
-        ok = False
-    else:
-        for plat in platforms:
+    host_platforms = [p for p in platforms if p == host_platform]
+    foreign_platforms = [p for p in platforms if p != host_platform]
+
+    def check_libs(plats: list[str], heading: str | None, foreign: bool) -> None:
+        nonlocal ok
+        if not plats:
+            return
+        if heading:
+            print(heading)
+        if not os.path.isdir(bin_dir):
+            print(f"  [X] bin/ — MISSING")
+            ok = False
+            return
+        for plat in plats:
             found = [f for f in os.listdir(bin_dir)
                      if f.startswith(f"libgodot-cpp.{plat}") and "template_release" in f]
             if found:
                 for f in found:
                     size_mb = os.path.getsize(os.path.join(bin_dir, f)) / (1024 * 1024)
                     print(f"  [+] bin/{f} ({size_mb:.1f} MB)")
+            elif foreign:
+                print(f"  [~] bin/ — no release lib for {plat} (not buildable on this host)")
             else:
                 print(f"  [X] bin/ — no release lib for {plat}")
                 ok = False
+
+    check_libs(host_platforms, f"Host platform ({host_platform})", foreign=False)
+    if foreign_platforms:
+        check_libs(
+            foreign_platforms,
+            "Other platforms (not buildable on this host)",
+            foreign=True,
+        )
 
     # Tools (SCons tool modules)
     tools_dir = os.path.join(TOOLCHAIN_DST, "tools")
@@ -190,10 +209,13 @@ def main():
     else:
         platforms = [detect_host_platform()]
 
+    host_platform = detect_host_platform()
+
     if args.verify:
         print(f"Verifying toolchain at: {os.path.relpath(TOOLCHAIN_DST, ROOT)}")
+        print(f"Host platform: {host_platform}")
         print("-" * 50)
-        ok = verify(platforms)
+        ok = verify(platforms, host_platform)
         print("-" * 50)
         if ok:
             print("Toolchain ready!")

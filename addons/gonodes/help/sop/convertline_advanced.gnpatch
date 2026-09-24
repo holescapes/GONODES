@@ -129,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ConvertLineSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "ConvertLineSOP — Advanced\n\nRuns Box SOP through Convert Line SOP with target=2, segments=18, tension=1, closed=true.",
             "position": [
                 -100.0,
                 -100.0

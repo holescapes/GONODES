@@ -58,7 +58,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectCOMP \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "SelectCOMP — Parameters\n\nShows Select COMP in a minimal setup.",
             "position": [
                 -100.0,
                 -100.0

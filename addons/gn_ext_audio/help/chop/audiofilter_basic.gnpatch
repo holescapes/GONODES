@@ -98,7 +98,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioFilterCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+            "text": "AudioFilterCHOP — Basic\n\nApplies a low-pass biquad filter to smooth an LFO test signal.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

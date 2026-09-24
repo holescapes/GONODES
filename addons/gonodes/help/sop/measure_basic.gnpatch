@@ -133,7 +133,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "MeasureSOP \u2014 Basic\n\nDefault settings.",
+            "text": "MeasureSOP — Basic\n\nRuns Grid SOP through Measure SOP with area=true, perimeter=true, curvature=false.",
             "position": [
                 -100.0,
                 -100.0

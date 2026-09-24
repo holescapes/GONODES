@@ -50,7 +50,7 @@
             "parameters": {}
         },
         "lfo1": {
-            "type": "LFOCHOP",
+            "type": "LFO_CHOP",
             "position": [
                 0,
                 400

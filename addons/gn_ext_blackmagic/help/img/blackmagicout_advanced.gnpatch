@@ -83,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BlackmagicOutIMG \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_blackmagic extension.",
+            "text": "BlackmagicOutIMG — Advanced\n\nShows alternate output device settings with playback disabled.\nRequires gn_ext_blackmagic extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

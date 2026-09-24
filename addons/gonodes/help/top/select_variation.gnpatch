@@ -64,7 +64,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectTOP \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "SelectTOP — Parameters\n\nRuns Ramp TOP through Select TOP.",
             "position": [
                 -100.0,
                 -100.0

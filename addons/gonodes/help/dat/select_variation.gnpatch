@@ -85,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectDAT \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "SelectDAT — Parameters\n\nRuns Text DAT through Select DAT.",
             "position": [
                 -100.0,
                 -100.0

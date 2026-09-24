@@ -104,7 +104,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PdSynthCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_libpd extension.",
+            "text": "PdSynthCHOP — Basic\n\nSynthesizes stereo audio from a Pure Data patch at A4 (440 Hz).\nRequires gn_ext_libpd extension.",
             "position": [
                 -100.0,
                 -100.0

@@ -97,14 +97,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SubsetDAT \u2014 Advanced\n\nMore complex configuration.",
+            "text": "SubsetDAT — Advanced\n\nRuns Constant DAT through Subset DAT with row_start=2, row_end=1, col_start=2, col_end=1, include_header=false.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

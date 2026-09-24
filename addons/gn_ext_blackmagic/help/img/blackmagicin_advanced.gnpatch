@@ -83,14 +83,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "BlackmagicInIMG \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_blackmagic extension.",
+            "text": "BlackmagicInIMG — Advanced\n\nShows alternate device and frame-rate settings with capture disabled.\nRequires gn_ext_blackmagic extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

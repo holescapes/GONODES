@@ -41,6 +41,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if pd == null or not pd.has_particles():
 		return null
 
+	pd = _mutable_input(pd) as GNParticleData
+
 	var ctx := _get_ctx()
 	if ctx.rd == null:
 		return _cook_cpu_fallback(pd)
@@ -79,6 +81,8 @@ func _cook_cpu(inputs: Array[GNData]) -> GNData:
 	var pd := _get_input_pop_cpu(inputs)
 	if pd == null or not pd.has_particles():
 		return null
+
+	pd = _mutable_input(pd) as GNParticleData
 	return _cook_cpu_fallback(pd)
 
 

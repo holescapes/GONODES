@@ -17,13 +17,56 @@
                 }
             }
         },
-        "select1": {
-            "type": "SelectSOP",
+        "filter1": {
+            "type": "FilterSOP",
             "position": [
                 450,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "entity": {
+                    "value": 0
+                },
+                "method": {
+                    "value": 0
+                },
+                "start": {
+                    "value": 0
+                },
+                "end": {
+                    "value": 50
+                },
+                "bmin_x": {
+                    "value": -0.5
+                },
+                "bmin_y": {
+                    "value": -0.5
+                },
+                "bmin_z": {
+                    "value": -0.5
+                },
+                "bmax_x": {
+                    "value": 0.5
+                },
+                "bmax_y": {
+                    "value": 0.5
+                },
+                "bmax_z": {
+                    "value": 0.5
+                },
+                "expression": {
+                    "value": "i % 2 == 0"
+                },
+                "step": {
+                    "value": 2
+                },
+                "offset": {
+                    "value": 0
+                },
+                "invert": {
+                    "value": false
+                }
+            }
         },
         "geo_view": {
             "type": "GeometryCOMP",
@@ -91,11 +134,11 @@
         {
             "from": "src_grid",
             "from_port": 0,
-            "to": "select1",
+            "to": "filter1",
             "to_port": 0
         },
         {
-            "from": "select1",
+            "from": "filter1",
             "from_port": 0,
             "to": "geo_view",
             "to_port": 0
@@ -123,7 +166,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectSOP \u2014 Basic\n\nDefault settings.",
+            "text": "FilterSOP — Basic\n\nRuns Grid SOP through Filter SOP with entity=0, method=0, start=0, end=50, bmin_x=-0.5.",
             "position": [
                 -100.0,
                 -100.0

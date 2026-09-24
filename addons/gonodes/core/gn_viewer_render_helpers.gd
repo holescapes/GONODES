@@ -675,6 +675,61 @@ static func _blit_scaled(dst: Image, src: Image, dx: int, dy: int,
 
 
 # ═════════════════════════════════════════════════════════════════════════════
+# Shared geo viewer provider (UI registers; operators call helpers only)
+# ═════════════════════════════════════════════════════════════════════════════
+
+static var _geo_viewer_provider: Object = null
+
+
+## Returns the registered geo viewer provider, or null when none.
+static func geo_viewer_provider() -> Object:
+	return _geo_viewer_provider
+
+
+## Registers the UI-owned geo viewer scene provider.
+static func register_geo_viewer(provider: Object) -> void:
+	_geo_viewer_provider = provider
+
+
+## Clears the registered provider (tests only).
+static func clear_geo_viewer() -> void:
+	_geo_viewer_provider = null
+
+
+## Ensures the shared geo viewer scene exists; no-op when unregistered.
+static func ensure_shared_geo_viewer() -> void:
+	if _geo_viewer_provider != null:
+		_geo_viewer_provider.call("ensure_scene")
+
+
+## Re-parents shared geo viewer nodes into [param vp]; no-op when unregistered.
+static func reparent_shared_geo_viewer(vp: SubViewport) -> void:
+	if _geo_viewer_provider != null:
+		_geo_viewer_provider.call("reparent_scene", vp)
+
+
+## Returns the shared mesh instance, or null when no provider is registered.
+static func shared_geo_mesh() -> MeshInstance3D:
+	if _geo_viewer_provider == null:
+		return null
+	return _geo_viewer_provider.call("shared_mesh") as MeshInstance3D
+
+
+## Returns the shared orbit camera, or null when no provider is registered.
+static func shared_geo_camera() -> Camera3D:
+	if _geo_viewer_provider == null:
+		return null
+	return _geo_viewer_provider.call("shared_camera") as Camera3D
+
+
+## Returns the shared axis gizmo root, or null when no provider is registered.
+static func shared_geo_gizmo() -> Node3D:
+	if _geo_viewer_provider == null:
+		return null
+	return _geo_viewer_provider.call("shared_gizmo") as Node3D
+
+
+# ═════════════════════════════════════════════════════════════════════════════
 # Shared 3D Scene Helpers
 # ═════════════════════════════════════════════════════════════════════════════
 

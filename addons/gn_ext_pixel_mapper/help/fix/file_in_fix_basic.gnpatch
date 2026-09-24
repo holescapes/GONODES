@@ -1,0 +1,121 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "file1": {
+            "type": "FileInFIX",
+            "position": [
+                100,
+                400
+            ],
+            "parameters": {
+                "file": {
+                    "value": ""
+                },
+                "channel_layout": {
+                    "value": 0
+                },
+                "universe": {
+                    "value": 0
+                },
+                "start_channel": {
+                    "value": 0
+                }
+            }
+        },
+        "noise1": {
+            "type": "NoiseTOP",
+            "position": [
+                100,
+                200
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "noise_type": {
+                    "value": 0
+                },
+                "scale": {
+                    "value": 2.0
+                }
+            }
+        },
+        "sampler1": {
+            "type": "FixtureSamplerTOP",
+            "position": [
+                450,
+                280
+            ],
+            "parameters": {
+                "sample_mode": {
+                    "value": 0
+                }
+            }
+        },
+        "out1": {
+            "type": "WindowOUT",
+            "position": [
+                800,
+                280
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "sampler1",
+            "to_port": 0
+        },
+        {
+            "from": "file1",
+            "from_port": 0,
+            "to": "sampler1",
+            "to_port": 1
+        },
+        {
+            "from": "sampler1",
+            "from_port": 0,
+            "to": "out1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "FileInFIX loads LED layout metadata from a .fixture JSON file on disk.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

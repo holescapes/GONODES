@@ -114,7 +114,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "LineEdit → TextTOP — Live Text Input\n\nType in the LineEdit widget (wired to WindowOUT panel port)\nand see the text rendered live in the TextTOP background.\n\nScriptCHOP reads the LineEditUI text string and sets the\nTextTOP text parameter. LineEditUI has native keyboard\ninput via WindowOUT's panel layer — no manual forwarding.\n\nNote: ScriptCHOP is needed because text is a string\nand CHOP channels are float-only. For numeric data\nuse chop() expressions directly on parameters.",
+            "text": "LineEdit → TextTOP — Live Text Input\n\nType in the LineEdit widget (wired to WindowOUT panel port)\nand see the text rendered live in the TextTOP background.\n\nGDScriptSCRIPT reads the LineEditUI text string and sets the\nTextTOP text parameter. LineEditUI has native keyboard\ninput via WindowOUT's panel layer — no manual forwarding.\n\nNote: GDScriptSCRIPT is needed because text is a string\nand CHOP channels are float-only. For numeric data\nuse chop() expressions directly on parameters.",
             "position": [
                 -150.0,
                 -150.0

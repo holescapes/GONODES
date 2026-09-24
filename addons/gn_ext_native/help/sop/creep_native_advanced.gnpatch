@@ -1,146 +1,146 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "src_box": {
-      "type": "BoxSOP",
-      "position": [
-        100,
-        100
-      ],
-      "parameters": {}
-    },
-    "creep1": {
-      "type": "CreepSOPNative",
-      "position": [
-        450,
-        100
-      ],
-      "parameters": {
-        "distance": {
-          "value": 0.2
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_box": {
+            "type": "BoxSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
         },
-        "direction": {
-          "value": 2
+        "creep1": {
+            "type": "CreepSOPNative",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "distance": {
+                    "value": 0.2
+                },
+                "direction": {
+                    "value": 2
+                },
+                "seed": {
+                    "value": 2
+                }
+            }
         },
-        "seed": {
-          "value": 2
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
+        },
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
-      }
     },
-    "geo_view": {
-      "type": "GeometryCOMP",
-      "position": [
-        700,
-        100
-      ],
-      "parameters": {}
-    },
-    "cam_view": {
-      "type": "CameraCOMP",
-      "position": [
-        700,
-        300
-      ],
-      "parameters": {
-        "tx": {
-          "value": 0
+    "connections": [
+        {
+            "from": "src_box",
+            "from_port": 0,
+            "to": "creep1",
+            "to_port": 0
         },
-        "ty": {
-          "value": 0.5
+        {
+            "from": "creep1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
         },
-        "tz": {
-          "value": 3
-        }
-      }
-    },
-    "render_view": {
-      "type": "RenderTOP",
-      "position": [
-        1000,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
-        }
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [
-        1550,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
         },
-        "open": {
-          "value": true
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
         }
-      }
-    }
-  },
-  "connections": [
-    {
-      "from": "src_box",
-      "from_port": 0,
-      "to": "creep1",
-      "to_port": 0
-    },
-    {
-      "from": "creep1",
-      "from_port": 0,
-      "to": "geo_view",
-      "to_port": 0
-    },
-    {
-      "from": "geo_view",
-      "from_port": 0,
-      "to": "render_view",
-      "to_port": 0
-    },
-    {
-      "from": "cam_view",
-      "from_port": 0,
-      "to": "render_view",
-      "to_port": 1
-    },
-    {
-      "from": "render_view",
-      "from_port": 0,
-      "to": "window1",
-      "to_port": 0
-    }
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "CreepSOPNative — Advanced\n\nMore complex configuration.",
-      "position": [
-        -100.0,
-        -100.0
-      ],
-      "size": [
-        400.0,
-        100.0
-      ],
-      "color": [
-        1.0,
-        1.0,
-        1.0,
-        0.8
-      ]
-    }
-  ]
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "CreepSOPNative — Advanced\n\nRuns Box SOP through Creep SOPNative with distance=0.2, direction=2, seed=2.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

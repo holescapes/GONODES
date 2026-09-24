@@ -155,6 +155,30 @@ func test_resolve_url_returns_error_for_failed_entry() -> void:
 	dummy_node.queue_free()
 
 
+func test_start_fetch_off_tree_caller_uses_scene_root() -> void:
+	var url := "https://example.com/offtree_%d.glb" % randi()
+	var orphan := Node.new()
+	var result: Dictionary = GNUrlCache.resolve_url(url, orphan)
+	GNTestAssert.assert_eq(result.status, "pending", "off-tree caller returns pending")
+	GNTestAssert.assert_true(GNUrlCache._in_flight.has(url), "fetch is in flight")
+	if GNUrlCache._entries.has(url):
+		var entry: Dictionary = GNUrlCache._entries[url]
+		GNTestAssert.assert_ne(entry.status, "error", "fetch did not fail at start")
+		GNTestAssert.assert_false(
+			String(entry.get("error", "")).contains("HTTP request start failed"),
+			"no ERR_UNCONFIGURED start failure")
+	var http: HTTPRequest = GNUrlCache._in_flight[url]
+	var tree := Engine.get_main_loop() as SceneTree
+	GNTestAssert.assert_eq(http.get_parent(), tree.root,
+		"parented to scene root when caller is off-tree")
+	GNTestAssert.assert_true(GNUrlCache._in_flight.has(url), "fetch still in flight after resolve")
+	http.cancel_request()
+	GNUrlCache._in_flight.erase(url)
+	GNUrlCache._waiters.erase(url)
+	GNUrlCache._cleanup_http(http)
+	orphan.queue_free()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Operator URL integration (offline — cook with URL returns placeholder)
 # ═══════════════════════════════════════════════════════════════════════════════

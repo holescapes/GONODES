@@ -70,7 +70,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectTOP \u2014 Basic\n\nDefault settings.",
+            "text": "SelectTOP — Basic\n\nRuns Noise TOP through Select TOP.",
             "position": [
                 -100.0,
                 -100.0

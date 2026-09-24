@@ -1,0 +1,102 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "const1": {
+            "type": "ConstantDAT",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "hout1": {
+            "type": "HostOutDAT",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "status"
+                }
+            }
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1050,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "const1",
+            "from_port": 0,
+            "to": "hout1",
+            "to_port": 0
+        },
+        {
+            "from": "const1",
+            "from_port": 0,
+            "to": "texttop1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostOutDAT serializes table or text DAT data for the host to read each cook.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

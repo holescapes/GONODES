@@ -39,7 +39,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                900,
+                1100,
                 100
             ],
             "parameters": {
@@ -54,17 +54,45 @@
                     "value": true
                 }
             }
+        },
+        "top2img1": {
+            "type": "TOPtoIMG",
+            "position": [
+                300,
+                100
+            ],
+            "parameters": {}
+        },
+        "img2top1": {
+            "type": "ImgToTOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
             "from": "src1",
             "from_port": 0,
+            "to": "top2img1",
+            "to_port": 0
+        },
+        {
+            "from": "top2img1",
+            "from_port": 0,
             "to": "focus1",
             "to_port": 0
         },
         {
             "from": "focus1",
+            "from_port": 0,
+            "to": "img2top1",
+            "to_port": 0
+        },
+        {
+            "from": "img2top1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0

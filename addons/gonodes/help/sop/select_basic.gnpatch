@@ -123,7 +123,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectSOP \u2014 Basic\n\nDefault settings.",
+            "text": "SelectSOP — Basic\n\nRuns Grid SOP through Select SOP.",
             "position": [
                 -100.0,
                 -100.0

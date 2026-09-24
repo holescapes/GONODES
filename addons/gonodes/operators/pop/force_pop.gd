@@ -25,9 +25,12 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	var pd := _get_input_pop(inputs)
-	if pd == null or not pd.has_particles():
+	var src := _get_input_pop(inputs)
+	if src == null or not src.has_particles():
 		return null
+
+	# COW: duplicate only when upstream output is shared (fan-out)
+	var pd := _mutable_input(src) as GNParticleData
 
 	var ctx := _get_ctx()
 	if ctx.rd == null:
@@ -63,9 +66,12 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 func _cook_cpu(inputs: Array[GNData]) -> GNData:
-	var pd := _get_input_pop_cpu(inputs)
-	if pd == null or not pd.has_particles():
+	var src := _get_input_pop_cpu(inputs)
+	if src == null or not src.has_particles():
 		return null
+
+	# COW: duplicate only when upstream output is shared (fan-out)
+	var pd := _mutable_input(src) as GNParticleData
 
 	var fx: float = get_param_value("gravity_x") + get_param_value("wind_x")
 	var fy: float = get_param_value("gravity_y") + get_param_value("wind_y")

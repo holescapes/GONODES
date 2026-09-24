@@ -64,8 +64,8 @@ The GDExtension (`GNBlackmagic`) wraps the DeckLink C++ API:
 
 | Operator | Family | Description |
 |----------|--------|-------------|
-| `BlackmagicInTOP` | TOP | Capture SDI/HDMI input as texture (UYVY → RGBA conversion) |
-| `BlackmagicOutTOP` | TOP | Output TOP texture to SDI/HDMI (RGBA → UYVY conversion) |
+| `BlackmagicInIMG` | IMG | Capture SDI/HDMI input as texture (UYVY → RGBA conversion) |
+| `BlackmagicOutIMG` | IMG | Output TOP texture to SDI/HDMI (RGBA → UYVY conversion) |
 | `BlackmagicDAT` | DAT | Device enumeration and info table |
 
 ## Supported Formats

@@ -66,5 +66,26 @@
 			"to": "window1",
 			"to_port": 0
 		}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"position": [
+				-100.0,
+				-100.0
+			],
+			"size": [
+				400.0,
+				100.0
+			],
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.8
+			],
+			"text": "Particle State TOP — Velocity (Native)\n\nVisualizes SourcePOP velocity with attribute=1 and scale=1.0."
+		}
 	]
 }

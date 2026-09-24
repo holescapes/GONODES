@@ -92,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ReplaceCHOP \u2014 Basic\n\nDefault settings.",
+            "text": "ReplaceCHOP — Basic\n\nRuns LFO_ CHOP through Replace CHOP with pattern='*', blend=1.",
             "position": [
                 -100.0,
                 -100.0

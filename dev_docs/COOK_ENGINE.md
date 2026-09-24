@@ -15,16 +15,24 @@ every optimisation layer, and walks through concrete examples.
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                         GNCookEngine._process(delta)                    │
 │                                                                         │
-│  1. Pre-cook pass      – time-dependent active nodes mark_dirty()       │
-│  2. Topological sort   – Kahn's BFS (cached, invalidated on topology Δ) │
-│  3a. Snapshot dirty IDs – for debug overlay                             │
-│  3b. Active set        – BFS upstream from sinks (event-driven)         │
-│  3c. Consumer counts   – fan-out per node (event-driven)                │
-│  4. Cook loop          – per-node: expr → active → resolve → hash guard │
+│  1. Topological sort   – Kahn's BFS (cached, invalidated on topology Δ) │
+│  2. Active set         – BFS upstream from sinks (event-driven)         │
+│  3. Pre-cook pass      – time-dependent active nodes mark_dirty()       │
+│  4a. Snapshot dirty IDs – for debug overlay                             │
+│  4b. Consumer counts   – fan-out per node (event-driven)                │
+│  5. Cook loop          – per-node: expr → active → resolve → hash guard │
 │                          → bypass/cook → propagate                      │
-│  5. Bookkeeping        – frame_count++, frame_cooked signal             │
+│  6. Bookkeeping        – frame_count++, frame_cooked signal             │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
+
+Active set is recomputed **before** the pre-cook pass so that newly activated
+time-dependent nodes (e.g. a MovieFileIn selected in the viewer) see
+`is_active = true` during `_pre_cook()` and can mark themselves dirty on
+their first active frame.
+
+`max_cooks_per_frame` (default 0 = unlimited) is enforced only on the
+sequential cook path; the parallel branch ignores it.
 
 ---
 
@@ -32,18 +40,18 @@ every optimisation layer, and walks through concrete examples.
 
 ```mermaid
 flowchart TD
-    START["cook_frame(delta)"] --> PRECOOK["Step 1: Pre-Cook Pass\n_pre_cook_pass(delta)\nTime-dependent active nodes\nmark themselves dirty"]
-    PRECOOK --> TOPO["Step 2: Topological Sort\nKahn's BFS cached order"]
-    TOPO --> SNAP["Step 3a: Snapshot dirty IDs\nfor debug overlay"]
-    SNAP --> ACTIVE{"Step 3b:\n_active_set_dirty?"}
-    ACTIVE -->|Yes| REBUILD["Recompute active set\nBFS upstream from sinks\nReorder scene-tree children\nRebuild expr consumer map"]
-    ACTIVE -->|No| CONSUMER
-    REBUILD --> CONSUMER{"Step 3c:\n_consumer_counts_dirty?"}
+    START["cook_frame(delta)"] --> TOPO["Step 1: Topological Sort\nKahn's BFS cached order"]
+    TOPO --> ACTIVE{"Step 2:\n_active_set_dirty?"}
+    ACTIVE -->|Yes| REBUILD["Recompute active set\nBFS upstream from sinks\nStamp is_active\nReorder scene-tree children\nRebuild expr consumer map"]
+    ACTIVE -->|No| PRECOOK
+    REBUILD --> PRECOOK["Step 3: Pre-Cook Pass\n_pre_cook_pass(delta)\nTime-dependent active nodes\nmark themselves dirty"]
+    PRECOOK --> SNAP["Step 4a: Snapshot dirty IDs\nfor debug overlay"]
+    SNAP --> CONSUMER{"Step 4b:\n_consumer_counts_dirty?"}
     CONSUMER -->|Yes| RECOUNT["Rebuild consumer counts\nfrom connection topology"]
     CONSUMER -->|No| LOOP
     RECOUNT --> LOOP
 
-    LOOP["Step 4: For each node\nin topo order"] --> DIRTY{"node.dirty?"}
+    LOOP["Step 5: For each node\nin topo order"] --> DIRTY{"node.dirty?"}
     DIRTY -->|No| EXPR{"Has expression params\n& upstream cooked?"}
     EXPR -->|Yes| TRYEXPR["_try_expression_dirty()\nEvaluate expressions\nCompare old vs new values"]
     EXPR -->|No| SKIPNODE["SKIP — continue"]
@@ -54,9 +62,9 @@ flowchart TD
     FALLTHRU --> ACTIVECHECK
     ACTIVECHECK -->|No| SKIPINACTIVE["SKIP — frozen\ncached_output kept"]
     ACTIVECHECK -->|Yes| RESOLVE["Inject timing context\nResolve parameters\nGather inputs"]
-    RESOLVE --> HASHCHECK{"Input Hash Guard\nhash(params + input timestamps)\n== _last_cook_input_hash?"}
-    HASHCHECK -->|Same| SKIPHASH["SKIP — clear dirty\nNo cook, no propagation"]
-    HASHCHECK -->|Different| BYPASS{"node.bypass?"}
+    RESOLVE --> HASHCHECK{"Compute & store input hash\nhash(params + input timestamps)"}
+    HASHCHECK -->|Same + not dirty| SKIPHASH["NOT TAKEN — cook loop\nonly sends dirty nodes\n(see §3.3)"]
+    HASHCHECK -->|Dirty or hash changed| BYPASS{"node.bypass?"}
     BYPASS -->|Yes| PASSTHRU["Pass first non-null input\nthrough as cached_output"]
     BYPASS -->|No| COMPUTE{"requires_compute()\n& !_compute_available?"}
     COMPUTE -->|Yes| SKIPCOMPUTE["SKIP — warning badge"]
@@ -71,7 +79,7 @@ flowchart TD
     SKIPCOMPUTE --> NEXT
     NEXT --> DONE{"More nodes?"}
     DONE -->|Yes| LOOP
-    DONE -->|No| BOOKKEEP["Step 5: frame_count++\nEmit frame_cooked signal"]
+    DONE -->|No| BOOKKEEP["Step 6: frame_count++\nEmit frame_cooked signal"]
 ```
 
 ---
@@ -155,7 +163,7 @@ of TouchDesigner and Houdini.
 
 ### 3.3 Input Hash Guard (Tier 2)
 
-The core Tier 2 optimisation. Before cooking, the engine hashes:
+Before cooking, the engine computes a hash of the node's resolved inputs:
 
 1. **All resolved parameter values** (built-in + spare) via `hash(param.get_resolved_value())`
 2. **Upstream input data timestamps** — each `GNData.timestamp` records the frame when the data was last written
@@ -168,7 +176,9 @@ for each input:   hash = hash * 37 + input.timestamp   (or *37 if null)
 if time_dependent: hash = hash * 41 + hash(elapsed_time)
 ```
 
-If the hash matches `node._last_cook_input_hash` → skip cook, clear dirty, **no downstream propagation**. The cascade stops here.
+The hash is stored in `node._last_cook_input_hash` after each cook.
+
+There is also a skip arm: if the new hash matches `_last_cook_input_hash` **and** `not node.dirty`, the cook is skipped (clear dirty, no downstream propagation). **This arm is not taken by the current cook loop:** `_classify_cook_status()` only sends dirty (or expression-just-dirtied) nodes into `_cook_single_node`, so `not node.dirty` is always false on that path. The hash is still computed and stored each time; a dirty node with unchanged params and timestamps may recook unnecessarily, but output remains correct.
 
 ### 3.4 Expression Consumer Map
 
@@ -331,11 +341,13 @@ guarded — each can be disabled without affecting the others.
 
 **Operators using per-port guards:** BlobTrackIMG, ContourIMG, ColorTrackIMG,
 ObjectTrackIMG, HoughLinesIMG, HoughCirclesIMG, ArucoDetectIMG (port 0+1),
-MovieFileInTOP (port 1), MultiBufferRenderTOP (port 1+2).
+MovieFileInTOP (port 1), MultiBufferRenderTOP (port 1+2),
+GLSLMultiTOP (fallback per-output), SubNetworkNode (OutTunnel is_sink),
+GNTopInteractiveBase (panel port via get_output_data).
 
 Operators where secondary outputs are integral to the primary compute
-(FluidVOL velocity, PyroVOL temperature, GLSLMultiTOP MRT passes,
-SubNetworkNode tunnel routing, GdScriptScript user outputs) do NOT
+(FluidVOL velocity, PyroVOL temperature, GLSLMultiTOP MRT pass,
+GdScriptScript user outputs) do NOT
 use demand guards — the work is inseparable.
 
 ---
@@ -412,7 +424,7 @@ Network:  [LfoCHOP]──[NoiseTOP]──[Viewer]
 
 ---
 
-### Example 4 — Hash Guard Stops Propagation
+### Example 4 — Upstream Recooks Propagate via Dirty Flags
 
 ```
 Network:  [LfoCHOP]──[MathCHOP (floor)]──[NoiseTOP]──[Viewer]
@@ -434,7 +446,7 @@ Between transitions, the floored value stays the same for many frames.
 
 > **Note:** The hash guard uses timestamps, not output values. If upstream re-cooked, the timestamp changes, so downstream always re-cooks. This is intentional — it matches TD's "demand-driven" model and avoids the cost and accuracy issues of comparing actual output data.
 
-**Where the hash guard DOES save work:** when the LfoCHOP is NOT time-dependent (e.g., it's a ConstantCHOP) and nothing upstream changes, the entire chain is skipped.
+**Where work is saved on a static chain:** when the LfoCHOP is NOT time-dependent (e.g., it's a ConstantCHOP) and nothing upstream changes, nodes stay **clean** and `_classify_cook_status()` never sends them to `_cook_single_node`. That skip is the dirty-flag gate, not the input-hash skip arm (unreachable from the current loop; see §3.3).
 
 ---
 
@@ -589,7 +601,7 @@ a fixed `1.0 / non_realtime_fps` each frame. This guarantees:
 
 ```gdscript
 if non_realtime:
-    current_delta = 1.0 / non_realtime_fps   # e.g., 1/30 = 0.0333s
+    current_delta = (1.0 / non_realtime_fps) * playback_speed   # e.g., 1/30 = 0.0333s
     elapsed_time += current_delta
 else:
     current_delta = delta                     # actual wall-clock delta
@@ -600,7 +612,7 @@ else:
 
 ## 8. SubNetwork Cook Engines
 
-SubNetworkCOMP nodes host an inner `GNCookEngine` with `cooking_enabled = false`.
+SubNetworkNode nodes host an inner `GNCookEngine` with `cooking_enabled = false`.
 The outer engine calls `inner_engine.cook_frame(delta)` explicitly during the
 SubNetwork's `_cook()`. This enables:
 

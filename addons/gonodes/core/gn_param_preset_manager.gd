@@ -7,9 +7,7 @@ extends RefCounted
 ##      between nodes of the same operator type (same GDScript class_name).
 ##   2. **Named Snapshots** — save / load JSON snapshots of a node's parameter
 ##      state, scoped per operator type (e.g. "NoiseTOP").
-##   3. **Global Preset Library** — factory presets ship in
-##      `res://addons/gonodes/presets/params/`, user presets live under
-##      `user://gonodes_param_presets/`.  Both directories are scanned when
+##   3. **Global Preset Library** — Both directories are scanned when
 ##      listing available presets.
 ##
 ## All serialization reuses `GNParameter.to_dict()` / `from_dict()` so the

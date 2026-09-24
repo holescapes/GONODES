@@ -66,5 +66,26 @@
 			"to": "window1",
 			"to_port": 0
 		}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"position": [
+				-100.0,
+				-100.0
+			],
+			"size": [
+				400.0,
+				100.0
+			],
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.8
+			],
+			"text": "Particle State TOP — Age (Native)\n\nRenders SourcePOP particle age as a texture with attribute=2 and scale=0.5."
+		}
 	]
 }

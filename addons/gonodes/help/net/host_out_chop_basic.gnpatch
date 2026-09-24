@@ -2,52 +2,34 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_sphere": {
-            "type": "SphereSOP",
+        "lfo1": {
+            "type": "LFO_CHOP",
             "position": [
                 100,
                 100
             ],
-            "parameters": {}
-        },
-        "select1": {
-            "type": "SelectSOP",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {}
-        },
-        "geo_view": {
-            "type": "GeometryCOMP",
-            "position": [
-                700,
-                100
-            ],
-            "parameters": {}
-        },
-        "cam_view": {
-            "type": "CameraCOMP",
-            "position": [
-                700,
-                300
-            ],
             "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 0.5
-                },
-                "tz": {
-                    "value": 3
+                "frequency": {
+                    "value": 2.0
                 }
             }
         },
-        "render_view": {
-            "type": "RenderTOP",
+        "hout1": {
+            "type": "HostOutCHOP",
             "position": [
-                1000,
+                400,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "audio_level"
+                }
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                700,
                 100
             ],
             "parameters": {
@@ -63,7 +45,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
+                1050,
                 100
             ],
             "parameters": {
@@ -82,31 +64,19 @@
     },
     "connections": [
         {
-            "from": "src_sphere",
+            "from": "lfo1",
             "from_port": 0,
-            "to": "select1",
+            "to": "hout1",
             "to_port": 0
         },
         {
-            "from": "select1",
+            "from": "lfo1",
             "from_port": 0,
-            "to": "geo_view",
+            "to": "choptop1",
             "to_port": 0
         },
         {
-            "from": "geo_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 0
-        },
-        {
-            "from": "cam_view",
-            "from_port": 0,
-            "to": "render_view",
-            "to_port": 1
-        },
-        {
-            "from": "render_view",
+            "from": "choptop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -116,7 +86,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectSOP \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "HostOutCHOP exports cooked CHOP channels back to the host application by label.",
             "position": [
                 -100.0,
                 -100.0

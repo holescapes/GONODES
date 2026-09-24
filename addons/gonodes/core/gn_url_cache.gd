@@ -123,16 +123,41 @@ static func _start_fetch(url: String, caller: Node) -> void:
 	_waiters[url] = [caller]
 	_in_flight[url] = http
 
-	# We need to add the HTTPRequest to the scene tree.
-	# Use the caller node as parent.
-	caller.add_child(http)
+	# HTTPRequest must live in the scene tree or request() returns ERR_UNCONFIGURED.
+	var parent: Node = null
+	if caller.is_inside_tree():
+		parent = caller
+	else:
+		var tree := Engine.get_main_loop()
+		if tree is SceneTree:
+			parent = (tree as SceneTree).root
+	if parent == null:
+		var entry := {"status": "error", "path": "", "error": "HTTP request start failed: %s" % error_string(ERR_UNCONFIGURED)}
+		_entries[url] = entry
+		_in_flight.erase(url)
+		_waiters.erase(url)
+		_cleanup_http(http)
+		GNLogger.warn("GNUrlCache", "Failed to start fetch for '%s': %s" % [url, error_string(ERR_UNCONFIGURED)])
+		return
+
+	parent.add_child(http)
 	http.request_completed.connect(_on_fetch_completed.bind(url, http))
 
+	if http.is_inside_tree():
+		_complete_fetch_start(url, http)
+	else:
+		http.tree_entered.connect(_complete_fetch_start.bind(url, http), CONNECT_ONE_SHOT)
+
+
+static func _complete_fetch_start(url: String, http: HTTPRequest) -> void:
+	if not _in_flight.has(url) or _in_flight[url] != http:
+		return
 	var err := http.request(url)
 	if err != OK:
 		var entry := {"status": "error", "path": "", "error": "HTTP request start failed: %s" % error_string(err)}
 		_entries[url] = entry
 		_in_flight.erase(url)
+		_waiters.erase(url)
 		_cleanup_http(http)
 		GNLogger.warn("GNUrlCache", "Failed to start fetch for '%s': %s" % [url, error_string(err)])
 

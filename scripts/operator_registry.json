@@ -13322,7 +13322,168 @@
     "family": "top",
     "file": "addons/gn_ext_mapper/operators/top/bezier_map_top.gd",
     "extension": "gn_ext_mapper",
-    "params": []
+    "params": [
+      {
+        "name": "top_left_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "top_left_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "top_cleft_x",
+        "type": "float",
+        "default": 0.333
+      },
+      {
+        "name": "top_cleft_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "top_cright_x",
+        "type": "float",
+        "default": 0.667
+      },
+      {
+        "name": "top_cright_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "top_right_x",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "top_right_y",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "umid_left_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "umid_left_y",
+        "type": "float",
+        "default": 0.333
+      },
+      {
+        "name": "umid_cleft_x",
+        "type": "float",
+        "default": 0.333
+      },
+      {
+        "name": "umid_cleft_y",
+        "type": "float",
+        "default": 0.333
+      },
+      {
+        "name": "umid_cright_x",
+        "type": "float",
+        "default": 0.667
+      },
+      {
+        "name": "umid_cright_y",
+        "type": "float",
+        "default": 0.333
+      },
+      {
+        "name": "umid_right_x",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "umid_right_y",
+        "type": "float",
+        "default": 0.333
+      },
+      {
+        "name": "lmid_left_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "lmid_left_y",
+        "type": "float",
+        "default": 0.667
+      },
+      {
+        "name": "lmid_cleft_x",
+        "type": "float",
+        "default": 0.333
+      },
+      {
+        "name": "lmid_cleft_y",
+        "type": "float",
+        "default": 0.667
+      },
+      {
+        "name": "lmid_cright_x",
+        "type": "float",
+        "default": 0.667
+      },
+      {
+        "name": "lmid_cright_y",
+        "type": "float",
+        "default": 0.667
+      },
+      {
+        "name": "lmid_right_x",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "lmid_right_y",
+        "type": "float",
+        "default": 0.667
+      },
+      {
+        "name": "bot_left_x",
+        "type": "float",
+        "default": 0.0
+      },
+      {
+        "name": "bot_left_y",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "bot_cleft_x",
+        "type": "float",
+        "default": 0.333
+      },
+      {
+        "name": "bot_cleft_y",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "bot_cright_x",
+        "type": "float",
+        "default": 0.667
+      },
+      {
+        "name": "bot_cright_y",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "bot_right_x",
+        "type": "float",
+        "default": 1.0
+      },
+      {
+        "name": "bot_right_y",
+        "type": "float",
+        "default": 1.0
+      }
+    ]
   },
   {
     "class_name": "BilateralBlurTOP",

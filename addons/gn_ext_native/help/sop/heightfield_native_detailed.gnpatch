@@ -127,5 +127,26 @@
 			"to": "window1",
 			"to_port": 0
 		}
+	],
+	"annotations": [
+		{
+			"id": "ann_1",
+			"type": "note",
+			"position": [
+				-100.0,
+				-100.0
+			],
+			"size": [
+				500.0,
+				140.0
+			],
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.8
+			],
+			"text": "Heightfield SOP — Detailed (Native)\n\nBuilds a 20×20 terrain with 256 subdivisions and 8 noise octaves at frequency=0.8."
+		}
 	]
 }

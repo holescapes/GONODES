@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "lfo1": {
-            "type": "LFOCHOP",
+            "type": "LFO_CHOP",
             "position": [100, 100],
             "parameters": {
                 "frequency": {"value": 2.0}

@@ -2,74 +2,38 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_box": {
-            "type": "BoxSOP",
+        "host1": {
+            "type": "HostInSOP",
             "position": [
-                100,
-                100
-            ],
-            "parameters": {}
-        },
-        "filter1": {
-            "type": "FilterSOP",
-            "position": [
-                450,
+                200,
                 100
             ],
             "parameters": {
-                "entity": {
-                    "value": 2
-                },
-                "method": {
-                    "value": 2
-                },
-                "start": {
-                    "value": 2
-                },
-                "end": {
-                    "value": 52
-                },
-                "bmin_x": {
-                    "value": -1.0
-                },
-                "bmin_y": {
-                    "value": -1.0
-                },
-                "bmin_z": {
-                    "value": -1.0
-                },
-                "bmax_x": {
-                    "value": 1.0
-                },
-                "bmax_y": {
-                    "value": 1.0
-                },
-                "bmax_z": {
-                    "value": 1.0
-                },
-                "step": {
-                    "value": 4
-                },
-                "offset": {
-                    "value": 2
-                },
-                "invert": {
-                    "value": true
+                "label": {
+                    "value": "mesh"
                 }
             }
         },
-        "geo_view": {
-            "type": "GeometryCOMP",
+        "null1": {
+            "type": "NullSOP",
             "position": [
-                700,
+                500,
                 100
             ],
             "parameters": {}
         },
-        "cam_view": {
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "cam1": {
             "type": "CameraCOMP",
             "position": [
-                700,
+                800,
                 300
             ],
             "parameters": {
@@ -84,10 +48,10 @@
                 }
             }
         },
-        "render_view": {
+        "render1": {
             "type": "RenderTOP",
             "position": [
-                1000,
+                1150,
                 100
             ],
             "parameters": {
@@ -103,7 +67,7 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
+                1500,
                 100
             ],
             "parameters": {
@@ -122,31 +86,31 @@
     },
     "connections": [
         {
-            "from": "src_box",
+            "from": "host1",
             "from_port": 0,
-            "to": "filter1",
+            "to": "null1",
             "to_port": 0
         },
         {
-            "from": "filter1",
+            "from": "null1",
             "from_port": 0,
-            "to": "geo_view",
+            "to": "geo1",
             "to_port": 0
         },
         {
-            "from": "geo_view",
+            "from": "geo1",
             "from_port": 0,
-            "to": "render_view",
+            "to": "render1",
             "to_port": 0
         },
         {
-            "from": "cam_view",
+            "from": "cam1",
             "from_port": 0,
-            "to": "render_view",
+            "to": "render1",
             "to_port": 1
         },
         {
-            "from": "render_view",
+            "from": "render1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -156,7 +120,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FilterSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "HostInSOP receives geometry arrays from the host and outputs them as SOP data.",
             "position": [
                 -100.0,
                 -100.0

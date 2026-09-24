@@ -136,7 +136,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ResampleSOP \u2014 Basic\n\nDefault settings.",
+            "text": "ResampleSOP — Basic\n\nRuns Grid SOP through Resample SOP with mode=0, count=32, segment_length=0.1, close=false.",
             "position": [
                 -100.0,
                 -100.0

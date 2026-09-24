@@ -104,7 +104,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioDelayCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
+            "text": "AudioDelayCHOP — Advanced\n\nUses a longer delay and heavier feedback on a wave signal.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

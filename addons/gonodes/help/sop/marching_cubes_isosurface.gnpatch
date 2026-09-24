@@ -3,19 +3,12 @@
     "generator": "GONODES",
     "nodes": {
         "src_grid": {
-            "type": "GridSOP",
+            "type": "NoiseVOL",
             "position": [
                 100,
                 100
             ],
-            "parameters": {
-                "rows": {
-                    "value": 20
-                },
-                "cols": {
-                    "value": 20
-                }
-            }
+            "parameters": {}
         },
         "focus1": {
             "type": "MarchingCubesSOP",
@@ -25,18 +18,10 @@
             ],
             "parameters": {}
         },
-        "raymarch1": {
-            "type": "RaymarchTOP",
-            "position": [
-                800,
-                100
-            ],
-            "parameters": {}
-        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1150,
+                1300,
                 100
             ],
             "parameters": {
@@ -51,6 +36,48 @@
                     "value": true
                 }
             }
+        },
+        "geo1": {
+            "type": "GeometryCOMP",
+            "position": [
+                800,
+                100
+            ],
+            "parameters": {}
+        },
+        "render1": {
+            "type": "RenderTOP",
+            "position": [
+                950,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                950,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
+            }
         }
     },
     "connections": [
@@ -63,11 +90,23 @@
         {
             "from": "focus1",
             "from_port": 0,
-            "to": "raymarch1",
+            "to": "geo1",
             "to_port": 0
         },
         {
-            "from": "raymarch1",
+            "from": "geo1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 0
+        },
+        {
+            "from": "camera1",
+            "from_port": 0,
+            "to": "render1",
+            "to_port": 1
+        },
+        {
+            "from": "render1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -77,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Marching Cubes VOL — Isosurface\n\nExtract iso-surface mesh from volume density field (CPU marching cubes).",
+            "text": "Marching Cubes VOL \u2014 Isosurface\n\nExtract iso-surface mesh from volume density field (CPU marching cubes).",
             "position": [
                 -100.0,
                 -100.0

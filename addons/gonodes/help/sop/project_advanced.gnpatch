@@ -126,7 +126,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ProjectSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "ProjectSOP — Advanced\n\nRuns Box SOP through Project SOP with axis=2, offset=1, recompute_normals=false.",
             "position": [
                 -100.0,
                 -100.0

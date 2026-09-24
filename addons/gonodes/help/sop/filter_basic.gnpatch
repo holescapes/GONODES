@@ -166,7 +166,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "FilterSOP \u2014 Basic\n\nDefault settings.",
+            "text": "FilterSOP — Basic\n\nRuns Grid SOP through Filter SOP with entity=0, method=0, start=0, end=50, bmin_x=-0.5.",
             "position": [
                 -100.0,
                 -100.0

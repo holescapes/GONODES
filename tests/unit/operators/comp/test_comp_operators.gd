@@ -333,3 +333,11 @@ func test_audio_source_comp_produces_output() -> void:
 	var node := _make_node(AudioSourceCOMP.new(), "src1")
 	var out := _cook_no_input(node)
 	GNTestAssert.assert_true(out == null or out is GNCompData, "comp output type")
+
+func test_audio_source_comp_is_sink_when_playing() -> void:
+	var node := _make_node(AudioSourceCOMP.new(), "src1")
+	GNTestAssert.assert_true(node.is_sink, "Playing on → is_sink")
+	node.set_param_value("playing", false)
+	GNTestAssert.assert_false(node.is_sink, "Playing off → not is_sink")
+	node.set_param_value("playing", true)
+	GNTestAssert.assert_true(node.is_sink, "Playing on again → is_sink")

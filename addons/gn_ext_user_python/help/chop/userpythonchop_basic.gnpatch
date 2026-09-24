@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "userpythonchop1": {
-            "type": "UserPythonCHOP",
+            "type": "PythonSCRIPT",
             "position": [
                 100,
                 100
@@ -71,7 +71,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserPythonCHOP — Python Signal Processing\n\nWrite CHOP operators in Python using NumPy.\nThe default example generates phase-offset sine channels.\n\nUse gonodes.chop helpers: make_chop_result(channels_dict)\nfor multi-channel output with sample rate.\n\nLoad the Signal Generator example for waveform selection.",
+            "text": "PythonSCRIPT — Python Signal Processing\n\nWrite CHOP operators in Python using NumPy.\nThe default example generates phase-offset sine channels.\n\nUse gonodes.chop helpers: make_chop_result(channels_dict)\nfor multi-channel output with sample rate.\n\nLoad the Signal Generator example for waveform selection.",
             "position": [
                 -100.0,
                 -100.0

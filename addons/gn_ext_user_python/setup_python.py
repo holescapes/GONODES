@@ -10,7 +10,7 @@ Python needed at runtime.
 
 Usage:
   python addons/gn_ext_user_python/setup_python.py
-  python addons/gn_ext_user_python/setup_python.py --python-version 3.12.8
+  python addons/gn_ext_user_python/setup_python.py --python-version 3.10.11
   python addons/gn_ext_user_python/setup_python.py --skip-numpy
   python addons/gn_ext_user_python/setup_python.py --verify
 
@@ -35,6 +35,7 @@ EXT_DIR = os.path.dirname(os.path.abspath(__file__))
 TOOLCHAIN_DIR = os.path.join(EXT_DIR, "toolchain", "python")
 TOOLCHAIN_PARENT = os.path.join(EXT_DIR, "toolchain")
 NATIVE_DIR = os.path.join(EXT_DIR, "native")
+BIN_WIN64_DIR = os.path.join(EXT_DIR, "bin", "win64")
 
 
 def log(msg):
@@ -357,27 +358,30 @@ def link_python_dlls():
     """Copy Python DLLs next to the extension binary so Windows can find them.
 
     Godot loads the .gdextension DLL at engine startup, before any GDScript
-    runs. The DLL is linked against python312.lib, so Windows needs python312.dll
-    in the DLL's own directory (or on PATH). We copy from toolchain/python/.
+    runs. The DLL is linked against python310.lib, so Windows needs python310.dll
+    in the DLL's own directory (or on PATH). We copy from toolchain/python/
+    into bin/win64/ (outside native/, which Godot cannot res://).
     """
     if platform.system() != "Windows":
         return  # Linux/macOS use rpath or system library paths
 
-    bin_dir = os.path.join(NATIVE_DIR, "bin", "win64")
-    if not os.path.isdir(bin_dir):
-        return  # Extension not built yet
+    dll_names = ["python3.dll", "python310.dll"]
+    if not any(os.path.isfile(os.path.join(TOOLCHAIN_DIR, n)) for n in dll_names):
+        return  # Toolchain not set up yet
 
-    for dll_name in ["python3.dll", "python312.dll"]:
+    os.makedirs(BIN_WIN64_DIR, exist_ok=True)
+
+    for dll_name in dll_names:
         src = os.path.join(TOOLCHAIN_DIR, dll_name)
-        dst = os.path.join(bin_dir, dll_name)
+        dst = os.path.join(BIN_WIN64_DIR, dll_name)
         if os.path.isfile(src) and not os.path.isfile(dst):
             shutil.copy2(src, dst)
-            log(f"Copied {dll_name} \u2192 native/bin/win64/")
+            log(f"Copied {dll_name} \u2192 bin/win64/")
         elif os.path.isfile(dst):
             # Check if toolchain version is newer
             if os.path.isfile(src) and os.path.getmtime(src) > os.path.getmtime(dst):
                 shutil.copy2(src, dst)
-                log(f"Updated {dll_name} \u2192 native/bin/win64/")
+                log(f"Updated {dll_name} \u2192 bin/win64/")
 
 
 # ── Verify ────────────────────────────────────────────────────────────────────
@@ -437,14 +441,13 @@ def verify_toolchain() -> int:
 
     # Check Python DLLs next to extension binary (Windows only)
     if platform.system() == "Windows":
-        bin_dir = os.path.join(NATIVE_DIR, "bin", "win64")
-        for dll_name in ["python3.dll", "python312.dll"]:
-            dll_path = os.path.join(bin_dir, dll_name)
+        for dll_name in ["python3.dll", "python310.dll"]:
+            dll_path = os.path.join(BIN_WIN64_DIR, dll_name)
             if os.path.isfile(dll_path):
                 size_mb = os.path.getsize(dll_path) / (1024 * 1024)
-                log(f"[+] native/bin/win64/{dll_name} ({size_mb:.1f} MB)")
+                log(f"[+] bin/win64/{dll_name} ({size_mb:.1f} MB)")
             else:
-                log(f"[X] native/bin/win64/{dll_name} — MISSING (Godot can't load the extension)")
+                log(f"[X] bin/win64/{dll_name} — MISSING (Godot can't load the extension)")
                 log(f"    Run: python setup_python.py  (copies from toolchain/)")
                 ok = False
 

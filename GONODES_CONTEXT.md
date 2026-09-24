@@ -8,11 +8,11 @@
 
 ## 1. Project Overview
 
-**GONODES** is a real-time node-based visual programming framework built on Godot 4.6, inspired by Derivative TouchDesigner. It targets **visual/generative art and VJing** workflows.
+**GONODES** is a real-time node-based visual programming framework built on Godot 4.7.2, inspired by Derivative TouchDesigner. It targets **visual/generative art and VJing** workflows.
 
 ### Key Differentiator
 
-GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portability layer. This means:
+GONODES uses **LibGodot** (Godot 4.7.2's embeddable engine library) as its portability layer. This means:
 - The GONODES editor is a full Godot application
 - For embedding in host apps (VDMX, Resolume, etc.), LibGodot is embedded in the host process
 - The same GONODES framework code (GDExtension) runs in both contexts
@@ -25,9 +25,9 @@ GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portabi
 
 | Decision               | Choice                                              |
 |------------------------|-----------------------------------------------------|
-| Engine                 | Godot 4.6 (with LibGodot)                           |
+| Engine                 | Godot 4.7.2 (with LibGodot)                           |
 | Primary Language       | GDScript (GDExtension/C++ for hot paths later)      |
-| Patch Format (MVP)     | Godot Resource (.tres)                              |
+| Patch Format (MVP, historical) | Godot Resource (.tres) — superseded by JSON `.gnpatch` |
 | Patch Format           | JSON (.gnpatch) for cross-app portability — IMPLEMENTED |
 | Project Name           | GONODES                                             |
 | Target Use Case        | Visual/generative art, VJing                        |
@@ -48,7 +48,7 @@ GONODES uses **LibGodot** (Godot 4.6's embeddable engine library) as its portabi
 
 ```
 ├──────────────────────────────────────────────────┐
-│  GONODES Editor (Godot 4.6 Application)          │
+│  GONODES Editor (Godot 4.7.2 Application)          │
 │                                                  │
 │  ├─────────────────────────────────────────────┐ │
 │  │  UI Layer                                   │ │
@@ -871,7 +871,7 @@ Family-aware viewer panel that displays any node family's output. Only one visua
 | **IMG** | `GNImageRenderer` | `set_texture()` | Same as TOP — uploads `Image` → shared static `ImageTexture` |
 | **CHOP** | `GNChannelRenderer` | `set_texture()` | Waveform rendered to `ImageTexture` via `GNViewerRenderHelpers.render_chop_waveform_rolling()` |
 | **DAT** | `GNTableRenderer` | `set_control(tree)` | Shared static `Tree` widget with column headers, scrollable rows |
-| **SOP** | `GNGeoRenderer` | `get_3d_viewport()` | Static shared camera/light/mesh/gizmo, orbit via renderer `handle_viewer_input()` |
+| **SOP** | `GNGeoRenderer` | `get_3d_viewport()` | Static shared camera/light/mesh/gizmo, orbit via renderer `handle_viewer_input()`. COMP viewer overrides reach the same scene through `GNViewerRenderHelpers.register_geo_viewer`. |
 | **MAT** | `GNMaterialRenderer` | `get_3d_viewport()` | Static shared camera/light/sphere, material applied to sphere |
 | **POP** | `GNParticleRenderer` | `get_3d_viewport()` | Static shared camera/light/multimesh, orbit via renderer `handle_viewer_input()` |
 | **VOL** | `GNVolumeRenderer` | `set_texture()` | Slice composite rendered to `ImageTexture`, scroll to change slice via renderer `handle_viewer_input()` |
@@ -2485,7 +2485,7 @@ Expression context provides:
 Example: `chop("lfo1", "out") * 5.0`
 
 ### Godot Version Requirements
-- **Godot 4.6** (for LibGodot support)
+- **Godot 4.7.2** (for LibGodot support)
 - Uses: GraphEdit, GraphNode, SubViewport, ShaderMaterial, Resource serialization
 - GDScript typed syntax throughout
 - Static typing enforced where possible
@@ -3438,11 +3438,15 @@ Ownership Rule:
 | Family | Data Type         | GPU/CPU | Passing Strategy                                     |
 |--------|-------------------|---------|------------------------------------------------------|
 | TOP    | GNTextureData     | GPU     | ViewportTexture reference. Zero-copy. Texture stays on GPU. Downstream samples via shader uniform. |
+| IMG    | GNImageData       | CPU     | Reference to Image pixel data. Read-only contract; use `_mutable_input()` before in-place edits. |
 | CHOP   | GNChannelData     | CPU     | Reference to channels Dictionary. Read-only. PackedFloat32Array is CoW-safe. |
 | SOP    | GNGeoData         | CPU/GPU | Reference to ArrayMesh. Transform ops create new output. Mesh data on GPU after upload. |
-| POP    | (future)          | GPU     | GPU buffer handle. Zero-copy. Downstream compute shaders bind the buffer. |
+| POP    | GNParticleData    | GPU     | GPU SSBO reference. Zero-copy. Downstream compute shaders bind the particle buffer. |
 | DAT    | GNTableData       | CPU     | Reference to table/text data. Read-only. Lightweight string arrays. |
 | COMP   | GNCompData         | CPU    | Wraps reference to Node3D scene node. Optional `environment` field for EnvironmentCOMP. |
+| VOL    | GNVolumeData      | GPU     | GPU 3D texture RID reference. Zero-copy. Downstream compute shaders bind/sample the volume. |
+| UI     | GNUIData          | CPU     | Reference to Control node and widget state snapshot. Read-only. |
+| SDF    | GNSDFData         | CPU     | Reference to SDF scene-graph AST Dictionary. Read-only. Final raymarch op compiles tree to GLSL. |
 
 ### GNTextureData Reuse
 
@@ -5726,8 +5730,9 @@ Eliminated CPU `get_image()` readback from **7 TOP operators** by introducing a 
 
 ### 35.7 SelectSOP Absorbs ObjectMergeSOP
 
-- **SelectSOP** gained `apply_transform` Bool parameter (default false) — applies source node's Transform3D to fetched geometry when using remote `sop` reference. Vertex positions are multiplied by source transform; normals use inverse-transposed basis.
-- **ObjectMergeSOP** marked `@deprecated` in GDScript doc comment and `deprecated=true` in gn_core.cfg. Superseded by SelectSOP which provides remote reference + apply_transform + geometry filtering (range, bbox, expression, every-Nth).
+- **SelectSOP** is the wireless remote reference — set the `sop` parameter to a node id and it returns that SOP's cached output (no wire input).
+- **FilterSOP** is the geometry filter — range, bounding box, expression, and every-Nth selection. Use after SelectSOP when filtering a remote reference, or inline in any wired SOP chain.
+- **ObjectMergeSOP** is `@deprecated` in GDScript and `deprecated=true` in gn_core.cfg. Its remote fetch is replaced by SelectSOP; its filtering modes are replaced by FilterSOP. The `apply_transform` Bool (apply source node's Transform3D to fetched geometry) remains only on ObjectMergeSOP — no current operator replaces it.
 
 ## §37 — Roadmap: Missing Merge/Combine Operators
 

@@ -79,11 +79,33 @@
                     }
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                450,
+                250
+            ],
+            "parameters": {}
+        },
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                200,
+                250
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
             "from": "script1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "box1",
             "from_port": 0,
             "to": "geo_view",
             "to_port": 0

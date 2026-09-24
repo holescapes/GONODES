@@ -129,13 +129,21 @@
                 100
             ],
             "parameters": {}
+        },
+        "img2top_webcam": {
+            "type": "ImgToTOP",
+            "position": [
+                350,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
             "from": "webcam1",
             "from_port": 0,
-            "to": "seg1",
+            "to": "img2top_webcam",
             "to_port": 0
         },
         {
@@ -145,7 +153,7 @@
             "to_port": 0
         },
         {
-            "from": "bridge1",
+            "from": "img2top_webcam",
             "from_port": 0,
             "to": "comp1",
             "to_port": 0
@@ -197,6 +205,12 @@
             "from_port": 0,
             "to": "comp1",
             "to_port": 1
+        },
+        {
+            "from": "webcam1",
+            "from_port": 0,
+            "to": "seg1",
+            "to_port": 0
         }
     ],
     "annotations": [

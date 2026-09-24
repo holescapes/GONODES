@@ -95,7 +95,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PdControlCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_libpd extension.",
+            "text": "PdControlCHOP — Basic\n\nReceives Pure Data control values on named receive channels.\nRequires gn_ext_libpd extension.",
             "position": [
                 -100.0,
                 -100.0

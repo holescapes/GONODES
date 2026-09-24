@@ -114,7 +114,7 @@ All extensions are self-contained — delete a folder and it disappears cleanly,
 | **User Python** | 1 | Write custom Python operators with NumPy | `setup_python.py` + build `gn_ext_user_python` |
 | **Web Render** | 1 | Render HTML/CSS/JS/WebGL to texture via Chromium CEF | Requires `python scripts/setup_cef.py` (~550 MB download) |
 
-Extensions can go far beyond adding operators — they can define **entirely new data families** with custom port types, wire colors, data classes, and palette sections. The SDF extension demonstrates this: it registers a new "SDF" family at runtime, complete with 40+ operators, custom data type (`GNSDFData`), and its own wire color. No core code modification is required to add a new family. See [CONTRIBUTING.md §5](dev_docs/CONTRIBUTING.md) for the full extension authoring guide.
+Extensions can go far beyond adding operators — they can define **entirely new data families** with custom port types, wire colors, data classes, and palette sections. The SDF extension demonstrates this: it registers a new "SDF" family at runtime, complete with 29 operators, custom data type (`GNSDFData`), and its own wire color. No core code modification is required to add a new family. See [CONTRIBUTING.md §5](dev_docs/CONTRIBUTING.md) for the full extension authoring guide.
 
 #### Extension Self-Containment
 
@@ -166,11 +166,11 @@ Press **F2** to open the debug system:
 
 ### Help System
 
-Every operator has a **?** button that opens auto-generated documentation (inputs, outputs, parameters, description) plus hand-written guides where available. **1,547 example patches** — 3+ per operator — open in floating editor windows so your work stays untouched.
+Every operator has a **?** button that opens auto-generated documentation (inputs, outputs, parameters, description) plus hand-written guides where available. **2,085 example patches** open in floating editor windows so your work stays untouched.
 
 ### Testing
 
-**1,376 automated tests** across 52 test files covering all 13 families, the cook engine, parameter system, data types, serialization, and operator behavior.
+**2,082 automated tests** across 81 test files covering all 15 families, the cook engine, parameter system, data types, serialization, and operator behavior.
 
 ### GONODES Player — Standalone Export
 
@@ -256,6 +256,8 @@ pip install scons
 python scripts/check_env.py
 .\scripts\build_windows.ps1              # tier=all — skips optional SDKs that are missing
 .\scripts\build_windows.ps1 -Shipped     # faster: core + extension tiers only
+python addons/gn_ext_user_python/setup_python.py
+python scripts/bundle_toolchain.py
 python scripts/check_builds.py
 ```
 
@@ -302,7 +304,7 @@ GN Extensions can range from **pure GDScript** (no compilation needed) to **full
 |-----------|-----------|-------------|
 | **gn_ext_shadertoy** | 1 | Paste/fetch Shadertoy GLSL shaders, auto-translated to Godot |
 | **gn_ext_isf** | 1 | ISF v2 interactive shader format with multi-pass and auto-parameter generation |
-| **gn_ext_mapper** | 5 | Projection mapping — quad pin, bezier warp, grid warp, edge blend, mask |
+| **gn_ext_mapper** | 7 | Projection mapping — QuadMap, BezierMap, GridWarp, EdgeBlend, Stoner, Mask, ProjectorBlend |
 | **gn_ext_webrender** | 1 | Render web pages to texture via Chromium CEF — URL or inline HTML, input forwarding |
 
 These exist as extensions rather than core operators specifically to serve as **templates for building your own packs**. Copy one, rename the folder, edit `gn_extension.cfg`, add your operators — that's it. No C++ required.
@@ -328,7 +330,7 @@ Both formats work today. A dedicated asset browser and community sharing portal 
 │  UI Layer                                   │
 │  Node graph, Inspector, Viewer, Debug       │
 ├─────────────────────────────────────────────┤
-│  Operator Library (402 + extensions)        │
+│  Operator Library (585)                     │
 │  TOPs, CHOPs, SOPs, POPs, VOLs, DATs,      │
 │  MATs, COMPs, IMGs, OUTs, UIs              │
 ├─────────────────────────────────────────────┤
@@ -341,7 +343,7 @@ Both formats work today. A dedicated asset browser and community sharing portal 
 │  Textures, Channels, Geometry, Tables,      │
 │  Materials — expressions, bind, export      │
 ├─────────────────────────────────────────────┤
-│  Godot 4.6 Engine                           │
+│  Godot 4.7.2 Engine                           │
 │  Rendering, Audio, Compute, Physics, I/O    │
 └─────────────────────────────────────────────┘
 ```
@@ -370,7 +372,7 @@ For the full roadmap including optimisation tiers, see [dev_docs/ROADMAP.md](dev
 
 ### LibGONODES — Embeddable Engine
 
-The `libgonodes/` directory contains a complete C shared library for embedding GONODES in any host application — VJ tools, media servers, game engines, creative coding frameworks. Five working example apps are included:
+The `libgonodes/` directory contains a complete C shared library for embedding GONODES in any host application — VJ tools, media servers, game engines, creative coding frameworks. Eight working example apps are included:
 
 | Example | What It Demonstrates |
 |---------|---------------------|
@@ -379,6 +381,9 @@ The `libgonodes/` directory contains a complete C shared library for embedding G
 | `opengl_host/` | OpenGL shared context — legacy GPU path |
 | `sdl_host/` | SDL2 window — cross-platform minimal embedding |
 | `params_demo/` | Parameter introspection and live control from the host |
+| `geometry_host/` | Geometry/SOP exchange — push mesh data to HostInSOP and read cooked outputs back |
+| `midi_osc_host/` | MIDI/OSC bridge — protocol injection, events, transport, and resolution override |
+| `graph_edit_demo/` | Dynamic graph editing — insert, wire, and delete nodes programmatically |
 
 See [libgonodes/README.md](libgonodes/README.md) and [dev_docs/INTEGRATION.md](dev_docs/INTEGRATION.md) for the full API reference.
 

@@ -3,17 +3,14 @@
     "generator": "GONODES",
     "nodes": {
         "src_grid": {
-            "type": "GridSOP",
+            "type": "SourcePOP",
             "position": [
                 100,
                 100
             ],
             "parameters": {
-                "rows": {
-                    "value": 10
-                },
-                "cols": {
-                    "value": 10
+                "emit_rate": {
+                    "value": 100
                 }
             }
         },
@@ -142,14 +139,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TrailRibbonSOP \u2014 Basic\n\nDefault settings.",
+            "text": "TrailRibbonSOP — Basic\n\nRuns Source POP through Trail Ribbon SOP with trail_length=30, taper=0.8, max_particles=1000, fade_alpha=true, active=true.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

@@ -98,14 +98,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioEnvelopeCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+            "text": "AudioEnvelopeCHOP — Basic\n\nFollows the amplitude of an LFO signal with quick attack and release.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

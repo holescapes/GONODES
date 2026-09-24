@@ -2,14 +2,6 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_sphere": {
-            "type": "SphereSOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {}
-        },
         "scriptsop1": {
             "type": "GDScriptSCRIPT",
             "position": [
@@ -92,17 +84,33 @@
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                450,
+                250
+            ],
+            "parameters": {}
+        },
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                200,
+                250
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
-            "from": "src_sphere",
+            "from": "scriptsop1",
             "from_port": 0,
-            "to": "scriptsop1",
+            "to": "null1",
             "to_port": 0
         },
         {
-            "from": "scriptsop1",
+            "from": "box1",
             "from_port": 0,
             "to": "geo_view",
             "to_port": 0
@@ -130,7 +138,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GDScript SCRIPT — Dependent\n\nUser-scripted node. Write GDScript with @output annotations for any data type. Template dropdown provides CHOP/SOP/DAT/IMG starting code.\nShowcasing: time_dependent=True, cook_once=True, force_active=True.",
+            "text": "GDScript SCRIPT \u2014 Dependent\n\nUser-scripted node. Write GDScript with @output annotations for any data type. Template dropdown provides CHOP/SOP/DAT/IMG starting code.\nShowcasing: time_dependent=True, cook_once=True, force_active=True.",
             "position": [
                 -100.0,
                 -100.0

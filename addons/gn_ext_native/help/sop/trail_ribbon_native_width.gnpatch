@@ -1,155 +1,159 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "src_sphere": {
-      "type": "SphereSOP",
-      "position": [
-        100,
-        100
-      ],
-      "parameters": {}
-    },
-    "trail_ribbon1": {
-      "type": "TrailRibbonSOPNative",
-      "position": [
-        450,
-        100
-      ],
-      "parameters": {
-        "trail_length": {
-          "value": 29
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_sphere": {
+            "type": "SourcePOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "emit_rate": {
+                    "value": 100
+                }
+            }
         },
-        "width": {
-          "value": 0.05
+        "trail_ribbon1": {
+            "type": "TrailRibbonSOPNative",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "trail_length": {
+                    "value": 29
+                },
+                "width": {
+                    "value": 0.05
+                },
+                "taper": {
+                    "value": 0.4
+                },
+                "max_particles": {
+                    "value": 999
+                },
+                "fade_alpha": {
+                    "value": true
+                },
+                "active": {
+                    "value": true
+                }
+            }
         },
-        "taper": {
-          "value": 0.4
+        "geo_view": {
+            "type": "GeometryCOMP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {}
         },
-        "max_particles": {
-          "value": 999
+        "cam_view": {
+            "type": "CameraCOMP",
+            "position": [
+                700,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0
+                },
+                "ty": {
+                    "value": 0.5
+                },
+                "tz": {
+                    "value": 3
+                }
+            }
         },
-        "fade_alpha": {
-          "value": true
+        "render_view": {
+            "type": "RenderTOP",
+            "position": [
+                1000,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         },
-        "active": {
-          "value": true
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
-      }
     },
-    "geo_view": {
-      "type": "GeometryCOMP",
-      "position": [
-        700,
-        100
-      ],
-      "parameters": {}
-    },
-    "cam_view": {
-      "type": "CameraCOMP",
-      "position": [
-        700,
-        300
-      ],
-      "parameters": {
-        "tx": {
-          "value": 0
+    "connections": [
+        {
+            "from": "src_sphere",
+            "from_port": 0,
+            "to": "trail_ribbon1",
+            "to_port": 0
         },
-        "ty": {
-          "value": 0.5
+        {
+            "from": "trail_ribbon1",
+            "from_port": 0,
+            "to": "geo_view",
+            "to_port": 0
         },
-        "tz": {
-          "value": 3
-        }
-      }
-    },
-    "render_view": {
-      "type": "RenderTOP",
-      "position": [
-        1000,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
-        }
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [
-        1550,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
+        {
+            "from": "geo_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 0
         },
-        "open": {
-          "value": true
+        {
+            "from": "cam_view",
+            "from_port": 0,
+            "to": "render_view",
+            "to_port": 1
+        },
+        {
+            "from": "render_view",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
         }
-      }
-    }
-  },
-  "connections": [
-    {
-      "from": "src_sphere",
-      "from_port": 0,
-      "to": "trail_ribbon1",
-      "to_port": 0
-    },
-    {
-      "from": "trail_ribbon1",
-      "from_port": 0,
-      "to": "geo_view",
-      "to_port": 0
-    },
-    {
-      "from": "geo_view",
-      "from_port": 0,
-      "to": "render_view",
-      "to_port": 0
-    },
-    {
-      "from": "cam_view",
-      "from_port": 0,
-      "to": "render_view",
-      "to_port": 1
-    },
-    {
-      "from": "render_view",
-      "from_port": 0,
-      "to": "window1",
-      "to_port": 0
-    }
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "TrailRibbonSOPNative — Parameters\n\nShowcases: trail_length, width, taper.",
-      "position": [
-        -100.0,
-        -100.0
-      ],
-      "size": [
-        400.0,
-        100.0
-      ],
-      "color": [
-        1.0,
-        1.0,
-        1.0,
-        0.8
-      ]
-    }
-  ]
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "TrailRibbonSOPNative \u2014 Parameters\n\nShowcases: trail_length, width, taper.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

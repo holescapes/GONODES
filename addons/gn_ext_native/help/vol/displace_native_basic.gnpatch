@@ -3,19 +3,12 @@
   "generator": "GONODES",
   "nodes": {
     "src_grid": {
-      "type": "GridSOP",
+      "type": "NoiseVOL",
       "position": [
         100,
         100
       ],
-      "parameters": {
-        "rows": {
-          "value": 20
-        },
-        "cols": {
-          "value": 20
-        }
-      }
+      "parameters": {}
     },
     "focus1": {
       "type": "DisplaceVOLNative",

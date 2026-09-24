@@ -2,42 +2,39 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "src_grid": {
-            "type": "GridSOP",
+        "box1": {
+            "type": "BoxSOP",
             "position": [
                 100,
                 100
             ],
+            "parameters": {}
+        },
+        "hout1": {
+            "type": "HostOutSOP",
+            "position": [
+                400,
+                100
+            ],
             "parameters": {
-                "rows": {
-                    "value": 10
-                },
-                "cols": {
-                    "value": 10
+                "label": {
+                    "value": "mesh"
                 }
             }
         },
-        "select1": {
-            "type": "SelectSOP",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {}
-        },
-        "geo_view": {
+        "geo1": {
             "type": "GeometryCOMP",
             "position": [
-                700,
-                100
+                400,
+                250
             ],
             "parameters": {}
         },
-        "cam_view": {
+        "cam1": {
             "type": "CameraCOMP",
             "position": [
-                700,
-                300
+                400,
+                450
             ],
             "parameters": {
                 "tx": {
@@ -51,11 +48,11 @@
                 }
             }
         },
-        "render_view": {
+        "render1": {
             "type": "RenderTOP",
             "position": [
-                1000,
-                100
+                750,
+                250
             ],
             "parameters": {
                 "resolution": {
@@ -70,8 +67,8 @@
         "window1": {
             "type": "WindowOUT",
             "position": [
-                1550,
-                100
+                1100,
+                250
             ],
             "parameters": {
                 "resolution": {
@@ -89,31 +86,31 @@
     },
     "connections": [
         {
-            "from": "src_grid",
+            "from": "box1",
             "from_port": 0,
-            "to": "select1",
+            "to": "hout1",
             "to_port": 0
         },
         {
-            "from": "select1",
+            "from": "box1",
             "from_port": 0,
-            "to": "geo_view",
+            "to": "geo1",
             "to_port": 0
         },
         {
-            "from": "geo_view",
+            "from": "geo1",
             "from_port": 0,
-            "to": "render_view",
+            "to": "render1",
             "to_port": 0
         },
         {
-            "from": "cam_view",
+            "from": "cam1",
             "from_port": 0,
-            "to": "render_view",
+            "to": "render1",
             "to_port": 1
         },
         {
-            "from": "render_view",
+            "from": "render1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -123,7 +120,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectSOP \u2014 Basic\n\nDefault settings.",
+            "text": "HostOutSOP exports cooked SOP geometry to the host as mesh arrays.",
             "position": [
                 -100.0,
                 -100.0

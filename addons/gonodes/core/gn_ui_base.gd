@@ -121,7 +121,8 @@ func get_output_data(port_index: int) -> GNData:
 func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 	var result := super.execute_cook(inputs, frame)
 	_build_ui_data()
-	_build_state_chop()
+	if is_output_demanded(output_ports.size() - 1):
+		_build_state_chop()
 	return _cached_ui_data
 
 

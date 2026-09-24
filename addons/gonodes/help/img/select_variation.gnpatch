@@ -70,7 +70,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectIMG \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "SelectIMG — Parameters\n\nRuns Noise IMG through Select IMG.",
             "position": [
                 -100.0,
                 -100.0

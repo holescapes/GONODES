@@ -1,124 +1,124 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "src_lfo": {
-      "type": "LFO_CHOP",
-      "position": [
-        100,
-        100
-      ],
-      "parameters": {
-        "frequency": {
-          "value": 1.0
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_lfo": {
+            "type": "LFO_CHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "frequency": {
+                    "value": 1.0
+                },
+                "amplitude": {
+                    "value": 1.0
+                }
+            }
         },
-        "amplitude": {
-          "value": 1.0
+        "audiodelay1": {
+            "type": "AudioDelayCHOPNative",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "delay_ms": {
+                    "value": 250.0
+                },
+                "feedback": {
+                    "value": 0.4
+                },
+                "wet": {
+                    "value": 0.5
+                },
+                "dry": {
+                    "value": 1.0
+                },
+                "ping_pong": {
+                    "value": false
+                },
+                "clear": {
+                    "value": false
+                }
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
-      }
     },
-    "audiodelay1": {
-      "type": "AudioDelayCHOPNative",
-      "position": [
-        450,
-        100
-      ],
-      "parameters": {
-        "delay_ms": {
-          "value": 250.0
+    "connections": [
+        {
+            "from": "src_lfo",
+            "from_port": 0,
+            "to": "audiodelay1",
+            "to_port": 0
         },
-        "feedback": {
-          "value": 0.4
+        {
+            "from": "audiodelay1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
         },
-        "wet": {
-          "value": 0.5
-        },
-        "dry": {
-          "value": 1.0
-        },
-        "ping_pong": {
-          "value": false
-        },
-        "clear": {
-          "value": false
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
         }
-      }
-    },
-    "choptop1": {
-      "type": "CHOPtoTOP",
-      "position": [
-        1150,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AudioDelayCHOPNative — Basic\n\nAdds a short echo with light feedback to an LFO signal.\nRequires gn_ext_audio extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [
-        1550,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
-        },
-        "open": {
-          "value": true
-        }
-      }
-    }
-  },
-  "connections": [
-    {
-      "from": "src_lfo",
-      "from_port": 0,
-      "to": "audiodelay1",
-      "to_port": 0
-    },
-    {
-      "from": "audiodelay1",
-      "from_port": 0,
-      "to": "choptop1",
-      "to_port": 0
-    },
-    {
-      "from": "choptop1",
-      "from_port": 0,
-      "to": "window1",
-      "to_port": 0
-    }
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "AudioDelayCHOPNative — Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
-      "position": [
-        -100.0,
-        -100.0
-      ],
-      "size": [
-        400.0,
-        100.0
-      ],
-      "color": [
-        1.0,
-        1.0,
-        1.0,
-        0.8
-      ]
-    }
-  ]
+    ]
 }

@@ -24,7 +24,7 @@
             }
         },
         "usernativesop1": {
-            "type": "UserNativeSOP",
+            "type": "NativeSCRIPT",
             "position": [
                 100,
                 100
@@ -48,24 +48,6 @@
                 100
             ],
             "parameters": {}
-        },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                500,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 1.5
-                },
-                "tz": {
-                    "value": 4
-                }
-            }
         },
         "render1": {
             "type": "RenderTOP",
@@ -101,6 +83,32 @@
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                400,
+                250
+            ],
+            "parameters": {}
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                950,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
+            }
         }
     },
     "connections": [
@@ -113,6 +121,12 @@
         {
             "from": "usernativesop1",
             "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "grid1",
+            "from_port": 0,
             "to": "geo1",
             "to_port": 0
         },
@@ -123,7 +137,7 @@
             "to_port": 0
         },
         {
-            "from": "cam1",
+            "from": "camera1",
             "from_port": 0,
             "to": "render1",
             "to_port": 1
@@ -139,7 +153,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserNativeSOP — Basic C++ Geometry\n\nWrite custom SOP operators in C++ with hot-reload.\nThe default example generates a sine-wave deformed grid.\n\nClick the node, then 'Edit C++ ↗' in the inspector.\nPress Ctrl+B to build. The node reloads automatically.\n\n10-50× faster than equivalent GDScript.",
+            "text": "NativeSCRIPT \u2014 Basic C++ Geometry\n\nWrite custom SOP operators in C++ with hot-reload.\nThe default example generates a sine-wave deformed grid.\n\nClick the node, then 'Edit C++ \u2197' in the inspector.\nPress Ctrl+B to build. The node reloads automatically.\n\n10-50\u00d7 faster than equivalent GDScript.",
             "position": [
                 -100.0,
                 -100.0

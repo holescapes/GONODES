@@ -95,7 +95,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioStreamOutCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+            "text": "AudioStreamOutCHOP — Basic\n\nSends audio to localhost on UDP port 9100.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

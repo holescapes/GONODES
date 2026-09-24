@@ -92,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AreaCHOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "AreaCHOP — Advanced\n\nRuns Wave CHOP through Area CHOP with method=2, cumulative=true.",
             "position": [
                 -100.0,
                 -100.0

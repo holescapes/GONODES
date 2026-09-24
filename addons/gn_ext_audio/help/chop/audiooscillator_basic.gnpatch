@@ -107,7 +107,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioOscillatorCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+            "text": "AudioOscillatorCHOP — Basic\n\nGenerates a 440 Hz sine tone at audio rate.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

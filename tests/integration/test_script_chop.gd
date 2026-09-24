@@ -13,6 +13,12 @@ var _network: GNNetwork
 # Lifecycle
 # ═══════════════════════════════════════════════════════════════════════════════
 
+func before_all() -> void:
+	# Initialize extension registry — scan for gn_ext_* addon manifests
+	# (same as gn_editor.gd _ready(); registers family data factories via gn_core.cfg)
+	GNExtensionRegistry.instance().scan_extensions()
+
+
 func before_each() -> void:
 	_network = GNNetwork.new()
 	_engine = GNCookEngine.new()
@@ -190,7 +196,7 @@ func cook():
 
 func test_script_chop_syntax_error_graceful() -> void:
 	## A script with broken syntax should not crash.
-	## It should produce null or empty output.
+	## It should surface a compile warning on the node.
 	var s := _make_node(GDScriptSCRIPT, "script1")
 	s.set_param_value("code", """
 func cook():
@@ -198,10 +204,10 @@ func cook():
 """.strip_edges())
 	_sink(["script1"])
 
+	GNTestAssert.allow_script_errors(1)
 	_cook_one_frame()
 
-	# Should not crash — output may be null or empty
-	GNTestAssert.assert_true(true, "no crash on syntax error")
+	GNTestAssert.assert_not_empty(s.node_warning, "compile error reported on node")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -218,13 +218,13 @@ inside `native/` **cannot be resolved by Godot** — this means:
 
 ```ini
 [windows]
-runtime_dlls = bin/win64/python3.dll, bin/win64/python312.dll
-runtime_dlls_dest = runtime/win64   # relative to extension root, NOT native/
+runtime_dlls = bin/win64/python3.dll, bin/win64/python310.dll
+runtime_dlls_dest = bin/win64   # relative to extension root, NOT native/
 ```
 
 OpenCV's `opencv_world4100.dll` doesn't need pre-loading (Windows finds it via
 `LOAD_WITH_ALTERED_SEARCH_PATH` in the same dir as the DLL) so it stays in `bin/`.
-Python's `python3.dll`/`python312.dll` DO need pre-loading, so they live in `runtime/win64/`.
+Python's `python3.dll`/`python310.dll` DO need pre-loading, so they live in `bin/win64/`.
 
 If you get "Could not find module ... (or one of its dependencies)" errors, verify:
 1. The SDK is present (e.g., `native/opencv_sdk/` for OpenCV)

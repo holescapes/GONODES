@@ -8,11 +8,15 @@
             ],
             "parameters": {
                 "resolution": {
-                    "_type": "Vector2i",
-                    "x": 512,
-                    "y": 512
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "monochrome": false
+                "monochrome": {
+                    "value": false
+                }
             }
         },
         "glsl_multi1": {
@@ -22,7 +26,9 @@
                 200
             ],
             "parameters": {
-                "shader_code": "shader_type canvas_item;\nuniform sampler2D gn_tex0 : hint_default_white;\nuniform float edge_strength = 5.0;\n\nvoid fragment() {\n\tvec4 src = texture(gn_tex0, UV);\n\tfloat luma = dot(src.rgb, vec3(0.299, 0.587, 0.114));\n\tvec3 chroma = src.rgb - vec3(luma);\n\tvec3 edge = fwidth(src.rgb) * edge_strength;\n\n\tgn_out0 = src;\n\tgn_out1 = vec4(vec3(luma), 1.0);\n\tgn_out2 = vec4(chroma + 0.5, 1.0);\n\tgn_out3 = vec4(edge, 1.0);\n}"
+                "shader_code": {
+                    "value": "shader_type canvas_item;\nuniform sampler2D gn_tex0 : hint_default_white;\nuniform float edge_strength = 5.0;\n\nvoid fragment() {\n\tvec4 src = texture(gn_tex0, UV);\n\tfloat luma = dot(src.rgb, vec3(0.299, 0.587, 0.114));\n\tvec3 chroma = src.rgb - vec3(luma);\n\tvec3 edge = fwidth(src.rgb) * edge_strength;\n\n\tgn_out0 = src;\n\tgn_out1 = vec4(vec3(luma), 1.0);\n\tgn_out2 = vec4(chroma + 0.5, 1.0);\n\tgn_out3 = vec4(edge, 1.0);\n}"
+                }
             }
         },
         "layout1": {
@@ -32,11 +38,15 @@
                 200
             ],
             "parameters": {
-                "columns": 2,
+                "columns": {
+                    "value": 2
+                },
                 "resolution": {
-                    "_type": "Vector2i",
-                    "x": 1024,
-                    "y": 1024
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 1024,
+                        "y": 1024
+                    }
                 }
             }
         },
@@ -47,12 +57,18 @@
                 50
             ],
             "parameters": {
-                "text": "GLSLMultiTOP — 4-Output Decomposition\n\nOne shader pass generates 4 outputs:\n  out0: Original\n  out1: Luminance\n  out2: Chrominance\n  out3: Edges\n\nCustom uniform 'edge_strength' auto-creates\nan inspector parameter.",
-                "font_size": 18,
+                "text": {
+                    "value": "GLSLMultiTOP \u2014 4-Output Decomposition\n\nOne shader pass generates 4 outputs:\n  out0: Original\n  out1: Luminance\n  out2: Chrominance\n  out3: Edges\n\nCustom uniform 'edge_strength' auto-creates\nan inspector parameter."
+                },
+                "font_size": {
+                    "value": 18
+                },
                 "resolution": {
-                    "_type": "Vector2i",
-                    "x": 512,
-                    "y": 512
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 }
             }
         },
@@ -64,11 +80,15 @@
             ],
             "parameters": {
                 "resolution": {
-                    "_type": "Vector2i",
-                    "x": 512,
-                    "y": 512
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
                 },
-                "open": true
+                "open": {
+                    "value": true
+                }
             }
         }
     },
@@ -114,7 +134,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Noise TOP — Decompose\n\nProcedural noise texture (Simplex, Perlin, Voronoi, White, Value, Ridged). GPU shader.",
+            "text": "Noise TOP \u2014 Decompose\n\nProcedural noise texture (Simplex, Perlin, Voronoi, White, Value, Ridged). GPU shader.",
             "position": [
                 -100.0,
                 -100.0

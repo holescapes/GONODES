@@ -7,6 +7,9 @@ extends GNTopBase
 ## Requires compute shaders (forward_plus / mobile renderers).
 
 var _out_tex: GNTextureData = null
+var _output_tex_rid: RID = RID()
+var _output_tex2d_rd: Texture2DRD = null
+var _prev_res: Vector2i = Vector2i.ZERO
 
 
 func _init() -> void:
@@ -69,6 +72,21 @@ func supported_renderers() -> PackedStringArray:
 	return PackedStringArray(["forward_plus", "mobile"])
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_free_output_texture()
+
+
+func _free_output_texture() -> void:
+	if _output_tex2d_rd != null:
+		_output_tex2d_rd.texture_rd_rid = RID()
+	if _output_tex_rid.is_valid():
+		var ctx := GNGpuContext.get_context()
+		if ctx != null and ctx.rd != null:
+			ctx.rd.free_rid(_output_tex_rid)
+		_output_tex_rid = RID()
+
+
 func _cook(inputs: Array[GNData]) -> GNData:
 	var vol: GNVolumeData = inputs[0] as GNVolumeData if inputs.size() > 0 and inputs[0] is GNVolumeData else null
 	if vol == null or not vol.has_volume():
@@ -118,23 +136,16 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var amb: float = get_param_value("ambient")
 	var emit_col: Color = get_param_value("emit_color")
 
-	# Create 2D output texture on RD
-	var tf := RDTextureFormat.new()
-	tf.texture_type = RenderingDevice.TEXTURE_TYPE_2D
-	tf.format = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
-	tf.width = w
-	tf.height = h
-	tf.depth = 1
-	tf.mipmaps = 1
-	tf.array_layers = 1
-	tf.usage_bits = (
-		RenderingDevice.TEXTURE_USAGE_STORAGE_BIT |
-		RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT)
-	var out_tex: RID = ctx.rd.texture_create(tf, RDTextureView.new())
+	var res := Vector2i(w, h)
+	if res != _prev_res:
+		_free_output_texture()
+		_output_tex_rid = ctx.create_texture_2d(w, h)
+		_prev_res = res
+		if not _output_tex_rid.is_valid():
+			return null
 
 	var shader: RID = ctx.get_shader("res://addons/gonodes/shaders/vol/raymarch_vol.glsl")
 	if not shader.is_valid():
-		ctx.rd.free_rid(out_tex)
 		return null
 
 	var sampler: RID = ctx.create_linear_sampler()
@@ -187,7 +198,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var us: RID = ctx.rd.uniform_set_create([
 		ctx.uniform_sampler(0, sampler, vol.rd_texture),
-		ctx.uniform_image(1, out_tex),
+		ctx.uniform_image(1, _output_tex_rid),
 	], shader, 0)
 
 	var wg_x: int = ceili(float(w) / 8.0)
@@ -196,17 +207,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	ctx.rd.free_rid(us)
 	ctx.rd.free_rid(sampler)
 
-	# Read back 2D texture -> Image -> ImageTexture -> GNTextureData
-	var bytes: PackedByteArray = ctx.rd.texture_get_data(out_tex, 0)
-	ctx.rd.free_rid(out_tex)
-
-	var img := Image.create_from_data(w, h, false, Image.FORMAT_RGBA8, bytes)
-	var itex := ImageTexture.create_from_image(img)
+	if _output_tex2d_rd == null:
+		_output_tex2d_rd = Texture2DRD.new()
+	_output_tex2d_rd.texture_rd_rid = _output_tex_rid
 
 	if _out_tex == null:
 		_out_tex = GNTextureData.new()
-	_out_tex.texture = itex
-	_out_tex.resolution = Vector2i(w, h)
+	_out_tex.texture = _output_tex2d_rd
+	_out_tex.resolution = res
 	_out_tex.format = Image.FORMAT_RGBA8
 	return _out_tex
 

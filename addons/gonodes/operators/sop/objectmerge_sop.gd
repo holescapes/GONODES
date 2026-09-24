@@ -1,7 +1,7 @@
 class_name ObjectMergeSOP
 extends GNSopBase
-## @deprecated Use SelectSOP instead (has the same remote reference + apply_transform,
-## plus geometry filtering).
+## @deprecated Use SelectSOP for remote SOP references; use FilterSOP for geometry filtering.
+## No current operator replaces apply_transform.
 ##
 ## Fetch geometry from another SOP node by reference path.
 ##

@@ -102,7 +102,10 @@ func _cook(inputs_arr: Array[GNData]) -> GNData:
 		_rebuild_output_ports(code)
 
 	if not _helper.script_ok:
-		# Return first cached output or null
+		if not _helper.compile_error.is_empty():
+			node_warning = "GDScript compile error: %s" % _helper.compile_error.substr(0, 200)
+		else:
+			node_warning = "GDScript did not compile."
 		return _output_data[0] if not _output_data.is_empty() else null
 
 	# Pre-create fresh typed data objects for each output port

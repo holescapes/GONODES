@@ -98,7 +98,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "RecordCHOP \u2014 Basic\n\nDefault settings.",
+            "text": "RecordCHOP — Basic\n\nRuns LFO_ CHOP through Record CHOP with record=false, max_length=3600, loop=false, sample_rate=60.",
             "position": [
                 -100.0,
                 -100.0

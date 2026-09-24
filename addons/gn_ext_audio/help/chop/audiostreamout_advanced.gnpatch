@@ -92,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioStreamOutCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
+            "text": "AudioStreamOutCHOP — Advanced\n\nShows alternate port output with streaming disabled.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

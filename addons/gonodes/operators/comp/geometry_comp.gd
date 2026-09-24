@@ -101,14 +101,20 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 	if cached_output is GNGeoData and _mesh_instance != null:
 		var geo: GNGeoData = cached_output as GNGeoData
 		if geo.mesh != null:
-			GNGeoRenderer._ensure_viewer_scene()
+			GNViewerRenderHelpers.ensure_shared_geo_viewer()
 			var vp: SubViewport = viewer.get_3d_viewport()
-			GNGeoRenderer._reparent_viewer_nodes(vp)
-			GNGeoRenderer._viewer_mesh_instance.material_override = _mesh_instance.material_override
+			GNViewerRenderHelpers.reparent_shared_geo_viewer(vp)
+			var mesh_inst := GNViewerRenderHelpers.shared_geo_mesh()
+			var cam := GNViewerRenderHelpers.shared_geo_camera()
+			if mesh_inst == null or cam == null:
+				return
+			mesh_inst.material_override = _mesh_instance.material_override
 			GNViewerRenderHelpers.apply_orbit_camera(
-				GNGeoRenderer._viewer_camera, viewer.orbit_yaw, viewer.orbit_pitch, viewer.orbit_distance)
-			GNViewerRenderHelpers.update_gizmo_scale(GNGeoRenderer._viewer_gizmo, viewer.orbit_distance)
-			GNViewerRenderHelpers.render_sop(vp, GNGeoRenderer._viewer_mesh_instance, geo.mesh, viewer.wireframe)
+				cam, viewer.orbit_yaw, viewer.orbit_pitch, viewer.orbit_distance)
+			var gizmo := GNViewerRenderHelpers.shared_geo_gizmo()
+			if gizmo != null:
+				GNViewerRenderHelpers.update_gizmo_scale(gizmo, viewer.orbit_distance)
+			GNViewerRenderHelpers.render_sop(vp, mesh_inst, geo.mesh, viewer.wireframe)
 			viewer.set_info_bar("%d verts" % geo.vertex_count)
 			return
 	super.render_for_viewer(viewer, port_index)

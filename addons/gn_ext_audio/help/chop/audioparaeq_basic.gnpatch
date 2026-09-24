@@ -95,7 +95,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioParaEQCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+            "text": "AudioParaEQCHOP — Basic\n\nShapes an LFO signal with four parametric EQ bands.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

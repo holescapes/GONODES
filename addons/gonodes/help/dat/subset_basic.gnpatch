@@ -97,14 +97,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SubsetDAT \u2014 Basic\n\nDefault settings.",
+            "text": "SubsetDAT — Basic\n\nRuns Constant DAT through Subset DAT with row_start=0, row_end=-1, col_start=0, col_end=-1, include_header=true.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

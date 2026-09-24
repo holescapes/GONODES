@@ -129,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ResampleSOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "ResampleSOP — Advanced\n\nRuns Box SOP through Resample SOP with mode=2, count=34, segment_length=0.2, close=true.",
             "position": [
                 -100.0,
                 -100.0

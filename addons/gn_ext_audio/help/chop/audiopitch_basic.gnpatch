@@ -98,7 +98,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioPitchCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+            "text": "AudioPitchCHOP — Basic\n\nPasses an LFO signal through the pitch shifter at unity pitch.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

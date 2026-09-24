@@ -4,44 +4,124 @@
     "nodes": {
         "noise1": {
             "type": "NoiseTOP",
-            "position": [100, 200],
+            "position": [
+                100,
+                200
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "noise_type":  {"value": 0},
-                "scale":       {"value": 2.0}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "noise_type": {
+                    "value": 0
+                },
+                "scale": {
+                    "value": 2.0
+                }
             }
         },
         "grid1": {
             "type": "GridFIX",
-            "position": [100, 400],
+            "position": [
+                100,
+                400
+            ],
             "parameters": {
-                "fixture_name": {"value": "panel"},
-                "cols":         {"value": 8},
-                "rows":         {"value": 8},
-                "channel_layout": {"value": 0},
-                "universe":     {"value": 1},
-                "start_channel": {"value": 1}
+                "fixture_name": {
+                    "value": "panel"
+                },
+                "cols": {
+                    "value": 8
+                },
+                "rows": {
+                    "value": 8
+                },
+                "channel_layout": {
+                    "value": 0
+                },
+                "universe": {
+                    "value": 1
+                },
+                "start_channel": {
+                    "value": 1
+                }
             }
         },
         "sampler1": {
             "type": "FixtureSamplerTOP",
-            "position": [450, 280],
+            "position": [
+                450,
+                280
+            ],
             "parameters": {
-                "sample_mode": {"value": 0}
+                "sample_mode": {
+                    "value": 0
+                }
             }
         },
         "out1": {
             "type": "WindowOUT",
-            "position": [800, 280],
+            "position": [
+                800,
+                280
+            ],
             "parameters": {
-                "resolution": {"value": {"_type": "Vector2i", "x": 512, "y": 512}},
-                "open":       {"value": true}
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
             }
         }
     },
     "connections": [
-        {"from": "noise1",   "from_port": 0, "to": "sampler1", "to_port": 0},
-        {"from": "grid1",    "from_port": 0, "to": "sampler1", "to_port": 1},
-        {"from": "sampler1", "from_port": 0, "to": "out1",     "to_port": 0}
+        {
+            "from": "noise1",
+            "from_port": 0,
+            "to": "sampler1",
+            "to_port": 0
+        },
+        {
+            "from": "grid1",
+            "from_port": 0,
+            "to": "sampler1",
+            "to_port": 1
+        },
+        {
+            "from": "sampler1",
+            "from_port": 0,
+            "to": "out1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ],
+            "text": "Grid FIX — Basic\n\nConfigures Grid FIX with fixture_name='panel', cols=8, rows=8, channel_layout=0, universe=1."
+        }
     ]
 }

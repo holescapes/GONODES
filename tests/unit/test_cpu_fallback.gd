@@ -106,16 +106,17 @@ func test_thread_detection_returns_bool() -> void:
 
 func test_source_pop_cpu_emits_particles() -> void:
 	var node := _make_node(SourcePOP.new(), "src1")
+	node.current_delta = 1.0 / 60.0
 	node.set_param_value("max_particles", 100)
-	node.set_param_value("emit_rate", 50)
+	node.set_param_value("rate", 3000.0)
 	var out := _cook_cpu_no_input(node)
 	assert(out != null, "SourcePOP CPU should produce output")
 	assert(out is GNParticleData, "Output should be GNParticleData")
 	var pd: GNParticleData = out as GNParticleData
 	assert(pd.is_cpu, "Should be in CPU mode")
 	assert(pd.particle_count > 0, "Should have emitted particles")
-	assert(pd.cpu_positions.size() == pd.particle_count,
-		"CPU positions array should match particle count")
+	assert(pd.cpu_positions.size() == pd.max_particles,
+		"CPU positions pool should match max_particles capacity")
 
 
 func test_force_pop_cpu_applies_gravity() -> void:
@@ -205,7 +206,9 @@ func test_null_pop_cpu_passthrough() -> void:
 
 func test_noise_vol_cpu_produces_volume() -> void:
 	var node := _make_node(NoiseVOL.new(), "noise1")
-	node.set_param_value("resolution", Vector3i(16, 16, 16))
+	node.set_param_value("res_x", 16)
+	node.set_param_value("res_y", 16)
+	node.set_param_value("res_z", 16)
 	var out := _cook_cpu_no_input(node)
 	assert(out != null, "NoiseVOL CPU should produce output")
 	assert(out is GNVolumeData, "Output should be GNVolumeData")

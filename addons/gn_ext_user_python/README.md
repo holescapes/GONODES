@@ -12,7 +12,7 @@ GNPythonProcessor (C++ GDExtension, per-node)
     ↓ managed by
 GNPythonRuntime (C++ singleton, embeds CPython)
     ↓ called from
-GDScript wrapper (UserPythonSOP/CHOP/IMG/TOP/DAT)
+GDScript wrapper (PythonSCRIPT)
     ↓ integrated into
 GONODES cook engine
 ```
@@ -52,15 +52,12 @@ cd build && scons ext=gn_ext_user_python platform=<your_platform> -j8
 - NumPy (`pip install numpy`)
 - Desktop only: Windows, macOS, Linux
 
-## Operator Families
+## Operator
 
-| Operator | Base Class | Description |
-|----------|-----------|-------------|
-| UserPythonSOP | GNSopBase | Geometry processing |
-| UserPythonCHOP | GNChopBase | Channel/signal processing |
-| UserPythonIMG | GNImgBase | CPU image processing |
-| UserPythonTOP | GNTopBase | CPU texture generation |
-| UserPythonDAT | GNDatBase | Table/text data |
+Add a **PythonSCRIPT** node from the User Python section. Use the
+**Template** dropdown in the parameter inspector to select the CHOP, SOP,
+DAT, IMG, or TOP context — this loads a family-focused starter script and
+sets up the default input/output marshalling for that family.
 
 ## Quick Start
 

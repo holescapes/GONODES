@@ -1,0 +1,40 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "subnet1": {
+            "type": "SubNetworkNode",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "My Subnet"
+                }
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "SubNetworkNode wraps an inner operator graph whose ports are driven by InTunnel and OutTunnel nodes.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

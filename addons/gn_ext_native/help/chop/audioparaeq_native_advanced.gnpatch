@@ -1,115 +1,115 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "src_wave": {
-      "type": "WaveCHOP",
-      "position": [
-        100,
-        100
-      ],
-      "parameters": {
-        "waveform": {
-          "value": 0
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_wave": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 0
+                },
+                "frequency": {
+                    "value": 2.0
+                }
+            }
         },
-        "frequency": {
-          "value": 2.0
-        }
-      }
-    },
-    "audioparaeq1": {
-      "type": "AudioParaEQCHOPNative",
-      "position": [
-        450,
-        100
-      ],
-      "parameters": {
-        "bands": {
-          "value": 6
+        "audioparaeq1": {
+            "type": "AudioParaEQCHOPNative",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "bands": {
+                    "value": 6
+                },
+                "low_shelf": {
+                    "value": true
+                },
+                "high_shelf": {
+                    "value": true
+                }
+            }
         },
-        "low_shelf": {
-          "value": true
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         },
-        "high_shelf": {
-          "value": true
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
-      }
     },
-    "choptop1": {
-      "type": "CHOPtoTOP",
-      "position": [
-        1150,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
-        }
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [
-        1550,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
+    "connections": [
+        {
+            "from": "src_wave",
+            "from_port": 0,
+            "to": "audioparaeq1",
+            "to_port": 0
         },
-        "open": {
-          "value": true
+        {
+            "from": "audioparaeq1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
+        },
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
         }
-      }
-    }
-  },
-  "connections": [
-    {
-      "from": "src_wave",
-      "from_port": 0,
-      "to": "audioparaeq1",
-      "to_port": 0
-    },
-    {
-      "from": "audioparaeq1",
-      "from_port": 0,
-      "to": "choptop1",
-      "to_port": 0
-    },
-    {
-      "from": "choptop1",
-      "from_port": 0,
-      "to": "window1",
-      "to_port": 0
-    }
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "AudioParaEQCHOPNative — Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
-      "position": [
-        -100.0,
-        -100.0
-      ],
-      "size": [
-        400.0,
-        100.0
-      ],
-      "color": [
-        1.0,
-        1.0,
-        1.0,
-        0.8
-      ]
-    }
-  ]
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AudioParaEQCHOPNative — Advanced\n\nAdds six EQ bands including low and high shelves on a wave input.\nRequires gn_ext_audio extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
 }

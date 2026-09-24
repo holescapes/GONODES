@@ -31,6 +31,13 @@ func _init() -> void:
 	node_type = "artnet"
 	time_dependent = true
 	thread_safe = false  # PacketPeerUDP I/O
+	is_sink = false
+	parameter_changed.connect(_on_active_sink_changed)
+
+
+func _on_active_sink_changed(_node_id: String, param_name: String) -> void:
+	if param_name == "active":
+		is_sink = bool(get_param_value("active"))
 
 
 func _init_ports() -> void:

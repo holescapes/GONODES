@@ -724,8 +724,7 @@ func cook_frame(delta: float) -> void:
 
 			# Cook CPU nodes in parallel if batch is large enough
 			if cpu_batch.size() >= parallel_min_batch:
-				_cook_cpu_batch_parallel(cpu_batch)
-				cooked_count += cpu_batch.size()
+				cooked_count += _cook_cpu_batch_parallel(cpu_batch)
 			else:
 				for node in cpu_batch:
 					var r := _cook_single_node(node)
@@ -2180,6 +2179,9 @@ func _cook_single_node(node: GNNode) -> int:
 
 	# ── Input hash guard (Tier 2) ──
 	var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
+	# Skip when inputs unchanged on a clean node — unreachable here: the cook
+	# loop only calls _cook_single_node for dirty nodes, so not node.dirty is
+	# always false. Hash is still stored below.
 	if cook_input_hash == node._last_cook_input_hash and not node.dirty:
 		return 0
 	node._last_cook_input_hash = cook_input_hash
@@ -2303,7 +2305,7 @@ func _cook_single_node(node: GNNode) -> int:
 ## the actual _cook() calls to worker threads.
 ## Nodes with thread_safe == false are cooked sequentially after the parallel
 ## batch completes (they may call set_par, network_*, or use I/O objects).
-func _cook_cpu_batch_parallel(batch: Array) -> void:
+func _cook_cpu_batch_parallel(batch: Array) -> int:
 	# Phase 1: Main-thread preparation (graph reads are not thread-safe)
 	var parallel_prepared: Array[Dictionary] = []
 	var sequential_prepared: Array[Dictionary] = []
@@ -2315,6 +2317,7 @@ func _cook_cpu_batch_parallel(batch: Array) -> void:
 		_resolve_node_parameters(node)
 		var inputs: Array[GNData] = _gather_inputs(node)
 		var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
+		# Unreachable — batch only contains nodes already selected to cook (dirty).
 		if cook_input_hash == node._last_cook_input_hash and not node.dirty:
 			continue
 		node._last_cook_input_hash = cook_input_hash
@@ -2372,6 +2375,8 @@ func _cook_cpu_batch_parallel(batch: Array) -> void:
 		n.node_cooked.emit(n.id)
 		_cooked_this_frame[n.id] = true
 		_stamp_owned_output(n, n.cached_output, entry["inputs"])
+
+	return parallel_prepared.size() + sequential_prepared.size()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

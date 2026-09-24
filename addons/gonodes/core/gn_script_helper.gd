@@ -286,16 +286,42 @@ func run_cook(node: GNNode, inputs: Array[GNData], output: Variant,
 	return true
 
 
+## Captures script errors logged while a user script method runs.
+class _CallErrorLogger extends Logger:
+	var message: String = ""
+	var had_error: bool = false
+
+	func _log_error(_function: String, _file: String, _line: int, _code: String,
+			rationale: String, _editor_notify: bool, _error_type: int,
+			_script_backtraces: Array[ScriptBacktrace]) -> void:
+		had_error = true
+		if message.is_empty():
+			if not rationale.is_empty():
+				message = rationale
+			elif not _code.is_empty():
+				message = _code
+			else:
+				message = "script error in %s()" % _function
+
+
 ## Safely calls a method on the instance, catching runtime errors.
 ## Returns empty string on success, or the error message on failure.
 static func _safe_call(instance: RefCounted, method: String, node: GNNode) -> String:
-	# GDScript doesn't have try/catch, but we can check for common issues.
-	# Runtime errors in Godot 4.x will print to console but won't crash.
-	# We rely on Godot's built-in error reporting for now.
-	if instance.has_method(method):
-		instance.call(method)
-		return ""
-	return "Method '%s' not found" % method
+	if not instance.has_method(method):
+		return "Method '%s' not found" % method
+
+	var err_logger := _CallErrorLogger.new()
+	OS.add_logger(err_logger)
+	instance.call(method)
+	if OS.has_method("remove_logger"):
+		OS.remove_logger(err_logger)
+
+	if err_logger.had_error:
+		var msg := err_logger.message
+		node.node_warning = msg
+		return msg
+	node.node_warning = ""
+	return ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

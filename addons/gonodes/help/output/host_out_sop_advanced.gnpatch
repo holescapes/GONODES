@@ -2,18 +2,6 @@
     "version": "1.0.0",
     "generator": "GONODES",
     "nodes": {
-        "lfo1": {
-            "type": "LFO_CHOP",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {
-                "frequency": {
-                    "value": 1.0
-                }
-            }
-        },
         "host_out_sop1": {
             "type": "HostOutSOP",
             "position": [
@@ -21,11 +9,19 @@
                 100
             ],
             "parameters": {}
+        },
+        "box1": {
+            "type": "BoxSOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
         }
     },
     "connections": [
         {
-            "from": "lfo1",
+            "from": "box1",
             "from_port": 0,
             "to": "host_out_sop1",
             "to_port": 0
@@ -35,7 +31,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Host Out SOP — Advanced\n\nExport geometry data to host application (LibGodot embedding).",
+            "text": "Host Out SOP \u2014 Advanced\n\nExport geometry data to host application (LibGodot embedding).",
             "position": [
                 -100.0,
                 -100.0

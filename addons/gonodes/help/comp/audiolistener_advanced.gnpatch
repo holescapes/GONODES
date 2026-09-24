@@ -80,7 +80,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioListenerCOMP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "AudioListenerCOMP — Advanced\n\nConfigures Audio Listener COMP with current=false.",
             "position": [
                 -100.0,
                 -100.0

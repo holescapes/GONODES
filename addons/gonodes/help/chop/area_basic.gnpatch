@@ -92,7 +92,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AreaCHOP \u2014 Basic\n\nDefault settings.",
+            "text": "AreaCHOP — Basic\n\nRuns LFO_ CHOP through Area CHOP with method=0, cumulative=false.",
             "position": [
                 -100.0,
                 -100.0

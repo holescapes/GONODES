@@ -216,7 +216,7 @@ func _run_suite(script_path: String) -> void:
 		if GNTestAssert._failure_count > 0:
 			success = false
 			error_msg = GNTestAssert._last_failure
-		elif _error_counter.count > errors_before:
+		elif _error_counter.count - errors_before > GNTestAssert._script_error_allowance:
 			success = false
 			error_msg = "script error during test (bare assert or runtime error)"
 

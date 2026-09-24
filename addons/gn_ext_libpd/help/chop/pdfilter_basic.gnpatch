@@ -98,14 +98,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PdFilterCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_libpd extension.",
+            "text": "PdFilterCHOP — Basic\n\nProcesses an LFO signal through a Pure Data effect patch at full wet mix.\nRequires gn_ext_libpd extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

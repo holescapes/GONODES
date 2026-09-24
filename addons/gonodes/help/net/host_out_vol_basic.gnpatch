@@ -1,0 +1,94 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "noise_vol": {
+            "type": "NoiseVOL",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {}
+        },
+        "hout1": {
+            "type": "HostOutVOL",
+            "position": [
+                500,
+                100
+            ],
+            "parameters": {
+                "label": {
+                    "value": "density"
+                }
+            }
+        },
+        "ray1": {
+            "type": "RaymarchTOP",
+            "position": [
+                500,
+                250
+            ],
+            "parameters": {}
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                900,
+                250
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
+        }
+    },
+    "connections": [
+        {
+            "from": "noise_vol",
+            "from_port": 0,
+            "to": "hout1",
+            "to_port": 0
+        },
+        {
+            "from": "noise_vol",
+            "from_port": 0,
+            "to": "ray1",
+            "to_port": 0
+        },
+        {
+            "from": "ray1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
+        }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "HostOutVOL publishes volumetric field data from the network to the host application.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

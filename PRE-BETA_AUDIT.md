@@ -1192,108 +1192,108 @@ Every finding from this audit, with the fix to make. Status is as of the B-8 / B
 
 | ID | Finding | Recommended fix |
 |----|---------|-----------------|
-| F4a-01 | Cook flowchart order is stale | Rewrite `COOK_ENGINE.md` §1–§2 to match `cook_frame`: topo, then active set, then pre-cook |
-| F4a-02 | Input-hash skip cannot run | Either cook clean nodes through the hash check, or delete the dead branch and stop calling it done in ROADMAP and `COOK_ENGINE.md` §3.3 |
-| F4a-03 | Cook budget applies only to the sequential path | Document that, or apply `max_cooks_per_frame` inside the parallel branch too |
-| F4a-04 | Parallel cook count includes nodes the hash skip continued past | Increment only when a node actually cooked, same as the sequential path |
-| F4a-05 | No tests for Switch pruning, 1-frame hold, demand culling, parallel cook, subnet engines, or cycle rejection | Add one headless test each. Do not mark them pass from a code read |
-| F4a-06 | NRT delta snippet omits `playback_speed` | Put `* playback_speed` in the `COOK_ENGINE.md` §7 snippet |
-| F4a-07 | Demand-culling list stops at 15 operators | Add `GLSLMultiTOP`, subnet OutTunnels, and interactive panel ports to §4.1 |
-| F4a-08 | Doc says `SubNetworkCOMP` | Rename it to `SubNetworkNode` in `COOK_ENGINE.md` §8 |
-| F4a-09 | User help says dirtiness floods the whole chain, and lists RenderTOP as a sink | Fix `help/cook_engine.md`: only immediate successors are dirtied, and RenderTOP is not `is_sink` |
-| F4b-04 | Only BlurIMG and PixelSortIMG call `_mutable_input` | Grep operators that write into `inputs[0]` and route those writes through `_mutable_input` |
-| F4b-05 | Context §21 still calls POP future and says `GNImgData` | Update `GONODES_CONTEXT.md` §21 and `DATA_TYPES.md` to `GNImageData` and the current families |
-| F4x-01 | FixtureSamplerTOP samples LEDs even when the CHOP port is idle | Gate the sample pass on `is_output_demanded` of the CHOP port alone. Drop the `or _total_leds > 0` term |
-| F4x-02 | Every UI widget rebuilds its CHOP every cook | In `GNUIBase`, build the state CHOP only when port 1 is demanded |
-| F4x-03 | FluidVOL and PyroVOL secondary fields are ungated | If a field can be skipped, wrap it in `is_output_demanded`. If the sim must write it, say so in the operator's `OPERATORS.md` row |
+| F4a-01 | Cook flowchart order is stale | **Fixed.** `COOK_ENGINE.md` §1–§2 now matches `cook_frame`: topo, then active set, then pre-cook, with the reason active set runs first |
+| F4a-02 | Input-hash skip cannot run | **Fixed.** Left scheduling alone. Commented the dead `not node.dirty` arm in `_cook_single_node` and `_cook_cpu_batch_parallel`. `COOK_ENGINE.md` §2, §3.3, and Example 4, plus the ROADMAP row, now say the skip is not taken; a static chain is skipped by the dirty flag |
+| F4a-03 | Cook budget applies only to the sequential path | **Fixed.** Documented only. `COOK_ENGINE.md` §1 now says `max_cooks_per_frame` (default 0) is enforced on the sequential path and ignored by the parallel branch |
+| F4a-04 | Parallel cook count includes nodes the hash skip continued past | **Fixed.** `_cook_cpu_batch_parallel` now returns how many nodes were prepared and cooked. The caller adds that, not `cpu_batch.size()`. The unreachable hash `continue` is excluded |
+| F4a-05 | No tests for Switch pruning, 1-frame hold, demand culling, parallel cook, subnet engines, or cycle rejection | **Fixed.** `tests/unit/test_cook_behaviours.gd` — six tests, all passing: pruning, expression one-frame hold, demand stamp, parallel batch, subnet inner `cook_frame`, and `connect_nodes` cycle rejection |
+| F4a-06 | NRT delta snippet omits `playback_speed` | **Fixed.** `COOK_ENGINE.md` §7 snippet is now `(1.0 / non_realtime_fps) * playback_speed`, matching `gn_cook_engine.gd:253` |
+| F4a-07 | Demand-culling list stops at 15 operators | **Fixed.** §4.1 guard list now includes GLSLMultiTOP fallback, SubNetworkNode OutTunnel `is_sink`, and `GNTopInteractiveBase` panel ports. The "15 operators" census (nodes with 2+ ports) was left as-is |
+| F4a-08 | Doc says `SubNetworkCOMP` | **Fixed.** `COOK_ENGINE.md` §8 now says `SubNetworkNode`, which matches `sub_network_node.gd` |
+| F4a-09 | User help says dirtiness floods the whole chain, and lists RenderTOP as a sink | **Fixed.** `help/cook_engine.md` now says only immediate successors are dirtied, and the sink example is WindowOUT. RenderTOP does not set `is_sink` |
+| F4b-04 | Only BlurIMG and PixelSortIMG call `_mutable_input` | **Fixed.** In-place POP processors now duplicate a shared buffer before writing: Force, Attract, Advect, Boids, Collision, Limit, Turbulence (GPU and CPU). SourcePOP was left alone; it writes its own particle buffer and only reads the SOP input |
+| F4b-05 | Context §21 still calls POP future and says `GNImgData` | **Fixed.** §21 table now has IMG, POP (`GNParticleData`), VOL, UI, and SDF. `DATA_TYPES.md` §6 sample uses `GNImageData` |
+| F4x-01 | FixtureSamplerTOP samples LEDs even when the CHOP port is idle | **Fixed.** The GPU sample pass in `fixture_sampler_top.gd` now runs only when `is_output_demanded(1)`. The `_total_leds > 0` term is gone. Port 0 still passes the texture through |
+| F4x-02 | Every UI widget rebuilds its CHOP every cook | **Fixed.** `GNUiBase.execute_cook` calls `_build_state_chop()` only when the last output (the state CHOP) is demanded. The UI port still builds every cook |
+| F4x-03 | FluidVOL and PyroVOL secondary fields are ungated | **Fixed.** No gate. Both solvers keep those fields as coupled state. `docs/OPERATORS.md` now says FluidVOL always writes velocity, and PyroVOL always writes temperature and velocity |
 | F4x-04 | Audio, OSC, MIDI, and DMX sinks exist | No change |
-| F4x-05, F4l-02 | MIDI out and DMX out return the input CHOP | Engine fix in B-12 already refuses to restamp that object. Add a fan-out test that cooks MIDI or DMX beside a Null so it cannot regress |
-| F4x-06 | AudioDeviceOUT and OscOUT stay sinks while Active is off | Leave the chain cooking. Document that Active gates the send, not the sink flag |
+| F4x-05, F4l-02 | MIDI out and DMX out return the input CHOP | **Fixed.** No return-path change. `test_cow_dmx_fanout_preserves_shared` cooks a ConstantCHOP into a Null and a DmxOutCHOP (Active off) and asserts the producer's `_shared` flag survives |
+| F4x-06 | AudioDeviceOUT and OscOUT stay sinks while Active is off | **Fixed.** No behavior change. `docs/OPERATORS.md` now says Active gates the send and both nodes stay sinks, so upstream still cooks while Active is off |
 
 ### Editor, parameters, viewer, timeline
 
 | ID | Finding | Recommended fix |
 |----|---------|-----------------|
-| F4c-01 | `EDITOR.md` says H=help, V=viewer, Tab=palette | Replace that shortcut table with the code: H/V align, Alt+A palette. `help/editor.md` is already right |
-| F4c-02 | Toolbar doc is two rows and "four" overlays | Describe three scroll rows and the five overlays `#Order`, Dim, Dirty, Sinks, Flow |
-| F4c-03 | Shake doc types the direction as int and resets the timer on every reversal | Match the code: `Vector2`, timer cleared only on the first reversal |
-| F4d-01 | Takes skip spare parameters | Walk spare params in `capture_take`, same as preset copy already does |
-| F4d-02 | Docs call `GNTakeManager.new(network)` | Add that `_init`, or change the docstring to assign `.network` |
-| F4d-03 | Preset docstring names two user directories | Delete the `user://gonodes_param_presets/` line. The code uses `user://gonodes/presets/` |
-| F4f-01 | Viewer and WindowOUT were not opened | Run `tests/visual_audit/`, especially `04_mapper_dual_panel.gnpatch`. No code change until that fails |
-| F4g-01 | Cues and the scrubber were not run | Run the transport and a cue under load (walkthrough rows 3 and 6) |
+| F4c-01 | `EDITOR.md` says H=help, V=viewer, Tab=palette | **Fixed.** `EDITOR.md` Keyboard Shortcuts now follows `gn_graph_editor.gd::_handle_key_input`: H/V align, palette is Alt+A. `help/editor.md` was already right |
+| F4c-02 | Toolbar doc is two rows and "four" overlays | **Fixed.** `EDITOR.md` toolbar section now describes three scroll rows and the five overlays `#Order`, Dim, Dirty, Sinks, Flow |
+| F4c-03 | Shake doc types the direction as int and resets the timer on every reversal | **Fixed.** `EDITOR.md` now types `_shake_last_dir` as `Vector2` and says the timer clears only on the first reversal |
+| F4d-01 | Takes skip spare parameters | **Fixed.** `capture_base`, `capture_take`, and `_apply_snapshot` include `spare_parameters` (built-in name wins on collision). `test_take_apply_revert_and_file` expects the spare override and checks revert/apply |
+| F4d-02 | Docs call `GNTakeManager.new(network)` | **Fixed.** `GNTakeManager._init` takes an optional `GNNetwork`. `new()` and `new(network)` both work. The take round-trip test still passes |
+| F4d-03 | Preset docstring names two user directories | **Fixed.** Removed the `user://gonodes_param_presets/` sentence. The docstring now matches `GNPresetPaths`: `user://gonodes/presets/params/` |
+| F4f-01 | Viewer and WindowOUT were not opened | **Left unverified.** This row is a human visual run (`tests/visual_audit/`, especially `04_mapper_dual_panel.gnpatch`). No code change |
+| F4g-01 | Cues and the scrubber were not run | **Left unverified.** This row is a human transport/cue walkthrough (rows 3 and 6). No code change |
 
 ### Scripting, GPU, files, audio, protocols, export
 
 | ID | Finding | Recommended fix |
 |----|---------|-----------------|
-| F4h-01 | `_safe_call` treats a `cook()` script error as success | If Godot reported an error during the call, set `cook_ok` false and copy the message onto `node_warning` |
-| F4h-02 | GDScript compile errors never reach the badge | Copy `compile_error` onto `node_warning` in `GDScriptSCRIPT`, as Python and Native already do |
-| F4h-03 | Script-CHOP tests cook a bare `GNData` because nothing registered the family factory | Call `scan_extensions()` in that test's setup. Do not change `set_single_value` |
-| F4i-01 | SourcePOP "zero particles" was the test | In `test_cpu_fallback.gd`, set `current_delta`, set `rate` (not `emit_rate`), and expect `max_particles` for the pool size. Do not change SourcePOP |
-| B-9, F4i-02, F3-02 | VOL CPU readback size is still unverified | Re-run the VOL assertion in `test_cpu_fallback.gd`. Fix the readback only if the size is still wrong |
-| F4j-01 | URL download never starts when the node is outside the tree | Parent the `HTTPRequest` before `request_raw`, or document that a headless cook returns empty until the node is in the tree. Then do one live download |
-| F4k-01 | `AudioSourceCOMP` never cooks alone | Set `is_sink` from the Playing parameter, the way `AudioFileInCHOP` does from Play |
-| F4k-02 | Speakers were not heard | Walkthrough row 7. No code change until that fails |
+| F4h-01 | `_safe_call` treats a `cook()` script error as success | **Fixed.** `_safe_call` watches the call with a logger. A script error sets `node_warning` and makes `run_cook` return false. A clean call clears that warning |
+| F4h-02 | GDScript compile errors never reach the badge | **Fixed.** When GDScript does not compile, `GDScriptSCRIPT._cook` copies `compile_error` onto `node_warning`, with a short fallback if that string is empty |
+| F4h-03 | Script-CHOP tests cook a bare `GNData` because nothing registered the family factory | **Fixed.** `test_script_chop.gd` calls `scan_extensions()` in `before_all`. The syntax-error test allows one expected parse error and asserts `node_warning` is set. Six tests pass |
+| F4i-01 | SourcePOP "zero particles" was the test | **Fixed.** `test_source_pop_cpu_emits_particles` sets `current_delta` and `rate`, expects `particle_count > 0`, and expects the position pool to be `max_particles`. SourcePOP was not changed |
+| B-9, F4i-02, F3-02 | VOL CPU readback size is still unverified | **Fixed.** The buffer was 64³ because the test set a parameter named `resolution`. NoiseVOL uses `res_x` / `res_y` / `res_z`. The test now sets those to 16, and `cpu_data.size()` is 4096. The readback was not changed |
+| F4j-01 | URL download never starts when the node is outside the tree | **Fixed.** If the caller is off the tree, `HTTPRequest` is parented to the scene-tree root before `request()`. `test_start_fetch_off_tree_caller_uses_scene_root` expects status pending, not `ERR_UNCONFIGURED`. A full public download was not run |
+| F4k-01 | `AudioSourceCOMP` never cooks alone | **Fixed.** `_init` sets `is_sink` true (Playing defaults on). `parameter_changed` updates it when `playing` changes, before the next active-set rebuild. `_pre_cook` alone cannot start a node that is not already active |
+| F4k-02 | Speakers were not heard | **Left unverified.** Walkthrough row 7. No code change until that fails |
 | F4l-01 | OSC int/float/string and bundles round-trip | No change. Keep `test_osc_roundtrip.gd` |
-| F4l-03 | No live OSC, MIDI, or Art-Net peer | Walkthrough rows 10–12 |
-| F4m-01 | Player and the eight libgonodes hosts were not launched | Launch `GONODESPlayer.exe` on a one-node patch (walkthrough row 15) and build one example host |
-| F4m-02 | User Python skipped at scan | Same as B-6 |
-| F5a-01 | `AudioRenderCHOP` only bounces while something else cooks it | Set `is_sink` while Record or Export is on |
-| F5a-02 | `RaymarchTOP` readbacks the compute texture every cook | Keep the result as a GPU texture. Do not `texture_get_data` into an `Image` on the output path |
-| F5a-03 | NDI, Spout, Syphon, and MovieFileOut read pixels back to send | Leave them. They are outputs. A later GPU-share path is optional, not a beta fix |
-| F5a-04 | `scan_operators.py` misses `create_*` whose name is not a string literal | Teach the scanner to record a dynamic param, or have BezierMapTOP register names the scanner can see. `BezierMapTOP` is the known miss |
+| F4l-03 | No live OSC, MIDI, or Art-Net peer | **Left unverified.** Walkthrough rows 10–12 |
+| F4m-01 | Player and the eight libgonodes hosts were not launched | **Left unverified.** Walkthrough row 15. No code change |
+| F4m-02 | User Python skipped at scan | Same as B-6. Not fixed in this table |
+| F5a-01 | `AudioRenderCHOP` only bounces while something else cooks it | **Fixed.** `is_sink` follows `record` or `export_now` (both default off), set in `_init` and updated from `parameter_changed` so the next active set sees it |
+| F5a-02 | `RaymarchTOP` readbacks the compute texture every cook | **Fixed.** `_cook` returns `GNTextureData` wrapping the compute RID in a `Texture2DRD`. `texture_get_data` is gone from that path. The CPU fallback still builds an image when there is no GPU |
+| F5a-03 | NDI, Spout, Syphon, and MovieFileOut read pixels back to send | No change. They are outputs |
+| F5a-04 | `scan_operators.py` misses `create_*` whose name is not a string literal | **Fixed.** BezierMapTOP's 32 control-point floats are string literals. `scan_operators.py` now records them (539/585 operators with params). Cook still reads the same `_CP_NAMES` |
 | F5a-05 | Mapper panel ports are demand-gated | No change |
-| F5b-01 | `ArtnetDAT` polls only while cooked | Set `is_sink` while Active is on, and drop it when Active is off |
-| F5b-02 | `DMXDAT` and `SerialDAT` are deprecated and unregistered | Leave them unregistered. Point old patches at `DmxOutCHOP` and `gn_ext_serial` |
-| F5b-03 | `ObjectMergeSOP` is deprecated and missing from the operator reference | Keep the deprecation. Either document the replacement or delete the class if nothing loads it |
-| F5b-04 | FilterSOP TODO is a comment, and it has no help patch | Write the help patches (B-2). Leave the native-expression TODO until that mode is built |
-| F5d-01 | Nine COMPs call `GNGeoRenderer` from `operators/` | Move the viewer-mesh updates behind a core hook the UI implements. Operators should not name the UI class |
+| F5b-01 | `ArtnetDAT` polls only while cooked | **Fixed.** `is_sink` follows `active` (default off), set in `_init` and updated from `parameter_changed`, so a lone node cooks while Active is on |
+| F5b-02 | `DMXDAT` and `SerialDAT` are deprecated and unregistered | **Fixed.** Left unregistered. `DMXDAT` now points at `DmxOutCHOP`. `SerialDAT` already pointed at `SerialSendDAT` and `SerialReceiveDAT` |
+| F5b-03 | `ObjectMergeSOP` is deprecated and missing from the operator reference | **Fixed.** Kept `deprecated=true`. Docstring and OPERATORS.md point remote fetch at SelectSOP and filtering at FilterSOP. `apply_transform` has no replacement; the class stays so old patches load |
+| F5b-04 | FilterSOP TODO is a comment, and it has no help patch | **Deferred to B-2.** Help patches stay in the next table. The native-expression TODO stays until that mode is built |
+| F5d-01 | Nine COMPs call `GNGeoRenderer` from `operators/` | **Fixed.** Those nine `render_for_viewer` overrides call `GNViewerRenderHelpers`. `GNGeoRenderer` registers itself in `_static_init`. Operators and core no longer name that UI class. `test_geo_viewer_hook.gd` restores the live provider after each test |
 
 ### Help patches and operator reference
 
 | ID | Finding | Recommended fix |
 |----|---------|-----------------|
-| B-1, F1-04 | VOL examples wire a SOP into a VOL input | Regenerate `help/vol` from a VOL source, not `GridSOP`. Fix `AnalyzeVOL` so its CHOP output is not wired into `RaymarchTOP`'s VOL input |
-| B-2, F1-01 | 26 operators have no help patch, including all of NET | Generate at least one patch each for NET, the six FIX operators, FeedbackCOMP, FilterSOP, and PixelDmxOUT. Skip DMXDAT and SerialDAT (F5b-02) |
-| B-3, F1-05 | Patches name operators that do not exist | Rename `LFOCHOP` → `LFO_CHOP`, `DepthSensorTOP` → `DepthSensorIMG`, `GDScriptSCRIPT` / `UserPython*` / `UserNative*` → `PythonSCRIPT` and `NativeSCRIPT`, `ScriptCHOP` → the real script class. Replace `EmitterPOP` with `SourcePOP` or delete those five patches |
-| B-5 | 108 operators have fewer than 3 patches | After B-2, run `generate_help_patches.py` for anyone still under 3. Do not claim "3+" in the README until `check_coverage.py` says so |
-| F1-02, F0-09, F6-03 | README says 1,547 patches and 3+ each | Set `README.md:169` to 2,064 and drop the "3+" sentence until B-5 is actually true |
-| F1-03 | 147 patches fail validation | Fix the VOL mismatches first (B-1), then orphans, missing WindowOUT sinks, and flat params. Gate `validate_all_patches.py` (B-4) |
-| F1-06 | 148 patches use boilerplate annotations | Replace "More complex configuration… / Default settings…" with one sentence about the parameter that patch changes. Start with pixel-mapper and SDF, which scored worst |
-| F1-07 | Help generator keys patches by `node_type` alone, so FilterSOP landed in `help/top` | Key `all_existing` by `(family, node_type)` in `generate_help_patches.py`. Move the FilterSOP patches out of `help/top` |
-| B-14, F5-01, F6-01, F6-02 | `OPERATORS.md` header says 585; 127 classes and the SDF, NET, and SCRIPT chapters are missing; section totals are the old catalog | Regenerate the body from `operator_registry.json`. Delete the stale "Total:" lines and the "see the SDF section above" note |
-| F6-04 | `dev_docs/README.md` links a missing `OPERATORS.md` and quotes 1,355 tests / 13 families | Link `../docs/OPERATORS.md`. Quote the Phase 3 count (2,048) and 15 families |
-| F6-05 | `help/building.md` points at `addons/dev_docs` | Change the link to `../../../dev_docs/BUILD.md` |
-| F6-06 | ML, Blackmagic, and depth READMEs call IMG operators TOPs | Rename those table rows to the cfg classes: `*IMG` |
-| F6-07 | Native README says 93 operators and does not list them | Set the count to 131 and generate the class table from `gn_extension.cfg` |
-| F6-08, F6-09 | User Python and user-native READMEs tell you to add UserPythonSOP / UserNativeSOP | Describe `PythonSCRIPT` and `NativeSCRIPT`. List every cfg class (Rule 25.43) |
+| B-1, F1-04 | VOL examples wire a SOP into a VOL input | **Fixed.** VOL inputs that were fed by `GridSOP` now use `NoiseVOL`. `SOPtoVOL` still takes SOP. Analyze patches no longer wire the CHOP output into `RaymarchTOP`; the same `NoiseVOL` feeds the raymarcher. The generator template uses `RaymarchTOP` (there is no `RaymarchVOL`) |
+| B-2, F1-01 | 26 operators have no help patch, including all of NET | **Fixed.** One patch each for the 15 NET operators, the six FIX operators that had none, FeedbackCOMP, and PixelDmxOUT. FilterSOP already had patches after F1-07. DMXDAT and SerialDAT stay without patches |
+| B-3, F1-05 | Patches name operators that do not exist | **Fixed.** Help patches now use `LFO_CHOP`, `DepthSensorIMG`, `SourcePOP`, `PythonSCRIPT`, and `NativeSCRIPT`. `ScriptCHOP` and `GDScriptSCRIPT (IMG template)` are `GDScriptSCRIPT`. `GDScriptSCRIPT` itself was already a real class and was not renamed |
+| B-5 | 108 operators have fewer than 3 patches | **No change.** The generator writes the boilerplate F1-06 is removing, and it has no NET or FIX templates. Do not add filler patches to hit 3. The false "3+" claim is F1-02 |
+| F1-02, F0-09, F6-03 | README says 1,547 patches and 3+ each | **Fixed.** README now says 2,085 example patches, counted from `addons/**/help`. The "3+" claim is gone |
+| F1-03 | 147 patches fail validation | **Fixed for real defects.** Type mismatches 51→9, flat params 17→0, unknown types 1→0. The 9 left are DotNode, SnapshotTOP mode, and SinkOUT, which accept another family at runtime. Orphans (62) and missing WindowOUT (32) stay; the audit called those mostly false positives. The CI gate is B-4, not this row |
+| F1-06 | 148 patches use boilerplate annotations | **Fixed.** 79 exact boilerplate bodies and 57 more that added a "Requires extension" line were replaced. 12 patches that had no annotation got one. Those three phrases are gone under `addons/**/help`. Pixel-mapper and SDF notes that already said something specific were left |
+| F1-07 | Help generator keys patches by `node_type` alone, so FilterSOP landed in `help/top` | **Fixed.** `all_existing` is keyed by `(family, node_type)`. The three FilterSOP patches moved from `help/top` to `help/sop`. Duplicate SelectSOP files were removed from `help/vol`; `select_vol_basic.gnpatch` moved to `help/sop` |
+| B-14, F5-01, F6-01, F6-02 | `OPERATORS.md` header says 585; 127 classes and the SDF, NET, and SCRIPT chapters are missing; section totals are the old catalog | **Fixed for the false counts and the missing headings.** Section totals and the quick-reference counts match the registry (585). SDF, NET, and SCRIPT sections are one line per class. Existing writeups were not replaced. The name lists in the quick reference are still the old catalog |
+| F6-04 | `dev_docs/README.md` links a missing `OPERATORS.md` and quotes 1,355 tests / 13 families | **Fixed.** The link is `../docs/OPERATORS.md`. The index now says 2,082 `func test_` definitions across 81 files and 15 families |
+| F6-05 | `help/building.md` points at `addons/dev_docs` | **Fixed.** The link is `../../../dev_docs/BUILD.md` |
+| F6-06 | ML, Blackmagic, and depth READMEs call IMG operators TOPs | **Fixed.** Those READMEs now use `DepthEstimateIMG`, `StyleTransferIMG`, `SegmentationIMG`, `BlackmagicInIMG`, `BlackmagicOutIMG`, and `DepthSensorIMG` |
+| F6-07 | Native README says 93 operators and does not list them | **Fixed.** The README lists all 131 cfg classes. Family counts are SOP 62, CHOP 44, POP 8, VOL 8, IMG 5, TOP 4 |
+| F6-08, F6-09 | User Python and user-native READMEs tell you to add UserPythonSOP / UserNativeSOP | **Fixed.** Those READMEs now say to add `PythonSCRIPT` and `NativeSCRIPT`. The template dropdown picks the family. The old per-family class names are gone |
 
 ### Build, tests, and public counts
 
 | ID | Finding | Recommended fix |
 |----|---------|-----------------|
-| B-6, F2-05, F4m-02 | `setup_python.py` copies `python312.dll` while the toolchain is 3.10.11 | Copy `python310.dll` next to the extension. Point `--verify` at 3.10.11. Stop excluding the extension from the player export |
-| B-7, F2-06 | README Windows path never runs Python setup or the native toolchain bundle | Add `setup_python.py` and `bundle_toolchain.py` to the README quick path, in front of `check_builds.py` |
-| B-10, F3-03 | OpenCV loads without `opencv_world4100.dll` | Copy that DLL from the SDK into `gn_ext_opencv/native/bin/win64/` as part of the Windows build |
-| B-11, F3-05 | `check_builds.py` treats a file on disk as a working extension | Have it launch headless Godot and fail if an enabled `.gdextension` does not load |
-| F2-01 | `build_windows.ps1` dies when `ProgramFiles(x86)` is unset | Fall back to `C:\Program Files (x86)` before calling `vswhere.exe` |
-| F2-02, F2-07 | `clean_builds.py` crashes on a `~`-locked DLL and leaves extensions half-disabled | Ignore `~*.dll` the way `build_templates.ps1` already does, and catch `PermissionError` so the script finishes or rolls back |
-| F2-03 | SCons warns that `tier=all` is ignored | Declare `tier` with `Variables.Add` so the warning goes away. The GONODES `SConstruct` already reads it |
-| F2-04 | `--all` on Windows fails for Linux and macOS binaries that cannot exist here | Split the report into "missing on this host" and "not buildable on this host" |
-| F3-04 | Ultraleap `.gdextension` and `.gdextension.disabled` are both present, and `LeapC.dll` is absent | Ship one file. If the vendor DLL is not there, leave only the `.disabled` file so Godot does not error on every launch |
-| F3-06, B-4, F1-10 | CI runs the unit runner only. Patch validation and the audit scripts are not gated | Add `validate_all_patches.py` and `check_coverage.py` to `tests.yml`. They already exit non-zero |
-| F3-07 | Test exit leaks hundreds of thousands of objects and hides the summary | Free the nodes each suite creates. Do not treat the leak count as an engine bug until a single test reproduces it |
-| F1-08 | Scanner records no params for 47 operators | 46 of those have no `create_*` call. The real miss is F5a-04. Re-run the scanner after that fix and drop this row if the count matches |
-| F1-09 | Port registry has 717 entries because it includes 131 native variants | No change. Do not compare it to the 585 GDScript registry as if they were the same list |
-| F0-01, F0-07 | README diagram and `GONODES_CONTEXT.md` still say Godot 4.6 | Set both to 4.7.2 |
-| F0-02 | README diagram says 402 operators | Set it to 585 |
-| F0-03 | README says 1,376 tests and 13 families | Set it to the Phase 3 count and 15 families |
-| F0-04 | README says five libgonodes examples | Name all eight |
-| F0-05 | Mapper count is 5 in one README line and 7 in the cfg | Use 7 |
-| F0-06 | One README line says SDF has 40+ operators | Use 29 |
-| F0-08 | Context decision table still shows `.tres` patches as current | Mark that row historical. `.gnpatch` is the format |
-| F0-10 | Roadmap says it was verified in June 2025 | Put a new verified date on it after the doc fixes above, or stop claiming a verification date |
+| B-6, F2-05, F4m-02 | `setup_python.py` copies `python312.dll` while the toolchain is 3.10.11 | **Fixed.** Windows setup copies `python3.dll` and `python310.dll` into `bin/win64/`, which is what `gn_python.gdextension` loads. `--verify` checks those files. `libgn_python.windows.template_release.x86_64.dll` is still not on disk, so the player export still skips the extension until that library is built |
+| B-7, F2-06 | README Windows path never runs Python setup or the native toolchain bundle | **Fixed.** The Windows quick path runs `setup_python.py` and `scripts/bundle_toolchain.py` before `check_builds.py` |
+| B-10, F3-03 | OpenCV loads without `opencv_world4100.dll` | **Fixed in the build.** The unified `build/SConstruct` now calls `copy_runtime_dlls()`, which the per-extension shim already did. A Windows OpenCV build copies `opencv_world4100.dll` into `native/bin/win64/`. This tree was not rebuilt, so the DLL is not on disk yet |
+| B-11, F3-05 | `check_builds.py` treats a file on disk as a working extension | **Fixed.** After the on-disk checks it runs headless Godot and fails if an enabled `.gdextension` does not load. A run here exited 1 on `gn_ext_depth_sensor` (Ultraleap). OpenCV loaded. Disabled files are not failures |
+| F2-01 | `build_windows.ps1` dies when `ProgramFiles(x86)` is unset | **Fixed.** If that variable is empty, the script sets it to `C:\Program Files (x86)` before the vswhere path |
+| F2-02, F2-07 | `clean_builds.py` crashes on a `~`-locked DLL and leaves extensions half-disabled | **Fixed.** Names starting with `~` are skipped. A `PermissionError` on any other file skips deactivating that extension instead of aborting halfway |
+| F2-03 | SCons warns that `tier=all` is ignored | **Fixed.** `build/SConstruct` drops `tier`, `ext`, and `exts` from `ARGUMENTS` after reading them and before it loads godot-cpp. Declaring the variable on the parent would not have silenced that child warning |
+| F2-04 | `--all` on Windows fails for Linux and macOS binaries that cannot exist here | **Fixed.** `check_builds.py` and `bundle_toolchain.py` report foreign-platform gaps as not buildable on this host. Those gaps do not change the exit code. A missing host binary still fails |
+| F3-04 | Ultraleap `.gdextension` and `.gdextension.disabled` are both present, and `LeapC.dll` is absent | **Fixed.** Only `gn_depth_ultraleap.gdextension.disabled` remains, so Godot does not load it. Sync turns it back on only when `LeapC.dll` / `libLeapC.so` is next to the built library or on the library search path. A duplicate pair is collapsed to one file |
+| F3-06, B-4, F1-10 | CI runs the unit runner only. Patch validation and the audit scripts are not gated | **No change.** `validate_all_patches.py` still fails 84 patches. Gating it, or `check_coverage.py`, in CI would fail the build. The unit runner stays the CI gate |
+| F3-07 | Test exit leaks hundreds of thousands of objects and hides the summary | **No change.** This is suite teardown. Do not free objects across the suite, and do not treat the leak count as an engine bug, until one test reproduces it |
+| F1-08 | Scanner records no params for 47 operators | **Dropped.** A re-run records 585 operators, 46 with no parameters, and none of those 46 contain a `create_*` call. The extra miss was BezierMapTOP, already fixed as F5a-04 |
+| F1-09 | Port registry has 717 entries because it includes 131 native variants | **No change.** That registry includes the 131 native variants. It is a different list from the 585 GDScript operators |
+| F0-01, F0-07 | README diagram and `GONODES_CONTEXT.md` still say Godot 4.6 | **Fixed.** The README diagram and the current-version lines in `GONODES_CONTEXT.md` say 4.7.2. The README "4.6+" minimum and historical notes were left |
+| F0-02 | README diagram says 402 operators | **Fixed.** The diagram says `Operator Library (585)`. That total already includes extensions |
+| F0-03 | README says 1,376 tests and 13 families | **Fixed.** That sentence now says 2,082 automated tests, 81 test files, and 15 families |
+| F0-04 | README says five libgonodes examples | **Fixed.** The LibGONODES section names eight example apps, including `geometry_host`, `midi_osc_host`, and `graph_edit_demo` |
+| F0-05 | Mapper count is 5 in one README line and 7 in the cfg | **Fixed.** The `gn_ext_mapper` row says 7 and names the same seven operators as the earlier Mapper row |
+| F0-06 | One README line says SDF has 40+ operators | **Fixed.** That sentence says 29 operators |
+| F0-08 | Context decision table still shows `.tres` patches as current | **Fixed.** That row is labelled historical and says it was superseded by JSON `.gnpatch` |
+| F0-10 | Roadmap says it was verified in June 2025 | **Fixed.** The roadmap no longer says the list is verified. It says the list was last checked in June 2025 and has not been re-checked since |
 
 ### Not a code fix until someone runs them
 

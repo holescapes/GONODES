@@ -95,6 +95,14 @@
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                450,
+                250
+            ],
+            "parameters": {}
         }
     },
     "connections": [
@@ -106,6 +114,12 @@
         },
         {
             "from": "scriptsop1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "src_grid",
             "from_port": 0,
             "to": "geo_view",
             "to_port": 0
@@ -133,7 +147,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "GDScript SCRIPT — Basic\n\nUser-scripted node. Write GDScript with @output annotations for any data type. Template dropdown provides CHOP/SOP/DAT/IMG starting code.\nUsing: time_dependent=False, cook_once=False, force_active=False.",
+            "text": "GDScript SCRIPT \u2014 Basic\n\nUser-scripted node. Write GDScript with @output annotations for any data type. Template dropdown provides CHOP/SOP/DAT/IMG starting code.\nUsing: time_dependent=False, cook_once=False, force_active=False.",
             "position": [
                 -100.0,
                 -100.0

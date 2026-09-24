@@ -3,7 +3,7 @@
     "generator": "GONODES",
     "nodes": {
         "usernativetop1": {
-            "type": "UserNativeTOP",
+            "type": "NativeSCRIPT",
             "position": [
                 100,
                 100
@@ -38,11 +38,44 @@
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                400,
+                100
+            ],
+            "parameters": {}
+        },
+        "texttop1": {
+            "type": "TextTOP",
+            "position": [
+                700,
+                100
+            ],
+            "parameters": {
+                "text": {
+                    "value": "Script output is CHOP \u2014 visual placeholder"
+                },
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
         }
     },
     "connections": [
         {
             "from": "usernativetop1",
+            "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "texttop1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -52,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserNativeTOP — Basic C++ GPU Shader\n\nWrite custom TOP operators that generate GPU shader code.\nThe default example renders an animated ring pattern.\nTry loading the Game of Life example for interactive cellular\nautomata.\n\nnative_cook() returns shader GLSL + uniforms.\nThe wrapper handles SubViewport submission.",
+            "text": "NativeSCRIPT \u2014 Basic C++ GPU Shader\n\nWrite custom TOP operators that generate GPU shader code.\nThe default example renders an animated ring pattern.\nTry loading the Game of Life example for interactive cellular\nautomata.\n\nnative_cook() returns shader GLSL + uniforms.\nThe wrapper handles SubViewport submission.",
             "position": [
                 -100.0,
                 -100.0

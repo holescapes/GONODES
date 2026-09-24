@@ -89,7 +89,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ChannelFilterCHOP \u2014 Basic\n\nDefault settings.",
+            "text": "ChannelFilterCHOP — Basic\n\nRuns LFO_ CHOP through Channel Filter CHOP with pattern='*'.",
             "position": [
                 -100.0,
                 -100.0

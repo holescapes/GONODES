@@ -107,14 +107,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "DepthSensorIMG \u2014 Basic\n\nDefault settings.\nRequires gn_ext_depth_sensor extension.",
+            "text": "DepthSensorIMG — Basic\n\nReads depth, skeleton, and point cloud data from sensor device 0.\nRequires gn_ext_depth_sensor extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

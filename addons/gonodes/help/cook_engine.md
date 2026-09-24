@@ -10,13 +10,14 @@ processing only what needs to update and in the correct order.
 ### 1. Dirty Propagation
 
 When a parameter changes, an input updates, or time advances (for time-dependent
-operators), the affected node is marked **dirty**. Dirtiness propagates downstream
-through all connected nodes — if a node's input changes, it too becomes dirty.
+operators), the affected node is marked **dirty**. After a node successfully cooks,
+the engine marks only its immediate downstream successors dirty — propagation stops
+when a node does not cook, and cascades one hop at a time as the cook loop proceeds.
 
 ### 2. Active Chain Resolution
 
 Not all nodes cook every frame. The engine traces backward from **output sinks**
-(WindowOUT, RenderTOP, etc.) to find all nodes that feed them. Only
+(WindowOUT, etc.) to find all nodes that feed them. Only
 these "active" nodes are candidates for cooking. Disconnected nodes and branches
 that don't reach a sink are skipped entirely.
 
@@ -158,7 +159,6 @@ Output sinks are the "endpoints" of your graph — they trigger the active chain
 | Sink          | Purpose                                          |
 |---------------|--------------------------------------------------|
 | **WindowOUT** | Displays a texture in a standalone OS window   |
-| **RenderTOP** | Renders a 3D scene to a viewport texture         |
 | **WindowOUT** | Opens a separate OS window showing the texture   |
 
 Any TOP that feeds into these sinks becomes part of the active chain.

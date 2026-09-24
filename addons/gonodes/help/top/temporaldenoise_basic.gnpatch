@@ -80,7 +80,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "TemporalDenoiseTOP \u2014 Basic\n\nDefault settings.",
+            "text": "TemporalDenoiseTOP — Basic\n\nRuns Noise TOP through Temporal Denoise TOP with strength=0.8, threshold=0.1, reset=false.",
             "position": [
                 -100.0,
                 -100.0

@@ -259,7 +259,7 @@ func cook(ctx: Dictionary) -> void:
     var src: GNData = get_input_value(0)
     if src == null:
         return
-    var img_data := _mutable_input(src) as GNImgData  # ← safe copy if shared
+    var img_data := _mutable_input(src) as GNImageData  # ← safe copy if shared
     _apply_blur(img_data.image)
     set_output_value(0, img_data)
 ```

@@ -101,14 +101,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioRenderCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+            "text": "AudioRenderCHOP — Basic\n\nPrepares an offline audio render with export path configured but idle.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

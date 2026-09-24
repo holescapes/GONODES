@@ -101,14 +101,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioReverbCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
+            "text": "AudioReverbCHOP — Advanced\n\nApplies a larger room size with more wet mix on a square wave input.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

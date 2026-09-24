@@ -133,7 +133,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ProjectSOP \u2014 Basic\n\nDefault settings.",
+            "text": "ProjectSOP — Basic\n\nRuns Grid SOP through Project SOP with axis=0, offset=0, recompute_normals=true.",
             "position": [
                 -100.0,
                 -100.0

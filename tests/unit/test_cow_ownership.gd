@@ -179,6 +179,26 @@ func test_cow_null_cooked_before_sort_does_not_alias() -> void:
 		"NullIMG cooking first must not clear _shared before PixelSort")
 
 
+func test_cow_dmx_fanout_preserves_shared() -> void:
+	## DmxOutCHOP returns the input CHOP object. The cook engine must not
+	## restamp _shared on that borrowed object when the producer fans out.
+	var a := _make(ConstantCHOP, "a")
+	a.set_param_value("name0", "ch")
+	a.set_param_value("value0", 3.0)
+	_make(NullCHOP, "b")
+	var dmx := _make(DmxOutCHOP, "dmx")
+	_network.connect_nodes("a", 0, "b", 0)
+	_network.connect_nodes("a", 0, "dmx", 0)
+	var sinks: Array[String] = ["b"]
+	_engine.set_active_sinks(sinks)
+	_cook()
+	GNTestAssert.assert_not_null(a.cached_output, "producer cooked")
+	GNTestAssert.assert_eq(dmx.cached_output, a.cached_output,
+		"DMX returns upstream object")
+	GNTestAssert.assert_true(a.cached_output._shared,
+		"fan-out _shared must survive DmxOutCHOP passthrough")
+
+
 func test_cow_viewer_on_noise_pixel_sort_does_not_alias() -> void:
 	## Behavioral form of test_viewer_on_producer_counts_as_consumer.
 	## PixelSortIMG writes pixels in place, then publishes that same Image.

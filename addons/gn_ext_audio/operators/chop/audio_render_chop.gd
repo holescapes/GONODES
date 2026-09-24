@@ -17,6 +17,13 @@ var _sample_rate: float = 44100.0
 
 func _init() -> void:
 	node_type = "audiorender"
+	is_sink = false
+	parameter_changed.connect(_on_record_export_sink_changed)
+
+
+func _on_record_export_sink_changed(_node_id: String, param_name: String) -> void:
+	if param_name == "record" or param_name == "export_now":
+		is_sink = bool(get_param_value("record")) or bool(get_param_value("export_now"))
 
 
 func _init_ports() -> void:

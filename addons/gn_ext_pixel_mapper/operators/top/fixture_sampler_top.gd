@@ -182,7 +182,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_last_fix_hash = fix_hash
 
 	# GPU sampling pass
-	if is_output_demanded(1) or _total_leds > 0:
+	if is_output_demanded(1):
 		var sample_extent: Vector2 = get_param_value("sample_extent")
 		var out_size := Vector2i(_max_channels, _total_leds)
 		_init_shader_viewport(

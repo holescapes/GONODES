@@ -104,7 +104,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioDelayCHOP \u2014 Basic\n\nDefault settings.\nRequires gn_ext_audio extension.",
+            "text": "AudioDelayCHOP — Basic\n\nAdds a short echo with light feedback to an LFO signal.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

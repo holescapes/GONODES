@@ -89,7 +89,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "ReplaceCHOP \u2014 Advanced\n\nMore complex configuration.",
+            "text": "ReplaceCHOP — Advanced\n\nRuns Wave CHOP through Replace CHOP with blend=2.",
             "position": [
                 -100.0,
                 -100.0

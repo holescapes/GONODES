@@ -133,7 +133,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "CreepSOP \u2014 Basic\n\nDefault settings.",
+            "text": "CreepSOP — Basic\n\nRuns Grid SOP through Creep SOP with distance=0.1, direction=0, seed=0.",
             "position": [
                 -100.0,
                 -100.0

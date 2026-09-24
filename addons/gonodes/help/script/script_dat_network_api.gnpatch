@@ -3,7 +3,7 @@
     "generator":  "GONODES",
     "nodes":  {
                   "script1":  {
-                                  "type":  "GDScriptSCRIPT (DAT template)",
+                                  "type":  "GDScriptSCRIPT",
                                   "position":  [
                                                    200,
                                                    100
@@ -33,6 +33,16 @@
                                                  },
                                   "type":  "WindowOUT"
                               },
+                  "null1":  {
+                                "type":  "NullCHOP",
+                                "position":  [
+                                                 450,
+                                                 100
+                                             ],
+                                "parameters":  {
+
+                                               }
+                            },
                   "text_view":  {
                                     "type":  "TextTOP",
                                     "position":  [
@@ -60,7 +70,7 @@
                         {
                             "from":  "script1",
                             "from_port":  0,
-                            "to":  "text_view",
+                            "to":  "null1",
                             "to_port":  0
                         },
                         {

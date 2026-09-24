@@ -98,14 +98,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PdFilterCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_libpd extension.",
+            "text": "PdFilterCHOP — Advanced\n\nDrives a Pure Data filter patch with raised parameters on a wave input.\nRequires gn_ext_libpd extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

@@ -11,6 +11,19 @@ var _stream_loaded: bool = false
 
 func _init() -> void:
 	node_type = "audiosource"
+	is_sink = true
+	parameter_changed.connect(_on_playing_sink_changed)
+
+
+func _on_playing_sink_changed(_node_id: String, param_name: String) -> void:
+	if param_name == "playing":
+		is_sink = bool(get_param_value("playing"))
+
+
+func _pre_cook(delta: float) -> void:
+	# Cook while Playing is on even with no downstream wires.
+	is_sink = bool(get_param_value("playing"))
+	super._pre_cook(delta)
 
 
 func _init_ports() -> void:

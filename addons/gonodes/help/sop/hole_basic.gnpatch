@@ -133,7 +133,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "HoleSOP \u2014 Basic\n\nDefault settings.",
+            "text": "HoleSOP — Basic\n\nRuns Grid SOP through Hole SOP with plane=0, tolerance=0.001, invert=false.",
             "position": [
                 -100.0,
                 -100.0

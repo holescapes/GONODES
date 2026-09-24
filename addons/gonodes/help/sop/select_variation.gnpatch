@@ -116,7 +116,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "SelectSOP \u2014 Parameters\n\nAlternate parameter values.",
+            "text": "SelectSOP — Parameters\n\nRuns Sphere SOP through Select SOP.",
             "position": [
                 -100.0,
                 -100.0

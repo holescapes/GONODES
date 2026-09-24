@@ -24,7 +24,7 @@
             }
         },
         "userpythonsop1": {
-            "type": "UserPythonSOP",
+            "type": "PythonSCRIPT",
             "position": [
                 100,
                 100
@@ -45,24 +45,6 @@
                 100
             ],
             "parameters": {}
-        },
-        "cam1": {
-            "type": "CameraCOMP",
-            "position": [
-                500,
-                300
-            ],
-            "parameters": {
-                "tx": {
-                    "value": 0
-                },
-                "ty": {
-                    "value": 1.5
-                },
-                "tz": {
-                    "value": 4
-                }
-            }
         },
         "render1": {
             "type": "RenderTOP",
@@ -98,6 +80,32 @@
                     "value": true
                 }
             }
+        },
+        "null1": {
+            "type": "NullCHOP",
+            "position": [
+                400,
+                250
+            ],
+            "parameters": {}
+        },
+        "camera1": {
+            "type": "CameraCOMP",
+            "position": [
+                950,
+                300
+            ],
+            "parameters": {
+                "tx": {
+                    "value": 0.0
+                },
+                "ty": {
+                    "value": 0.0
+                },
+                "tz": {
+                    "value": 5.0
+                }
+            }
         }
     },
     "connections": [
@@ -110,6 +118,12 @@
         {
             "from": "userpythonsop1",
             "from_port": 0,
+            "to": "null1",
+            "to_port": 0
+        },
+        {
+            "from": "grid1",
+            "from_port": 0,
             "to": "geo1",
             "to_port": 0
         },
@@ -120,7 +134,7 @@
             "to_port": 0
         },
         {
-            "from": "cam1",
+            "from": "camera1",
             "from_port": 0,
             "to": "render1",
             "to_port": 1
@@ -136,7 +150,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "UserPythonSOP — Python Geometry with NumPy\n\nWrite SOP operators in Python using NumPy arrays.\nThe default example applies a sine-wave vertex deformation.\n\nClick the node, then 'Edit Python ↗' in the inspector.\nPress Ctrl+R to reload. No compilation needed.\n\nUse vectorized NumPy ops for best performance.",
+            "text": "PythonSCRIPT \u2014 Python Geometry with NumPy\n\nWrite SOP operators in Python using NumPy arrays.\nThe default example applies a sine-wave vertex deformation.\n\nClick the node, then 'Edit Python \u2197' in the inspector.\nPress Ctrl+R to reload. No compilation needed.\n\nUse vectorized NumPy ops for best performance.",
             "position": [
                 -100.0,
                 -100.0

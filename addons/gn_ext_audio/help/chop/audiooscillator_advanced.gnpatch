@@ -107,7 +107,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "AudioOscillatorCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
+            "text": "AudioOscillatorCHOP — Advanced\n\nGenerates an 880 Hz square wave at doubled amplitude.\nRequires gn_ext_audio extension.",
             "position": [
                 -100.0,
                 -100.0

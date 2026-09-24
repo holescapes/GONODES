@@ -4,15 +4,16 @@ Write C++ operators that run at native speed with a 2–8 second compile-and-rel
 
 ## Quick Start
 
-1. In the GONODES editor, add a **UserNativeSOP** (or CHOP/IMG/TOP/DAT) node
-2. Click **"Edit C++ ↗"** in the parameter inspector — opens the C++ code editor
-3. Write your `cook()` function using the GONODES C++ SDK
-4. Press **Ctrl+B** or click **"Build"** — compiles in 2–8 seconds
-5. The node hot-reloads and starts cooking with your C++ code immediately
+1. In the GONODES editor, add a **NativeSCRIPT** node
+2. Use the **Template** dropdown to select the CHOP, SOP, DAT, IMG, or TOP context
+3. Click **"Edit C++ ↗"** in the parameter inspector — opens the C++ code editor
+4. Write your `cook()` function using the GONODES C++ SDK
+5. Press **Ctrl+B** or click **"Build"** — compiles in 2–8 seconds
+6. The node hot-reloads and starts cooking with your C++ code immediately
 
 ## How It Works
 
-Each UserNative operator:
+Each **NativeSCRIPT** node:
 - Has an embedded C++ source file stored as a parameter
 - Compiles to a temporary GDExtension `.dll`/`.so` via bundled godot-cpp + SCons
 - Hot-reloads using Godot 4.2+'s GDExtension reload API
@@ -55,12 +56,9 @@ addons/gn_ext_user_native/
 ├── gn_extension.cfg         # Extension manifest
 ├── build_user_node.py       # CLI build script
 ├── README.md                # This file
-├── operators/               # GDScript wrapper operators
-│   ├── user_native_sop.gd
-│   ├── user_native_chop.gd
-│   ├── user_native_img.gd
-│   ├── user_native_top.gd
-│   └── user_native_dat.gd
+├── operators/
+│   └── script/
+│       └── native_script.gd # NativeSCRIPT wrapper operator
 ├── sdk/                     # C++ SDK headers (user-facing API)
 │   ├── gn_user_node.h       # Base class for all user nodes
 │   ├── gn_user_types.h      # Type aliases + param factories + make_multi_output()

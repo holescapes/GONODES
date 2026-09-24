@@ -100,12 +100,16 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 				entries.append({"mesh": mmi.multimesh.mesh, "material": mmi.material_override, "transform": Transform3D.IDENTITY})
 
 	if entries.size() > 0:
-		GNGeoRenderer._ensure_viewer_scene()
+		GNViewerRenderHelpers.ensure_shared_geo_viewer()
 		var vp: SubViewport = viewer.get_3d_viewport()
-		GNGeoRenderer._reparent_viewer_nodes(vp)
+		GNViewerRenderHelpers.reparent_shared_geo_viewer(vp)
+		var mesh_inst := GNViewerRenderHelpers.shared_geo_mesh()
+		var cam := GNViewerRenderHelpers.shared_geo_camera()
+		if mesh_inst == null or cam == null:
+			return
 		# Primary mesh
-		GNGeoRenderer._viewer_mesh_instance.mesh = entries[0]["mesh"]
-		GNGeoRenderer._viewer_mesh_instance.material_override = entries[0]["material"]
+		mesh_inst.mesh = entries[0]["mesh"]
+		mesh_inst.material_override = entries[0]["material"]
 		# Extra meshes
 		var extra_mis: Array[MeshInstance3D] = []
 		for i in range(1, entries.size()):
@@ -115,7 +119,7 @@ func render_for_viewer(viewer, port_index: int = 0) -> void:
 			mi.transform = entries[i]["transform"]
 			vp.add_child(mi)
 			extra_mis.append(mi)
-		GNViewerRenderHelpers.apply_orbit_camera(GNGeoRenderer._viewer_camera, 45.0, -30.0, 5.0)
+		GNViewerRenderHelpers.apply_orbit_camera(cam, 45.0, -30.0, 5.0)
 		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 		viewer.set_info_bar("MergeCOMP")
 		# Clean up extra meshes

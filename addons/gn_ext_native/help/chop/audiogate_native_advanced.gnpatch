@@ -1,124 +1,124 @@
 {
-  "version": "1.0.0",
-  "generator": "GONODES",
-  "nodes": {
-    "src_wave": {
-      "type": "WaveCHOP",
-      "position": [
-        100,
-        100
-      ],
-      "parameters": {
-        "waveform": {
-          "value": 0
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "src_wave": {
+            "type": "WaveCHOP",
+            "position": [
+                100,
+                100
+            ],
+            "parameters": {
+                "waveform": {
+                    "value": 0
+                },
+                "frequency": {
+                    "value": 2.0
+                }
+            }
         },
-        "frequency": {
-          "value": 2.0
+        "audiogate1": {
+            "type": "AudioGateCHOPNative",
+            "position": [
+                450,
+                100
+            ],
+            "parameters": {
+                "threshold_db": {
+                    "value": -80.0
+                },
+                "hysteresis_db": {
+                    "value": 6.0
+                },
+                "attack_ms": {
+                    "value": 2.0
+                },
+                "hold_ms": {
+                    "value": 100.0
+                },
+                "release_ms": {
+                    "value": 100.0
+                },
+                "range_db": {
+                    "value": -160.0
+                }
+            }
+        },
+        "choptop1": {
+            "type": "CHOPtoTOP",
+            "position": [
+                1150,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                }
+            }
+        },
+        "window1": {
+            "type": "WindowOUT",
+            "position": [
+                1550,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "open": {
+                    "value": true
+                }
+            }
         }
-      }
     },
-    "audiogate1": {
-      "type": "AudioGateCHOPNative",
-      "position": [
-        450,
-        100
-      ],
-      "parameters": {
-        "threshold_db": {
-          "value": -80.0
+    "connections": [
+        {
+            "from": "src_wave",
+            "from_port": 0,
+            "to": "audiogate1",
+            "to_port": 0
         },
-        "hysteresis_db": {
-          "value": 6.0
+        {
+            "from": "audiogate1",
+            "from_port": 0,
+            "to": "choptop1",
+            "to_port": 0
         },
-        "attack_ms": {
-          "value": 2.0
-        },
-        "hold_ms": {
-          "value": 100.0
-        },
-        "release_ms": {
-          "value": 100.0
-        },
-        "range_db": {
-          "value": -160.0
+        {
+            "from": "choptop1",
+            "from_port": 0,
+            "to": "window1",
+            "to_port": 0
         }
-      }
-    },
-    "choptop1": {
-      "type": "CHOPtoTOP",
-      "position": [
-        1150,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
+    ],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "AudioGateCHOPNative — Advanced\n\nUses a deeper threshold and longer hold to gate a wave signal harder.\nRequires gn_ext_audio extension.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                500.0,
+                120.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
         }
-      }
-    },
-    "window1": {
-      "type": "WindowOUT",
-      "position": [
-        1550,
-        100
-      ],
-      "parameters": {
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 512,
-            "y": 512
-          }
-        },
-        "open": {
-          "value": true
-        }
-      }
-    }
-  },
-  "connections": [
-    {
-      "from": "src_wave",
-      "from_port": 0,
-      "to": "audiogate1",
-      "to_port": 0
-    },
-    {
-      "from": "audiogate1",
-      "from_port": 0,
-      "to": "choptop1",
-      "to_port": 0
-    },
-    {
-      "from": "choptop1",
-      "from_port": 0,
-      "to": "window1",
-      "to_port": 0
-    }
-  ],
-  "annotations": [
-    {
-      "id": "ann_1",
-      "type": "note",
-      "text": "AudioGateCHOPNative — Advanced\n\nMore complex configuration.\nRequires gn_ext_audio extension.",
-      "position": [
-        -100.0,
-        -100.0
-      ],
-      "size": [
-        400.0,
-        100.0
-      ],
-      "color": [
-        1.0,
-        1.0,
-        1.0,
-        0.8
-      ]
-    }
-  ]
+    ]
 }

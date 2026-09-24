@@ -1,0 +1,43 @@
+{
+    "version": "1.0.0",
+    "generator": "GONODES",
+    "nodes": {
+        "out1": {
+            "type": "OutTunnel",
+            "position": [
+                200,
+                100
+            ],
+            "parameters": {
+                "index": {
+                    "value": 0
+                },
+                "family": {
+                    "value": 0
+                }
+            }
+        }
+    },
+    "connections": [],
+    "annotations": [
+        {
+            "id": "ann_1",
+            "type": "note",
+            "text": "OutTunnel collects inner-network results and exposes them on the parent SubNetworkNode.",
+            "position": [
+                -100.0,
+                -100.0
+            ],
+            "size": [
+                400.0,
+                100.0
+            ],
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                0.8
+            ]
+        }
+    ]
+}

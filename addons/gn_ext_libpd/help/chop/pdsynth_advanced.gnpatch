@@ -104,14 +104,14 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "PdSynthCHOP \u2014 Advanced\n\nMore complex configuration.\nRequires gn_ext_libpd extension.",
+            "text": "PdSynthCHOP — Advanced\n\nPlays a higher note at 880 Hz with doubled amplitude from Pure Data.\nRequires gn_ext_libpd extension.",
             "position": [
                 -100.0,
                 -100.0
             ],
             "size": [
-                400.0,
-                100.0
+                500.0,
+                120.0
             ],
             "color": [
                 1.0,

@@ -13,6 +13,7 @@ extends RefCounted
 static var _failure_count: int = 0
 static var _last_failure: String = ""
 static var _all_failures: Array[String] = []
+static var _script_error_allowance: int = 0
 
 
 ## Resets the failure state between test methods.
@@ -20,6 +21,13 @@ static func _reset() -> void:
 	_failure_count = 0
 	_last_failure = ""
 	_all_failures.clear()
+	_script_error_allowance = 0
+
+
+## Allows up to [param n] Godot script errors during the next test method.
+## Used when a test deliberately triggers expected compile/runtime errors.
+static func allow_script_errors(n: int) -> void:
+	_script_error_allowance = n
 
 
 ## Records a failure with context.

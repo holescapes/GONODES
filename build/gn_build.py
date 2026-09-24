@@ -50,6 +50,7 @@ __all__ = [
     "detect_host_arch",
     "make_env",
     "collect_sources",
+    "copy_runtime_dlls",
     "build_extension",
 ]
 ALL_ARCHS_BY_PLATFORM = {
@@ -353,6 +354,33 @@ def collect_sources(env, cfg, native_dir, plat):
 
 # ── Build orchestration ────────────────────────────────────────────────────────
 
+def copy_runtime_dlls(cfg, plat, native_dir, out_dir):
+    """Copy platform runtime_dlls from build.cfg into the extension output dir."""
+    import shutil
+
+    plat_cfg = cfg.get(plat, {})
+    runtime_dlls = plat_cfg.get("runtime_dlls", [])
+    if not runtime_dlls:
+        return
+
+    # runtime_dlls_dest is relative to the extension root (parent of native_dir).
+    # Defaults to out_dir (native/bin/<platform>/) if not set.
+    ext_root = os.path.dirname(native_dir)
+    dlls_dest_rel = plat_cfg.get("runtime_dlls_dest", "")
+    if dlls_dest_rel:
+        dlls_dest = os.path.normpath(os.path.join(ext_root, dlls_dest_rel))
+    else:
+        dlls_dest = out_dir
+    os.makedirs(dlls_dest, exist_ok=True)
+    for dll_rel in runtime_dlls:
+        dll_src = os.path.join(native_dir, dll_rel)
+        if os.path.isfile(dll_src):
+            dll_dst = os.path.join(dlls_dest, os.path.basename(dll_src))
+            if not os.path.isfile(dll_dst):
+                shutil.copy2(dll_src, dll_dst)
+                print(f"  Copied runtime DLL: {os.path.basename(dll_src)} -> {dlls_dest}")
+
+
 def build_extension(native_dir=None, plat=None, target=None, arch=None):
     """
     Build a single extension from its native/ directory.
@@ -427,25 +455,6 @@ def build_extension(native_dir=None, plat=None, target=None, arch=None):
         if os.path.isfile(lib_target):
             shutil.copy2(lib_target, lib_copy_dst)
             print(f"  Copied library: {os.path.basename(lib_target)} -> {lib_dest_dir}")
-    import shutil
-    plat_cfg = cfg.get(plat, {})
-    runtime_dlls = plat_cfg.get("runtime_dlls", [])
-    if runtime_dlls:
-        # runtime_dlls_dest is relative to the extension root (parent of native_dir).
-        # Defaults to out_dir (native/bin/<platform>/) if not set.
-        ext_root = os.path.dirname(native_dir)
-        dlls_dest_rel = plat_cfg.get("runtime_dlls_dest", "")
-        if dlls_dest_rel:
-            dlls_dest = os.path.normpath(os.path.join(ext_root, dlls_dest_rel))
-        else:
-            dlls_dest = out_dir
-        os.makedirs(dlls_dest, exist_ok=True)
-        for dll_rel in runtime_dlls:
-            dll_src = os.path.join(native_dir, dll_rel)
-            if os.path.isfile(dll_src):
-                dll_dst = os.path.join(dlls_dest, os.path.basename(dll_src))
-                if not os.path.isfile(dll_dst):
-                    shutil.copy2(dll_src, dll_dst)
-                    print(f"  Copied runtime DLL: {os.path.basename(dll_src)} -> {dlls_dest}")
+    copy_runtime_dlls(cfg, plat, native_dir, out_dir)
 
     return library

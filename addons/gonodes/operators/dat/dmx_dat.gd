@@ -2,6 +2,10 @@ class_name DMXDAT
 extends GNDatBase
 ## DMX lighting protocol DAT via Art-Net (UDP).
 ##
+## **DEPRECATED**: Retired from the operator palette; kept so old patches that
+## reference this type by name can still load. For DMX/Art-Net output, use
+## DmxOutCHOP instead.
+##
 ## Bidirectional Art-Net node: sends and/or receives DMX-512 data over
 ## Ethernet using Godot's built-in PacketPeerUDP.
 ##

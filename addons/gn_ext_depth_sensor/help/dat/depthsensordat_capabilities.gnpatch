@@ -11,7 +11,7 @@
             "parameters": {}
         },
         "sensor1": {
-            "type": "DepthSensorTOP",
+            "type": "DepthSensorIMG",
             "position": [
                 100,
                 350
@@ -105,7 +105,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Depth Sensor \u2014 Capability Reference\n\nAll 4 depth sensor operators side by side.\n\n1. DepthSensorDAT \u2014 lists devices + capabilities\n2. DepthSensorTOP \u2014 depth/color/IR/player textures\n3. DepthSkeletonCHOP \u2014 joint tracking (Kinect only)\n4. DepthPointCloudSOP \u2014 3D point cloud mesh\n\nSet the same Device Serial on all operators to\nshare one hardware connection. The DAT table\nshows which capabilities each sensor supports.",
+            "text": "Depth Sensor \u2014 Capability Reference\n\nAll 4 depth sensor operators side by side.\n\n1. DepthSensorDAT \u2014 lists devices + capabilities\n2. DepthSensorIMG \u2014 depth/color/IR/player textures\n3. DepthSkeletonCHOP \u2014 joint tracking (Kinect only)\n4. DepthPointCloudSOP \u2014 3D point cloud mesh\n\nSet the same Device Serial on all operators to\nshare one hardware connection. The DAT table\nshows which capabilities each sensor supports.",
             "position": [
                 -250.0,
                 -100.0
