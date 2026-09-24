@@ -1595,18 +1595,15 @@ GONODES/
   - **Renderer in standalone apps:**
     - Automatic via `fallback_to_opengl3 = true` baked into project.godot / `.pck`.
     - No self-relaunch logic needed. Power users can override with `--rendering-method` CLI flag.
-  - **Extension distribution for exported apps**: When GONODES ships as a
-    standalone application (not running inside the Godot editor), users will need
-    a way to install extensions without touching `res://addons/`. Design a
-    user-facing `Extensions/` folder (e.g. next to the executable or in
-    `user://extensions/`) that `scan_extensions()` also searches. This keeps the
-    same `gn_ext_<name>/gn_extension.cfg` manifest convention but lets
-    end-users drag-and-drop extension folders without rebuilding the project.
-    Consider:
-    - Scanning both `res://addons/gn_ext_*` (dev) and `user://extensions/gn_ext_*` (end-user).
-    - An in-app "Extensions" settings panel listing installed / available extensions with enable/disable toggles.
-    - Version compatibility checks (engine version, GONODES version) in the manifest.
-    - Hot-reload of extensions without restarting the editor.
+  - [x] **Extension distribution for exported apps**: `scan_extensions()` reads
+    `res://addons/gn_ext_*` and `user://extensions/gn_ext_*`. Preferences →
+    Extensions lists name, version, and source, loads a `.pck` via
+    `ProjectSettings.load_resource_pack`, and enable/disable updates the palette
+    for GDScript operators and `.gnasset` files without a restart. Disable state
+    is `user://gn_extension_prefs.cfg`. Native GDExtension libraries still need a
+    Godot restart. `scripts/pack_extension.ps1` writes
+    `templates/extensions/gn_ext_<name>.pck`. There is no engine-version
+    compatibility gate. The community asset portal is still open.
 - [x] **Node help system**:
   - `?` button in node header **and** right-click context menu opens a help Window.
   - Help window: `Window` + `RichTextLabel` rendering per-node documentation.

@@ -65,8 +65,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_setup_viewport()
 
 	var res: Vector2i = get_param_value("resolution")
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_bg.color = get_param_value("bg_color")
 

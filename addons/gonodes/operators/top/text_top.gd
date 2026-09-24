@@ -46,8 +46,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var av: int = get_param_value("align_v")
 	var wrap: bool = get_param_value("word_wrap")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_bg.color = bgcol
 

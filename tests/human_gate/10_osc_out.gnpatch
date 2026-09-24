@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "const": {
+      "type": "ConstantCHOP",
+      "position": [0, 200],
+      "parameters": {
+        "count": {"value": 1},
+        "name0": {"value": "chan1"},
+        "value0": {"value": 0.5}
+      }
+    },
+    "osc": {
+      "type": "OscOUT",
+      "position": [360, 200],
+      "parameters": {
+        "active": {"value": true},
+        "port": {"value": 9001}
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "const",
+      "from_port": 0,
+      "to_node": "osc",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 10. Start a UDP listener on port 9001 before opening this patch.\nPackets must arrive while Active is on.\nTurn Active off. Packets must stop.\nA cook with no listener is UNVERIFIED, not a pass.",
+      "position": [-40, 20],
+      "size": [560, 130],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

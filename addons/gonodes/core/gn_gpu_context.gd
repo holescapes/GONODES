@@ -52,6 +52,10 @@ var _pipeline_cache: Dictionary = {}
 ## 3D texture pool for VOL ping-pong: key = "WxHxD:format" → Array[RID]
 var _texture_pool: Dictionary = {}
 
+## Async 2D texture readback cache: texture RID id → { image, pending }.
+## Populated by get_texture_readback_image(); callbacks run on the main thread.
+var _texture_readbacks: Dictionary = {}
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Initialisation
@@ -361,6 +365,83 @@ func download_image(tex_rid: RID, width: int, height: int) -> Image:
 	if data.is_empty():
 		return null
 	return Image.create_from_data(width, height, false, Image.FORMAT_RGBA8, data)
+
+
+## GPU → CPU readback for bridge operators.
+## [ViewportTexture]: Godot 4.7 has no RenderingServer async readback API
+## (only sync [method RenderingServer.texture_2d_get] / [method Texture2D.get_image]).
+## [Texture2DRD]: uses [method RenderingDevice.texture_get_data_async] on the
+## RD RID; output is ~1 frame behind live GPU contents after the first cook.
+func get_texture_readback_image(texture: Texture2D, size: Vector2i,
+		img_format: Image.Format = Image.FORMAT_RGBA8) -> Image:
+	if texture == null:
+		return null
+
+	if texture is ImageTexture:
+		return (texture as ImageTexture).get_image()
+
+	if texture is ViewportTexture:
+		# RS-owned RID — no non-blocking viewport readback in this engine.
+		return texture.get_image()
+
+	if texture is Texture2DRD:
+		var rd_rid: RID = (texture as Texture2DRD).texture_rd_rid
+		if rd == null or not rd_rid.is_valid():
+			return texture.get_image()
+		return _get_rd_async_readback(rd_rid, size, img_format, texture)
+
+	return texture.get_image()
+
+
+func _get_rd_async_readback(tex_rid: RID, size: Vector2i, img_format: Image.Format,
+		fallback_texture: Texture2D) -> Image:
+	var w: int = size.x if size.x > 0 else fallback_texture.get_width()
+	var h: int = size.y if size.y > 0 else fallback_texture.get_height()
+	if w <= 0 or h <= 0:
+		return null
+
+	var tex_key: int = tex_rid.get_id()
+	if tex_key not in _texture_readbacks:
+		_texture_readbacks[tex_key] = {"image": null, "pending": false}
+
+	var entry: Dictionary = _texture_readbacks[tex_key]
+
+	if not entry["pending"]:
+		var err: Error = rd.texture_get_data_async(
+			tex_rid, 0, _on_texture_readback.bind(tex_key, w, h, img_format))
+		if err != OK:
+			GNLogger.warn("GpuContext",
+				"texture_get_data_async failed (err %d), sync fallback" % err)
+			return fallback_texture.get_image()
+		entry["pending"] = true
+
+	var cached: Image = entry.get("image")
+	if cached != null:
+		return cached.duplicate()
+
+	# First miss — one blocking read so Texture2DRD bridges are not empty on frame 0.
+	var first_img: Image = fallback_texture.get_image()
+	if first_img != null:
+		entry["image"] = first_img
+	return first_img
+
+
+func _on_texture_readback(tex_key: int, width: int, height: int,
+		img_format: Image.Format, data: PackedByteArray) -> void:
+	if tex_key not in _texture_readbacks:
+		return
+	var entry: Dictionary = _texture_readbacks[tex_key]
+	entry["pending"] = false
+	if data.is_empty():
+		GNLogger.error("GpuContext",
+			"Async texture readback returned empty data (texture key %d)" % tex_key)
+		return
+	var img := Image.create_from_data(width, height, false, img_format, data)
+	if img == null or img.is_empty():
+		GNLogger.error("GpuContext",
+			"Failed to build Image from async readback (texture key %d)" % tex_key)
+		return
+	entry["image"] = img
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

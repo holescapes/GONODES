@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "filein": {
+      "type": "AudioFileInCHOP",
+      "position": [0, 200],
+      "parameters": {
+        "play": {"value": false},
+        "loop": {"value": true},
+        "volume": {"value": -6.0}
+      }
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 8. Set File to a short WAV, OGG, or MP3 you already have. 24-bit WAV is not supported.\nTurn Play on. There is no AudioDeviceOUT. You should hear the file on Master.\nNo file picked means UNVERIFIED, not a fail.",
+      "position": [-40, 20],
+      "size": [560, 120],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

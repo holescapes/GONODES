@@ -44,7 +44,7 @@ func _ready() -> void:
 
 	# Search bar
 	_search_edit = LineEdit.new()
-	_search_edit.placeholder_text = "Search operators…"
+	_search_edit.placeholder_text = "Search operators or families…"
 	_search_edit.clear_button_enabled = true
 	_search_edit.text_changed.connect(_on_search_changed)
 	_search_edit.gui_input.connect(_on_search_gui_input)
@@ -243,6 +243,60 @@ func _on_pill_toggled(pressed: bool, family_id: int) -> void:
 # Tree Population
 # ═══════════════════════════════════════════════════════════════════════════════
 
+## op_name → extra output family names (not the operator's primary family).
+var _extra_output_families: Dictionary = {}
+
+
+## Fills [_extra_output_families] from the registry port cache.
+func _rebuild_extra_outputs(reg: GNExtensionRegistry) -> void:
+	_extra_output_families.clear()
+	for fam_id: int in GNFamily.FAMILY_NAMES:
+		var fam_name: String = GNFamily.FAMILY_NAMES[fam_id]
+		for op_name in reg.get_operators_producing_family(fam_id):
+			var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
+			if entry == null:
+				continue
+			if GNFamily.string_to_type(entry.family) == fam_id:
+				continue
+			if not _extra_output_families.has(op_name):
+				_extra_output_families[op_name] = PackedStringArray()
+			(_extra_output_families[op_name] as PackedStringArray).append(fam_name)
+
+
+## Name match, family match, semantic tag match, or extra-output family match.
+static func matches_operator_query(op_name: String, filter_lower: String,
+		reg: GNExtensionRegistry, extra_output_families: Dictionary = {}) -> bool:
+	if filter_lower.is_empty():
+		return true
+	if op_name.to_lower().contains(filter_lower):
+		return true
+	var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
+	if entry != null and GNExtensionRegistry.tags_match_search_query(entry.tags, filter_lower):
+		return true
+	if filter_lower.length() < 2:
+		return false
+	if entry != null and entry.family.to_lower().contains(filter_lower):
+		return true
+	if extra_output_families.has(op_name):
+		for fam_name in extra_output_families[op_name]:
+			if str(fam_name).to_lower().contains(filter_lower):
+				return true
+	return false
+
+
+func _matches_query(op_name: String, filter_lower: String, reg: GNExtensionRegistry) -> bool:
+	return matches_operator_query(op_name, filter_lower, reg, _extra_output_families)
+
+
+func _also_outputs_suffix(op_name: String) -> String:
+	if not _extra_output_families.has(op_name):
+		return ""
+	var names: PackedStringArray = _extra_output_families[op_name]
+	if names.is_empty():
+		return ""
+	return "  (also outputs: %s)" % ", ".join(names)
+
+
 ## Builds or rebuilds the tree, optionally filtering by search text.
 ## Operators with a non-empty section get grouped under a sub-heading within
 ## their family (e.g. TOP → Shadertoy → ShadertoyTOP).
@@ -255,6 +309,7 @@ func _populate_tree(filter: String) -> void:
 	var registry_sectioned := reg.get_operator_registry_sectioned()
 	var custom_registry := reg.get_custom_asset_registry()
 	var filter_lower := filter.to_lower()
+	_rebuild_extra_outputs(reg)
 
 	# ── Built-in operators (excludes custom assets) ────────────────────
 	var _show_builtin := (_active_family_filter != _FILTER_CUSTOM)
@@ -280,7 +335,7 @@ func _populate_tree(filter: String) -> void:
 					continue
 				if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
 					continue
-				if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+				if _matches_query(op_name, filter_lower, reg):
 					any_visible = true
 					break
 			if any_visible:
@@ -311,7 +366,7 @@ func _populate_tree(filter: String) -> void:
 					continue  # Skip custom assets — they go in Custom section
 				if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
 					continue
-				if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+				if _matches_query(op_name, filter_lower, reg):
 					filtered_ops.append(op_name)
 
 			if filtered_ops.is_empty():
@@ -332,6 +387,9 @@ func _populate_tree(filter: String) -> void:
 			for op_name in filtered_ops:
 				_add_operator_item(parent_item, op_name, reg)
 
+	if _allowed_operators.is_empty() and _active_family_filter >= 0:
+		_append_cross_family_outputs(root, filter_lower, reg)
+
 	# ── Custom Assets — dedicated top-level section ────────────────────
 	var custom_any_visible := false
 	for fam_name in custom_registry:
@@ -344,7 +402,7 @@ func _populate_tree(filter: String) -> void:
 			for op_name in custom_registry[fam_name][sec_name]:
 				if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
 					continue
-				if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+				if _matches_query(op_name, filter_lower, reg):
 					custom_any_visible = true
 					break
 			if custom_any_visible:
@@ -377,7 +435,7 @@ func _populate_tree(filter: String) -> void:
 				for op_name in fam_sections[sec_name]:
 					if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
 						continue
-					if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+					if _matches_query(op_name, filter_lower, reg):
 						fam_visible = true
 						break
 				if fam_visible:
@@ -401,7 +459,7 @@ func _populate_tree(filter: String) -> void:
 				for op_name in ops:
 					if not _allowed_operators.is_empty() and not _allowed_operators.has(op_name):
 						continue
-					if filter_lower.is_empty() or op_name.to_lower().contains(filter_lower):
+					if _matches_query(op_name, filter_lower, reg):
 						filtered_ops.append(op_name)
 
 				if filtered_ops.is_empty():
@@ -424,6 +482,43 @@ func _populate_tree(filter: String) -> void:
 		_select_first_leaf(root)
 
 
+## Lists operators whose primary family is elsewhere but which emit [param family].
+func _append_cross_family_outputs(root: TreeItem, filter_lower: String,
+		reg: GNExtensionRegistry) -> void:
+	var family_name: String = GNFamily.get_family_name(_active_family_filter)
+	var cross: Array[String] = []
+	for op_name in _extra_output_families:
+		var extras: PackedStringArray = _extra_output_families[op_name]
+		if not extras.has(family_name):
+			continue
+		var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
+		if entry != null and entry.is_custom_asset:
+			continue
+		if not _matches_query(op_name, filter_lower, reg):
+			continue
+		cross.append(op_name)
+	if cross.is_empty():
+		return
+	cross.sort()
+	var family_item := _find_child_by_text(root, family_name)
+	if family_item == null:
+		family_item = _tree.create_item(root)
+		family_item.set_text(0, family_name)
+		family_item.set_selectable(0, false)
+		family_item.set_custom_color(0, GNFamily.get_color(_active_family_filter))
+	for op_name in cross:
+		_add_operator_item(family_item, op_name, reg)
+
+
+func _find_child_by_text(parent: TreeItem, text: String) -> TreeItem:
+	var child := parent.get_first_child()
+	while child:
+		if child.get_text(0) == text:
+			return child
+		child = child.get_next()
+	return null
+
+
 ## Adds a single operator item to the tree under [param parent_item].
 func _add_operator_item(parent_item: TreeItem, op_name: String,
 		reg: GNExtensionRegistry) -> void:
@@ -433,16 +528,19 @@ func _add_operator_item(parent_item: TreeItem, op_name: String,
 		op_item.set_text(0, "\u29b8 " + op_name + "  (deprecated)")
 		op_item.set_custom_color(0, Color(0.5, 0.5, 0.5))
 	elif entry != null and entry.is_custom_asset:
-		op_item.set_text(0, op_name)
+		op_item.set_text(0, op_name + _also_outputs_suffix(op_name))
 		op_item.set_custom_color(0, Color(0.9, 0.85, 0.6))
 	else:
-		op_item.set_text(0, op_name)
+		op_item.set_text(0, op_name + _also_outputs_suffix(op_name))
 	op_item.set_metadata(0, op_name)
 	var desc := _get_operator_description(op_name)
 	if entry != null and entry.deprecated and not entry.deprecation_message.is_empty():
 		desc = "\u26a0 DEPRECATED: " + entry.deprecation_message + ("\n" + desc if not desc.is_empty() else "")
 	if entry != null and entry.is_custom_asset and entry.asset_read_only:
 		desc = ("[extension asset] " if desc.is_empty() else desc + "\n") + "(read-only — from extension)"
+	if entry != null and not entry.tags.is_empty():
+		var tags_line := "tags: " + ", ".join(entry.tags)
+		desc = tags_line if desc.is_empty() else desc + "\n" + tags_line
 	if not desc.is_empty():
 		op_item.set_tooltip_text(0, desc)
 

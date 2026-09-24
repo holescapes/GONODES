@@ -141,6 +141,12 @@ var node_ref_family: int = -2
 ## Compiled Godot Expression object (cached, recompiled on expression text change).
 var _compiled_expression: Expression = null
 
+## Pre-compiled GDScript eval(host, me, time, frame, dt) callable (fast path).
+var _compiled_expression_callable: Callable = Callable()
+
+## RefCounted instance backing _compiled_expression_callable.
+var _compiled_expression_evaluator: RefCounted = null
+
 ## Whether the compiled expression is valid.
 var _expression_valid: bool = false
 
@@ -161,6 +167,12 @@ var component_modes: Array = []  # Array[Mode]
 
 ## Per-component compiled Expression objects.
 var _compiled_component_expressions: Array = []  # Array[Expression]
+
+## Per-component compiled GDScript eval callables (parallel to expressions).
+var _compiled_component_callables: Array = []  # Array[Callable]
+
+## Per-component RefCounted evaluators backing component callables.
+var _compiled_component_evaluators: Array = []  # Array[RefCounted]
 
 ## Per-component validity flags.
 var _component_expression_valid: Array = []  # Array[bool]
@@ -508,6 +520,7 @@ func reset() -> void:
 	resolved_value = default_value
 	expression = ""
 	_compiled_expression = null
+	_clear_expression_callable()
 	_expression_valid = false
 	expression_error = ""
 	# Reset per-component expressions
@@ -515,6 +528,7 @@ func reset() -> void:
 		component_modes[i] = Mode.CONSTANT
 		component_expressions[i] = ""
 		_compiled_component_expressions[i] = null
+		_clear_component_callable(i)
 		_component_expression_valid[i] = false
 		component_expression_errors[i] = ""
 	value_changed.emit(param_name, value)
@@ -574,6 +588,7 @@ func set_chop_reference(source_node: String, channel: String,
 ## Compiles the current expression string into a Godot Expression object.
 ## Called internally when the expression text changes.
 func _compile_expression() -> void:
+	_clear_expression_callable()
 	if expression.is_empty():
 		_expression_valid = false
 		expression_error = "Empty expression"
@@ -596,6 +611,7 @@ func _compile_expression() -> void:
 	else:
 		_expression_valid = true
 		expression_error = ""
+		_build_expression_callable(expression)
 		GNLogger.debug("Parameter", "'%s' expression compiled OK: %s" % [param_name, expression])
 
 
@@ -606,9 +622,126 @@ func get_compiled_expression() -> Expression:
 	return _compiled_expression if _expression_valid else null
 
 
+## Returns a pre-compiled eval(host, me, time, frame, dt) callable, or an invalid Callable.
+func get_expression_eval_callable() -> Callable:
+	if not _expression_valid:
+		return Callable()
+	if not _compiled_expression_callable.is_valid() and not expression.is_empty():
+		if _compiled_expression == null:
+			_compile_expression()
+		elif _expression_valid:
+			_build_expression_callable(expression)
+	return _compiled_expression_callable
+
+
 ## Returns true if the expression is compiled and ready to evaluate.
 func is_expression_valid() -> bool:
 	return _expression_valid and _compiled_expression != null
+
+
+## Clears the scalar expression callable cache.
+func _clear_expression_callable() -> void:
+	_compiled_expression_callable = Callable()
+	_compiled_expression_evaluator = null
+
+
+## Clears one component expression callable cache.
+func _clear_component_callable(idx: int) -> void:
+	if idx < 0:
+		return
+	if idx < _compiled_component_callables.size():
+		_compiled_component_callables[idx] = Callable()
+	if idx < _compiled_component_evaluators.size():
+		_compiled_component_evaluators[idx] = null
+
+
+## True when the expression cannot be turned into a single-return GDScript callable.
+static func _expression_callable_blocked(expr_text: String) -> bool:
+	if expr_text.contains("\n") or expr_text.contains(";"):
+		return true
+	var re := RegEx.new()
+	re.compile("\\b(func|class)\\b")
+	return re.search(expr_text) != null
+
+
+## Rewrites chop(, op(, top(, par( calls to host.* without touching longer identifiers or string literals.
+static func _rewrite_host_method_calls(expr_text: String) -> String:
+	const HOST_METHODS := ["chop", "op", "top", "par"]
+	var out := ""
+	var i := 0
+	var in_string := false
+	var string_quote := ""
+	while i < expr_text.length():
+		var ch: String = expr_text[i]
+		if in_string:
+			out += ch
+			if ch == string_quote and (i == 0 or expr_text[i - 1] != "\\"):
+				in_string = false
+			i += 1
+			continue
+		if ch == '"' or ch == "'":
+			in_string = true
+			string_quote = ch
+			out += ch
+			i += 1
+			continue
+		var matched := false
+		for method_name in HOST_METHODS:
+			var token := method_name + "("
+			if expr_text.length() - i < token.length():
+				continue
+			if expr_text.substr(i, token.length()) != token:
+				continue
+			var prev_is_ident := i > 0 and _is_expression_ident_char(expr_text[i - 1])
+			if prev_is_ident:
+				continue
+			out += "host." + token
+			i += token.length()
+			matched = true
+			break
+		if not matched:
+			out += ch
+			i += 1
+	return out
+
+
+static func _is_expression_ident_char(ch: String) -> bool:
+	return ch == "_" \
+			or (ch >= "a" and ch <= "z") \
+			or (ch >= "A" and ch <= "Z") \
+			or (ch >= "0" and ch <= "9")
+
+
+## Builds _compiled_expression_callable after a successful Expression.parse().
+func _build_expression_callable(expr_text: String) -> void:
+	_clear_expression_callable()
+	if _expression_callable_blocked(expr_text):
+		return
+	var body := _rewrite_host_method_calls(expr_text)
+	var source := "extends RefCounted\n\nfunc eval(host, me, time, frame, dt):\n\treturn %s\n" % body
+	var script := GDScript.new()
+	script.source_code = source
+	if script.reload() != OK:
+		return
+	var evaluator: RefCounted = script.new()
+	_compiled_expression_evaluator = evaluator
+	_compiled_expression_callable = evaluator.eval
+
+
+## Builds one component callable after a successful Expression.parse().
+func _build_component_expression_callable(idx: int, expr_text: String) -> void:
+	_clear_component_callable(idx)
+	if _expression_callable_blocked(expr_text):
+		return
+	var body := _rewrite_host_method_calls(expr_text)
+	var source := "extends RefCounted\n\nfunc eval(host, me, time, frame, dt):\n\treturn %s\n" % body
+	var script := GDScript.new()
+	script.source_code = source
+	if script.reload() != OK:
+		return
+	var evaluator: RefCounted = script.new()
+	_compiled_component_evaluators[idx] = evaluator
+	_compiled_component_callables[idx] = evaluator.eval
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -650,6 +783,8 @@ func _ensure_component_arrays() -> void:
 		component_modes.resize(count)
 		component_expressions.resize(count)
 		_compiled_component_expressions.resize(count)
+		_compiled_component_callables.resize(count)
+		_compiled_component_evaluators.resize(count)
 		_component_expression_valid.resize(count)
 		component_expression_errors.resize(count)
 		for i in range(count):
@@ -659,6 +794,10 @@ func _ensure_component_arrays() -> void:
 				component_expressions[i] = ""
 			if _compiled_component_expressions[i] == null:
 				_compiled_component_expressions[i] = null
+			if _compiled_component_callables[i] == null:
+				_compiled_component_callables[i] = Callable()
+			if _compiled_component_evaluators[i] == null:
+				_compiled_component_evaluators[i] = null
 			if _component_expression_valid[i] == null:
 				_component_expression_valid[i] = false
 			if component_expression_errors[i] == null:
@@ -710,6 +849,7 @@ func has_any_component_expression() -> bool:
 ## Compiles a single component's expression string.
 func _compile_component_expression(idx: int) -> void:
 	var expr_text: String = component_expressions[idx]
+	_clear_component_callable(idx)
 	if expr_text.is_empty():
 		_component_expression_valid[idx] = false
 		component_expression_errors[idx] = "Empty expression"
@@ -731,6 +871,7 @@ func _compile_component_expression(idx: int) -> void:
 		_component_expression_valid[idx] = true
 		component_expression_errors[idx] = ""
 		_compiled_component_expressions[idx] = expr
+		_build_component_expression_callable(idx, expr_text)
 
 
 ## Returns the compiled Expression for a component, or null.
@@ -741,6 +882,23 @@ func get_compiled_component_expression(idx: int) -> Expression:
 	if _compiled_component_expressions[idx] == null and not component_expressions[idx].is_empty():
 		_compile_component_expression(idx)
 	return _compiled_component_expressions[idx] if _component_expression_valid[idx] else null
+
+
+## Returns a pre-compiled component eval callable, or an invalid Callable.
+func get_component_expression_eval_callable(idx: int) -> Callable:
+	_ensure_component_arrays()
+	if idx < 0 or idx >= _component_expression_valid.size():
+		return Callable()
+	if not _component_expression_valid[idx]:
+		return Callable()
+	var callable: Callable = _compiled_component_callables[idx]
+	if not callable.is_valid() and not component_expressions[idx].is_empty():
+		if _compiled_component_expressions[idx] == null:
+			_compile_component_expression(idx)
+		elif _component_expression_valid[idx]:
+			_build_component_expression_callable(idx, component_expressions[idx])
+		callable = _compiled_component_callables[idx]
+	return callable if callable is Callable and callable.is_valid() else Callable()
 
 
 ## Returns the constant value of a single component (extracted from the stored value).

@@ -31,8 +31,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var strength_val: float = get_param_value("strength")
 	var gray: bool = get_param_value("grayscale")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	(_canvas as TextureRect).texture = tex_in.texture
 	_material.set_shader_parameter("source_tex", tex_in.texture)

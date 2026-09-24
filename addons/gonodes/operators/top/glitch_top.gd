@@ -67,7 +67,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_init_shader_viewport("res://addons/gonodes/shaders/top/glitch.gdshader", true, true, res)
 
 	if _viewport.size != res:
-		_viewport.size = res
+		_ensure_viewport_size(res)
 		_destroy_blit()
 		_frame_count = 0
 

@@ -43,7 +43,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var do_reset: bool = get_param_value("reset")
 
 	if _viewport.size != res:
-		_viewport.size = res
+		_ensure_viewport_size(res)
 		_destroy_blit()
 
 	if do_reset:

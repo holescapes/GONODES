@@ -44,7 +44,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if tex_data == null or tex_data.texture == null:
 		return null
 
-	var img: Image = tex_data.texture.get_image()
+	var img: Image = tex_data.get_readback_image()
 	if img == null:
 		return null
 

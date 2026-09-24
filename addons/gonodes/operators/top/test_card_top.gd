@@ -59,8 +59,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
 	_init_shader_viewport(SHADER_PATH, false, false, res)
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("resolution", Vector2(res))
 	_material.set_shader_parameter("card_type", get_param_value("card_type"))

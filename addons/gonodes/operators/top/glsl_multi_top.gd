@@ -822,14 +822,9 @@ func _cleanup_mrt() -> void:
 func _ensure_fallback_viewports(count: int, size: Vector2i) -> void:
 	while _fb_viewports.size() < count:
 		var idx := _fb_viewports.size()
-		var vp := SubViewport.new()
-		vp.name = "FBPass%d" % idx
-		vp.size = size
+		var vp := GNViewportPool.acquire("FBPass%d" % idx, size, true, true)
 		vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		vp.render_target_clear_mode = SubViewport.CLEAR_MODE_ALWAYS
-		vp.transparent_bg = true
-		vp.disable_3d = true
-		vp.gui_disable_input = true
 		add_child(vp)
 
 		var shader := Shader.new()
@@ -849,8 +844,7 @@ func _ensure_fallback_viewports(count: int, size: Vector2i) -> void:
 
 	while _fb_viewports.size() > count:
 		var idx := _fb_viewports.size() - 1
-		remove_child(_fb_viewports[idx])
-		_fb_viewports[idx].queue_free()
+		GNViewportPool.release(_fb_viewports[idx])
 		_fb_viewports.remove_at(idx)
 		_fb_shaders.remove_at(idx)
 		_fb_materials.remove_at(idx)
@@ -910,7 +904,8 @@ func _cook_fallback(inputs: Array[GNData], res: Vector2i) -> GNData:
 			continue
 		var vp := _fb_viewports[idx]
 		if vp.size != res:
-			vp.size = res
+			vp = _swap_fb_viewport_size(vp, res)
+			_fb_viewports[idx] = vp
 		var mat := _fb_materials[idx]
 		for i in range(input_ports.size()):
 			var tex: GNTextureData = inputs[i] as GNTextureData if i < inputs.size() and inputs[i] is GNTextureData else null
@@ -925,6 +920,13 @@ func _cook_fallback(inputs: Array[GNData], res: Vector2i) -> GNData:
 
 	_cached_tex_data = _output_textures[0]
 	return _cached_tex_data
+
+
+func _swap_fb_viewport_size(vp: SubViewport, new_size: Vector2i) -> SubViewport:
+	vp = _swap_viewport_size(vp, new_size, true, true)
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	vp.render_target_clear_mode = SubViewport.CLEAR_MODE_ALWAYS
+	return vp
 
 
 # ===========================================================================

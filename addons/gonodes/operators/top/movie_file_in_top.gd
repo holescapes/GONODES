@@ -63,8 +63,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var bg_col: Color = get_param_value("bg_color")
 
 	# Update viewport size
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_bg.color = bg_col
 
@@ -78,7 +77,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			var native_res := Vector2i(vtex.get_width(), vtex.get_height())
 			if native_res != res:
 				set_param_value("resolution", native_res)
-				_viewport.size = native_res
+				_ensure_viewport_size(native_res)
 				GNLogger.info("MovieFileInTOP", "'%s' resolution auto-set to %s" % [id, str(native_res)])
 			_awaiting_video_size = false
 

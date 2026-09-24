@@ -38,7 +38,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_init_shader_viewport("res://addons/gonodes/shaders/top/cellular_automata.gdshader", true, false, res)
 
 	if _viewport.size != res:
-		_viewport.size = res
+		_ensure_viewport_size(res)
 		_destroy_blit()
 
 	# Reset on toggle or first frame

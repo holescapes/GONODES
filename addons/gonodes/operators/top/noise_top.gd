@@ -54,8 +54,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var tile_sz: float = get_param_value("tile_size")
 
 	# Update viewport size
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	# Update shader uniforms
 	_material.set_shader_parameter("noise_type", noise_type_idx)

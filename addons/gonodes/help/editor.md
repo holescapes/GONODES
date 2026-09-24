@@ -94,7 +94,7 @@ Greyed-out items require a selection, clipboard content, or ≥2 nodes.
 
 | Menu Item          | Shortcut        | Notes                                              |
 |--------------------|-----------------|-----------------------------------------------------|
-| **Add Node…**      | Alt + A         | Opens the node palette search popup                 |
+| **Add Node…**      | Alt + A         | Palette search: name, family, secondary output, and tags (`audio`, `video`, `file`, `camera`) |
 | **Copy**           | Ctrl + C        | Copies selected nodes + internal wires              |
 | **Cut**            | Ctrl + X        | Cut (copy then delete)                              |
 | **Paste**          | Ctrl + V        | Paste at cursor position (IDs get `_copy` suffix)   |

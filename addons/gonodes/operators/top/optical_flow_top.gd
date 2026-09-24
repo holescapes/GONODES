@@ -62,8 +62,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	# Ensure the "previous frame" capture viewport exists (child index > main VP)
 	_ensure_prev_viewport(res)
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	# Set shader uniforms
 	_material.set_shader_parameter("current_frame", tex_in.texture)
@@ -95,13 +94,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 func _ensure_prev_viewport(size: Vector2i) -> void:
 	if _prev_viewport != null:
 		if _prev_viewport.size != size:
-			_prev_viewport.size = size
+			_prev_viewport = _swap_prev_viewport_size(_prev_viewport, size)
 		return
 
-	_prev_viewport = SubViewport.new()
-	_prev_viewport.name = "PrevFrame"
-	_prev_viewport.size = size
-	_prev_viewport.transparent_bg = true
+	_prev_viewport = GNViewportPool.acquire("PrevFrame", size, true, true)
 	_prev_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	_prev_viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_ONCE
 	add_child(_prev_viewport)
@@ -112,3 +108,10 @@ func _ensure_prev_viewport(size: Vector2i) -> void:
 	_prev_canvas.stretch_mode = TextureRect.STRETCH_SCALE
 	_prev_viewport.add_child(_prev_canvas)
 	_prev_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+
+func _swap_prev_viewport_size(vp: SubViewport, new_size: Vector2i) -> SubViewport:
+	vp = _swap_viewport_size(vp, new_size, true, true)
+	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	vp.render_target_clear_mode = SubViewport.CLEAR_MODE_ONCE
+	return vp

@@ -28,6 +28,11 @@ var _recent_count_spin: SpinBox = null
 var _auto_save_spin: SpinBox = null
 var _renderer_option: OptionButton = null
 var _audio_out_option: OptionButton = null
+const _ExtensionsPanelScript := preload("res://addons/gonodes/ui/gn_extensions_panel.gd")
+const _AssetBrowserScript := preload("res://addons/gonodes/ui/gn_asset_browser.gd")
+
+var _extensions_panel: Window = null
+var _asset_browser: Window = null
 
 
 func _init() -> void:
@@ -86,6 +91,9 @@ func _ready() -> void:
 
 	_build_section_header("Performance")
 	_build_performance_settings()
+
+	_build_section_header("Extensions & Assets")
+	_build_extensions_settings()
 
 	# Close button at the bottom
 	_content.add_child(_make_spacer(12))
@@ -424,6 +432,43 @@ func _on_audio_refresh_pressed() -> void:
 	_populate_audio_out_option()
 	var idx: int = _audio_out_option.selected if _audio_out_option != null else 0
 	_on_audio_out_selected(idx)
+
+
+func _build_extensions_settings() -> void:
+	var note := Label.new()
+	note.text = "Manage optional extension packs and custom .gnasset operators. Native GDExtension DLLs require a Godot restart."
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_font_size_override("font_size", 11)
+	note.add_theme_color_override("font_color", Color(0.65, 0.65, 0.7))
+	_content.add_child(note)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var ext_btn := Button.new()
+	ext_btn.text = "Extensions…"
+	ext_btn.tooltip_text = "List extensions, load .pck packs, enable or disable folders"
+	ext_btn.pressed.connect(_open_extensions_panel)
+	row.add_child(ext_btn)
+	var asset_btn := Button.new()
+	asset_btn.text = "Asset Browser…"
+	asset_btn.tooltip_text = "Browse, install, or uninstall .gnasset custom operators"
+	asset_btn.pressed.connect(_open_asset_browser)
+	row.add_child(asset_btn)
+	_content.add_child(row)
+
+
+func _open_extensions_panel() -> void:
+	if _extensions_panel == null:
+		_extensions_panel = _ExtensionsPanelScript.new()
+		add_child(_extensions_panel)
+	_extensions_panel.popup_centered()
+
+
+func _open_asset_browser() -> void:
+	if _asset_browser == null:
+		_asset_browser = _AssetBrowserScript.new()
+		add_child(_asset_browser)
+	_asset_browser.popup_centered()
 
 
 func _notification(what: int) -> void:

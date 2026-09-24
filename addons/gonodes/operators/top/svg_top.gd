@@ -29,8 +29,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var svg_path: String = get_param_value("svg_path")
 
 	_ensure_viewport(res)
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	if svg_path.is_empty():
 		_cached_tex_data.resolution = res

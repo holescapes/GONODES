@@ -176,7 +176,7 @@ func test_no_sinks_empty_active_set() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func test_hash_guard_skips_unchanged() -> void:
-	## After the first cook, a second cook with no changes should skip.
+	## A dirty node whose hash is unchanged skips cook via the hash guard.
 	var a := _make_constant("a", "ch", 5.0)
 	var b := _make_null("b")
 	_network.connect_nodes("a", 0, "b", 0)
@@ -186,12 +186,13 @@ func test_hash_guard_skips_unchanged() -> void:
 	GNTestAssert.assert_not_null(_output(b), "b cooked on frame 0")
 	var first_output := _output(b)
 
-	# Frame 1: nothing changed — b should be skipped by hash guard
+	# Frame 1: force b dirty without changing params or upstream output
+	b.mark_dirty()
 	_engine.elapsed_time += _engine.current_delta
 	_cook()
 
-	# b's output should be the same object (no re-cook)
-	GNTestAssert.assert_eq(_output(b), first_output, "same output object (skipped)")
+	GNTestAssert.assert_false(b.dirty, "hash skip clears dirty")
+	GNTestAssert.assert_eq(_output(b), first_output, "same output object (hash skip)")
 
 
 func test_hash_guard_recooks_on_param_change() -> void:

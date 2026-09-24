@@ -83,8 +83,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	# CPU fallback (Compatibility renderer — no RenderingDevice).
 	_ensure_viewport(res, true)
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 	_cached_tex_data.resolution = res
 	_cached_tex_data.valid = true
 	_host_dirty = false

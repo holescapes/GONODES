@@ -196,7 +196,7 @@ No dirty system at all. *Everything* evaluates *every frame*. A 100-node network
 | GPU texture ops | **Multi-stream command queues** — independent TOP chains submit in parallel | DirectX 11 immediate context | Stride engine (Vulkan) | **Unified DX11/12 GPU pipeline** — entire scene rendered as a single GPU submission | **Single Godot render thread** — sequential SubViewport renders |
 | GPU↔CPU sync | Explicit fence management, async readback | DX11 pipeline | Stride pipeline | Minimal — almost everything stays on GPU | Implicit via Godot renderer + scene-tree ordering |
 | Compute shaders | Full GLSL/HLSL compute | Limited (beta), Stride compute (gamma) | N/A (offline) | **Extensive** — particles, fluids, cloth, hair all GPU compute | RenderingDevice compute (POP/VOL) + ComputeShaderTOP |
-| Texture pooling | **Yes** — GPU memory pool with resolution-matched recycling | DX11 resource management | Stride pools | Yes — GPU resource management | **No** — per-node SubViewport, created once |
+| Texture pooling | **Yes** — GPU memory pool with resolution-matched recycling | DX11 resource management | Stride pools | Yes — GPU resource management | **SubViewport pool** — recycled by size and flags (cap 16 per bucket). Not a GPU texture allocator |
 | Multi-GPU | **Yes** — distribute chains across GPUs | No | No | **Yes** — workload distribution across GPUs | No (Godot limitation) |
 
 ### This Is GONODES's Most Significant Gap
@@ -229,7 +229,7 @@ No explicit GPU fences, barriers, or synchronisation code — Godot's renderer h
 | | **TouchDesigner** | **VVVV beta** | **VVVV gamma** | **Houdini** | **Notch** | **GONODES** |
 |---|---|---|---|---|---|---|
 | Operator core | C++ | C++ | .NET (RyuJIT) | C++ + VEX (LLVM JIT) | C++ (proprietary, GPU-centric) | GDScript + 132 C++ GDExtension |
-| Expression eval | Python (interpreted) | N/A (pin-based) | .NET IL (JIT) | **VEX (LLVM JIT — near native C++)** | N/A (no user expressions) | GDScript Expression (interpreted) |
+| Expression eval | Python (interpreted) | N/A (pin-based) | .NET IL (JIT) | **VEX (LLVM JIT — near native C++)** | N/A (no user expressions) | GDScript Expression, plus a generated callable for simple expressions |
 | Per-op parallelism | Thread CHOP only | Some (beta) | .NET Task parallelism | Many SOPs internally threaded | GPU parallelism (not CPU) | WorkerThreadPool batch per topo level |
 | Data throughput | ~1M pts @ 60fps (C++ SOPs) | Comparable (C++) | ~500K pts @ 60fps (.NET) | 10M+ pts (VEX wrangles) | Millions (GPU-resident) | ~100K–500K pts (native), ~10K–50K (GDScript) |
 
@@ -261,7 +261,7 @@ Not a fair comparison for our use case — VEX compiles via LLVM to native machi
 | | **TouchDesigner** | **VVVV** | **Houdini** | **Notch** | **GONODES** |
 |---|---|---|---|---|---|
 | Copy-on-write | GPU textures (FBO handles), CPU (ref-counted) | Spread COW (beta); .NET ref semantics (gamma) | GU_Detail COW with ref counting | N/A — GPU-resident, no CPU data copies | `_shared` flag + `_mutable_input()` COW |
-| GPU texture management | **Pool** — resolution-matched recycling | DX resource management | N/A (offline) | Unified GPU memory management | Per-node SubViewport (no pool) |
+| GPU texture management | **Pool** — resolution-matched recycling | DX resource management | N/A (offline) | Unified GPU memory management | SubViewport pool (size + flags, cap 16). ViewportTexture readback stays synchronous |
 | Allocation per frame | Near-zero (pooled) | Low (.NET GC) | Near-zero (COW) | Near-zero (GPU-resident) | Near-zero (cached output reuse) |
 | Cross-family data | Bridge operators + CHOP Export | Typeless pins (auto-convert) | Bridge operators + attribute promotion | Implicit (unified pipeline) | Bridge operators + expressions |
 
@@ -272,14 +272,9 @@ Not a fair comparison for our use case — VEX compiles via LLVM to native machi
 - **Viewer-aware:** Viewed nodes count as extra consumers, so in-place operators properly duplicate when being watched.
 - **TOPs are immune:** SubViewport textures are inherently read-only (sampled by shaders). No COW needed for GPU paths.
 
-### What's Missing: Texture Pool
+### Texture pool
 
-TD reuses GPU texture allocations from a resolution-matched pool. GONODES creates one SubViewport per TOP node, kept for node lifetime. This means:
-- No allocation pressure per frame ✓
-- No recycling across nodes when resolution changes ✗ (SubViewport resizes instead of pool swap)
-- No cross-network texture sharing ✗
-
-Practical impact: minor. SubViewport creation is a one-time cost, and resolution changes are rare during normal playback.
+TD reuses GPU texture allocations from a resolution-matched pool. GONODES recycles `SubViewport` nodes through `GNViewportPool` (key is size, transparent background, and 3D flag; 16 per bucket). A resize takes a viewport from that bucket and reparents the children. This is not a GPU memory allocator, and `ViewportTexture.get_image()` is still a synchronous readback. Cross-network texture sharing is not implemented.
 
 ---
 
@@ -311,7 +306,7 @@ TD can automatically reduce texture resolution, skip low-priority branches, or d
 
 | Feature | TouchDesigner | VVVV | Houdini | Notch | GONODES |
 |---|---|---|---|---|---|
-| Expression language | Python (interpreted) | VL (.NET JIT) | HScript + VEX (LLVM JIT) | N/A (no user expressions) | GDScript Expression (interpreted) |
+| Expression language | Python (interpreted) | VL (.NET JIT) | HScript + VEX (LLVM JIT) | N/A (no user expressions) | GDScript Expression, plus a generated callable when the source has no newline, semicolon, or `func`/`class` |
 | Param-level deps | Partial (CHOP Export) | Pin connections | **Full dependency DAG** | None (static params) | Expression dep map + value-compare gate + input hash |
 | Ramp/curve parameter | No (LookupTOP workaround) | SplineEditor (gamma) | **Yes** (first-class `chramp()`) | Limited (keyframe curves) | **Yes** (GNRampEditor, `ramp()`) |
 | Per-component expressions | Yes | N/A (pin-based) | Yes | No | Yes (Vector2/3/4, Color) |
@@ -498,7 +493,7 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 | # | Optimisation | What | Expected Gain | Effort |
 |---|---|---|---|---|
 | 1 | ~~**Hot-reloadable C++ user nodes (`gn_ext_user_native`)**~~ | ✅ **IMPLEMENTED.** GDExtension addon: users write single-file C++ operators, compile in 2–8s, hot-reload without restart. Bundled godot-cpp headers + compiler toolchain. Integrated code editor with templates, examples, presets, and help system. 5 operator wrappers (SOP/CHOP/IMG/TOP/DAT). | **Eliminates the GDScript bottleneck entirely** for power users. Full WorkerThreadPool parallelism. | ~~Medium-High~~ Done |
-| 2 | **Expression compilation/caching** | Replace per-frame `Expression.execute()` with pre-compiled GDScript callables. Cache the compiled `Expression` object (already partially done — extend to skip re-parse when source unchanged). | 2–5× faster expression eval. Biggest win for expression-heavy graphs. | Medium |
+| 2 | ~~**Expression compilation/caching**~~ | ✅ **IMPLEMENTED.** Simple expressions compile to a `RefCounted` `eval(host, me, time, frame, dt)` callable. `chop`/`op`/`top`/`par` are rewritten to host calls. Newlines, semicolons, and `func`/`class` stay on `Expression.execute`. | Faster eval for the simple subset. | ~~Medium~~ Done |
 | 3 | **Adaptive frame budget** | When frame time exceeds target, automatically reduce SubViewport resolution on non-critical TOPs (e.g., secondary chains, background layers). Priority levels per sink. | Maintain 60fps during spikes. Critical for live performance reliability. | Medium |
 | 4 | **Parallel cook: extend to GPU batch** | Currently CPU nodes parallelise but GPU nodes are strictly sequential. Group independent TOP chains and submit their SubViewport `UPDATE_ONCE` flags in a single batch, letting Godot's renderer parallelise within a frame. | 10–30% GPU utilisation improvement for multi-chain patches. | Medium-High |
 | 5 | **`max_cooks_per_frame` for parallel path** | Currently the frame budget cap only works in the sequential cook path. Extend it to the parallel path — abort remaining topo levels when budget exceeded. | Prevents frame overruns in heavy parallel batches. | Low |
@@ -507,7 +502,7 @@ Each TOP renders exactly once per dirty cycle, never redundantly. Combined with 
 
 | # | Optimisation | What | Expected Gain | Effort |
 |---|---|---|---|---|
-| 6 | **Texture pool / SubViewport recycling** | Maintain a pool of SubViewports grouped by resolution and format. When a TOP changes resolution, swap from pool instead of resizing. Recycle SubViewports from deleted nodes. | Smoother resolution transitions. Reduced GPU memory fragmentation. | Medium |
+| 6 | ~~**Texture pool / SubViewport recycling**~~ | ✅ **IMPLEMENTED** as `GNViewportPool` (size + transparent_bg + disable_3d, cap 16). Deleted-node viewports return to the bucket. This is not a GPU texture allocator. | Fewer SubViewport allocs on resize and delete. | ~~Medium~~ Done |
 | 7 | ~~**Embedded Python + NumPy (`gn_ext_user_python`)**~~ | ✅ **IMPLEMENTED.** Embedded CPython 3.10+ with NumPy. Zero-copy `PackedFloat32Array` ↔ `numpy.ndarray` bridge via C++ GDExtension (`GNPythonRuntime`, `GNPythonProcessor`). 5 operator wrappers (UserPythonSOP/CHOP/IMG/TOP/DAT). Full Python SDK (`gonodes` package), integrated code editor with syntax highlighting, templates, examples, presets, and help system. | NumPy vectorised operations 50–200× faster than GDScript per-element loops. Opens Python ecosystem (librosa, OpenCV, scipy). | ~~High~~ Done |
 | 8 | **Parameter-level dirty tracking** | Track which specific parameter changed on a node (not just "node is dirty"). Consumers that reference only `par("A", "scale")` skip re-eval when `A.seed` changes but `A.scale` doesn't. | Eliminates remaining false-positive expression re-evaluations. Closest to Houdini's parameter-level DAG. | Medium-High |
 | 9 | **Async GPU readback** | For TOPtoCHOP, TOPtoIMG, and other GPU→CPU bridges, use `RenderingDevice` async readback with fences instead of synchronous `texture_2d_get()`. | Eliminates GPU stalls on readback. 1–5ms saved per readback node per frame. | Medium |

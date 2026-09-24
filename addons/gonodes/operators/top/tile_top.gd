@@ -35,8 +35,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var mx: bool = get_param_value("mirror_x")
 	var my: bool = get_param_value("mirror_y")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	(_canvas as TextureRect).texture = tex_in.texture
 	_material.set_shader_parameter("source_tex", tex_in.texture)

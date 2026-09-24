@@ -122,8 +122,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var aa_mode: int = get_param_value("anti_aliasing")
 
 	# Update viewport settings
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
+	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 
 	_viewport.transparent_bg = transparent
 
@@ -199,12 +199,7 @@ func _setup_viewport() -> void:
 	# and descendant physics nodes would not register with the
 	# correct physics space on ENTER_WORLD.
 	var res: Vector2i = get_param_value("resolution")
-	_viewport = SubViewport.new()
-	_viewport.name = "VP3D_%s" % id
-	_viewport.size = res
-	_viewport.transparent_bg = false
-	_viewport.disable_3d = false
-	_viewport.gui_disable_input = true
+	_viewport = GNViewportPool.acquire("VP3D_%s" % id, res, false, false)
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 
 	# Set an explicit World3D BEFORE entering tree.  Do NOT set

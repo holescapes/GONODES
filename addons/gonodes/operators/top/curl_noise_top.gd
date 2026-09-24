@@ -36,8 +36,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
 	_init_shader_viewport("res://addons/gonodes/shaders/top/curl_noise.gdshader", false, false, res)
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("scale", get_param_value("scale"))
 	_material.set_shader_parameter("offset", get_param_value("offset"))

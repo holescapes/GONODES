@@ -1499,6 +1499,8 @@ func _on_mode_toggle() -> void:
 				# losing their work.  Only reset the compiled state / mode.
 				param.mode = GNParameter.Mode.CONSTANT
 				param._compiled_expression = null
+				param._compiled_expression_callable = Callable()
+				param._compiled_expression_evaluator = null
 				param._expression_valid = false
 				param.expression_error = ""
 				param.mode_changed.emit(param.param_name, param.mode)

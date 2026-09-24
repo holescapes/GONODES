@@ -122,15 +122,59 @@ static func _default_resolution() -> Vector2i:
 ## [param disable_3d]     — false only for RenderTOP-style 3D viewports.
 func _create_viewport(vp_name: String = "", size: Vector2i = Vector2i(512, 512),
 		transparent_bg: bool = true, disable_3d: bool = true) -> SubViewport:
-	var vp := SubViewport.new()
-	vp.name = vp_name if not vp_name.is_empty() else ("VP_%s" % id)
-	vp.size = size
-	vp.transparent_bg = transparent_bg
-	vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
-	vp.disable_3d = disable_3d
-	vp.gui_disable_input = true
+	var name := vp_name if not vp_name.is_empty() else ("VP_%s" % id)
+	var vp := GNViewportPool.acquire(name, size, transparent_bg, disable_3d)
 	add_child(vp)
 	return vp
+
+
+## Swaps [param vp] for a pooled viewport of [param new_size], reparenting
+## children and releasing the old instance.  Returns [param vp] unchanged when
+## the size already matches.
+func _swap_viewport_size(vp: SubViewport, new_size: Vector2i,
+		transparent_bg: bool = true, disable_3d: bool = true) -> SubViewport:
+	if vp == null or vp.size == new_size:
+		return vp
+	var vp_name := vp.name
+	var old_parent := vp.get_parent()
+	var old_index := vp.get_index() if old_parent != null else -1
+	var new_vp := GNViewportPool.acquire(vp_name, new_size, transparent_bg, disable_3d)
+	if not disable_3d and vp.world_3d != null:
+		new_vp.world_3d = vp.world_3d
+	while vp.get_child_count() > 0:
+		var child := vp.get_child(0)
+		vp.remove_child(child)
+		new_vp.add_child(child)
+	if old_parent != null:
+		old_parent.remove_child(vp)
+		old_parent.add_child(new_vp)
+		if old_index >= 0:
+			old_parent.move_child(new_vp, old_index)
+	GNViewportPool.release(vp)
+	return new_vp
+
+
+## Resizes [member _viewport] via pool swap and refreshes [member _cached_tex_data].
+func _ensure_viewport_size(new_size: Vector2i) -> void:
+	if _viewport == null or _viewport.size == new_size:
+		return
+	var transparent_bg := _viewport.transparent_bg
+	var disable_3d := _viewport.disable_3d
+	_viewport = _swap_viewport_size(_viewport, new_size, transparent_bg, disable_3d)
+	if _cached_tex_data != null:
+		_cached_tex_data.texture = _viewport.get_texture()
+		_cached_tex_data.viewport = _viewport
+		_cached_tex_data.resolution = _viewport.size
+
+
+func _exit_tree() -> void:
+	var to_release: Array[SubViewport] = []
+	for child in get_children():
+		if child is SubViewport and GNViewportPool.is_pool_managed(child as SubViewport):
+			to_release.append(child as SubViewport)
+	for vp in to_release:
+		GNViewportPool.release(vp)
+	_viewport = null
 
 
 ## Lazily creates the primary viewport if it doesn't exist yet.
@@ -225,13 +269,7 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 ## Read back via [code]blit.viewport.get_texture()[/code].
 static func _create_blit_viewport(parent: Node, vp_name: String,
 		size: Vector2i, transparent: bool = true) -> Dictionary:
-	var vp := SubViewport.new()
-	vp.name = vp_name
-	vp.size = size
-	vp.transparent_bg = transparent
-	vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
-	vp.disable_3d = true
-	vp.gui_disable_input = true
+	var vp := GNViewportPool.acquire(vp_name, size, transparent, true)
 	parent.add_child(vp)
 
 	var canvas := TextureRect.new()

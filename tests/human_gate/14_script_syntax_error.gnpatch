@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "script": {
+      "type": "GDScriptSCRIPT",
+      "position": [0, 200],
+      "parameters": {
+        "code": {
+          "value": "func cook(:\n\tpass\n"
+        }
+      }
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 14. The script has a syntax error.\nThe node should show a warning. A silent empty cook is a fail.",
+      "position": [-40, 20],
+      "size": [480, 100],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

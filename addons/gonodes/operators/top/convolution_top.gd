@@ -43,8 +43,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = tex_in.resolution
 	_init_shader_viewport("res://addons/gonodes/shaders/top/convolution.gdshader", true, true, res)
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	var preset_idx: int = get_param_value("preset")
 	var preset_name: String = PRESETS.keys()[preset_idx]

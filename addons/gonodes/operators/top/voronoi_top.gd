@@ -30,8 +30,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
 	_init_shader_viewport("res://addons/gonodes/shaders/top/voronoi.gdshader", true, false, res)
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("scale", get_param_value("scale"))
 	_material.set_shader_parameter("jitter", get_param_value("jitter"))

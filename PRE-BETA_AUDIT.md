@@ -196,12 +196,18 @@ Supporting intent sources, frozen here so later phases cite a fixed target:
 
 ### Declared-incomplete inventory (from ROADMAP, not blockers)
 
-Recorded so no later phase mistakes these for regressions: modular per-extension `.pck` distribution;
+Recorded at audit time so no later phase mistakes these for regressions: modular per-extension `.pck` distribution;
 asset browser panel + sharing portal; FxPlug/FFGL export; laser DAC drivers (EtherDream, Helios,
 ShowNET); palette multi-output discoverability; network collaboration. Plus optimisation Tiers 1-4
 (expression compilation to callables, adaptive frame budget, GPU batch parallel cook,
 `max_cooks_per_frame` on the parallel path, texture pooling, async GPU readback, and the Tier 3-4
 research items).
+
+After the audit, these shipped and are no longer open: per-extension `.pck` plus the Extensions panel
+(native DLLs still need a restart; no version gate), the in-app asset browser (the web portal is still
+open), palette search by family, secondary output, and semantic tags, expression callables for simple
+sources, the SubViewport pool, and the input hash skip. `ViewportTexture` readback is still synchronous.
+The live list is `dev_docs/ROADMAP.md` v1.2.
 
 Two ROADMAP Tier 1 items are worth flagging now because they contradict performance claims elsewhere and
 will be re-examined in Phase 4a: **item 5** states the frame-budget cap `max_cooks_per_frame` *only works
@@ -621,7 +627,7 @@ Sources: `addons/gonodes/core/gn_cook_engine.gd`, `addons/gonodes/core/gn_networ
 | Wire cycles rejected at connect; leftover cycle logs and drops nodes from order | `connect_nodes` + `has_cycle`; `_compute_topological_order` 597-600 | `test_network.gd` only asserts *no* cycle on a linear graph | **PARTIAL** — reject path exists (M1), cycle-reject test missing |
 | Pre-cook only on `is_active` | `_pre_cook_pass` 793-797 | implied by inactive-set tests | **PASS** (M1+M4) |
 | Incremental dirty: only direct successors | `_dirty_immediate_downstream` 891-899 | `test_incremental_dirty_only_direct_successors`, `test_dirty_sibling_branch_not_affected` | **PASS** (M4) |
-| Input hash guard skips cook when params + timestamps unchanged | see F4a-02 | `test_hash_guard_skips_unchanged` does **not** exercise the hash | **FAIL as documented** |
+| Input hash guard skips cook when params + timestamps unchanged | `gn_cook_engine.gd` clears dirty and returns 0 when the hash matches | `test_hash_guard_skips_unchanged` asserts the node is clean | **Fixed after the audit** |
 | Bypass passthrough, `_cook()` not called | `_cook_single_node` 2173-2188 | `test_bypass_passes_input_through`, `test_bypass_cook_time_zero` | **PASS** (M4) |
 | Compute-unavailable → CPU fallback or skip + warning badge | 2190-2219 | `test_compute_guard_flag_default`; fallback *behavior* is B-9 / F3-02 | **PARTIAL** — skip path exists; fallback output is broken |
 | `max_cooks_per_frame` aborts remaining work | only in sequential `else` at 775-776 | `test_max_cooks_per_frame_respected` (sequential) | **PASS sequential / FAIL parallel** — confirms ROADMAP item 5 |

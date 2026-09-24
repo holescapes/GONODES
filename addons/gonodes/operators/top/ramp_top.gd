@@ -35,8 +35,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var phase_val: float = get_param_value("phase")
 	var repeat_val: bool = get_param_value("repeat")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("ramp_type", type_idx)
 	_material.set_shader_parameter("color_a", col_a)

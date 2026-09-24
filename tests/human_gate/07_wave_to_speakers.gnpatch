@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "wave": {
+      "type": "WaveCHOP",
+      "position": [0, 200],
+      "parameters": {
+        "channels": {"value": 2},
+        "length": {"value": 256},
+        "frequency": {"value": 440.0},
+        "amplitude": {"value": 0.15}
+      }
+    },
+    "speakers": {
+      "type": "AudioDeviceOUT",
+      "position": [360, 200],
+      "parameters": {
+        "active": {"value": true},
+        "gain": {"value": 0.4}
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "wave",
+      "from_port": 0,
+      "to_node": "speakers",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 7. You should hear a quiet 440 Hz tone from the selected output device.\nTurn Active off on AudioDeviceOUT. The tone must stop.\nA WaveCHOP with no AudioDeviceOUT is silence, and that is not a pass.",
+      "position": [-40, 20],
+      "size": [560, 120],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

@@ -157,8 +157,14 @@ requires_renderers = ["forward_plus"]
    `GNExtensionRegistry.instance()`.
 2. **Core operators registered** — `_register_core_operators()` registers all
    built-in operators from `addons/gonodes/operators/`.
-3. **Extension scan** — `scan_extensions()` iterates `res://addons/` looking
-   for directories matching `gn_ext_*`.
+3. **Extension scan** — `scan_extensions()` iterates `res://addons/` and
+   `user://extensions/` looking for directories matching `gn_ext_*`. Folders
+   listed in `user://gn_extension_prefs.cfg` are skipped. Preferences →
+   Extensions can load a `.pck` (`ProjectSettings.load_resource_pack`) and
+   unload a folder's operators without a restart. Native GDExtension
+   libraries still need a Godot restart. Pack one addon with
+   `scripts/pack_extension.ps1 -ExtensionName gn_ext_<name>` (refuses
+   `gn_ext_native`).
 4. **Per-extension load** — for each found directory, `_load_extension()`:
    a. Parses `gn_extension.cfg`
    b. Checks platform/arch/renderer/dependency guards — skips extension if any fail

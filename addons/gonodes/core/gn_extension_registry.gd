@@ -76,6 +76,7 @@ class OperatorEntry:
 	var deprecated_replacement: String         ## Class name of the replacement operator
 	var is_custom_asset: bool   ## True if this is a .gnasset custom operator
 	var asset_read_only: bool   ## True if this asset came from an extension (not user-editable)
+	var tags: PackedStringArray  ## Semantic palette tags (e.g. audio, video, file, camera)
 
 	func _init(p_family: String, p_script: GDScript, p_desc: String,
 			p_source: String = "core", p_section: String = "",
@@ -93,6 +94,7 @@ class OperatorEntry:
 		deprecated_replacement = ""
 		is_custom_asset = false
 		asset_read_only = false
+		tags = PackedStringArray()
 
 
 ## class_name → OperatorEntry
@@ -100,6 +102,15 @@ var _operators: Dictionary = {}
 
 ## Loaded extension names (to avoid double-loading).
 var _loaded_extensions: PackedStringArray = []
+
+## User-installed extension root and disable prefs (see discover_extensions()).
+const EXTENSION_USER_ROOT := "user://extensions"
+const EXTENSION_PREFS_PATH := "user://gn_extension_prefs.cfg"
+const EXTENSION_PREFS_SECTION := "disabled"
+const EXTENSION_PREFS_KEY := "folders"
+
+## Last discover_extensions() snapshot for UI (folder_name, name, version, source, path, disabled, loaded, has_native).
+var _discovered_extensions: Array[Dictionary] = []
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -109,8 +120,9 @@ var _loaded_extensions: PackedStringArray = []
 ## Register a single operator.  Overwrites any existing entry with the same key.
 func register_operator(class_name_key: String, family: String, op_script: GDScript,
 		description: String, source: String = "core", section: String = "",
-		extension_dir: String = "") -> OperatorEntry:
+		extension_dir: String = "", explicit_tags: PackedStringArray = PackedStringArray()) -> OperatorEntry:
 	var entry := OperatorEntry.new(family, op_script, description, source, section, extension_dir)
+	entry.tags = build_operator_tags(class_name_key, description, explicit_tags)
 	_operators[class_name_key] = entry
 	_invalidate_port_cache()
 	return entry
@@ -203,6 +215,78 @@ func get_description(class_name_key: String) -> String:
 	return ""
 
 
+## Returns semantic palette tags for a single operator, or an empty array.
+func get_tags(class_name_key: String) -> PackedStringArray:
+	var entry: OperatorEntry = _operators.get(class_name_key, null)
+	if entry:
+		return entry.tags
+	return PackedStringArray()
+
+
+## Returns true if any tag contains [param query_lower] (query length >= 3).
+static func tags_match_search_query(tags: PackedStringArray, query_lower: String) -> bool:
+	if query_lower.length() < 3:
+		return false
+	for tag in tags:
+		if str(tag).contains(query_lower):
+			return true
+	return false
+
+
+## Derives semantic tags from class name and description (case-insensitive).
+static func derive_operator_tags(op_class_name: String, description: String) -> PackedStringArray:
+	var haystack := (op_class_name + " " + description).to_lower()
+	var tags: PackedStringArray = []
+	if _haystack_contains_any(haystack, ["audio", "midi", "osc", "dmx", "lfo"]):
+		tags.append("audio")
+	if _haystack_contains_any(haystack, ["movie", "video", "webcam"]):
+		tags.append("video")
+	if _haystack_contains_any(haystack, ["filein", "fileout", "file_in", "file_out", "file in", "file out"]):
+		tags.append("file")
+	if haystack.contains("camera"):
+		tags.append("camera")
+	return tags
+
+
+## Unions explicit cfg tags (lowercase) with derived tags; result is sorted unique.
+static func build_operator_tags(op_class_name: String, description: String,
+		explicit_tags: PackedStringArray = PackedStringArray()) -> PackedStringArray:
+	var tag_set: Dictionary = {}
+	for tag in derive_operator_tags(op_class_name, description):
+		tag_set[tag] = true
+	for tag in explicit_tags:
+		var normalized := str(tag).strip_edges().to_lower()
+		if not normalized.is_empty():
+			tag_set[normalized] = true
+	var merged: Array = tag_set.keys()
+	merged.sort()
+	var result := PackedStringArray()
+	for tag in merged:
+		result.append(str(tag))
+	return result
+
+
+static func _haystack_contains_any(haystack: String, needles: Array) -> bool:
+	for needle in needles:
+		if haystack.contains(str(needle)):
+			return true
+	return false
+
+
+static func parse_cfg_tags(tags_value: Variant) -> PackedStringArray:
+	if tags_value == null:
+		return PackedStringArray()
+	var raw := str(tags_value).strip_edges()
+	if raw.is_empty():
+		return PackedStringArray()
+	var parsed := PackedStringArray()
+	for part in raw.split(","):
+		var normalized := part.strip_edges().to_lower()
+		if not normalized.is_empty():
+			parsed.append(normalized)
+	return parsed
+
+
 ## Returns true if the operator is registered.
 func has_operator(class_name_key: String) -> bool:
 	return _operators.has(class_name_key)
@@ -285,6 +369,168 @@ func get_all_operator_names() -> PackedStringArray:
 ## Returns a list of loaded extension names.
 func get_loaded_extensions() -> PackedStringArray:
 	return _loaded_extensions.duplicate()
+
+
+## Unregisters every operator provided by [param folder_name] (e.g.
+## `gn_ext_example`).  Does not touch nodes already placed in a graph — only
+## the registry entries used for palette lookup and new spawns.
+func unload_extension_folder(folder_name: String) -> void:
+	if folder_name.is_empty():
+		return
+
+	var ops_to_remove: Array[String] = []
+	var asset_paths_to_drop: PackedStringArray = []
+
+	for op_name in _operators:
+		var entry: OperatorEntry = _operators[op_name]
+		if entry.is_custom_asset:
+			if _path_belongs_to_extension_folder(entry.extension_dir, folder_name):
+				ops_to_remove.append(op_name)
+				if not asset_paths_to_drop.has(entry.extension_dir):
+					asset_paths_to_drop.append(entry.extension_dir)
+		elif entry.extension_dir.ends_with(folder_name):
+			ops_to_remove.append(op_name)
+
+	for op_name in ops_to_remove:
+		unregister_operator(op_name)
+
+	for asset_path in asset_paths_to_drop:
+		var idx := _loaded_assets.find(asset_path)
+		if idx >= 0:
+			_loaded_assets.remove_at(idx)
+
+	var ext_idx := _loaded_extensions.find(folder_name)
+	if ext_idx >= 0:
+		_loaded_extensions.remove_at(ext_idx)
+
+	if ops_to_remove.size() > 0 or asset_paths_to_drop.size() > 0:
+		GNLogger.info("ExtRegistry", "Unloaded extension '%s' (%d operators, %d assets)" % [
+			folder_name, ops_to_remove.size(), asset_paths_to_drop.size()])
+
+
+static func _path_belongs_to_extension_folder(path: String, folder_name: String) -> bool:
+	if path.is_empty() or folder_name.is_empty():
+		return false
+	if path.ends_with(folder_name):
+		return true
+	return ("/%s/" % folder_name) in path
+
+
+## Returns the most recent discover_extensions() result.
+func get_discovered_extensions() -> Array:
+	return _discovered_extensions.duplicate()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Extension disable prefs (user://gn_extension_prefs.cfg)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Loads disabled extension folder names from user://gn_extension_prefs.cfg.
+static func load_disabled_extension_folders() -> PackedStringArray:
+	var cfg := ConfigFile.new()
+	if cfg.load(EXTENSION_PREFS_PATH) != OK:
+		return PackedStringArray()
+	var val: Variant = cfg.get_value(EXTENSION_PREFS_SECTION, EXTENSION_PREFS_KEY, [])
+	if val is PackedStringArray:
+		return val
+	if val is Array:
+		var out := PackedStringArray()
+		for item in val:
+			out.append(str(item))
+		return out
+	return PackedStringArray()
+
+
+## Persists disabled extension folder names to user://gn_extension_prefs.cfg.
+static func save_disabled_extension_folders(folders: PackedStringArray) -> void:
+	var cfg := ConfigFile.new()
+	if FileAccess.file_exists(EXTENSION_PREFS_PATH):
+		cfg.load(EXTENSION_PREFS_PATH)
+	cfg.set_value(EXTENSION_PREFS_SECTION, EXTENSION_PREFS_KEY, folders)
+	cfg.save(EXTENSION_PREFS_PATH)
+
+
+## Returns true when [param folder_name] is listed in the disabled set.
+static func is_extension_folder_disabled(folder_name: String,
+		disabled_folders: PackedStringArray) -> bool:
+	return disabled_folders.has(folder_name)
+
+
+## Scans res://addons/ and user://extensions/ for gn_ext_* folders with manifests.
+## Does not register operators — use scan_extensions() for that.
+func discover_extensions() -> Array:
+	_discovered_extensions.clear()
+	var disabled := load_disabled_extension_folders()
+	_discover_extensions_in_root("res://addons", "res://", disabled)
+	_discover_extensions_in_root(EXTENSION_USER_ROOT, "user://", disabled)
+	return _discovered_extensions.duplicate()
+
+
+func _discover_extensions_in_root(root_path: String, source_label: String,
+		disabled_folders: PackedStringArray) -> void:
+	if not DirAccess.dir_exists_absolute(root_path):
+		return
+	var dir := DirAccess.open(root_path)
+	if dir == null:
+		return
+
+	dir.list_dir_begin()
+	var folder_name := dir.get_next()
+	while folder_name != "":
+		if dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
+			var ext_path := root_path.path_join(folder_name)
+			var cfg_path := ext_path.path_join("gn_extension.cfg")
+			if FileAccess.file_exists(cfg_path):
+				var info := _read_extension_manifest_info(cfg_path, folder_name,
+					source_label, ext_path, disabled_folders)
+				_discovered_extensions.append(info)
+		folder_name = dir.get_next()
+	dir.list_dir_end()
+
+
+func _read_extension_manifest_info(cfg_path: String, folder_name: String,
+		source_label: String, ext_path: String,
+		disabled_folders: PackedStringArray) -> Dictionary:
+	var cfg := ConfigFile.new()
+	var name := folder_name.trim_prefix("gn_ext_").capitalize()
+	var version := ""
+	if cfg.load(cfg_path) == OK:
+		name = cfg.get_value("extension", "name", name)
+		version = str(cfg.get_value("extension", "version", ""))
+	return {
+		"folder_name": folder_name,
+		"name": name,
+		"version": version,
+		"source": source_label,
+		"path": ext_path,
+		"disabled": is_extension_folder_disabled(folder_name, disabled_folders),
+		"loaded": _loaded_extensions.has(folder_name),
+		"has_native": _extension_has_native_library(ext_path),
+	}
+
+
+static func _extension_has_native_library(ext_path: String) -> bool:
+	return _extension_has_native_library_dir(ext_path)
+
+
+static func _extension_has_native_library_dir(dir_path: String) -> bool:
+	var nd := DirAccess.open(dir_path)
+	if nd == null:
+		return false
+	var found := false
+	nd.list_dir_begin()
+	var fname := nd.get_next()
+	while fname != "":
+		if nd.current_is_dir():
+			if fname != "godot-cpp" and _extension_has_native_library_dir(dir_path.path_join(fname)):
+				found = true
+				break
+		elif fname.ends_with(".gdextension") or fname.ends_with(".gdextension.disabled"):
+			found = true
+			break
+		fname = nd.get_next()
+	nd.list_dir_end()
+	return found
 
 
 ## Lazily-built cache: GNFamily.Type → Array[String] of operator names that accept
@@ -615,15 +861,30 @@ static func _ultraleap_leapc_present(lib_path: String) -> bool:
 # Extension Scanning
 # ═══════════════════════════════════════════════════════════════════════════════
 
-## Scans `res://addons/` for folders matching `gn_ext_*` that contain a
-## `gn_extension.cfg` manifest.  For each valid manifest whose ClassDB
-## dependencies are satisfied, the declared operators are registered.
+## Scans `res://addons/` and `user://extensions/` for folders matching
+## `gn_ext_*` that contain a `gn_extension.cfg` manifest.  Folders listed in
+## user://gn_extension_prefs.cfg are skipped.  For each valid manifest whose
+## ClassDB dependencies are satisfied, the declared operators are registered.
 func scan_extensions() -> void:
-	var addons_path := "res://addons"
-	var dir := DirAccess.open(addons_path)
+	var disabled := load_disabled_extension_folders()
+	var found_count := 0
+	found_count += _scan_extensions_in_root("res://addons", disabled)
+	found_count += _scan_extensions_in_root(EXTENSION_USER_ROOT, disabled)
+	discover_extensions()
+
+	if found_count == 0:
+		print("[ExtRegistry] No extensions found")
+	else:
+		print("[ExtRegistry] Scanned %d extension(s)" % found_count)
+
+
+func _scan_extensions_in_root(root_path: String, disabled_folders: PackedStringArray) -> int:
+	if not DirAccess.dir_exists_absolute(root_path):
+		return 0
+	var dir := DirAccess.open(root_path)
 	if dir == null:
-		print("[ExtRegistry] Cannot open addons directory")
-		return
+		print("[ExtRegistry] Cannot open extensions directory: %s" % root_path)
+		return 0
 
 	var found_count := 0
 	dir.list_dir_begin()
@@ -631,19 +892,18 @@ func scan_extensions() -> void:
 	while folder_name != "":
 		if dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
 			found_count += 1
-			var ext_path := addons_path + "/" + folder_name
-			var cfg_path := ext_path + "/gn_extension.cfg"
-			if FileAccess.file_exists(cfg_path):
-				_load_extension(cfg_path, folder_name)
+			if is_extension_folder_disabled(folder_name, disabled_folders):
+				print("[ExtRegistry] Extension '%s' skipped — disabled in prefs" % folder_name)
 			else:
-				print("[ExtRegistry] Extension folder '%s' has no gn_extension.cfg" % folder_name)
+				var ext_path := root_path.path_join(folder_name)
+				var cfg_path := ext_path.path_join("gn_extension.cfg")
+				if FileAccess.file_exists(cfg_path):
+					_load_extension(cfg_path, folder_name)
+				else:
+					print("[ExtRegistry] Extension folder '%s' has no gn_extension.cfg" % folder_name)
 		folder_name = dir.get_next()
 	dir.list_dir_end()
-
-	if found_count == 0:
-		print("[ExtRegistry] No extensions found")
-	else:
-		print("[ExtRegistry] Scanned %d extension(s)" % found_count)
+	return found_count
 
 
 ## Loads a single extension manifest and registers its operators.
@@ -776,6 +1036,7 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 		var script_path: String = cfg.get_value(section, "script", "")
 		var desc: String = cfg.get_value(section, "description", "")
 		var op_section: String = cfg.get_value(section, "section", ext_section)
+		var explicit_tags := parse_cfg_tags(cfg.get_value(section, "tags", ""))
 
 		if family.is_empty() or script_path.is_empty():
 			print("[ExtRegistry] Extension '%s': operator '%s' missing family or script" % [ext_name, op_class])
@@ -799,7 +1060,8 @@ func _load_extension(cfg_path: String, folder_name: String) -> void:
 			push_error("[ExtRegistry] [%s] class_name mismatch: cfg says '%s', script declares '%s' -- skipping (cfg section='%s', script_path='%s', resource_path='%s')" % [ext_name, op_class, got_class, section, script_path, loaded_script.resource_path])
 			continue
 
-		var entry := register_operator(op_class, family, loaded_script, desc, ext_name, op_section, ext_dir)
+		var entry := register_operator(op_class, family, loaded_script, desc, ext_name,
+			op_section, ext_dir, explicit_tags)
 
 		# Per-operator capability tags
 		if entry:
@@ -910,20 +1172,35 @@ func scan_custom_assets() -> void:
 ## Returns the number of assets found.
 func _scan_extension_assets() -> int:
 	var count := 0
-	var addons_path := "res://addons"
-	var dir := DirAccess.open(addons_path)
+	var disabled := load_disabled_extension_folders()
+	count += _scan_extension_assets_in_root("res://addons", disabled)
+	count += _scan_extension_assets_in_root(EXTENSION_USER_ROOT, disabled)
+
+	if count > 0:
+		GNLogger.info("ExtRegistry", "Found %d extension-shipped asset(s)" % count)
+	return count
+
+
+func _scan_extension_assets_in_root(root_path: String,
+		disabled_folders: PackedStringArray) -> int:
+	if not DirAccess.dir_exists_absolute(root_path):
+		return 0
+	var dir := DirAccess.open(root_path)
 	if dir == null:
 		return 0
 
+	var count := 0
 	dir.list_dir_begin()
 	var folder_name := dir.get_next()
 	while folder_name != "":
 		if dir.current_is_dir() and folder_name.begins_with("gn_ext_"):
-			var ext_path := addons_path + "/" + folder_name
-			var assets_dir := ext_path + "/assets"
+			if is_extension_folder_disabled(folder_name, disabled_folders):
+				folder_name = dir.get_next()
+				continue
+			var ext_path := root_path.path_join(folder_name)
+			var assets_dir := ext_path.path_join("assets")
 			if DirAccess.dir_exists_absolute(assets_dir):
-				# Determine extension display name from cfg
-				var cfg_path := ext_path + "/gn_extension.cfg"
+				var cfg_path := ext_path.path_join("gn_extension.cfg")
 				var ext_display_name := folder_name.trim_prefix("gn_ext_").capitalize()
 				if FileAccess.file_exists(cfg_path):
 					var cfg := ConfigFile.new()
@@ -936,7 +1213,7 @@ func _scan_extension_assets() -> int:
 					var f := ad.get_next()
 					while f != "":
 						if not ad.current_is_dir() and f.ends_with(".gnasset"):
-							var full_path := assets_dir + "/" + f
+							var full_path := assets_dir.path_join(f)
 							if not _loaded_assets.has(full_path):
 								if _register_custom_asset(full_path, true, ext_display_name, folder_name):
 									count += 1
@@ -944,10 +1221,15 @@ func _scan_extension_assets() -> int:
 					ad.list_dir_end()
 		folder_name = dir.get_next()
 	dir.list_dir_end()
-
-	if count > 0:
-		GNLogger.info("ExtRegistry", "Found %d extension-shipped asset(s)" % count)
 	return count
+
+
+## Removes a user-installed custom asset from the registry.
+func unregister_custom_asset(op_name: String, asset_path: String) -> void:
+	unregister_operator(op_name)
+	var idx := _loaded_assets.find(asset_path)
+	if idx >= 0:
+		_loaded_assets.remove_at(idx)
 
 
 ## Registers a single .gnasset file as a custom operator.

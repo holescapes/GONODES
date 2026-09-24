@@ -8,7 +8,12 @@ core code.
 
 ## Extension Structure
 
-Extensions live under `res://addons/gn_ext_<name>/` and contain:
+Shipped extensions live under `res://addons/gn_ext_<name>/`. Installed packs
+also load from `user://extensions/gn_ext_<name>/`. Preferences → Extensions
+lists them, loads a `.pck`, and can disable a folder (GDScript operators leave
+the palette immediately; a native library still needs a Godot restart).
+
+Each extension folder contains:
 
 - **gn_extension.cfg** — Manifest file declaring operators and metadata
 - **operators/** — GDScript files extending GNNode (or family base classes)

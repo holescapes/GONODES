@@ -1101,7 +1101,19 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 	# Pass self (CookEngine) as base_instance so Expression can call
 	# our chop(), op(), top(), par() methods directly.
 	var _t0 := Time.get_ticks_usec()
-	var result = expr.execute(context, self)
+	var result: Variant
+	var used_callable := false
+	var eval_callable := param.get_expression_eval_callable()
+	if eval_callable.is_valid():
+		var call_args := [self, node, elapsed_time, frame_count, current_delta]
+		var call_result := GNScriptHelper.safe_callv(eval_callable, call_args)
+		if call_result.ok:
+			result = call_result.value
+			used_callable = true
+		else:
+			result = expr.execute(context, self)
+	else:
+		result = expr.execute(context, self)
 	var _t1 := Time.get_ticks_usec()
 	var eval_usec := float(_t1 - _t0)
 	param.expression_eval_usec = eval_usec
@@ -1111,7 +1123,10 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 	# Clear circular guard
 	_evaluating_params.erase(guard_key)
 
-	if expr.has_execute_failed():
+	if used_callable:
+		param.resolved_value = result
+		param.fallback_value = result
+	elif expr.has_execute_failed():
 		var err_msg := "Expression error on %s: %s" % [param.param_name, expr.get_error_text()]
 		if editor_mode:
 			node.node_error = err_msg
@@ -1158,10 +1173,24 @@ func _evaluate_component_expressions(node: GNNode, param: GNParameter) -> void:
 				components[i] = param.get_component_value(i)
 				continue
 			var ct0 := Time.get_ticks_usec()
-			var result = expr.execute(context, self)
+			var result: Variant
+			var used_callable := false
+			var eval_callable := param.get_component_expression_eval_callable(i)
+			if eval_callable.is_valid():
+				var call_args := [self, node, elapsed_time, frame_count, current_delta]
+				var call_result := GNScriptHelper.safe_callv(eval_callable, call_args)
+				if call_result.ok:
+					result = call_result.value
+					used_callable = true
+				else:
+					result = expr.execute(context, self)
+			else:
+				result = expr.execute(context, self)
 			var ct1 := Time.get_ticks_usec()
 			param.component_expression_eval_usec[i] = float(ct1 - ct0)
-			if expr.has_execute_failed():
+			if used_callable:
+				components[i] = float(result)
+			elif expr.has_execute_failed():
 				var labels := param.get_component_labels()
 				var label_str: String = labels[i] if i < labels.size() else str(i)
 				var comp_err := "Expression error on %s.%s[%s] — %s" % [
@@ -2179,10 +2208,10 @@ func _cook_single_node(node: GNNode) -> int:
 
 	# ── Input hash guard (Tier 2) ──
 	var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
-	# Skip when inputs unchanged on a clean node — unreachable here: the cook
-	# loop only calls _cook_single_node for dirty nodes, so not node.dirty is
-	# always false. Hash is still stored below.
-	if cook_input_hash == node._last_cook_input_hash and not node.dirty:
+	# Skip when resolved params, input timestamps, and (if time_dependent)
+	# elapsed_time match the last cook — even if the node is dirty.
+	if cook_input_hash == node._last_cook_input_hash:
+		node.clear_dirty()
 		return 0
 	node._last_cook_input_hash = cook_input_hash
 
@@ -2317,8 +2346,9 @@ func _cook_cpu_batch_parallel(batch: Array) -> int:
 		_resolve_node_parameters(node)
 		var inputs: Array[GNData] = _gather_inputs(node)
 		var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
-		# Unreachable — batch only contains nodes already selected to cook (dirty).
-		if cook_input_hash == node._last_cook_input_hash and not node.dirty:
+		# Skip when hash unchanged — same guard as _cook_single_node (see above).
+		if cook_input_hash == node._last_cook_input_hash:
+			node.clear_dirty()
 			continue
 		node._last_cook_input_hash = cook_input_hash
 		var entry := {"node": node, "inputs": inputs}

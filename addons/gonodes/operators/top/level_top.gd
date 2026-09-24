@@ -41,8 +41,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var opacity_val: float = get_param_value("opacity")
 
 	# Match viewport to input resolution
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	# Feed input texture — this is a GPU reference (zero-copy)
 	(_canvas as TextureRect).texture = tex_in.texture

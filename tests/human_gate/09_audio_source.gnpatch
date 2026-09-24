@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "src": {
+      "type": "AudioSourceCOMP",
+      "position": [0, 200],
+      "parameters": {
+        "playing": {"value": false},
+        "autoplay": {"value": false},
+        "loop": {"value": true},
+        "volume_db": {"value": -6.0}
+      }
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 9. Set File to a short WAV, OGG, or MP3, then turn Playing on.\nPass: you hear it, or the node makes it obvious it will not cook.\nFail: Playing is on, a real file is set, and there is silence with no warning.",
+      "position": [-40, 20],
+      "size": [560, 130],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

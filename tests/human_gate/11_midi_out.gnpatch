@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "const": {
+      "type": "ConstantCHOP",
+      "position": [0, 200],
+      "parameters": {
+        "count": {"value": 1},
+        "name0": {"value": "n60"},
+        "value0": {"value": 0.8}
+      }
+    },
+    "midi": {
+      "type": "RtMidiOutCHOP",
+      "position": [360, 200],
+      "parameters": {
+        "active": {"value": true},
+        "channel": {"value": 0}
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "const",
+      "from_port": 0,
+      "to_node": "midi",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 11. Needs a MIDI output port and a monitor (loopMIDI + a monitor is enough).\nChannel n60 at 0.8 should show as a note. No port in the menu means UNVERIFIED, not a pass.\nTurn Active off. New messages must stop.",
+      "position": [-40, 20],
+      "size": [580, 130],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

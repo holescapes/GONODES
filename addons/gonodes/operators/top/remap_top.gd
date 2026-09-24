@@ -33,8 +33,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = tex_in.resolution
 	_init_shader_viewport("res://addons/gonodes/shaders/top/remap.gdshader", true, false, res)
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("source_tex", tex_in.texture)
 	if tex_map != null:

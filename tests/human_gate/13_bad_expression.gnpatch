@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "wave": {
+      "type": "WaveCHOP",
+      "position": [0, 200],
+      "parameters": {
+        "frequency": {
+          "expression": "1 +",
+          "mode": "EXPRESSION",
+          "value": 1.0
+        }
+      }
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 13. Frequency is the expression \"1 +\".\nThe field should go red and show an error arrow, not only a line in the Godot log.\nThen replace it with sin(time) and confirm the value moves.",
+      "position": [-40, 20],
+      "size": [560, 120],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

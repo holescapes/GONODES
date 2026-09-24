@@ -366,7 +366,8 @@ For the full technical design document, see [GONODES_CONTEXT.md](GONODES_CONTEXT
 - FxPlug / FFGL plugin export
 - Laser DAC drivers — EtherDream, Helios, ShowNET (GDExtension; data model via LaserCHOP ready)
 - Network collaboration (shared editing)
-- Modular extension distribution (per-extension `.pck` install/remove)
+- ~~Modular extension distribution~~ — **Done.** `scripts/pack_extension.ps1` writes one `.pck` per extension. Preferences → Extensions lists installed packs, loads a `.pck`, and enable/disable drops GDScript operators without a restart. Native libraries still need a restart. `scan_extensions()` also reads `user://extensions/`.
+- Community asset portal (the in-app Asset Browser is done; a public web catalog is not)
 
 For the full roadmap including optimisation tiers, see [dev_docs/ROADMAP.md](dev_docs/ROADMAP.md).
 

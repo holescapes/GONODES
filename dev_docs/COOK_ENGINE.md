@@ -62,9 +62,9 @@ flowchart TD
     FALLTHRU --> ACTIVECHECK
     ACTIVECHECK -->|No| SKIPINACTIVE["SKIP — frozen\ncached_output kept"]
     ACTIVECHECK -->|Yes| RESOLVE["Inject timing context\nResolve parameters\nGather inputs"]
-    RESOLVE --> HASHCHECK{"Compute & store input hash\nhash(params + input timestamps)"}
-    HASHCHECK -->|Same + not dirty| SKIPHASH["NOT TAKEN — cook loop\nonly sends dirty nodes\n(see §3.3)"]
-    HASHCHECK -->|Dirty or hash changed| BYPASS{"node.bypass?"}
+    RESOLVE --> HASHCHECK{"Compute input hash\nhash(params + input timestamps\n+ elapsed_time if time_dependent)"}
+    HASHCHECK -->|Same hash| SKIPHASH["SKIP — no cook,\nno downstream dirty"]
+    HASHCHECK -->|Hash changed| BYPASS{"node.bypass?"}
     BYPASS -->|Yes| PASSTHRU["Pass first non-null input\nthrough as cached_output"]
     BYPASS -->|No| COMPUTE{"requires_compute()\n& !_compute_available?"}
     COMPUTE -->|Yes| SKIPCOMPUTE["SKIP — warning badge"]
@@ -176,9 +176,9 @@ for each input:   hash = hash * 37 + input.timestamp   (or *37 if null)
 if time_dependent: hash = hash * 41 + hash(elapsed_time)
 ```
 
-The hash is stored in `node._last_cook_input_hash` after each cook.
+The hash is stored in `node._last_cook_input_hash` after each real cook.
 
-There is also a skip arm: if the new hash matches `_last_cook_input_hash` **and** `not node.dirty`, the cook is skipped (clear dirty, no downstream propagation). **This arm is not taken by the current cook loop:** `_classify_cook_status()` only sends dirty (or expression-just-dirtied) nodes into `_cook_single_node`, so `not node.dirty` is always false on that path. The hash is still computed and stored each time; a dirty node with unchanged params and timestamps may recook unnecessarily, but output remains correct.
+If the new hash matches `_last_cook_input_hash`, the cook is skipped even when the node is dirty: `clear_dirty()` runs, `_cook()` is not called, `_last_cook_input_hash` is not rewritten, and `_dirty_immediate_downstream()` is not invoked. A dirty node whose resolved parameters, upstream input timestamps, and (when `time_dependent`) elapsed time are unchanged therefore keeps its cached output and does not mark downstream dirty. Static chains are also skipped by the dirty flag when nothing marks them dirty — `_classify_cook_status()` never sends clean nodes into `_cook_single_node`.
 
 ### 3.4 Expression Consumer Map
 
@@ -446,7 +446,7 @@ Between transitions, the floored value stays the same for many frames.
 
 > **Note:** The hash guard uses timestamps, not output values. If upstream re-cooked, the timestamp changes, so downstream always re-cooks. This is intentional — it matches TD's "demand-driven" model and avoids the cost and accuracy issues of comparing actual output data.
 
-**Where work is saved on a static chain:** when the LfoCHOP is NOT time-dependent (e.g., it's a ConstantCHOP) and nothing upstream changes, nodes stay **clean** and `_classify_cook_status()` never sends them to `_cook_single_node`. That skip is the dirty-flag gate, not the input-hash skip arm (unreachable from the current loop; see §3.3).
+**Where work is saved on a static chain:** when the LfoCHOP is NOT time-dependent (e.g., it's a ConstantCHOP) and nothing upstream changes, nodes stay **clean** and `_classify_cook_status()` never sends them to `_cook_single_node`. That skip is the dirty-flag gate. If a node is marked dirty anyway but its hash is unchanged, the input-hash skip arm (§3.3) skips the cook without dirtying downstream.
 
 ---
 

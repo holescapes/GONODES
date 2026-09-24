@@ -65,7 +65,7 @@ func _extract_pixels(tex_data: GNTextureData, tbl: GNTableData) -> void:
 		GNLogger.warn("TOPtoDAT", "No texture available for pixel extraction.")
 		return
 
-	var image: Image = tex_data.texture.get_image()
+	var image: Image = tex_data.get_readback_image()
 	if image == null:
 		GNLogger.warn("TOPtoDAT", "Cannot get Image from texture.")
 		return

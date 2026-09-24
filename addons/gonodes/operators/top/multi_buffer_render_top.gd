@@ -81,20 +81,16 @@ func get_output_data(port_index: int) -> GNData:
 ## a depth-only debug draw mode.
 func _ensure_secondary_viewport_depth(res: Vector2i) -> void:
 	if _depth_viewport == null:
-		_depth_viewport = SubViewport.new()
-		_depth_viewport.name = "VP_Depth_%s" % id
-		_depth_viewport.disable_3d = false
-		_depth_viewport.gui_disable_input = true
-		_depth_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-		# Share the primary viewport's World3D — all scene nodes are visible
+		_depth_viewport = GNViewportPool.acquire("VP_Depth_%s" % id, res, false, false)
 		_depth_viewport.world_3d = _viewport.world_3d
 		add_child(_depth_viewport)
 
 		_depth_tex_data = GNTextureData.new()
 		_depth_tex_data.texture = _depth_viewport.get_texture()
 		_depth_tex_data.viewport = _depth_viewport
+	elif _depth_viewport.size != res:
+		_depth_viewport = _swap_secondary_viewport_size(_depth_viewport, res)
 
-	_depth_viewport.size = res
 	_depth_viewport.transparent_bg = false
 	_depth_viewport.msaa_3d = _viewport.msaa_3d
 	# Overdraw debug draw shows pixel density which correlates with depth
@@ -104,22 +100,27 @@ func _ensure_secondary_viewport_depth(res: Vector2i) -> void:
 	_depth_tex_data.resolution = res
 
 
+func _swap_secondary_viewport_size(vp: SubViewport, new_size: Vector2i) -> SubViewport:
+	vp = _swap_viewport_size(vp, new_size, false, false)
+	if _viewport != null:
+		vp.world_3d = _viewport.world_3d
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	return vp
+
+
 ## Creates or reconfigures the normal secondary viewport.
 func _ensure_secondary_viewport_normal(res: Vector2i) -> void:
 	if _normal_viewport == null:
-		_normal_viewport = SubViewport.new()
-		_normal_viewport.name = "VP_Normal_%s" % id
-		_normal_viewport.disable_3d = false
-		_normal_viewport.gui_disable_input = true
-		_normal_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		_normal_viewport = GNViewportPool.acquire("VP_Normal_%s" % id, res, false, false)
 		_normal_viewport.world_3d = _viewport.world_3d
 		add_child(_normal_viewport)
 
 		_normal_tex_data = GNTextureData.new()
 		_normal_tex_data.texture = _normal_viewport.get_texture()
 		_normal_tex_data.viewport = _normal_viewport
+	elif _normal_viewport.size != res:
+		_normal_viewport = _swap_secondary_viewport_size(_normal_viewport, res)
 
-	_normal_viewport.size = res
 	_normal_viewport.transparent_bg = false
 	_normal_viewport.msaa_3d = _viewport.msaa_3d
 	_normal_viewport.debug_draw = Viewport.DEBUG_DRAW_NORMAL_BUFFER

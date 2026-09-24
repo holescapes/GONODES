@@ -4,8 +4,8 @@ extends GNOutBase
 ##
 ## Activate the "active" toggle to start writing.
 ## Supports auto-numbering for image sequences.
-## The GPU→CPU readback (`get_image()`) stays on the cook thread; compress +
-## disk write run on a background thread so sync save does not stutter the graph.
+## GPU→CPU readback uses async readback on the cook thread; compress + disk
+## write run on a background thread so sync save does not stutter the graph.
 ## Turning Active OFF flushes the write queue before idle.
 
 enum Format { PNG, WEBP, EXR }
@@ -88,11 +88,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if not active:
 		return null
 
-	# GPU → CPU readback (must stay on cook / render thread)
-	var image: Image = tex_in.texture.get_image()
+	# GPU → CPU readback (async; must stay on cook / render thread)
+	var image: Image = tex_in.get_readback_image()
 	if image == null:
 		GNLogger.warn("TextureSaveOUT",
-			"'%s': get_image() returned null (texture may not be ready)" % id)
+			"'%s': readback returned null (texture may not be ready)" % id)
 		return null
 
 	# Build path

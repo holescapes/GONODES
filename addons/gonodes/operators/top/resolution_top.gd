@@ -34,8 +34,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
 	var filter_idx: int = get_param_value("filter")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	(_canvas as TextureRect).texture = tex_in.texture
 	_canvas.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if filter_idx == 0 else CanvasItem.TEXTURE_FILTER_NEAREST

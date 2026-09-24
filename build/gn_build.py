@@ -51,6 +51,7 @@ __all__ = [
     "make_env",
     "collect_sources",
     "copy_runtime_dlls",
+    "copy_built_library",
     "build_extension",
 ]
 ALL_ARCHS_BY_PLATFORM = {
@@ -63,6 +64,13 @@ BIN_DIRS = {
     "windows": "bin/win64",
     "linux":   "bin/linux64",
     "macos":   "bin/macos",
+}
+
+# Subdir under extension-root bin/ (library_dest = ../bin → ext_root/bin/<subdir>/)
+LIBRARY_DEST_PLAT_DIRS = {
+    "windows": "win64",
+    "linux":   "linux64",
+    "macos":   "macos",
 }
 
 LIB_EXTENSIONS = {
@@ -354,6 +362,24 @@ def collect_sources(env, cfg, native_dir, plat):
 
 # ── Build orchestration ────────────────────────────────────────────────────────
 
+def copy_built_library(cfg, plat, native_dir, lib_target_path):
+    """Copy built library to library_dest if configured in build.cfg."""
+    import shutil
+
+    lib_dest_rel = cfg.get("library_dest", "")
+    if not lib_dest_rel or not os.path.isfile(lib_target_path):
+        return
+
+    # library_dest is relative to native_dir (e.g. ../bin → extension_root/bin/)
+    lib_dest_dir = os.path.normpath(
+        os.path.join(native_dir, lib_dest_rel.rstrip("/\\"), LIBRARY_DEST_PLAT_DIRS[plat])
+    )
+    os.makedirs(lib_dest_dir, exist_ok=True)
+    lib_copy_dst = os.path.join(lib_dest_dir, os.path.basename(lib_target_path))
+    shutil.copy2(lib_target_path, lib_copy_dst)
+    print(f"  Copied library: {os.path.basename(lib_target_path)} -> {lib_dest_dir}")
+
+
 def copy_runtime_dlls(cfg, plat, native_dir, out_dir):
     """Copy platform runtime_dlls from build.cfg into the extension output dir."""
     import shutil
@@ -443,18 +469,13 @@ def build_extension(native_dir=None, plat=None, target=None, arch=None):
     library = env.SharedLibrary(target=lib_target, source=sources)
     Default(library)
 
-    # If library_dest is set, also copy the built library to that location
-    # (relative to extension root). Needed when main DLL must be outside native/.
-    import shutil
-    lib_dest_rel = cfg.get("library_dest", "")
-    if lib_dest_rel:
-        ext_root = os.path.dirname(native_dir)
-        lib_dest_dir = os.path.normpath(os.path.join(ext_root, lib_dest_rel.rstrip("/\\"), BIN_DIRS[plat]))
-        os.makedirs(lib_dest_dir, exist_ok=True)
-        lib_copy_dst = os.path.join(lib_dest_dir, os.path.basename(lib_target))
-        if os.path.isfile(lib_target):
-            shutil.copy2(lib_target, lib_copy_dst)
-            print(f"  Copied library: {os.path.basename(lib_target)} -> {lib_dest_dir}")
+    if cfg.get("library_dest"):
+        env.AddPostAction(
+            library,
+            lambda target, source, env, _cfg=cfg, _plat=plat, _native=native_dir: copy_built_library(
+                _cfg, _plat, _native, str(target[0])
+            ),
+        )
     copy_runtime_dlls(cfg, plat, native_dir, out_dir)
 
     return library

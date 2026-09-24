@@ -39,8 +39,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var res: Vector2i = col_a.resolution
 	_init_shader_viewport("res://addons/gonodes/shaders/top/z_composite.gdshader", true, false, res)
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("color_a", col_a.texture)
 	_material.set_shader_parameter("depth_a", dep_a.texture if dep_a != null else col_a.texture)

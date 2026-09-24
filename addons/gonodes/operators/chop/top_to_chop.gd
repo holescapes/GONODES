@@ -49,7 +49,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var want_b: bool = get_param_value("channel_b")
 	var want_a: bool = get_param_value("channel_a")
 
-	var img: Image = tex_data.texture.get_image()
+	var img: Image = tex_data.get_readback_image()
 	if img == null:
 		GNLogger.warn("TOPtoCHOP", "'%s' — could not get Image from texture" % id)
 		return null

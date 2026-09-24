@@ -38,8 +38,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = get_param_value("resolution")
 	_init_shader_viewport("res://addons/gonodes/shaders/top/triangle.gdshader", true, false, res)
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	var fill: Color = get_param_value("fill_color")
 	var bg: Color = get_param_value("bg_color")

@@ -82,10 +82,20 @@ func get_export_filters() -> Array[Dictionary]:
 	]
 
 
+## Returns CPU pixels from [member texture].
+## [ViewportTexture] uses blocking [method Texture2D.get_image]; [Texture2DRD]
+## uses async readback via [method GNGpuContext.get_texture_readback_image].
+func get_readback_image() -> Image:
+	if texture == null:
+		return null
+	return GNGpuContext.get_context().get_texture_readback_image(
+		texture, resolution, format)
+
+
 func export_to_file(path: String) -> Error:
 	if texture == null:
 		return ERR_INVALID_DATA
-	var img: Image = texture.get_image()
+	var img: Image = get_readback_image()
 	if img == null:
 		return ERR_INVALID_DATA
 	var ext := path.get_extension().to_lower()

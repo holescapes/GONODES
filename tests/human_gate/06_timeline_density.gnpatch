@@ -1,0 +1,647 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "n0": {
+      "type": "ConstantTOP",
+      "position": [
+        0,
+        0
+      ]
+    },
+    "n1": {
+      "type": "ConstantTOP",
+      "position": [
+        220,
+        0
+      ]
+    },
+    "n2": {
+      "type": "ConstantTOP",
+      "position": [
+        440,
+        0
+      ]
+    },
+    "n3": {
+      "type": "ConstantTOP",
+      "position": [
+        660,
+        0
+      ]
+    },
+    "n4": {
+      "type": "ConstantTOP",
+      "position": [
+        880,
+        0
+      ]
+    },
+    "n5": {
+      "type": "ConstantTOP",
+      "position": [
+        1100,
+        0
+      ]
+    },
+    "n6": {
+      "type": "ConstantTOP",
+      "position": [
+        1320,
+        0
+      ]
+    },
+    "n7": {
+      "type": "ConstantTOP",
+      "position": [
+        1540,
+        0
+      ]
+    },
+    "n8": {
+      "type": "ConstantTOP",
+      "position": [
+        0,
+        160
+      ]
+    },
+    "n9": {
+      "type": "ConstantTOP",
+      "position": [
+        220,
+        160
+      ]
+    },
+    "n10": {
+      "type": "ConstantTOP",
+      "position": [
+        440,
+        160
+      ]
+    },
+    "n11": {
+      "type": "ConstantTOP",
+      "position": [
+        660,
+        160
+      ]
+    },
+    "n12": {
+      "type": "ConstantTOP",
+      "position": [
+        880,
+        160
+      ]
+    },
+    "n13": {
+      "type": "ConstantTOP",
+      "position": [
+        1100,
+        160
+      ]
+    },
+    "n14": {
+      "type": "ConstantTOP",
+      "position": [
+        1320,
+        160
+      ]
+    },
+    "n15": {
+      "type": "ConstantTOP",
+      "position": [
+        1540,
+        160
+      ]
+    },
+    "n16": {
+      "type": "ConstantTOP",
+      "position": [
+        0,
+        320
+      ]
+    },
+    "n17": {
+      "type": "ConstantTOP",
+      "position": [
+        220,
+        320
+      ]
+    },
+    "n18": {
+      "type": "ConstantTOP",
+      "position": [
+        440,
+        320
+      ]
+    },
+    "n19": {
+      "type": "ConstantTOP",
+      "position": [
+        660,
+        320
+      ]
+    },
+    "n20": {
+      "type": "ConstantTOP",
+      "position": [
+        880,
+        320
+      ]
+    },
+    "n21": {
+      "type": "ConstantTOP",
+      "position": [
+        1100,
+        320
+      ]
+    },
+    "n22": {
+      "type": "ConstantTOP",
+      "position": [
+        1320,
+        320
+      ]
+    },
+    "n23": {
+      "type": "ConstantTOP",
+      "position": [
+        1540,
+        320
+      ]
+    },
+    "n24": {
+      "type": "ConstantTOP",
+      "position": [
+        0,
+        480
+      ]
+    },
+    "n25": {
+      "type": "ConstantTOP",
+      "position": [
+        220,
+        480
+      ]
+    },
+    "n26": {
+      "type": "ConstantTOP",
+      "position": [
+        440,
+        480
+      ]
+    },
+    "n27": {
+      "type": "ConstantTOP",
+      "position": [
+        660,
+        480
+      ]
+    },
+    "n28": {
+      "type": "ConstantTOP",
+      "position": [
+        880,
+        480
+      ]
+    },
+    "n29": {
+      "type": "ConstantTOP",
+      "position": [
+        1100,
+        480
+      ]
+    },
+    "n30": {
+      "type": "ConstantTOP",
+      "position": [
+        1320,
+        480
+      ]
+    },
+    "n31": {
+      "type": "ConstantTOP",
+      "position": [
+        1540,
+        480
+      ]
+    },
+    "n32": {
+      "type": "ConstantTOP",
+      "position": [
+        0,
+        640
+      ]
+    },
+    "n33": {
+      "type": "ConstantTOP",
+      "position": [
+        220,
+        640
+      ]
+    },
+    "n34": {
+      "type": "ConstantTOP",
+      "position": [
+        440,
+        640
+      ]
+    },
+    "n35": {
+      "type": "ConstantTOP",
+      "position": [
+        660,
+        640
+      ]
+    },
+    "n36": {
+      "type": "ConstantTOP",
+      "position": [
+        880,
+        640
+      ]
+    },
+    "n37": {
+      "type": "ConstantTOP",
+      "position": [
+        1100,
+        640
+      ]
+    },
+    "n38": {
+      "type": "ConstantTOP",
+      "position": [
+        1320,
+        640
+      ]
+    },
+    "n39": {
+      "type": "ConstantTOP",
+      "position": [
+        1540,
+        640
+      ]
+    },
+    "n40": {
+      "type": "ConstantTOP",
+      "position": [
+        0,
+        800
+      ]
+    },
+    "n41": {
+      "type": "ConstantTOP",
+      "position": [
+        220,
+        800
+      ]
+    },
+    "n42": {
+      "type": "ConstantTOP",
+      "position": [
+        440,
+        800
+      ]
+    },
+    "n43": {
+      "type": "ConstantTOP",
+      "position": [
+        660,
+        800
+      ]
+    },
+    "n44": {
+      "type": "ConstantTOP",
+      "position": [
+        880,
+        800
+      ]
+    },
+    "n45": {
+      "type": "ConstantTOP",
+      "position": [
+        1100,
+        800
+      ]
+    },
+    "n46": {
+      "type": "ConstantTOP",
+      "position": [
+        1320,
+        800
+      ]
+    },
+    "n47": {
+      "type": "ConstantTOP",
+      "position": [
+        1540,
+        800
+      ]
+    }
+  },
+  "connections": [
+    {
+      "from_node": "n0",
+      "from_port": 0,
+      "to_node": "n1",
+      "to_port": 0
+    },
+    {
+      "from_node": "n1",
+      "from_port": 0,
+      "to_node": "n2",
+      "to_port": 0
+    },
+    {
+      "from_node": "n2",
+      "from_port": 0,
+      "to_node": "n3",
+      "to_port": 0
+    },
+    {
+      "from_node": "n3",
+      "from_port": 0,
+      "to_node": "n4",
+      "to_port": 0
+    },
+    {
+      "from_node": "n4",
+      "from_port": 0,
+      "to_node": "n5",
+      "to_port": 0
+    },
+    {
+      "from_node": "n5",
+      "from_port": 0,
+      "to_node": "n6",
+      "to_port": 0
+    },
+    {
+      "from_node": "n6",
+      "from_port": 0,
+      "to_node": "n7",
+      "to_port": 0
+    },
+    {
+      "from_node": "n7",
+      "from_port": 0,
+      "to_node": "n8",
+      "to_port": 0
+    },
+    {
+      "from_node": "n8",
+      "from_port": 0,
+      "to_node": "n9",
+      "to_port": 0
+    },
+    {
+      "from_node": "n9",
+      "from_port": 0,
+      "to_node": "n10",
+      "to_port": 0
+    },
+    {
+      "from_node": "n10",
+      "from_port": 0,
+      "to_node": "n11",
+      "to_port": 0
+    },
+    {
+      "from_node": "n11",
+      "from_port": 0,
+      "to_node": "n12",
+      "to_port": 0
+    },
+    {
+      "from_node": "n12",
+      "from_port": 0,
+      "to_node": "n13",
+      "to_port": 0
+    },
+    {
+      "from_node": "n13",
+      "from_port": 0,
+      "to_node": "n14",
+      "to_port": 0
+    },
+    {
+      "from_node": "n14",
+      "from_port": 0,
+      "to_node": "n15",
+      "to_port": 0
+    },
+    {
+      "from_node": "n15",
+      "from_port": 0,
+      "to_node": "n16",
+      "to_port": 0
+    },
+    {
+      "from_node": "n16",
+      "from_port": 0,
+      "to_node": "n17",
+      "to_port": 0
+    },
+    {
+      "from_node": "n17",
+      "from_port": 0,
+      "to_node": "n18",
+      "to_port": 0
+    },
+    {
+      "from_node": "n18",
+      "from_port": 0,
+      "to_node": "n19",
+      "to_port": 0
+    },
+    {
+      "from_node": "n19",
+      "from_port": 0,
+      "to_node": "n20",
+      "to_port": 0
+    },
+    {
+      "from_node": "n20",
+      "from_port": 0,
+      "to_node": "n21",
+      "to_port": 0
+    },
+    {
+      "from_node": "n21",
+      "from_port": 0,
+      "to_node": "n22",
+      "to_port": 0
+    },
+    {
+      "from_node": "n22",
+      "from_port": 0,
+      "to_node": "n23",
+      "to_port": 0
+    },
+    {
+      "from_node": "n23",
+      "from_port": 0,
+      "to_node": "n24",
+      "to_port": 0
+    },
+    {
+      "from_node": "n24",
+      "from_port": 0,
+      "to_node": "n25",
+      "to_port": 0
+    },
+    {
+      "from_node": "n25",
+      "from_port": 0,
+      "to_node": "n26",
+      "to_port": 0
+    },
+    {
+      "from_node": "n26",
+      "from_port": 0,
+      "to_node": "n27",
+      "to_port": 0
+    },
+    {
+      "from_node": "n27",
+      "from_port": 0,
+      "to_node": "n28",
+      "to_port": 0
+    },
+    {
+      "from_node": "n28",
+      "from_port": 0,
+      "to_node": "n29",
+      "to_port": 0
+    },
+    {
+      "from_node": "n29",
+      "from_port": 0,
+      "to_node": "n30",
+      "to_port": 0
+    },
+    {
+      "from_node": "n30",
+      "from_port": 0,
+      "to_node": "n31",
+      "to_port": 0
+    },
+    {
+      "from_node": "n31",
+      "from_port": 0,
+      "to_node": "n32",
+      "to_port": 0
+    },
+    {
+      "from_node": "n32",
+      "from_port": 0,
+      "to_node": "n33",
+      "to_port": 0
+    },
+    {
+      "from_node": "n33",
+      "from_port": 0,
+      "to_node": "n34",
+      "to_port": 0
+    },
+    {
+      "from_node": "n34",
+      "from_port": 0,
+      "to_node": "n35",
+      "to_port": 0
+    },
+    {
+      "from_node": "n35",
+      "from_port": 0,
+      "to_node": "n36",
+      "to_port": 0
+    },
+    {
+      "from_node": "n36",
+      "from_port": 0,
+      "to_node": "n37",
+      "to_port": 0
+    },
+    {
+      "from_node": "n37",
+      "from_port": 0,
+      "to_node": "n38",
+      "to_port": 0
+    },
+    {
+      "from_node": "n38",
+      "from_port": 0,
+      "to_node": "n39",
+      "to_port": 0
+    },
+    {
+      "from_node": "n39",
+      "from_port": 0,
+      "to_node": "n40",
+      "to_port": 0
+    },
+    {
+      "from_node": "n40",
+      "from_port": 0,
+      "to_node": "n41",
+      "to_port": 0
+    },
+    {
+      "from_node": "n41",
+      "from_port": 0,
+      "to_node": "n42",
+      "to_port": 0
+    },
+    {
+      "from_node": "n42",
+      "from_port": 0,
+      "to_node": "n43",
+      "to_port": 0
+    },
+    {
+      "from_node": "n43",
+      "from_port": 0,
+      "to_node": "n44",
+      "to_port": 0
+    },
+    {
+      "from_node": "n44",
+      "from_port": 0,
+      "to_node": "n45",
+      "to_port": 0
+    },
+    {
+      "from_node": "n45",
+      "from_port": 0,
+      "to_node": "n46",
+      "to_port": 0
+    },
+    {
+      "from_node": "n46",
+      "from_port": 0,
+      "to_node": "n47",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 6. Forty-eight ConstantTOPs in a chain.\nScrub the timeline. The playhead should follow the mouse without a multi-frame stall.",
+      "position": [
+        -40,
+        -80
+      ],
+      "size": [
+        520,
+        90
+      ],
+      "color": [
+        1,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

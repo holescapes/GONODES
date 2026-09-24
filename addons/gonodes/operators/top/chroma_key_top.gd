@@ -31,8 +31,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var res: Vector2i = tex_in.resolution
 	_init_shader_viewport("res://addons/gonodes/shaders/top/chroma_key.gdshader", true, true, res)
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	var kc: Color = get_param_value("key_color")
 

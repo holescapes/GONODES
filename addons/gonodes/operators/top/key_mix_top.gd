@@ -38,8 +38,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var res: Vector2i = tex_a.resolution
 	_init_shader_viewport("res://addons/gonodes/shaders/top/key_mix.gdshader", true, false, res)
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("texture_a", tex_a.texture)
 	_material.set_shader_parameter("texture_b", tex_b.texture if tex_b != null else null)

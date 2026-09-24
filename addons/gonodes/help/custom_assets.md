@@ -2,7 +2,10 @@
 
 Custom assets let you promote sub-networks into reusable, shareable
 operators with their own name, family, and parameter interface. They
-appear in the palette and behave like built-in operators.
+appear in the palette and behave like built-in operators. Preferences →
+Asset Browser searches them by name and description, filters by family, shows
+promoted parameter names, and installs or removes files under
+`user://gonodes_assets/` only.
 
 ---
 

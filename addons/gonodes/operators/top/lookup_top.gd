@@ -34,8 +34,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var index_mode: int = get_param_value("index_by")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("source_tex", source.texture)
 	if ramp_tex != null:

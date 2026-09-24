@@ -207,7 +207,8 @@ func _cook_dat(data: GNData, res: Vector2i) -> GNData:
 		return null
 
 	_ensure_dat_viewport(res)
-	_dat_vp.size = res
+	if _dat_vp.size != res:
+		_dat_vp = _swap_dat_viewport_size(_dat_vp, res)
 	_dat_draw.table_data = tbl
 	_dat_draw.queue_redraw()
 
@@ -329,14 +330,18 @@ func _ensure_mat_viewport(size: Vector2i) -> void:
 func _ensure_dat_viewport(size: Vector2i) -> void:
 	if _dat_vp != null:
 		return
-	_dat_vp = SubViewport.new()
-	_dat_vp.size = size
+	_dat_vp = GNViewportPool.acquire("VP_Dat_%s" % id, size, false, true)
 	_dat_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
-	_dat_vp.transparent_bg = false
 	_dat_draw = _DATTableDraw.new()
 	_dat_draw.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_dat_vp.add_child(_dat_draw)
 	add_child(_dat_vp)
+
+
+func _swap_dat_viewport_size(vp: SubViewport, new_size: Vector2i) -> SubViewport:
+	vp = _swap_viewport_size(vp, new_size, false, true)
+	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	return vp
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

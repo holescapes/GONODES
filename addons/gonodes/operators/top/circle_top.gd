@@ -34,8 +34,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var border: float = get_param_value("border_width")
 	var soft: float = get_param_value("softness")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("fill_color", fill)
 	_material.set_shader_parameter("bg_color", bg)

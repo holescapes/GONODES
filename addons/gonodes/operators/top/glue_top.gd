@@ -49,8 +49,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# Ensure viewport
 	_ensure_viewport(res, true)
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	# Determine grid dimensions
 	var n: int = textures.size()

@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "const": {
+      "type": "ConstantCHOP",
+      "position": [0, 200],
+      "parameters": {
+        "count": {"value": 1},
+        "name0": {"value": "chan1"},
+        "value0": {"value": 1.0}
+      }
+    },
+    "dmx": {
+      "type": "DmxOutCHOP",
+      "position": [360, 200],
+      "parameters": {
+        "active": {"value": false},
+        "port": {"value": 6454}
+      }
+    }
+  },
+  "connections": [
+    {
+      "from_node": "const",
+      "from_port": 0,
+      "to_node": "dmx",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 12. Active starts off. With an Art-Net listener on UDP 6454, you should see nothing.\nTurn Active on. A DMX packet should arrive.\nNo listener means UNVERIFIED, not a pass.",
+      "position": [-40, 20],
+      "size": [560, 120],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

@@ -40,8 +40,8 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var disp_scale: float = get_param_value("displacement_scale")
 	var uv_set: int = get_param_value("uv_set")
 
-	# Get Image from texture for CPU sampling
-	var image: Image = tex_data.texture.get_image()
+	# Get Image from texture for CPU sampling (async readback)
+	var image: Image = tex_data.get_readback_image()
 	if image == null:
 		return in_geo
 

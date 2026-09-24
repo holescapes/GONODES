@@ -157,8 +157,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		# Return last good output (or null on first failure)
 		return _cached_tex_data if _cached_tex_data != null else null
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	# ── Bind input textures (dynamic count from shader parsing) ──
 	for i in range(input_ports.size()):

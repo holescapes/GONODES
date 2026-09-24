@@ -3,7 +3,7 @@ extends GNImgBase
 ## Converts a GPU GNTextureData (TOP) to a CPU-side GNImageData (IMG).
 ## This is the bridge from TOP → IMG pipeline (reverse of ImgToTOP).
 ##
-## Uses `Texture2D.get_image()` to read the GPU texture back to CPU.
+## Uses async GPU readback via [method GNTextureData.get_readback_image].
 ## The readback happens once per cook (only when dirty).
 ##
 ## ViewportTexture timing: upstream TOPs set their SubViewport to UPDATE_ONCE
@@ -53,11 +53,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 	_readback_pending = false
 
-	# GPU → CPU readback
-	var image: Image = tex_data.texture.get_image()
+	# GPU → CPU readback (async; ~1 frame latency after first cook)
+	var image: Image = tex_data.get_readback_image()
 	if image == null:
 		GNLogger.warn("TOPtoIMG",
-			"'%s': get_image() returned null (texture not ready)" % id)
+			"'%s': readback returned null (texture not ready)" % id)
 		return null
 
 	var out := _prepare_image()

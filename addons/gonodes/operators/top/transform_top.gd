@@ -38,8 +38,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var pvt: Vector2 = get_param_value("pivot")
 	var ext: int = get_param_value("extend")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	(_canvas as TextureRect).texture = tex_in.texture
 	_material.set_shader_parameter("source_tex", tex_in.texture)

@@ -304,6 +304,23 @@ class _CallErrorLogger extends Logger:
 				message = "script error in %s()" % _function
 
 
+## Safely calls a Callable with argument array, capturing GDScript runtime errors.
+## Returns {ok: bool, value: Variant, error: String}.
+static func safe_callv(callable: Callable, args: Array) -> Dictionary:
+	if not callable.is_valid():
+		return {"ok": false, "value": null, "error": "invalid callable"}
+	var err_logger := _CallErrorLogger.new()
+	OS.add_logger(err_logger)
+	var value: Variant = callable.callv(args)
+	if OS.has_method("remove_logger"):
+		OS.remove_logger(err_logger)
+	return {
+		"ok": not err_logger.had_error,
+		"value": value,
+		"error": err_logger.message,
+	}
+
+
 ## Safely calls a method on the instance, catching runtime errors.
 ## Returns empty string on success, or the error message on failure.
 static func _safe_call(instance: RefCounted, method: String, node: GNNode) -> String:

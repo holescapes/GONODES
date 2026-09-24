@@ -87,6 +87,7 @@ $env:PYTHONUTF8 = "1"
 | 5. Activate | `python scripts/sync_gdextensions.py` | Renames `.gdextension.disabled` ↔ `.gdextension` when binaries exist (also runs post-`scons`) |
 | 6. Import + test | `& $env:GONODES_GODOT --headless --path . --import` then `-s res://tests/test_runner.gd` | Register `class_name`s; run suite |
 | 7. Player templates (optional) | `.\scripts\build_templates.ps1` | Godot export → `templates/` for Quick Build |
+| 7b. One extension pack (optional) | `.\scripts\pack_extension.ps1 -ExtensionName gn_ext_mapper` | Writes `templates/extensions/gn_ext_mapper.pck`. Refuses `gn_ext_native`. The player export still includes addons. |
 
 **Quick path (Windows):** one script covers steps 1–3:
 

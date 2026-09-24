@@ -46,8 +46,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var res: Vector2i = tex_in.resolution
 	_init_shader_viewport("res://addons/gonodes/shaders/top/lens_flare.gdshader", true, false, res)
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	var tint_col: Color = get_param_value("tint")
 

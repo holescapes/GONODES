@@ -31,8 +31,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var res: Vector2i = tex_in.resolution
 	_ensure_viewport(res, true, true)
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	# If the input comes from a RenderTOP with depth texture available,
 	# read it; otherwise fall back to luminance as a depth proxy.

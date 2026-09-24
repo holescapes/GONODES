@@ -41,8 +41,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var res: Vector2i = tex_color.resolution
 	_init_shader_viewport("res://addons/gonodes/shaders/top/depth_of_field.gdshader", true, false, res)
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("color_tex", tex_color.texture)
 	_material.set_shader_parameter("depth_tex", tex_depth.texture if tex_depth != null else tex_color.texture)

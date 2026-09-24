@@ -91,8 +91,11 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# Resize existing VPs when resolution changes (no rebuild needed)
 	if _last_res != res:
-		_sim_viewport.size = res
-		_render_viewport.size = res
+		_sim_viewport = _swap_sim_viewport_size(_sim_viewport, res)
+		_render_viewport = _swap_render_viewport_size(_render_viewport, res)
+		_viewport = _render_viewport
+		_cached_tex_data.texture = _render_viewport.get_texture()
+		_cached_tex_data.viewport = _render_viewport
 		_last_res = res
 		_needs_reset = true
 
@@ -172,14 +175,9 @@ func _apply_preset(preset_idx: int) -> void:
 ## Build dual viewport pipeline (called once on first cook).
 func _build_pipeline(res: Vector2i) -> void:
 	# --- Simulation viewport ---
-	_sim_viewport = SubViewport.new()
-	_sim_viewport.name = "VP_RDSim_%s" % id
-	_sim_viewport.size = res
-	_sim_viewport.transparent_bg = false
+	_sim_viewport = GNViewportPool.acquire("VP_RDSim_%s" % id, res, false, true)
 	_sim_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_sim_viewport.render_target_clear_mode = SubViewport.CLEAR_MODE_NEVER
-	_sim_viewport.disable_3d = true
-	_sim_viewport.gui_disable_input = true
 	add_child(_sim_viewport)
 
 	var sim_shader: Shader = load("res://addons/gonodes/shaders/top/reaction_diffusion.gdshader")
@@ -193,13 +191,8 @@ func _build_pipeline(res: Vector2i) -> void:
 	sim_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	# --- Render viewport ---
-	_render_viewport = SubViewport.new()
-	_render_viewport.name = "VP_RDRender_%s" % id
-	_render_viewport.size = res
-	_render_viewport.transparent_bg = false
+	_render_viewport = GNViewportPool.acquire("VP_RDRender_%s" % id, res, false, true)
 	_render_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_render_viewport.disable_3d = true
-	_render_viewport.gui_disable_input = true
 	add_child(_render_viewport)
 
 	var render_shader: Shader = load("res://addons/gonodes/shaders/top/reaction_diffusion_render.gdshader")
@@ -221,3 +214,16 @@ func _build_pipeline(res: Vector2i) -> void:
 	_cached_tex_data.viewport = _render_viewport
 	_cached_tex_data.resolution = res
 	_viewport = _render_viewport
+
+
+func _swap_sim_viewport_size(vp: SubViewport, new_size: Vector2i) -> SubViewport:
+	vp = _swap_viewport_size(vp, new_size, false, true)
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	vp.render_target_clear_mode = SubViewport.CLEAR_MODE_NEVER
+	return vp
+
+
+func _swap_render_viewport_size(vp: SubViewport, new_size: Vector2i) -> SubViewport:
+	vp = _swap_viewport_size(vp, new_size, false, true)
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	return vp

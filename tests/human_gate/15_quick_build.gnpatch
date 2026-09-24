@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "color": {
+      "type": "ConstantTOP",
+      "position": [0, 200]
+    }
+  },
+  "connections": [],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Row 15. Save this patch, then Quick Build it and run GONODESPlayer.exe.\nA window should open. Escape should quit.",
+      "position": [-40, 20],
+      "size": [520, 100],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

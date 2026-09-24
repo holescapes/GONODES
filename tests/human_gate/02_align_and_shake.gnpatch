@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "noise": {
+      "type": "NoiseTOP",
+      "position": [0, 200]
+    },
+    "level": {
+      "type": "LevelTOP",
+      "position": [280, 360]
+    }
+  },
+  "connections": [
+    {
+      "from_node": "noise",
+      "from_port": 0,
+      "to_node": "level",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Rows 2 and 4.\nSelect both nodes. Press H, then V. They should align. H is not help. V is not the viewer.\nThen drag the right node and shake it left-right. The wire should drop and a toast should say how many.",
+      "position": [-80, 20],
+      "size": [560, 140],
+      "color": [1.0, 0.95, 0.55, 0.92]
+    }
+  ]
+}

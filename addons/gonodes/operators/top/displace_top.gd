@@ -37,8 +37,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var method_idx: int = get_param_value("method")
 	var scale_val: Vector2 = get_param_value("scale")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("source_tex", source.texture)
 	if disp != null:

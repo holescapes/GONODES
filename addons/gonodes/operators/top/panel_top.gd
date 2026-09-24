@@ -72,8 +72,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var spacing: int = get_param_value("spacing")
 
 	# Update viewport settings
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 	_viewport.transparent_bg = transparent
 
 	# Update container layout
@@ -106,12 +105,7 @@ func _setup_panel_viewport() -> void:
 
 	var res: Vector2i = get_param_value("resolution")
 
-	_viewport = SubViewport.new()
-	_viewport.name = "VP_Panel_%s" % id
-	_viewport.size = res
-	_viewport.transparent_bg = false
-	_viewport.disable_3d = true
-	_viewport.gui_disable_input = true
+	_viewport = GNViewportPool.acquire("VP_Panel_%s" % id, res, false, true)
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(_viewport)
 

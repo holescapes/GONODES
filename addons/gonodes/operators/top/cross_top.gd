@@ -32,8 +32,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var cross_val: float = get_param_value("cross")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	_material.set_shader_parameter("texture_a", tex_a.texture)
 	if tex_b != null:

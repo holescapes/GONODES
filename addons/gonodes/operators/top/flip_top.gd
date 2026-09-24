@@ -31,8 +31,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var fx: bool = get_param_value("flip_x")
 	var fy: bool = get_param_value("flip_y")
 
-	if _viewport.size != res:
-		_viewport.size = res
+	_ensure_viewport_size(res)
 
 	(_canvas as TextureRect).texture = tex_in.texture
 	_material.set_shader_parameter("source_tex", tex_in.texture)
