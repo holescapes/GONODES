@@ -735,8 +735,9 @@ static func shared_geo_gizmo() -> Node3D:
 
 ## Creates the standard 3D viewer scene nodes shared by SOP, POP, and MAT renderers.
 ## Returns a Dictionary: {camera, light, env_node, gizmo}.
-## [param bg_color] sets the environment background tint.
-static func create_3d_viewer_scene(bg_color: Color = Color(0.1, 0.1, 0.12),
+## [param bg_color] is kept for callers. The clear color is not painted;
+## the viewer panel is the backdrop so text under the picture stays visible.
+static func create_3d_viewer_scene(_bg_color: Color = Color(0.1, 0.1, 0.12),
 		ambient_color: Color = Color(0.2, 0.2, 0.25)) -> Dictionary:
 	var camera := Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
@@ -748,8 +749,11 @@ static func create_3d_viewer_scene(bg_color: Color = Color(0.1, 0.1, 0.12),
 	var gizmo := _create_axis_gizmo()
 
 	var env := Environment.new()
+	# Transparent clear. The viewer panel is the backdrop, so status text
+	# under the picture is not covered by an opaque plate. Godot 4.7 has no
+	# BG_CLEAR; alpha 0 with the viewport's transparent_bg is the clear plate.
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = bg_color
+	env.background_color = Color(0, 0, 0, 0)
 	env.ambient_light_color = ambient_color
 	env.ambient_light_energy = 0.5
 	var env_node := WorldEnvironment.new()

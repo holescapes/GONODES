@@ -9,6 +9,9 @@ extends GNOutBase
 ## Typical chain:  WaveCHOP → AudioDeviceOUT
 ##                 AudioFileInCHOP → MathCHOP (gain) → AudioDeviceOUT
 
+const BUFFER_SAMPLES: Array[int] = [512, 1024, 2048, 4096, 8192]
+const GENERATOR_MIN_SECONDS := 0.01
+
 var _bus_name: String = ""
 var _bus_idx: int = -1
 var _stream_player: AudioStreamPlayer = null
@@ -39,8 +42,11 @@ func _init_parameters() -> void:
 		"Gain", "Output gain multiplier"))
 	add_parameter(GNParameter.create_float("mix_rate", 44100.0, 8000.0, 96000.0, 1.0,
 		"Sample Rate", "Audio output sample rate (Hz)"))
-	add_parameter(GNParameter.create_float("buffer_length", 0.1, 0.01, 1.0, 0.01,
-		"Buffer (s)", "Generator buffer length in seconds"))
+	var buf_options := PackedStringArray()
+	for samples in BUFFER_SAMPLES:
+		buf_options.append(str(samples))
+	add_parameter(GNParameter.create_enum("buffer_length", buf_options, 3, "Buffer",
+		"Generator buffer size in samples (512–8192). Godot enforces a 10 ms minimum."))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -92,12 +98,76 @@ func _resolve_channel(data: GNChannelData, preferred_name: String,
 	return PackedFloat32Array()
 
 
+func _get_buffer_sample_count() -> int:
+	var idx: int = int(get_param_value("buffer_length"))
+	idx = clampi(idx, 0, BUFFER_SAMPLES.size() - 1)
+	return BUFFER_SAMPLES[idx]
+
+
+func _get_buffer_seconds() -> float:
+	var mix_rate: float = float(get_param_value("mix_rate"))
+	if mix_rate <= 0.0:
+		mix_rate = 44100.0
+	var seconds: float = float(_get_buffer_sample_count()) / mix_rate
+	if seconds < GENERATOR_MIN_SECONDS:
+		return GENERATOR_MIN_SECONDS
+	return seconds
+
+
+func _update_buffer_warning() -> void:
+	var mix_rate: float = float(get_param_value("mix_rate"))
+	if mix_rate <= 0.0:
+		mix_rate = 44100.0
+	var seconds: float = float(_get_buffer_sample_count()) / mix_rate
+	if seconds < GENERATOR_MIN_SECONDS:
+		node_warning = "Generator buffer floor is 10 ms — at this sample rate the effective buffer was raised."
+	else:
+		node_warning = ""
+
+
+static func _migrate_buffer_length_value(val: Variant, mix_rate: float) -> int:
+	if val is int and val >= 0 and val < BUFFER_SAMPLES.size():
+		return val
+	if val is float or val is int:
+		var seconds: float = float(val)
+		if seconds > 0.0 and seconds <= 2.0:
+			var target_samples: float = seconds * mix_rate
+			var best_idx: int = 0
+			var best_diff: float = absf(float(BUFFER_SAMPLES[0]) - target_samples)
+			for i in range(1, BUFFER_SAMPLES.size()):
+				var diff: float = absf(float(BUFFER_SAMPLES[i]) - target_samples)
+				if diff < best_diff:
+					best_diff = diff
+					best_idx = i
+			return best_idx
+	return 3
+
+
+func from_dict(d: Dictionary) -> void:
+	var migrated := d.duplicate(true)
+	if migrated.has("parameters"):
+		var params: Dictionary = migrated["parameters"]
+		if params.has("buffer_length"):
+			var buf_dict: Dictionary = params["buffer_length"]
+			if buf_dict.has("value"):
+				var mix_rate: float = 44100.0
+				if params.has("mix_rate"):
+					var mix_dict: Dictionary = params["mix_rate"]
+					if mix_dict.has("value"):
+						var mr = mix_dict["value"]
+						if mr is float or mr is int:
+							mix_rate = float(mr)
+				buf_dict["value"] = _migrate_buffer_length_value(buf_dict["value"], mix_rate)
+	super.from_dict(migrated)
+
+
 func _start_output() -> void:
 	if _active:
 		return
 
 	var mix_rate: float = get_param_value("mix_rate")
-	var buf_length: float = get_param_value("buffer_length")
+	var buf_length: float = _get_buffer_seconds()
+	_update_buffer_warning()
 
 	# Create a dedicated audio bus
 	_bus_name = "GN_AudioOut_%s" % id
@@ -167,6 +237,8 @@ func _get_device_menu() -> PackedStringArray:
 
 
 func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
-	if param_name == "device" and _active:
+	if param_name in ["buffer_length", "mix_rate"]:
+		_update_buffer_warning()
+	if param_name in ["device", "buffer_length", "mix_rate"] and _active:
 		_stop_output()
 		_start_output()

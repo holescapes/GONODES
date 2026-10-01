@@ -62,8 +62,8 @@ is unavailable.
 | MagnetSOPNative | SOP | Magnet point attractor deformation with native C++ acceleration. |
 | PolyLoftSOPNative | SOP | Cross-section lofting with native C++ acceleration. |
 | SkinSOPNative | SOP | Cross-section skinning with native C++ acceleration. |
-| OpticalFlowTOPNative | TOP | Horn-Schunck optical flow with native C++ acceleration. |
-| AnalyzeTOPNative | TOP | Pixel min/max/avg/sum statistics with native C++ acceleration. |
+| OpticalFlowTOPNative | TOP | Horn-Schunck optical flow on the GPU (same shader as OpticalFlowTOP). |
+| AnalyzeTOPNative | TOP | Pixel min/max/avg/sum on the GPU (same shader as AnalyzeTOP). |
 | TOPtoSOPNative | SOP | Convert TOP texture to heightfield mesh with native C++ acceleration. |
 | PointSOPNative | SOP | Per-vertex expression deformation with native C++ acceleration. |
 | ClipSOPNative | SOP | Plane-based geometry clipping with native C++ acceleration. |

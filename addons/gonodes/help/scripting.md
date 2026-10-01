@@ -121,8 +121,10 @@ These variables are available in every script, injected automatically:
 | `chop(id, chan, index)` | float | Read a CHOP channel value (also accepts port arg) |
 | `top(id, property)` | Variant | Read a TOP property (also accepts port arg) |
 | `sop(id)` | GNGeoData | Get a SOP node's geometry data |
-| `dat(id, row, col)` | Variant | Read a DAT cell or full table |
+| `dat(id, port)` | GNTableData | Read a DAT table. The second argument is an output port, not a cell |
 | `op_ref(id, param)` | Variant | Read any node's parameter |
+
+Parameter expressions read a single DAT cell with `cell()`, `cellf()`, `lookup()`, and `lookupf()`. Those are documented in `help/expressions.md`. `dat()` here returns the table.
 
 ### Parameter Writing
 

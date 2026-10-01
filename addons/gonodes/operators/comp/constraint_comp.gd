@@ -53,8 +53,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		node_warning = "No source COMP connected"
 		return null
 
-	# Get the source scene node from upstream COMP
-	var source_node: Node3D = _get_comp_scene_node(source_comp)
+	# Get the source scene node from upstream COMP. GeometryCOMP keeps the
+	# mesh on the operator and does not put it on GNCompData.
+	var source_node: Node3D = _get_upstream_scene_node(0)
 	if source_node == null:
 		node_warning = "Source has no scene node"
 		return source_comp
@@ -64,7 +65,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		node_warning = "No target COMP connected — pass-through"
 		return source_comp
 
-	var target_node: Node3D = _get_comp_scene_node(target_comp)
+	var target_node: Node3D = _get_upstream_scene_node(1)
 	if target_node == null:
 		node_warning = "Target has no scene node"
 		return source_comp
@@ -124,11 +125,3 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	_scene_node = source_node
 	return source_comp
-
-
-## Extracts the scene node from COMP data.
-func _get_comp_scene_node(data: GNData) -> Node3D:
-	var comp_data := data as GNCompData
-	if comp_data != null:
-		return comp_data.scene_node
-	return null

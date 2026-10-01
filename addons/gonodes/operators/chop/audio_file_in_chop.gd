@@ -32,8 +32,6 @@ var _audio_stream: AudioStream = null
 var _current_file: String = ""
 var _current_load_mode: int = -1
 var _capture_active: bool = false
-var _devices_ready: bool = false
-var _last_device_idx: int = -1
 var _last_loop: bool = false
 var _loop_applied: bool = false
 var _load_queued: bool = false
@@ -82,12 +80,6 @@ func _init() -> void:
 	is_sink = false
 
 
-func _pre_cook(delta: float) -> void:
-	# Cook while Play is on even with no downstream wires (hear + capture).
-	is_sink = bool(get_param_value("play"))
-	super._pre_cook(delta)
-
-
 func _init_ports() -> void:
 	add_output("out", GNFamily.Type.CHOP, "Audio waveform + transport channels")
 
@@ -104,7 +96,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("loop", true, "Loop",
 		"Loop playback (returns to Start Position)"))
 	add_parameter(GNParameter.create_float("volume", 0.0, -60.0, 6.0, 0.1, "Volume (dB)",
-		"Speaker / bus playback level in decibels (before Gain)"))
+		"Capture-bus level in decibels (before Gain)"))
 	add_parameter(GNParameter.create_float("gain", 1.0, 0.0, 16.0, 0.05, "Gain",
 		"Linear amplitude for CHOP waveform + analysis bus (1 = unity). Raise if spectrum/bands look weak on loud masters."))
 	# Cue point — Play starts here; Loop returns here. Independent of Seek scrubber.
@@ -120,14 +112,7 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("stereo", true, "Stereo",
 		"Output stereo channels"))
 	add_parameter(GNParameter.create_bool("mute_output", false, "Mute",
-		"Mute speakers (waveform + spectrum still captured)"))
-	var dev_param := GNParameter.create_enum("output_device",
-		PackedStringArray(["Default"]), 0, "Output Device",
-		"Speaker / headphones. Godot has one global output device — change this after swapping hardware. Prefer Preferences → Audio for editor-wide default.")
-	dev_param.dynamic_enum_callback = Callable(self, "_get_output_device_menu")
-	add_parameter(dev_param)
-	add_parameter(GNParameter.create_bool("refresh_devices", false, "Refresh Devices",
-		"Pulse: re-scan OS audio devices (use after plugging speakers). Auto-resets."))
+		"Does not send this file to the speakers. The capture bus stays audible to the waveform and a wired AudioSpectrumCHOP. Hear the file through AudioDeviceOUT."))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -135,16 +120,6 @@ func _init_parameters() -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _cook(_inputs: Array[GNData]) -> GNData:
-	if not _devices_ready:
-		refresh_dynamic_enums()
-		_devices_ready = true
-		_apply_selected_output_device()
-
-	if get_param_value("refresh_devices"):
-		set_param_value("refresh_devices", false)
-		refresh_dynamic_enums()
-		_apply_selected_output_device(true)
-
 	var file_path: String = get_param_value("file")
 	var want_mode: int = int(get_param_value("load_mode"))
 	var want_play: bool = get_param_value("play")
@@ -153,14 +128,9 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var gain_lin: float = maxf(float(get_param_value("gain")), 0.0)
 	var buf_size: int = get_param_value("buffer_size")
 	var stereo: bool = get_param_value("stereo")
-	var mute: bool = get_param_value("mute_output")
 	var effective_db: float = _effective_volume_db(volume_db, gain_lin)
 
 	var play_rising: bool = want_play and not _was_playing
-
-	var dev_idx: int = int(get_param_value("output_device"))
-	if dev_idx != _last_device_idx:
-		_apply_selected_output_device()
 
 	var sample_rate: float = float(AudioServer.get_mix_rate())
 	var out: GNChannelData = _prepare_output(sample_rate)
@@ -209,9 +179,9 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_last_applied_cue = _clamped_cue_seconds()
 
 	if _is_stream_mode:
-		_cook_stream_transport(want_play, want_loop, effective_db, mute)
+		_cook_stream_transport(want_play, want_loop, effective_db)
 	elif _stream_player != null and _audio_stream != null:
-		_cook_memory_transport(want_play, want_loop, effective_db, mute)
+		_cook_memory_transport(want_play, want_loop, effective_db)
 
 	# Waveform / CHOP channels
 	var filled := false
@@ -258,15 +228,14 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	return out
 
 
-func _cook_memory_transport(want_play: bool, want_loop: bool, volume_db: float, mute: bool) -> void:
+func _cook_memory_transport(want_play: bool, want_loop: bool, volume_db: float) -> void:
 	if not _loop_applied or want_loop != _last_loop:
 		_apply_loop(_audio_stream, want_loop)
 		_last_loop = want_loop
 		_loop_applied = true
 
 	_stream_player.volume_db = volume_db
-	if _bus_idx >= 0:
-		AudioServer.set_bus_mute(_bus_idx, mute)
+	_route_capture_off_speakers()
 
 	_apply_seek_scrub(want_play)
 
@@ -278,14 +247,13 @@ func _cook_memory_transport(want_play: bool, want_loop: bool, volume_db: float, 
 		_stream_player.stop()
 
 
-func _cook_stream_transport(want_play: bool, want_loop: bool, volume_db: float, mute: bool) -> void:
+func _cook_stream_transport(want_play: bool, want_loop: bool, volume_db: float) -> void:
 	if _stream_player == null:
 		return
 
 	_last_loop = want_loop
 	_stream_player.volume_db = volume_db
-	if _bus_idx >= 0:
-		AudioServer.set_bus_mute(_bus_idx, mute)
+	_route_capture_off_speakers()
 
 	_apply_seek_scrub(want_play)
 
@@ -299,7 +267,7 @@ func _cook_stream_transport(want_play: bool, want_loop: bool, volume_db: float, 
 		_gen_playback = null
 
 
-## Volume (dB) plus linear Gain → effective bus level for speakers + spectrum.
+## Volume (dB) plus linear Gain → effective capture-bus level for waveform + spectrum.
 func _effective_volume_db(volume_db: float, gain_lin: float) -> float:
 	if gain_lin <= 0.0001:
 		return -80.0
@@ -743,16 +711,42 @@ func _wav_frame_count(wav: AudioStreamWAV) -> int:
 # Players / stream feeder
 # ═══════════════════════════════════════════════════════════════════════════════
 
+const _NULL_BUS_NAME := "GN_AudioNull"
+
+
+## A muted bus placed ahead of every capture bus. Godot ignores a send whose
+## target is at the same index or later, and an unknown send falls through to
+## Master. Muting the capture bus itself also drops the signal before
+## AudioEffectCapture and AudioSpectrumCHOP, which is why the viewers stayed
+## flat and AudioDeviceOUT played silence.
+func _ensure_null_bus() -> void:
+	if AudioServer.get_bus_index(_NULL_BUS_NAME) >= 0:
+		return
+	AudioServer.add_bus(1)
+	var idx := 1 if AudioServer.bus_count > 1 else AudioServer.bus_count - 1
+	AudioServer.set_bus_name(idx, _NULL_BUS_NAME)
+	AudioServer.set_bus_send(idx, &"Master")
+	AudioServer.set_bus_mute(idx, true)
+	AudioServer.set_bus_volume_db(idx, -80.0)
+
+
+func _route_capture_off_speakers() -> void:
+	if _bus_idx < 0:
+		return
+	AudioServer.set_bus_send(_bus_idx, StringName(_NULL_BUS_NAME))
+	AudioServer.set_bus_mute(_bus_idx, false)
+	AudioServer.set_bus_volume_db(_bus_idx, 0.0)
+
+
 func _ensure_bus() -> void:
 	if _capture_active:
 		return
+	_ensure_null_bus()
 	_bus_name = "GN_AudioFile_%s" % id
-	_bus_idx = AudioServer.bus_count
-	AudioServer.add_bus(_bus_idx)
+	AudioServer.add_bus()
+	_bus_idx = AudioServer.bus_count - 1
 	AudioServer.set_bus_name(_bus_idx, _bus_name)
-	AudioServer.set_bus_send(_bus_idx, &"Master")
-	AudioServer.set_bus_mute(_bus_idx, false)
-	AudioServer.set_bus_volume_db(_bus_idx, 0.0)
+	_route_capture_off_speakers()
 
 	_capture_effect = AudioEffectCapture.new()
 	_capture_effect.buffer_length = 0.5
@@ -872,24 +866,9 @@ func _notification(what: int) -> void:
 		_stop_and_cleanup()
 
 
-func _get_output_device_menu() -> PackedStringArray:
-	return GNAudioDevices.output_menu()
-
-
-func _apply_selected_output_device(_force: bool = false) -> void:
-	var menu := GNAudioDevices.output_menu()
-	var idx: int = clampi(int(get_param_value("output_device")), 0, maxi(menu.size() - 1, 0))
-	_last_device_idx = idx
-	if menu.is_empty():
-		return
-	GNAudioDevices.apply_output_device(menu[idx])
-
-
 func _on_parameter_changed(param_name: String, new_value: Variant) -> void:
 	super._on_parameter_changed(param_name, new_value)
-	if param_name == "output_device":
-		_apply_selected_output_device(true)
-	elif param_name == "loop":
+	if param_name == "loop":
 		_loop_applied = false
 	elif param_name == "start_pos":
 		# Cue change: refresh loop region and jump playhead to the new cue

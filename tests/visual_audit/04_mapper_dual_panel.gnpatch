@@ -1,83 +1,252 @@
 {
-  "version": "1.0.0",
-  "generator": "visual_audit",
-  "nodes": {
-    "noise": {
-      "type": "NoiseTOP",
-      "position": [
-        0,
-        200
-      ]
-    },
-    "bezier": {
-      "type": "BezierMapTOP",
-      "position": [
-        350,
-        200
-      ]
-    },
-    "win": {
-      "type": "WindowOUT",
-      "position": [
-        700,
-        200
-      ],
-      "parameters": {
-        "open": {
-          "value": true
-        },
-        "title": {
-          "value": "VA: Mapper Dual Panel"
-        },
-        "resolution": {
-          "value": {
-            "_type": "Vector2i",
-            "x": 800,
-            "y": 450
-          }
-        }
-      }
-    }
-  },
-  "connections": [
-    {
-      "from_node": "noise",
-      "from_port": 0,
-      "to_node": "bezier",
-      "to_port": 0
-    },
-    {
-      "from_node": "bezier",
-      "from_port": 0,
-      "to_node": "win",
-      "to_port": 0
-    },
-    {
-      "from_node": "bezier",
-      "from_port": 1,
-      "to_node": "win",
-      "to_port": 1
-    }
-  ],
-  "annotations": [
-    {
-      "id": "ann_2119022",
-      "type": "note",
-      "text": "VISUAL AUDIT 04 \u2014 dual interactive panel (Rule 25.42)\n\u25a1 Viewer on BezierMap Out: handles ON texture\n\u25a1 WindowOUT Open: handles ALSO in pop-out\n\u25a1 Drag either \u2192 both stay in sync\n\u25a1 No crash when wiring panel",
-      "position": [
-        -120,
-        20
-      ],
-      "size": [
-        520,
-        160
-      ],
-      "color": [
-        1.0,
-        0.95,
-        0.55,
-        0.92
-      ]
-    }
-  ]
+	"annotations": [
+		{
+			"color": [
+				1.0,
+				0.949999988079071,
+				0.550000011920929,
+				0.920000016689301
+			],
+			"id": "ann_2119022",
+			"position": [
+				-120.0,
+				20.0
+			],
+			"size": [
+				520.0,
+				160.0
+			],
+			"text": "VISUAL AUDIT 04 — dual interactive panel (Rule 25.42)\n□ Viewer on BezierMap Out: handles ON texture\n□ WindowOUT Open: handles ALSO in pop-out\n□ Drag either → both stay in sync\n□ No crash when wiring panel",
+			"type": "note"
+		}
+	],
+	"app_version": "0.1.0-beta",
+	"connections": [
+		{
+			"from": "noise",
+			"from_port": 0,
+			"to": "bezier",
+			"to_port": 0
+		},
+		{
+			"from": "bezier",
+			"from_port": 0,
+			"to": "win",
+			"to_port": 0
+		},
+		{
+			"from": "bezier",
+			"from_port": 1,
+			"to": "win",
+			"to_port": 1
+		}
+	],
+	"generator": "GONODES",
+	"nodes": {
+		"bezier": {
+			"parameters": {
+				"bot_cleft_x": {
+					"value": 0.333
+				},
+				"bot_cleft_y": {
+					"value": 1.0
+				},
+				"bot_cright_x": {
+					"value": 0.667
+				},
+				"bot_cright_y": {
+					"value": 1.0
+				},
+				"bot_left_x": {
+					"value": 0.0
+				},
+				"bot_left_y": {
+					"value": 1.0
+				},
+				"bot_right_x": {
+					"value": 1.0
+				},
+				"bot_right_y": {
+					"value": 1.0
+				},
+				"lmid_cleft_x": {
+					"value": 0.333
+				},
+				"lmid_cleft_y": {
+					"value": 0.667
+				},
+				"lmid_cright_x": {
+					"value": 0.667
+				},
+				"lmid_cright_y": {
+					"value": 0.667
+				},
+				"lmid_left_x": {
+					"value": 0.0
+				},
+				"lmid_left_y": {
+					"value": 0.667
+				},
+				"lmid_right_x": {
+					"value": 1.0
+				},
+				"lmid_right_y": {
+					"value": 0.667
+				},
+				"top_cleft_x": {
+					"value": 0.333
+				},
+				"top_cleft_y": {
+					"value": 0.0
+				},
+				"top_cright_x": {
+					"value": 0.667
+				},
+				"top_cright_y": {
+					"value": 0.0
+				},
+				"top_left_x": {
+					"value": 0.0
+				},
+				"top_left_y": {
+					"value": 0.0
+				},
+				"top_right_x": {
+					"value": 1.0
+				},
+				"top_right_y": {
+					"value": 0.0
+				},
+				"umid_cleft_x": {
+					"value": 0.333
+				},
+				"umid_cleft_y": {
+					"value": 0.333
+				},
+				"umid_cright_x": {
+					"value": 0.667
+				},
+				"umid_cright_y": {
+					"value": 0.333
+				},
+				"umid_left_x": {
+					"value": 0.0
+				},
+				"umid_left_y": {
+					"value": 0.333
+				},
+				"umid_right_x": {
+					"value": 1.0
+				},
+				"umid_right_y": {
+					"value": 0.333
+				}
+			},
+			"position": [
+				340.0,
+				200.0
+			],
+			"type": "BezierMapTOP"
+		},
+		"noise": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": true
+				},
+				"noise_type": {
+					"value": 0
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 0
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 0.0
+				}
+			},
+			"position": [
+				0.0,
+				200.0
+			],
+			"type": "NoiseTOP"
+		},
+		"win": {
+			"parameters": {
+				"always_on_top": {
+					"value": false
+				},
+				"monitor": {
+					"value": 0
+				},
+				"open": {
+					"value": true
+				},
+				"position": {
+					"value": {
+						"_type": "Vector2i",
+						"x": -1,
+						"y": -1
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 800,
+						"y": 450
+					}
+				},
+				"title": {
+					"value": "VA: Mapper Dual Panel"
+				},
+				"vsync": {
+					"value": true
+				},
+				"window_mode": {
+					"value": 0
+				}
+			},
+			"position": [
+				680.0,
+				200.0
+			],
+			"type": "WindowOUT"
+		}
+	},
+	"version": "1.0.0",
+	"viewport": {
+		"scroll_x": -95.13330078125,
+		"scroll_y": -28.7638244628906,
+		"zoom": 0.967999756336212
+	}
 }

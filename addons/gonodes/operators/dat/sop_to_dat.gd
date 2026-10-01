@@ -92,12 +92,15 @@ func _extract_summary(geo: GNGeoData, tbl: GNTableData) -> void:
 	tbl.append_row(PackedStringArray(["surface_count", str(geo.mesh.get_surface_count())]))
 
 	var aabb: AABB = geo.bounds
-	tbl.append_row(PackedStringArray(["aabb_min",
-		"%.3f, %.3f, %.3f" % [aabb.position.x, aabb.position.y, aabb.position.z]]))
-	tbl.append_row(PackedStringArray(["aabb_max",
-		"%.3f, %.3f, %.3f" % [aabb.end.x, aabb.end.y, aabb.end.z]]))
-	tbl.append_row(PackedStringArray(["aabb_size",
-		"%.3f, %.3f, %.3f" % [aabb.size.x, aabb.size.y, aabb.size.z]]))
+	tbl.append_row(PackedStringArray(["aabb_min_x", "%.6f" % aabb.position.x]))
+	tbl.append_row(PackedStringArray(["aabb_min_y", "%.6f" % aabb.position.y]))
+	tbl.append_row(PackedStringArray(["aabb_min_z", "%.6f" % aabb.position.z]))
+	tbl.append_row(PackedStringArray(["aabb_max_x", "%.6f" % aabb.end.x]))
+	tbl.append_row(PackedStringArray(["aabb_max_y", "%.6f" % aabb.end.y]))
+	tbl.append_row(PackedStringArray(["aabb_max_z", "%.6f" % aabb.end.z]))
+	tbl.append_row(PackedStringArray(["aabb_size_x", "%.6f" % aabb.size.x]))
+	tbl.append_row(PackedStringArray(["aabb_size_y", "%.6f" % aabb.size.y]))
+	tbl.append_row(PackedStringArray(["aabb_size_z", "%.6f" % aabb.size.z]))
 
 	# Per-surface info
 	for s in range(geo.mesh.get_surface_count()):

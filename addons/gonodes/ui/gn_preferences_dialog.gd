@@ -28,11 +28,20 @@ var _recent_count_spin: SpinBox = null
 var _auto_save_spin: SpinBox = null
 var _renderer_option: OptionButton = null
 var _audio_out_option: OptionButton = null
+var _interface_scale_option: OptionButton = null
+var _wrap_sticky_notes_check: CheckButton = null
+var _side_panel_min_spin: SpinBox = null
+var _annotation_manager: GNAnnotationManager = null
+const _INTERFACE_SCALE_PERCENTS: Array[int] = [100, 125, 150, 175, 200]
 const _ExtensionsPanelScript := preload("res://addons/gonodes/ui/gn_extensions_panel.gd")
 const _AssetBrowserScript := preload("res://addons/gonodes/ui/gn_asset_browser.gd")
 
 var _extensions_panel: Window = null
 var _asset_browser: Window = null
+
+
+func set_annotation_manager(mgr: GNAnnotationManager) -> void:
+	_annotation_manager = mgr
 
 
 func _init() -> void:
@@ -70,6 +79,9 @@ func _ready() -> void:
 	_first_section = true
 	_build_section_header("Renderer")
 	_build_renderer_settings()
+
+	_build_section_header("Interface")
+	_build_interface_settings()
 
 	_build_section_header("General")
 	_build_general_settings()
@@ -181,6 +193,64 @@ func _prompt_renderer_restart(new_renderer: String) -> void:
 		get_tree().quit(0))
 	add_child(dialog)
 	dialog.popup_centered()
+
+
+func _build_interface_settings() -> void:
+	var row := _make_row("Interface scale",
+		"Scale the entire GONODES editor UI. Does not affect the Godot editor chrome.")
+	_interface_scale_option = OptionButton.new()
+	for i in _INTERFACE_SCALE_PERCENTS.size():
+		var pct: int = _INTERFACE_SCALE_PERCENTS[i]
+		_interface_scale_option.add_item("%d%%" % pct, i)
+	var current_pct: int = GNUiPrefs.get_interface_scale_percent()
+	var sel_idx := _INTERFACE_SCALE_PERCENTS.find(current_pct)
+	if sel_idx < 0:
+		sel_idx = 0
+	_interface_scale_option.selected = sel_idx
+	_interface_scale_option.custom_minimum_size.x = 120
+	_interface_scale_option.item_selected.connect(func(idx: int) -> void:
+		var chosen: int = _INTERFACE_SCALE_PERCENTS[idx]
+		GNUiPrefs.set_interface_scale_percent(chosen)
+		GNUiPrefs.apply_interface_scale(get_tree()))
+	row.add_child(_interface_scale_option)
+	_content.add_child(row)
+
+	var wrap_row := _make_row("Wrap sticky notes",
+		"Notes grow so wrapped text stays inside the box.")
+	_wrap_sticky_notes_check = CheckButton.new()
+	_wrap_sticky_notes_check.button_pressed = GNUiPrefs.get_wrap_sticky_notes()
+	_wrap_sticky_notes_check.toggled.connect(func(val: bool) -> void:
+		GNUiPrefs.set_wrap_sticky_notes(val)
+		if _annotation_manager != null:
+			_annotation_manager.refit_sticky_notes())
+	wrap_row.add_child(_wrap_sticky_notes_check)
+	_content.add_child(wrap_row)
+
+	var side_row := _make_row("Side panel minimum width",
+		"Smallest width of the viewer and parameter column. 260 is the current size. The preset buttons keep their labels and move to the next line if the column is narrower than they are.")
+	_side_panel_min_spin = SpinBox.new()
+	_side_panel_min_spin.min_value = GNUiPrefs.SIDE_PANEL_MIN_WIDTH_MIN
+	_side_panel_min_spin.max_value = GNUiPrefs.SIDE_PANEL_MIN_WIDTH_MAX
+	_side_panel_min_spin.step = 10
+	_side_panel_min_spin.value = GNUiPrefs.get_side_panel_min_width()
+	_side_panel_min_spin.suffix = " px"
+	_side_panel_min_spin.custom_minimum_size.x = 100
+	_side_panel_min_spin.value_changed.connect(func(v: float) -> void:
+		GNUiPrefs.set_side_panel_min_width(int(v))
+		if get_tree() == null:
+			return
+		for node in get_tree().get_nodes_in_group("gn_side_panel_width"):
+			if node.has_method("apply_side_panel_min_width"):
+				node.apply_side_panel_min_width())
+	side_row.add_child(_side_panel_min_spin)
+	_content.add_child(side_row)
+
+	var note := Label.new()
+	note.text = "Higher scale makes the interface larger and shows less of the graph."
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_font_size_override("font_size", 11)
+	note.add_theme_color_override("font_color", Color(0.65, 0.65, 0.7))
+	_content.add_child(note)
 
 
 func _build_general_settings() -> void:
@@ -465,9 +535,12 @@ func _open_extensions_panel() -> void:
 
 
 func _open_asset_browser() -> void:
-	if _asset_browser == null:
+	if _asset_browser == null or not is_instance_valid(_asset_browser):
 		_asset_browser = _AssetBrowserScript.new()
-		add_child(_asset_browser)
+		# Keep it out of this exclusive dialog. A child of an exclusive window
+		# cannot be dismissed while that dialog is holding the screen.
+		get_tree().root.add_child(_asset_browser)
+	_asset_browser.size = Vector2i(720, 520)
 	_asset_browser.popup_centered()
 
 

@@ -16,3 +16,19 @@ func test_palette_tags_matches_audio_query() -> void:
 	GNTestAssert.assert_true(
 		GNNodePalette.matches_operator_query("AudioInCHOP", "audio", reg),
 		"Palette search for 'audio' should match AudioInCHOP via name or tag")
+
+
+func test_palette_search_audio_out_matches_device_not_every_audio_node() -> void:
+	var reg := GNExtensionRegistry.instance()
+	GNTestAssert.assert_true(
+		GNNodePalette.matches_operator_query("AudioDeviceOUT", "audio out", reg),
+		"audio out should match AudioDeviceOUT by name words")
+	GNTestAssert.assert_true(
+		GNNodePalette.matches_operator_query("AudioDeviceOUT", "audio dev", reg),
+		"audio dev should match AudioDeviceOUT by word prefix")
+	GNTestAssert.assert_false(
+		GNNodePalette.matches_operator_query("AudioFileInCHOP", "audio out", reg),
+		"audio out should not match AudioFileInCHOP")
+	GNTestAssert.assert_false(
+		GNNodePalette.matches_operator_query("WindowOUT", "audio out", reg),
+		"audio out should not match WindowOUT")

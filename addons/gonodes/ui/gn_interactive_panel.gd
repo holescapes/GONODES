@@ -10,6 +10,9 @@ signal interaction_changed
 ## Grab radius in normalized UV space for handle hit tests.
 var grab_radius_uv: float = 0.04
 
+## Operator node that owns this panel while it is not hosted in a viewer/window.
+var _storage_parent: Node = null
+
 
 func _enter_tree() -> void:
 	if not gui_input.is_connected(_on_gui_input):
@@ -20,6 +23,37 @@ func _configure_for_panel_export() -> void:
 	size_flags_horizontal = SIZE_EXPAND_FILL
 	size_flags_vertical = SIZE_EXPAND_FILL
 	mouse_filter = MOUSE_FILTER_STOP
+
+
+## Called when the interactive TOP spawns this panel on the operator node.
+func bind_storage_parent(node: Node) -> void:
+	_storage_parent = node
+
+
+## Clears storage binding (e.g. viewer panel-port preview duplicates).
+func clear_storage_binding() -> void:
+	_storage_parent = null
+
+
+func is_storage_managed() -> bool:
+	return _storage_parent != null and is_instance_valid(_storage_parent)
+
+
+## Show when a viewer or WindowOUT adopts this control for display.
+func show_for_host() -> void:
+	visible = true
+
+
+## Hide and reparent back onto the operator node when removed from a host.
+func return_to_storage() -> void:
+	visible = false
+	if not is_storage_managed():
+		return
+	if get_parent() == _storage_parent:
+		return
+	if get_parent() != null:
+		get_parent().remove_child(self)
+	_storage_parent.add_child(self)
 
 
 func uv_to_px(uv: Vector2) -> Vector2:

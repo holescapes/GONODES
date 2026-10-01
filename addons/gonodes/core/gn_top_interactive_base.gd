@@ -82,6 +82,7 @@ func _spawn_panel_instance(suffix: String) -> GNInteractivePanel:
 		return null
 	panel.name = id + suffix
 	panel._configure_for_panel_export()
+	panel.bind_storage_parent(self)
 	if not panel.interaction_changed.is_connected(_on_view_interaction):
 		panel.interaction_changed.connect(_on_view_interaction.bind(panel))
 	add_child(panel)
@@ -212,6 +213,7 @@ func _render_texture_with_interactive_panel(viewer, port_index: int) -> void:
 			var panel := _ensure_viewer_panel()
 			_interactive_panel = panel
 			_sync_panel_from_params()
+			panel.show_for_host()
 			viewer.set_interactive_texture_overlay(panel)
 			return
 	viewer.set_info("No texture output", "")
@@ -226,6 +228,9 @@ func _render_panel_port_in_viewer(viewer) -> void:
 		viewer.set_info("No interactive panel", "")
 		return
 	var preview: Control = panel.duplicate()
+	if preview is GNInteractivePanel:
+		(preview as GNInteractivePanel).clear_storage_binding()
+	preview.visible = true
 	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var info := "Panel export view (synced)"
 	if _is_panel_port_demanded():

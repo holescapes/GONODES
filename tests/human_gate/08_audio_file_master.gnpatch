@@ -10,14 +10,29 @@
         "loop": {"value": true},
         "volume": {"value": -6.0}
       }
+    },
+    "speakers": {
+      "type": "AudioDeviceOUT",
+      "position": [360, 200],
+      "parameters": {
+        "active": {"value": false},
+        "gain": {"value": 0.8}
+      }
     }
   },
-  "connections": [],
+  "connections": [
+    {
+      "from_node": "filein",
+      "from_port": 0,
+      "to_node": "speakers",
+      "to_port": 0
+    }
+  ],
   "annotations": [
     {
       "id": "note",
       "type": "note",
-      "text": "Row 8. Set File to a short WAV, OGG, or MP3 you already have. 24-bit WAV is not supported.\nTurn Play on. There is no AudioDeviceOUT. You should hear the file on Master.\nNo file picked means UNVERIFIED, not a fail.",
+      "text": "Row 8. Set File to a short WAV, OGG, or MP3 you already have. 24-bit WAV is not supported.\nTurn Play on on the file node, then Active on on AudioDeviceOUT. You should hear the file.\nPlay on with no AudioDeviceOUT is silence. No file picked means UNVERIFIED, not a fail.",
       "position": [-40, 20],
       "size": [560, 120],
       "color": [1.0, 0.95, 0.55, 0.92]

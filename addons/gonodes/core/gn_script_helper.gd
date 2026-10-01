@@ -205,6 +205,199 @@ static func _ensure_regex() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Pre-reload Syntax Checks
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Lightweight checks run before GDScript.reload() on user code.
+## Returns empty string if OK, or a short error message.
+static func validate_user_code(code: String) -> String:
+	var quote_err := _check_unclosed_quotes(code)
+	if not quote_err.is_empty():
+		return quote_err
+	var func_err := _check_func_param_headers(code)
+	if not func_err.is_empty():
+		return func_err
+	return ""
+
+
+static func _check_unclosed_quotes(code: String) -> String:
+	var in_double := false
+	var in_single := false
+	var escaped := false
+	var i := 0
+	while i < code.length():
+		var c := code[i]
+		if not in_double and not in_single:
+			if c == "#":
+				while i < code.length() and code[i] != "\n":
+					i += 1
+				continue
+			if c == '"':
+				in_double = true
+				i += 1
+				continue
+			if c == "'":
+				in_single = true
+				i += 1
+				continue
+		elif in_double:
+			if escaped:
+				escaped = false
+			elif c == "\\":
+				escaped = true
+			elif c == '"':
+				in_double = false
+		elif in_single:
+			if escaped:
+				escaped = false
+			elif c == "\\":
+				escaped = true
+			elif c == "'":
+				in_single = false
+		i += 1
+	if in_double:
+		return "Unclosed string (\""
+	if in_single:
+		return "Unclosed string (')"
+	return ""
+
+
+static func _check_func_param_headers(code: String) -> String:
+	var i := 0
+	while i < code.length():
+		var c := code[i]
+		if c == "#":
+			while i < code.length() and code[i] != "\n":
+				i += 1
+		elif c == '"':
+			i = _skip_double_quoted(code, i + 1)
+		elif c == "'":
+			i = _skip_single_quoted(code, i + 1)
+		elif _match_keyword_at(code, i, "func"):
+			var err := _validate_func_signature_after_keyword(code, i + 4)
+			if not err.is_empty():
+				return err
+			i += 4
+		else:
+			i += 1
+	return ""
+
+
+static func _validate_func_signature_after_keyword(code: String, start: int) -> String:
+	var i := _skip_horizontal_ws(code, start)
+	if i >= code.length() or not _is_ident_start(code[i]):
+		return ""
+	i = _skip_ident(code, i)
+	i = _skip_horizontal_ws(code, i)
+	if i >= code.length() or code[i] != "(":
+		return ""
+	return _validate_func_param_list(code, i)
+
+
+static func _validate_func_param_list(code: String, open_paren_idx: int) -> String:
+	var i := open_paren_idx + 1
+	var depth := 1
+	var expect_name := true
+	while i < code.length():
+		var c := code[i]
+		if c == "#":
+			while i < code.length() and code[i] != "\n":
+				i += 1
+			continue
+		if c == '"':
+			i = _skip_double_quoted(code, i + 1)
+			continue
+		if c == "'":
+			i = _skip_single_quoted(code, i + 1)
+			continue
+		if c == "(":
+			depth += 1
+		elif c == ")":
+			depth -= 1
+			if depth == 0:
+				return ""
+		elif depth == 1:
+			if c == " " or c == "\t" or c == "\n" or c == "\r":
+				pass
+			elif c == ":" or c == ",":
+				if expect_name:
+					return "Expected parameter name"
+				if c == ",":
+					expect_name = true
+			elif _is_ident_start(c):
+				i = _skip_ident(code, i)
+				expect_name = false
+				continue
+		i += 1
+	return ""
+
+
+static func _skip_double_quoted(code: String, start: int) -> int:
+	var escaped := false
+	var i := start
+	while i < code.length():
+		var c := code[i]
+		if escaped:
+			escaped = false
+		elif c == "\\":
+			escaped = true
+		elif c == '"':
+			return i + 1
+		i += 1
+	return code.length()
+
+
+static func _skip_single_quoted(code: String, start: int) -> int:
+	var escaped := false
+	var i := start
+	while i < code.length():
+		var c := code[i]
+		if escaped:
+			escaped = false
+		elif c == "\\":
+			escaped = true
+		elif c == "'":
+			return i + 1
+		i += 1
+	return code.length()
+
+
+static func _skip_horizontal_ws(code: String, start: int) -> int:
+	var i := start
+	while i < code.length() and code[i] in " \t":
+		i += 1
+	return i
+
+
+static func _skip_ident(code: String, start: int) -> int:
+	var i := start
+	while i < code.length() and _is_ident_char(code[i]):
+		i += 1
+	return i
+
+
+static func _match_keyword_at(code: String, pos: int, keyword: String) -> bool:
+	if pos + keyword.length() > code.length():
+		return false
+	if code.substr(pos, keyword.length()) != keyword:
+		return false
+	if pos > 0 and _is_ident_char(code[pos - 1]):
+		return false
+	var after := pos + keyword.length()
+	if after < code.length() and _is_ident_char(code[after]):
+		return false
+	return true
+
+
+static func _is_ident_start(ch: String) -> bool:
+	return (ch >= "a" and ch <= "z") or (ch >= "A" and ch <= "Z") or ch == "_"
+
+
+static func _is_ident_char(ch: String) -> bool:
+	return _is_ident_start(ch) or (ch >= "0" and ch <= "9")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Compilation
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -218,6 +411,12 @@ func compile(code: String) -> bool:
 
 	if code.strip_edges().is_empty():
 		compile_error = "Empty script"
+		script_ok = false
+		return false
+
+	var preflight_err := validate_user_code(code)
+	if not preflight_err.is_empty():
+		compile_error = preflight_err
 		script_ok = false
 		return false
 

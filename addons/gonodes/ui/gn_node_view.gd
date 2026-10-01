@@ -658,10 +658,9 @@ func _update_preview_btn() -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.double_click and event.button_index == MOUSE_BUTTON_LEFT:
 		# Title bar area — start rename
-		if event.position.y <= 30.0:
+		if event.position.y <= 30.0 and not gn_node is SubNetworkNode:
 			_start_rename()
 			accept_event()
-		# Body area — dive into sub-network (if applicable)
 		elif gn_node is SubNetworkNode:
 			dive_into_requested.emit(gn_node.id)
 			accept_event()

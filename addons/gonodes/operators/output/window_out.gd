@@ -168,14 +168,16 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_apply_window_params()
 		_window_params_dirty = false
 
-	# Feed the texture — direct GPU reference, zero-copy.
-	if tex_in != null and tex_in.texture != null:
+	# The output window and the editor share one RenderingDevice. Assign the
+	# source texture directly. A SubViewport does not draw while its update
+	# mode is disabled, which is why the picture waited until a viewer sampled it.
+	if should_open and tex_in != null and tex_in.texture != null:
+		_ensure_source_will_draw(tex_in)
 		if _display_rect.texture != tex_in.texture:
 			_display_rect.texture = tex_in.texture
-			GNLogger.debug("WindowOUT", "'%s' texture assigned (zero-copy GPU)" % id)
-		_display_rect.queue_redraw()
+			GNLogger.debug("WindowOUT", "'%s' texture assigned" % id)
 		_display_rect.visible = true
-	else:
+	elif _display_rect != null:
 		_display_rect.visible = false
 
 	# Update cached window size for input CHOPs normalisation
@@ -310,6 +312,16 @@ func _ensure_embedded() -> void:
 	GNLogger.info("WindowOUT", "'%s' embedded display created (mobile/web mode)" % id)
 
 
+## A disabled SubViewport does not draw. Cook sets UPDATE_ONCE on TOP viewports;
+## if that was skipped, ask for one draw so the window is not waiting on the viewer.
+func _ensure_source_will_draw(tex_data: GNTextureData) -> void:
+	var vp: SubViewport = tex_data.viewport as SubViewport
+	if vp == null or not is_instance_valid(vp):
+		return
+	if vp.render_target_update_mode == SubViewport.UPDATE_DISABLED:
+		vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
 ## Applies current parameter values to the Window node.
 func _apply_window_params() -> void:
 	if _window == null:
@@ -327,8 +339,6 @@ func _apply_window_params() -> void:
 	_window.always_on_top = on_top
 
 	# Apply V-Sync — standard VSYNC_ENABLED for tear-free output.
-	# The queue_redraw() call in _cook() ensures the output window redraws
-	# every cook frame, keeping it in sync with the viewer panel.
 	if vsync_val:
 		DisplayServer.window_set_vsync_mode(
 			DisplayServer.VSYNC_ENABLED, _window.get_window_id())
@@ -336,23 +346,17 @@ func _apply_window_params() -> void:
 		DisplayServer.window_set_vsync_mode(
 			DisplayServer.VSYNC_DISABLED, _window.get_window_id())
 
-	# Apply window mode
+	# Apply window mode. Borderless is windowed with no title bar, at Resolution.
+	# Fullscreen is the mode that takes the monitor.
 	match mode_idx:
-		WindowMode.WINDOWED:
+		WindowMode.WINDOWED, WindowMode.BORDERLESS:
 			_window.mode = Window.MODE_WINDOWED
-			_window.borderless = false
+			_window.borderless = mode_idx == WindowMode.BORDERLESS
 			if _window.size != res:
 				_window.size = res
 		WindowMode.FULLSCREEN:
 			_window.mode = Window.MODE_EXCLUSIVE_FULLSCREEN
-		WindowMode.BORDERLESS:
-			_window.mode = Window.MODE_WINDOWED
-			_window.borderless = true
-			# Borderless fills the target monitor (native Godot behaviour)
-			var screen_count := DisplayServer.get_screen_count()
-			var target_monitor := clampi(monitor_idx, 0, screen_count - 1)
-			var screen_size := DisplayServer.screen_get_size(target_monitor)
-			_window.size = screen_size
+			_window.borderless = false
 
 	# Only reposition when layout-affecting params actually changed —
 	# cosmetic changes (always_on_top, vsync, title) must not move the window.
@@ -378,13 +382,14 @@ func _position_on_monitor(monitor_idx: int, pos: Vector2i, mode_idx: int) -> voi
 	var screen_size := DisplayServer.screen_get_size(target_monitor)
 
 	if pos == Vector2i(-1, -1):
-		# Auto-center on target monitor
-		if mode_idx == WindowMode.WINDOWED:
+		# Auto-center on target monitor. Fullscreen covers the display, so it
+		# sits at the monitor origin. Windowed and borderless use Resolution.
+		if mode_idx == WindowMode.FULLSCREEN:
+			_window.position = screen_pos
+		else:
 			var win_size := _window.size
 			var centered := screen_pos + (screen_size - win_size) / 2
 			_window.position = centered
-		else:
-			_window.position = screen_pos
 	else:
 		# Explicit position relative to the target monitor's origin
 		_window.position = screen_pos + pos
@@ -571,6 +576,10 @@ func _adopt_control(ctrl: Control) -> void:
 							break
 			prev_parent.remove_child(ctrl)
 		_panel_ui_root.add_child(ctrl)
+	if ctrl is GNInteractivePanel:
+		(ctrl as GNInteractivePanel).show_for_host()
+	else:
+		ctrl.visible = true
 	_managed_controls.append(ctrl)
 
 
@@ -578,7 +587,9 @@ func _adopt_control(ctrl: Control) -> void:
 func _remove_stale_controls() -> void:
 	for ctrl in _prev_managed:
 		if ctrl != null and is_instance_valid(ctrl) and not _managed_controls.has(ctrl):
-			if ctrl.get_parent() == _panel_ui_root:
+			if ctrl is GNInteractivePanel:
+				(ctrl as GNInteractivePanel).return_to_storage()
+			elif ctrl.get_parent() == _panel_ui_root:
 				_panel_ui_root.remove_child(ctrl)
 	_prev_managed.clear()
 
@@ -586,7 +597,11 @@ func _remove_stale_controls() -> void:
 ## Removes all managed controls from the panel viewport.
 func _clear_managed_controls() -> void:
 	for ctrl in _managed_controls:
-		if ctrl != null and is_instance_valid(ctrl) and ctrl.get_parent() == _panel_ui_root:
+		if ctrl == null or not is_instance_valid(ctrl):
+			continue
+		if ctrl is GNInteractivePanel:
+			(ctrl as GNInteractivePanel).return_to_storage()
+		elif ctrl.get_parent() == _panel_ui_root:
 			_panel_ui_root.remove_child(ctrl)
 	_managed_controls.clear()
 	_prev_managed.clear()

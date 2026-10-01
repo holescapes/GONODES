@@ -44,7 +44,7 @@
                     "value": 44100.0
                 },
                 "buffer_length": {
-                    "value": 0.1
+                    "value": 3
                 }
             }
         },

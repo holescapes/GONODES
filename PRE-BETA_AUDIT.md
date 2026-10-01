@@ -1000,21 +1000,21 @@ This turn:
 
 | # | Action | Expected | Actual |
 |---|--------|----------|--------|
-| 1 | Press Alt+A, type a family name, place a node | Palette opens at the mouse. Tab does nothing | |
-| 2 | Press H, then V, with two nodes selected | Nodes align. H is not help. V is not the viewer | |
-| 3 | Ctrl+F, type a node id, then Escape | Search opens, then closes, and the timeline does not reset | |
-| 4 | Shake one node left-right while dragging | Its wires disconnect. A toast says how many | |
-| 5 | Open `tests/visual_audit/04_mapper_dual_panel.gnpatch`. Drag a corner in the viewer and in a WindowOUT | Both panels show the same warp. No freed-object error | |
-| 6 | Scrub the timeline on a patch with more than a few dozen nodes | The playhead follows the mouse without a multi-frame stall | |
-| 7 | WaveCHOP → AudioDeviceOUT, Active on | Sound from the selected output device. WaveCHOP alone is silent | |
-| 8 | AudioFileInCHOP, Play on, no AudioDeviceOUT | The file is heard on Master | |
-| 9 | AudioSourceCOMP alone, Playing on | Either it plays, or it is obvious that it will not cook. Silence with no warning is a fail (F4k-01) | |
-| 10 | ConstantCHOP → OscOUT, Active on, a local listener on port 9001 | UDP packets arrive. A cook with no OscOUT is not a pass | |
-| 11 | Note channels → RtMidiOutCHOP, Active on, a MIDI monitor | Messages arrive. No port open means UNVERIFIED, not pass | |
-| 12 | Channels → DmxOutCHOP, Active on, an Art-Net listener | A DMX packet arrives. Active off must send nothing | |
-| 13 | Type a bad expression on a float parameter | The field goes red and shows `→ err`, not only a log line | |
-| 14 | GDScriptSCRIPT with a syntax error | The node shows a warning, not a silent empty cook (F4h-02) | |
-| 15 | Quick Build a one-node patch and run `GONODESPlayer.exe` | A window opens. Escape quits | |
+| 1 | Press Alt+A, type a family name, place a node | Palette opens at the mouse. Tab does nothing | **PASS** (24 Sep 2026). Family search plus `audio` and `cam` tags. Tab does nothing |
+| 2 | Press H, then V, with two nodes selected | Nodes align. H is not help. V is not the viewer | **PASS** (24 Sep 2026). H makes a row, V alone makes a column. Neither key opens help or a viewer. Shake-to-disconnect works; the toast position is a separate UX fix |
+| 3 | Ctrl+F, type a node id, then Escape | Search opens, then closes, and the timeline does not reset | **PASS** (24 Sep 2026). Ctrl+F toggles the search bar. Escape closes it. The playhead does not jump |
+| 4 | Shake one node left-right while dragging | Its wires disconnect. A toast says how many | **PASS** (24 Sep 2026). The wire drops. The toast reports the wire count and the node name, and it sits at the top of the graph |
+| 5 | Open `tests/visual_audit/04_mapper_dual_panel.gnpatch`. Drag a corner in the viewer and in a WindowOUT | Both panels show the same warp. No freed-object error | **PASS** (28 Sep 2026). Handle drag in the viewer and in WindowOUT accepted with the rest of the walkthrough. |
+| 6 | Scrub the timeline on a patch with more than a few dozen nodes | The playhead follows the mouse without a multi-frame stall | **PASS** (24 Sep 2026). Playhead follows the mouse on the 48-node patch. No multi-frame stall |
+| 7 | WaveCHOP → AudioDeviceOUT, Active on | Sound from the selected output device. WaveCHOP alone is silent | **PASS** (24 Sep 2026). Quiet 440 Hz tone from the selected device. Active off stops it |
+| 8 | AudioFileInCHOP, Play on, CHOP wired to AudioDeviceOUT, Active on | You hear the file. Play on with no AudioDeviceOUT is silence | **PASS** (24 Sep 2026). File plays through AudioDeviceOUT |
+| 9 | AudioSourceCOMP alone, Playing on | Either it plays, or it is obvious that it will not cook. Silence with no warning is a fail (F4k-01) | **PASS** (25 Sep 2026). File plays with Playing on. The orphan-player error is fixed |
+| 10 | ConstantCHOP → OscOUT, Active on, a local listener on port 9001 | UDP packets arrive. A cook with no OscOUT is not a pass | **PASS** (25 Sep 2026). UDP packets arrived while Active was on |
+| 11 | Note channels → RtMidiOutCHOP, Active on, a MIDI monitor | Messages arrive. No port open means UNVERIFIED, not pass | **PASS** (25 Sep 2026). Note 60 velocity 101 arrived in Protokol and loopMIDI. Active off sends note-off; Active on sends note-on again |
+| 12 | Channels → DmxOutCHOP, Active on, an Art-Net listener | A DMX packet arrives. Active off must send nothing | **PASS** (25 Sep 2026) |
+| 13 | Type a bad expression on a float parameter | The field goes red and shows `→ err`, not only a log line | **PASS** (25 Sep 2026) |
+| 14 | GDScriptSCRIPT with a syntax error | The node shows a warning, not a silent empty cook (F4h-02) | PASS (27 Sep 2026). Warning shows on the node. |
+| 15 | Quick Build a one-node patch and run `GONODESPlayer.exe` | A window opens. Escape quits | PASS (27 Sep 2026). Player window opened from `tests/human_gate/15_quick_build_build/15_quick_build_windows_x86_64_forward_plus`. The patch has no WindowOUT, so that window is the player host, not the color TOP. |
 
 ---
 
@@ -1331,7 +1331,7 @@ Every finding from this audit, with the fix to make. Status is as of the B-8 / B
 | 4k | Audio subsystem | **PARTIAL** — device list and sinks present; AudioSourceCOMP is not a sink; unheard |
 | 4l | Protocol interop | **PARTIAL** — OSC round-trip passed; DMX returns the input CHOP; no live peer |
 | 4m | Subnets, assets, export, embedding, extensions | **PARTIAL** — registry scan + asset/tunnel tests passed; player and libgonodes not launched |
-| 4n | Hands-on UX walkthrough | **UNVERIFIED** — 15-row script written, none executed |
+| 4n | Hands-on UX walkthrough | **PASS** — rows 1–15 (28 Sep 2026). Gallery inventories and visual packs 01–03 and 05–08 are not part of this pass. |
 | 5a | Per-operator — TOP, CHOP | **PARTIAL** — 121/138 TOP and 88/107 CHOP mechanically clean; F5a-01..04; behavior match UNVERIFIED |
 | 5b | Per-operator — SOP, DAT | **PARTIAL** — SOP nearly clean; 22 DATs absent from OPERATORS.md; ArtnetDAT is not a sink |
 | 5c | Per-operator — IMG, UI, SDF | **PARTIAL** — SDF 29/29 and IMG 24/41 undocumented; UI demand gap is F4x-02 |

@@ -51,7 +51,7 @@ expand_mode = 1
 
 [node name="InspectorPanel" type="PanelContainer" parent="HSplit/RightPanel"]
 layout_mode = 2
-custom_minimum_size = Vector2(260, 40)
+custom_minimum_size = Vector2(0, 40)
 size_flags_vertical = 3
 size_flags_stretch_ratio = 1.0
 clip_contents = true

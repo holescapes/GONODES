@@ -20,7 +20,8 @@ var connections: Array[GNConnection] = []
 ## Each entry is a Dictionary with keys:
 ##   "id": String (unique), "type": "box"|"note",
 ##   "position": Vector2, "size": Vector2,
-##   "text": String, "color": Color
+##   "text": String, "color": Color,
+##   "font_size": int (notes only; default 12 when omitted)
 var annotations: Array[Dictionary] = []
 
 ## Counter for generating unique annotation IDs.
@@ -921,6 +922,8 @@ func to_dict() -> Dictionary:
 				ann_d["color"] = [col.r, col.g, col.b, col.a]
 			else:
 				ann_d["color"] = [1.0, 1.0, 1.0, 1.0]
+			if ann.has("font_size"):
+				ann_d["font_size"] = int(ann["font_size"])
 			ann_array.append(ann_d)
 		d["annotations"] = ann_array
 
@@ -995,8 +998,8 @@ func from_dict(d: Dictionary) -> bool:
 	# First pass: ensure placeholder nodes have enough ports for all connections.
 	var conns_array: Array = d["connections"]
 	for cd in conns_array:
-		var from_id: String = cd.get("from", "")
-		var to_id: String = cd.get("to", "")
+		var from_id: String = cd.get("from", cd.get("from_node", ""))
+		var to_id: String = cd.get("to", cd.get("to_node", ""))
 		var from_port: int = int(cd.get("from_port", 0))
 		var to_port: int = int(cd.get("to_port", 0))
 		# Grow placeholder output ports
@@ -1014,8 +1017,8 @@ func from_dict(d: Dictionary) -> bool:
 
 	# Second pass: create connections.
 	for cd in conns_array:
-		var from_id: String = cd.get("from", "")
-		var to_id: String = cd.get("to", "")
+		var from_id: String = cd.get("from", cd.get("from_node", ""))
+		var to_id: String = cd.get("to", cd.get("to_node", ""))
 		var from_port: int = int(cd.get("from_port", 0))
 		var to_port: int = int(cd.get("to_port", 0))
 
@@ -1076,6 +1079,8 @@ func from_dict(d: Dictionary) -> bool:
 				"text": ann_text,
 				"color": col,
 			}
+			if ad.has("font_size"):
+				ann["font_size"] = int(ad["font_size"])
 			annotations.append(ann)
 			# Track counter to ensure unique IDs for new annotations
 			if ann_id.begins_with("ann_"):

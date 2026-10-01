@@ -26,7 +26,13 @@ func handle_pointer(uv: Vector2, event: InputEvent) -> bool:
 				return true
 
 	elif event is InputEventMouseMotion:
+		var mm: InputEventMouseMotion = event
 		if _dragging_index >= 0:
+			if (mm.button_mask & MOUSE_BUTTON_MASK_LEFT) == 0:
+				_dragging_index = -1
+				active_index = -1
+				queue_redraw()
+				return true
 			var x: int = _dragging_index % grid_cols
 			var y: int = _dragging_index / grid_cols
 			var base_u: float = float(x) / float(grid_cols - 1)

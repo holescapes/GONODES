@@ -113,31 +113,56 @@ static func resolve_scene_node_upstream(node: GNNode, net: GNNetwork) -> Node3D:
 
 static func _resolve_scene_node_r(node: GNNode, net: GNNetwork,
 		visited: Dictionary) -> Node3D:
-	var comp_data := node.cached_output as GNCompData
-	if comp_data != null and comp_data.scene_node != null:
-		return comp_data.scene_node
 	if visited.has(node.id):
 		return null
 	visited[node.id] = true
+	var comp_data := node.cached_output as GNCompData
+	if comp_data != null and comp_data.scene_node != null:
+		return comp_data.scene_node
+	# GeometryCOMP passes the SOP mesh through as GNGeoData and keeps the
+	# MeshInstance3D on the operator. That node is what RenderTOP adopts.
+	if node is GNCompBase:
+		var owned: Node3D = (node as GNCompBase).get_scene_node()
+		if owned != null:
+			return owned
+	var found_wire := false
 	for conn in net.get_input_connections(node.id):
+		found_wire = true
 		var upstream: GNNode = net.nodes.get(conn.from_node, null)
 		if upstream != null:
 			var resolved: Node3D = _resolve_scene_node_r(upstream, net, visited)
 			if resolved != null:
 				return resolved
+	# SelectCOMP has no wire. Follow its remote COMP reference.
+	if not found_wire:
+		for ref_id in node.get_remote_dependencies():
+			var remote: GNNode = net.nodes.get(ref_id, null)
+			if remote != null and remote.family == GNFamily.Type.COMP:
+				var remote_scene: Node3D = _resolve_scene_node_r(remote, net, visited)
+				if remote_scene != null:
+					return remote_scene
 	return null
 
 
 
 ## Instance convenience: resolves the scene node from an upstream input port.
-## Reads cached_output as GNCompData — works for any upstream node type.
+## Uses [method resolve_scene_node_upstream], so a GeometryCOMP mesh is found
+## even when that operator returns GNGeoData instead of GNCompData.
 func _get_upstream_scene_node(port: int) -> Node3D:
 	var upstream := get_input_node(port)
 	if upstream == null:
 		return null
+	var net: GNNetwork = null
+	var parent := get_parent()
+	if parent is GNCookEngine:
+		net = (parent as GNCookEngine).network
+	if net != null:
+		return resolve_scene_node_upstream(upstream, net)
 	var comp_data := upstream.cached_output as GNCompData
-	if comp_data != null:
+	if comp_data != null and comp_data.scene_node != null:
 		return comp_data.scene_node
+	if upstream is GNCompBase:
+		return (upstream as GNCompBase).get_scene_node()
 	return null
 
 

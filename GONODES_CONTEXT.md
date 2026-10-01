@@ -184,7 +184,9 @@ GNTableData extends GNData (RefCounted)
 ├── rows: Array[PackedStringArray]
 ├── text: String             # Plain text content (text mode only)
 ├── cell(row, col) -> String
+├── cell_at(row, col) -> String   # index or name; row name matches column 0
 ├── cell_by_name(row, col_name) -> String
+├── lookup_cell(key_col, key, value_col) -> String  # first matching data row
 ├── cell_as_float(row, col) -> float
 ├── set_headers(headers: PackedStringArray)
 ├── append_row(row: PackedStringArray)
@@ -2667,6 +2669,12 @@ chop("script1", 1, "tx")          # Channel 'tx' from output port index 1
 chop("script1", "out2", "tx", 5)  # Sample 5 of 'tx' from port "out2"
 chopf("script1", 1, "tx")         # Same, guaranteed float return
 
+# Read a DAT cell. Row and column are an index or a name.
+# A row name matches column 0. A column name matches the header.
+cellf("info", "screen_width", "value")
+# Search a column when the key is not in column 0 (SystemDAT property column)
+lookupf("sys", "property", "screen_0_width", "value")
+
 # Reference TOP properties
 top("noise1", "resolution").x     # Width of TOP output
 top("noise1", "resolution").y     # Height of TOP output
@@ -3630,9 +3638,9 @@ When assigning a ViewportTexture programmatically (not via the editor), it works
 ### VJ Workflow
 
 1. Build patch in the editor (monitor 1)
-2. Add a WindowOUT node, set `monitor = 1` (projector), `window_mode = Borderless`
+2. Add a WindowOUT node, set `monitor = 1` (projector), `window_mode = Fullscreen`
 3. Wire the final TOP chain into the WindowOUT
-4. The projector shows the live output, borderless, fullscreen
+4. The projector shows the live output, fullscreen. Borderless keeps Resolution and only removes the title bar
 5. Multiple WindowOUTs can show different parts of the patch on different displays
 6. Parameters (monitor, fullscreen, resolution) can be driven by CHOPs for live switching
 

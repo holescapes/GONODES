@@ -148,6 +148,9 @@ func _ready() -> void:
 	# uncheck "Embed Game on Next Play". Project code cannot override that.
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
+	# Apply saved interface scale before building UI (user://gn_ui_prefs.cfg).
+	GNUiPrefs.apply_interface_scale(get_tree())
+
 	# Wire log toggle early so extension scan results are visible
 	log_toggle.toggled.connect(_on_log_toggled)
 	GNLogger.enabled = log_toggle.button_pressed
@@ -1668,6 +1671,8 @@ func _open_preferences() -> void:
 	if _preferences_dialog == null:
 		_preferences_dialog = GNPreferencesDialog.new()
 		add_child(_preferences_dialog)
+	if graph_editor != null:
+		_preferences_dialog.set_annotation_manager(graph_editor.get_annotations())
 	_preferences_dialog.popup_centered()
 
 

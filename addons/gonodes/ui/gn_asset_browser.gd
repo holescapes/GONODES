@@ -16,11 +16,13 @@ var _filtered: Array[Dictionary] = []
 
 func _init() -> void:
 	title = "GONODES Asset Browser"
-	size = Vector2i(640, 480)
+	size = Vector2i(720, 520)
 	min_size = Vector2i(480, 360)
 	exclusive = false
-	transient = true
-	wrap_controls = true
+	transient = false
+	# Expanding children plus wrap_controls grow the window to the screen.
+	# The title bar then sits off the display and the window cannot be closed.
+	wrap_controls = false
 
 
 func _ready() -> void:
@@ -55,6 +57,7 @@ func _ready() -> void:
 	var split := HSplitContainer.new()
 	split.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_list = ItemList.new()
+	_list.custom_minimum_size = Vector2(200, 160)
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_list.item_selected.connect(_on_asset_selected)
@@ -62,8 +65,9 @@ func _ready() -> void:
 	_detail = RichTextLabel.new()
 	_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_detail.fit_content = true
+	_detail.fit_content = false
 	_detail.scroll_active = true
+	_detail.custom_minimum_size = Vector2(200, 160)
 	split.add_child(_detail)
 	root.add_child(split)
 

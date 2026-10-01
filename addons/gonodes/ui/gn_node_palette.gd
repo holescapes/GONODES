@@ -75,12 +75,11 @@ func _ready() -> void:
 	_populate_tree("")
 
 
-## Opens the palette popup at the given global position.
-func popup_at(global_pos: Vector2) -> void:
+## Opens the palette popup at the given screen position.
+func popup_at(screen_pos: Vector2) -> void:
 	_allowed_operators = []
 	_ensure_pills()
-	position = Vector2i(global_pos)
-	popup()
+	_popup_at_screen(screen_pos)
 	_search_edit.text = ""
 	_search_edit.grab_focus()
 	_populate_tree("")
@@ -88,14 +87,19 @@ func popup_at(global_pos: Vector2) -> void:
 
 ## Opens the palette filtered to only show operators in [param allowed].
 ## Used when the user drops a connection on empty space — only compatible nodes shown.
-func popup_at_filtered(global_pos: Vector2, allowed: PackedStringArray) -> void:
+func popup_at_filtered(screen_pos: Vector2, allowed: PackedStringArray) -> void:
 	_allowed_operators = allowed
 	_ensure_pills()
-	position = Vector2i(global_pos)
-	popup()
+	_popup_at_screen(screen_pos)
 	_search_edit.text = ""
 	_search_edit.grab_focus()
 	_populate_tree("")
+
+
+## Popup windows use screen coordinates. popup() with no rect places the window at the screen origin.
+func _popup_at_screen(screen_pos: Vector2) -> void:
+	var popup_size := Vector2i(maxi(int(size.x), int(min_size.x)), maxi(int(size.y), int(min_size.y)))
+	popup(Rect2i(Vector2i(screen_pos), popup_size))
 
 
 ## Builds pills from the current registry, then resets the filter to "All".
@@ -264,10 +268,16 @@ func _rebuild_extra_outputs(reg: GNExtensionRegistry) -> void:
 
 
 ## Name match, family match, semantic tag match, or extra-output family match.
+## Several words must each match a word in the class name (Audio + out →
+## AudioDeviceOUT). Words are split on capitals. A typed word matches when
+## a name word starts with it. "to", "a", "the", "of", and "and" are skipped.
 static func matches_operator_query(op_name: String, filter_lower: String,
 		reg: GNExtensionRegistry, extra_output_families: Dictionary = {}) -> bool:
 	if filter_lower.is_empty():
 		return true
+	var tokens := _search_tokens(filter_lower)
+	if tokens.size() > 1:
+		return _all_tokens_match_name(op_name, tokens, reg, extra_output_families)
 	if op_name.to_lower().contains(filter_lower):
 		return true
 	var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
@@ -282,6 +292,69 @@ static func matches_operator_query(op_name: String, filter_lower: String,
 			if str(fam_name).to_lower().contains(filter_lower):
 				return true
 	return false
+
+
+static func _search_tokens(filter_lower: String) -> PackedStringArray:
+	var skip := ["to", "a", "the", "of", "and"]
+	var tokens := PackedStringArray()
+	for part in filter_lower.split(" ", false):
+		var token := part.strip_edges()
+		if token.length() < 2 or token in skip:
+			continue
+		tokens.append(token)
+	return tokens
+
+
+static func _all_tokens_match_name(op_name: String, tokens: PackedStringArray,
+		reg: GNExtensionRegistry, extra_output_families: Dictionary) -> bool:
+	var words := _name_words(op_name)
+	var entry: GNExtensionRegistry.OperatorEntry = reg.get_entry(op_name)
+	if entry != null and not entry.family.is_empty():
+		words.append(entry.family.to_lower())
+	if extra_output_families.has(op_name):
+		for fam_name in extra_output_families[op_name]:
+			var fam := str(fam_name).to_lower()
+			if not fam.is_empty():
+				words.append(fam)
+	for token in tokens:
+		if not _token_starts_word(token, words):
+			return false
+	return true
+
+
+static func _token_starts_word(token: String, words: PackedStringArray) -> bool:
+	for word in words:
+		if word.begins_with(token):
+			return true
+	return false
+
+
+## Splits AudioDeviceOUT into audio, device, out.
+static func _name_words(op_name: String) -> PackedStringArray:
+	var words := PackedStringArray()
+	var current := ""
+	for i in op_name.length():
+		var upper := _is_ascii_upper(op_name, i)
+		var prev_upper := i > 0 and _is_ascii_upper(op_name, i - 1)
+		var next_lower := i + 1 < op_name.length() and not _is_ascii_upper(op_name, i + 1) \
+				and op_name.unicode_at(i + 1) != 95
+		if not current.is_empty() and upper and (not prev_upper or next_lower):
+			words.append(current.to_lower())
+			current = ""
+		if op_name.unicode_at(i) == 95:
+			if not current.is_empty():
+				words.append(current.to_lower())
+				current = ""
+			continue
+		current += op_name[i]
+	if not current.is_empty():
+		words.append(current.to_lower())
+	return words
+
+
+static func _is_ascii_upper(s: String, i: int) -> bool:
+	var c := s.unicode_at(i)
+	return c >= 65 and c <= 90
 
 
 func _matches_query(op_name: String, filter_lower: String, reg: GNExtensionRegistry) -> bool:

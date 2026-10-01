@@ -9,6 +9,7 @@ extends GNChopBase
 var _midi_out: RefCounted = null
 var _port_open := false
 var _prev_port := -1
+var _prev_port_list: PackedStringArray = PackedStringArray()
 var _prev_note_states: PackedFloat32Array = PackedFloat32Array()
 var _devices_initialized: bool = false
 
@@ -59,14 +60,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var active: bool = get_param_value("active")
 	if not active:
-		if _port_open:
-			_midi_out.close_port()
-			_port_open = false
+		_deactivate_midi_output()
 		return _get_input_chop(inputs)
 
 	var port: int = get_param_value("port")
 	var midi_ch: int = get_param_value("channel")
 	var normalized: bool = get_param_value("normalized_input")
+
+	_check_port_list_changed()
 
 	# (Re)open port if changed
 	if port != _prev_port:
@@ -77,6 +78,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			return _get_input_chop(inputs)
 		_port_open = true
 		_prev_port = port
+		_reset_note_states()
 
 	if not _port_open:
 		return _get_input_chop(inputs)
@@ -137,6 +139,28 @@ func _on_node_removed() -> void:
 func _on_parameter_changed(param_name: String, _new_value: Variant) -> void:
 	if param_name == "port":
 		_prev_port = -1
+
+
+func _deactivate_midi_output() -> void:
+	if _midi_out != null and _port_open:
+		var midi_ch: int = get_param_value("channel")
+		for note in 128:
+			if _prev_note_states[note] > 0.0:
+				_midi_out.send_note_off(midi_ch, note, 0)
+		_midi_out.close_port()
+	_port_open = false
+	_prev_port = -1
+
+
+func _reset_note_states() -> void:
+	_prev_note_states.fill(0.0)
+
+
+func _check_port_list_changed() -> void:
+	var current_ports: PackedStringArray = ClassDB.class_call_static(&"GNMidiOut", &"get_port_list")
+	if current_ports != _prev_port_list:
+		_prev_port = -1
+	_prev_port_list = current_ports
 
 
 func _get_port_menu() -> PackedStringArray:

@@ -35,7 +35,7 @@
                     "mode": "EXPRESSION"
                 },
                 "buffer_length": {
-                    "value": 0.05
+                    "value": 3
                 }
             }
         }

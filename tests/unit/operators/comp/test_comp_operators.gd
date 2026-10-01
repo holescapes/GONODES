@@ -57,6 +57,39 @@ func test_geometry_comp_default_transforms() -> void:
 	GNTestAssert.assert_approx(node.get_param_value("ty"), 0.0, 0.001, "ty default")
 	GNTestAssert.assert_approx(node.get_param_value("tz"), 0.0, 0.001, "tz default")
 
+func test_geometry_comp_scene_node_resolves_from_operator() -> void:
+	var box := _make_node(BoxSOP.new(), "box1")
+	var geo_data := _cook_no_input(box)
+	var geo := _make_node(GeometryCOMP.new(), "geo1")
+	var inputs: Array[GNData] = []
+	inputs.append(geo_data)
+	_cook_with(geo, inputs)
+	GNTestAssert.assert_true(geo.cached_output is GNGeoData, "geometry passes the SOP mesh through")
+	var scene := GNCompBase.resolve_scene_node_upstream(geo, _network)
+	GNTestAssert.assert_true(scene is MeshInstance3D, "render can adopt the mesh instance")
+
+
+func test_geometry_scene_node_resolves_through_null_and_select() -> void:
+	var box := _make_node(BoxSOP.new(), "box1")
+	var geo_data := _cook_no_input(box)
+	var geo := _make_node(GeometryCOMP.new(), "geo1")
+	var geo_inputs: Array[GNData] = []
+	geo_inputs.append(geo_data)
+	_cook_with(geo, geo_inputs)
+	var passer := _make_node(NullCOMP.new(), "null1")
+	_network.connect_nodes("geo1", 0, "null1", 0)
+	var null_inputs: Array[GNData] = []
+	null_inputs.append(geo.cached_output)
+	_cook_with(passer, null_inputs)
+	var through_null := GNCompBase.resolve_scene_node_upstream(passer, _network)
+	GNTestAssert.assert_true(through_null is MeshInstance3D, "null comp walks to the geometry mesh")
+	var sel := _make_node(SelectCOMP.new(), "sel1")
+	sel.set_param_value("comp", "geo1")
+	_cook_no_input(sel)
+	var through_sel := GNCompBase.resolve_scene_node_upstream(sel, _network)
+	GNTestAssert.assert_true(through_sel is MeshInstance3D, "select comp follows the remote geometry")
+
+
 func test_geometry_comp_produces_output() -> void:
 	var node := _make_node(GeometryCOMP.new(), "geo1")
 	# GeometryCOMP needs SOP input to display, but should not crash without it
@@ -341,3 +374,11 @@ func test_audio_source_comp_is_sink_when_playing() -> void:
 	GNTestAssert.assert_false(node.is_sink, "Playing off → not is_sink")
 	node.set_param_value("playing", true)
 	GNTestAssert.assert_true(node.is_sink, "Playing on again → is_sink")
+
+func test_audio_source_comp_player_in_scene_tree_when_playing() -> void:
+	var node := _make_node(AudioSourceCOMP.new(), "src1")
+	node.set_param_value("playing", true)
+	_cook_no_input(node)
+	var player: Node3D = node.get_scene_node()
+	GNTestAssert.assert_not_null(player, "player created")
+	GNTestAssert.assert_true(player.is_inside_tree(), "player in scene tree")

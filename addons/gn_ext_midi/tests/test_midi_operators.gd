@@ -100,3 +100,37 @@ func test_rt_midi_out_chop_cook_null() -> void:
 func test_rt_midi_out_chop_is_sink() -> void:
 	var node := _make_node(RtMidiOutCHOP.new(), "rtmidiout5")
 	GNTestAssert.assert_true(node.is_sink, "is_sink is true")
+
+
+func test_rt_midi_out_chop_resets_note_states_on_port_open() -> void:
+	var node := _make_node(RtMidiOutCHOP.new(), "rtmidiout6")
+	node._prev_note_states[60] = 101.0
+	GNTestAssert.assert_eq(node._prev_note_states[60], 101.0, "seeded non-zero held note state")
+	node._reset_note_states()
+	GNTestAssert.assert_eq(node._prev_note_states[60], 0.0,
+		"note state cleared so held input sends note-on after port open")
+
+
+func test_rt_midi_out_chop_deactivate_resets_port_state() -> void:
+	var node := _make_node(RtMidiOutCHOP.new(), "rtmidiout8")
+	node._prev_port = 2
+	node._port_open = true
+	node._prev_note_states[60] = 101.0
+	node._deactivate_midi_output()
+	GNTestAssert.assert_eq(node._prev_port, -1,
+		"deactivate clears prev port so next active cook reopens")
+	GNTestAssert.assert_false(node._port_open, "deactivate closes port")
+
+
+func test_rt_midi_out_chop_port_list_change_forces_reopen() -> void:
+	if not ClassDB.class_exists("GNMidiOut"):
+		GNTestAssert.assert_true(true, "GNMidiOut unavailable — reset test covers open path")
+		return
+	var node := _make_node(RtMidiOutCHOP.new(), "rtmidiout7")
+	node._prev_port = 0
+	node._prev_port_list = PackedStringArray(["__stale_port_name__"])
+	node._check_port_list_changed()
+	GNTestAssert.assert_eq(node._prev_port, -1,
+		"device list change forces port reopen even when index unchanged")
+	var current_ports: PackedStringArray = ClassDB.class_call_static(&"GNMidiOut", &"get_port_list")
+	GNTestAssert.assert_eq(node._prev_port_list, current_ports, "port list cache updated")

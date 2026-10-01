@@ -60,6 +60,7 @@ Only these "active" nodes are evaluated — disconnected nodes are skipped.
 Any parameter can be driven by a GDScript expression instead of a static value.
 Click the **C** button next to a parameter to switch to expression mode (the button
 changes to **E**). Expressions have access to `time`, `frame`, `dt`, and `me`.
+Read another node's table with `cell()` and `lookup()`. See `help/expressions.md`.
 
 ### Sub-Networks
 

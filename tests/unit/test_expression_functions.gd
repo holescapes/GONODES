@@ -789,6 +789,60 @@ func test_dat_returns_data() -> void:
 	GNTestAssert.assert_not_null(result, "dat() should return non-null")
 
 
+func _make_keyed_dat(id: String) -> GNNode:
+	var node := ConstantDAT.new()
+	node.initialize(id)
+	_network.add_node(node)
+	_engine.add_child(node)
+	node.set_param_value("col0", "category")
+	node.set_param_value("col1", "property")
+	node.set_param_value("col2", "value")
+	node.set_param_value("r0c0", "Display")
+	node.set_param_value("r0c1", "screen_0_width")
+	node.set_param_value("r0c2", "1920")
+	node.set_param_value("r1c0", "Display")
+	node.set_param_value("r1c1", "screen_0_height")
+	node.set_param_value("r1c2", "1080")
+	node.set_param_value("r2c0", "Engine")
+	node.set_param_value("r2c1", "fps")
+	node.set_param_value("r2c2", "60")
+	var inputs: Array[GNData] = []
+	node.execute_cook(inputs, _engine.frame_count)
+	return node
+
+
+func test_cell_addresses_by_index_and_name() -> void:
+	var _dat := _make_keyed_dat("table1")
+	_engine._current_eval_node = _make_null_chop("caller")
+	GNTestAssert.assert_eq(_engine.cell("table1", 0, 0), "Display", "index address")
+	GNTestAssert.assert_eq(_engine.cell("table1", 1, "value"), "1080", "column name")
+	GNTestAssert.assert_eq(_engine.cell("table1", "Engine", "property"), "fps", "row name is column 0")
+	GNTestAssert.assert_eq(_engine.cellf("table1", "Engine", "value"), 60.0, "named cellf")
+	GNTestAssert.assert_eq(_engine.cell("table1", "missing", "value"), "", "missing row name")
+
+
+func test_lookup_finds_row_by_named_column() -> void:
+	var _dat := _make_keyed_dat("table1")
+	_engine._current_eval_node = _make_null_chop("caller")
+	GNTestAssert.assert_eq(
+		_engine.lookup("table1", "property", "screen_0_height", "value"),
+		"1080", "lookup by property")
+	GNTestAssert.assert_eq(
+		_engine.lookupf("table1", "property", "screen_0_width", "value"),
+		1920.0, "lookupf")
+	GNTestAssert.assert_eq(_engine.lookup("table1", "property", "nope", "value"), "", "lookup miss")
+	GNTestAssert.assert_eq(_engine.lookupf("missing", "property", "fps", "value"), 0.0, "missing dat")
+
+
+func test_lookupf_in_expression() -> void:
+	var _dat := _make_keyed_dat("table1")
+	var node := _make_null_chop("caller")
+	var p := _add_float_param(node, "w", 0.0)
+	p.set_expression('lookupf("table1", "property", "screen_0_width", "value")')
+	_resolve_param(node, p)
+	GNTestAssert.assert_eq(p.resolved_value, 1920.0, "lookupf expression")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # output() — universal port accessor
 # ═══════════════════════════════════════════════════════════════════════════════

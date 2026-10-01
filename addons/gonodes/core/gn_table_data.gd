@@ -98,6 +98,47 @@ func cell_by_name(row: int, col_name: String) -> String:
 	return cell(row, col_idx)
 
 
+## Address a cell. [param row] and [param col] are an index, or a name.
+## A column name matches the header. A row name matches column 0.
+## Text-mode DATs have no grid and return an empty string.
+func cell_at(row: Variant, col: Variant) -> String:
+	if not is_table:
+		return ""
+	var row_idx := _resolve_row(row)
+	var col_idx := _resolve_col(col)
+	if row_idx < 0 or col_idx < 0:
+		return ""
+	return cell(row_idx, col_idx)
+
+
+## Search [param key_col] for [param key] and return [param value_col] from the first matching data row.
+## Column arguments are an index or a header name. The key is matched as text.
+func lookup_cell(key_col: Variant, key: Variant, value_col: Variant) -> String:
+	if not is_table:
+		return ""
+	var row_idx := find_row(key_col, str(key))
+	if row_idx < 0:
+		return ""
+	var col_idx := _resolve_col(value_col)
+	if col_idx < 0:
+		return ""
+	return cell(row_idx, col_idx)
+
+
+## Data-row index of the first cell in [param key_col] equal to [param key], or -1.
+func find_row(key_col: Variant, key: String) -> int:
+	if not is_table:
+		return -1
+	var col_idx := _resolve_col(key_col)
+	if col_idx < 0:
+		return -1
+	var start: int = 1 if has_header else 0
+	for r in range(start, table.size()):
+		if col_idx < table[r].size() and table[r][col_idx] == key:
+			return r - start
+	return -1
+
+
 # ─── Row / Column Access ──────────────────────────────────────────────────────
 
 ## Returns the header row (column names), or empty array if no header.
@@ -155,11 +196,9 @@ func get_expression_value(key: String, index: int = -1) -> Variant:
 		if parts.size() == 2:
 			var row_str := parts[0]
 			var col_str := parts[1]
-			var row := row_str.to_int() if row_str.is_valid_int() else 0
-			if col_str.is_valid_int():
-				return cell(row, col_str.to_int()).to_float()
-			else:
-				return cell_by_name(row, col_str).to_float()
+			var row_v: Variant = row_str.to_int() if row_str.is_valid_int() else row_str
+			var col_v: Variant = col_str.to_int() if col_str.is_valid_int() else col_str
+			return cell_at(row_v, col_v).to_float()
 	return 0.0
 
 
@@ -320,6 +359,24 @@ func export_to_file(path: String) -> Error:
 
 
 # ─── Internal ──────────────────────────────────────────────────────────────────
+
+func _resolve_row(row: Variant) -> int:
+	if row is int:
+		return row
+	if row is float:
+		return int(row)
+	return find_row(0, str(row))
+
+
+func _resolve_col(col: Variant) -> int:
+	if col is int:
+		return col
+	if col is float:
+		return int(col)
+	if not has_header or table.is_empty():
+		return -1
+	return _col_index(str(col))
+
 
 ## Returns the column index for a header name, or -1 if not found.
 func _col_index(col_name: String) -> int:

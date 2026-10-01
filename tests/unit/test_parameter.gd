@@ -232,6 +232,32 @@ func test_empty_expression_is_invalid() -> void:
 	GNTestAssert.assert_false(p.is_expression_valid(), "empty expression is invalid")
 
 
+func test_rewrite_host_method_calls_chopi() -> void:
+	var rewritten := GNParameter._rewrite_host_method_calls('chopi("a")')
+	GNTestAssert.assert_eq(rewritten, 'host.chopi("a")', "chopi() rewritten to host.chopi()")
+
+
+func test_rewrite_host_method_calls_chop_not_chopi() -> void:
+	var rewritten := GNParameter._rewrite_host_method_calls('chop("a")')
+	GNTestAssert.assert_eq(rewritten, 'host.chop("a")', "chop() rewritten without touching chopi prefix")
+
+
+func test_rewrite_host_method_calls_chop_before_chopi() -> void:
+	var rewritten := GNParameter._rewrite_host_method_calls('chop("a") + chopi("b")')
+	GNTestAssert.assert_eq(
+		rewritten,
+		'host.chop("a") + host.chopi("b")',
+		"chop and chopi both rewritten independently")
+
+
+func test_chopi_expression_callable_compiles() -> void:
+	var p := GNParameter.create_float("x", 0.0)
+	p.set_expression('chopi("lfo1", "out")')
+	GNTestAssert.assert_true(p.is_expression_valid(), "chopi expression should parse")
+	var callable := p.get_expression_eval_callable()
+	GNTestAssert.assert_true(callable.is_valid(), "chopi expression callable should compile")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Per-Component Expressions
 # ═══════════════════════════════════════════════════════════════════════════════

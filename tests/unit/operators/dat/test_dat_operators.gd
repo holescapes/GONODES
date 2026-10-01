@@ -761,6 +761,58 @@ func test_system_dat_produces_output() -> void:
 	GNTestAssert.assert_not_null(out, "system dat produces output")
 	GNTestAssert.assert_gt(out.table.size(), 0, "has info rows")
 
+func test_system_dat_numeric_rows() -> void:
+	var node := _make_node(SystemDAT.new(), "sysnum")
+	var out: GNTableData = _cook_no_input(node) as GNTableData
+	GNTestAssert.assert_not_null(out, "system table")
+	var bytes := out.lookup_cell("property", "static_bytes", "value")
+	GNTestAssert.assert_true(bytes.is_valid_int(), "static_bytes is an integer, got '%s'" % bytes)
+	var count := out.lookup_cell("property", "screen_count", "value")
+	if count.is_valid_int() and int(count) > 0:
+		var width := out.lookup_cell("property", "screen_0_width", "value")
+		var height := out.lookup_cell("property", "screen_0_height", "value")
+		GNTestAssert.assert_true(width.is_valid_int(), "screen width is an integer, got '%s'" % width)
+		GNTestAssert.assert_true(height.is_valid_int(), "screen height is an integer, got '%s'" % height)
+	else:
+		GNTestAssert.assert_eq(out.lookup_cell("property", "screen_0_width", "value"), "", "no screen row without a display")
+
+
+func test_info_dat_numeric_rows() -> void:
+	var node := _make_node(InfoDAT.new(), "infonum")
+	var out: GNTableData = _cook_no_input(node) as GNTableData
+	GNTestAssert.assert_not_null(out, "info table")
+	GNTestAssert.assert_true(out.cell_at("screen_width", "value").is_valid_int(), "screen_width")
+	GNTestAssert.assert_true(out.cell_at("screen_height", "value").is_valid_int(), "screen_height")
+	GNTestAssert.assert_true(out.cell_at("static_memory_bytes", "value").is_valid_int(), "memory bytes")
+
+
+func test_sop_to_dat_summary_aabb_is_numeric() -> void:
+	var node := _make_node(SOPtoDAT.new(), "s2dsum")
+	var geo := GNGeoData.new()
+	geo.mesh = ArrayMesh.new()
+	geo.vertex_count = 4
+	geo.bounds = AABB(Vector3(1, 2, 3), Vector3(4, 5, 6))
+	var tbl := GNTableData.new()
+	tbl.has_header = true
+	node._extract_summary(geo, tbl)
+	GNTestAssert.assert_eq(tbl.cell_at("aabb_min_x", "value"), "1.000000", "min x")
+	GNTestAssert.assert_eq(tbl.cell_at("aabb_max_x", "value"), "5.000000", "max x")
+	GNTestAssert.assert_eq(tbl.cell_at("aabb_size_z", "value"), "6.000000", "size z")
+	GNTestAssert.assert_eq(tbl.find_row("attribute", "aabb_min"), -1, "packed aabb row is gone")
+
+
+func test_table_lookup_skips_header_and_text_mode() -> void:
+	var tbl := GNTableData.new()
+	tbl.has_header = true
+	tbl.set_headers(PackedStringArray(["category", "property", "value"]))
+	tbl.append_row(PackedStringArray(["Display", "screen_0_width", "1920"]))
+	tbl.append_row(PackedStringArray(["Display", "screen_0_height", "1080"]))
+	GNTestAssert.assert_eq(tbl.lookup_cell("property", "screen_0_width", "value"), "1920", "first match")
+	GNTestAssert.assert_eq(tbl.find_row("category", "Display"), 0, "first of a repeated key")
+	tbl.is_table = false
+	GNTestAssert.assert_eq(tbl.lookup_cell("property", "screen_0_width", "value"), "", "text mode miss")
+
+
 func test_system_dat_has_os_info() -> void:
 	var node := _make_node(SystemDAT.new(), "sysdat3")
 	var out: GNTableData = _cook_no_input(node) as GNTableData

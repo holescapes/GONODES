@@ -63,6 +63,7 @@ func _init() -> void:
 	family = GNFamily.Type.SCRIPT
 	node_type = "script"
 	thread_safe = false  # user code can call set_par / network_*
+	parameter_changed.connect(_on_compile_sink_param_changed)
 
 
 func _init_ports() -> void:
@@ -84,7 +85,10 @@ func _init_parameters() -> void:
 
 func _pre_cook(delta: float) -> void:
 	time_dependent = get_param_value("time_dependent")
-	is_sink = get_param_value("force_active")
+	var code: String = get_param_value("code")
+	if not GNScriptHelper.validate_user_code(code).is_empty():
+		time_dependent = true
+	_sync_compile_sink()
 	# Cook-once pulse: mark dirty for one frame, then auto-reset
 	if get_param_value("cook_once"):
 		mark_dirty()
@@ -204,3 +208,18 @@ func from_dict(d: Dictionary) -> void:
 		_rebuild_output_ports(code)
 	if d.has("parameters"):
 		GNScriptHelper.restore_dynamic_param_values(self, d["parameters"], _STATIC_PARAMS)
+	_sync_compile_sink()
+	mark_dirty()
+
+
+## Keeps invalid scripts in the active cook chain so compile errors surface as warnings.
+func _sync_compile_sink() -> void:
+	var force_active := bool(get_param_value("force_active"))
+	var code: String = get_param_value("code")
+	var has_compile_error := not GNScriptHelper.validate_user_code(code).is_empty()
+	is_sink = force_active or has_compile_error
+
+
+func _on_compile_sink_param_changed(_node_id: String, param_name: String) -> void:
+	if param_name == "code" or param_name == "force_active":
+		_sync_compile_sink()

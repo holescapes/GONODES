@@ -50,6 +50,14 @@ func get_annotation_views() -> Dictionary:
 	return _annotation_views
 
 
+## Refits every sticky note (e.g. after toggling wrap preference).
+func refit_sticky_notes() -> void:
+	for ann_id in _annotation_views:
+		var view: Control = _annotation_views[ann_id]
+		if view is GNStickyNote:
+			(view as GNStickyNote).refit()
+
+
 func is_box_dragging() -> bool:
 	return not _box_drag_ann_id.is_empty()
 
@@ -135,12 +143,14 @@ func _create_annotation_view(ann: Variant) -> void:
 		_graph.move_child(box, 0)
 		_annotation_views[ann_id] = box
 	elif ann_type == "note":
+		var note_font_size: int = int(ann_dict.get("font_size", 12))
 		var note := GNStickyNote.new()
-		note.setup(ann_id, pixel_pos, pixel_size, ann_text, col)
+		note.setup(ann_id, pixel_pos, pixel_size, ann_text, col, note_font_size)
 		note.note_changed.connect(_on_annotation_moved)
 		note.text_changed.connect(_on_annotation_text_changed)
 		note.delete_requested.connect(_on_annotation_delete_requested)
 		note.color_changed.connect(_on_annotation_color_changed)
+		note.font_size_changed.connect(_on_annotation_font_size_changed)
 		_graph.add_child(note)
 		_graph.move_child(note, 0)
 		_annotation_views[ann_id] = note
@@ -172,6 +182,8 @@ func sync_transforms() -> void:
 		var gs: Vector2 = graph_size if graph_size is Vector2 else Vector2(200, 150)
 		view.position = gp * zoom - scroll
 		view.size = gs * zoom
+		if view is GNStickyNote:
+			(view as GNStickyNote).after_sync_transform()
 
 
 func clear_views() -> void:
@@ -209,6 +221,11 @@ func _on_annotation_delete_requested(ann_id: String) -> void:
 func _on_annotation_color_changed(ann_id: String, new_color: Color) -> void:
 	if network:
 		network.update_annotation(ann_id, {"color": new_color})
+
+
+func _on_annotation_font_size_changed(ann_id: String, new_font_size: int) -> void:
+	if network:
+		network.update_annotation(ann_id, {"font_size": new_font_size})
 
 
 func get_nodes_inside_box(box_pos: Vector2, box_size: Vector2) -> Array[String]:

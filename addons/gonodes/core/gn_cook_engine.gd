@@ -466,7 +466,7 @@ func _get_expression_refs(node_id: String) -> Array[String]:
 	# Lazy-init regex (same pattern as GNGraphEditor's overlay scanner)
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|pop|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
+		_expr_ref_regex.compile("(?:lookupf?|chop[sfi]?|op|top|sop|dat|mat|vol|img|pop|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for param_name in node.parameters:
 		var param: GNParameter = node.parameters[param_name]
@@ -1523,12 +1523,13 @@ func dat(node_name: String, port = null) -> Variant:
 	return _resolve_output(node_name, port, GNFamily.Type.DAT)
 
 
-## Read a DAT table cell by row and column index.
-## Usage: cell("table1", 0, 1)  → string value at row 0, col 1
-func cell(node_name: String, row: int, col: int) -> String:
+## Read a DAT cell. Row and column are an index or a name.
+## A column name matches the header. A row name matches column 0.
+## Usage: cell("table1", 0, 1)  cell("info", "fps", "value")
+func cell(node_name: String, row: Variant, col: Variant) -> String:
 	var data: Variant = _resolve_output(node_name, null, GNFamily.Type.DAT)
 	if data is GNTableData:
-		return data.cell(row, col)
+		return data.cell_at(row, col)
 	return ""
 
 
@@ -1541,9 +1542,9 @@ func cell_by_name(node_name: String, row: int, col_name: String) -> String:
 	return ""
 
 
-## Read a DAT table cell as float by row and column index.
-## Usage: cellf("table1", 0, 1)
-func cellf(node_name: String, row: int, col: int) -> float:
+## Read a DAT cell as a float. Same addressing as [method cell].
+## Usage: cellf("info", "fps", "value")
+func cellf(node_name: String, row: Variant, col: Variant) -> float:
 	return cell(node_name, row, col).to_float()
 
 
@@ -1551,6 +1552,22 @@ func cellf(node_name: String, row: int, col: int) -> float:
 ## Usage: cellf_by_name("table1", 0, "speed")
 func cellf_by_name(node_name: String, row: int, col_name: String) -> float:
 	return cell_by_name(node_name, row, col_name).to_float()
+
+
+## Find the first data row whose [param key_col] equals [param key], and return [param value_col].
+## Columns are an index or a header name. A miss is an empty string.
+## Usage: lookup("sys", "property", "screen_0_width", "value")
+func lookup(node_name: String, key_col: Variant, key: Variant, value_col: Variant) -> String:
+	var data: Variant = _resolve_output(node_name, null, GNFamily.Type.DAT)
+	if data is GNTableData:
+		return data.lookup_cell(key_col, key, value_col)
+	return ""
+
+
+## [method lookup] as a float. A miss is 0.
+## Usage: lookupf("sys", "property", "screen_0_width", "value")
+func lookupf(node_name: String, key_col: Variant, key: Variant, value_col: Variant) -> float:
+	return lookup(node_name, key_col, key, value_col).to_float()
 
 
 ## Read IMG data. Usage:

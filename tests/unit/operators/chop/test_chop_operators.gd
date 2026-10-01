@@ -1128,6 +1128,67 @@ func test_audio_file_in_chop_no_file() -> void:
 	var out: GNData = _cook_no_input(node)
 	GNTestAssert.assert_true(true, "null output acceptable when no file")
 
+func test_audio_file_in_chop_play_not_sink_no_output_device() -> void:
+	var node := _make_node(AudioFileInCHOP.new(), "audiofilein3")
+	node.set_param_value("play", true)
+	GNTestAssert.assert_false(node.is_sink, "Play on does not make AudioFileInCHOP a sink")
+	GNTestAssert.assert_true(node.get_parameter("output_device") == null,
+		"output_device parameter removed")
+
+
+func test_audio_file_in_play_keeps_capture_bus_muted() -> void:
+	# Headless -s runs before the suite is inside the tree, so AudioStreamPlayer.play()
+	# logs errors. The bus mute is what this test checks.
+	GNTestAssert.allow_script_errors(4)
+	var path := "user://gn_audio_file_mute_test.wav"
+	_write_pcm16_wav(path)
+	var node := _make_node(AudioFileInCHOP.new(), "audiofilein_mute")
+	node.set_param_value("file", path)
+	node.set_param_value("play", true)
+	node.set_param_value("mute_output", false)
+	_cook_no_input(node)
+	node._deferred_load_audio()
+	_cook_no_input(node)
+	var bus_name := "GN_AudioFile_%s" % node.id
+	var idx := AudioServer.get_bus_index(bus_name)
+	GNTestAssert.assert_true(idx >= 0, "capture bus exists")
+	GNTestAssert.assert_false(AudioServer.is_bus_mute(idx),
+		"capture bus stays live so the waveform and spectrum still move")
+	var null_idx := AudioServer.get_bus_index("GN_AudioNull")
+	GNTestAssert.assert_true(null_idx >= 0 and null_idx < idx,
+		"null bus sits earlier so the send is valid")
+	GNTestAssert.assert_eq(String(AudioServer.get_bus_send(idx)), "GN_AudioNull",
+		"capture bus does not send to Master")
+	GNTestAssert.assert_true(AudioServer.is_bus_mute(null_idx),
+		"null bus is muted so Play does not reach the speakers")
+	node._stop_and_cleanup()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+
+func _write_pcm16_wav(path: String) -> void:
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	GNTestAssert.assert_not_null(file, "wav fixture opens")
+	if file == null:
+		return
+	var frames := 64
+	var data_size := frames * 2
+	file.store_buffer("RIFF".to_ascii_buffer())
+	file.store_32(36 + data_size)
+	file.store_buffer("WAVE".to_ascii_buffer())
+	file.store_buffer("fmt ".to_ascii_buffer())
+	file.store_32(16)
+	file.store_16(1)
+	file.store_16(1)
+	file.store_32(44100)
+	file.store_32(44100 * 2)
+	file.store_16(2)
+	file.store_16(16)
+	file.store_buffer("data".to_ascii_buffer())
+	file.store_32(data_size)
+	for _i in frames:
+		file.store_16(0)
+	file.close()
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  AudioInCHOP

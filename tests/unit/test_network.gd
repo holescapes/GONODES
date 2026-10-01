@@ -476,6 +476,23 @@ func test_from_dict_unknown_type_creates_placeholder() -> void:
 		"connection to placeholder is preserved")
 
 
+func test_from_dict_accepts_from_node_keys() -> void:
+	var data := {
+		"nodes": {
+			"n1": {"type": "NoiseTOP", "position": [0.0, 0.0], "parameters": {}},
+			"n2": {"type": "NullTOP", "position": [200.0, 0.0], "parameters": {}}
+		},
+		"connections": [
+			{"from_node": "n1", "from_port": 0, "to_node": "n2", "to_port": 0}
+		]
+	}
+	var ok := _network.from_dict(data)
+	GNTestAssert.assert_true(ok, "from_dict accepts from_node keys")
+	GNTestAssert.assert_eq(_network.connections.size(), 1, "visual-audit style wire is kept")
+	GNTestAssert.assert_eq(_network.connections[0].from_node, "n1", "from node")
+	GNTestAssert.assert_eq(_network.connections[0].to_node, "n2", "to node")
+
+
 func test_placeholder_roundtrip_preserves_data() -> void:
 	var data := {
 		"nodes": {

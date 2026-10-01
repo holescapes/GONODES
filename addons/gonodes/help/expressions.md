@@ -310,6 +310,84 @@ mat("pbr1")                  # → GNMaterialData
 > Both `output()` and the typed variants match either one, case-insensitively.
 > Labels are visible on the node in the graph editor.
 
+## Reading DAT Tables
+
+A table DAT is a grid of strings. The first row is the header when the table has one. Text DATs (TextDAT, and script DATs in text mode) are one string, and the cell functions below return an empty string for them.
+
+Use `cell` to address a cell, and `lookup` when the name you want is not in the first column.
+
+### `cell(node_id, row, col)` and `cellf(node_id, row, col)`
+
+`cell` returns the cell text. `cellf` returns that text as a float. A miss is `""` or `0`.
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `node_id` | String | DAT node id |
+| `row` | int or String | Data-row index, or the text in column 0 |
+| `col` | int or String | Column index, or a header name |
+
+Row indexes skip the header, so `0` is the first data row. A string row matches column 0. A string column matches the header. The match is exact and case-sensitive.
+
+`cell_by_name(node_id, row, col_name)` and `cellf_by_name(...)` are the older spelling of a numeric row plus a header name. Prefer `cell`.
+
+```gdscript
+# InfoDAT keeps the row name in column 0
+cellf("info", "fps", "value")
+cellf("info", "screen_width", "value")
+cell("info", 0, 1)
+
+# ConstantDAT with headers name / value, and "kick" in column 0
+cell("table1", "kick", "value")
+cellf("table1", 2, "speed")
+```
+
+### `lookup(node_id, key_col, key, value_col)` and `lookupf(...)`
+
+Search one column for a text value and read another column on that row. Use this when the same text repeats in column 0, as it does on SystemDAT (`Display` is on every screen row).
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `node_id` | String | DAT node id |
+| `key_col` | int or String | Column to search: index or header name |
+| `key` | String | Text to find in that column |
+| `value_col` | int or String | Column to return: index or header name |
+
+The header row is not searched. The first matching data row wins. A miss is `""` or `0`.
+
+```gdscript
+# SystemDAT columns are category, property, value
+lookupf("sys", "property", "screen_0_width", "value")
+lookupf("sys", "property", "screen_0_height", "value")
+lookup("sys", "property", "screen_0_dpi", "value")
+
+# Same search with column indexes: property is column 1, value is column 2
+lookupf("sys", 1, "screen_0_width", 2)
+```
+
+### Numbers versus display text
+
+`cellf` and `lookupf` read the start of the cell as a number. A cell that says `1920x1080` or `1.2 MB` does not yield both numbers, and the byte label does not yield a byte count. Read the plain numeric rows:
+
+| Table | Display text | Use in an expression |
+|-------|----------------|----------------------|
+| InfoDAT | `screen_size`, `static_memory` | `screen_width`, `screen_height`, `static_memory_bytes` |
+| SystemDAT | `screen_N_size`, `static`, `static_peak` | `screen_N_width`, `screen_N_height`, `static_bytes`, `static_peak_bytes` |
+| SOPtoDAT summary | — | `aabb_min_x/y/z`, `aabb_max_x/y/z`, `aabb_size_x/y/z` |
+
+```gdscript
+# Drive a resolution from the primary monitor
+lookupf("sys", "property", "screen_0_width", "value")
+lookupf("sys", "property", "screen_0_height", "value")
+
+# Same numbers from InfoDAT, where the name is already column 0
+cellf("info", "screen_width", "value")
+cellf("info", "screen_height", "value")
+```
+
+Turning SystemDAT's Hardware, Memory, or Display parameters off removes those rows. `lookup` still finds a row by its `property` text, so the row index does not matter.
+
+`ncells("table1")` returns the cell count (rows × columns). `dat("table1")` returns the table object. Parameter expressions should use `cell` and `lookup` to get a single value.
+
 ### Copy Reference Workflow
 
 Instead of typing references manually, you can copy them from the UI:
@@ -748,6 +826,10 @@ These functions are available in all expressions, called directly (no imports ne
 |----------|-----------|-------------|
 | `npoints` | `npoints(node_id)` | Number of vertices in a SOP node's output geometry |
 | `ncells` | `ncells(node_id)` | Number of cells (rows × columns) in a DAT node's output table |
+| `cell` | `cell(node_id, row, col)` | DAT cell text. Row and column are an index or a name |
+| `cellf` | `cellf(node_id, row, col)` | `cell()` as a float |
+| `lookup` | `lookup(node_id, key_col, key, value_col)` | Find a row by a column's text and return another column |
+| `lookupf` | `lookupf(node_id, key_col, key, value_col)` | `lookup()` as a float |
 
 ### Examples
 
@@ -938,6 +1020,12 @@ methods on `GNCookEngine`, callable directly in any expression.
 | `top` | `top(node, property?)` | Variant | Read TOP metadata (resolution, aspect) |
 | `sop` | `sop(node, port?)` | GNGeoData | Read SOP geometry data |
 | `dat` | `dat(node, port?)` | GNTableData | Read DAT table data |
+| `cell` | `cell(node, row, col)` | String | DAT cell by row and column index or name |
+| `cellf` | `cellf(node, row, col)` | float | cell() as a float |
+| `cell_by_name` | `cell_by_name(node, row, col_name)` | String | Older spelling of cell() with a numeric row |
+| `cellf_by_name` | `cellf_by_name(node, row, col_name)` | float | cell_by_name() as a float |
+| `lookup` | `lookup(node, key_col, key, value_col)` | String | Search a column, return another column on that row |
+| `lookupf` | `lookupf(node, key_col, key, value_col)` | float | lookup() as a float |
 | `vol` | `vol(node, port?)` | GNVolumeData | Read VOL volume data |
 | `img` | `img(node, port?)` | GNImageData | Read IMG image data |
 | `mat` | `mat(node, port?)` | GNMaterialData | Read MAT material data |
@@ -1030,7 +1118,7 @@ The expression editor's **Snippets ▾** dropdown provides ready-to-use template
 | **Remapping** | Fit to range, Fit to 0-1, Sin to 0-1, Smoothstep, Step threshold |
 | **Smoothing** | Smooth follow, Lag (asymmetric), Trigger detect |
 | **Noise & Random** | Noise 1D, Noise 2D, Random [0,1], Random range |
-| **Node References** | Read CHOP channel, Read parameter, Self-reference par(), TOP resolution, TOP aspect, Named output (output/vol/sop/dat/img/mat), Copy reference workflow |
+| **Node References** | Read CHOP channel, Read DAT cell, Look up DAT cell, Read parameter, Self-reference par(), TOP resolution, TOP aspect, Named output (output/vol/sop/dat/img/mat), Copy reference workflow |
 | **Math Patterns** | Sine + offset, Exponential decay, Power curve, Circular motion, Quantize |
 
 Snippets are inserted at the cursor position, or replace the entire editor if empty.

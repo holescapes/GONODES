@@ -285,6 +285,35 @@ func test_no_annotations_key_when_empty() -> void:
 	GNTestAssert.assert_false(d.has("annotations"), "no annotations key when empty")
 
 
+func test_annotation_font_size_round_trip() -> void:
+	var net := GNNetwork.new()
+	var ann_id := net.add_annotation("note", Vector2.ZERO, Vector2(200, 120), "Big note")
+	net.update_annotation(ann_id, {"font_size": 24})
+
+	var d := net.to_dict()
+	GNTestAssert.assert_true(d.has("annotations"), "to_dict has annotations key")
+	var ann_arr: Array = d["annotations"]
+	GNTestAssert.assert_eq(ann_arr.size(), 1, "1 annotation serialized")
+	GNTestAssert.assert_eq(ann_arr[0]["font_size"], 24, "font_size serialized")
+
+	var net2 := GNNetwork.new()
+	var ok := net2.from_dict(d)
+	GNTestAssert.assert_true(ok, "from_dict succeeded")
+	var restored: Dictionary = net2.annotations[0]
+	GNTestAssert.assert_eq(int(restored.get("font_size", 12)), 24, "font_size restored")
+
+
+func test_annotation_font_size_default() -> void:
+	var net := GNNetwork.new()
+	net.add_annotation("note", Vector2.ZERO)
+	var d := net.to_dict()
+	var net2 := GNNetwork.new()
+	net2.from_dict(d)
+	var ann: Dictionary = net2.annotations[0]
+	GNTestAssert.assert_false(ann.has("font_size"), "no font_size key when default")
+	GNTestAssert.assert_eq(int(ann.get("font_size", 12)), 12, "missing font_size loads as 12")
+
+
 func test_clear_all_clears_annotations() -> void:
 	var net := GNNetwork.new()
 	net.add_annotation("box", Vector2.ZERO)

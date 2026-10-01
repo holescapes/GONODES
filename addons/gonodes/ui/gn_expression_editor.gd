@@ -507,84 +507,177 @@ func _suggest_fn_names() -> void:
 	_code_edit.update_code_completion_options(true)
 
 
-## Suggests general expression symbols: variables, functions, constructors.
-func _suggest_general() -> void:
-	# Context variables
+## Returns the shared general-expression completion catalog.
+## Each entry: insert (String), label (String), description (String),
+## kind (String: "variable", "function", "constant"), color (Color).
+static func get_general_completion_entries() -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+
 	for v in [["me", "Current node"], ["time", "Elapsed seconds"],
 			["frame", "Frame number"], ["dt", "Delta time"]]:
-		_code_edit.add_code_completion_option(
-			CodeEdit.KIND_VARIABLE, v[0], v[0],
-			Color(0.55, 0.8, 1.0), null, v[1])
+		entries.append({
+			"insert": v[0],
+			"label": v[0],
+			"description": v[1],
+			"kind": "variable",
+			"color": Color(0.55, 0.8, 1.0),
+		})
 
-	# Node reference functions
-	for fn_entry in [["chop(\"", "Read CHOP channel value"],
-			["op(\"", "Read node parameter value"],
-			["top(\"", "Read TOP info (resolution, aspect)"],
-			["par(\"", "Read parameter value (self or cross-node)"],
-			["set_par(\"", "Write parameter value on another node"]]:
-		_code_edit.add_code_completion_option(
-			CodeEdit.KIND_FUNCTION, fn_entry[0], fn_entry[0],
-			Color(0.4, 0.9, 0.5), null, fn_entry[1])
+	for fn_entry in [["chop(\"", "chop(", "Read CHOP channel value"],
+			["op(\"", "op(", "Read node parameter value"],
+			["top(\"", "top(", "Read TOP info (resolution, aspect)"],
+			["par(\"", "par(", "Read parameter value (self or cross-node)"],
+			["set_par(\"", "set_par(", "Write parameter value on another node"]]:
+		entries.append({
+			"insert": fn_entry[0],
+			"label": fn_entry[1],
+			"description": fn_entry[2],
+			"kind": "function",
+			"color": Color(0.4, 0.9, 0.5),
+		})
 
-	# GONODES built-in expression functions
 	var builtin_funcs: Array = [
-		["fit(", "Remap value between ranges: fit(v, in_min, in_max, out_min, out_max)"],
-		["fit01(", "Remap to 0-1: fit01(v, in_min, in_max)"],
-		["smooth(\"", "Exponential smoothing: smooth(key, target, speed)"],
-		["lag(\"", "Asymmetric lag: lag(key, target, up_speed, down_speed)"],
-		["pulse(", "Pulse wave: pulse(phase, duty)"],
-		["step(", "Step function: step(edge, value)"],
-		["smoothstep(", "Smooth interpolation: smoothstep(edge0, edge1, x)"],
-		["cycle(", "Cyclic 0-1 ramp: cycle(period_seconds)"],
-		["bounce(", "Bounce: abs(sin(t * PI))"],
-		["noise1(", "1D value noise: noise1(x)"],
-		["noise2(", "2D value noise: noise2(x, y)"],
-		["noise3(", "3D value noise: noise3(x, y, z)"],
-		["trigger(\"", "Trigger on threshold cross: trigger(key, value, threshold)"],
-		["fn(\"", "Call custom function: fn(name, arg1, arg2, ...)"],
-		["ramp(\"", "Sample ramp curve: ramp(param_name, t) or ramp(node, param, t)"],
-		["iif(", "Inline conditional: iif(condition, true_val, false_val)"],
-		["rand(", "Seeded random [0,1): rand(seed)"],
-		["digits(", "Trailing digits from node ID: digits()"],
-		["store(\"", "Persist per-node state: store(key, value)"],
-		["fetch(\"", "Read persistent state: fetch(key, default)"],
-		["npoints(\"", "Count SOP points: npoints(node_id)"],
-		["ncells(\"", "Count DAT cells: ncells(node_id)"],
-		["fps(", "Current FPS (NRT-aware)"],
-		["speed(", "Current playback speed"],
-		["tstart(", "Timeline start (seconds)"],
-		["tend(", "Timeline end (seconds)"],
-		["frames(", "Total frames in timeline"],
+		["fit(", "fit(", "Remap value between ranges: fit(v, in_min, in_max, out_min, out_max)"],
+		["fit01(", "fit01(", "Remap to 0-1: fit01(v, in_min, in_max)"],
+		["smooth(\"", "smooth(", "Exponential smoothing: smooth(key, target, speed)"],
+		["lag(\"", "lag(", "Asymmetric lag: lag(key, target, up_speed, down_speed)"],
+		["pulse(", "pulse(", "Pulse wave: pulse(phase, duty)"],
+		["step(", "step(", "Step function: step(edge, value)"],
+		["smoothstep(", "smoothstep(", "Smooth interpolation: smoothstep(edge0, edge1, x)"],
+		["cycle(", "cycle(", "Cyclic 0-1 ramp: cycle(period_seconds)"],
+		["bounce(", "bounce(", "Bounce: abs(sin(t * PI))"],
+		["noise1(", "noise1(", "1D value noise: noise1(x)"],
+		["noise2(", "noise2(", "2D value noise: noise2(x, y)"],
+		["noise3(", "noise3(", "3D value noise: noise3(x, y, z)"],
+		["trigger(\"", "trigger(", "Trigger on threshold cross: trigger(key, value, threshold)"],
+		["fn(\"", "fn(", "Call custom function: fn(name, arg1, arg2, ...)"],
+		["ramp(\"", "ramp(", "Sample ramp curve: ramp(param_name, t) or ramp(node, param, t)"],
+		["iif(", "iif(", "Inline conditional: iif(condition, true_val, false_val)"],
+		["rand(", "rand(", "Seeded random [0,1): rand(seed)"],
+		["digits(", "digits(", "Trailing digits from node ID: digits()"],
+		["store(\"", "store(", "Persist per-node state: store(key, value)"],
+		["fetch(\"", "fetch(", "Read persistent state: fetch(key, default)"],
+		["npoints(\"", "npoints(", "Count SOP points: npoints(node_id)"],
+		["ncells(\"", "ncells(", "Count DAT cells: ncells(node_id)"],
+		["cell(\"", "cell(", "Read a DAT cell by row and column index or name"],
+		["cellf(\"", "cellf(", "Read a DAT cell as a float"],
+		["lookup(\"", "lookup(", "Find a DAT row by a column value and read another column"],
+		["lookupf(\"", "lookupf(", "lookup() as a float"],
+		["fps(", "fps(", "Current FPS (NRT-aware)"],
+		["speed(", "speed(", "Current playback speed"],
+		["tstart(", "tstart(", "Timeline start (seconds)"],
+		["tend(", "tend(", "Timeline end (seconds)"],
+		["frames(", "frames(", "Total frames in timeline"],
 	]
 	for fn_entry in builtin_funcs:
-		_code_edit.add_code_completion_option(
-			CodeEdit.KIND_FUNCTION, fn_entry[0], fn_entry[0],
-			Color(0.45, 0.92, 0.72), null, fn_entry[1])
+		entries.append({
+			"insert": fn_entry[0],
+			"label": fn_entry[1],
+			"description": fn_entry[2],
+			"kind": "function",
+			"color": Color(0.45, 0.92, 0.72),
+		})
 
-	# Common math functions
 	for fn_name in ["sin(", "cos(", "abs(", "clamp(", "lerp(", "remap(",
 			"sqrt(", "pow(", "min(", "max(", "floor(", "ceil(",
 			"round(", "fmod(", "randf()", "pingpong("]:
-		_code_edit.add_code_completion_option(
-			CodeEdit.KIND_FUNCTION, fn_name, fn_name,
-			Color(0.6, 0.7, 0.95))
+		entries.append({
+			"insert": fn_name,
+			"label": fn_name,
+			"description": "",
+			"kind": "function",
+			"color": Color(0.6, 0.7, 0.95),
+		})
 
-	# Custom user-defined functions (registered via GNExpressionFunctions)
 	for func_name in GNExpressionFunctions.get_names():
-		var entry = GNExpressionFunctions.get_all().get(func_name)
-		if entry and not entry.is_builtin:
-			var desc: String = entry.description if entry.description else "Custom function"
+		var fn_entry = GNExpressionFunctions.get_all().get(func_name)
+		if fn_entry and not fn_entry.is_builtin:
+			var desc: String = fn_entry.description if fn_entry.description else "Custom function"
 			var insert := "fn(\"%s\", " % func_name
-			_code_edit.add_code_completion_option(
-				CodeEdit.KIND_FUNCTION, insert, insert,
-				Color(0.9, 0.75, 0.4), null, desc)
+			entries.append({
+				"insert": insert,
+				"label": "fn(\"%s\"" % func_name,
+				"description": desc,
+				"kind": "function",
+				"color": Color(0.9, 0.75, 0.4),
+			})
 
-	# Constants
 	for c in ["PI", "TAU", "INF", "true", "false"]:
-		_code_edit.add_code_completion_option(
-			CodeEdit.KIND_CONSTANT, c, c,
-			Color(0.95, 0.5, 0.6))
+		entries.append({
+			"insert": c,
+			"label": c,
+			"description": "",
+			"kind": "constant",
+			"color": Color(0.95, 0.5, 0.6),
+		})
 
+	return entries
+
+
+## Returns the identifier used for prefix matching on a completion entry.
+static func completion_entry_name(entry: Dictionary) -> String:
+	var label: String = str(entry.get("label", entry.get("insert", "")))
+	var re := RegEx.new()
+	re.compile("^([a-zA-Z_][a-zA-Z0-9_]*)")
+	var m := re.search(label)
+	if m:
+		return m.get_string(1)
+	return label
+
+
+## Filters the shared general catalog by identifier prefix (case-insensitive).
+static func filter_general_completions(prefix: String) -> Array[Dictionary]:
+	var q := prefix.to_lower()
+	if q.is_empty():
+		return []
+	var results: Array[Dictionary] = []
+	for entry in get_general_completion_entries():
+		if completion_entry_name(entry).to_lower().begins_with(q):
+			results.append(entry)
+	return results
+
+
+## Returns the identifier fragment immediately before the caret, or "".
+static func extract_identifier_prefix(text_before: String) -> String:
+	if is_inside_string_literal(text_before):
+		return ""
+	var re := RegEx.new()
+	re.compile("[a-zA-Z_][a-zA-Z0-9_]*$")
+	var m := re.search(text_before)
+	if m:
+		return m.get_string(0)
+	return ""
+
+
+## True when the caret sits inside an unclosed double-quoted string.
+static func is_inside_string_literal(text_before: String) -> bool:
+	var in_string := false
+	for i in range(text_before.length()):
+		if text_before[i] == "#" and not in_string:
+			return false
+		if text_before[i] == "\"":
+			in_string = not in_string
+	return in_string
+
+
+## Suggests general expression symbols: variables, functions, constructors.
+func _suggest_general() -> void:
+	for entry in get_general_completion_entries():
+		var kind := CodeEdit.KIND_PLAIN_TEXT
+		match entry.get("kind", ""):
+			"variable":
+				kind = CodeEdit.KIND_VARIABLE
+			"function":
+				kind = CodeEdit.KIND_FUNCTION
+			"constant":
+				kind = CodeEdit.KIND_CONSTANT
+		_code_edit.add_code_completion_option(
+			kind,
+			entry["label"],
+			entry["insert"],
+			entry.get("color", Color.WHITE),
+			null,
+			entry.get("description", ""))
 	_code_edit.update_code_completion_options(true)
 
 
@@ -625,6 +718,8 @@ const PRESETS := {
 	],
 	"Node References": [
 		["Read CHOP channel", "chop(\"node_id\", \"channel\")"],
+		["Read DAT cell", "cellf(\"table_id\", \"row_name\", \"column\")"],
+		["Look up DAT cell", "lookupf(\"table_id\", \"key_column\", \"key\", \"value_column\")"],
 		["Read parameter", "op(\"node_id\", \"param\")"],
 		["TOP resolution X", "top(\"node_id\", \"resolution\").x"],
 		["TOP aspect ratio", "top(\"node_id\", \"aspect\")"],
@@ -841,6 +936,9 @@ func _maybe_request_completion() -> void:
 	var before := line.substr(0, col)
 	var ctx := _detect_function_context(before)
 	if not ctx.is_empty():
+		_code_edit.request_code_completion(true)
+		return
+	if extract_identifier_prefix(before).length() >= 1:
 		_code_edit.request_code_completion(true)
 
 

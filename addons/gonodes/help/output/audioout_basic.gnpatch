@@ -34,7 +34,7 @@
                     "value": 44100.0
                 },
                 "buffer_length": {
-                    "value": 0.1
+                    "value": 3
                 }
             }
         }
@@ -51,7 +51,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Audio Device OUT — Basic\n\nOutput CHOP channels to audio device as PCM audio.\nUsing: active=False, gain=1.0, mix_rate=44100.0, buffer_length=0.1.",
+            "text": "Audio Device OUT — Basic\n\nOutput CHOP channels to audio device as PCM audio.\nUsing: active=False, gain=1.0, mix_rate=44100.0, buffer=4096 samples.",
             "position": [
                 -100.0,
                 -100.0

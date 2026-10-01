@@ -41,9 +41,12 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# Display info
 	var screen_size: Vector2i = DisplayServer.screen_get_size()
 	_cached_table.append_row(PackedStringArray(["screen_size", "%d×%d" % [screen_size.x, screen_size.y]]))
+	_cached_table.append_row(PackedStringArray(["screen_width", str(screen_size.x)]))
+	_cached_table.append_row(PackedStringArray(["screen_height", str(screen_size.y)]))
 
 	# Memory
 	_cached_table.append_row(PackedStringArray(["static_memory", _format_bytes(OS.get_static_memory_usage())]))
+	_cached_table.append_row(PackedStringArray(["static_memory_bytes", str(OS.get_static_memory_usage())]))
 
 	return _cached_table
 

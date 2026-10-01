@@ -228,6 +228,7 @@ const _EDGE_SCROLL_SPEED  := 800.0  ## Pixels per second at full speed.
 
 ## ── Toast notification container ─────────────────────────────────────────────
 var _toast_container: VBoxContainer = null
+const _TOAST_TOP_MARGIN := 16.0
 
 ## ── Node search overlay (Ctrl+F) ─────────────────────────────────────────────
 var _search: GNGraphSearch = null
@@ -379,20 +380,21 @@ func _ready() -> void:
 	debug_overlay.graph_editor = self
 	add_child(debug_overlay)
 
-	# Create toast notification container (top-center, above everything)
+	# Create toast notification container (top-center of visible viewport).
+	# top_level keeps it out of GraphEdit's panned/zoomed graph space.
 	_toast_container = VBoxContainer.new()
 	_toast_container.name = "ToastContainer"
 	_toast_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_toast_container.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_toast_container.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_toast_container.grow_vertical = Control.GROW_DIRECTION_BOTH
-	_toast_container.position = Vector2(-200, -30)
+	_toast_container.top_level = true
 	_toast_container.custom_minimum_size = Vector2(400, 0)
 	_toast_container.add_theme_constant_override("separation", 6)
 	_toast_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	_toast_container.z_index = 4096
 	_toast_container.z_as_relative = false
 	add_child(_toast_container)
+	_toast_container.resized.connect(_update_toast_position)
+	resized.connect(_update_toast_position)
+	call_deferred("_update_toast_position")
 
 	# Hook logger warnings/errors to toast notifications
 	GNLogger.toast_sink = Callable(self, "_on_logger_toast")
@@ -420,12 +422,15 @@ func _handle_key_input(event: InputEventKey) -> bool:
 	if event.keycode == KEY_A and event.alt_pressed and not event.ctrl_pressed:
 		# Open node palette at mouse position (Alt+A)
 		_spawn_position = (get_local_mouse_position() + scroll_offset) / zoom
-		_palette.popup_at(get_global_mouse_position())
+		_palette.popup_at(get_screen_position() + get_local_mouse_position())
 		return true
 	if event.ctrl_pressed:
 		match event.keycode:
 			KEY_F:
-				_search.open_search()
+				if _search.is_search_open():
+					_search.close_search()
+				else:
+					_search.open_search()
 			KEY_Z:
 				if event.shift_pressed:
 					redo_action()
@@ -532,7 +537,7 @@ func _gui_input(event: InputEvent) -> void:
 					# Double left-click on empty space → open add node palette
 					var graph_pos: Vector2 = (get_local_mouse_position() + scroll_offset) / zoom
 					_spawn_position = graph_pos
-					_palette.popup_at(get_global_mouse_position())
+					_palette.popup_at(get_screen_position() + get_local_mouse_position())
 					accept_event()
 		elif event.button_index == MOUSE_BUTTON_LEFT and not event.double_click:
 			# Single left-click — check if user clicked a wire
@@ -576,6 +581,11 @@ func _gui_input(event: InputEvent) -> void:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Network Binding
 # ═══════════════════════════════════════════════════════════════════════════════
+
+## Returns the annotation manager (network boxes and sticky notes).
+func get_annotations() -> GNAnnotationManager:
+	return _annotations
+
 
 ## Binds this editor to a GNNetwork and populates the graph from it.
 func bind_network(net: GNNetwork) -> void:
@@ -1549,11 +1559,11 @@ func _scan_expr_references() -> void:
 	# Lazy-init regex — captures full call and first argument (node ID)
 	if _expr_ref_regex == null:
 		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("((?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\([^)]*\\))")
+		_expr_ref_regex.compile("((?:lookupf?|chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\([^)]*\\))")
 
 	# Secondary regex to pull just the first string argument (node ID)
 	var _id_regex := RegEx.new()
-	_id_regex.compile("(?:chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
+	_id_regex.compile("(?:lookupf?|chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
 
 	for node_id in network.nodes:
 		var node: GNNode = network.nodes[node_id]
@@ -2909,7 +2919,9 @@ func _perform_shake_disconnect(node_id: String) -> void:
 
 	_undo_redo.commit_action(false)
 
-	show_toast("Disconnected '%s'" % node_id, ToastType.INFO, 1.5)
+	var wire_count := in_conns.size() + out_conns.size()
+	var wire_label := "wire" if wire_count == 1 else "wires"
+	show_toast("Disconnected %d %s from %s" % [wire_count, wire_label, node_id], ToastType.INFO, 1.5)
 	GNLogger.info("GraphEditor", "Shake-disconnect '%s' (%d bypass pairs)" % [
 		node_id, bypass_pairs.size()])
 
@@ -3472,7 +3484,7 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 			_param_preset_submenu.add_item(label, _CtxID.LOAD_PARAM_PRESET_BASE + i)
 		_param_preset_submenu.id_pressed.connect(_on_context_menu_id_pressed)
 	_context_menu.add_child(_param_preset_submenu)
-	_context_menu.add_submenu_node_item("Load Param Preset", _param_preset_submenu)
+	_context_menu.add_submenu_item("Load Param Preset", "ParamPresetSubmenu")
 	_context_menu.set_item_disabled(
 		_context_menu.item_count - 1, not single_selected or _param_preset_list.is_empty())
 
@@ -5000,6 +5012,20 @@ func _handle_edge_scroll(delta: float) -> void:
 # Toast notifications — temporary overlay messages
 # ─────────────────────────────────────────────────────────────────────────────
 enum ToastType { INFO, WARNING, ERROR }
+
+
+## Pin the toast stack to the top-center of the visible GraphEdit rect.
+func _update_toast_position() -> void:
+	if _toast_container == null or not is_inside_tree():
+		return
+	var vis := get_global_rect()
+	var sz := _toast_container.get_combined_minimum_size()
+	_toast_container.size = sz
+	_toast_container.global_position = Vector2(
+		vis.position.x + (vis.size.x - sz.x) * 0.5,
+		vis.position.y + _TOAST_TOP_MARGIN
+	)
+
 
 func show_toast(message: String, type: int = ToastType.INFO, duration: float = 3.0) -> void:
 	if _toast_container == null:

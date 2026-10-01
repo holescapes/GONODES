@@ -28,7 +28,7 @@ var _status_label: Label = null
 
 
 ## Preset toolbar elements
-var _preset_bar: HBoxContainer = null
+var _preset_bar: HFlowContainer = null
 var _preset_dropdown: OptionButton = null
 var _copy_btn: Button = null
 var _paste_btn: Button = null
@@ -49,7 +49,15 @@ var _updating_dropdown: bool = false
 # ═══════════════════════════════════════════════════════════════════════════════
 
 func _ready() -> void:
-	# Minimum width set in scene (custom_minimum_size on parent PanelContainer)
+	add_to_group("gn_side_panel_width")
+	apply_side_panel_min_width()
+
+
+## Floor for this column. The scene default is 260. A lower preference still
+## cannot beat the buttons and labels inside, so those clip instead of
+## forcing the split.
+func apply_side_panel_min_width() -> void:
+	custom_minimum_size.x = GNUiPrefs.get_side_panel_min_width()
 
 	var root_vbox := VBoxContainer.new()
 	root_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -85,10 +93,14 @@ func _ready() -> void:
 	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	header_box.add_child(_status_label)
 
-	# Preset toolbar (copy / paste / reset / presets dropdown)
-	_preset_bar = HBoxContainer.new()
-	_preset_bar.add_theme_constant_override("separation", 4)
+	# Preset toolbar. A flow keeps Copy / Paste / Reset / Presets at their label
+	# width and moves them to the next line when the column is narrower than
+	# the row. That width does not become the split's minimum.
+	_preset_bar = HFlowContainer.new()
+	_preset_bar.add_theme_constant_override("h_separation", 4)
+	_preset_bar.add_theme_constant_override("v_separation", 4)
 	_preset_bar.visible = false  # Hidden until a node is inspected
+	_preset_bar.size_flags_horizontal = SIZE_EXPAND_FILL
 	header_box.add_child(_preset_bar)
 
 	# Preset dropdown selector
@@ -101,13 +113,13 @@ func _ready() -> void:
 	_preset_dropdown = OptionButton.new()
 	_preset_dropdown.add_theme_font_size_override("font_size", 11)
 	_preset_dropdown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_preset_dropdown.clip_text = true
+	_preset_dropdown.fit_to_longest_item = false
+	_preset_dropdown.custom_minimum_size = Vector2(80, 0)
 	_preset_dropdown.item_selected.connect(_on_preset_dropdown_selected)
 	preset_row.add_child(_preset_dropdown)
+	preset_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_preset_bar.add_child(preset_row)
-
-	# Buttons row
-	var btn_row := HBoxContainer.new()
-	btn_row.add_theme_constant_override("separation", 4)
 
 	_copy_btn = Button.new()
 	_copy_btn.text = "Copy"
@@ -115,7 +127,7 @@ func _ready() -> void:
 	_copy_btn.add_theme_font_size_override("font_size", 11)
 	_copy_btn.custom_minimum_size = Vector2(50, 0)
 	_copy_btn.pressed.connect(_on_copy_pressed)
-	btn_row.add_child(_copy_btn)
+	_preset_bar.add_child(_copy_btn)
 
 	_paste_btn = Button.new()
 	_paste_btn.text = "Paste"
@@ -123,7 +135,7 @@ func _ready() -> void:
 	_paste_btn.add_theme_font_size_override("font_size", 11)
 	_paste_btn.custom_minimum_size = Vector2(50, 0)
 	_paste_btn.pressed.connect(_on_paste_pressed)
-	btn_row.add_child(_paste_btn)
+	_preset_bar.add_child(_paste_btn)
 
 	_reset_btn = Button.new()
 	_reset_btn.text = "Reset"
@@ -131,17 +143,17 @@ func _ready() -> void:
 	_reset_btn.add_theme_font_size_override("font_size", 11)
 	_reset_btn.custom_minimum_size = Vector2(50, 0)
 	_reset_btn.pressed.connect(_on_reset_pressed)
-	btn_row.add_child(_reset_btn)
+	_preset_bar.add_child(_reset_btn)
 
 	_presets_btn = MenuButton.new()
 	_presets_btn.text = "Presets ▾"
 	_presets_btn.tooltip_text = "Save / load parameter presets"
 	_presets_btn.add_theme_font_size_override("font_size", 11)
 	_presets_btn.flat = false
+	_presets_btn.custom_minimum_size = Vector2(96, 0)
 	_presets_btn.get_popup().id_pressed.connect(_on_preset_menu_id_pressed)
 	_presets_btn.get_popup().about_to_popup.connect(_rebuild_presets_menu)
-	btn_row.add_child(_presets_btn)
-	_preset_bar.add_child(btn_row)
+	_preset_bar.add_child(_presets_btn)
 
 	# Separator
 	var sep := HSeparator.new()

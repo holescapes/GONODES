@@ -59,7 +59,9 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# Memory
 	if show_mem:
 		table.append_row(PackedStringArray(["Memory", "static", _format_bytes(OS.get_static_memory_usage())]))
+		table.append_row(PackedStringArray(["Memory", "static_bytes", str(OS.get_static_memory_usage())]))
 		table.append_row(PackedStringArray(["Memory", "static_peak", _format_bytes(OS.get_static_memory_peak_usage())]))
+		table.append_row(PackedStringArray(["Memory", "static_peak_bytes", str(OS.get_static_memory_peak_usage())]))
 
 	# Display
 	if show_disp:
@@ -69,6 +71,8 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			var size: Vector2i = DisplayServer.screen_get_size(i)
 			var dpi: int = DisplayServer.screen_get_dpi(i)
 			table.append_row(PackedStringArray(["Display", "screen_%d_size" % i, "%dx%d" % [size.x, size.y]]))
+			table.append_row(PackedStringArray(["Display", "screen_%d_width" % i, str(size.x)]))
+			table.append_row(PackedStringArray(["Display", "screen_%d_height" % i, str(size.y)]))
 			table.append_row(PackedStringArray(["Display", "screen_%d_dpi" % i, str(dpi)]))
 
 	return table

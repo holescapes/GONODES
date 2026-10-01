@@ -116,6 +116,7 @@ func _ready() -> void:
 	_toolbar.add_theme_constant_override("separation", 6)
 	add_child(_toolbar)
 
+	_toolbar.z_index = 2
 	_family_label = Label.new()
 	_family_label.add_theme_font_size_override("font_size", 11)
 	_family_label.text = ""
@@ -171,6 +172,7 @@ func _ready() -> void:
 	_info_bar.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 	_info_bar.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_info_bar.mouse_filter = MOUSE_FILTER_IGNORE
+	_info_bar.z_index = 2
 	add_child(_info_bar)
 
 	# Metadata button (anchored bottom-right, left of info bar)
@@ -225,6 +227,7 @@ func _ready() -> void:
 	_info_overlay.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
 	_info_overlay.add_theme_constant_override("shadow_offset_x", 1)
 	_info_overlay.add_theme_constant_override("shadow_offset_y", 1)
+	_info_overlay.z_index = 3
 	add_child(_info_overlay)
 
 	# Display modes (hidden by default)
@@ -405,7 +408,9 @@ func _ensure_3d_viewport() -> void:
 	_3d_viewport.name = "Viewer3D_VP"
 	_3d_viewport.size = _snap_size(_get_content_rect().size)
 	_3d_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-	_3d_viewport.transparent_bg = false
+	# Clear plate is transparent so status text under the picture stays readable.
+	# The panel ColorRect is the backdrop; the mesh still has ambient light.
+	_3d_viewport.transparent_bg = true
 	_3d_viewport.own_world_3d = true
 	_3d_viewport.world_3d = World3D.new()
 	add_child(_3d_viewport)
@@ -416,6 +421,7 @@ func _ensure_3d_viewport() -> void:
 	_3d_display.texture = _3d_viewport.get_texture()
 	_3d_display.mouse_filter = MOUSE_FILTER_STOP
 	_3d_display.visible = false
+	_3d_display.z_index = 1
 	add_child(_3d_display)
 
 	_3d_display.gui_input.connect(_on_3d_gui_input)
@@ -483,10 +489,8 @@ func set_control(control: Control, info_bar_text: String = "") -> void:
 	_control_container.position = content.position
 	_control_container.size = content.size
 
-	# Reparent the control into our container
 	if _current_control != null and _current_control != control:
-		if _current_control.get_parent() == _control_container:
-			_control_container.remove_child(_current_control)
+		_release_hosted_control(_current_control)
 
 	_current_control = control
 	if control.get_parent() != _control_container:
@@ -496,6 +500,7 @@ func set_control(control: Control, info_bar_text: String = "") -> void:
 
 	control.position = Vector2.ZERO
 	control.size = content.size
+	control.visible = true
 	_info_bar.text = info_bar_text
 
 
@@ -550,9 +555,20 @@ func set_info_bar(text: String) -> void:
 ## through [method GNNode.handle_viewer_input].  Interactive overlays
 ## ([GNInteractivePanel]) receive pointer events directly in UV space.
 func set_texture_overlay(overlay: Control, interactive: bool = false) -> void:
-	_clear_texture_overlay()
 	if overlay == null:
+		_clear_texture_overlay()
 		return
+	# Redraw in place during interactive drags — reparenting breaks mouse capture.
+	if overlay == _current_overlay and overlay.get_parent() == _tex_overlay:
+		_interactive_overlay = interactive and overlay is GNInteractivePanel
+		if _interactive_overlay:
+			overlay.mouse_filter = MOUSE_FILTER_STOP
+		else:
+			overlay.mouse_filter = MOUSE_FILTER_IGNORE
+		overlay.queue_redraw()
+		_tex_overlay.visible = true
+		return
+	_clear_texture_overlay()
 	_current_overlay = overlay
 	_interactive_overlay = interactive and overlay is GNInteractivePanel
 	if _interactive_overlay:
@@ -563,6 +579,10 @@ func set_texture_overlay(overlay: Control, interactive: bool = false) -> void:
 		overlay.get_parent().remove_child(overlay)
 	_tex_overlay.add_child(overlay)
 	overlay.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	if overlay is GNInteractivePanel:
+		(overlay as GNInteractivePanel).show_for_host()
+	else:
+		overlay.visible = true
 	_tex_overlay.visible = true
 
 
@@ -575,7 +595,13 @@ func _clear_texture_overlay() -> void:
 	if _tex_overlay == null:
 		return
 	if _current_overlay != null:
-		if _current_overlay.get_parent() == _tex_overlay:
+		var stored := false
+		if _current_overlay.has_method("return_to_storage") \
+				and _current_overlay.has_method("is_storage_managed") \
+				and _current_overlay.is_storage_managed():
+			_current_overlay.call("return_to_storage")
+			stored = true
+		if not stored and _current_overlay.get_parent() == _tex_overlay:
 			_tex_overlay.remove_child(_current_overlay)
 		_current_overlay = null
 	_interactive_overlay = false
@@ -612,6 +638,7 @@ func set_info_overlay(text: String) -> void:
 		return
 	_info_overlay.text = text
 	_info_overlay.visible = true
+	_info_overlay.move_to_front()
 	var content := _get_content_rect()
 	_info_overlay.position = content.position + Vector2(6, 4)
 	_info_overlay.size = Vector2(content.size.x - 12, content.size.y * 0.4)
@@ -631,10 +658,27 @@ func hide_all_displays() -> void:
 # Display Management
 # ═══════════════════════════════════════════════════════════════════════════════
 
+func _release_hosted_control(ctrl: Control) -> void:
+	if ctrl == null:
+		return
+	if ctrl is GNInteractivePanel:
+		var panel := ctrl as GNInteractivePanel
+		if panel.is_storage_managed():
+			panel.return_to_storage()
+			return
+		if ctrl.get_parent() == _control_container:
+			_control_container.remove_child(ctrl)
+		ctrl.queue_free()
+	elif ctrl.get_parent() == _control_container:
+		_control_container.remove_child(ctrl)
+
+
 func _hide_all_displays() -> void:
 	if _tex_clip:
 		_tex_clip.visible = false
 	_clear_texture_overlay()
+	_release_hosted_control(_current_control)
+	_current_control = null
 	if _control_container:
 		_control_container.visible = false
 	if _3d_display:

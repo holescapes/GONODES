@@ -77,13 +77,13 @@
       "from_node": "cam",
       "from_port": 0,
       "to_node": "render",
-      "to_port": 0
+      "to_port": 1
     },
     {
       "from_node": "light",
       "from_port": 0,
       "to_node": "render",
-      "to_port": 0
+      "to_port": 2
     },
     {
       "from_node": "render",

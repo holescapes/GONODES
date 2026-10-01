@@ -63,6 +63,9 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 		_player.name = id + "_source"
 		_scene_node = _player
 
+	if _player.get_parent() == null:
+		add_child(_player)
+
 	_player.position = Vector3(
 		get_param_value("tx"), get_param_value("ty"), get_param_value("tz"))
 
@@ -89,11 +92,17 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 				_stream_loaded = true
 
 	var should_play: bool = get_param_value("playing")
-	if _stream_loaded:
-		if should_play and not _player.playing:
-			_player.play()
-		elif not should_play and _player.playing:
+	if not should_play:
+		if _player.playing:
 			_player.stop()
+		node_warning = ""
+	elif _stream_loaded:
+		if _player.is_inside_tree():
+			if not _player.playing:
+				_player.play()
+			node_warning = ""
+		else:
+			node_warning = "Audio playback requires the player to be in the scene tree."
 
 	return _build_comp_data()
 

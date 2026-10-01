@@ -39,6 +39,8 @@ mouse interaction, and inspector control in the GONODES editor.
 | **F**    | **Fit to view** — zooms and pans to frame the selected nodes (or the entire graph if nothing is selected). |
 | **H**    | **Align Horizontal** — moves 2+ selected nodes so they share the same vertical center (average Y). |
 | **V**    | **Align Vertical** — moves 2+ selected nodes so they share the same horizontal center (average X). |
+
+Sticky notes: right-click a note → **Text Size** to choose 12, 16, 24, or 32 px (saved with the patch). Enable **Wrap sticky notes** in Preferences → Interface to grow notes so wrapped text stays inside the box.
 | **M**    | **Minimap** toggle — show/hide the corner minimap. |
 | **W**    | **Wire style** — cycle through Curved → Straight → Right-Angle wire rendering. |
 | **Ctrl + L** | **Auto-layout** — arrange all nodes using topological layering. Undoable. |
@@ -94,7 +96,7 @@ Greyed-out items require a selection, clipboard content, or ≥2 nodes.
 
 | Menu Item          | Shortcut        | Notes                                              |
 |--------------------|-----------------|-----------------------------------------------------|
-| **Add Node…**      | Alt + A         | Palette search: name, family, secondary output, and tags (`audio`, `video`, `file`, `camera`) |
+| **Add Node…**      | Alt + A         | Palette search: name, family, secondary output, and tags (`audio`, `video`, `file`, `camera`). Several words must each match a word in the name (`audio out` finds AudioDeviceOUT) |
 | **Copy**           | Ctrl + C        | Copies selected nodes + internal wires              |
 | **Cut**            | Ctrl + X        | Cut (copy then delete)                              |
 | **Paste**          | Ctrl + V        | Paste at cursor position (IDs get `_copy` suffix)   |
@@ -327,8 +329,8 @@ for the full list of what triggers each.
 ## Expression Reference Lines
 
 When a parameter's expression references another node via `chop("node_id")`,
-`op("node_id")`, `top("node_id")`, `sop()`, `dat()`, `mat()`, `vol()`,
-`img()`, or `output()`, the editor
+`op("node_id")`, `top("node_id")`, `sop()`, `dat()`, `cell()`, `lookup()`,
+`mat()`, `vol()`, `img()`, or `output()`, the editor
 draws **dashed cyan lines with arrowheads** from the referencing node to the
 referenced node.
 
@@ -447,7 +449,7 @@ Toggle from the toolbar dropdown or press **W** to cycle.
 2. An inline text field appears with the current ID pre-selected
 3. Type the new name and press **Enter** (or click away to confirm)
 4. The node, all wire references, and expression references update automatically:
-   - All `chop()`, `op()`, `top()`, `sop()`, `dat()`, `mat()`, `vol()`, `img()`, `output()`, `par()`, `set_par()` references
+   - All `chop()`, `op()`, `top()`, `sop()`, `dat()`, `cell()`, `lookup()`, `mat()`, `vol()`, `img()`, `output()`, `par()`, `set_par()` references
    - Per-component expressions on Vector2/3/4 and Color parameters
    - Script operator code bodies (GDScriptSCRIPT, PythonSCRIPT, NativeSCRIPT)
    - CallbackDAT callback slots (on_start, on_cook, on_value_change, on_create)
@@ -671,3 +673,5 @@ Editor state is saved to `user://gonodes_settings.cfg` via `_save_setting()` / `
 - NRT target FPS
 - Split container offsets (panel sizes)
 - Last opened patch path
+
+**Interface scale** (Preferences → Interface) scales the entire GONODES editor UI at 100–200% and is stored in `user://gn_ui_prefs.cfg`. **Side panel minimum width** there defaults to 260 px, the viewer and parameter column's floor. The preset buttons stay at label width and move to the next line if that column is narrower.

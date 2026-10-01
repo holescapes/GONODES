@@ -52,7 +52,13 @@ func handle_pointer(uv: Vector2, event: InputEvent) -> bool:
 				return true
 
 	elif event is InputEventMouseMotion:
+		var mm: InputEventMouseMotion = event
 		if _dragging.x >= 0:
+			if (mm.button_mask & MOUSE_BUTTON_MASK_LEFT) == 0:
+				_dragging = Vector2i(-1, -1)
+				active = Vector2i(-1, -1)
+				queue_redraw()
+				return true
 			handle_moved.emit(_dragging.x, _dragging.y, uv)
 			queue_redraw()
 			_emit_interaction_changed()

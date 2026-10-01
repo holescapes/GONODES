@@ -66,11 +66,23 @@ var _comp_resolved_labels: Array[Label] = []
 ## Resolved-value label shown next to the expression LineEdit (scalar params).
 var _resolved_label: Label = null
 
-## Inline autocomplete popup for expression fields.
-var _autocomplete_popup: PopupMenu = null
+## Inline autocomplete panel for expression fields (Panel + ItemList, not a Window).
+var _autocomplete_panel: Panel = null
+
+## ItemList inside _autocomplete_panel.
+var _autocomplete_list: ItemList = null
 
 ## The LineEdit that triggered the current autocomplete popup.
 var _autocomplete_target: LineEdit = null
+
+## "quote" replaces partial text inside a string arg; "general" replaces an identifier.
+var _autocomplete_mode: String = ""
+
+## Column where the replaceable fragment starts (general mode only).
+var _autocomplete_replace_start: int = 0
+
+## Highlighted row index while the LineEdit keeps keyboard focus.
+var _autocomplete_highlight: int = 0
 
 ## Direct reference to the code TextEdit when inside a code-editor wrapper VBox.
 var _code_edit: TextEdit = null
@@ -117,6 +129,8 @@ func setup(p_param: GNParameter, p_owner: GNNode) -> void:
 	_name_label = Label.new()
 	_name_label.text = param.label if not param.label.is_empty() else param.param_name
 	_name_label.custom_minimum_size = Vector2(100, 0)
+	_name_label.clip_text = true
+	_name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_name_label.size_flags_horizontal = 0
 	_name_label.add_theme_font_size_override("font_size", 12)
 	_name_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
@@ -446,40 +460,22 @@ func _create_string_control() -> Control:
 	if param.node_ref_family >= -1:
 		return _create_node_ref_control()
 
-	var edit := TextEdit.new()
-	edit.text = str(param.value)
-	edit.size_flags_horizontal = SIZE_EXPAND_FILL
-	edit.custom_minimum_size = Vector2(0, 80)
-	edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
-	edit.scroll_fit_content_height = false
-	if param.read_only:
-		edit.editable = false
-		edit.custom_minimum_size = Vector2(0, 48)
-		edit.add_theme_color_override("font_readonly_color", Color(0.7, 0.7, 0.7, 0.8))
-		return edit
-	edit.focus_exited.connect(_on_string_focus_lost.bind(edit))
-
-	# If this is a code param (Script operators or CustomShaderTOP), add Edit ↗ button
+	# Code params keep a multi-line read-only preview plus the Edit ↗ button
 	if _is_code_editor_param():
-		_code_edit = edit
-		# Show only a short preview — the full source is in the windowed editor.
-		# This avoids Godot's TextEdit doing expensive word-wrap/glyph shaping
-		# on potentially thousands of lines that aren't visible anyway.
-		var full_text: String = str(param.value)
-		var preview_lines := full_text.split("\n", true, 6)
-		if preview_lines.size() > 5:
-			preview_lines.resize(5)
-			preview_lines.append("…")
-		edit.text = "\n".join(preview_lines)
-		edit.editable = false
+		var edit := TextEdit.new()
+		edit.size_flags_horizontal = SIZE_EXPAND_FILL
 		edit.custom_minimum_size = Vector2(0, 60)
+		edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+		edit.scroll_fit_content_height = false
+		edit.editable = false
 		edit.add_theme_color_override("font_readonly_color", Color(0.6, 0.6, 0.6, 0.7))
+		_code_edit = edit
+		_set_code_preview_text(str(param.value))
 
 		var vbox := VBoxContainer.new()
 		vbox.size_flags_horizontal = SIZE_EXPAND_FILL
 		vbox.add_theme_constant_override("separation", 2)
 
-		# "Edit ↗" opens the full windowed code editor (presets, highlighting, etc.)
 		var edit_btn := Button.new()
 		edit_btn.text = "Edit \u2197"
 		edit_btn.tooltip_text = "Open full code editor (syntax highlighting, presets, Ctrl+Enter)"
@@ -489,7 +485,18 @@ func _create_string_control() -> Control:
 		vbox.add_child(edit)
 		return vbox
 
-	return edit
+	# One-line strings (IP, OSC address, labels, etc.)
+	var line := LineEdit.new()
+	line.text = str(param.value)
+	line.size_flags_horizontal = SIZE_EXPAND_FILL
+	line.custom_minimum_size = Vector2(0, 28)
+	if param.read_only:
+		line.editable = false
+		line.add_theme_color_override("font_uneditable_color", Color(0.7, 0.7, 0.7, 0.8))
+	else:
+		line.text_submitted.connect(_on_string_submitted)
+		line.focus_exited.connect(_on_string_line_focus_lost.bind(line))
+	return line
 
 
 ## Creates a dropdown (OptionButton) for node-reference string parameters.
@@ -500,6 +507,7 @@ func _create_node_ref_control() -> Control:
 	var ob := OptionButton.new()
 	ob.size_flags_horizontal = SIZE_EXPAND_FILL
 	ob.custom_minimum_size = Vector2(0, 28)
+	_keep_option_button_from_stretching(ob)
 	ob.allow_reselect = true
 
 	_populate_node_ref_dropdown(ob)
@@ -637,13 +645,7 @@ func _open_code_editor() -> void:
 ## and syncs the inline TextEdit.
 func _on_code_editor_committed(text: String, _param_name: String) -> void:
 	_set_value_with_undo(text)
-	if _code_edit != null:
-		# Keep only a short preview in the inline TextEdit
-		var preview_lines := text.split("\n", true, 6)
-		if preview_lines.size() > 5:
-			preview_lines.resize(5)
-			preview_lines.append("…")
-		_code_edit.text = "\n".join(preview_lines)
+	_set_code_preview_text(text)
 	if owner_node:
 		owner_node.mark_dirty()
 
@@ -651,10 +653,14 @@ func _on_code_editor_committed(text: String, _param_name: String) -> void:
 
 func _create_enum_control() -> Control:
 	var option := OptionButton.new()
+	option.size_flags_horizontal = SIZE_EXPAND_FILL
+	# Device names and other long items must not set the button's minimum
+	# width. That width climbs through the inspector and the side panel
+	# cannot shrink. The popup still lists the full strings.
+	_keep_option_button_from_stretching(option)
 	for i in range(param.enum_options.size()):
 		option.add_item(param.enum_options[i], i)
 	option.selected = int(param.value)
-	option.size_flags_horizontal = SIZE_EXPAND_FILL
 	option.item_selected.connect(_on_enum_changed)
 	# Dynamic enum: refresh options every time the dropdown is about to open
 	if param.dynamic_enum_callback.is_valid():
@@ -778,6 +784,23 @@ func _create_vector2i_control() -> Control:
 	return hbox
 
 
+## File lists can match hundreds of project files. Without a cap, PopupMenu
+## grows to the parent window. A positive max height makes that menu scroll.
+## Width stays uncapped (0).
+const FILE_DROPDOWN_MAX_HEIGHT := 360
+
+
+## Stops an OptionButton from adopting its longest (or selected) string as a
+## minimum width. The inspector scroll does not scroll sideways, so that width
+## becomes the side panel's minimum and the split cannot shrink.
+func _keep_option_button_from_stretching(option: OptionButton) -> void:
+	option.clip_text = true
+	option.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	option.fit_to_longest_item = false
+	if option.custom_minimum_size.x < 80.0:
+		option.custom_minimum_size.x = 80.0
+
+
 func _create_file_control() -> Control:
 	var hbox := HBoxContainer.new()
 	hbox.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -785,8 +808,8 @@ func _create_file_control() -> Control:
 
 	var option := OptionButton.new()
 	option.size_flags_horizontal = SIZE_EXPAND_FILL
-	option.clip_text = true
-	option.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_keep_option_button_from_stretching(option)
+	option.get_popup().max_size = Vector2i(0, FILE_DROPDOWN_MAX_HEIGHT)
 	option.tooltip_text = "Select a file from the project or bundled resources"
 	hbox.add_child(option)
 
@@ -1057,13 +1080,36 @@ func _on_string_changed(text: String) -> void:
 	_set_value_with_undo(text, true)
 
 
-## Called when the TextEdit for a string parameter loses focus — commits the value.
-func _on_string_focus_lost(edit: TextEdit) -> void:
+## Commits a string parameter value when it changed.
+func _commit_string_value(new_text: String) -> void:
 	if _updating:
 		return
-	var new_text := edit.text
 	if new_text != str(param.value):
 		_set_value_with_undo(new_text)
+
+
+## Enter in a one-line string field — commit immediately and release focus.
+func _on_string_submitted(text: String) -> void:
+	_commit_string_value(text)
+	var line_edit := _control as LineEdit
+	if line_edit:
+		line_edit.release_focus()
+
+
+## Click-away / Tab away from a one-line string field — commit on focus loss.
+func _on_string_line_focus_lost(edit: LineEdit) -> void:
+	_commit_string_value(edit.text)
+
+
+## Sets the read-only code preview TextEdit to a truncated multi-line snippet.
+func _set_code_preview_text(full_text: String) -> void:
+	if _code_edit == null:
+		return
+	var preview_lines := full_text.split("\n", true, 6)
+	if preview_lines.size() > 5:
+		preview_lines.resize(5)
+		preview_lines.append("…")
+	_code_edit.text = "\n".join(preview_lines)
 
 
 func _on_enum_changed(idx: int) -> void:
@@ -1150,6 +1196,8 @@ func _on_ramp_changed(new_keys: Array) -> void:
 func _input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton) or not event.pressed:
 		return
+	if _is_pointer_over_autocomplete():
+		return
 	# Check main expression field
 	if _expr_edit and _expr_edit.has_focus() and _expr_edit.visible:
 		if not _expr_edit.get_global_rect().has_point(event.global_position):
@@ -1161,11 +1209,11 @@ func _input(event: InputEvent) -> void:
 			if not edit.get_global_rect().has_point(event.global_position):
 				edit.release_focus()
 				return
-	# Check string TextEdit controls (plain and code params)
-	var text_edit: TextEdit = _code_edit if _code_edit != null else (_control as TextEdit if _control is TextEdit else null)
-	if text_edit and text_edit.has_focus() and text_edit.visible:
-		if not text_edit.get_global_rect().has_point(event.global_position):
-			text_edit.release_focus()
+	# Check one-line string LineEdit controls
+	var string_edit: LineEdit = _control as LineEdit if _control is LineEdit else null
+	if string_edit and string_edit.has_focus() and string_edit.visible and string_edit.editable:
+		if not string_edit.get_global_rect().has_point(event.global_position):
+			string_edit.release_focus()
 			return
 
 
@@ -1222,10 +1270,15 @@ func _on_comp_field_tab(comp_idx: int, forward: bool) -> void:
 ## Handles Tab/Shift+Tab in expression LineEdits to navigate between rows.
 ## Also triggers inline autocomplete on caret-moving input (arrows, mouse click).
 func _on_expr_gui_input(event: InputEvent) -> void:
+	if _expr_edit == null:
+		return
 	if event is InputEventKey and (event as InputEventKey).pressed:
 		var key := event as InputEventKey
+		if _handle_autocomplete_key(_expr_edit, key):
+			accept_event()
+			return
 		if key.keycode == KEY_TAB:
-			if _expr_edit and _expr_edit.has_focus():
+			if _expr_edit.has_focus():
 				_apply_expression_text(_expr_edit.text)
 				_expr_edit.release_focus()
 			if key.shift_pressed:
@@ -1244,33 +1297,40 @@ func _on_expr_gui_input(event: InputEvent) -> void:
 
 ## Handles Tab/Shift+Tab in per-component expression LineEdits, cycling siblings first.
 func _on_comp_expr_gui_input(comp_idx: int, event: InputEvent) -> void:
-	if not (event is InputEventKey) or not (event as InputEventKey).pressed:
+	if comp_idx < 0 or comp_idx >= _comp_expr_edits.size():
 		return
-	var key := event as InputEventKey
-	if key.keycode != KEY_TAB:
-		return
-	# Commit current component's expression
-	if comp_idx >= 0 and comp_idx < _comp_expr_edits.size():
-		var edit: LineEdit = _comp_expr_edits[comp_idx]
+	var edit: LineEdit = _comp_expr_edits[comp_idx]
+	if event is InputEventKey and (event as InputEventKey).pressed:
+		var key := event as InputEventKey
+		if _handle_autocomplete_key(edit, key):
+			accept_event()
+			return
+		if key.keycode != KEY_TAB:
+			if key.keycode in [KEY_LEFT, KEY_RIGHT, KEY_HOME, KEY_END]:
+				_check_inline_autocomplete.call_deferred(edit)
+			return
+		# Commit current component's expression
 		if edit.has_focus():
 			_on_comp_expr_submitted(comp_idx, edit.text)
 			edit.release_focus()
-	var forward := not key.shift_pressed
-	if forward:
-		for i in range(comp_idx + 1, _comp_expr_edits.size()):
-			if _comp_expr_edits[i].visible:
-				_comp_expr_edits[i].grab_focus()
-				accept_event()
-				return
-		tab_next_requested.emit()
-	else:
-		for i in range(comp_idx - 1, -1, -1):
-			if _comp_expr_edits[i].visible:
-				_comp_expr_edits[i].grab_focus()
-				accept_event()
-				return
-		tab_prev_requested.emit()
-	accept_event()
+		var forward := not key.shift_pressed
+		if forward:
+			for i in range(comp_idx + 1, _comp_expr_edits.size()):
+				if _comp_expr_edits[i].visible:
+					_comp_expr_edits[i].grab_focus()
+					accept_event()
+					return
+			tab_next_requested.emit()
+		else:
+			for i in range(comp_idx - 1, -1, -1):
+				if _comp_expr_edits[i].visible:
+					_comp_expr_edits[i].grab_focus()
+					accept_event()
+					return
+			tab_prev_requested.emit()
+		accept_event()
+	elif event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
+		_check_inline_autocomplete.call_deferred(edit)
 
 
 func _on_expression_submitted(text: String) -> void:
@@ -1278,6 +1338,11 @@ func _on_expression_submitted(text: String) -> void:
 
 
 func _on_expression_focus_lost() -> void:
+	if _is_pointer_over_autocomplete():
+		if _expr_edit:
+			_expr_edit.call_deferred("grab_focus")
+		return
+	_close_autocomplete()
 	if _expr_edit and _expr_edit.visible:
 		_apply_expression_text(_expr_edit.text)
 
@@ -1372,6 +1437,11 @@ func _on_comp_expr_submitted(idx: int, text: String) -> void:
 
 ## Called when a per-component expression field loses focus.
 func _on_comp_expr_focus_lost(idx: int) -> void:
+	if _is_pointer_over_autocomplete():
+		if idx >= 0 and idx < _comp_expr_edits.size():
+			_comp_expr_edits[idx].call_deferred("grab_focus")
+		return
+	_close_autocomplete()
 	if idx < _comp_expr_edits.size() and _comp_expr_edits[idx].visible:
 		_apply_comp_expression(idx, _comp_expr_edits[idx].text)
 
@@ -1751,10 +1821,13 @@ func _update_value_display() -> void:
 				cb.button_pressed = bool(param.get_resolved_value())
 				cb.text = "On" if cb.button_pressed else "Off"
 		GNParameter.ValueType.STRING:
-			# _code_edit is set when this is a Script code param wrapped in VBox
-			var edit: TextEdit = _code_edit if _code_edit != null else (_control as TextEdit)
-			if edit:
-				edit.text = str(param.get_resolved_value())
+			if _code_edit != null:
+				if not _code_edit.has_focus():
+					_set_code_preview_text(str(param.get_resolved_value()))
+			elif _control is LineEdit:
+				var line_edit := _control as LineEdit
+				if not line_edit.has_focus():
+					line_edit.text = str(param.get_resolved_value())
 		GNParameter.ValueType.ENUM:
 			var option := _control as OptionButton
 			if option:
@@ -2283,7 +2356,7 @@ func _check_inline_autocomplete(edit: LineEdit) -> void:
 			completions = _gather_param_completions(node_id)
 		else:
 			completions = _gather_data_completions(node_id)
-		_show_inline_autocomplete(edit, completions, partial)
+		_show_inline_autocomplete(edit, completions, partial, "quote")
 		return
 
 	# Check for first-arg context (node ID suggestions)
@@ -2292,7 +2365,14 @@ func _check_inline_autocomplete(edit: LineEdit) -> void:
 		var fn := m.get_string(1)
 		var partial := m.get_string(2)
 		var filter_family: int = _fn_to_family(fn)
-		_show_inline_autocomplete(edit, _gather_node_ids(filter_family), partial)
+		_show_inline_autocomplete(edit, _gather_node_ids(filter_family), partial, "quote")
+		return
+
+	# General identifier suggestions (functions, variables, constants)
+	var id_prefix := GNExpressionEditor.extract_identifier_prefix(before)
+	if id_prefix.length() >= 1:
+		var general_items := _gather_general_completions(id_prefix)
+		_show_inline_autocomplete(edit, general_items, id_prefix, "general")
 		return
 
 	# No match — close popup if open
@@ -2347,6 +2427,20 @@ func _gather_param_completions(node_id: String) -> Array[Dictionary]:
 	return results
 
 
+## Gathers shared general-expression completions filtered by identifier prefix.
+func _gather_general_completions(prefix: String) -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	for entry in GNExpressionEditor.filter_general_completions(prefix):
+		results.append({
+			"id": GNExpressionEditor.completion_entry_name(entry),
+			"insert": entry["insert"],
+			"label": entry.get("label", entry["insert"]),
+			"description": entry.get("description", ""),
+			"color": entry.get("color", Color.WHITE),
+		})
+	return results
+
+
 ## Gathers completion items (e.g. channel names, expression info keys) from
 ## a node's cached output.  Combines data.get_completions() + expression info
 ## keys so the inline LineEdit offers the same completions as the popup editor.
@@ -2368,81 +2462,267 @@ func _gather_data_completions(node_id: String) -> Array[Dictionary]:
 	return results
 
 
-## Shows or updates the inline autocomplete popup below the given LineEdit.
-func _show_inline_autocomplete(edit: LineEdit, items: Array[Dictionary], partial: String) -> void:
+## Pixel offset from the LineEdit inner left edge to the caret (margin + typed width).
+static func line_edit_caret_text_offset_x(edit: LineEdit) -> float:
+	var font := edit.get_theme_font("font")
+	var font_size := edit.get_theme_font_size("font_size")
+	var prefix := edit.text.substr(0, edit.caret_column)
+	var text_w := font.get_string_size(prefix, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var margin_left := 0.0
+	var style := edit.get_theme_stylebox("normal")
+	if style:
+		margin_left = style.get_margin(SIDE_LEFT)
+	return margin_left + text_w
+
+
+const EXPR_AUTOCOMPLETE_LIST_WIDTH := 320.0
+const EXPR_AUTOCOMPLETE_LIST_MAX_HEIGHT := 240.0
+const EXPR_AUTOCOMPLETE_LIST_VERTICAL_INSET := 4.0  # ItemList offset_top + offset_bottom (2 + 2)
+const EXPR_AUTOCOMPLETE_SCROLL_PAD := 6.0
+const EXPR_AUTOCOMPLETE_ROW_HEIGHT_MIN := 8.0
+const EXPR_AUTOCOMPLETE_ROW_HEIGHT_FLOOR := 32.0
+
+
+## Panel height for inline autocomplete: row_h * count + vertical insets + scroll pad, capped.
+static func compute_expr_autocomplete_panel_height(row_height: float, item_count: int) -> float:
+	if item_count <= 0:
+		return 0.0
+	var content_h := row_height * float(item_count) + EXPR_AUTOCOMPLETE_LIST_VERTICAL_INSET + EXPR_AUTOCOMPLETE_SCROLL_PAD
+	return mini(content_h, EXPR_AUTOCOMPLETE_LIST_MAX_HEIGHT)
+
+
+## Row height from a laid-out ItemList row, or theme font + padding with a 32px floor.
+static func estimate_expr_autocomplete_row_height(list: ItemList) -> float:
+	if list.item_count > 0:
+		var measured := list.get_item_rect(0).size.y
+		if measured >= EXPR_AUTOCOMPLETE_ROW_HEIGHT_MIN:
+			return measured
+	var font := list.get_theme_font("font")
+	var font_size := list.get_theme_font_size("font_size")
+	var font_h := float(font.get_height(font_size)) if font else 16.0
+	return maxf(maxf(font_h, 12.0) + 8.0, EXPR_AUTOCOMPLETE_ROW_HEIGHT_FLOOR)
+
+
+## Panel + ItemList suggestion widget for inline expression autocomplete (headless-testable).
+static func make_expr_autocomplete_suggestion_widget() -> Control:
+	var panel := Panel.new()
+	panel.name = "ExprAutocomplete"
+	panel.top_level = true
+	panel.focus_mode = Control.FOCUS_NONE
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.visible = false
+	panel.z_index = 100
+
+	var list := ItemList.new()
+	list.name = "List"
+	list.focus_mode = Control.FOCUS_NONE
+	list.mouse_filter = Control.MOUSE_FILTER_STOP
+	list.fixed_icon_size = Vector2i(12, 12)
+	list.max_columns = 1
+	list.same_column_width = true
+	list.select_mode = ItemList.SELECT_SINGLE
+	panel.add_child(list)
+	list.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	list.offset_left = 2
+	list.offset_top = 2
+	list.offset_right = -2
+	list.offset_bottom = -2
+	return panel
+
+
+## Canvas position for the autocomplete list: caret X, bottom of the LineEdit Y.
+func _autocomplete_panel_position(edit: LineEdit) -> Vector2:
+	return Vector2(
+		edit.global_position.x + line_edit_caret_text_offset_x(edit),
+		edit.global_position.y + edit.size.y
+	)
+
+
+## True when the pointer is over the open autocomplete panel.
+func _is_pointer_over_autocomplete() -> bool:
+	if _autocomplete_panel == null or not _autocomplete_panel.visible:
+		return false
+	var vp := _autocomplete_panel.get_viewport()
+	if vp == null:
+		return false
+	return _autocomplete_panel.get_global_rect().has_point(vp.get_mouse_position())
+
+
+## True when the inline autocomplete panel is open for this LineEdit.
+func _is_autocomplete_active_for(edit: LineEdit) -> bool:
+	return (_autocomplete_panel != null
+			and _autocomplete_panel.visible
+			and _autocomplete_target == edit)
+
+
+## Handles Up/Down/Enter/Escape while the LineEdit keeps focus. Returns true if consumed.
+func _handle_autocomplete_key(edit: LineEdit, key: InputEventKey) -> bool:
+	if not _is_autocomplete_active_for(edit):
+		return false
+	match key.keycode:
+		KEY_UP:
+			_autocomplete_highlight = maxi(0, _autocomplete_highlight - 1)
+			_sync_autocomplete_highlight()
+			return true
+		KEY_DOWN:
+			if _autocomplete_list != null:
+				_autocomplete_highlight = mini(_autocomplete_list.item_count - 1, _autocomplete_highlight + 1)
+			_sync_autocomplete_highlight()
+			return true
+		KEY_ENTER, KEY_KP_ENTER:
+			_insert_autocomplete_highlight()
+			return true
+		KEY_ESCAPE:
+			_close_autocomplete()
+			return true
+	return false
+
+
+## Updates the list's highlighted row without moving keyboard focus.
+func _sync_autocomplete_highlight() -> void:
+	if _autocomplete_list == null:
+		return
+	_autocomplete_list.deselect_all()
+	if _autocomplete_list.item_count > 0:
+		_autocomplete_highlight = clampi(_autocomplete_highlight, 0, _autocomplete_list.item_count - 1)
+		_autocomplete_list.select(_autocomplete_highlight, true)
+		_autocomplete_list.ensure_current_is_visible()
+
+
+## Shows or updates the inline autocomplete popup below the caret in the LineEdit.
+func _show_inline_autocomplete(
+		edit: LineEdit,
+		items: Array[Dictionary],
+		partial: String,
+		mode: String = "quote") -> void:
 	if items.is_empty():
 		_close_autocomplete()
 		return
 
-	# Filter by partial text
-	var q := partial.to_lower()
-	var filtered: Array[Dictionary] = []
-	for item in items:
-		if q.is_empty() or str(item.id).to_lower().contains(q):
-			filtered.append(item)
+	var filtered: Array[Dictionary] = items
+	if mode == "quote":
+		# Filter by partial text inside quotes
+		var q := partial.to_lower()
+		filtered = []
+		for item in items:
+			if q.is_empty() or str(item.id).to_lower().contains(q):
+				filtered.append(item)
+		if filtered.is_empty():
+			_close_autocomplete()
+			return
 
-	if filtered.is_empty():
-		_close_autocomplete()
-		return
+	# Create panel lazily
+	if _autocomplete_panel == null:
+		_autocomplete_panel = make_expr_autocomplete_suggestion_widget() as Panel
+		_autocomplete_list = _autocomplete_panel.get_node("List") as ItemList
+		_autocomplete_list.item_selected.connect(_on_autocomplete_list_item_selected)
+		add_child(_autocomplete_panel)
 
-	# Create popup lazily
-	if _autocomplete_popup == null:
-		_autocomplete_popup = PopupMenu.new()
-		_autocomplete_popup.name = "ExprAutocomplete"
-		_autocomplete_popup.max_size = Vector2(320, 240)
-		_autocomplete_popup.id_pressed.connect(_on_autocomplete_selected)
-		add_child(_autocomplete_popup)
+	var was_visible := _is_autocomplete_active_for(edit)
 
 	_autocomplete_target = edit
-	_autocomplete_popup.clear()
+	_autocomplete_mode = mode
+	if mode == "general":
+		_autocomplete_replace_start = edit.caret_column - partial.length()
+	else:
+		_autocomplete_replace_start = 0
+	_autocomplete_list.clear()
 
 	for i in range(filtered.size()):
 		var entry: Dictionary = filtered[i]
-		var label: String = str(entry.id)
-		var family_color: Color = GNFamily.FAMILY_COLORS.get(entry.family, Color.WHITE)
-		_autocomplete_popup.add_item(label, i)
-		_autocomplete_popup.set_item_metadata(i, entry.id)
+		var label: String = str(entry.get("label", entry.id))
+		var family_color: Color = entry.get("color", GNFamily.FAMILY_COLORS.get(entry.get("family", -1), Color.WHITE))
+		_autocomplete_list.add_item(label)
+		_autocomplete_list.set_item_metadata(i, entry)
 		var img := Image.create(12, 12, false, Image.FORMAT_RGBA8)
 		img.fill(family_color)
 		var tex := ImageTexture.create_from_image(img)
-		_autocomplete_popup.set_item_icon(_autocomplete_popup.get_item_index(i), tex)
+		_autocomplete_list.set_item_icon(i, tex)
+		var tip: String = str(entry.get("description", ""))
+		if not tip.is_empty():
+			_autocomplete_list.set_item_tooltip(i, tip)
 
-	# Position below the LineEdit
-	var edit_rect := edit.get_global_rect()
-	var popup_pos := Vector2(edit_rect.position.x, edit_rect.position.y + edit_rect.size.y)
-	_autocomplete_popup.position = Vector2i(int(popup_pos.x), int(popup_pos.y))
-	_autocomplete_popup.reset_size()
-	if not _autocomplete_popup.visible:
-		_autocomplete_popup.popup()
+	if not was_visible:
+		_autocomplete_highlight = 0
+	else:
+		_autocomplete_highlight = mini(_autocomplete_highlight, filtered.size() - 1)
+	_sync_autocomplete_highlight()
+
+	var row_h := estimate_expr_autocomplete_row_height(_autocomplete_list)
+	var list_h := compute_expr_autocomplete_panel_height(row_h, filtered.size())
+	_autocomplete_panel.size = Vector2(EXPR_AUTOCOMPLETE_LIST_WIDTH, list_h)
+	_autocomplete_panel.global_position = _autocomplete_panel_position(edit)
+	_autocomplete_panel.show()
+	_fit_autocomplete_panel_height.call_deferred(filtered.size())
 
 
-## Called when the user selects an item from the autocomplete popup.
-func _on_autocomplete_selected(id: int) -> void:
-	if _autocomplete_target == null or _autocomplete_popup == null:
+## Re-sizes the autocomplete panel after layout so get_item_rect() reflects real row height.
+func _fit_autocomplete_panel_height(item_count: int) -> void:
+	if _autocomplete_panel == null or _autocomplete_list == null or not _autocomplete_panel.visible:
 		return
-	var idx := _autocomplete_popup.get_item_index(id)
-	var selected_id: String = str(_autocomplete_popup.get_item_metadata(idx))
-	var edit := _autocomplete_target
+	var row_h := estimate_expr_autocomplete_row_height(_autocomplete_list)
+	var list_h := compute_expr_autocomplete_panel_height(row_h, item_count)
+	_autocomplete_panel.size.y = list_h
 
-	# Find the partial text that needs replacing (everything after the last ")
+
+## Inserts the currently highlighted autocomplete item into the target LineEdit.
+func _insert_autocomplete_highlight() -> void:
+	if _autocomplete_list == null or _autocomplete_target == null:
+		return
+	if _autocomplete_highlight < 0 or _autocomplete_highlight >= _autocomplete_list.item_count:
+		return
+	var meta = _autocomplete_list.get_item_metadata(_autocomplete_highlight)
+	_insert_autocomplete_item(meta)
+
+
+## Inserts one autocomplete entry into the target LineEdit.
+func _insert_autocomplete_item(meta: Variant) -> void:
+	if _autocomplete_target == null:
+		return
+	var edit := _autocomplete_target
 	var text := edit.text
 	var col := edit.caret_column
 	var before := text.substr(0, col)
 	var after := text.substr(col)
 
-	# Find the last unclosed quote to determine where partial starts
-	var quote_pos := before.rfind("\"")
-	if quote_pos < 0:
-		return
-	var new_before := before.substr(0, quote_pos + 1) + selected_id
-	edit.text = new_before + after
-	edit.caret_column = new_before.length()
+	if _autocomplete_mode == "general":
+		if not (meta is Dictionary):
+			return
+		var insert_text: String = str(meta.get("insert", meta.get("id", "")))
+		var new_before := text.substr(0, _autocomplete_replace_start) + insert_text
+		edit.text = new_before + after
+		edit.caret_column = new_before.length()
+	else:
+		var selected_id: String = ""
+		if meta is Dictionary:
+			selected_id = str(meta.get("id", ""))
+		else:
+			selected_id = str(meta)
+		var quote_pos := before.rfind("\"")
+		if quote_pos < 0:
+			return
+		var new_before := before.substr(0, quote_pos + 1) + selected_id
+		edit.text = new_before + after
+		edit.caret_column = new_before.length()
+
 	edit.grab_focus()
 	_close_autocomplete()
 
 
-## Closes the autocomplete popup if open.
+## Called when the user clicks a row in the autocomplete list.
+func _on_autocomplete_list_item_selected(index: int, _at_position: Vector2, _mouse_button_index: int) -> void:
+	if _autocomplete_target == null or _autocomplete_list == null:
+		return
+	var meta = _autocomplete_list.get_item_metadata(index)
+	_insert_autocomplete_item(meta)
+	_autocomplete_target.grab_focus()
+
+
+## Closes the autocomplete panel if open.
 func _close_autocomplete() -> void:
-	if _autocomplete_popup != null and _autocomplete_popup.visible:
-		_autocomplete_popup.hide()
+	if _autocomplete_panel != null and _autocomplete_panel.visible:
+		_autocomplete_panel.hide()
 	_autocomplete_target = null
+	_autocomplete_mode = ""
+	_autocomplete_replace_start = 0
+	_autocomplete_highlight = 0

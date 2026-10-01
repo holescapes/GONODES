@@ -664,9 +664,62 @@ static func _expression_callable_blocked(expr_text: String) -> bool:
 	return re.search(expr_text) != null
 
 
-## Rewrites chop(, op(, top(, par( calls to host.* without touching longer identifiers or string literals.
+## Rewrites GNCookEngine method calls to host.* without touching longer identifiers or string literals.
 static func _rewrite_host_method_calls(expr_text: String) -> String:
-	const HOST_METHODS := ["chop", "op", "top", "par"]
+	const HOST_METHODS: Array[String] = [
+		"cell_by_name",
+		"cellf_by_name",
+		"lookupf",
+		"lookup",
+		"par_label",
+		"smoothstep",
+		"cellf",
+		"chopf",
+		"chopi",
+		"chops",
+		"parf",
+		"pari",
+		"pars",
+		"bounce",
+		"frames",
+		"noise1",
+		"noise2",
+		"noise3",
+		"npoints",
+		"ncells",
+		"output",
+		"set_par",
+		"smooth",
+		"speed",
+		"tstart",
+		"trigger",
+		"cell",
+		"chop",
+		"cycle",
+		"digits",
+		"fetch",
+		"fit01",
+		"fit",
+		"fn",
+		"fps",
+		"iif",
+		"img",
+		"lag",
+		"log",
+		"mat",
+		"op",
+		"par",
+		"pulse",
+		"ramp",
+		"rand",
+		"sop",
+		"step",
+		"store",
+		"tend",
+		"top",
+		"vol",
+		"dat",
+	]
 	var out := ""
 	var i := 0
 	var in_string := false
@@ -687,7 +740,7 @@ static func _rewrite_host_method_calls(expr_text: String) -> String:
 			continue
 		var matched := false
 		for method_name in HOST_METHODS:
-			var token := method_name + "("
+			var token: String = method_name + "("
 			if expr_text.length() - i < token.length():
 				continue
 			if expr_text.substr(i, token.length()) != token:
@@ -718,7 +771,7 @@ func _build_expression_callable(expr_text: String) -> void:
 	if _expression_callable_blocked(expr_text):
 		return
 	var body := _rewrite_host_method_calls(expr_text)
-	var source := "extends RefCounted\n\nfunc eval(host, me, time, frame, dt):\n\treturn %s\n" % body
+	var source := "extends RefCounted\n\n@warning_ignore(\"unused_parameter\")\nfunc eval(host, me, time, frame, dt):\n\treturn %s\n" % body
 	var script := GDScript.new()
 	script.source_code = source
 	if script.reload() != OK:
@@ -734,7 +787,7 @@ func _build_component_expression_callable(idx: int, expr_text: String) -> void:
 	if _expression_callable_blocked(expr_text):
 		return
 	var body := _rewrite_host_method_calls(expr_text)
-	var source := "extends RefCounted\n\nfunc eval(host, me, time, frame, dt):\n\treturn %s\n" % body
+	var source := "extends RefCounted\n\n@warning_ignore(\"unused_parameter\")\nfunc eval(host, me, time, frame, dt):\n\treturn %s\n" % body
 	var script := GDScript.new()
 	script.source_code = source
 	if script.reload() != OK:

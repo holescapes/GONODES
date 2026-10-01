@@ -97,6 +97,10 @@ func _build_search_bar() -> void:
 	_graph.add_child(_search_bar)
 
 
+func is_search_open() -> bool:
+	return _search_bar != null and _search_bar.visible
+
+
 func open_search() -> void:
 	if _search_bar == null:
 		return

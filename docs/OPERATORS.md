@@ -644,9 +644,9 @@ Renders a 3D scene from COMPs into a 2D texture. Bridge between the COMP/SOP pip
 | dof_bokeh_shape | Enum | Circle | Box, Hexagon, Circle | Bokeh shape |
 | cook_every_frame | Bool | true | — | Re-cook every frame (disable for static scenes) |
 
-**Inputs:** `comp_in` — accepts multiple COMP connections (multi-input port).
+**Inputs:** `comp_in` — one input per COMP. Connect Geometry, Camera, and Light each to their own input. A new empty input appears after each wire. A second wire dropped on the same input replaces the first.
 
-**How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks network input connections to discover GeometryCOMP, CameraCOMP, LightCOMP, EnvironmentCOMP, and MergeCOMP and adopts their 3D nodes into the viewport. Without an EnvironmentCOMP, ambient params apply and advanced post-FX are cleared. If no CameraCOMP is connected, a default perspective camera is placed at (0, 1.5, 3). DOF is applied to the active camera. Time-dependent when `cook_every_frame` is on.
+**How it works:** Creates an isolated 3D SubViewport with `own_world_3d = true`. Walks each COMP input and adopts its scene node. That node comes from `GNCompData`, or from the operator itself when the output is not COMP data (GeometryCOMP, InstanceCOMP, LODCOMP). NullCOMP and SwitchCOMP pass the walk upstream. SelectCOMP follows its remote COMP. CameraCOMP, LightCOMP, EnvironmentCOMP, and MergeCOMP are adopted the same way. Without an EnvironmentCOMP, ambient params apply and advanced post-FX are cleared. If no CameraCOMP is connected, a default perspective camera is placed at (0, 1.5, 3). DOF is applied to the active camera. Time-dependent when `cook_every_frame` is on.
 
 **Limitation:** COMP fan-out is supported via GNProxyTree — first consumer adopts the original scene node; later consumers get lightweight proxies sharing GPU resources.
 
@@ -662,7 +662,7 @@ Renders a 3D scene into multiple output buffers: color, depth, and normal. Exten
 | normal_enabled | Bool | true | — | Enable normal buffer output on port 2 |
 | *(inherits all RenderTOP parameters)* | | | | |
 
-**Inputs:** `comp_in` — accepts multiple COMP connections (multi-input port, same as RenderTOP).
+**Inputs:** `comp_in` — same as RenderTOP. One input per COMP. A new empty input appears after each wire.
 
 **Output 0:** Color — standard rendered scene texture (identical to RenderTOP).
 **Output 1:** Depth — depth buffer visualization (uses `DEBUG_DRAW_OVERDRAW`).
@@ -3381,20 +3381,18 @@ Play an audio file and output waveform / transport channels. Supports **8/16-bit
 | load_mode | Enum | Auto | Auto, Memory, Stream | Auto: disk-stream 8/16-bit WAV, Memory for OGG/MP3. Memory: full RAM decode. Stream: force disk stream (8/16-bit WAV only; large WAV forced off Memory) |
 | play | Bool | false | — | Start / stop playback (begins at Start Position) |
 | loop | Bool | true | — | Loop playback (wraps to Start Position) |
-| volume | Float | 0.0 | −60–6 dB | Speaker / bus level before Gain |
+| volume | Float | 0.0 | −60–6 dB | Capture-bus level before Gain |
 | gain | Float | 1.0 | 0–16 | Linear boost for CHOP waveform + analysis bus (raise if spectrum/bands look weak) |
 | start_pos | Float | 0.0 | 0–86400 (then clip length) | Cue time (seconds) — Play starts here; Loop returns here. Range widens to clip length after load (initial max is large so patch reload does not clamp saved cues). |
 | seek_pos | Float | 0.0 | 0–86400 (then clip length) | Live scrubber (seconds); follows playhead while playing |
 | buffer_size | Int | 1024 | 64–8192 | Samples per cook for CHOP waveform |
 | stereo | Bool | true | — | Output left/right channels |
-| mute_output | Bool | false | — | Mute speakers (waveform + spectrum still captured) |
-| output_device | Enum | Default | (dynamic) | Global Godot output device (one at a time) |
-| refresh_devices | Bool | false | pulse | Re-scan OS audio devices |
+| mute_output | Bool | false | — | Does not send this file to the speakers. The capture bus stays live so the waveform and a wired AudioSpectrumCHOP still move. Hear the file through AudioDeviceOUT with Active on |
 
 **No inputs** — source operator.
-**Output:** `out` (CHOP) — `left`, `right` (optional), `level`, `pos`, `length`, `playing`. Sets `source_bus` for spectrum routing.
+**Output:** `out` (CHOP) — `left`, `right` (optional), `level`, `pos`, `length`, `playing`. Sets `source_bus` for spectrum routing. This node outputs CHOP samples only and does not play to speakers — wire `out` to **AudioDeviceOUT** to hear the file.
 
-**How it works:** Auto/Stream opens 8/16-bit PCM WAV with `FileAccess` + `AudioStreamGenerator` (low RAM). OGG/MP3 (and small WAVs in Memory mode) decode via `GNResourceLoader.load_audio` on a worker thread. Effective bus level is `volume_db + 20·log10(gain)` so Gain lifts both speakers and `AudioSpectrumCHOP` analysis. Typical chain: `AudioFileInCHOP → AudioSpectrumCHOP → AudioBandCHOP → chop() into shaders`. AudioBandCHOP also has its own `gain` for post-FFT shaping.
+**How it works:** Auto/Stream opens 8/16-bit PCM WAV with `FileAccess` + `AudioStreamGenerator` (low RAM). OGG/MP3 (and small WAVs in Memory mode) decode via `GNResourceLoader.load_audio` on a worker thread. Effective capture-bus level is `volume_db + 20·log10(gain)` so Gain lifts the CHOP waveform and `AudioSpectrumCHOP` analysis. Typical chain: `AudioFileInCHOP → AudioSpectrumCHOP → AudioBandCHOP → chop() into shaders`. Wire `out` to **AudioDeviceOUT** for speaker playback. AudioBandCHOP also has its own `gain` for post-FFT shaping.
 
 ---
 
@@ -3582,6 +3580,8 @@ Send/receive control messages to/from a Pure Data patch.
 
 DATs process tables and text. The output type is `GNTableData`, which operates in either **table mode** (2D grid of strings with headers) or **text mode** (plain string). DATs are useful for configuration, data lookups, text processing, and cross-family data conversion.
 
+**Expressions.** `cell("table", row, col)` and `cellf(...)` read one cell. A row or column can be an index or a name. A row name matches column 0. A column name matches the header. `lookup("table", key_col, key, value_col)` and `lookupf(...)` search any column and return another column on the first matching row. A miss is `""` or `0`. Text-mode DATs have no grid. Full rules and examples are in `addons/gonodes/help/expressions.md`.
+
 **Total: 51 operators.**
 
 ### Generators
@@ -3622,9 +3622,11 @@ System information table. Time-dependent — updates every frame.
 
 **Parameters:** None.
 
-**Output table columns:** `property`, `value`.
+**Output table columns:** `property`, `value`. Row names are in column 0, so `cellf("info", "fps", "value")` addresses a row.
 
-**Rows:** `fps`, `frame`, `elapsed_time`, `delta`, `engine_version`, `os`, `processor_name`, `processor_count`, `screen_size`, `static_memory`.
+**Rows:** `fps`, `frame`, `elapsed_time`, `delta`, `engine_version`, `os`, `processor_name`, `processor_count`, `screen_size`, `screen_width`, `screen_height`, `static_memory`, `static_memory_bytes`.
+
+`screen_size` and `static_memory` are display text. Use `screen_width`, `screen_height`, and `static_memory_bytes` in expressions.
 
 **How it works:** Reads values from Godot's `Engine`, `OS`, `Performance`, and `DisplayServer` APIs each frame.
 
@@ -3893,7 +3895,7 @@ Convert SOP geometry to a DAT table.
 | attribute | Enum | Points | Points, Summary |
 | max_points | Int | 1000 | Max vertices (Points mode) |
 
-**Input:** `in` (SOP). Points mode: headers `px, py, pz, nx, ny, nz, u, v`. Summary mode: vertex count, surface count, AABB.
+**Input:** `in` (SOP). Points mode: headers `px, py, pz, nx, ny, nz, u, v`. Summary mode: `attribute` / `value` rows for vertex count, surface count, and AABB components `aabb_min_x/y/z`, `aabb_max_x/y/z`, `aabb_size_x/y/z`.
 
 ---
 
@@ -4181,10 +4183,13 @@ Outputs system information (OS, CPU, GPU, memory, display) as a DAT table.
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | hardware | Bool | true | Include hardware (CPU/GPU) info |
+| memory | Bool | true | Include memory usage |
 | display | Bool | true | Include display/monitor info |
 
 **No inputs** — reads system information.
-**Output:** `out` (DAT — property, value columns).
+**Output:** `out` (DAT — `category`, `property`, `value`). The unique key is `property`, not column 0, because `category` repeats. Read a cell with `lookupf("sys", "property", "screen_0_width", "value")`.
+
+Each monitor adds `screen_N_size` (`1920x1080` display text), `screen_N_width`, `screen_N_height`, and `screen_N_dpi`. Memory adds `static` and `static_peak` as display text, plus `static_bytes` and `static_peak_bytes` as plain integers. Expressions should use the numeric rows. Turning Hardware, Memory, or Display off drops those rows; the property name still finds the row.
 
 ---
 
@@ -5860,15 +5865,18 @@ Wraps Godot's `AudioStreamPlayer3D` for positional audio playback in 3D scenes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| tx/ty/tz | Float | 0.0 | — | Position |
-| file | File | "" | `*.wav`, `*.ogg`, `*.mp3` | Audio file path |
-| volume_db | Float | 0.0 | -80.0–24.0 | Volume in decibels |
-| max_distance | Float | 10.0 | 0.0–100.0 | Maximum audible distance |
-| bus | String | Master | — | Audio bus name |
+| tx/ty/tz | Float | 0.0 | — | Position in the 3D scene |
+| file | File | "" | `*.wav`, `*.ogg`, `*.mp3` | Audio file path. This is the only sound source |
+| volume_db | Float | 0.0 | −80–24 | Volume in decibels |
+| max_distance | Float | 10.0 | 0.1–1000 | Maximum audible distance |
+| unit_size | Float | 1.0 | 0.1–100 | Distance at which the stream is full volume |
+| attenuation | Enum | Inverse Distance | Inverse Distance, Inverse Square, Logarithmic, Disabled | Distance attenuation model |
+| autoplay | Bool | true | — | Stored on the node. Cook follows Playing, not this flag |
+| loop | Bool | true | — | Loop the file |
+| playing | Bool | true | — | Play / pause. While on, the node cooks with no downstream wire |
 
-**Inputs:** `audio` (CHOP, optional — audio source data).
-**No inputs required** — can also use built-in stream.
-**Output:** `out` (COMP — AudioStreamPlayer3D scene node).
+**No inputs.** There is no CHOP port. Wire nothing in; set File.
+**Output:** `out` (COMP — AudioStreamPlayer3D scene node). Godot plays it from this position against AudioListenerCOMP. It does not emit samples for AudioDeviceOUT.
 
 ---
 
@@ -6060,7 +6068,7 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 | open | Bool | false | — | Show/hide the output window (must be ON to see anything) |
 | title | String | "GONODES Output" | — | Window title |
 | monitor | Int | 0 | 0–8 | Target display index |
-| window_mode | Enum | Windowed | Windowed, Fullscreen, Borderless | Window mode |
+| window_mode | Enum | Windowed | Windowed, Fullscreen, Borderless | Windowed uses Resolution and a title bar. Borderless uses Resolution with no title bar. Fullscreen takes the monitor |
 | resolution | Vector2i | 512×512 | — | Window resolution in pixels |
 | position | Vector2i | (-1, -1) | — | Window position (-1,-1 = auto center) |
 | always_on_top | Bool | false | — | Keep window above others |
@@ -6069,7 +6077,7 @@ Displays a TOP texture in a standalone OS window. Essential for VJ output — ea
 **Input 0:** `in` (TOP — background texture).
 **Input 1:** `panel` (UI — interactive panel with native Godot input routing).
 
-**How it works:** When Open is ON, creates a Godot `Window` with a `TextureRect` (`mouse_filter = IGNORE`, z=0) for the background texture and a `VBoxContainer` "UIRoot" (`mouse_filter = PASS`, z=1) for the interactive panel layer. The TextureRect is assigned the input TOP's `ViewportTexture` — a live GPU reference with zero copy overhead. UI controls from ContainerUI are adopted directly into the UIRoot container — no SubViewport indirection — so Godot's native input dispatch (mouse, keyboard, focus) works automatically. An overlay system (CanvasLayer at layer 100) supports dropdowns, color pickers, and popup menus above the panel layer. Window configuration (mode, position, monitor, vsync) is only applied when the WindowOUT's own parameters change, NOT when upstream textures update (preventing per-frame window reconfiguration). Multiple WindowOUT instances create multiple independent windows.
+**How it works:** When Open is ON, creates a Godot `Window` with a `TextureRect` (`mouse_filter = IGNORE`, z=0) for the background texture and a `VBoxContainer` "UIRoot" (`mouse_filter = PASS`, z=1) for the interactive panel layer. The editor and the output window share one rendering device, so the TextureRect is assigned the input TOP's texture directly, including a `ViewportTexture`. There is no CPU readback. The source SubViewport is asked to draw if it is still disabled, so the picture appears when Open is on without selecting the source node. UI controls from ContainerUI are adopted directly into the UIRoot container — no SubViewport indirection — so Godot's native input dispatch (mouse, keyboard, focus) works automatically. An overlay system (CanvasLayer at layer 100) supports dropdowns, color pickers, and popup menus above the panel layer. Window configuration (mode, position, monitor, vsync) is only applied when the WindowOUT's own parameters change, NOT when upstream textures update (preventing per-frame window reconfiguration). Multiple WindowOUT instances create multiple independent windows.
 
 > **Architecture note — process_mode:** GNNode sets `process_mode = PROCESS_MODE_DISABLED` during `initialize()` so operators don't run Godot's `_process()` (all cooking is driven by GNCookEngine). However, Godot propagates process_mode to child nodes, so the Window would also become DISABLED — blocking GUI event dispatch entirely (buttons, sliders, etc. stop responding). The fix: WindowOUT explicitly sets `_window.process_mode = Node.PROCESS_MODE_ALWAYS` in `_ensure_window()`. This has zero performance cost — it simply re-enables standard Godot GUI dispatch for the Window subtree.
 
@@ -6139,7 +6147,7 @@ Push CHOP samples to speakers via AudioStreamGenerator (`left`/`right` or first 
 | device | Enum | Default | Output device (one at a time project-wide) |
 | gain | Float | 1.0 | Output gain |
 | mix_rate | Float | 44100 | Sample rate Hz |
-| buffer_length | Float | 0.1 | Generator buffer seconds |
+| buffer_length | Enum | 4096 | Generator buffer in samples (512, 1024, 2048, 4096, 8192). Godot enforces a 10 ms minimum buffer length. |
 
 **Input 0:** `in` (CHOP).
 
@@ -7063,9 +7071,9 @@ The `gn_ext_native` extension provides C++ GDExtension-accelerated variants of *
 
 | Operator | Native Class | Description |
 |----------|-------------|-------------|
-| AnalyzeTOP | AnalyzeTOPNative | Pixel min/max/avg/sum statistics with native C++ acceleration |
+| AnalyzeTOP | AnalyzeTOPNative | Pixel min/max/avg/sum on the GPU (same shader as AnalyzeTOP, no readback) |
 | CHOPtoTOP | CHOPtoTOPNative | Render CHOP channels as texture with native C++ acceleration |
-| OpticalFlowTOP | OpticalFlowTOPNative | Horn-Schunck optical flow with native C++ acceleration |
+| OpticalFlowTOP | OpticalFlowTOPNative | Horn-Schunck optical flow on the GPU (same shader as OpticalFlowTOP, no readback) |
 | ParticleStateTOP | ParticleStateTOPNative | Visualize particle attributes as 2D texture with native C++ acceleration |
 ### VOL — Native Variants
 

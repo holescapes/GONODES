@@ -89,6 +89,14 @@ func _ready() -> void:
 	_validate_timer.timeout.connect(_validate_code)
 	add_child(_validate_timer)
 	_code_edit.text_changed.connect(_on_text_changed)
+	_code_edit.caret_changed.connect(_on_caret_changed)
+
+
+## Enables CodeEdit completion for cook-script GDScript mode only.
+func _setup_code_edit(edit: CodeEdit) -> void:
+	edit.code_completion_enabled = true
+	edit.code_completion_prefixes = PackedStringArray([".", "(", "\""])
+	edit.code_completion_requested.connect(_on_code_completion_requested)
 
 
 ## Adds the preset toolbar between info label and CodeEdit.
@@ -172,14 +180,123 @@ func open(node: GNNode, param_name: String) -> void:
 	else:
 		_setup_gdscript_highlighter()
 
+	# Cook-script helpers only — not Godot LSP, not extension/shader languages.
+	_code_edit.code_completion_enabled = _is_gdscript_completion_mode()
+
 	# Load current param value
 	var param := node.get_parameter(param_name)
 	_code_edit.text = str(param.value) if param else ""
 
-	_set_status("Ctrl+Enter to confirm  |  Escape to cancel")
+	if _is_gdscript_completion_mode():
+		_validate_code()
+	else:
+		_set_status("Ctrl+Enter to confirm  |  Escape to cancel")
 
 	_popup_clamped()
 	_focus_end()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Cook-Script Code Completion (GDScript mode only)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+## Returns cook-script completion entries for GNCodeEditor.
+## Each entry: insert, label, description, kind ("variable" | "function"), color.
+static func get_script_completion_entries() -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+
+	for v in [
+		["me", "Current node"],
+		["inputs", "Input port values"],
+		["outputs", "Output port values"],
+		["time", "Elapsed seconds"],
+		["frame", "Frame number"],
+		["dt", "Delta time"],
+		["target", "Event target node id"],
+		["event", "Active callback event name"],
+		["event_param", "Event parameter name"],
+	]:
+		entries.append({
+			"insert": v[0],
+			"label": v[0],
+			"description": v[1],
+			"kind": "variable",
+			"color": Color(0.55, 0.8, 1.0),
+		})
+
+	for fn_entry in [
+		["par(", "par(", "Read parameter value"],
+		["chop(", "chop(", "Read CHOP channel value"],
+		["op(", "op(", "Read node parameter value"],
+		["op_ref(", "op_ref(", "Reference another operator"],
+		["top(", "top(", "Read TOP info"],
+		["sop(", "sop(", "Read SOP info"],
+		["dat(", "dat(", "Read DAT cell value"],
+		["set_par(", "set_par(", "Write parameter on another node"],
+		["network_add_node(", "network_add_node(", "Add node to network"],
+		["network_remove_node(", "network_remove_node(", "Remove node from network"],
+		["network_connect(", "network_connect(", "Connect two ports"],
+		["network_disconnect(", "network_disconnect(", "Disconnect a wire"],
+		["network_node_ids(", "network_node_ids(", "List node ids in network"],
+		["network_node_info(", "network_node_info(", "Get node metadata"],
+	]:
+		entries.append({
+			"insert": fn_entry[0],
+			"label": fn_entry[1],
+			"description": fn_entry[2],
+			"kind": "function",
+			"color": Color(0.4, 0.9, 0.5),
+		})
+
+	return entries
+
+
+static func filter_script_completions(prefix: String) -> Array[Dictionary]:
+	var q := prefix.to_lower()
+	if q.is_empty():
+		return []
+	var results: Array[Dictionary] = []
+	for entry in get_script_completion_entries():
+		if GNExpressionEditor.completion_entry_name(entry).to_lower().begins_with(q):
+			results.append(entry)
+	return results
+
+
+func _is_gdscript_completion_mode() -> bool:
+	return not _shader_mode and not _ext_languages.has(_param_name)
+
+
+func _on_code_completion_requested() -> void:
+	if not _is_gdscript_completion_mode():
+		return
+	var line := _code_edit.get_line(_code_edit.get_caret_line())
+	var col := _code_edit.get_caret_column()
+	var prefix := GNExpressionEditor.extract_identifier_prefix(line.substr(0, col))
+	if prefix.is_empty():
+		return
+	for entry in filter_script_completions(prefix):
+		var kind := CodeEdit.KIND_FUNCTION if entry.get("kind", "") == "function" else CodeEdit.KIND_VARIABLE
+		_code_edit.add_code_completion_option(
+			kind,
+			entry["label"],
+			entry["insert"],
+			entry.get("color", Color.WHITE),
+			null,
+			entry.get("description", ""))
+	_code_edit.update_code_completion_options(true)
+
+
+func _on_caret_changed() -> void:
+	_maybe_request_completion()
+
+
+func _maybe_request_completion() -> void:
+	if not _is_gdscript_completion_mode():
+		return
+	var line := _code_edit.get_line(_code_edit.get_caret_line())
+	var col := _code_edit.get_caret_column()
+	if GNExpressionEditor.extract_identifier_prefix(line.substr(0, col)).length() >= 1:
+		_code_edit.request_code_completion(true)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -473,6 +590,7 @@ func _on_save_preset_pressed() -> void:
 
 func _on_text_changed() -> void:
 	_validate_timer.start()
+	_maybe_request_completion()
 
 
 func _validate_code() -> void:
@@ -485,6 +603,11 @@ func _validate_code() -> void:
 
 	if code.is_empty():
 		_set_status("Ctrl+Enter to confirm  |  Escape to cancel")
+		return
+
+	var preflight_err := GNScriptHelper.validate_user_code(code)
+	if not preflight_err.is_empty():
+		_set_status("\u2717 %s" % preflight_err, Color(1.0, 0.35, 0.3))
 		return
 
 	var full_source: String = GNScriptHelper._PREAMBLE + code
