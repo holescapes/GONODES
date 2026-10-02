@@ -102,13 +102,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			RenderingDevice.DATA_FORMAT_R32_SFLOAT)
 		_prev_res = res
 
-	# Clear output with bg color, depth with 1.0
-	var bg_img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	bg_img.fill(bg)
-	mrd.texture_update(_output_tex_rid, 0, bg_img.get_data())
-	var depth_img := Image.create(w, h, false, Image.FORMAT_RF)
-	depth_img.fill(Color(1.0, 0.0, 0.0))
-	mrd.texture_update(_depth_tex_rid, 0, depth_img.get_data())
+	# Clear on the GPU. A full CPU image upload of the picture stalls the cook.
+	mrd.texture_clear(_output_tex_rid, bg, 0, 1, 0, 1)
+	mrd.texture_clear(_depth_tex_rid, Color(1.0, 0.0, 0.0, 1.0), 0, 1, 0, 1)
 
 	# ── POP buffer is on the same device — zero-copy, no bulk memcpy needed ──
 
@@ -118,9 +114,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if not shader.is_valid():
 		return null
 
-	# ── Push constants ──
+	# 100 bytes. The shader's push constant ends at color_b.
 	var pc := PackedByteArray()
-	pc.resize(112)
+	pc.resize(100)
 	pc.encode_s32(0, w)
 	pc.encode_s32(4, h)
 	pc.encode_s32(8, pd.particle_count)
@@ -138,9 +134,6 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	pc.encode_float(88, col.r)
 	pc.encode_float(92, col.g)
 	pc.encode_float(96, col.b)
-	pc.encode_float(100, 0.0)
-	pc.encode_float(104, 0.0)
-	pc.encode_float(108, 0.0)
 
 	# ── Dispatch (fire-and-forget, no submit/sync) ──
 	var us: RID = mrd.uniform_set_create([

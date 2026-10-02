@@ -103,7 +103,7 @@ func _cook_cpu(_inputs: Array[GNData]) -> GNData:
 				var nx: float = float(x) / float(res.x) + ox
 				var ny: float = float(y) / float(res.y) + oy
 				var nz: float = float(z) / float(res.z) + oz + t
-				var v: float = noise.get_noise_3d(nx, ny, nz) * amplitude
+				var v: float = maxf(noise.get_noise_3d(nx, ny, nz) * amplitude, 0.0)
 				vol.cpu_data[_vol_idx(x, y, z, res)] = v
 
 	return vol

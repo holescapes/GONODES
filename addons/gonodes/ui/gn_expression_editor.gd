@@ -742,7 +742,8 @@ func _build_presets_menu(popup: PopupMenu) -> void:
 	# Disconnect any prior signal to avoid duplicates on rebuild
 	if popup.id_pressed.is_connected(_on_preset_selected):
 		popup.id_pressed.disconnect(_on_preset_selected)
-	popup.clear()
+	# Frees the Delete snippet submenu. Leaving it and adding another crashes.
+	popup.clear(true)
 	var id := 0
 
 	# ── Built-in presets ────────────────────────────────────────────────

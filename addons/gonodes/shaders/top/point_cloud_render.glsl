@@ -92,12 +92,19 @@ void main() {
     float px = (ndc_x * 0.5 + 0.5) * float(p.img_w);
     float py = ((-ndc_y) * 0.5 + 0.5) * float(p.img_h);
 
-    // Splat radius (world-space pscale → screen pixels)
-    float base_radius = p.point_size * max(pscale, 0.01);
-    float radius = mix(base_radius, base_radius / max(depth, 0.001) * float(p.img_h) * 0.5 / half_fov,
-        p.size_attenuation);
+    // Constant pixel size when attenuation is 0 (the node viewer).
+    // Perspective size is capped so one near particle cannot fill the frame.
+    float radius;
+    if (p.size_attenuation <= 0.001) {
+        radius = max(p.point_size, 1.0);
+    } else {
+        float base_radius = p.point_size * max(pscale, 0.01);
+        radius = base_radius / max(depth, 0.001) * float(p.img_h) * 0.5 / half_fov;
+        radius = min(radius, 16.0);
+    }
     int r = int(ceil(radius));
     if (r < 1) r = 1;
+    if (r > 16) r = 16;
 
     // Determine color
     vec3 col;

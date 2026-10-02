@@ -19,10 +19,12 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("direction", 0, 0, 1,
-		"Direction", "0 = Horizontal, 1 = Vertical"))
-	add_parameter(GNParameter.create_int("sort_mode", 0, 0, 5,
-		"Sort Mode", "0=Brightness, 1=Hue, 2=Saturation, 3=Red, 4=Green, 5=Blue"))
+	add_parameter(GNParameter.create_enum("direction",
+		PackedStringArray(["Horizontal", "Vertical"]), 0,
+		"Direction", "Sort across rows or down columns"))
+	add_parameter(GNParameter.create_enum("sort_mode",
+		PackedStringArray(["Brightness", "Hue", "Saturation", "Red", "Green", "Blue"]), 0,
+		"Sort Mode", "Which channel orders the pixels"))
 	add_parameter(GNParameter.create_float("threshold_low", 0.25, 0.0, 1.0, 0.01,
 		"Threshold Low", "Minimum brightness to include in a span"))
 	add_parameter(GNParameter.create_float("threshold_high", 0.8, 0.0, 1.0, 0.01,

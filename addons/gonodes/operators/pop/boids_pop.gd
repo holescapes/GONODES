@@ -1,8 +1,8 @@
 class_name BoidsPOP
 extends GNPopBase
 ## Flocking / boids simulation on GPU particles using Reynolds rules:
-## separation, alignment, cohesion.  Brute-force O(n²) neighbor search
-## in a compute shader — performant up to ~50k particles on modern GPUs.
+## separation, alignment, cohesion. Each particle samples up to 48 others,
+## spread across the pool, so a few thousand particles stay one short dispatch.
 
 func _init() -> void:
 	super._init()
@@ -101,6 +101,8 @@ func _cook_cpu_fallback(pd: GNParticleData) -> GNParticleData:
 	var r2: float = percep_r * percep_r
 	var avoid_r2: float = avoid_r * avoid_r
 	var n: int = pd.particle_count
+	var checks: int = mini(n, 48)
+	var stride: int = maxi(int(float(n) / float(maxi(checks, 1))), 1)
 
 	for i in range(n):
 		if pd.cpu_ages[i] >= pd.cpu_lives[i]:
@@ -116,7 +118,9 @@ func _cook_cpu_fallback(pd: GNParticleData) -> GNParticleData:
 		var ali_count: int = 0
 		var coh_count: int = 0
 
-		for j in range(n):
+		var start: int = i % stride
+		for k in range(checks):
+			var j: int = (start + k * stride) % n
 			if j == i:
 				continue
 			if pd.cpu_ages[j] >= pd.cpu_lives[j]:

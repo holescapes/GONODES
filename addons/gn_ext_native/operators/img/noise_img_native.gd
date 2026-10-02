@@ -20,8 +20,9 @@ func _init_ports() -> void:
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512),
 		"Resolution", "Output image resolution"))
-	add_parameter(GNParameter.create_int("type", 0, 0, 1,
-		"Noise Type", "0 = Value noise (smooth), 1 = White noise (random)"))
+	add_parameter(GNParameter.create_enum("type",
+		PackedStringArray(["Value", "White"]), 0,
+		"Noise Type", "Value is smooth noise. White is random pixels."))
 	add_parameter(GNParameter.create_float("scale", 4.0, 0.01, 100.0, 0.1,
 		"Scale", "Spatial frequency (value noise)"))
 	add_parameter(GNParameter.create_float("offset_x", 0.0, -1000.0, 1000.0, 0.1,

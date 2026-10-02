@@ -57,6 +57,17 @@ func test_create_enum() -> void:
 	GNTestAssert.assert_eq(p.enum_options.size(), 3, "enum_options size")
 
 
+func test_enum_expression_accepts_index_or_name() -> void:
+	var opts := PackedStringArray(["Value", "White"])
+	var p := GNParameter.create_enum("type", opts, 0, "Noise Type")
+	GNTestAssert.assert_eq(p.resolve_enum_index(1), 1, "index")
+	GNTestAssert.assert_eq(p.resolve_enum_index(1.0), 1, "float index")
+	GNTestAssert.assert_eq(p.resolve_enum_index("White"), 1, "name")
+	GNTestAssert.assert_eq(p.resolve_enum_index("value"), 0, "name ignores case")
+	GNTestAssert.assert_eq(p.resolve_enum_index(2), null, "out of range")
+	GNTestAssert.assert_eq(p.resolve_enum_index("nope"), null, "unknown name")
+
+
 func test_create_vector2() -> void:
 	var p := GNParameter.create_vector2("offset", Vector2(1.0, 2.0), "Offset")
 	GNTestAssert.assert_eq(p.value_type, GNParameter.ValueType.VECTOR2, "value_type")
@@ -217,6 +228,14 @@ func test_valid_expression_compiles() -> void:
 	GNTestAssert.assert_true(p.is_expression_valid(), "expression should be valid")
 	GNTestAssert.assert_not_null(p.get_compiled_expression(), "compiled object should exist")
 	GNTestAssert.assert_empty(p.expression_error, "no error text")
+
+
+func test_calling_time_is_an_error_not_a_script() -> void:
+	var p := GNParameter.create_float("x", 0.0)
+	p.set_expression("time(1)")
+	GNTestAssert.assert_false(p.is_expression_valid(), "time() is not a function")
+	GNTestAssert.assert_true(p.expression_error.contains("time"), "error names time")
+	GNTestAssert.assert_false(p.get_expression_eval_callable().is_valid(), "no script was compiled")
 
 
 func test_invalid_expression_reports_error() -> void:

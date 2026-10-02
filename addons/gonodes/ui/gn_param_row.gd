@@ -813,12 +813,9 @@ func _create_file_control() -> Control:
 	option.tooltip_text = "Select a file from the project or bundled resources"
 	hbox.add_child(option)
 
-	# Populate with matching files from all tiers
-	_populate_file_dropdown(option)
-
-	# Re-populate every time the user opens the dropdown so that project_dir
-	# (set by the cook engine after the first cook) is always current.
-	option.pressed.connect(func() -> void:
+	# Show the current file only. The full project scan runs when the list opens.
+	_show_current_file(option)
+	option.get_popup().about_to_popup.connect(func() -> void:
 		_populate_file_dropdown(option)
 	)
 
@@ -867,6 +864,28 @@ func _create_ramp_control() -> Control:
 	# Wire change signal back to the parameter model
 	ramp_editor.ramp_changed.connect(_on_ramp_changed)
 	return ramp_editor
+
+
+## Shows the current path without scanning the project. The scan is the hitch
+## when a node with a file parameter is selected.
+func _show_current_file(option: OptionButton) -> void:
+	option.clear()
+	option.add_item("(none)", 0)
+	option.set_item_metadata(0, "")
+	var current_path := ""
+	if param != null:
+		var resolved: Variant = param.get_resolved_value()
+		current_path = str(resolved) if resolved != null else ""
+	if current_path.is_empty() or current_path == "<null>":
+		option.selected = 0
+		return
+	var display := current_path.get_file()
+	if display.is_empty():
+		display = current_path
+	option.add_item(display, 1)
+	option.set_item_metadata(1, current_path)
+	option.set_item_tooltip(1, current_path)
+	option.selected = 1
 
 
 ## Populates the OptionButton dropdown with files from all tiers:
@@ -1862,17 +1881,10 @@ func _update_value_display() -> void:
 			if hbox and hbox.get_child_count() >= 1:
 				var option: OptionButton = hbox.get_child(0) as OptionButton
 				if option:
-					var file_path: String = str(param.get_resolved_value())
-					# Find the matching item in the dropdown
-					var found := false
-					for i in range(option.item_count):
-						if option.get_item_metadata(i) == file_path:
-							option.selected = i
-							found = true
-							break
-					if not found and not file_path.is_empty():
-						# File not in dropdown — rescan then try again
-						_populate_file_dropdown(option)
+					# Do not rescan the project here. This runs when the row is
+					# built, so a node with a texture, movie, or sound was
+					# walking res:// on every click. The list fills when opened.
+					_show_current_file(option)
 		GNParameter.ValueType.RAMP:
 			var ramp_editor := _control as GNRampEditor
 			if ramp_editor:

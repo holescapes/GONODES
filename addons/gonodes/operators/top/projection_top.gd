@@ -21,8 +21,8 @@ func _init_parameters() -> void:
 		"UV translation"))
 	add_parameter(GNParameter.create_vector2("uv_scale", Vector2(1.0, 1.0), "UV Scale",
 		"UV scale multiplier"))
-	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 0.01, "The rotation value",
-		"UV rotation in radians"))
+	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 1.0, "Rotation",
+		"UV rotation in degrees"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
@@ -41,7 +41,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("projection_mode", get_param_value("mode"))
 	_material.set_shader_parameter("uv_offset", get_param_value("uv_offset"))
 	_material.set_shader_parameter("uv_scale", get_param_value("uv_scale"))
-	_material.set_shader_parameter("rotation", get_param_value("rotation"))
+	_material.set_shader_parameter("rotation", deg_to_rad(get_param_value("rotation")))
 
 	_cached_tex_data.resolution = res
 	return _cached_tex_data

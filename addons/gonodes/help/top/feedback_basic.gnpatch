@@ -19,6 +19,11 @@
                 "scale": {
                     "value": 4.0
                 },
+                "time_offset": {
+                    "value": 0.0,
+                    "mode": "EXPRESSION",
+                    "expression": "time"
+                },
                 "monochrome": {
                     "value": true
                 }
@@ -80,7 +85,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Feedback TOP — Basic\n\nBlends current frame with previous frame for trails/echoes.\nUsing: mix=0.9, rotate=0.0, reset=False.",
+            "text": "Feedback TOP — Basic\n\nBlends the current frame with the previous one, so a moving picture leaves a trail.\nNoise Time Offset is time, so the pattern keeps changing.\nUsing: mix=0.9, rotate=0.0, reset=False.",
             "position": [
                 -100.0,
                 -100.0

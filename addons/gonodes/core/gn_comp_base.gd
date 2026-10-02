@@ -119,10 +119,9 @@ static func _resolve_scene_node_r(node: GNNode, net: GNNetwork,
 	var comp_data := node.cached_output as GNCompData
 	if comp_data != null and comp_data.scene_node != null:
 		return comp_data.scene_node
-	# GeometryCOMP passes the SOP mesh through as GNGeoData and keeps the
-	# MeshInstance3D on the operator. That node is what RenderTOP adopts.
-	if node is GNCompBase:
-		var owned: Node3D = (node as GNCompBase).get_scene_node()
+	# GeometryCOMP and RenderPOP keep the 3D node on the operator.
+	if node.has_method("get_scene_node"):
+		var owned: Node3D = node.get_scene_node()
 		if owned != null:
 			return owned
 	var found_wire := false

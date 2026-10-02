@@ -288,6 +288,11 @@ func _adopt_network_nodes() -> void:
 	if not network.connection_removed.is_connected(_on_connection_changed):
 		network.connection_removed.connect(_on_connection_changed)
 	_nodes_adopted = true
+	# A new network reuses node ids from the previous patch. If we keep the
+	# old active set, those ids look already active, the new nodes stay
+	# inactive, and WindowOUT does not cook until a click rebuilds the set.
+	_active_set.clear()
+	_active_set_dirty = true
 	GNLogger.info("CookEngine", "Adopted %d node(s) into scene tree" % adopted_count)
 
 
@@ -873,12 +878,17 @@ func _compute_cook_input_hash(node: GNNode, inputs: Array[GNData]) -> int:
 	# Use a sentinel for null so that null vs timestamp-0 are distinct.
 	for inp in inputs:
 		if inp != null:
+			# Instance id matters when bypass swaps in another node's data
+			# that was cooked on the same frame and shares a timestamp.
 			h = h * 37 + inp.timestamp
+			h = h * 37 + inp.get_instance_id()
 		else:
 			h = h * 37 + 2654435761
 	# Time-dependent nodes: include frame timing so hash always differs
 	if node.time_dependent:
 		h = h * 41 + hash(elapsed_time)
+	# Bypass is not a parameter. Without it, toggling B keeps the last cook.
+	h = h * 43 + int(node.bypass)
 	return h
 
 
@@ -1124,19 +1134,46 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 	_evaluating_params.erase(guard_key)
 
 	if used_callable:
-		param.resolved_value = result
-		param.fallback_value = result
+		var stored: Variant = _stored_expression_value(node, param, result)
+		if stored == null and param.value_type == GNParameter.ValueType.ENUM:
+			return
+		param.resolved_value = stored
+		param.fallback_value = stored
+		param.expression_error = ""
 	elif expr.has_execute_failed():
-		var err_msg := "Expression error on %s: %s" % [param.param_name, expr.get_error_text()]
+		var err_text := expr.get_error_text()
+		param.expression_error = err_text
+		var err_msg := "Expression error on %s: %s" % [param.param_name, err_text]
 		if editor_mode:
 			node.node_error = err_msg
 		GNLogger.error("CookEngine", "Expression error on %s.%s — %s" % [
-			node.id, param.param_name, expr.get_error_text()])
+			node.id, param.param_name, err_text])
 		param.resolved_value = param.fallback_value
-		cook_error.emit(node.id, "Expression error: %s" % expr.get_error_text())
+		cook_error.emit(node.id, "Expression error: %s" % err_text)
 	else:
-		param.resolved_value = result
-		param.fallback_value = result  # Update fallback for next failure
+		var stored: Variant = _stored_expression_value(node, param, result)
+		if stored == null and param.value_type == GNParameter.ValueType.ENUM:
+			return
+		param.resolved_value = stored
+		param.fallback_value = stored
+		param.expression_error = ""
+
+
+## Menus keep the choice as an index. An index or the option name both
+## become that index. Anything else keeps the previous value.
+func _stored_expression_value(node: GNNode, param: GNParameter, result: Variant) -> Variant:
+	if param.value_type != GNParameter.ValueType.ENUM:
+		return result
+	var idx: Variant = param.resolve_enum_index(result)
+	if idx != null:
+		return idx
+	var err_text := "Use an index from 0 to %d, or one of the menu names" % maxi(param.enum_options.size() - 1, 0)
+	param.expression_error = err_text
+	param.resolved_value = param.fallback_value
+	if editor_mode:
+		node.node_error = "Expression error on %s: %s" % [param.param_name, err_text]
+	cook_error.emit(node.id, "Expression error: %s" % err_text)
+	return null
 
 
 ## Evaluates per-component expressions for multi-dimensional parameters.
@@ -1190,17 +1227,21 @@ func _evaluate_component_expressions(node: GNNode, param: GNParameter) -> void:
 			param.component_expression_eval_usec[i] = float(ct1 - ct0)
 			if used_callable:
 				components[i] = float(result)
+				param.component_expression_errors[i] = ""
 			elif expr.has_execute_failed():
 				var labels := param.get_component_labels()
 				var label_str: String = labels[i] if i < labels.size() else str(i)
+				var err_text := expr.get_error_text()
+				param.component_expression_errors[i] = err_text
 				var comp_err := "Expression error on %s.%s[%s] — %s" % [
-					node.id, param.param_name, label_str, expr.get_error_text()]
+					node.id, param.param_name, label_str, err_text]
 				if editor_mode:
 					node.node_error = comp_err
 				GNLogger.error("CookEngine", comp_err)
 				components[i] = param.get_component_value(i)
 			else:
 				components[i] = float(result)
+				param.component_expression_errors[i] = ""
 		else:
 			# CONSTANT — use stored component value
 			components[i] = param.get_component_value(i)

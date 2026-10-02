@@ -11,7 +11,8 @@ extends Control
 ##   Left drag          → virtual slider (scrub value at current tier)
 ##   Shift+drag         → fine mode (÷10)
 ##   Ctrl+drag          → coarse mode (×10)
-##   Middle-button drag → ladder tier picker (vertical, no value change)
+##   Middle-button drag → ladder: vertical picks the step, horizontal
+##     changes the value at that step while the button stays down
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -236,6 +237,7 @@ func _gui_input(event: InputEvent) -> void:
 			if _state == _S.EDITING:
 				return
 			_ladder_pick_origin_y = mb.global_position.y
+			_on_drag_pending(mb.position)
 			_state = _S.LADDER_PICK
 			_any_ladder_active = true
 			_show_ladder()
@@ -300,6 +302,8 @@ func _process_ladder_pick(mm: InputEventMouseMotion) -> void:
 		if _ladder:
 			_update_ladder_labels()
 			_ladder.queue_redraw()
+	if not is_zero_approx(mm.relative.x):
+		_on_drag_motion(mm)
 
 
 func _end_ladder_pick() -> void:

@@ -125,12 +125,8 @@
                 100
             ],
             "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
+                "point_size": {
+                    "value": 4.0
                 }
             }
         }

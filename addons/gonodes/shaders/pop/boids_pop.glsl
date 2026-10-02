@@ -57,8 +57,16 @@ void main() {
     float r2 = pc.perception_radius * pc.perception_radius;
     float avoid_r2 = pc.avoid_radius * pc.avoid_radius;
 
-    // Brute-force neighbor search (O(n²) — works well up to ~50k on modern GPUs)
-    for (int j = 0; j < pc.particle_count; j++) {
+    // A full neighbor scan is O(n²). At a few thousand particles that hangs
+    // the GPU and D3D12 removes the device. 48 samples, spread through the
+    // pool, are enough for the flock and stay a fixed cost per particle.
+    int checks = min(pc.particle_count, 48);
+    int stride = max(pc.particle_count / max(checks, 1), 1);
+    int start = int(gid) % stride;
+
+    for (int k = 0; k < 48; k++) {
+        if (k >= checks) break;
+        int j = (start + k * stride) % pc.particle_count;
         if (j == int(gid)) continue;
         if (particles[j].age >= particles[j].life) continue;
 

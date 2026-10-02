@@ -49,8 +49,9 @@ func _init_parameters() -> void:
 		"Fade Range", "Crossfade range between LOD levels (0 = instant switch)"))
 	add_parameter(GNParameter.create_bool("auto_lod", true,
 		"Auto LOD", "Automatically select LOD based on camera distance"))
-	add_parameter(GNParameter.create_int("forced_lod", 0, 0, 3,
-		"Forced LOD", "Manually select LOD level (when Auto LOD is off)"))
+	add_parameter(GNParameter.create_enum("forced_lod",
+		PackedStringArray(["LOD 0", "LOD 1", "LOD 2", "LOD 3"]), 0,
+		"Forced LOD", "Which level to show when Auto LOD is off"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

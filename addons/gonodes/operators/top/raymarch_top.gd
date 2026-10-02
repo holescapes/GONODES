@@ -150,51 +150,42 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	var sampler: RID = ctx.create_linear_sampler()
 
-	# Push constants: camera + lighting (40 fields -> 160 bytes)
+	# 128 bytes, matching raymarch_vol.glsl. The volume size is not sent:
+	# the shader samples the 3D texture by UV, and Godot's limit is 128.
 	var pc := PackedByteArray()
-	pc.resize(160)
+	pc.resize(128)
 	pc.encode_s32(0, w)
 	pc.encode_s32(4, h)
-	pc.encode_s32(8, vol.resolution.x)
-	pc.encode_s32(12, vol.resolution.y)
-	pc.encode_s32(16, vol.resolution.z)
-	pc.encode_s32(20, max_steps)
-	pc.encode_float(24, step)
-	pc.encode_float(28, dscale)
-	pc.encode_float(32, eye.x)
-	pc.encode_float(36, eye.y)
-	pc.encode_float(40, eye.z)
-	pc.encode_float(44, fwd.x)
-	pc.encode_float(48, fwd.y)
-	pc.encode_float(52, fwd.z)
-	pc.encode_float(56, right.x)
-	pc.encode_float(60, right.y)
-	pc.encode_float(64, right.z)
-	pc.encode_float(68, up.x)
-	pc.encode_float(72, up.y)
-	pc.encode_float(76, up.z)
-	pc.encode_float(80, fov_rad)
-	pc.encode_float(84, absorb)
-	# Lighting fields (offset 88)
-	pc.encode_float(88, light_dir.x)
-	pc.encode_float(92, light_dir.y)
-	pc.encode_float(96, light_dir.z)
-	pc.encode_float(100, light_col.r)
-	pc.encode_float(104, light_col.g)
-	pc.encode_float(108, light_col.b)
-	pc.encode_float(112, light_int)
-	pc.encode_float(116, hg_g)
-	pc.encode_s32(120, shadow_st)
-	pc.encode_float(124, amb)
-	pc.encode_float(128, emit_col.r)
-	pc.encode_float(132, emit_col.g)
-	pc.encode_float(136, emit_col.b)
-	# Pad to 160 bytes (next multiple of 16 after 140)
-	pc.encode_float(140, 0.0)
-	pc.encode_float(144, 0.0)
-	pc.encode_float(148, 0.0)
-	pc.encode_float(152, 0.0)
-	pc.encode_float(156, 0.0)
+	pc.encode_s32(8, max_steps)
+	pc.encode_float(12, step)
+	pc.encode_float(16, dscale)
+	pc.encode_float(20, eye.x)
+	pc.encode_float(24, eye.y)
+	pc.encode_float(28, eye.z)
+	pc.encode_float(32, fwd.x)
+	pc.encode_float(36, fwd.y)
+	pc.encode_float(40, fwd.z)
+	pc.encode_float(44, right.x)
+	pc.encode_float(48, right.y)
+	pc.encode_float(52, right.z)
+	pc.encode_float(56, up.x)
+	pc.encode_float(60, up.y)
+	pc.encode_float(64, up.z)
+	pc.encode_float(68, fov_rad)
+	pc.encode_float(72, absorb)
+	pc.encode_float(76, light_dir.x)
+	pc.encode_float(80, light_dir.y)
+	pc.encode_float(84, light_dir.z)
+	pc.encode_float(88, light_col.r)
+	pc.encode_float(92, light_col.g)
+	pc.encode_float(96, light_col.b)
+	pc.encode_float(100, light_int)
+	pc.encode_float(104, hg_g)
+	pc.encode_s32(108, shadow_st)
+	pc.encode_float(112, amb)
+	pc.encode_float(116, emit_col.r)
+	pc.encode_float(120, emit_col.g)
+	pc.encode_float(124, emit_col.b)
 
 	var us: RID = ctx.rd.uniform_set_create([
 		ctx.uniform_sampler(0, sampler, vol.rd_texture),
@@ -210,6 +201,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if _output_tex2d_rd == null:
 		_output_tex2d_rd = Texture2DRD.new()
 	_output_tex2d_rd.texture_rd_rid = _output_tex_rid
+	# The RID object does not change when the pixels do. Tell the window
+	# the texture changed, or Frequency looks stuck.
+	_output_tex2d_rd.emit_changed()
 
 	if _out_tex == null:
 		_out_tex = GNTextureData.new()
@@ -248,6 +242,7 @@ func _cook_cpu(inputs: Array[GNData]) -> GNData:
 		cos(l_pitch) * cos(l_yaw)).normalized()
 	var light_col: Color = get_param_value("light_color")
 	var light_int: float = get_param_value("light_intensity")
+	var hg_g: float = get_param_value("hg_g")
 	var amb: float = get_param_value("ambient")
 	var emit_col: Color = get_param_value("emit_color")
 
@@ -313,13 +308,12 @@ func _cook_cpu(inputs: Array[GNData]) -> GNData:
 				var density: float = _vol_sample_trilinear(vol.cpu_data, uvw, res) * dscale
 				if density > 0.0:
 					var alpha: float = 1.0 - exp(-absorb * density * step)
-					# Simplified lighting for CPU: directional + ambient, no shadows
-					var radiance_r: float = (light_col.r * light_int * (1.0 + amb) * density) + (emit_col.r * density)
-					var radiance_g: float = (light_col.g * light_int * (1.0 + amb) * density) + (emit_col.g * density)
-					var radiance_b: float = (light_col.b * light_int * (1.0 + amb) * density) + (emit_col.b * density)
-					color_r += transmittance * alpha * radiance_r
-					color_g += transmittance * alpha * radiance_g
-					color_b += transmittance * alpha * radiance_b
+					# Same source color as the shader, without the shadow march.
+					var phase: float = _henyey_greenstein(rd.dot(light_dir), hg_g)
+					var lit: float = light_int * (phase + amb)
+					color_r += transmittance * alpha * (light_col.r * lit + emit_col.r)
+					color_g += transmittance * alpha * (light_col.g * lit + emit_col.g)
+					color_b += transmittance * alpha * (light_col.b * lit + emit_col.b)
 					transmittance *= (1.0 - alpha)
 				t_cur += step
 
@@ -335,6 +329,12 @@ func _cook_cpu(inputs: Array[GNData]) -> GNData:
 	_out_tex.resolution = Vector2i(w, h)
 	_out_tex.format = Image.FORMAT_RGBA8
 	return _out_tex
+
+
+func _henyey_greenstein(cos_theta: float, g: float) -> float:
+	var g2: float = g * g
+	var denom: float = maxf(1.0 + g2 - 2.0 * g * cos_theta, 0.0001)
+	return (1.0 - g2) / (denom * sqrt(denom))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

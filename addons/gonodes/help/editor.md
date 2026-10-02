@@ -472,8 +472,8 @@ Duplicated nodes automatically receive an `_copy` suffix (e.g., `lfo1` → `lfo1
 
 ## Take Panel
 
-Toggle the **Takes** button in the toolbar to show the Take panel —
-a parameter layer system for live performance preset switching.
+Toggle the **Takes** button on the timeline row to show the Take panel —
+a parameter layer system for live performance preset switching. Shift+T toggles it.
 
 - **Capture Base**: Snapshot all current parameter values as the reference state
 - **Capture Take**: Save current parameter differences as a named take

@@ -94,7 +94,7 @@ func _init() -> void:
 	_cook_chain_tree.set_column_expand(2, false)
 	_cook_chain_tree.set_column_custom_minimum_width(2, 55)
 	_cook_chain_tree.set_column_expand(3, false)
-	_cook_chain_tree.set_column_custom_minimum_width(3, 70)
+	_cook_chain_tree.set_column_custom_minimum_width(3, 88)
 	_cook_chain_tree.set_column_expand(4, false)
 	_cook_chain_tree.set_column_custom_minimum_width(4, 70)
 	_cook_chain_tree.set_column_expand(5, false)
@@ -156,6 +156,9 @@ func update_debug_info() -> void:
 		return
 
 	var active_tab := _tab_container.current_tab
+	# Each tab keeps its TreeItems. A refresh rewrites cells and adds or
+	# removes a row only when the node list changed. clear() dropped the
+	# row under the cursor, so a double-click never landed.
 	match active_tab:
 		0:
 			_update_cook_chain()
@@ -167,82 +170,97 @@ func update_debug_info() -> void:
 
 # ── Tab 1: Cook Chain ─────────────────────────────────────────────────────────
 
-func _update_cook_chain() -> void:
-	_cook_chain_tree.clear()
-	var root := _cook_chain_tree.create_item()
+var _ref_regex: RegEx = null
+var _set_par_regex: RegEx = null
 
+
+func _ensure_tree_root(tree: Tree) -> TreeItem:
+	var root := tree.get_root()
+	if root == null:
+		root = tree.create_item()
+	return root
+
+
+## Grows or shrinks the direct children of parent to count. Existing children stay.
+func _resize_child_count(tree: Tree, parent: TreeItem, count: int) -> void:
+	var child := parent.get_first_child()
+	var seen := 0
+	while child != null and seen < count:
+		child = child.get_next()
+		seen += 1
+	while seen < count:
+		tree.create_item(parent)
+		seen += 1
+	while child != null:
+		var nxt := child.get_next()
+		child.free()
+		child = nxt
+
+
+func _update_cook_chain() -> void:
 	var nodes: Array[GNNode] = cook_engine.last_topo_order
 	if _cook_sort_mode == "time":
 		nodes = nodes.duplicate()
 		nodes.sort_custom(func(a: GNNode, b: GNNode) -> bool:
 			return a.cook_time_ms > b.cook_time_ms)
 
+	var root := _ensure_tree_root(_cook_chain_tree)
+	_resize_child_count(_cook_chain_tree, root, nodes.size())
+
 	var active_set: Dictionary = cook_engine._active_set
-
+	var item := root.get_first_child()
 	for i in range(nodes.size()):
-		var node: GNNode = nodes[i]
-		var item := _cook_chain_tree.create_item(root)
+		_fill_cook_chain_row(item, nodes[i], i, active_set)
+		item = item.get_next()
 
-		# Column 0: cook order
-		item.set_text(0, str(i + 1))
 
-		# Column 1: node ID
-		item.set_text(1, node.id)
+func _fill_cook_chain_row(item: TreeItem, node: GNNode, index: int, active_set: Dictionary) -> void:
+	item.set_text(0, str(index + 1))
+	item.set_text(1, node.id)
+	item.set_text(2, GNFamily.get_family_name(node.family))
+	item.set_custom_color(2, GNFamily.get_color(node.family))
 
-		# Column 2: family
-		item.set_text(2, GNFamily.get_family_name(node.family))
-		item.set_custom_color(2, GNFamily.get_color(node.family))
+	var is_active: bool = active_set.has(node.id)
+	if not is_active:
+		item.set_text(3, "inactive")
+		item.set_custom_color(3, Color(0.5, 0.5, 0.5, 0.6))
+	elif node.cooked_this_frame and node.cook_valid:
+		item.set_text(3, "⟳ cooking")
+		item.set_custom_color(3, Color(0.3, 0.8, 1.0))
+	elif node.dirty:
+		item.set_text(3, "● dirty")
+		item.set_custom_color(3, Color(1.0, 0.7, 0.2))
+	elif not node.cook_valid:
+		item.set_text(3, "✗ error")
+		item.set_custom_color(3, Color(1.0, 0.35, 0.3))
+	else:
+		item.set_text(3, "— cached")
+		item.set_custom_color(3, Color(0.6, 0.6, 0.6))
 
-		# Column 3: status
-		var is_active: bool = active_set.has(node.id)
-		if not is_active:
-			item.set_text(3, "inactive")
-			item.set_custom_color(3, Color(0.5, 0.5, 0.5, 0.6))
-		elif node.cooked_this_frame and node.cook_valid:
-			item.set_text(3, "⟳ cooking")
-			item.set_custom_color(3, Color(0.3, 0.8, 1.0))
-		elif node.cook_valid and not node.dirty:
-			item.set_text(3, "— cached")
-			item.set_custom_color(3, Color(0.6, 0.6, 0.6))
-		elif node.dirty:
-			item.set_text(3, "● dirty")
-			item.set_custom_color(3, Color(1.0, 0.7, 0.2))
-		elif not node.cook_valid:
-			item.set_text(3, "✗ error")
-			item.set_custom_color(3, Color(1.0, 0.35, 0.3))
-		else:
-			item.set_text(3, "— cached")
-			item.set_custom_color(3, Color(0.6, 0.6, 0.6))
+	var cook_ms := node.cook_time_ms
+	item.set_text(4, "%.2f" % cook_ms)
+	if cook_ms < 1.0:
+		item.set_custom_color(4, Color(0.4, 1.0, 0.4))
+	elif cook_ms < 5.0:
+		item.set_custom_color(4, Color(1.0, 0.9, 0.3))
+	else:
+		item.set_custom_color(4, Color(1.0, 0.35, 0.3))
 
-		# Column 4: cook time
-		var cook_ms := node.cook_time_ms
-		item.set_text(4, "%.2f" % cook_ms)
-		if cook_ms < 1.0:
-			item.set_custom_color(4, Color(0.4, 1.0, 0.4))
-		elif cook_ms < 5.0:
-			item.set_custom_color(4, Color(1.0, 0.9, 0.3))
-		else:
-			item.set_custom_color(4, Color(1.0, 0.35, 0.3))
-
-		# Column 5: active
-		item.set_text(5, "yes" if is_active else "no")
-		if not is_active:
-			item.set_custom_color(5, Color(0.5, 0.5, 0.5, 0.6))
-			# Dim all columns for inactive rows
-			item.set_custom_color(0, Color(0.5, 0.5, 0.5, 0.6))
-			item.set_custom_color(1, Color(0.5, 0.5, 0.5, 0.6))
-
-		# Store node_id as metadata for click-to-select
-		item.set_metadata(0, node.id)
+	item.set_text(5, "yes" if is_active else "no")
+	var dim := Color(0.5, 0.5, 0.5, 0.6)
+	var full := Color(0.8, 0.8, 0.8)
+	item.set_custom_color(0, dim if not is_active else full)
+	item.set_custom_color(1, dim if not is_active else full)
+	if not is_active:
+		item.set_custom_color(5, dim)
+	else:
+		item.clear_custom_color(5)
+	item.set_metadata(0, node.id)
 
 
 # ── Tab 2: Active Chains ─────────────────────────────────────────────────────
 
 func _update_active_chains() -> void:
-	_active_chain_tree.clear()
-	var root := _active_chain_tree.create_item()
-
-	# Build upstream map: node_id → [upstream_node_ids]
 	var upstream_map: Dictionary = {}
 	for conn in network.connections:
 		var from_id: String = conn.from_node
@@ -254,123 +272,170 @@ func _update_active_chains() -> void:
 		if from_id not in upstream_map[to_id]:
 			upstream_map[to_id].append(from_id)
 
-	# Root each tree at a sink node
-	var sinks: Array[String] = cook_engine.active_sinks.duplicate()
-
-	# Also include structural sinks (is_sink nodes like WindowOUT)
+	var sinks: Array[String] = []
+	for sink_id in cook_engine.active_sinks:
+		if network.nodes.has(sink_id) and sink_id not in sinks:
+			sinks.append(sink_id)
 	for node_id in network.nodes:
 		var node: GNNode = network.nodes[node_id]
 		if node.is_sink and node_id not in sinks:
 			sinks.append(node_id)
 
+	var root := _ensure_tree_root(_active_chain_tree)
+	_drop_children_not_in(root, sinks)
+	var visited: Dictionary = {}
 	for sink_id in sinks:
-		var sink_node: GNNode = network.nodes.get(sink_id, null)
-		if sink_node == null:
-			continue
-		var visited: Dictionary = {}
-		_build_chain_tree(root, sink_id, sink_node, upstream_map, visited)
+		_sync_chain_node(root, sink_id, network.nodes[sink_id], upstream_map, visited)
 
 
-func _build_chain_tree(parent_item: TreeItem, node_id: String, node: GNNode,
+func _find_child(parent: TreeItem, node_id: String) -> TreeItem:
+	var child := parent.get_first_child()
+	while child != null:
+		if str(child.get_metadata(0)) == node_id:
+			return child
+		child = child.get_next()
+	return null
+
+
+func _drop_children_not_in(parent: TreeItem, keep_ids: Array) -> void:
+	var child := parent.get_first_child()
+	while child != null:
+		var nxt := child.get_next()
+		if str(child.get_metadata(0)) not in keep_ids:
+			child.free()
+		child = nxt
+
+
+func _sync_chain_node(parent_item: TreeItem, node_id: String, node: GNNode,
 		upstream_map: Dictionary, visited: Dictionary) -> void:
 	if visited.has(node_id):
 		return
 	visited[node_id] = true
 
-	var item := _active_chain_tree.create_item(parent_item)
+	var item := _find_child(parent_item, node_id)
+	if item == null:
+		item = _active_chain_tree.create_item(parent_item)
+	_fill_chain_row(item, node)
 
-	var label := "%s (%s)" % [node_id, node.node_type]
+	var desired: Array[String] = []
+	var ups: Array = upstream_map.get(node_id, [])
+	for up_id in ups:
+		if visited.has(up_id):
+			continue
+		if network.nodes.has(up_id):
+			desired.append(up_id)
+	_drop_children_not_in(item, desired)
+	for up_id in desired:
+		_sync_chain_node(item, up_id, network.nodes[up_id], upstream_map, visited)
+
+
+func _fill_chain_row(item: TreeItem, node: GNNode) -> void:
+	var label := "%s (%s)" % [node.id, node.node_type]
 	if node.time_dependent:
 		label += " ⟳"
-	item.set_text(0, label)
-
-	item.set_text(1, GNFamily.get_family_name(node.family))
-	item.set_custom_color(1, GNFamily.get_color(node.family))
+	if item.get_text(0) != label:
+		item.set_text(0, label)
+	var family_name := GNFamily.get_family_name(node.family)
+	if item.get_text(1) != family_name:
+		item.set_text(1, family_name)
+		item.set_custom_color(1, GNFamily.get_color(node.family))
 
 	var cook_ms := node.cook_time_ms
-	if not node.dirty and cook_ms == 0.0:
-		item.set_text(2, "cached")
-		item.set_custom_color(2, Color(0.6, 0.6, 0.6))
-	else:
-		item.set_text(2, "%.2f" % cook_ms)
-		if cook_ms < 1.0:
+	var time_text := "cached" if not node.dirty and cook_ms == 0.0 else "%.2f" % cook_ms
+	if item.get_text(2) != time_text:
+		item.set_text(2, time_text)
+		if time_text == "cached":
+			item.set_custom_color(2, Color(0.6, 0.6, 0.6))
+		elif cook_ms < 1.0:
 			item.set_custom_color(2, Color(0.4, 1.0, 0.4))
 		elif cook_ms < 5.0:
 			item.set_custom_color(2, Color(1.0, 0.9, 0.3))
 		else:
 			item.set_custom_color(2, Color(1.0, 0.35, 0.3))
-
-	item.set_metadata(0, node_id)
-
-	# Recurse upstream
-	var ups: Array = upstream_map.get(node_id, [])
-	for up_id in ups:
-		var up_node: GNNode = network.nodes.get(up_id, null)
-		if up_node != null:
-			_build_chain_tree(item, up_id, up_node, upstream_map, visited)
+	item.set_metadata(0, node.id)
 
 
 # ── Tab 3: Parameter References ───────────────────────────────────────────────
 
+func _ensure_param_regex() -> void:
+	if _ref_regex != null:
+		return
+	_ref_regex = RegEx.new()
+	_ref_regex.compile("(?:lookupf?|chop[sfi]?|op|top|sop|dat|mat|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
+	_set_par_regex = RegEx.new()
+	_set_par_regex.compile("set_par\\s*\\(\\s*\"([^\"]+)\"")
+
+
 func _update_param_refs() -> void:
-	_param_ref_tree.clear()
-	var root := _param_ref_tree.create_item()
+	_ensure_param_regex()
+	var root := _ensure_tree_root(_param_ref_tree)
+	var existing: Dictionary = {}
+	var child := root.get_first_child()
+	while child != null:
+		existing[str(child.get_metadata(1))] = child
+		child = child.get_next()
 
-	# Regex for extracting node references from expressions
-	var ref_regex := RegEx.new()
-	ref_regex.compile("(?:lookupf?|chop[sfi]?|op|top|sop|dat|mat|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
-
-	var set_par_regex := RegEx.new()
-	set_par_regex.compile("set_par\\s*\\(\\s*\"([^\"]+)\"")
-
+	var seen: Dictionary = {}
 	for node_id in network.nodes:
 		var node: GNNode = network.nodes[node_id]
 		for param_name in node.parameters:
 			var param: GNParameter = node.parameters[param_name]
-
-			# Only show params with expression mode
 			if param.mode != GNParameter.Mode.EXPRESSION or param.expression.is_empty():
 				continue
+			var key := "%s\t%s" % [node_id, param_name]
+			seen[key] = true
+			var item: TreeItem = existing.get(key, null)
+			if item == null:
+				item = _param_ref_tree.create_item(root)
+				existing[key] = item
+			_fill_param_ref_row(item, node_id, param_name, param)
 
-			var item := _param_ref_tree.create_item(root)
+	for key in existing:
+		if not seen.has(key):
+			(existing[key] as TreeItem).free()
 
-			# Column 0: source node
-			item.set_text(0, node_id)
 
-			# Column 1: parameter name
-			item.set_text(1, param_name)
+func _fill_param_ref_row(item: TreeItem, node_id: String, param_name: String, param: GNParameter) -> void:
+	if item.get_text(0) != node_id:
+		item.set_text(0, node_id)
+	if item.get_text(1) != param_name:
+		item.set_text(1, param_name)
 
-			# Column 2: expression (truncated)
-			var expr_text: String = param.expression
-			if expr_text.length() > 50:
-				expr_text = expr_text.left(47) + "..."
-			item.set_text(2, expr_text)
+	var expr_text: String = param.expression
+	if expr_text.length() > 50:
+		expr_text = expr_text.left(47) + "..."
+	if item.get_text(2) != expr_text:
+		item.set_text(2, expr_text)
 
-			# Column 3: references
-			var refs: Array[String] = []
-			var read_results := ref_regex.search_all(param.expression)
-			for m in read_results:
-				var ref_id := m.get_string(1)
-				if ref_id != node_id and ref_id not in refs:
-					refs.append("→ " + ref_id)
-			var write_results := set_par_regex.search_all(param.expression)
-			for m in write_results:
-				var ref_id := m.get_string(1)
-				if ref_id not in refs:
-					refs.append("← ✎ " + ref_id)
-			item.set_text(3, ", ".join(refs) if not refs.is_empty() else "—")
-			if not refs.is_empty():
-				item.set_custom_color(3, Color(0.2, 0.85, 0.95))
+	var refs: Array[String] = []
+	for m in _ref_regex.search_all(param.expression):
+		var ref_id := m.get_string(1)
+		if ref_id != node_id and ref_id not in refs:
+			refs.append("→ " + ref_id)
+	for m in _set_par_regex.search_all(param.expression):
+		var ref_id := m.get_string(1)
+		if ref_id not in refs:
+			refs.append("← ✎ " + ref_id)
+	var ref_text := ", ".join(refs) if not refs.is_empty() else "—"
+	if item.get_text(3) != ref_text:
+		item.set_text(3, ref_text)
+		if refs.is_empty():
+			item.clear_custom_color(3)
+		else:
+			item.set_custom_color(3, Color(0.2, 0.85, 0.95))
 
-			# Column 4: eval time
-			var eval_us := param.expression_eval_avg_usec
-			item.set_text(4, "%.1f" % eval_us if eval_us > 0.0 else "—")
-			if eval_us > 100.0:
-				item.set_custom_color(4, Color(1.0, 0.35, 0.3))
-			elif eval_us > 20.0:
-				item.set_custom_color(4, Color(1.0, 0.9, 0.3))
-
-			item.set_metadata(0, node_id)
+	var eval_us := param.expression_eval_avg_usec
+	var eval_text := "%.1f" % eval_us if eval_us > 0.0 else "—"
+	if item.get_text(4) != eval_text:
+		item.set_text(4, eval_text)
+		if eval_us > 100.0:
+			item.set_custom_color(4, Color(1.0, 0.35, 0.3))
+		elif eval_us > 20.0:
+			item.set_custom_color(4, Color(1.0, 0.9, 0.3))
+		else:
+			item.clear_custom_color(4)
+	item.set_metadata(0, node_id)
+	item.set_metadata(1, "%s\t%s" % [node_id, param_name])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -234,15 +234,20 @@ const _TOAST_TOP_MARGIN := 16.0
 var _search: GNGraphSearch = null
 
 ## ── Shake-to-disconnect state ────────────────────────────────────────────────
-## Tracks rapid direction reversals during node drag. When the user "shakes"
-## a mid-chain node, it disconnects and its neighbors are re-wired together.
-var _shake_last_dir: Vector2 = Vector2.ZERO   ## Last movement direction sign
-var _shake_reversals: int = 0                  ## Number of direction reversals
-var _shake_timer: float = 0.0                  ## Time since first reversal
-var _shake_triggered: bool = false             ## Prevent re-triggering per drag
-const _SHAKE_REVERSAL_THRESHOLD := 3           ## Reversals needed to trigger
-const _SHAKE_TIME_WINDOW := 0.5                  ## Seconds to accumulate reversals
-const _SHAKE_MIN_SPEED := 200.0                  ## Min px/s to count a reversal
+## Tracks a shake on one axis during a single-node drag. The first strong
+## move locks horizontal or vertical for the rest of the drag. A reversal
+## counts only after that swing has traveled a real distance.
+var _shake_axis: int = -1
+var _shake_sign: float = 0.0
+var _shake_leg: float = 0.0
+var _shake_reversals: int = 0
+var _shake_timer: float = 0.0
+var _shake_triggered: bool = false
+const _SHAKE_REVERSAL_THRESHOLD := 3
+const _SHAKE_TIME_WINDOW := 0.7
+const _SHAKE_MIN_SPEED := 200.0
+const _SHAKE_MIN_LEG := 40.0
+const _SHAKE_AXIS_RATIO := 2.0
 
 ## Origin of the current box-select drag (local/screen coords).  Set on left
 ## mouse-down over empty canvas so we can build the actual selection rect on
@@ -1309,6 +1314,24 @@ func update_status_badges() -> void:
 		view.update_status_badge()
 
 
+## Selects one node and centers the graph on it. The camera moves before the
+## selection signal, so the inspector rebuild does not delay the jump.
+func select_and_center_node(node_id: String) -> void:
+	var view: GNNodeView = _node_views.get(node_id, null)
+	if view == null:
+		return
+	scroll_to_node(node_id)
+	var changed := false
+	for vn in _node_views:
+		var other: GNNodeView = _node_views[vn]
+		var should_select := other == view
+		if other.selected != should_select:
+			other.selected = should_select
+			changed = true
+	if not changed and view.gn_node != null:
+		operator_selected.emit(view.gn_node.id)
+
+
 ## Scrolls the graph view to center on the given node.
 func scroll_to_node(node_id: String) -> void:
 	var view: GNNodeView = _node_views.get(node_id, null)
@@ -1316,7 +1339,26 @@ func scroll_to_node(node_id: String) -> void:
 		return
 	var center := view.position_offset + view.size / 2.0
 	var viewport_center := size / 2.0 / zoom
-	scroll_offset = (center - viewport_center) * zoom
+	_snap_scroll((center - viewport_center) * zoom)
+
+
+## GraphEdit stores the offset immediately, then moves every node and the wire
+## layer on a deferred call. A bookmark jump was sitting behind that deferral,
+## and behind an inspector rebuild, so the view arrived a few frames late.
+func _snap_scroll(target: Vector2) -> void:
+	scroll_offset = target
+	var applied := scroll_offset
+	for child in get_children():
+		if child is GraphElement:
+			var element := child as GraphElement
+			element.position = element.position_offset * zoom - applied
+	var wires := get_node_or_null("_connection_layer") as Control
+	if wires != null:
+		wires.position = -applied
+	if _annotations != null:
+		_annotations.sync_if_needed(zoom, applied)
+	_last_zoom = zoom
+	_last_scroll = applied
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -3202,12 +3244,14 @@ func jump_to_bookmark(slot: int) -> void:
 		_bookmarks.erase(slot)
 		return
 	var view: GNNodeView = _node_views[node_id]
-	# Deselect all, select the bookmarked node
+	# Move first. Selecting rebuilds the inspector, and doing that before the
+	# scroll made the jump wait on that rebuild.
+	scroll_to_node(node_id)
 	for vn in _node_views:
-		_node_views[vn].selected = false
-	view.selected = true
-	# Center view on the node
-	scroll_offset = view.position_offset * zoom - size / 2 + view.size * zoom / 2
+		var other: GNNodeView = _node_views[vn]
+		var should_select := other == view
+		if other.selected != should_select:
+			other.selected = should_select
 	GNLogger.info("GraphEditor", "Jumped to bookmark %d → %s" % [slot, node_id])
 
 
@@ -3256,7 +3300,13 @@ func _clear_bookmark_badge(node_id: String) -> void:
 
 ## Builds and shows the right-click context menu at the given screen position.
 func _show_context_menu(screen_pos: Vector2) -> void:
-	_context_menu.clear()
+	# clear(true) frees the Load Preset submenu. queue_free on that submenu
+	# while the menu still owns it crashes the engine, with no script error,
+	# the next time this menu opens.
+	if _context_menu.visible:
+		_context_menu.hide()
+	_context_menu.clear(true)
+	_param_preset_submenu = null
 
 	var has_selection := not _get_selected_node_ids().is_empty()
 	var has_clipboard := not _clipboard.is_empty()
@@ -3468,8 +3518,6 @@ func _show_context_menu(screen_pos: Vector2) -> void:
 	else:
 		_param_preset_list = []
 
-	if _param_preset_submenu != null:
-		_param_preset_submenu.queue_free()
 	_param_preset_submenu = PopupMenu.new()
 	_param_preset_submenu.name = "ParamPresetSubmenu"
 	if _param_preset_list.is_empty():
@@ -4000,7 +4048,9 @@ func _on_begin_node_move() -> void:
 	_drag_over_wire = {}
 	_drag_wire_in_port = -1
 	_drag_wire_out_port = -1
-	_shake_last_dir = Vector2.ZERO
+	_shake_axis = -1
+	_shake_sign = 0.0
+	_shake_leg = 0.0
 	_shake_reversals = 0
 	_shake_timer = 0.0
 	_shake_triggered = false
@@ -4097,26 +4147,39 @@ func _process(delta: float) -> void:
 		return
 
 	# ── Shake-to-disconnect detection ──
+	# A handful of compares on the one node being dragged. No allocation.
 	if not _shake_triggered and _pre_move_positions.size() == 1:
 		var speed := frame_delta.length() / maxf(delta, 0.001)
-		if speed > _SHAKE_MIN_SPEED:
-			# Only track the dominant axis to avoid false positives from
-			# diagonal or arc-like movement.
-			var dominant_axis: int = 0 if absf(frame_delta.x) >= absf(frame_delta.y) else 1
-			var cur_sign: float = signf(frame_delta.x) if dominant_axis == 0 else signf(frame_delta.y)
-			var last_sign: float = _shake_last_dir.x if dominant_axis == 0 else _shake_last_dir.y
-			if last_sign != 0.0 and cur_sign != 0.0 and cur_sign != last_sign:
-				if _shake_reversals == 0:
+		var along_x := absf(frame_delta.x)
+		var along_y := absf(frame_delta.y)
+		var frame_axis := 0 if along_x >= along_y else 1
+		var along := along_x if frame_axis == 0 else along_y
+		var across := along_y if frame_axis == 0 else along_x
+		var clear_axis := along > 0.0 and along >= across * _SHAKE_AXIS_RATIO
+		if _shake_axis < 0:
+			if speed > _SHAKE_MIN_SPEED and clear_axis:
+				_shake_axis = frame_axis
+				_shake_sign = signf(frame_delta.x if frame_axis == 0 else frame_delta.y)
+				_shake_leg = along
+		elif frame_axis == _shake_axis and clear_axis:
+			var cur_sign := signf(frame_delta.x if _shake_axis == 0 else frame_delta.y)
+			if cur_sign == _shake_sign:
+				_shake_leg += along
+			else:
+				if _shake_leg >= _SHAKE_MIN_LEG and speed > _SHAKE_MIN_SPEED:
+					if _shake_reversals == 0:
+						_shake_timer = 0.0
+					_shake_reversals += 1
+				_shake_sign = cur_sign
+				_shake_leg = along
+			if _shake_reversals > 0:
+				_shake_timer += delta
+				if _shake_timer > _SHAKE_TIME_WINDOW:
+					_shake_reversals = 0
 					_shake_timer = 0.0
-				_shake_reversals += 1
-			_shake_last_dir = Vector2(signf(frame_delta.x), signf(frame_delta.y))
-		_shake_timer += delta
-		if _shake_timer > _SHAKE_TIME_WINDOW:
-			_shake_reversals = 0
-			_shake_timer = 0.0
-		if _shake_reversals >= _SHAKE_REVERSAL_THRESHOLD:
-			_shake_triggered = true
-			_perform_shake_disconnect(first_id)
+			if _shake_reversals >= _SHAKE_REVERSAL_THRESHOLD:
+				_shake_triggered = true
+				_perform_shake_disconnect(first_id)
 
 	_node_drag_last_pos = current_pos
 

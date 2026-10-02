@@ -431,10 +431,9 @@ func _layout_debug_panel() -> void:
 	hsplit.offset_bottom = -(bottom_offset)
 
 
-## Debug panel click-to-select: select node in graph and scroll to it.
+## Debug panel double-click: select that node in the graph and center it.
 func _on_debug_node_selected(node_id: String) -> void:
-	_on_graph_node_selected(node_id)
-	graph_editor.scroll_to_node(node_id)
+	graph_editor.select_and_center_node(node_id)
 
 
 ## Builds the UI-level sink list and pushes it to the cook engine.
@@ -618,6 +617,9 @@ func _on_graph_node_selected(node_id: String) -> void:
 		_viewer_node_id = node_id
 		if viewer_panel:
 			viewer_panel.set_target(node_id)
+			# Draw the cached picture now. Waiting for the next cook made the
+			# viewer appear a frame late, after the inspector had already stalled.
+			viewer_panel.update_from_node(node)
 		_push_active_sinks()
 		GNLogger.info("Editor", "Viewer → '%s' (%s)" % [node_id, GNFamily.get_family_name(node.family)])
 
@@ -723,10 +725,7 @@ func _on_reset_pressed() -> void:
 				node.reset_viewport()
 
 	# 4. Resume cooking — the next cook_frame will rebuild everything
-	cook_engine.cooking_enabled = true
-
-	# 5. Sync play button back to "playing" state
-	play_button.text = "⏸"
+	_resume_playback()
 
 	GNLogger.info("Editor", "Patch reset — restarting from frame 0")
 
@@ -1167,6 +1166,9 @@ func _setup_toolbar() -> void:
 	nrt_fps_spin.value_changed.connect(_on_nrt_fps_changed)
 	tl_row.add_child(nrt_fps_spin)
 
+	take_toggle = _tb_check(tl_row, "Takes",
+		"Show take manager — capture, apply and blend named parameter snapshots (Shift+T)", _on_take_toggled)
+
 	tl_row.add_child(VSeparator.new())
 
 	_timeline_time_label = Label.new()
@@ -1231,8 +1233,6 @@ func _setup_toolbar() -> void:
 
 	compat_toggle = _tb_check(row3, "Compat",
 		"Show export compatibility report — scan network against target platform/renderer", _on_compat_toggled)
-	take_toggle = _tb_check(row3, "Takes",
-		"Show take manager — capture, apply and blend named parameter snapshots (Shift+T)", _on_take_toggled)
 
 	# Spacer pushes status info to the right
 	var spacer3 := Control.new()
@@ -1290,6 +1290,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F2:
 			debug_toggle.button_pressed = not debug_toggle.button_pressed
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_T and event.shift_pressed and not event.ctrl_pressed:
+			var focus_owner := get_viewport().gui_get_focus_owner()
+			if focus_owner is LineEdit or focus_owner is TextEdit or focus_owner is SpinBox:
+				return
+			take_toggle.button_pressed = not take_toggle.button_pressed
 			get_viewport().set_input_as_handled()
 
 
@@ -1388,6 +1394,7 @@ func _on_new_confirmed() -> void:
 
 	_push_active_sinks()
 	_clear_modified()
+	_resume_playback()
 	GNLogger.info("Editor", "New patch created")
 
 
@@ -1563,8 +1570,18 @@ func _load_from_path(path: String) -> void:
 
 	_push_active_sinks()
 	_clear_modified()
+	# A paused transport belongs to the previous session. A patch opens running.
+	_resume_playback()
 	print("[GONODES] Loaded patch: %s (%d nodes, %d connections)" % [
 		path, network.get_node_count(), network.get_connection_count()])
+
+
+## Starts cooking and shows the pause icon. Space still pauses after that.
+func _resume_playback() -> void:
+	if cook_engine != null:
+		cook_engine.cooking_enabled = true
+	if play_button != null:
+		play_button.text = "⏸"
 
 
 ## Removes all current network node instances from the scene tree.

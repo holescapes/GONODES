@@ -26,7 +26,9 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("max_val", 100.0, null, null, 0.01, "Max", "Maximum value"))
 	add_parameter(GNParameter.create_float("default_val", 0.0, null, null, 0.01, "Default", "Initial value"))
 	add_parameter(GNParameter.create_string("chop_channel", "value", "Channel", "CHOP channel name for driven value"))
-	add_parameter(GNParameter.create_int("fill_mode", 0, 0, 5, "Fill Mode", "0=L→R 1=R→L 2=T→B 3=B→T 4=CW 5=CCW"))
+	add_parameter(GNParameter.create_enum("fill_mode",
+		PackedStringArray(["Left to Right", "Right to Left", "Top to Bottom", "Bottom to Top", "Clockwise", "Counter-Clockwise"]),
+		0, "Fill Mode", "Direction the progress texture fills"))
 	add_parameter(GNParameter.create_vector2i("min_size", Vector2i(200, 32), "Min Size", "Minimum widget size"))
 
 

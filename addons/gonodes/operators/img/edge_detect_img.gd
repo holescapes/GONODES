@@ -16,8 +16,9 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_int("kernel", 0, 0, 1,
-		"Kernel", "0 = Sobel, 1 = Prewitt"))
+	add_parameter(GNParameter.create_enum("kernel",
+		PackedStringArray(["Sobel", "Prewitt"]), 0,
+		"Kernel", "Edge detection kernel"))
 	add_parameter(GNParameter.create_float("strength", 1.0, 0.1, 10.0, 0.1,
 		"Strength", "Edge intensity multiplier"))
 	add_parameter(GNParameter.create_bool("invert", false,

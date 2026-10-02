@@ -576,6 +576,10 @@ A → [C] 1.0
 
 ---
 
+## Menus
+
+A dropdown stores its choice as an index, starting at 0. An expression on that parameter can return the index or the option name. On Noise Image, `1` and `"White"` are the same choice.
+
 ## Built-in GDScript Functions
 
 Expressions use Godot's `Expression` class, so all

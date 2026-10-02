@@ -2,8 +2,8 @@
 #version 450
 
 // raymarch_vol.glsl — Volume ray-marching → 2D image output.
-// Multi-pass lighting: directional light with shadow rays,
-// Henyey-Greenstein phase function, ambient occlusion.
+// One directional light, shadow rays toward that light,
+// Henyey-Greenstein scattering, ambient fill, and emission.
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -11,12 +11,9 @@ layout(set = 0, binding = 0) uniform sampler3D u_volume;
 layout(set = 0, binding = 1, rgba8) uniform writeonly image2D u_output;
 
 layout(push_constant) uniform Params {
-    // Image + volume dimensions
+    // 32 scalars, 128 bytes. Godot rejects anything larger.
     int   img_w;
     int   img_h;
-    int   vol_x;
-    int   vol_y;
-    int   vol_z;
     int   max_steps;
     float step_size;
     float density_scale;
@@ -37,38 +34,57 @@ layout(push_constant) uniform Params {
     float emit_r, emit_g, emit_b;  // emission color
 } p;
 
-// AABB ray intersection (unit cube centered at origin: -0.5 to 0.5)
-bool intersect_aabb(vec3 ro, vec3 rd, out float t_near, out float t_far) {
-    vec3 inv_rd = 1.0 / rd;
-    vec3 t0 = (-0.5 - ro) * inv_rd;
-    vec3 t1 = (0.5 - ro) * inv_rd;
-    vec3 tmin = min(t0, t1);
-    vec3 tmax = max(t0, t1);
-    t_near = max(max(tmin.x, tmin.y), tmin.z);
-    t_far  = min(min(tmax.x, tmax.y), tmax.z);
-    return t_near < t_far && t_far > 0.0;
+// One slab of the unit cube [-0.5, 0.5]. A zero direction is inside or a miss,
+// never a divide by zero. That case is a camera or a light aimed on an axis.
+bool clip_slab(float ro, float rd, inout float t_near, inout float t_far) {
+    if (abs(rd) < 1e-8) {
+        return ro >= -0.5 && ro <= 0.5;
+    }
+    float t0 = (-0.5 - ro) / rd;
+    float t1 = ( 0.5 - ro) / rd;
+    if (t0 > t1) {
+        float tmp = t0;
+        t0 = t1;
+        t1 = tmp;
+    }
+    t_near = max(t_near, t0);
+    t_far = min(t_far, t1);
+    return t_near < t_far;
 }
 
-// Henyey-Greenstein phase function
+// AABB ray intersection (unit cube centered at origin: -0.5 to 0.5)
+bool intersect_aabb(vec3 ro, vec3 rd, out float t_near, out float t_far) {
+    t_near = -1.0e20;
+    t_far = 1.0e20;
+    if (!clip_slab(ro.x, rd.x, t_near, t_far)) return false;
+    if (!clip_slab(ro.y, rd.y, t_near, t_far)) return false;
+    if (!clip_slab(ro.z, rd.z, t_near, t_far)) return false;
+    return t_far > 0.0;
+}
+
+// Henyey-Greenstein shape. At g = 0 this is 1, so Light Intensity is the
+// brightness. g > 0 brightens where the view looks toward the light.
 float henyey_greenstein(float cos_theta, float g) {
     float g2 = g * g;
-    float denom = 1.0 + g2 - 2.0 * g * cos_theta;
-    return (1.0 - g2) / (4.0 * 3.14159265 * denom * sqrt(denom));
+    float denom = max(1.0 + g2 - 2.0 * g * cos_theta, 1e-4);
+    return (1.0 - g2) / (denom * sqrt(denom));
 }
 
 // Shadow ray: march toward the light from 'pos', return transmittance
 float shadow_transmittance(vec3 pos, vec3 light_dir) {
     if (p.shadow_steps <= 0) return 1.0;
 
-    // March from 'pos' in 'light_dir' until we leave the volume AABB
+    // March from 'pos' toward the light until we leave the volume AABB.
     float t_near_s, t_far_s;
     if (!intersect_aabb(pos, light_dir, t_near_s, t_far_s)) return 1.0;
-    t_near_s = max(t_near_s, 0.001); // avoid self-sampling
+    t_near_s = max(t_near_s, 0.0);
 
-    float shadow_dt = (t_far_s - t_near_s) / float(p.shadow_steps);
+    float span = t_far_s - t_near_s;
+    if (span <= 1e-4) return 1.0;
+    float shadow_dt = span / float(p.shadow_steps);
     float tau = 0.0;
-
-    for (int j = 0; j < p.shadow_steps; j++) {
+    // Skip the first step, or the voxel being shaded darkens its own lit face.
+    for (int j = 1; j < p.shadow_steps; j++) {
         float ts = t_near_s + (float(j) + 0.5) * shadow_dt;
         vec3 sp = pos + light_dir * ts;
         vec3 suvw = sp + 0.5;
@@ -132,17 +148,11 @@ void main() {
             float cos_theta = dot(rd, light_dir);
             float phase = henyey_greenstein(cos_theta, p.hg_g);
 
-            // Scattered light = light_color * shadow * phase
+            // alpha already carries density. Multiplying again squares it,
+            // which hides the light and the shadow in the thick parts.
             vec3 scattered = light_col * shadow * phase;
-
-            // Ambient contribution (omnidirectional)
             vec3 ambient_light = light_col * p.ambient;
-
-            // Emission (self-glow proportional to density)
-            vec3 emission = emit_col * density;
-
-            // Total radiance at this sample
-            vec3 radiance = (scattered + ambient_light) * density + emission;
+            vec3 radiance = scattered + ambient_light + emit_col;
 
             color += transmittance * alpha * radiance;
             transmittance *= (1.0 - alpha);

@@ -7,8 +7,8 @@ extends GNOutBase
 ##
 ## This is a terminal sink (no output ports) — display only.
 ## Multiple WindowOUT instances create multiple output windows.
-## The Window node is a child of this GNNode in the scene tree —
-## freed automatically when the node is removed.
+## The Window node is parented to the main window, not this operator,
+## because this node does not process. Freed in _exit_tree.
 ##
 ## Two input ports:
 ##   Port 0 (TOP "in"):     Background texture — pixels only, no interaction.
@@ -155,18 +155,16 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		# Embedded mode — show/hide the fullscreen Control in the main viewport
 		if _embedded_root != null:
 			_embedded_root.visible = should_open
-	else:
-		# Desktop mode — Window node
-		if _window != null and _window.visible != should_open:
-			_window.visible = should_open
-			if should_open:
-				GNLogger.info("WindowOUT", "'%s' output window re-opened via parameter" % id)
-
-	# Apply heavyweight window params only when OUR params changed
-	# (not when upstream input changes mark us cook-dirty)
-	if _window_params_dirty and not _embedded_mode:
-		_apply_window_params()
-		_window_params_dirty = false
+	elif _window != null:
+		if should_open:
+			if not _window.visible:
+				_window.show()
+			if _window_params_dirty:
+				_apply_window_params()
+				_window_params_dirty = false
+		elif _window.visible:
+			_window.hide()
+			GNLogger.info("WindowOUT", "'%s' output window hidden via parameter" % id)
 
 	# The output window and the editor share one RenderingDevice. Assign the
 	# source texture directly. A SubViewport does not draw while its update
@@ -214,9 +212,6 @@ func _ensure_window() -> void:
 	var init_res: Vector2i = get_param_value("resolution")
 	_window.size = init_res if init_res.x > 0 and init_res.y > 0 else Vector2i(512, 512)
 	_window.min_size = Vector2i(160, 120)
-	# GNNode sets process_mode = PROCESS_MODE_DISABLED which propagates to
-	# children and blocks Godot's internal GUI dispatch on the Window.
-	# Override to ALWAYS so the Window independently processes input.
 	_window.process_mode = Node.PROCESS_MODE_ALWAYS
 	_window.close_requested.connect(_on_window_close_requested)
 	_window.window_input.connect(_on_window_input)
@@ -265,9 +260,27 @@ func _ensure_window() -> void:
 	# Store reference on Window so widgets can find the overlay system
 	_window.set_meta("gn_panel_overlay", self)
 
-	add_child(_window)
+	# This operator does not process. A Window parented under it never appears,
+	# because a disabled parent blocks its children.
+	_window.visible = false
+	var tree := get_tree()
+	if tree == null or tree.root == null:
+		_window.queue_free()
+		_window = null
+		return
+	tree.root.add_child(_window)
 	_window_created = true
-	GNLogger.info("WindowOUT", "'%s' output window created: '%s'" % [id, _window.title])
+
+
+func _exit_tree() -> void:
+	_open_instance_ids.erase(id)
+	_input_registry.erase(id)
+	if _window != null and is_instance_valid(_window):
+		var closing := _window
+		_window = null
+		closing.hide()
+		closing.queue_free()
+	_window_created = false
 
 
 ## Creates the embedded-mode layout: fullscreen Control in the main viewport.
@@ -338,13 +351,16 @@ func _apply_window_params() -> void:
 	_window.title = title_val
 	_window.always_on_top = on_top
 
-	# Apply V-Sync — standard VSYNC_ENABLED for tear-free output.
-	if vsync_val:
-		DisplayServer.window_set_vsync_mode(
-			DisplayServer.VSYNC_ENABLED, _window.get_window_id())
-	else:
-		DisplayServer.window_set_vsync_mode(
-			DisplayServer.VSYNC_DISABLED, _window.get_window_id())
+	# Vsync is per native window. Id 0 is the editor window; skip until this
+	# output window has its own id.
+	var wid := _window.get_window_id()
+	var root_win := get_tree().root if is_inside_tree() else null
+	var root_id := root_win.get_window_id() if root_win != null else 0
+	if wid > 0 and wid != root_id:
+		if vsync_val:
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED, wid)
+		else:
+			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED, wid)
 
 	# Apply window mode. Borderless is windowed with no title bar, at Resolution.
 	# Fullscreen is the mode that takes the monitor.

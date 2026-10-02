@@ -48,10 +48,13 @@ float fbm(vec3 p) {
     float value = 0.0;
     float amp = pc.amplitude;
     float freq = pc.frequency;
-    for (int o = 0; o < pc.octaves; o++) {
-        value += gradient_noise(p * freq + vec3(pc.time)) * amp;
-        freq *= pc.lacunarity;
-        amp *= pc.gain;
+    // The importer requires a fixed loop. Extra steps past octaves add nothing.
+    for (int o = 0; o < 8; o++) {
+        if (o < pc.octaves) {
+            value += gradient_noise(p * freq + vec3(pc.time)) * amp;
+            freq *= pc.lacunarity;
+            amp *= pc.gain;
+        }
     }
     return value;
 }
@@ -64,7 +67,7 @@ void main() {
     vec3 uvw = vec3(gid) / vec3(pc.res_x, pc.res_y, pc.res_z);
     vec3 pos = uvw + vec3(pc.offset_x, pc.offset_y, pc.offset_z);
 
-    float density = fbm(pos);
+    float density = max(fbm(pos), 0.0);
 
     imageStore(out_volume, gid, vec4(density, 0.0, 0.0, 0.0));
 }

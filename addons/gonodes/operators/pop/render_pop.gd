@@ -48,6 +48,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var base_size: float = get_param_value("point_size")
+	var use_pscale: bool = get_param_value("use_pscale")
+	var max_extent := 0.0
+	var aabb_min := Vector3(INF, INF, INF)
+	var aabb_max := Vector3(-INF, -INF, -INF)
 
 	# Build MultiMesh
 	if _multi_mesh == null:
@@ -62,28 +66,44 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		var xform := Transform3D.IDENTITY
 		xform.origin = positions[i]
 		var s: float = base_size
-		if pscales.size() > i:
+		if use_pscale and pscales.size() > i:
 			s *= pscales[i]
-		xform.basis = xform.basis.scaled(Vector3(s, s, s))
+		s = maxf(s, 0.0)
+		xform.basis = Basis().scaled(Vector3(s, s, s))
 		_multi_mesh.set_instance_transform(i, xform)
+		aabb_min = aabb_min.min(positions[i])
+		aabb_max = aabb_max.max(positions[i])
+		max_extent = maxf(max_extent, s)
+
+	var pad := Vector3.ONE * max_extent
+	_multi_mesh.custom_aabb = AABB(aabb_min - pad, aabb_max - aabb_min + pad * 2.0)
 
 	# Ensure scene node exists
 	if _mesh_instance == null:
 		_mesh_instance = MultiMeshInstance3D.new()
 		_scene_node = _mesh_instance
 	_mesh_instance.multimesh = _multi_mesh
+	_apply_billboard(bool(get_param_value("billboard")))
 
-	# Set billboard material
-	if get_param_value("billboard") and _mesh_instance.material_override == null:
-		var mat := StandardMaterial3D.new()
-		mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		_mesh_instance.material_override = mat
-
-	# Return as a simple GNData wrapper — RenderTOP will adopt _scene_node
-	var out := GNData.new()
+	# Return the point cloud as COMP data so RenderTOP can place it in the scene.
+	var out := GNCompData.new()
+	out.scene_node = _scene_node
+	out.scene_label = "Point cloud"
 	out.valid = true
 	return out
+
+
+## Point Size and pscale live in the instance scale. Godot billboards drop
+## that scale unless keep_scale is on, which is why those params did nothing.
+func _apply_billboard(enabled: bool) -> void:
+	var mat := _mesh_instance.material_override as StandardMaterial3D
+	if mat == null:
+		mat = StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_mesh_instance.material_override = mat
+	mat.billboard_keep_scale = true
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED if enabled else BaseMaterial3D.BILLBOARD_DISABLED
 
 
 ## Provides the scene node for RenderTOP to adopt.

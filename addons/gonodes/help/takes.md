@@ -9,7 +9,7 @@ manage.
 
 ## Quick Start
 
-1. **Open the Take panel**: Click the **Takes** toggle in the toolbar.
+1. **Open the Take panel**: Click the **Takes** toggle on the timeline row (Shift+T).
 2. **Capture Base**: Click **Capture Base** to snapshot all current parameter values across the network.
 3. **Modify parameters**: Tweak any node's parameters to the look you want.
 4. **Capture a Take**: Type a name in the text field and click **Capture Take**. Only parameters that differ from Base are stored.

@@ -95,7 +95,9 @@ Help patches already have a note on the canvas. Follow the Do this column. Repor
 | 33 | `tests/visual_audit/03_top_filter_chain.gnpatch` | Select the Blur node. Press B. Press B again | The picture gets sharper while bypass is on, and the node shows ⏩. The second B brings the blur back | The picture does not change, or bypass stays on |
 | 34 | `addons/gonodes/help/top/text_basic.gnpatch` | Press F2 | The Cook Chain lists the text node and the window. The window row is active. Double-click a row selects that node in the graph | The panel does not open, or every row says inactive |
 | 35 | Same patch | Change Font Size. Ctrl+click that field | Font Size returns to its default | Ctrl+click does nothing, or it clears the text |
-| 36 | Same patch | Open Takes in the toolbar. Capture Base. Change Text to `TAKE`. Capture Take. Revert to Base. Apply the take | Revert shows Hello GONODES. Apply shows TAKE | The window text does not follow the take, or there is no Takes panel |
+| 36 | Same patch | Open Takes on the timeline row (Shift+T). Capture Base. Change Text to `TAKE`. Capture Take. Revert to Base. Apply the take | Revert shows Hello GONODES. Apply shows TAKE | The window text does not follow the take, or there is no Takes panel |
+
+Rows 27–36 passed on 1 Oct 2026. On that day, before the pass: the text window did not appear until WindowOUT was clicked; L did not lock parameters; bookmark 1 lagged across frames; F2 double-click did not select and center the node; bypass showed on the node while the picture still cooked. Those were fixed before that pass.
 
 ## More pictures
 
@@ -110,6 +112,8 @@ These windows open with the patch. You do not need to turn Open on.
 | 41 | `addons/gonodes/help/img/imgtotop_basic.gnpatch` | Look at the window | A noise picture, from the image node through ImgToTOP | A black or empty window |
 | 42 | `addons/gonodes/help/chop/lfo_basic.gnpatch` | Watch the window | The trace moves | A flat line that never moves, or a black window |
 | 43 | `addons/gonodes/help/script/script_chop_basic.gnpatch` | Turn Time Dependent on for the script node | The trace moves. The node has no warning badge | A warning badge, or the trace stays still after Time Dependent is on |
+
+Rows 37–43 passed on 2 Oct 2026.
 
 ## Tables and expressions
 

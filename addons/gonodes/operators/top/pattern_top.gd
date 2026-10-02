@@ -26,8 +26,8 @@ func _init_parameters() -> void:
 		"Primary pattern colour"))
 	add_parameter(GNParameter.create_color("color_b", Color.BLACK, "Color B",
 		"Secondary / background colour"))
-	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 0.01, "Rotation",
-		"Pattern rotation in radians"))
+	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 1.0, "Rotation",
+		"Pattern rotation in degrees"))
 	add_parameter(GNParameter.create_float("softness", 0.02, 0.0, 0.2, 0.001, "The softness value",
 		"Edge anti-aliasing / softness"))
 
@@ -46,7 +46,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("duty_cycle", get_param_value("duty_cycle"))
 	_material.set_shader_parameter("color_a", Vector4(ca.r, ca.g, ca.b, ca.a))
 	_material.set_shader_parameter("color_b", Vector4(cb.r, cb.g, cb.b, cb.a))
-	_material.set_shader_parameter("rotation", get_param_value("rotation"))
+	_material.set_shader_parameter("rotation", deg_to_rad(get_param_value("rotation")))
 	_material.set_shader_parameter("softness", get_param_value("softness"))
 
 	_cached_tex_data.resolution = res

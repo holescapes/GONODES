@@ -184,13 +184,10 @@ static func render_pop_gpu(pd: GNParticleData, size: Vector2i,
 			RenderingDevice.DATA_FORMAT_R32_SFLOAT)
 		_pop_prev_res = res
 
-	# Clear
-	var bg_img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	bg_img.fill(Color(0.08, 0.08, 0.1))
-	mrd.texture_update(_pop_output_tex_rid, 0, bg_img.get_data())
-	var depth_img := Image.create(w, h, false, Image.FORMAT_RF)
-	depth_img.fill(Color(1.0, 0.0, 0.0))
-	mrd.texture_update(_pop_depth_tex_rid, 0, depth_img.get_data())
+	# GPU clear. Building a CPU image of the viewer and uploading it every
+	# frame stalls the device, which is why selecting this node dropped to 1 FPS.
+	mrd.texture_clear(_pop_output_tex_rid, Color(0.08, 0.08, 0.1, 1.0), 0, 1, 0, 1)
+	mrd.texture_clear(_pop_depth_tex_rid, Color(1.0, 0.0, 0.0, 1.0), 0, 1, 0, 1)
 
 	# Camera
 	var yaw_rad := deg_to_rad(orbit_yaw)
@@ -208,9 +205,9 @@ static func render_pop_gpu(pd: GNParticleData, size: Vector2i,
 	var up := right.cross(fwd).normalized()
 	var fov_rad := deg_to_rad(60.0)
 
-	# Push constants (112 bytes, same layout as point_cloud_render.glsl)
+	# Push constants: 100 bytes, matching point_cloud_render.glsl.
 	var pc := PackedByteArray()
-	pc.resize(112)
+	pc.resize(100)
 	pc.encode_s32(0, w)
 	pc.encode_s32(4, h)
 	pc.encode_s32(8, pd.particle_count)
@@ -222,15 +219,14 @@ static func render_pop_gpu(pd: GNParticleData, size: Vector2i,
 	pc.encode_float(64, fov_rad)
 	pc.encode_float(68, 0.01)   # near clip
 	pc.encode_float(72, 100.0)  # far clip
-	pc.encode_float(76, 1.0)    # size attenuation
+	# Constant pixel size. Perspective sizing turns a near particle into a
+	# splat thousands of pixels wide, and the viewer redraws this every frame.
+	pc.encode_float(76, 0.0)
 	pc.encode_float(80, 1.0)    # alpha
 	pc.encode_s32(84, 1)        # use particle color
 	pc.encode_float(88, 0.2)    # fallback color r
 	pc.encode_float(92, 0.8)    # fallback color g
 	pc.encode_float(96, 0.8)    # fallback color b
-	pc.encode_float(100, 0.0)
-	pc.encode_float(104, 0.0)
-	pc.encode_float(108, 0.0)
 
 	var shader: RID = ctx.get_shader(
 		"res://addons/gonodes/shaders/top/point_cloud_render.glsl")
@@ -553,10 +549,8 @@ static func render_vol_gpu(vd: GNVolumeData, size: Vector2i,
 	if not _vol_sampler.is_valid():
 		_vol_sampler = ctx.create_linear_sampler()
 
-	# Clear background.
-	var bg_img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	bg_img.fill(Color(0.06, 0.06, 0.08))
-	mrd.texture_update(_vol_output_tex_rid, 0, bg_img.get_data())
+	# The composite shader writes every pixel, including the empty corner.
+	# A CPU image upload here only stalled the viewer.
 
 	# Push constants (32 bytes).
 	var pc := PackedByteArray()
@@ -568,7 +562,9 @@ static func render_vol_gpu(vd: GNVolumeData, size: Vector2i,
 	pc.encode_s32(16, vd.resolution.z)
 	pc.encode_float(20, clampf(slice_pos, 0.0, 1.0))
 	pc.encode_s32(24, 1 if show_mip else 0)
-	pc.encode_s32(28, vd.resolution.z)  # mip_steps = volume depth
+	# A handful of samples is enough for a preview. Marching every voxel
+	# of a deep volume, for every pixel of one quadrant, is not.
+	pc.encode_s32(28, mini(vd.resolution.z, 48))
 
 	var shader: RID = ctx.get_shader(
 		"res://addons/gonodes/shaders/vol/vol_viewer_composite.glsl")

@@ -213,6 +213,9 @@ func create_buffer(byte_size: int) -> RID:
 func read_buffer(buffer_rid: RID, byte_size: int) -> PackedByteArray:
 	if rd == null:
 		return PackedByteArray()
+	# Compute writes this frame are still in the UAV. Without this, a read
+	# returns the previous contents, so the window mesh stays on the first pose.
+	rd.barrier(RenderingDevice.BARRIER_MASK_COMPUTE, RenderingDevice.BARRIER_MASK_TRANSFER)
 	return rd.buffer_get_data(buffer_rid, 0, byte_size)
 
 
@@ -334,6 +337,7 @@ func create_texture_2d(width: int, height: int,
 		RenderingDevice.TEXTURE_USAGE_STORAGE_BIT |
 		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT |
 		RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT |
+		RenderingDevice.TEXTURE_USAGE_CAN_COPY_TO_BIT |
 		RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
 	)
 	fmt.mipmaps = 1

@@ -359,7 +359,7 @@ Procedural pattern generator: stripes, checkerboard, concentric circles, grids, 
 | duty_cycle | Float | 0.5 | 0.0–1.0 | Width ratio of primary shape |
 | color_a | Color | White | — | Primary colour |
 | color_b | Color | Black | — | Secondary / background colour |
-| rotation | Float | 0.0 | — | Rotation in radians |
+| rotation | Float | 0.0 | — | Rotation in degrees |
 | softness | Float | 0.02 | 0.0–0.2 | Edge anti-aliasing |
 
 ---
@@ -401,7 +401,7 @@ SDF 2D primitives: triangle, line, pentagon.
 | bg_color | Color | Black | — | Background colour |
 | border_width | Float | 0.02 | 0.0–0.1 | Border thickness (0 = none) |
 | border_color | Color | White | — | Border colour |
-| rotation | Float | 0.0 | — | Shape rotation in radians |
+| rotation | Float | 0.0 | — | Shape rotation in degrees |
 | softness | Float | 0.005 | 0.0–0.05 | Edge anti-aliasing |
 
 ---
@@ -497,7 +497,7 @@ Separable blur with 7 filter types matching TouchDesigner's Blur TOP.
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | translate | Vector2 | (0, 0) | — | UV translation |
-| rotate | Float | 0.0 | — | Rotation in radians |
+| rotate | Float | 0.0 | — | Rotation in degrees |
 | scale | Vector2 | (1.0, 1.0) | — | UV scale |
 | pivot | Vector2 | (0.5, 0.5) | — | Transform pivot point |
 | extend | Enum | Clamp | Clamp, Repeat, Mirror, Zero | Edge extension mode |
@@ -597,11 +597,11 @@ Blends current frame with previous frame's output for trails and echoes.
 |-----------|------|---------|-------|-------------|
 | mix | Float | 0.9 | 0.0–1.0 | Feedback persistence (higher = longer trails) |
 | translate | Vector2 | (0, 0) | — | Feedback UV translation per frame |
-| rotate | Float | 0.0 | — | Feedback rotation in radians per frame |
+| rotate | Float | 0.0 | — | Degrees applied to the previous frame each cook |
 | scale | Vector2 | (1.0, 1.0) | — | Feedback scale per frame |
 | reset | Bool | false | — | Clear feedback buffer |
 
-**How it works:** Each frame, the shader blends the new input with the previous frame's output texture. The previous frame can be spatially transformed (translate/rotate/scale), creating spiral, zoom, or drift effects. Uses deferred capture (`call_deferred`) to read the viewport output into an `ImageTexture` for next frame's feedback uniform.
+**How it works:** Each frame, the shader blends the new input with the previous frame's output texture. Translate, rotate, and scale move that previous frame before the blend, so the trail can drift, spin, or zoom. The previous frame is kept on a second viewport; there is no CPU readback.
 
 ---
 
@@ -681,7 +681,7 @@ Renders POP particle data as a 2D point-cloud image using GPU compute splatting.
 | width | Int | 512 | 64–4096 | Output image width |
 | height | Int | 512 | 64–4096 | Output image height |
 | point_size | Float | 4.0 | 0.5–64.0 | Base splat radius in pixels |
-| size_attenuation | Float | 1.0 | 0.0–1.0 | 0 = constant, 1 = full perspective |
+| size_attenuation | Float | 1.0 | 0.0–1.0 | 0 = constant pixel size. 1 = perspective, capped at 16 px so a near point cannot fill the frame |
 | alpha | Float | 1.0 | 0.0–1.0 | Global opacity multiplier |
 | use_particle_color | Bool | true | — | Use per-particle color (false = uniform) |
 | color | Color | white | — | Uniform color when not using particle color |
@@ -878,7 +878,7 @@ UV projection mapping: planar, cylindrical, or spherical.
 | mode | Enum | Planar | Planar, Cylindrical, Spherical | Projection type |
 | uv_offset | Vector2 | (0, 0) | — | UV translation |
 | uv_scale | Vector2 | (1, 1) | — | UV scale |
-| rotation | Float | 0.0 | — | UV rotation in radians |
+| rotation | Float | 0.0 | — | UV rotation in degrees |
 
 **Inputs:** `in` (TOP).
 
@@ -1731,7 +1731,7 @@ Spiral distortion — rotates pixels around a centre point with strength falling
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| strength | Float | 3.0 | −10.0–10.0 | Twist amount in radians (negative = opposite) |
+| strength | Float | 172.0 | −720.0–720.0 | Twist in degrees (negative = opposite). The shader still uses radians. |
 | radius | Float | 0.5 | 0.01–2.0 | Effect radius as fraction of image |
 | center | Vector2 | (0.5, 0.5) | — | Centre of the twist |
 
@@ -6409,7 +6409,7 @@ Clickable text link button with underline options.
 ### TextureProgressBarUI
 Textured progress bar with TOP layers and CHOP driver.
 - **Inputs:** `chop` (CHOP), `under` (TOP), `progress` (TOP), `over` (TOP)
-- **Parameters:** `min_val` (FLOAT), `max_val` (FLOAT), `default_val` (FLOAT), `chop_channel` (STRING), `fill_mode` (INT: 0-5), `min_size` (VECTOR2I)
+- **Parameters:** `min_val` (FLOAT), `max_val` (FLOAT), `default_val` (FLOAT), `chop_channel` (STRING), `fill_mode` (MENU: Left to Right, Right to Left, Top to Bottom, Bottom to Top, Clockwise, Counter-Clockwise), `min_size` (VECTOR2I)
 - **State channels:** `value`, `ratio`
 
 ---
@@ -6461,7 +6461,7 @@ Advects particles using a 3D velocity field from a VOL operator.
 - **Parameters:** `strength` (FLOAT, 1.0), `add_mode` (BOOL, true — add vs replace velocity)
 
 ### BoidsPOP
-Flocking/boids simulation using Reynolds rules (separation, alignment, cohesion). Brute-force O(n²) neighbor search via compute shader — performant up to ~50k particles.
+Flocking/boids simulation using Reynolds rules (separation, alignment, cohesion). Each particle samples up to 48 others, spread across the pool, so a few thousand particles do not hang the GPU.
 - **Inputs:** `pop_in` (POP)
 - **Outputs:** `out` (POP)
 - **Parameters:** `perception_radius` (FLOAT, 2.0), `avoid_radius` (FLOAT, 0.5), `separation/alignment/cohesion` (FLOAT, 1.5/1.0/1.0), `max_speed` (FLOAT, 5.0), `max_force` (FLOAT, 3.0), `bounds_radius` (FLOAT, 10.0), `bounds_force` (FLOAT, 5.0)
@@ -6473,7 +6473,7 @@ Copies SOP geometry onto each particle position. Bridge: reads POP SSBO → outp
 - **Parameters:** `max_instances` (INT, 10000), `use_pscale` (BOOL, true), `use_color` (BOOL, true)
 
 ### RenderPOP
-Renders particles as point cloud or billboards into a COMP scene. Bridge: reads POP SSBO → outputs COMP-compatible scene node.
+Renders particles as point cloud or billboards into a COMP scene. Bridge: reads POP SSBO → outputs COMP-compatible scene node. Point Size is the quad size. Use pscale multiplies that by each particle's pscale. Billboard faces the camera and keeps that size.
 - **Inputs:** `pop_in` (POP)
 - **Outputs:** `out` (COMP)
 - **Parameters:** `point_size` (FLOAT, 0.05), `use_pscale` (BOOL, true), `billboard` (BOOL, true)
@@ -6537,7 +6537,7 @@ Reads back a volume to CPU and outputs statistics as CHOP channels (min, max, me
 - **Parameters:** `histogram` (BOOL, false), `hist_bins` (INT, 64)
 
 ### RaymarchTOP
-Volume ray-march renderer → 2D image (TOP). Front-to-back compositing with Beer-Lambert absorption, Henyey-Greenstein scattering, shadow rays, and self-emission.
+Volume ray-march renderer → 2D image (TOP). Front-to-back compositing with Beer-Lambert absorption. One directional light, shadow rays marched toward that light, Henyey-Greenstein scattering (g = 0 is even, so Light Intensity is that brightness), ambient fill, and emission. A view or light aimed straight along an axis still hits the volume.
 - **Inputs:** `vol` (VOL)
 - **Outputs:** `image` (TOP)
 - **Parameters:** `width/height` (INT, 512), `max_steps` (INT, 128), `step_size` (FLOAT, 0.01), `density_scale` (FLOAT, 5.0), `absorption` (FLOAT, 10.0), `cam_dist` (FLOAT, 1.5), `cam_yaw/cam_pitch` (FLOAT, 0/20), `fov` (FLOAT, 60), `light_yaw/light_pitch` (FLOAT, 45/60), `light_color` (COLOR), `light_intensity` (FLOAT, 2.0), `hg_g` (FLOAT, 0.3), `shadow_steps` (INT, 32), `ambient` (FLOAT, 0.15), `emit_color` (COLOR)

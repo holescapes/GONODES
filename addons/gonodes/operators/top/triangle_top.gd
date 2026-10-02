@@ -28,8 +28,8 @@ func _init_parameters() -> void:
 		"Border thickness (0 = no border)"))
 	add_parameter(GNParameter.create_color("border_color", Color.WHITE, "Border Color",
 		"Border / outline colour"))
-	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 0.01, "The rotation value",
-		"Shape rotation in radians"))
+	add_parameter(GNParameter.create_float("rotation", 0.0, null, null, 1.0, "Rotation",
+		"Shape rotation in degrees"))
 	add_parameter(GNParameter.create_float("softness", 0.005, 0.0, 0.05, 0.001, "The softness value",
 		"Edge anti-aliasing"))
 
@@ -50,7 +50,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_material.set_shader_parameter("bg_color", Vector4(bg.r, bg.g, bg.b, bg.a))
 	_material.set_shader_parameter("border_width", get_param_value("border_width"))
 	_material.set_shader_parameter("border_color", Vector4(bc.r, bc.g, bc.b, bc.a))
-	_material.set_shader_parameter("rotation", get_param_value("rotation"))
+	_material.set_shader_parameter("rotation", deg_to_rad(get_param_value("rotation")))
 	_material.set_shader_parameter("softness", get_param_value("softness"))
 
 	_cached_tex_data.resolution = res

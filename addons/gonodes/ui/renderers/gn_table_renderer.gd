@@ -108,9 +108,9 @@ func render_for_viewer(data: GNData, viewer) -> void:
 		viewer.set_control(tree, "%d rows" % (tbl.table.size() - (1 if tbl.has_header else 0)))
 
 
-## Populates a read-only Tree from GNTableData.
-static func _populate_viewer_tree(tree: Tree, tbl: GNTableData) -> void:
-	tree.clear()
+## Rewrites cell text on the existing rows. Adds or removes a row when the
+## table grew or shrank. clear() reset the scroll position every cook frame.
+static func _sync_table_rows(tree: Tree, tbl: GNTableData, editable: bool) -> void:
 	var row_count: int = tbl.table.size()
 	var col_count: int = 0
 	for row in tbl.table:
@@ -118,56 +118,66 @@ static func _populate_viewer_tree(tree: Tree, tbl: GNTableData) -> void:
 			col_count = row.size()
 	if col_count == 0:
 		return
-	tree.columns = col_count
-	var root := tree.create_item()
+	if tree.columns != col_count:
+		tree.columns = col_count
+
+	var root := tree.get_root()
+	if root == null:
+		root = tree.create_item()
+
 	var start_row: int = 0
 	if tbl.has_header and row_count > 0:
 		for c in range(mini(tbl.table[0].size(), col_count)):
-			tree.set_column_title(c, str(tbl.table[0][c]))
-			tree.set_column_title_alignment(c, HORIZONTAL_ALIGNMENT_LEFT)
-		tree.set_column_titles_visible(true)
+			var title := str(tbl.table[0][c])
+			if tree.get_column_title(c) != title:
+				tree.set_column_title(c, title)
+				tree.set_column_title_alignment(c, HORIZONTAL_ALIGNMENT_LEFT)
+		if not tree.are_column_titles_visible():
+			tree.set_column_titles_visible(true)
 		start_row = 1
-	else:
+	elif tree.are_column_titles_visible():
 		tree.set_column_titles_visible(false)
+
+	var visible_rows := row_count - start_row
+	var child := root.get_first_child()
+	var seen := 0
+	while child != null and seen < visible_rows:
+		child = child.get_next()
+		seen += 1
+	while seen < visible_rows:
+		tree.create_item(root)
+		seen += 1
+	while child != null:
+		var nxt := child.get_next()
+		child.free()
+		child = nxt
+
+	var item := root.get_first_child()
 	for r in range(start_row, row_count):
-		var item := tree.create_item(root)
-		for c in range(mini(tbl.table[r].size(), col_count)):
-			item.set_text(c, str(tbl.table[r][c]))
+		if editable:
+			item.set_metadata(0, r - start_row)
+		for c in range(col_count):
+			var text := ""
+			if c < tbl.table[r].size():
+				text = str(tbl.table[r][c])
+			if item.get_text(c) != text:
+				item.set_text(c, text)
+			if editable and not item.is_editable(c):
+				item.set_editable(c, true)
+		item = item.get_next()
+
+
+## Populates a read-only Tree from GNTableData.
+static func _populate_viewer_tree(tree: Tree, tbl: GNTableData) -> void:
+	_sync_table_rows(tree, tbl, false)
 
 
 ## Populates an editable Tree and wires item_edited back to node.table_cell_edited.
-## Skips rebuild while a cell is actively being edited to avoid clobbering input.
+## Skips the rewrite while a cell is actively being edited so the keystrokes stay.
 static func _populate_edit_tree(tree: Tree, tbl: GNTableData, node: GNNode) -> void:
-	# Skip rebuild while user is mid-edit (cell selected / editor open).
 	if _editing_active.has(node.id):
 		return
-
-	tree.clear()
-	var row_count: int = tbl.table.size()
-	var col_count: int = 0
-	for row in tbl.table:
-		if row.size() > col_count:
-			col_count = row.size()
-	if col_count == 0:
-		return
-	tree.columns = col_count
-	var root := tree.create_item()
-	var start_row: int = 0
-	if tbl.has_header and row_count > 0:
-		for c in range(mini(tbl.table[0].size(), col_count)):
-			tree.set_column_title(c, str(tbl.table[0][c]))
-			tree.set_column_title_alignment(c, HORIZONTAL_ALIGNMENT_LEFT)
-		tree.set_column_titles_visible(true)
-		start_row = 1
-	else:
-		tree.set_column_titles_visible(false)
-
-	for r in range(start_row, row_count):
-		var item := tree.create_item(root)
-		item.set_metadata(0, r - start_row)  # 0-based data row index
-		for c in range(mini(tbl.table[r].size(), col_count)):
-			item.set_text(c, str(tbl.table[r][c]))
-			item.set_editable(c, true)
+	_sync_table_rows(tree, tbl, true)
 
 	# Wire the data callback once per node (not every rebuild).
 	if not _data_callback_for.has(node.id):

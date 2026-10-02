@@ -13,8 +13,8 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_float("strength", 3.0, -10.0, 10.0, 0.1,
-		"Strength", "Twist amount in radians (negative = opposite direction)"))
+	add_parameter(GNParameter.create_float("strength", 172.0, -720.0, 720.0, 1.0,
+		"Strength", "Twist in degrees (negative = opposite direction)"))
 	add_parameter(GNParameter.create_float("radius", 0.5, 0.01, 2.0, 0.01,
 		"Radius", "Effect radius as fraction of image"))
 	add_parameter(GNParameter.create_vector2("center", Vector2(0.5, 0.5),
@@ -34,7 +34,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	(_canvas as TextureRect).texture = tex_in.texture
 	_material.set_shader_parameter("source_tex", tex_in.texture)
-	_material.set_shader_parameter("strength", get_param_value("strength"))
+	_material.set_shader_parameter("strength", deg_to_rad(get_param_value("strength")))
 	_material.set_shader_parameter("radius", get_param_value("radius"))
 	_material.set_shader_parameter("center", get_param_value("center"))
 

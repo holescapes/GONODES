@@ -322,6 +322,31 @@ func test_bypass_passes_input_through() -> void:
 		"bypassed node passes input through")
 
 
+func test_bypass_after_cook_replaces_cached_output() -> void:
+	## Bypass toggled after a real cook must not keep that cook's result.
+	var a := _make_constant("a", "ch", 42.0)
+	var b := _make_math("b", 2, 10.0)
+	var c := _make_null("c")
+	_network.connect_nodes("a", 0, "b", 0)
+	_network.connect_nodes("b", 0, "c", 0)
+	_sink(["c"])
+
+	_cook()
+	GNTestAssert.assert_approx(_output(c).get_value("ch"), 420.0, 0.001, "math cooks before bypass")
+
+	b.bypass = true
+	b.mark_dirty()
+	_cook()
+	GNTestAssert.assert_approx(_output(c).get_value("ch"), 42.0, 0.001,
+		"bypass after cook passes the input through")
+
+	b.bypass = false
+	b.mark_dirty()
+	_cook()
+	GNTestAssert.assert_approx(_output(c).get_value("ch"), 420.0, 0.001,
+		"clearing bypass cooks again")
+
+
 func test_bypass_cook_time_zero() -> void:
 	## A bypassed node should report 0 cook time.
 	var a := _make_constant("a", "ch", 1.0)

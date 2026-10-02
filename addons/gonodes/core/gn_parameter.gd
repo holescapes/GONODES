@@ -298,6 +298,28 @@ static func create_enum(p_name: String, p_options: PackedStringArray,
 	return param
 
 
+## Menus store the choice as an index. An expression may return that index
+## or the option's name. null means the value is not one of the choices.
+func resolve_enum_index(result: Variant) -> Variant:
+	if enum_options.is_empty():
+		return null
+	var idx := -1
+	if result is int:
+		idx = result
+	elif result is float and is_finite(float(result)):
+		idx = int(result)
+	elif result is String or result is StringName:
+		var want := str(result).strip_edges().to_lower()
+		if not want.is_empty():
+			for i in range(enum_options.size()):
+				if enum_options[i].to_lower() == want:
+					idx = i
+					break
+	if idx < 0 or idx >= enum_options.size():
+		return null
+	return idx
+
+
 ## Factory method to create a VECTOR2 parameter.
 static func create_vector2(p_name: String, p_default: Vector2,
 		p_label: String = "",
@@ -766,15 +788,28 @@ static func _is_expression_ident_char(ch: String) -> bool:
 
 
 ## Builds _compiled_expression_callable after a successful Expression.parse().
+## Never compiles GDScript that the parser would reject: that error stops the
+## running editor instead of becoming a message on the parameter.
 func _build_expression_callable(expr_text: String) -> void:
 	_clear_expression_callable()
 	if _expression_callable_blocked(expr_text):
 		return
 	var body := _rewrite_host_method_calls(expr_text)
+	var block := _gdscript_body_problem(body)
+	if block == "skip":
+		return
+	if not block.is_empty():
+		_expression_valid = false
+		expression_error = block
+		GNLogger.error("Parameter", "'%s' expression error — %s" % [param_name, block])
+		return
 	var source := "extends RefCounted\n\n@warning_ignore(\"unused_parameter\")\nfunc eval(host, me, time, frame, dt):\n\treturn %s\n" % body
 	var script := GDScript.new()
 	script.source_code = source
 	if script.reload() != OK:
+		_expression_valid = false
+		expression_error = "Could not compile this expression"
+		GNLogger.error("Parameter", "'%s' expression could not compile: %s" % [param_name, expr_text])
 		return
 	var evaluator: RefCounted = script.new()
 	_compiled_expression_evaluator = evaluator
@@ -787,14 +822,94 @@ func _build_component_expression_callable(idx: int, expr_text: String) -> void:
 	if _expression_callable_blocked(expr_text):
 		return
 	var body := _rewrite_host_method_calls(expr_text)
+	var block := _gdscript_body_problem(body)
+	if block == "skip":
+		return
+	if not block.is_empty():
+		_component_expression_valid[idx] = false
+		component_expression_errors[idx] = block
+		var labels := get_component_labels()
+		var label_str: String = labels[idx] if idx < labels.size() else str(idx)
+		GNLogger.error("Parameter", "'%s'[%s] expression error — %s" % [param_name, label_str, block])
+		return
 	var source := "extends RefCounted\n\n@warning_ignore(\"unused_parameter\")\nfunc eval(host, me, time, frame, dt):\n\treturn %s\n" % body
 	var script := GDScript.new()
 	script.source_code = source
 	if script.reload() != OK:
+		_component_expression_valid[idx] = false
+		component_expression_errors[idx] = "Could not compile this expression"
 		return
 	var evaluator: RefCounted = script.new()
 	_compiled_component_evaluators[idx] = evaluator
 	_compiled_component_callables[idx] = evaluator.eval
+
+
+## "" means the body can be compiled. "skip" means use Expression.execute instead.
+## Anything else is a message for the user. Compiling a bad body prints a
+## parser error that stops the editor.
+static func _gdscript_body_problem(body: String) -> String:
+	var names := _bare_call_names(body)
+	var saw_unknown := false
+	for call_name in names:
+		if call_name == "me" or call_name == "time" or call_name == "frame" or call_name == "dt":
+			return "%s is a value, not a function. Write %s, not %s(...)." % [call_name, call_name, call_name]
+		if not _GD_EXPRESSION_BUILTINS.has(call_name):
+			saw_unknown = true
+	return "skip" if saw_unknown else ""
+
+
+static func _bare_call_names(body: String) -> PackedStringArray:
+	var names := PackedStringArray()
+	var i := 0
+	var in_string := false
+	var string_quote := ""
+	while i < body.length():
+		var ch: String = body[i]
+		if in_string:
+			if ch == string_quote and (i == 0 or body[i - 1] != "\\"):
+				in_string = false
+			i += 1
+			continue
+		if ch == '"' or ch == "'":
+			in_string = true
+			string_quote = ch
+			i += 1
+			continue
+		if _is_expression_ident_char(ch):
+			var start := i
+			i += 1
+			while i < body.length() and _is_expression_ident_char(body[i]):
+				i += 1
+			if i < body.length() and body[i] == "(":
+				var prev_is_dot := start > 0 and body[start - 1] == "."
+				if not prev_is_dot:
+					names.append(body.substr(start, i - start))
+			continue
+		i += 1
+	return names
+
+
+const _GD_EXPRESSION_BUILTINS := {
+	"abs": true, "absi": true, "absf": true,
+	"sign": true, "signi": true, "signf": true,
+	"sin": true, "cos": true, "tan": true,
+	"sinh": true, "cosh": true, "tanh": true,
+	"asin": true, "acos": true, "atan": true, "atan2": true,
+	"sqrt": true, "pow": true, "log": true, "exp": true,
+	"floor": true, "floori": true, "floorf": true,
+	"ceil": true, "ceili": true, "round": true, "roundi": true,
+	"snapped": true, "snappedf": true, "snappedi": true,
+	"min": true, "mini": true, "minf": true,
+	"max": true, "maxi": true, "maxf": true,
+	"clamp": true, "clampi": true, "clampf": true,
+	"lerp": true, "lerpf": true, "inverse_lerp": true, "smoothstep": true,
+	"posmod": true, "fmod": true, "fposmod": true,
+	"deg_to_rad": true, "rad_to_deg": true,
+	"wrapf": true, "wrapi": true, "pingpong": true, "remap": true,
+	"int": true, "float": true, "str": true, "bool": true,
+	"Vector2": true, "Vector2i": true, "Vector3": true, "Vector3i": true,
+	"Vector4": true, "Vector4i": true, "Color": true, "Color8": true,
+}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

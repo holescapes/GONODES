@@ -23,8 +23,9 @@ func _init_parameters() -> void:
 		0, "Mode", "How to apply the texture"))
 	add_parameter(GNParameter.create_float("displacement_scale", 0.1, 0.0, 10.0, 0.001,
 		"Displacement Scale", "Displacement multiplier (Displacement mode only)"))
-	add_parameter(GNParameter.create_int("uv_set", 0, 0, 1,
-		"UV Set", "Which UV set to sample (0 or 1)"))
+	add_parameter(GNParameter.create_enum("uv_set",
+		PackedStringArray(["UV", "UV2"]), 0,
+		"UV Set", "Which UV set to sample"))
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

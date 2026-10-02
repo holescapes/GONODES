@@ -197,8 +197,11 @@ func inspect_node(node_id: String) -> void:
 ## Inspects the given GNNode, building param rows for all its parameters.
 func inspect(node: GNNode) -> void:
 	if _current_node == node:
-		# Same node — just refresh the header (e.g., after rename)
+		# Same node — refresh the header and the lock. A lock toggle re-selects
+		# the node that is already open, and the old early return left the
+		# parameter fields editable.
 		_header_label.text = "%s" % node.id
+		_apply_lock_state()
 		return
 
 	_clear_rows()
@@ -382,6 +385,8 @@ func _on_node_cooked(node_id: String) -> void:
 			base_text += "  |  %s" % "  |  ".join(res_parts)
 
 	_status_label.text = base_text
+	if _current_node.locked:
+		_status_label.text += "  |  🔒 LOCKED"
 
 	# Update expression-mode rows to show resolved values
 	for p_name in _param_rows:
@@ -460,13 +465,11 @@ func _apply_lock_state() -> void:
 	var is_locked := _current_node.locked
 	for p_name in _param_rows:
 		var row: GNParamRow = _param_rows[p_name]
-		# Disable mouse input and visually dim when locked
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE if is_locked else Control.MOUSE_FILTER_STOP
 		row.modulate = Color(0.6, 0.6, 0.6, 0.8) if is_locked else Color.WHITE
-		# Recursively set mouse filter on children
 		_set_children_mouse_filter(row, Control.MOUSE_FILTER_IGNORE if is_locked else Control.MOUSE_FILTER_STOP)
-	# Show lock indicator in status
-	if is_locked:
+		_set_children_editable(row, not is_locked)
+	if is_locked and not _status_label.text.contains("LOCKED"):
 		_status_label.text += "  |  🔒 LOCKED"
 
 
@@ -476,7 +479,35 @@ func _set_children_mouse_filter(node: Control, filter: Control.MouseFilter) -> v
 		if child is Control:
 			child.mouse_filter = filter
 			_set_children_mouse_filter(child, filter)
-	_family_bar.color = Color(0.3, 0.3, 0.3)
+
+
+## LineEdit and Range stay usable when only mouse_filter changes, including
+## a field that already has focus. Lock turns editing off and restores it.
+func _set_children_editable(node: Node, editable: bool) -> void:
+	if node is LineEdit:
+		var line := node as LineEdit
+		if not editable:
+			if not line.has_meta("_gn_editable"):
+				line.set_meta("_gn_editable", line.editable)
+			line.editable = false
+			line.release_focus()
+		elif line.has_meta("_gn_editable"):
+			line.editable = bool(line.get_meta("_gn_editable"))
+	elif node is TextEdit:
+		var text_edit := node as TextEdit
+		if not editable:
+			if not text_edit.has_meta("_gn_editable"):
+				text_edit.set_meta("_gn_editable", text_edit.editable)
+			text_edit.editable = false
+			text_edit.release_focus()
+		elif text_edit.has_meta("_gn_editable"):
+			text_edit.editable = bool(text_edit.get_meta("_gn_editable"))
+	elif node is Range:
+		(node as Range).editable = editable
+	elif node is BaseButton:
+		(node as BaseButton).disabled = not editable
+	for child in node.get_children():
+		_set_children_editable(child, editable)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
