@@ -72,7 +72,8 @@ func render_for_preview(host) -> void:
 ## Returns null if the port doesn't exist or the data is not GNImageData.
 func _get_input_img(inputs: Array[GNData], port: int = 0) -> GNImageData:
 	if port < inputs.size() and inputs[port] is GNImageData:
-		return inputs[port] as GNImageData
+		var _ret0 := inputs[port] as GNImageData
+		return _ret0
 	return null
 
 

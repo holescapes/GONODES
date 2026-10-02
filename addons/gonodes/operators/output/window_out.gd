@@ -512,7 +512,8 @@ func _decay_input_state() -> void:
 static func get_window_by_id(node_id: String) -> WindowOUT:
 	var ref = _input_registry.get(node_id, null)
 	if ref != null and is_instance_valid(ref):
-		return ref as WindowOUT
+		var _ret0 := ref as WindowOUT
+		return _ret0
 	return null
 
 

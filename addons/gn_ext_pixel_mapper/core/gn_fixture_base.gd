@@ -32,7 +32,8 @@ func _is_family_data(data: GNData) -> bool:
 ## Safe input extraction -- returns null if port is empty or wrong type.
 func _get_input_fix(inputs: Array[GNData], port: int = 0) -> GNFixtureData:
 	if port < inputs.size() and inputs[port] is GNFixtureData:
-		return inputs[port] as GNFixtureData
+		var _ret0 := inputs[port] as GNFixtureData
+		return _ret0
 	return null
 
 

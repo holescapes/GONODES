@@ -96,7 +96,8 @@ func _find_network() -> GNNetwork:
 	var current: Node = get_parent()
 	while current != null:
 		if current.get("network") is GNNetwork:
-			return current.get("network") as GNNetwork
+			var _ret0 := current.get("network") as GNNetwork
+			return _ret0
 		current = current.get_parent()
 	return null
 

@@ -42,4 +42,5 @@ func _find_network() -> GNNetwork:
 	var p = get_parent()
 	while p != null and not (p is GNNetwork):
 		p = p.get_parent()
-	return p as GNNetwork
+	var _ret0 := p as GNNetwork
+	return _ret0

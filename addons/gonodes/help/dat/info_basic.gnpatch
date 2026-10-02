@@ -1,87 +1,141 @@
 {
-    "version": "1.0.0",
-    "generator": "GONODES",
-    "nodes": {
-        "info1": {
-            "type": "InfoDAT",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {}
-        },
-        "texttop1": {
-            "type": "TextTOP",
-            "position": [
-                1150,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "font_size": {
-                    "value": 14
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1550,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
-        }
-    },
-    "connections": [
-        {
-            "from": "info1",
-            "from_port": 0,
-            "to": "texttop1",
-            "to_port": 0
-        },
-        {
-            "from": "texttop1",
-            "from_port": 0,
-            "to": "window1",
-            "to_port": 0
-        }
-    ],
-    "annotations": [
-        {
-            "id": "ann_1",
-            "type": "note",
-            "text": "Info DAT — Basic\n\nSystem info table (fps, frame, time, OS, memory).",
-            "position": [
-                -100.0,
-                -100.0
-            ],
-            "size": [
-                400.0,
-                100.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                0.8
-            ]
-        }
-    ]
+	"annotations": [
+		{
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.800000011920929
+			],
+			"id": "ann_1",
+			"position": [
+				-100.0,
+				-100.0
+			],
+			"size": [
+				400.0,
+				100.0
+			],
+			"text": "Info DAT — Basic\n\nSystem info table (fps, frame, time, OS, memory).",
+			"type": "note"
+		}
+	],
+	"app_version": "0.1.0-beta",
+	"connections": [
+		{
+			"from": "texttop1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	],
+	"generator": "GONODES",
+	"nodes": {
+		"info1": {
+			"position": [
+				820.0,
+				100.0
+			],
+			"type": "InfoDAT"
+		},
+		"texttop1": {
+			"parameters": {
+				"align_h": {
+					"value": 1
+				},
+				"align_v": {
+					"value": 1
+				},
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"font_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"font_file": {
+					"value": "Path to the font file"
+				},
+				"font_size": {
+					"value": 14
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"text": {
+					"value": "Hello"
+				},
+				"word_wrap": {
+					"value": true
+				}
+			},
+			"position": [
+				1150.0,
+				100.0
+			],
+			"type": "TextTOP"
+		},
+		"window1": {
+			"parameters": {
+				"always_on_top": {
+					"value": false
+				},
+				"monitor": {
+					"value": 0
+				},
+				"open": {
+					"value": true
+				},
+				"position": {
+					"value": {
+						"_type": "Vector2i",
+						"x": -1,
+						"y": -1
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"title": {
+					"value": "GONODES Output"
+				},
+				"vsync": {
+					"value": true
+				},
+				"window_mode": {
+					"value": 0
+				}
+			},
+			"position": [
+				1550.0,
+				100.0
+			],
+			"type": "WindowOUT"
+		}
+	},
+	"version": "1.0.0",
+	"viewport": {
+		"scroll_x": 39.1954956054688,
+		"scroll_y": -169.169570922852,
+		"zoom": 0.308434545993805
+	}
 }

@@ -30,7 +30,8 @@ func _is_family_data(data: GNData) -> bool:
 ## Safe input extraction — returns null if port is empty or wrong type.
 func _get_input_sdf(inputs: Array[GNData], port: int = 0) -> GNSDFData:
 	if port < inputs.size() and inputs[port] is GNSDFData:
-		return inputs[port] as GNSDFData
+		var _ret0 := inputs[port] as GNSDFData
+		return _ret0
 	return null
 
 

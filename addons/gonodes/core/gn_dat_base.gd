@@ -62,7 +62,8 @@ func _prepare_table(clear: bool = true) -> GNTableData:
 ## Returns null if the port doesn't exist or the data is not GNTableData.
 func _get_input_dat(inputs: Array[GNData], port: int = 0) -> GNTableData:
 	if port < inputs.size() and inputs[port] is GNTableData:
-		return inputs[port] as GNTableData
+		var _ret0 := inputs[port] as GNTableData
+		return _ret0
 	return null
 
 

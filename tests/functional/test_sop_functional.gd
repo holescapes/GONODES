@@ -52,27 +52,31 @@ func _make_box_geo(sx: float = 1.0, sy: float = 1.0, sz: float = 1.0) -> GNGeoDa
 	box.set_param_value("size_x", sx)
 	box.set_param_value("size_y", sy)
 	box.set_param_value("size_z", sz)
-	return _cook_no_input(box) as GNGeoData
+	var _ret0 := _cook_no_input(box) as GNGeoData
+	return _ret0
 
 
 func _make_grid_geo(rows: int = 10, cols: int = 10) -> GNGeoData:
 	var grid := _make_node(GridSOP.new(), "grid_%d" % randi())
 	grid.set_param_value("rows", rows)
 	grid.set_param_value("cols", cols)
-	return _cook_no_input(grid) as GNGeoData
+	var _ret0 := _cook_no_input(grid) as GNGeoData
+	return _ret0
 
 
 func _make_sphere_geo(r_seg: int = 8, rings: int = 4) -> GNGeoData:
 	var sph := _make_node(SphereSOP.new(), "sph_%d" % randi())
 	sph.set_param_value("radial_segments", r_seg)
 	sph.set_param_value("rings", rings)
-	return _cook_no_input(sph) as GNGeoData
+	var _ret0 := _cook_no_input(sph) as GNGeoData
+	return _ret0
 
 
 func _make_line_geo(pts: int = 10) -> GNGeoData:
 	var ln := _make_node(LineSOP.new(), "line_%d" % randi())
 	ln.set_param_value("points", pts)
-	return _cook_no_input(ln) as GNGeoData
+	var _ret0 := _cook_no_input(ln) as GNGeoData
+	return _ret0
 
 
 func _vert_count(geo: GNGeoData, surf: int = 0) -> int:

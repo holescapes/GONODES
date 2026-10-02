@@ -57,7 +57,8 @@ func _prepare_output() -> GNMaterialData:
 ## Returns null if the port doesn't exist or the data is not GNMaterialData.
 func _get_input_mat(inputs: Array[GNData], port: int = 0) -> GNMaterialData:
 	if port < inputs.size() and inputs[port] is GNMaterialData:
-		return inputs[port] as GNMaterialData
+		var _ret0 := inputs[port] as GNMaterialData
+		return _ret0
 	return null
 
 

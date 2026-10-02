@@ -92,7 +92,8 @@ func _get_ctx() -> GNGpuContext:
 ## Safely extracts GNParticleData from inputs at [param port].
 func _get_input_pop(inputs: Array[GNData], port: int = 0) -> GNParticleData:
 	if port < inputs.size() and inputs[port] is GNParticleData:
-		return inputs[port] as GNParticleData
+		var _ret0 := inputs[port] as GNParticleData
+		return _ret0
 	return null
 
 

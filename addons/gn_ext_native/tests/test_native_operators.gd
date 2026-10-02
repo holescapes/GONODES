@@ -53,34 +53,39 @@ static func _native_libs_available() -> bool:
 
 func _make_box_geo() -> GNGeoData:
 	var box := _make_node(BoxSOP.new(), "box_%d" % randi())
-	return _cook_no_input(box) as GNGeoData
+	var _ret0 := _cook_no_input(box) as GNGeoData
+	return _ret0
 
 
 func _make_sphere_geo(rings: int = 8, segments: int = 4) -> GNGeoData:
 	var sph := _make_node(SphereSOP.new(), "sphere_%d" % randi())
 	sph.set_param_value("rings", rings)
 	sph.set_param_value("segments", segments)
-	return _cook_no_input(sph) as GNGeoData
+	var _ret0 := _cook_no_input(sph) as GNGeoData
+	return _ret0
 
 
 func _make_grid_geo(rows: int = 5, cols: int = 5) -> GNGeoData:
 	var grid := _make_node(GridSOP.new(), "grid_%d" % randi())
 	grid.set_param_value("rows", rows)
 	grid.set_param_value("columns", cols)
-	return _cook_no_input(grid) as GNGeoData
+	var _ret0 := _cook_no_input(grid) as GNGeoData
+	return _ret0
 
 
 func _make_line_geo(points: int = 8) -> GNGeoData:
 	var line := _make_node(LineSOP.new(), "line_%d" % randi())
 	line.set_param_value("points", points)
-	return _cook_no_input(line) as GNGeoData
+	var _ret0 := _cook_no_input(line) as GNGeoData
+	return _ret0
 
 
 func _make_cylinder_geo(segments: int = 8, height: float = 1.0) -> GNGeoData:
 	var cyl := _make_node(CylinderSOP.new(), "cyl_%d" % randi())
 	cyl.set_param_value("segments", segments)
 	cyl.set_param_value("height", height)
-	return _cook_no_input(cyl) as GNGeoData
+	var _ret0 := _cook_no_input(cyl) as GNGeoData
+	return _ret0
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

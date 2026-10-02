@@ -63,7 +63,8 @@ func _get_ctx() -> GNGpuContext:
 ## Safely extracts GNVolumeData from inputs at [param port].
 func _get_input_vol(inputs: Array[GNData], port: int = 0) -> GNVolumeData:
 	if port < inputs.size() and inputs[port] is GNVolumeData:
-		return inputs[port] as GNVolumeData
+		var _ret0 := inputs[port] as GNVolumeData
+		return _ret0
 	return null
 
 

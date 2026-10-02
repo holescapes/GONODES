@@ -121,11 +121,13 @@ func _find_skeleton(node: Node3D) -> Skeleton3D:
 	if node == null:
 		return null
 	if node is Skeleton3D:
-		return node as Skeleton3D
+		var _ret0 := node as Skeleton3D
+		return _ret0
 	# Search children recursively (glTF imports nest Skeleton3D)
 	for child in node.get_children():
 		if child is Skeleton3D:
-			return child as Skeleton3D
+			var _ret1 := child as Skeleton3D
+			return _ret1
 		if child is Node3D:
 			var found := _find_skeleton(child as Node3D)
 			if found != null:

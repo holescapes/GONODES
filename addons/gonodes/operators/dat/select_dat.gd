@@ -47,4 +47,5 @@ func _resolve_remote_dat(target_id: String) -> GNTableData:
 	var target: GNNode = _network_cache.get_node_by_id(target_id)
 	if target == null:
 		return null
-	return target.cached_output as GNTableData if target.cached_output is GNTableData else null
+	var _ret0 := target.cached_output as GNTableData if target.cached_output is GNTableData else null
+	return _ret0

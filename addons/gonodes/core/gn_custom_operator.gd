@@ -358,7 +358,8 @@ static func _read_asset_json(path: String) -> Dictionary:
 		GNLogger.error("CustomOperator", "JSON parse error in %s: %s" % [path, json.get_error_message()])
 		return {}
 	if json.data is Dictionary:
-		return json.data as Dictionary
+		var _ret0 := json.data as Dictionary
+		return _ret0
 	return {}
 
 

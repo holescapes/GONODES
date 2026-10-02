@@ -1,111 +1,152 @@
 {
-    "version": "1.0.0",
-    "generator": "GONODES",
-    "nodes": {
-        "src_constant": {
-            "type": "ConstantDAT",
-            "position": [
-                100,
-                100
-            ],
-            "parameters": {}
-        },
-        "system1": {
-            "type": "SystemDAT",
-            "position": [
-                450,
-                100
-            ],
-            "parameters": {
-                "hardware": {
-                    "value": true
-                },
-                "memory": {
-                    "value": true
-                },
-                "display": {
-                    "value": true
-                }
-            }
-        },
-        "texttop1": {
-            "type": "TextTOP",
-            "position": [
-                1150,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "font_size": {
-                    "value": 14
-                }
-            }
-        },
-        "window1": {
-            "type": "WindowOUT",
-            "position": [
-                1550,
-                100
-            ],
-            "parameters": {
-                "resolution": {
-                    "value": {
-                        "_type": "Vector2i",
-                        "x": 512,
-                        "y": 512
-                    }
-                },
-                "open": {
-                    "value": true
-                }
-            }
-        }
-    },
-    "connections": [
-        {
-            "from": "src_constant",
-            "from_port": 0,
-            "to": "system1",
-            "to_port": 0
-        },
-        {
-            "from": "system1",
-            "from_port": 0,
-            "to": "texttop1",
-            "to_port": 0
-        },
-        {
-            "from": "texttop1",
-            "from_port": 0,
-            "to": "window1",
-            "to_port": 0
-        }
-    ],
-    "annotations": [
-        {
-            "id": "ann_1",
-            "type": "note",
-            "text": "SystemDAT — Basic\n\nRuns Constant DAT through System DAT with hardware=true, memory=true, display=true.",
-            "position": [
-                -100.0,
-                -100.0
-            ],
-            "size": [
-                400.0,
-                100.0
-            ],
-            "color": [
-                1.0,
-                1.0,
-                1.0,
-                0.8
-            ]
-        }
-    ]
+	"annotations": [
+		{
+			"color": [
+				1.0,
+				1.0,
+				1.0,
+				0.800000011920929
+			],
+			"id": "ann_1",
+			"position": [
+				-100.0,
+				-100.0
+			],
+			"size": [
+				400.0,
+				100.0
+			],
+			"text": "SystemDAT — Basic\n\nRuns Constant DAT through System DAT with hardware=true, memory=true, display=true.",
+			"type": "note"
+		}
+	],
+	"app_version": "0.1.0-beta",
+	"connections": [
+		{
+			"from": "texttop1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	],
+	"generator": "GONODES",
+	"nodes": {
+		"system1": {
+			"parameters": {
+				"display": {
+					"value": true
+				},
+				"hardware": {
+					"value": true
+				},
+				"memory": {
+					"value": true
+				}
+			},
+			"position": [
+				450.0,
+				100.0
+			],
+			"type": "SystemDAT"
+		},
+		"texttop1": {
+			"parameters": {
+				"align_h": {
+					"value": 1
+				},
+				"align_v": {
+					"value": 1
+				},
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"font_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 1.0,
+						"g": 1.0,
+						"r": 1.0
+					}
+				},
+				"font_file": {
+					"value": "Path to the font file"
+				},
+				"font_size": {
+					"value": 14
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"text": {
+					"value": "Hello"
+				},
+				"word_wrap": {
+					"value": true
+				}
+			},
+			"position": [
+				1150.0,
+				100.0
+			],
+			"type": "TextTOP"
+		},
+		"window1": {
+			"parameters": {
+				"always_on_top": {
+					"value": false
+				},
+				"monitor": {
+					"value": 0
+				},
+				"open": {
+					"value": true
+				},
+				"position": {
+					"value": {
+						"_type": "Vector2i",
+						"x": -1,
+						"y": -1
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 512,
+						"y": 512
+					}
+				},
+				"title": {
+					"value": "GONODES Output"
+				},
+				"vsync": {
+					"value": true
+				},
+				"window_mode": {
+					"value": 0
+				}
+			},
+			"position": [
+				1550.0,
+				100.0
+			],
+			"type": "WindowOUT"
+		}
+	},
+	"version": "1.0.0",
+	"viewport": {
+		"scroll_x": 115.333343505859,
+		"scroll_y": -20.6666870117188,
+		"zoom": 0.800000011920929
+	}
 }

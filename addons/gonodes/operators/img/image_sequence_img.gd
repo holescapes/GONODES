@@ -201,7 +201,8 @@ func _get_frame_image(idx: int) -> Image:
 	if idx < 0 or idx >= _frame_paths.size():
 		return null
 	if _frame_cache.has(idx):
-		return _frame_cache[idx] as Image
+		var _ret0 := _frame_cache[idx] as Image
+		return _ret0
 
 	var path: String = _frame_paths[idx]
 	var img := GNResourceLoader.load_image(path, project_dir)

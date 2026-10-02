@@ -125,6 +125,8 @@ Rows 37–43 passed on 2 Oct 2026.
 | 47 | `addons/gonodes/help/dat/info_basic.gnpatch` | Click `info1` and read the docked viewer | The viewer lists `fps` and `os` | Those rows are missing |
 | 48 | `addons/gonodes/help/top/text_basic.gnpatch` | On Font Size, click C and enter `48 + sin(time) * 10` | The text size pulses. You can keep typing while a suggestion list is open; Up and Down move the highlight | The size stays still, the field stays red, or the suggestion list steals the keyboard |
 
+Rows 44–48 passed on 2 Oct 2026. On row 46, `cellf("system1", "Engine", "value")` showed 4.7, the leading number of the first Engine row (`4.7.2-stable`).
+
 ## Keys, mouse, and devices
 
 No MIDI port, no OSC sender, or no microphone is `UNVERIFIED`, not a pass and not a fail.

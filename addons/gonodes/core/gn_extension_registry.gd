@@ -159,7 +159,8 @@ func create_instance(class_name_key: String) -> GNNode:
 			entry.deprecated = true
 			entry.deprecation_message = node.deprecation_message
 			entry.deprecated_replacement = node.deprecated_replacement
-		return node as GNNode
+		var _ret0 := node as GNNode
+		return _ret0
 	GNLogger.error("ExtRegistry", "Script for '%s' does not extend GNNode" % class_name_key)
 	node.free()
 	return null

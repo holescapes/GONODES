@@ -2053,7 +2053,8 @@ func _is_inside_subnet() -> bool:
 func _find_parent_subnet() -> SubNetworkNode:
 	if network == null or not (network.host_node is SubNetworkNode):
 		return null
-	return network.host_node as SubNetworkNode
+	var _ret0 := network.host_node as SubNetworkNode
+	return _ret0
 
 
 ## Creates a spare parameter on the parent SubNetwork that mirrors this param,

@@ -705,7 +705,8 @@ static func parse_output_annotations(code: String) -> Array:
 static func create_data_for_family(family: int) -> GNData:
 	var data := GNFamily.create_data_for_family(family)
 	if data != null:
-		return data as GNData
+		var _ret0 := data as GNData
+		return _ret0
 	return GNData.new()
 
 

@@ -60,7 +60,8 @@ func _prepare_geo() -> GNGeoData:
 ## Returns null if the port doesn't exist or the data is not GNGeoData.
 func _get_input_sop(inputs: Array[GNData], port: int = 0) -> GNGeoData:
 	if port < inputs.size() and inputs[port] is GNGeoData:
-		return inputs[port] as GNGeoData
+		var _ret0 := inputs[port] as GNGeoData
+		return _ret0
 	return null
 
 

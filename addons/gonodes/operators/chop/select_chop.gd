@@ -47,4 +47,5 @@ func _resolve_remote_chop(target_id: String) -> GNChannelData:
 	var target: GNNode = _network_cache.get_node_by_id(target_id)
 	if target == null:
 		return null
-	return target.cached_output as GNChannelData if target.cached_output is GNChannelData else null
+	var _ret0 := target.cached_output as GNChannelData if target.cached_output is GNChannelData else null
+	return _ret0

@@ -155,7 +155,8 @@ func _create_ffmpeg_stream(path: String) -> VideoStream:
 		return null
 	# FFmpegVideoStream inherits VideoStream which has a "file" property.
 	stream.set(&"file", path)
-	return stream as VideoStream
+	var _ret0 := stream as VideoStream
+	return _ret0
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

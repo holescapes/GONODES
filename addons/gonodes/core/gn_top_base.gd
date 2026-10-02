@@ -96,7 +96,8 @@ func render_for_preview(host) -> void:
 ## Returns null if the port doesn't exist or the data is not GNTextureData.
 func _get_input_top(inputs: Array[GNData], port: int = 0) -> GNTextureData:
 	if port < inputs.size() and inputs[port] is GNTextureData:
-		return inputs[port] as GNTextureData
+		var _ret0 := inputs[port] as GNTextureData
+		return _ret0
 	return null
 
 

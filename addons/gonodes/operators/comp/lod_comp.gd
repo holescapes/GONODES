@@ -149,7 +149,8 @@ func _find_camera() -> Camera3D:
 			# Check for cameras in the viewport
 			for child in vp.get_children():
 				if child is Camera3D:
-					return child as Camera3D
+					var _ret0 := child as Camera3D
+					return _ret0
 		node = node.get_parent()
 	return null
 

@@ -45,7 +45,8 @@ func _cook() -> void:
 
 
 func _output(node: GNNode) -> GNChannelData:
-	return node.cached_output as GNChannelData
+	var _ret0 := node.cached_output as GNChannelData
+	return _ret0
 
 
 func _make_constant(id: String, ch_name: String = "out", value: float = 1.0) -> GNNode:

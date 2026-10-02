@@ -708,21 +708,24 @@ static func reparent_shared_geo_viewer(vp: SubViewport) -> void:
 static func shared_geo_mesh() -> MeshInstance3D:
 	if _geo_viewer_provider == null:
 		return null
-	return _geo_viewer_provider.call("shared_mesh") as MeshInstance3D
+	var mesh := _geo_viewer_provider.call("shared_mesh") as MeshInstance3D
+	return mesh
 
 
 ## Returns the shared orbit camera, or null when no provider is registered.
 static func shared_geo_camera() -> Camera3D:
 	if _geo_viewer_provider == null:
 		return null
-	return _geo_viewer_provider.call("shared_camera") as Camera3D
+	var camera := _geo_viewer_provider.call("shared_camera") as Camera3D
+	return camera
 
 
 ## Returns the shared axis gizmo root, or null when no provider is registered.
 static func shared_geo_gizmo() -> Node3D:
 	if _geo_viewer_provider == null:
 		return null
-	return _geo_viewer_provider.call("shared_gizmo") as Node3D
+	var gizmo := _geo_viewer_provider.call("shared_gizmo") as Node3D
+	return gizmo
 
 
 # ═════════════════════════════════════════════════════════════════════════════

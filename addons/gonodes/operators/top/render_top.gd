@@ -514,5 +514,6 @@ func _find_active_camera() -> Camera3D:
 		return null
 	for child in _viewport.get_children():
 		if child is Camera3D and (child as Camera3D).current:
-			return child as Camera3D
+			var _ret0 := child as Camera3D
+			return _ret0
 	return null

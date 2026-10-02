@@ -149,7 +149,8 @@ static func _normalize_mesh(mesh: ArrayMesh) -> ArrayMesh:
 
 func _find_mesh_instance(node: Node) -> MeshInstance3D:
 	if node is MeshInstance3D:
-		return node as MeshInstance3D
+		var _ret0 := node as MeshInstance3D
+		return _ret0
 	for child in node.get_children():
 		var result: MeshInstance3D = _find_mesh_instance(child)
 		if result != null:

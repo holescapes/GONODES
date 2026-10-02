@@ -45,7 +45,8 @@ func _cook_one_frame() -> void:
 
 
 func _get_output(node: GNNode) -> GNChannelData:
-	return node.cached_output as GNChannelData
+	var _ret0 := node.cached_output as GNChannelData
+	return _ret0
 
 
 func _sink(ids: Array) -> void:

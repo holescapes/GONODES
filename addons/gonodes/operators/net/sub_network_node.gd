@@ -229,7 +229,8 @@ func _find_parent_cook_engine() -> GNCookEngine:
 	var p: Node = get_parent()
 	while p != null:
 		if p is GNCookEngine and p != _inner_cook_engine:
-			return p as GNCookEngine
+			var _ret0 := p as GNCookEngine
+			return _ret0
 		p = p.get_parent()
 	return null
 

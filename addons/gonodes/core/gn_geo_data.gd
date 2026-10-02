@@ -108,7 +108,8 @@ func get_positions(surface_idx: int = 0) -> PackedVector3Array:
 	var arrays: Array = get_surface_arrays(surface_idx)
 	if arrays.is_empty():
 		return PackedVector3Array()
-	return arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+	var _ret0 := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+	return _ret0
 
 
 ## Returns vertex normals for a surface as PackedVector3Array.
@@ -116,7 +117,8 @@ func get_normals(surface_idx: int = 0) -> PackedVector3Array:
 	var arrays: Array = get_surface_arrays(surface_idx)
 	if arrays.is_empty() or arrays[Mesh.ARRAY_NORMAL] == null:
 		return PackedVector3Array()
-	return arrays[Mesh.ARRAY_NORMAL] as PackedVector3Array
+	var _ret0 := arrays[Mesh.ARRAY_NORMAL] as PackedVector3Array
+	return _ret0
 
 
 ## Returns UV coordinates for a surface as PackedVector2Array.
@@ -124,7 +126,8 @@ func get_uvs(surface_idx: int = 0) -> PackedVector2Array:
 	var arrays: Array = get_surface_arrays(surface_idx)
 	if arrays.is_empty() or arrays[Mesh.ARRAY_TEX_UV] == null:
 		return PackedVector2Array()
-	return arrays[Mesh.ARRAY_TEX_UV] as PackedVector2Array
+	var _ret0 := arrays[Mesh.ARRAY_TEX_UV] as PackedVector2Array
+	return _ret0
 
 
 # ─── Point Attributes (SOP-style) ─────────────────────────────────────────────
@@ -145,7 +148,8 @@ func get_point_attrib(attrib_name: String) -> PackedFloat32Array:
 func get_point_attrib_color(attrib_name: String) -> PackedColorArray:
 	var stored: Variant = point_attribs.get(attrib_name, null)
 	if stored is PackedColorArray:
-		return stored as PackedColorArray
+		var _ret0 := stored as PackedColorArray
+		return _ret0
 	if stored is PackedFloat32Array:
 		var fa := stored as PackedFloat32Array
 		var vc: int = vertex_count if vertex_count > 0 else 1
@@ -162,7 +166,8 @@ func get_point_attrib_color(attrib_name: String) -> PackedColorArray:
 		for s in range(mesh.get_surface_count()):
 			var arrays: Array = mesh.surface_get_arrays(s)
 			if arrays.size() > Mesh.ARRAY_COLOR and arrays[Mesh.ARRAY_COLOR] != null:
-				return arrays[Mesh.ARRAY_COLOR] as PackedColorArray
+				var _ret1 := arrays[Mesh.ARRAY_COLOR] as PackedColorArray
+				return _ret1
 	return PackedColorArray()
 
 

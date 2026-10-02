@@ -51,7 +51,8 @@ func _cook() -> void:
 
 
 func _out(node: GNNode) -> GNChannelData:
-	return node.cached_output as GNChannelData
+	var _ret0 := node.cached_output as GNChannelData
+	return _ret0
 
 
 func _sink(ids: Array) -> void:

@@ -65,7 +65,8 @@ func _notification(what: int) -> void:
 ## Returns null if the port doesn't exist or the data is not GNCompData.
 func _get_input_comp(inputs: Array[GNData], port: int = 0) -> GNCompData:
 	if port < inputs.size() and inputs[port] is GNCompData:
-		return inputs[port] as GNCompData
+		var _ret0 := inputs[port] as GNCompData
+		return _ret0
 	return null
 
 
@@ -172,10 +173,12 @@ func _resolve_upstream_mesh() -> MeshInstance3D:
 	if scene_nd == null:
 		return null
 	if scene_nd is MeshInstance3D:
-		return scene_nd as MeshInstance3D
+		var _ret0 := scene_nd as MeshInstance3D
+		return _ret0
 	for child in scene_nd.get_children():
 		if child is MeshInstance3D:
-			return child as MeshInstance3D
+			var _ret1 := child as MeshInstance3D
+			return _ret1
 	return null
 
 

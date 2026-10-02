@@ -43,28 +43,32 @@ func _init_ports() -> void:
 ## Safely extracts a GNTextureData from the inputs array at [param port].
 func _get_input_top(inputs: Array[GNData], port: int = 0) -> GNTextureData:
 	if port < inputs.size() and inputs[port] is GNTextureData:
-		return inputs[port] as GNTextureData
+		var _ret0 := inputs[port] as GNTextureData
+		return _ret0
 	return null
 
 
 ## Safely extracts a GNImageData from the inputs array at [param port].
 func _get_input_img(inputs: Array[GNData], port: int = 0) -> GNImageData:
 	if port < inputs.size() and inputs[port] is GNImageData:
-		return inputs[port] as GNImageData
+		var _ret0 := inputs[port] as GNImageData
+		return _ret0
 	return null
 
 
 ## Safely extracts a GNChannelData from the inputs array at [param port].
 func _get_input_chop(inputs: Array[GNData], port: int = 0) -> GNChannelData:
 	if port < inputs.size() and inputs[port] is GNChannelData:
-		return inputs[port] as GNChannelData
+		var _ret0 := inputs[port] as GNChannelData
+		return _ret0
 	return null
 
 
 ## Safely extracts a GNTableData from the inputs array at [param port].
 func _get_input_dat(inputs: Array[GNData], port: int = 0) -> GNTableData:
 	if port < inputs.size() and inputs[port] is GNTableData:
-		return inputs[port] as GNTableData
+		var _ret0 := inputs[port] as GNTableData
+		return _ret0
 	return null
 
 

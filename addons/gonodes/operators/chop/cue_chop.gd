@@ -203,7 +203,8 @@ func _get_timeline_time(timeline_ref: String) -> float:
 func _get_cook_engine() -> GNCookEngine:
 	var parent := get_parent()
 	if parent is GNCookEngine:
-		return parent as GNCookEngine
+		var _ret0 := parent as GNCookEngine
+		return _ret0
 	return null
 
 

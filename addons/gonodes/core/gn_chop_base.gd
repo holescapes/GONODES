@@ -63,5 +63,6 @@ func _prepare_output(sample_rate: float = 60.0) -> GNChannelData:
 ## Returns null if the port doesn't exist or the data is not GNChannelData.
 func _get_input_chop(inputs: Array[GNData], port: int = 0) -> GNChannelData:
 	if port < inputs.size() and inputs[port] is GNChannelData:
-		return inputs[port] as GNChannelData
+		var _ret0 := inputs[port] as GNChannelData
+		return _ret0
 	return null
