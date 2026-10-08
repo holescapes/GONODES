@@ -11,7 +11,23 @@ var _update_stale: bool = false
 
 func _init() -> void:
 	node_type = "glitch"
-	time_dependent = true
+
+
+## The shader only moves when a layer that samples time is actually on.
+## Intensity 0, no channel shift, and no tears is a still of the input.
+func update_time_dependency() -> void:
+	var intensity: float = get_param_value("intensity")
+	var shift: float = get_param_value("channel_shift")
+	var tears: float = get_param_value("tear_strength")
+	time_dependent = intensity > 0.0 or shift != 0.0 or tears > 0.0 \
+			or param_expression_uses_time("intensity") \
+			or param_expression_uses_time("channel_shift") \
+			or param_expression_uses_time("tear_strength") \
+			or param_expression_uses_time("speed") \
+			or param_expression_uses_time("scan_jitter") \
+			or param_expression_uses_time("noise_amount") \
+			or param_expression_uses_time("stale_mix") \
+			or param_expression_uses_time("color_crush")
 
 
 func _init_ports() -> void:

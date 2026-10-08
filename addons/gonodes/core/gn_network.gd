@@ -585,20 +585,32 @@ func _compute_topological_order() -> Array[GNNode]:
 			queue.append(node_id)
 
 	var sorted: Array[GNNode] = []
+	var sorted_ids: Dictionary = {}
 	while not queue.is_empty():
 		var current_id: String = queue.pop_front()
 		var current_node: GNNode = nodes.get(current_id, null)
 		if current_node:
 			sorted.append(current_node)
+			sorted_ids[current_id] = true
 		for downstream_id in adjacency.get(current_id, []):
 			in_degree[downstream_id] -= 1
 			if in_degree[downstream_id] == 0:
 				queue.append(downstream_id)
 
-	# If sorted.size() < nodes.size(), there's a cycle — return partial order
+	# Feedback / Select wireless loops create cycles once remote deps are
+	# included.  Kahn leaves those nodes out — append them so they still cook
+	# (they read one-frame-stale cached_output, which is the intended model).
 	if sorted.size() < nodes.size():
-		GNLogger.error("Network", "Topological sort incomplete: %d/%d nodes — cycle detected" % [sorted.size(), nodes.size()])
-		GNLogger.warn("Network", "topological sort incomplete — possible cycle detected")
+		GNLogger.warn("Network",
+			"Topo cycle (%d/%d sorted) — appending remaining nodes for feedback cook" % [
+				sorted.size(), nodes.size()])
+		for node_id in nodes:
+			if sorted_ids.has(node_id):
+				continue
+			var leftover: GNNode = nodes[node_id]
+			if leftover:
+				sorted.append(leftover)
+				sorted_ids[node_id] = true
 	else:
 		GNLogger.debug("Network", "Topo sort computed: %d node(s)" % sorted.size())
 	return sorted
@@ -677,15 +689,30 @@ func _compute_topological_levels() -> Array:
 			if in_degree[ds_id] == 0:
 				queue.append(ds_id)
 
-	# Bucket nodes into levels
+	# Bucket nodes into levels.  Nodes still having in_degree > 0 are in a
+	# feedback cycle — put them in a final level so parallel cook still runs them.
+	var cycle_nodes: Array[GNNode] = []
+	for node_id in in_degree:
+		if in_degree[node_id] > 0:
+			var cyc: GNNode = nodes.get(node_id, null)
+			if cyc:
+				cycle_nodes.append(cyc)
+
+	var level_count: int = max_depth + 1
+	if not cycle_nodes.is_empty():
+		level_count += 1
 	var levels: Array = []
-	levels.resize(max_depth + 1)
+	levels.resize(level_count)
 	for i in range(levels.size()):
 		levels[i] = []
 	for node_id in depth:
+		if in_degree.get(node_id, 0) > 0:
+			continue  # handled in cycle level
 		var node: GNNode = nodes.get(node_id, null)
 		if node:
 			levels[depth[node_id]].append(node)
+	if not cycle_nodes.is_empty():
+		levels[level_count - 1] = cycle_nodes
 	return levels
 
 

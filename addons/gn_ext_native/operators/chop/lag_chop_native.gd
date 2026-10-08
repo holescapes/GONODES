@@ -7,7 +7,10 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	node_type = "lag_native"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	time_dependent = _temporal_moving
 	if ClassDB.class_exists("GNNativeLagChop"):
 		_processor = ClassDB.instantiate("GNNativeLagChop")
 
@@ -34,8 +37,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var release: float = get_param_value("release")
 	var do_reset: bool = get_param_value("reset")
 
-	if do_reset and _processor != null:
-		_processor.reset()
+	if do_reset:
+		_temporal_end_state.clear()
+		if _processor != null:
+			_processor.reset()
 
 	var out := _prepare_output(in_data.sample_rate)
 
@@ -47,4 +52,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 			out.channels[ch_name] = samples.duplicate()
 
 	out.length = in_data.length
+	var moved := false
+	for ch_name in out.channels:
+		var cooked: PackedFloat32Array = out.channels[ch_name]
+		if _temporal_sample_moved(ch_name, _temporal_end_sample(cooked)):
+			moved = true
+	_finish_temporal_cook(moved)
 	return out

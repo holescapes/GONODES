@@ -56,6 +56,7 @@ var _preview_btn: Button = null
 
 ## Status badge label — shows ⚠ or ✖ for warnings/errors on the title bar.
 var _status_badge: Label = null
+var _status_badge_sig: String = ""
 
 ## Thumbnail height in pixels (width stretches to fit the node).
 const THUMBNAIL_HEIGHT := 80
@@ -497,6 +498,8 @@ func show_preview() -> void:
 	if _preview != null:
 		_preview.show()
 		reset_size()
+		if gn_node != null:
+			update_preview()
 	_update_preview_btn()
 
 
@@ -515,12 +518,16 @@ func update_perf_overlay() -> void:
 
 	# Inactive nodes show a dimmed "zzz" indicator
 	if not gn_node.is_active:
-		_perf_label.text = "zzz"
-		_perf_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 0.6))
+		if _perf_label.text != "zzz":
+			_perf_label.text = "zzz"
+			_perf_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 0.6))
 		return
 
 	var status_icon := "✓" if gn_node.cook_valid else "✗"
 	var cook_ms := gn_node.cook_time_ms
+	var next := "%s %.2fms" % [status_icon, cook_ms]
+	if _perf_label.text == next:
+		return
 	# Color-code: green < 1ms, yellow < 5ms, red >= 5ms
 	var color: Color
 	if cook_ms < 1.0:
@@ -529,7 +536,7 @@ func update_perf_overlay() -> void:
 		color = Color(1.0, 0.9, 0.3)
 	else:
 		color = Color(1.0, 0.35, 0.3)
-	_perf_label.text = "%s %.2fms" % [status_icon, cook_ms]
+	_perf_label.text = next
 	_perf_label.add_theme_color_override("font_color", color)
 
 
@@ -570,6 +577,10 @@ func _setup_status_badge() -> void:
 func update_status_badge() -> void:
 	if gn_node == null or _status_badge == null:
 		return
+	var sig := gn_node.node_error + "\n" + gn_node.node_warning
+	if sig == _status_badge_sig:
+		return
+	_status_badge_sig = sig
 	if not gn_node.node_error.is_empty():
 		_status_badge.text = "ERR"
 		_status_badge.tooltip_text = gn_node.node_error
@@ -583,6 +594,10 @@ func update_status_badge() -> void:
 	else:
 		_status_badge.visible = false
 		_status_badge.tooltip_text = ""
+
+
+func status_badge_shown() -> bool:
+	return _status_badge != null and _status_badge.visible
 
 
 ## Creates a permanent deprecation badge (⊘) in the title bar.

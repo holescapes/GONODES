@@ -4,9 +4,8 @@ extends GNDatBase
 ## Each row represents one touch point with columns:
 ##   id | x | y | pressure | relative_x | relative_y | phase | window
 ##
-## The optional "window" parameter binds this DAT to a specific WindowOUT
-## by node name — reading only touch events from that window.
-## When empty, reads from the global _input_event callback (all windows).
+## The Window menu binds this DAT to a WindowOUT by node name. (none) reads
+## the global input callback.
 
 var _touches: Dictionary = {}  # touch_index -> { x, y, pressure, phase }
 
@@ -25,8 +24,8 @@ func _init_parameters() -> void:
 		"Enable / disable touch capture"))
 	add_parameter(GNParameter.create_bool("normalize", false, "Normalize",
 		"Output 0-1 normalized coords instead of pixels"))
-	add_parameter(GNParameter.create_string("window", "Window ID to capture from (0 = main)",
-		"Window", "WindowOUT node name to read from (empty = global)"))
+	add_parameter(GNParameter.create_node_ref("window", GNFamily.Type.OUT,
+		"Window", "WindowOUT to read. (none) uses global input.", "window"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
@@ -40,6 +39,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	# Resolve target WindowOUT
 	var win_out: WindowOUT = null
+	node_warning = ""
 	if not window_id.is_empty():
 		win_out = WindowOUT.get_window_by_id(window_id)
 		if win_out == null:

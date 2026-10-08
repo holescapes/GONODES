@@ -14,6 +14,8 @@ var _network_cache: GNNetwork = null
 
 func _init() -> void:
 	node_type = "select"
+	# No wire inputs — wireless refresh is engine-driven (demand map +
+	# consumer dirty/hash when the target cooks, e.g. CacheTOP feedback).
 
 
 func _init_ports() -> void:
@@ -34,16 +36,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	# Resolve the owning GNNetwork via the CookEngine parent
 	if _network_cache == null or not is_instance_valid(_network_cache):
-		var p = get_parent()
-		if p is GNCookEngine:
-			_network_cache = p.network
-		else:
-			# Fallback: walk parents for a CookEngine
-			while p != null:
-				if p is GNCookEngine:
-					_network_cache = p.network
-					break
-				p = p.get_parent()
+		_network_cache = get_owning_network()
 
 	if _network_cache == null:
 		GNLogger.warn("SelectTOP", "'%s' — could not find parent GNNetwork" % id)

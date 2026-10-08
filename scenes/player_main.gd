@@ -66,6 +66,14 @@ var _info_label: Label = null
 ## Whether the debug info overlay is visible.  Toggle with F1.
 var _debug_visible: bool = false
 
+## Smoke-test readiness: emitted once after open WindowOUT sinks cook with no errors.
+## Grep logs for [GONODES_PLAYER_READY] / [GONODES_PLAYER_READY_FAIL] / [GONODES_PLAYER_READY_TIMEOUT].
+## Also writes player_ready.ok or player_ready.fail next to the executable.
+var _ready_status_emitted: bool = false
+var _cook_errors_since_load: PackedStringArray = []
+var _load_ticks_msec: int = 0
+const _READY_TIMEOUT_SEC := 180.0
+
 ## JS↔GDScript bridge signals (web only — called via JavaScriptBridge.create_callback).
 ## Emitted when the player is ready to receive patches.
 signal player_ready()
@@ -272,17 +280,38 @@ func _load_and_run() -> void:
 	# auto-detected by the cook engine via GNNode.is_sink.  No UI sinks needed.
 	cook_engine.set_active_sinks([])
 
+	_ready_status_emitted = false
+	_cook_errors_since_load.clear()
+	_load_ticks_msec = Time.get_ticks_msec()
+	set_process(true)
+
 	var ver: String = ProjectSettings.get_setting("application/config/version", "dev")
 	_update_info("GONODES v%s | %s (%d nodes)" % [
 		ver, _patch_path.get_file(), network.get_node_count()])
 
 	print("[GONODES Player v%s] Loaded: %s (%d nodes, %d connections)" % [
 		ver, _patch_path, network.get_node_count(), network.get_connection_count()])
+	patch_loaded.emit(_patch_path.get_file())
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Runtime Callbacks
 # ═══════════════════════════════════════════════════════════════════════════════
+
+func _process(_delta: float) -> void:
+	if _ready_status_emitted or cook_engine == null:
+		return
+	var elapsed := (Time.get_ticks_msec() - _load_ticks_msec) / 1000.0
+	if elapsed < _READY_TIMEOUT_SEC:
+		return
+	var window_ids := _open_window_ids()
+	var reason := "timeout"
+	if window_ids.is_empty():
+		reason = "no_open_window_sink"
+	elif not _cook_errors_since_load.is_empty():
+		reason = "cook_errors"
+	_emit_ready_status(false, 0, 0.0, reason)
+
 
 func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	# Light status update every 60 frames
@@ -290,10 +319,106 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 		var ver: String = ProjectSettings.get_setting("application/config/version", "dev")
 		_update_info("GONODES v%s | Frame %d | Cook %.1fms | %s" % [
 			ver, frame, cook_time_ms, _patch_path.get_file()])
+	_try_emit_ready(frame, cook_time_ms)
 
 
 func _on_cook_error(node_id: String, error_message: String) -> void:
 	push_warning("[GONODES Player] Cook error on '%s': %s" % [node_id, error_message])
+	var line := "[GONODES_PLAYER_COOK_ERROR] node=%s msg=%s" % [node_id, error_message]
+	print(line)
+	GNLogger.warn("Player", line)
+	_cook_errors_since_load.append("%s: %s" % [node_id, error_message])
+
+
+## True for WindowOUT instances (short node_type, class_name, or sink family).
+func _is_window_out(node: GNNode) -> bool:
+	if node == null or node.is_placeholder():
+		return false
+	if node.node_type == "window":
+		return true
+	var scr: Script = node.get_script()
+	if scr != null and String(scr.get_global_name()) == "WindowOUT":
+		return true
+	return node is WindowOUT
+
+
+## Returns IDs of WindowOUT nodes with open=true.
+func _open_window_ids() -> PackedStringArray:
+	var ids: PackedStringArray = []
+	if network == null:
+		return ids
+	for node in network.nodes.values():
+		if _is_window_out(node) and bool(node.get_param_value("open")):
+			ids.append(node.id)
+	return ids
+
+
+## True when every open WindowOUT cooked this frame with no node_error and a texture.
+func _window_sinks_ok_this_frame() -> bool:
+	var window_ids := _open_window_ids()
+	if window_ids.is_empty():
+		return false
+	if cook_engine == null:
+		return false
+	var cooked: Dictionary = cook_engine._cooked_this_frame
+	for wid in window_ids:
+		if not cooked.has(wid):
+			return false
+		var node: GNNode = network.nodes.get(wid)
+		if node == null or not node.node_error.is_empty():
+			return false
+		# WindowOUT keeps the displayed texture on _display_rect when assigned.
+		var display = node.get("_display_rect")
+		if display == null or display.texture == null:
+			return false
+	return true
+
+
+func _try_emit_ready(frame: int, cook_time_ms: float) -> void:
+	if _ready_status_emitted:
+		return
+	# Early frames often emit "cook returned null" while ImageFileIn / Fits warm up.
+	# READY is gated on WindowOUT having a real texture, not a clean error list.
+	if not _window_sinks_ok_this_frame():
+		return
+	_emit_ready_status(true, frame, cook_time_ms, "ok")
+
+
+func _emit_ready_status(ok: bool, frame: int, cook_time_ms: float, reason: String) -> void:
+	if _ready_status_emitted:
+		return
+	_ready_status_emitted = true
+	set_process(false)
+
+	var patch_name := _patch_path.get_file() if not _patch_path.is_empty() else ""
+	var windows := ",".join(_open_window_ids())
+	var err_n := _cook_errors_since_load.size()
+	var line: String
+	if ok:
+		line = "[GONODES_PLAYER_READY] patch=%s frame=%d cook_ms=%.1f windows=%s errors=0" % [
+			patch_name, frame, cook_time_ms, windows]
+	elif reason == "timeout" or reason == "no_open_window_sink" or reason == "cook_errors":
+		var tag := "GONODES_PLAYER_READY_TIMEOUT" if reason == "timeout" else "GONODES_PLAYER_READY_FAIL"
+		line = "[%s] patch=%s reason=%s frame=%d windows=%s errors=%d detail=%s" % [
+			tag, patch_name, reason, frame, windows, err_n,
+			"; ".join(_cook_errors_since_load)]
+	else:
+		line = "[GONODES_PLAYER_READY_FAIL] patch=%s reason=%s frame=%d windows=%s errors=%d detail=%s" % [
+			patch_name, reason, frame, windows, err_n,
+			"; ".join(_cook_errors_since_load)]
+
+	print(line)
+	if ok:
+		GNLogger.info("Player", line)
+	else:
+		GNLogger.warn("Player", line)
+
+	var exe_dir := OS.get_executable_path().get_base_dir()
+	var sentinel := exe_dir.path_join("player_ready.ok" if ok else "player_ready.fail")
+	var f := FileAccess.open(sentinel, FileAccess.WRITE)
+	if f != null:
+		f.store_string(line + "\n")
+		f.close()
 
 
 ## Handle hotkeys:
@@ -331,11 +456,20 @@ func _force_open_window_tops() -> void:
 		return
 	var count: int = 0
 	for node in network.nodes.values():
-		if node.node_type == "window":
-			node.set_param_value("open", true)
-			count += 1
-	if count > 0:
-		print("[GONODES Player] Auto-opened %d WindowOUT(s)." % count)
+		if not _is_window_out(node):
+			continue
+		node.set_param_value("open", true)
+		count += 1
+	print("[GONODES Player] Auto-opened %d WindowOUT(s)." % count)
+	if count == 0:
+		# Diagnostic: helps catch registry/placeholder mismatches in field smoke tests.
+		var types: PackedStringArray = []
+		for node in network.nodes.values():
+			var scr: Script = node.get_script()
+			var gname := String(scr.get_global_name()) if scr != null else ""
+			types.append("%s:node_type=%s:class=%s:placeholder=%s" % [
+				node.id, node.node_type, gname, node.is_placeholder()])
+		print("[GONODES Player] No WindowOUT detected. nodes=[%s]" % ", ".join(types))
 
 
 ## Sets up a minimal info label for debug overlay (hidden by default, F1 to show).
@@ -423,6 +557,11 @@ func _on_patch_url_fetched(result: int, response_code: int, _headers: PackedStri
 
 	_force_open_window_tops()
 	cook_engine.set_active_sinks([])
+
+	_ready_status_emitted = false
+	_cook_errors_since_load.clear()
+	_load_ticks_msec = Time.get_ticks_msec()
+	set_process(true)
 
 	var patch_name: String = _patch_url.get_file()
 	var ver2: String = ProjectSettings.get_setting("application/config/version", "dev")

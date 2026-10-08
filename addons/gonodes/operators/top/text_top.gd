@@ -2,6 +2,7 @@ class_name TextTOP
 extends GNTopBase
 ## Renders text onto a texture using Godot's Label node.
 ## Similar to TouchDesigner's Text TOP.
+## Supports outline and drop shadow via Label theme overrides.
 
 var _label: Label = null
 var _bg: ColorRect = null
@@ -18,7 +19,8 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("text", "Hello", "Text", "Text content to display"))
+	add_parameter(GNParameter.create_string("text", "Hello", "Text",
+		"Text content to display (supports multiple lines)", true))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 256), "Resolution", "Output texture resolution in pixels"))
 	add_parameter(GNParameter.create_file("font_file", "Path to the font file",
 		PackedStringArray(["*.ttf", "*.otf", "*.woff", "*.woff2", "*.tres", "*.res"]),
@@ -31,6 +33,19 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_enum("align_v",
 		PackedStringArray(["Top", "Center", "Bottom"]), 1, "", "Vertical text alignment"))
 	add_parameter(GNParameter.create_bool("word_wrap", true, "Word Wrap", "Wrap text at texture edges"))
+	# Outline / shadow — Godot Label theme items (portable, no custom shader)
+	add_parameter(GNParameter.create_int("outline_size", 0, 0, 64, "Outline Size",
+		"Glyph outline width in pixels (0 = off)"))
+	add_parameter(GNParameter.create_color("outline_color", Color(0, 0, 0, 1), "Outline Color",
+		"Outline color (ignored when outline size is 0)"))
+	add_parameter(GNParameter.create_bool("shadow", false, "Shadow",
+		"Enable drop shadow behind glyphs"))
+	add_parameter(GNParameter.create_color("shadow_color", Color(0, 0, 0, 0.6), "Shadow Color",
+		"Drop shadow color"))
+	add_parameter(GNParameter.create_vector2i("shadow_offset", Vector2i(2, 2), "Shadow Offset",
+		"Drop shadow offset in pixels"))
+	add_parameter(GNParameter.create_vector2i("margin", Vector2i(0, 0), "Margin",
+		"Inset from the texture edges in pixels (left/top; also right/bottom)"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
@@ -45,6 +60,12 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var ah: int = get_param_value("align_h")
 	var av: int = get_param_value("align_v")
 	var wrap: bool = get_param_value("word_wrap")
+	var outline_sz: int = int(get_param_value("outline_size"))
+	var outline_col: Color = get_param_value("outline_color")
+	var use_shadow: bool = bool(get_param_value("shadow"))
+	var shadow_col: Color = get_param_value("shadow_color")
+	var shadow_off: Vector2i = get_param_value("shadow_offset")
+	var margin: Vector2i = get_param_value("margin")
 
 	_ensure_viewport_size(res)
 
@@ -56,6 +77,24 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	_label.text = txt
 	_label.add_theme_font_size_override("font_size", fsize)
 	_label.add_theme_color_override("font_color", fcol)
+
+	# Outline
+	if outline_sz > 0:
+		_label.add_theme_constant_override("outline_size", outline_sz)
+		_label.add_theme_color_override("font_outline_color", outline_col)
+	else:
+		_label.remove_theme_constant_override("outline_size")
+		_label.remove_theme_color_override("font_outline_color")
+
+	# Drop shadow
+	if use_shadow:
+		_label.add_theme_color_override("font_shadow_color", shadow_col)
+		_label.add_theme_constant_override("shadow_offset_x", shadow_off.x)
+		_label.add_theme_constant_override("shadow_offset_y", shadow_off.y)
+	else:
+		_label.remove_theme_color_override("font_shadow_color")
+		_label.remove_theme_constant_override("shadow_offset_x")
+		_label.remove_theme_constant_override("shadow_offset_y")
 
 	# Horizontal alignment
 	match ah:
@@ -77,6 +116,15 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if wrap else TextServer.AUTOWRAP_OFF
 
+	# Edge inset (top-left margin for HUD overlays, etc.)
+	var mx := maxi(margin.x, 0)
+	var my := maxi(margin.y, 0)
+	_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_label.offset_left = float(mx)
+	_label.offset_top = float(my)
+	_label.offset_right = float(-mx)
+	_label.offset_bottom = float(-my)
+
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
 
@@ -85,7 +133,8 @@ func _setup_viewport() -> void:
 	if _viewport != null:
 		return
 
-	_ensure_viewport(get_param_value("resolution"), false)
+	# Transparent so overlays (bg alpha 0) composite correctly via Over.
+	_ensure_viewport(get_param_value("resolution"), true)
 
 	_bg = ColorRect.new()
 	_bg.name = "BG"

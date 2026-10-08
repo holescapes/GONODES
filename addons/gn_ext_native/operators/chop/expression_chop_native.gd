@@ -7,7 +7,10 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	node_type = "expression_native"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	time_dependent = GNNode.expression_uses_time(str(get_param_value("expr")))
 	node_description = "Evaluate per-channel math expressions — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeExpressionChop"):
 		_processor = ClassDB.instantiate("GNNativeExpressionChop")

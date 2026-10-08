@@ -7,7 +7,10 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "point"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	time_dependent = any_text_uses_time(PackedStringArray(["expr_x", "expr_y", "expr_z"]))
 
 
 func _init_ports() -> void:

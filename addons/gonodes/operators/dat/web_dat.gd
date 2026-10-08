@@ -39,7 +39,7 @@ func _init_parameters() -> void:
 		PackedStringArray(["GET", "POST"]), 0,
 		"Method", "HTTP method"))
 	add_parameter(GNParameter.create_string("body", "The body string",
-		"Body", "Request body (POST only)"))
+		"Body", "Request body (POST only)", true))
 	add_parameter(GNParameter.create_string("content_type", "application/json",
 		"Content Type", "Content-Type header value"))
 	add_parameter(GNParameter.create_bool("auto_parse", true,
@@ -59,11 +59,17 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	if url != _cached_url and not _request_pending:
 		_trigger_request(url)
 
-	# Return cached data
+	if _request_pending:
+		request_keep_dirty()
+		node_warning = "Fetching…"
+
+	# Return cached data (or placeholder while pending)
 	if _last_response.is_empty():
 		out.is_table = false
 		out.set_text("(awaiting response...)")
 		return out
+
+	node_warning = ""
 
 	var auto_parse: bool = get_param_value("auto_parse")
 	if auto_parse:

@@ -18,7 +18,8 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("text", "[b]Hello[/b] World", "Text", "BBCode text content"))
+	add_parameter(GNParameter.create_string("text", "[b]Hello[/b] World", "Text",
+		"BBCode text content", true))
 	add_parameter(GNParameter.create_bool("bbcode", true, "BBCode", "Enable BBCode parsing"))
 	add_parameter(GNParameter.create_int("font_size", 16, 8, 128, "Font Size", "Text size in pixels"))
 	add_parameter(GNParameter.create_bool("fit_content", true, "Fit Content", "Auto-resize to fit text"))

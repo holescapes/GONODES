@@ -14,7 +14,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("text", "", "Text", "Text content"))
+	add_parameter(GNParameter.create_string("text", "", "Text", "Text content", true))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

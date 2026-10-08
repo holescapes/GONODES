@@ -7,7 +7,11 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "system"
-	time_dependent = true
+
+
+## Memory counters move; hardware and display stay put until those toggles change.
+func update_time_dependency() -> void:
+	time_dependent = bool(get_param_value("memory"))
 
 
 func _init_ports() -> void:

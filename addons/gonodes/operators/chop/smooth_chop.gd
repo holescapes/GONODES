@@ -12,7 +12,10 @@ var _y2: Dictionary = {}  # channel -> prev output[n-2]
 
 func _init() -> void:
 	node_type = "smooth"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	time_dependent = _temporal_moving
 
 
 func _init_ports() -> void:
@@ -43,6 +46,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	if do_reset:
 		_x1.clear(); _x2.clear(); _y1.clear(); _y2.clear()
+		_temporal_end_state.clear()
 
 	var out: GNChannelData = _prepare_output(in_data.sample_rate)
 
@@ -98,4 +102,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_y1[ch_name] = yn1; _y2[ch_name] = yn2
 		out.set_channel(ch_name, result)
 
+	var moved := false
+	for ch_name in _y1:
+		if _temporal_sample_moved(ch_name, float(_y1[ch_name])):
+			moved = true
+	_finish_temporal_cook(moved)
 	return out

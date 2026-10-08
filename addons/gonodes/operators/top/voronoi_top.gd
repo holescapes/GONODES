@@ -5,7 +5,11 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "voronoi"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	time_dependent = float(get_param_value("speed")) > 0.0 \
+			or param_expression_uses_time("speed")
 
 
 func _init_ports() -> void:

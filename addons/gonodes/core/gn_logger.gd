@@ -64,6 +64,14 @@ static var _log_file_path: String = ""
 # Public API
 # ═══════════════════════════════════════════════════════════════════════════════
 
+## True when a message at this level and category would be printed.
+## Callers that build a string every frame should check this first.
+static func will_log(msg_level: Level, category: String) -> bool:
+	if not enabled or msg_level < level:
+		return false
+	return not muted_categories.has(category)
+
+
 ## Logs a DEBUG-level message (verbose internals).
 static func debug(category: String, message: String) -> void:
 	_log(Level.DEBUG, category, message)

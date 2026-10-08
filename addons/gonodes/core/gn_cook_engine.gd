@@ -180,12 +180,6 @@ var _expr_resolved_this_frame: Dictionary = {}
 ## Matches chop("id"), op("id"), top("id"), sop("id"), dat("id"), mat("id").
 static var _expr_ref_regex: RegEx = null
 
-## Regex for extracting node references WITH their function name (family hint).
-## Group 1 = function name (chop, top, dat, etc.), Group 2 = node ID.
-## Used by _build_wireless_demand_map() to determine which output port family
-## is demanded by each expression reference.
-static var _expr_demand_regex: RegEx = null
-
 ## Maps expression function names to the GNFamily.Type they demand.
 ## Built lazily from the dynamic GNFamily expression function registry,
 ## plus hardcoded variant suffixes (chopf, chopi, chops → CHOP).
@@ -210,8 +204,37 @@ static func _get_expr_func_to_family() -> Dictionary:
 ## Built by _build_wireless_demand_map() from:
 ##   1. Wireless node_ref parameters (Select operators, etc.)
 ##   2. Expression function calls (chop(), top(), dat(), etc.)
+##   3. Script code bodies (STRING params: code / py_source / cpp_source)
 ## -1 in the array means "all ports demanded" (from op()/output() or untyped refs).
 var _wireless_demand_map: Dictionary = {}
+
+## Per-frame reverse map: target_node_id → Array of consumer node IDs that
+## reference it via node_ref (Select*), expression calls, or script bodies.
+## Used to dirty wireless readers when the target cooks — without this, Select
+## can cook once with a null target output and never retry (no wire → no hash).
+var _wireless_consumer_map: Dictionary = {}
+
+## Runtime side-effect ledger (set_par / network_connect from scripts).
+## Cleared at the start of each cook_frame — holds only the current frame.
+var side_effect_writes: Dictionary = {}
+var side_effect_by_writer: Dictionary = {}
+var _side_effect_writer_id: String = ""
+
+## Cached GNReferenceScanner read-ids per node. Invalidated when expression /
+## code-body params change (not on every set_par constant write).
+var _expr_refs_cache: Dictionary = {}
+
+## Cached full GNReferenceScanner result per node (reads, calls, writes).
+var _node_scan_cache: Dictionary = {}
+
+## Per node: { has_expr: bool, uses_time: bool }. Same invalidation as refs.
+var _expr_eval_cache: Dictionary = {}
+
+## Last expression-edge signature so topo is rebuilt only when edges change.
+var _expr_edge_sig: String = ""
+
+## param key "node:param" → whether that param currently affects refs.
+var _expr_mode_live: Dictionary = {}
 
 ## Reverse map: upstream_node_id → Array of downstream node IDs that read it
 ## via expressions (chop/op/top/par).  Built alongside the active set so that
@@ -222,6 +245,21 @@ var _expr_consumer_map: Dictionary = {}
 ## Set of node IDs that were actually cooked (or re-dirtied) this frame.
 ## Populated during the cook loop; consulted by _should_eval_expressions().
 var _cooked_this_frame: Dictionary = {}
+
+## Node IDs whose warning/error text changed this frame. The editor refreshes
+## only these badges plus nodes that cooked, instead of every node view.
+var _status_refresh_ids: Dictionary = {}
+
+## Nodes that currently have a warning or error. The next frame clears only
+## these, instead of blanking every node in the topo.
+var _nodes_with_status: Dictionary = {}
+
+## Active nodes in cook order. Rebuilt with the active set, not every frame.
+var _active_topo: Array[GNNode] = []
+
+## Active nodes grouped by topo level, empty levels removed. Parallel cook
+## iterates this instead of the full-graph levels.
+var _active_levels: Array = []
 
 # ─── Signals ───────────────────────────────────────────────────────────────────
 
@@ -307,27 +345,76 @@ func _on_network_node_added(node_id: String) -> void:
 	_active_set_dirty = true
 
 
+## True when any vector/color component is in expression mode.
+func _param_has_component_expression(param: GNParameter) -> bool:
+	for i in range(param.component_modes.size()):
+		if param.component_modes[i] == GNParameter.Mode.EXPRESSION:
+			return true
+	return false
+
+
 ## Called when any node's parameter changes (value or mode).
-## Expression edits may change which nodes are referenced, so we
-## invalidate the active set. Remote dependencies (get_remote_dependencies)
-## may also change, so invalidate topological order too.
-## This fires rarely (user interaction only).
-func _on_node_param_changed(_node_id: String, _param_name: String) -> void:
-	_active_set_dirty = true
-	if network != null:
-		network._mark_topo_dirty()
+## Only expression text / code-body edits change which nodes are referenced.
+## Constant writes (including script set_par every frame) must NOT rebuild the
+## active set — that was O(nodes × regex) per frame and tanked large patches.
+func _on_node_param_changed(node_id: String, param_name: String) -> void:
+	if network == null:
+		_active_set_dirty = true
+		_expr_refs_cache.clear()
+		_node_scan_cache.clear()
+		_expr_eval_cache.clear()
+		_expr_mode_live.clear()
+		return
+	var node: GNNode = network.nodes.get(node_id, null)
+	if node == null:
+		_active_set_dirty = true
+		_expr_refs_cache.erase(node_id)
+		_node_scan_cache.erase(node_id)
+		_expr_eval_cache.erase(node_id)
+		return
+	var param: GNParameter = node.parameters.get(param_name, null)
+	if param == null:
+		_active_set_dirty = true
+		_expr_refs_cache.erase(node_id)
+		_node_scan_cache.erase(node_id)
+		_expr_eval_cache.erase(node_id)
+		return
+	_expr_eval_cache.erase(node_id)
+	# Topology of wireless refs changes when a script/callback body or an
+	# expression is edited, or when a param enters/leaves expression mode.
+	# A CONSTANT value edit must not rebuild just because an old expression
+	# string is still stored on the parameter.
+	var now_live := GNReferenceScanner.is_code_body_param(param) \
+			or param.mode == GNParameter.Mode.EXPRESSION \
+			or _param_has_component_expression(param)
+	var live_key := "%s:%s" % [node_id, param_name]
+	var was_live := bool(_expr_mode_live.get(live_key, false))
+	if now_live or was_live:
+		_active_set_dirty = true
+		_expr_refs_cache.erase(node_id)
+		_node_scan_cache.erase(node_id)
+		if now_live != was_live:
+			network._mark_topo_dirty()
+	_expr_mode_live[live_key] = now_live
 
 
 ## Called when a node is removed — invalidates the active set.
 func _on_topology_changed(_arg: Variant = null) -> void:
 	_active_set_dirty = true
 	_consumer_counts_dirty = true
+	_expr_refs_cache.clear()
+	_node_scan_cache.clear()
+	_expr_eval_cache.clear()
+	_expr_mode_live.clear()
 
 
 ## Called when a connection is added or removed — invalidates the active set.
 func _on_connection_changed(_arg: Variant = null) -> void:
 	_active_set_dirty = true
 	_consumer_counts_dirty = true
+	_expr_refs_cache.clear()
+	_node_scan_cache.clear()
+	_expr_eval_cache.clear()
 	# Invalidate the downstream node's input hash so the hash guard doesn't
 	# falsely skip a re-cook after rewiring (e.g., two upstreams with the
 	# same timestamp would otherwise produce an identical hash).
@@ -460,63 +547,51 @@ func _compute_active_set() -> Dictionary:
 	return active
 
 
-## Extracts node IDs referenced in expressions of the given node.
-## Scans all parameters for chop()/op()/top()/sop()/dat()/mat()/par()/set_par() calls.
+## Extracts node IDs referenced (read demand) by the given node.
 func _get_expression_refs(node_id: String) -> Array[String]:
-	var refs: Array[String] = []
+	if _expr_refs_cache.has(node_id):
+		return _expr_refs_cache[node_id]
 	var node: GNNode = network.nodes.get(node_id, null)
 	if node == null:
-		return refs
-
-	# Lazy-init regex (same pattern as GNGraphEditor's overlay scanner)
-	if _expr_ref_regex == null:
-		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("(?:lookupf?|chop[sfi]?|op|top|sop|dat|mat|vol|img|pop|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
-
-	for param_name in node.parameters:
-		var param: GNParameter = node.parameters[param_name]
-
-		# Main expression
-		if param.mode == GNParameter.Mode.EXPRESSION and param.expression != "":
-			var results := _expr_ref_regex.search_all(param.expression)
-			for m in results:
-				var ref_id: String = m.get_string(1)
-				if ref_id != node_id and not refs.has(ref_id):
-					refs.append(ref_id)
-
-		# Per-component expressions (Vector2/3/4, Color)
-		for i in range(param.component_expressions.size()):
-			if param.component_modes.size() > i and \
-					param.component_modes[i] == GNParameter.Mode.EXPRESSION:
-				var comp_expr: String = param.component_expressions[i]
-				if comp_expr != "":
-					var results := _expr_ref_regex.search_all(comp_expr)
-					for m in results:
-						var ref_id: String = m.get_string(1)
-						if ref_id != node_id and not refs.has(ref_id):
-							refs.append(ref_id)
-
+		return []
+	var scan: Dictionary = _scan_node_cached(node)
+	var refs: Array[String] = []
+	for rid in scan["reads"]:
+		refs.append(str(rid))
+	_expr_refs_cache[node_id] = refs
 	return refs
 
 
+## One scanner pass per node. Wireless family demand reads the cached calls
+## instead of regexing the same texts again.
+func _scan_node_cached(node: GNNode) -> Dictionary:
+	if _node_scan_cache.has(node.id):
+		return _node_scan_cache[node.id]
+	var scan: Dictionary = GNReferenceScanner.scan_node(node)
+	_node_scan_cache[node.id] = scan
+	return scan
+
+
+## Fold extension expression functions into the shared call regex.
+func _configure_scanner() -> void:
+	var names := PackedStringArray()
+	for func_name in _get_expr_func_to_family():
+		names.append(str(func_name))
+	if GNReferenceScanner.configure_call_funcs(names):
+		_expr_refs_cache.clear()
+		_node_scan_cache.clear()
+
+
 ## Builds _wireless_demand_map: target_node_id → Array[int] of demanded
-## family types.  Called once per frame after the active set is computed.
+## family types. Rebuilt only when the active set is dirty, not every frame.
 ## Scans all active nodes for:
 ##   1. Wireless node_ref parameters (Select operators, etc.) — the param's
 ##      node_ref_family tells us which output family is demanded on the target.
-##   2. Expression function calls (chop(), top(), dat(), etc.) — the function
-##      name implies which family is demanded on the referenced node.
+##   2. Expression and script calls already captured by [method _scan_node_cached].
 func _build_wireless_demand_map() -> void:
 	_wireless_demand_map.clear()
-
-	# Lazy-init the family-aware expression regex — built dynamically from
-	# the expression function registry so extension families are included.
-	if _expr_demand_regex == null:
-		_expr_demand_regex = RegEx.new()
-		var func_names := _get_expr_func_to_family().keys()
-		func_names.sort_custom(func(a: String, b: String) -> bool: return a.length() > b.length())
-		var alternation := "|".join(func_names) if not func_names.is_empty() else "(?!x)"
-		_expr_demand_regex.compile("(%s|op|output)\\s*\\(\\s*\"([^\"]+)\"" % alternation)
+	_wireless_consumer_map.clear()
+	var families := _get_expr_func_to_family()
 
 	for node_id in _active_set:
 		var node: GNNode = network.nodes.get(node_id, null)
@@ -536,11 +611,21 @@ func _build_wireless_demand_map() -> void:
 			else:
 				# node_ref_family == -1 → any-family ref → demand all ports
 				_add_wireless_demand(target_id, -1)
+			_add_wireless_consumer(target_id, node_id)
 
-		# ── 2. Expression function calls with family hints ────────────────
-		for p_name in node.parameters:
-			var param: GNParameter = node.parameters[p_name]
-			_scan_expr_demand(param, node_id)
+		# ── 2. Expression + script calls from the shared scan ─────────────
+		var scan: Dictionary = _scan_node_cached(node)
+		for call in scan.get("calls", []):
+			var func_name: String = str(call.get("func", ""))
+			var call_target: String = str(call.get("target_id", ""))
+			if call_target.is_empty() or call_target == node_id:
+				continue
+			if families.has(func_name):
+				_add_wireless_demand(call_target, int(families[func_name]))
+				_add_wireless_consumer(call_target, node_id)
+			elif func_name == "op" or func_name == "output":
+				_add_wireless_demand(call_target, -1)
+				_add_wireless_consumer(call_target, node_id)
 
 
 ## Adds a demanded family to the wireless demand map for a target node.
@@ -552,34 +637,13 @@ func _add_wireless_demand(target_id: String, family: int) -> void:
 		arr.append(family)
 
 
-## Scans a parameter's expressions for family-typed node references and
-## adds them to the wireless demand map.
-func _scan_expr_demand(param: GNParameter, owner_id: String) -> void:
-	if param.mode == GNParameter.Mode.EXPRESSION and param.expression != "":
-		_extract_expr_demand(param.expression, owner_id)
-	# Per-component expressions (Vector2/3/4, Color)
-	for i in range(param.component_expressions.size()):
-		if param.component_modes.size() > i and \
-				param.component_modes[i] == GNParameter.Mode.EXPRESSION:
-			var comp_expr: String = param.component_expressions[i]
-			if comp_expr != "":
-				_extract_expr_demand(comp_expr, owner_id)
-
-
-## Parses an expression string for function calls like chop("id"), top("id"),
-## and adds the implied family demand to _wireless_demand_map.
-func _extract_expr_demand(expr: String, owner_id: String) -> void:
-	var results := _expr_demand_regex.search_all(expr)
-	for m in results:
-		var func_name: String = m.get_string(1)
-		var target_id: String = m.get_string(2)
-		if target_id == owner_id:
-			continue
-		if _get_expr_func_to_family().has(func_name):
-			_add_wireless_demand(target_id, _get_expr_func_to_family()[func_name])
-		else:
-			# op() / output() → demand all ports on the target
-			_add_wireless_demand(target_id, -1)
+## Records that [param consumer_id] wirelessly reads [param target_id].
+func _add_wireless_consumer(target_id: String, consumer_id: String) -> void:
+	if not _wireless_consumer_map.has(target_id):
+		_wireless_consumer_map[target_id] = []
+	var arr: Array = _wireless_consumer_map[target_id]
+	if consumer_id not in arr:
+		arr.append(consumer_id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -594,7 +658,6 @@ func _extract_expr_demand(expr: String, owner_id: String) -> void:
 func _classify_cook_status(node: GNNode) -> int:
 	if not node.dirty:
 		if node.is_active and _should_eval_expressions(node) and _try_expression_dirty(node):
-			_cooked_this_frame[node.id] = true
 			return 1
 		return -1
 	if not node.is_active:
@@ -605,6 +668,11 @@ func _classify_cook_status(node: GNNode) -> int:
 ## Executes one full cook cycle for the current frame.
 func cook_frame(delta: float) -> void:
 	var frame_start := Time.get_ticks_usec()
+
+	# Side-effect overlay / inspector only need this frame's writes.
+	# Unbounded growth here previously drew thousands of dashed lines.
+	side_effect_writes.clear()
+	side_effect_by_writer.clear()
 
 	# One-time check: is GPU compute available on this renderer?
 	if not _compute_checked:
@@ -639,6 +707,7 @@ func cook_frame(delta: float) -> void:
 	# pulls them into the chain.
 	if _active_set_dirty:
 		var prev_active: Dictionary = _active_set
+		_configure_scanner()
 		_active_set = _compute_active_set()
 		_build_wireless_demand_map()
 		for node in topo_order:
@@ -650,13 +719,15 @@ func cook_frame(delta: float) -> void:
 				if node.time_dependent or node.cached_output == null:
 					node.mark_dirty()
 			node.is_active = now_active
+		# Rebuild the expression consumer map (upstream → expression readers).
+		# This can mark topo dirty, so the active cook list is cached after it.
+		_rebuild_expr_consumer_map()
+		_cache_active_cook_lists()
 		# Reorder scene-tree children to match topological order so that
 		# upstream TOPs' SubViewports render before downstream ones within
 		# the same frame.  Without this, viewports read stale/blank textures
 		# when the creation order doesn't match the dependency order.
-		_reorder_children_to_topo(topo_order)
-		# Rebuild the expression consumer map (upstream → expression readers)
-		_rebuild_expr_consumer_map()
+		_reorder_children_to_topo(last_topo_order)
 		_active_set_dirty = false
 
 	# Step 3: Pre-cook pass — let time-dependent nodes mark themselves dirty
@@ -676,8 +747,8 @@ func cook_frame(delta: float) -> void:
 	# player builds skip this dictionary entirely.
 	if editor_mode:
 		last_dirty_ids.clear()
-		for node in topo_order:
-			if node.dirty and _active_set.has(node.id):
+		for node in _active_topo:
+			if node.dirty:
 				last_dirty_ids[node.id] = true
 
 	# Step 4b: Rebuild consumer counts when topology changed.
@@ -688,25 +759,36 @@ func cook_frame(delta: float) -> void:
 	var cooked_count := 0
 	var skipped_count := 0
 	_expr_resolved_this_frame.clear()
-	_cooked_this_frame.clear()
-
-	# Clear per-node status before cooking — self-healing: stale warnings/errors
-	# from previous frames are wiped and only re-set if the problem persists.
-	# Placeholder nodes keep their error (it is structural, not per-cook).
+	_status_refresh_ids.clear()
 	if editor_mode:
-		for node in topo_order:
-			if not node.is_placeholder():
-				node.node_warning = ""
-				node.node_error = ""
-			node.cooked_this_frame = false
+		for cooked_id in _cooked_this_frame:
+			var cooked_node: GNNode = network.nodes.get(cooked_id, null)
+			if cooked_node:
+				cooked_node.cooked_this_frame = false
+		var status_ids: Array = _nodes_with_status.keys()
+		_nodes_with_status.clear()
+		for status_id in status_ids:
+			var status_node: GNNode = network.nodes.get(status_id, null)
+			if status_node == null:
+				continue
+			if status_node.is_placeholder():
+				_nodes_with_status[status_id] = true
+				continue
+			_status_refresh_ids[status_id] = true
+			status_node.node_warning = ""
+			status_node.node_error = ""
+	_cooked_this_frame.clear()
 
 	# Parallel cook path: group nodes into topo levels and cook independent
 	# CPU-family nodes within each level concurrently.
 	# Requires: engine-level parallel_cook_enabled + platform threads + patch opt-in.
 	var _use_parallel := parallel_cook_enabled and _threads_available and network.multithreading_enabled
+	var budget_hit := false
 	if _use_parallel:
-		var levels: Array = network.get_topological_levels()
-		for level in levels:
+		for level in _active_levels:
+			if _cook_budget_reached(cooked_count):
+				budget_hit = true
+				break
 			var cpu_batch: Array[GNNode] = []
 			var gpu_batch: Array[GNNode] = []
 			for node in level:
@@ -723,20 +805,30 @@ func cook_frame(delta: float) -> void:
 
 			# Cook GPU nodes sequentially on main thread (renderer constraint)
 			for node in gpu_batch:
+				if _cook_budget_reached(cooked_count):
+					budget_hit = true
+					break
 				var r := _cook_single_node(node)
 				if r == 1: cooked_count += 1
 				elif r == 0: skipped_count += 1
 
-			# Cook CPU nodes in parallel if batch is large enough
-			if cpu_batch.size() >= parallel_min_batch:
+			# Cook CPU nodes in parallel if batch is large enough and the
+			# whole batch fits in the remaining per-frame cook budget.
+			if not budget_hit and cpu_batch.size() >= parallel_min_batch \
+					and not _batch_exceeds_budget(cooked_count, cpu_batch.size()):
 				cooked_count += _cook_cpu_batch_parallel(cpu_batch)
-			else:
+			elif not budget_hit:
 				for node in cpu_batch:
+					if _cook_budget_reached(cooked_count):
+						budget_hit = true
+						break
 					var r := _cook_single_node(node)
 					if r == 1: cooked_count += 1
 					elif r == 0: skipped_count += 1
 
-			# Dirty propagation after entire level is cooked
+			# Dirty propagation after the nodes that cooked in this level.
+			# Runs even when the budget stopped the level early, so those
+			# cooks still reach their downstream.
 			for node in gpu_batch:
 				if _cooked_this_frame.has(node.id):
 					_dirty_immediate_downstream(node.id)
@@ -748,20 +840,25 @@ func cook_frame(delta: float) -> void:
 			# skipped because their expression source also cooked in this level.
 			# Without this second pass, chop()/par() refs between nodes at the
 			# same depth would lag one frame behind.
-			for node in level:
-				if _cooked_this_frame.has(node.id) or not node.is_active:
-					continue
-				if _should_eval_expressions(node) and _try_expression_dirty(node):
-					_cooked_this_frame[node.id] = true
-					var r2 := _cook_single_node(node)
-					if r2 == 1:
-						cooked_count += 1
-						_dirty_immediate_downstream(node.id)
-					elif r2 == 0:
-						skipped_count += 1
+			if not budget_hit:
+				for node in level:
+					if _cook_budget_reached(cooked_count):
+						budget_hit = true
+						break
+					if _cooked_this_frame.has(node.id) or not node.is_active:
+						continue
+					if _should_eval_expressions(node) and _try_expression_dirty(node):
+						var r2 := _cook_single_node(node)
+						if r2 == 1:
+							cooked_count += 1
+							_dirty_immediate_downstream(node.id)
+						elif r2 == 0:
+							skipped_count += 1
+			if budget_hit:
+				break
 	else:
 		# Sequential cook path (original)
-		for node in topo_order:
+		for node in _active_topo:
 			var cs := _classify_cook_status(node)
 			if cs == -1:
 				continue
@@ -783,7 +880,14 @@ func cook_frame(delta: float) -> void:
 	frame_count += 1
 	var frame_end := Time.get_ticks_usec()
 	frame_cook_time_ms = (frame_end - frame_start) / 1000.0
-	GNLogger.debug("CookEngine", "Frame %d: cooked %d, skipped %d inactive in %.2fms" % [frame_count, cooked_count, skipped_count, frame_cook_time_ms])
+	if editor_mode:
+		for cooked_id in _cooked_this_frame:
+			var cooked_node: GNNode = network.nodes.get(cooked_id, null)
+			if cooked_node and (not cooked_node.node_warning.is_empty() \
+					or not cooked_node.node_error.is_empty()):
+				_nodes_with_status[cooked_id] = true
+	if GNLogger.will_log(GNLogger.Level.DEBUG, "CookEngine"):
+		GNLogger.debug("CookEngine", "Frame %d: cooked %d, skipped %d inactive in %.2fms" % [frame_count, cooked_count, skipped_count, frame_cook_time_ms])
 	frame_cooked.emit(frame_count, frame_cook_time_ms)
 
 
@@ -795,10 +899,43 @@ func cook_frame(delta: float) -> void:
 ## can mark themselves dirty.  Inactive nodes are skipped — they don't cook
 ## anyway, so marking them dirty would only waste a dirty-propagation walk.
 func _pre_cook_pass(delta: float) -> void:
-	for node_id in network.nodes:
-		var node: GNNode = network.nodes[node_id]
-		if node.is_active:
-			node._pre_cook(delta)
+	for node in _active_topo:
+		node._pre_cook(delta)
+
+
+## Active nodes in topo order, and the same nodes split into parallel levels.
+## Built when the active set changes. Expression edges are already applied,
+## so [method GNNetwork.get_topological_order] recomputes if they moved.
+func _cache_active_cook_lists() -> void:
+	var topo := network.get_topological_order()
+	last_topo_order = topo
+	_active_topo.clear()
+	for node in topo:
+		if _active_set.has(node.id):
+			_active_topo.append(node)
+	_active_levels.clear()
+	for level in network.get_topological_levels():
+		var active_level: Array[GNNode] = []
+		for node in level:
+			if _active_set.has(node.id):
+				active_level.append(node)
+		if not active_level.is_empty():
+			_active_levels.append(active_level)
+
+
+func _cook_budget_reached(cooked_count: int) -> bool:
+	return max_cooks_per_frame > 0 and cooked_count >= max_cooks_per_frame
+
+
+func _batch_exceeds_budget(cooked_count: int, batch_size: int) -> bool:
+	return max_cooks_per_frame > 0 and cooked_count + batch_size > max_cooks_per_frame
+
+
+func _note_node_status(node: GNNode) -> void:
+	if node == null:
+		return
+	_status_refresh_ids[node.id] = true
+	_nodes_with_status[node.id] = true
 
 
 ## Builds the reverse expression-consumer map: for each upstream node
@@ -822,7 +959,14 @@ func _rebuild_expr_consumer_map() -> void:
 			expr_edges.append([ref_id, node_id])
 	# Inject into network so both topo order and topo levels include them
 	network._expression_edges = expr_edges
-	network._mark_topo_dirty()
+	var parts: PackedStringArray = []
+	for edge in expr_edges:
+		parts.append("%s>%s" % [edge[0], edge[1]])
+	parts.sort()
+	var sig := "|".join(parts)
+	if sig != _expr_edge_sig:
+		_expr_edge_sig = sig
+		network._mark_topo_dirty()
 
 
 ## Returns true if this node's expressions should be re-evaluated this frame.
@@ -833,15 +977,14 @@ func _rebuild_expr_consumer_map() -> void:
 ##   (c) the node references time/frame/dt (always needs re-eval).
 ## Falls back to true (safe) if no consumer map is available yet.
 func _should_eval_expressions(node: GNNode) -> bool:
-	# If no consumer map yet (first frame), fall back to always-eval
-	if _expr_consumer_map.is_empty() and _active_set.is_empty():
-		return true
+	var flags := _get_expr_eval_flags(node)
+	if not flags.get("has_expr", false):
+		return false
 
 	var refs: Array[String] = _get_expression_refs(node.id)
 	if refs.is_empty():
-		# Node has expressions but they don't reference other nodes.
-		# They likely use time/frame/dt → must re-eval every frame.
-		return true
+		# No other nodes — re-eval only when the expression reads time/frame/dt.
+		return bool(flags.get("uses_time", false))
 
 	# Check if any referenced upstream node cooked or is time-dependent
 	for ref_id in refs:
@@ -850,7 +993,31 @@ func _should_eval_expressions(node: GNNode) -> bool:
 		var ref_node: GNNode = network.nodes.get(ref_id, null)
 		if ref_node and ref_node.time_dependent:
 			return true
-	return false
+	return bool(flags.get("uses_time", false))
+
+
+func _get_expr_eval_flags(node: GNNode) -> Dictionary:
+	if _expr_eval_cache.has(node.id):
+		return _expr_eval_cache[node.id]
+	var has_expr := false
+	var uses_time := false
+	for param_name in node.parameters:
+		var param: GNParameter = node.parameters[param_name]
+		if param.mode == GNParameter.Mode.EXPRESSION and param.expression != "":
+			has_expr = true
+			if GNNode.expression_uses_time(param.expression):
+				uses_time = true
+		for i in range(param.component_expressions.size()):
+			if param.component_modes.size() > i \
+					and param.component_modes[i] == GNParameter.Mode.EXPRESSION:
+				var comp: String = param.component_expressions[i]
+				if not comp.is_empty():
+					has_expr = true
+					if GNNode.expression_uses_time(comp):
+						uses_time = true
+	var info := {"has_expr": has_expr, "uses_time": uses_time}
+	_expr_eval_cache[node.id] = info
+	return info
 
 
 ## Computes a hash of all cook inputs for a node: resolved parameter values +
@@ -865,6 +1032,22 @@ func _should_eval_expressions(node: GNNode) -> bool:
 ## last cook — if an upstream node re-cooked, the timestamp changes and the
 ## hash differs, triggering a re-cook.  This mirrors TD's demand-driven model:
 ## if upstream cooked, downstream cooks.
+## True when this dirty node can skip _cook. A live node whose elapsed time
+## moved cannot match the hash, so the parameter walk is skipped and the
+## stored hash is invalidated for the next paused frame.
+func _input_unchanged(node: GNNode, inputs: Array[GNData]) -> bool:
+	if node.time_dependent and elapsed_time != node._last_cook_elapsed:
+		node._last_cook_elapsed = elapsed_time
+		node._last_cook_input_hash = -1
+		return false
+	var cook_input_hash := _compute_cook_input_hash(node, inputs)
+	if cook_input_hash == node._last_cook_input_hash:
+		return true
+	node._last_cook_input_hash = cook_input_hash
+	node._last_cook_elapsed = elapsed_time
+	return false
+
+
 func _compute_cook_input_hash(node: GNNode, inputs: Array[GNData]) -> int:
 	var h: int = 73856093
 	# Hash all resolved parameter values (both built-in and spare)
@@ -884,6 +1067,16 @@ func _compute_cook_input_hash(node: GNNode, inputs: Array[GNData]) -> int:
 			h = h * 37 + inp.get_instance_id()
 		else:
 			h = h * 37 + 2654435761
+	# Wireless refs (Select*, etc.) have no wire inputs — include the
+	# target's cached_output so null→data and frame updates change the hash.
+	for dep_id in node.get_remote_dependencies():
+		var dep: GNNode = network.nodes.get(dep_id, null) if network else null
+		var dep_out: GNData = dep.cached_output if dep else null
+		if dep_out != null:
+			h = h * 37 + dep_out.timestamp
+			h = h * 37 + dep_out.get_instance_id()
+		else:
+			h = h * 37 + 2654435761
 	# Time-dependent nodes: include frame timing so hash always differs
 	if node.time_dependent:
 		h = h * 41 + hash(elapsed_time)
@@ -897,6 +1090,8 @@ func _compute_cook_input_hash(node: GNNode, inputs: Array[GNData]) -> int:
 ## Since nodes cook in topological order, marking only direct successors
 ## is sufficient — further propagation cascades naturally as each downstream
 ## node reaches the input hash guard and checks its own inputs.
+## Also dirties wireless consumers (Select*, expression readers) so a
+## Cache→Select feedback loop recovers after the first null cook.
 func _dirty_immediate_downstream(node_id: String) -> void:
 	engine_propagating = true
 	for ds_id in network.get_immediate_downstream(node_id):
@@ -905,6 +1100,20 @@ func _dirty_immediate_downstream(node_id: String) -> void:
 			ds_node.mark_dirty()
 			if editor_mode:
 				last_dirty_ids[ds_id] = true
+	for consumer_id in _wireless_consumer_map.get(node_id, []):
+		# Already cooked this frame (e.g. Select before Cache in a cycle) —
+		# leave dirty for next frame so it picks up the fresh cached_output.
+		var consumer: GNNode = network.nodes.get(consumer_id, null)
+		if consumer == null:
+			continue
+		if not consumer.dirty:
+			consumer.mark_dirty()
+			if editor_mode:
+				last_dirty_ids[consumer_id] = true
+		# Force hash miss: Select has no wire inputs, so without this the
+		# input-hash guard can skip after a null→data transition.
+		if _cooked_this_frame.has(consumer_id):
+			consumer._last_cook_input_hash = -1
 	engine_propagating = false
 
 
@@ -920,7 +1129,10 @@ func _try_expression_dirty(node: GNNode) -> bool:
 	var old_values: Dictionary = {}
 	for param_name in node.parameters:
 		var param: GNParameter = node.parameters[param_name]
-		if param.mode == GNParameter.Mode.EXPRESSION:
+		if param.mode == GNParameter.Mode.EXPRESSION \
+				or _param_has_component_expression(param):
+			# Vectors and colors copy by value, so the snapshot stays put
+			# while component evaluation writes a new resolved_value.
 			old_values[param_name] = param.resolved_value
 	if old_values.is_empty():
 		return false
@@ -1146,6 +1358,7 @@ func _evaluate_expression(node: GNNode, param: GNParameter) -> void:
 		var err_msg := "Expression error on %s: %s" % [param.param_name, err_text]
 		if editor_mode:
 			node.node_error = err_msg
+			_note_node_status(node)
 		GNLogger.error("CookEngine", "Expression error on %s.%s — %s" % [
 			node.id, param.param_name, err_text])
 		param.resolved_value = param.fallback_value
@@ -1172,6 +1385,7 @@ func _stored_expression_value(node: GNNode, param: GNParameter, result: Variant)
 	param.resolved_value = param.fallback_value
 	if editor_mode:
 		node.node_error = "Expression error on %s: %s" % [param.param_name, err_text]
+		_note_node_status(node)
 	cook_error.emit(node.id, "Expression error: %s" % err_text)
 	return null
 
@@ -1237,6 +1451,7 @@ func _evaluate_component_expressions(node: GNNode, param: GNParameter) -> void:
 					node.id, param.param_name, label_str, err_text]
 				if editor_mode:
 					node.node_error = comp_err
+					_note_node_status(node)
 				GNLogger.error("CookEngine", comp_err)
 				components[i] = param.get_component_value(i)
 			else:
@@ -1518,7 +1733,61 @@ func set_par(name_or_node: String, param_or_value = null, value_arg = null) -> b
 	engine_propagating = true
 	target_node.mark_dirty()
 	engine_propagating = false
+	_record_side_effect(target_node.id, target_param_name, "set_par")
 	return true
+
+
+## Marks the node currently executing script/callback code (for side-effect ledger).
+func begin_side_effect_scope(writer_id: String) -> void:
+	_side_effect_writer_id = writer_id
+	if network != null and network.nodes.has(writer_id):
+		_current_eval_node = network.nodes[writer_id]
+
+
+func end_side_effect_scope() -> void:
+	_side_effect_writer_id = ""
+
+
+func _record_side_effect(target_id: String, param_name: String, kind: String) -> void:
+	var writer_id := _side_effect_writer_id
+	if writer_id.is_empty() and _current_eval_node != null:
+		writer_id = _current_eval_node.id
+	if writer_id.is_empty() or target_id.is_empty():
+		return
+	var rec := {
+		"writer_id": writer_id,
+		"target_id": target_id,
+		"param": param_name,
+		"frame": frame_count,
+		"kind": kind,
+	}
+	if not side_effect_by_writer.has(writer_id):
+		side_effect_by_writer[writer_id] = []
+	(side_effect_by_writer[writer_id] as Array).append(rec)
+	if not side_effect_writes.has(target_id):
+		side_effect_writes[target_id] = []
+	(side_effect_writes[target_id] as Array).append(rec)
+
+
+## Inspector / overlay: static reads + runtime writes for one node.
+func get_dependency_summary(node_id: String) -> Dictionary:
+	var node: GNNode = network.nodes.get(node_id, null) if network else null
+	var reads: Array[String] = []
+	var writes: Array = []
+	if node != null:
+		_configure_scanner()
+		var scan: Dictionary = _scan_node_cached(node)
+		for rid in scan["reads"]:
+			reads.append(str(rid))
+		writes = (scan["writes"] as Array).duplicate()
+	var written_by: Array = side_effect_writes.get(node_id, [])
+	var writes_to: Array = side_effect_by_writer.get(node_id, [])
+	return {
+		"reads": reads,
+		"static_writes": writes,
+		"written_by": written_by,
+		"writes_to": writes_to,
+	}
 
 
 ## Logs a message from an expression context via GNLogger.
@@ -1700,6 +1969,7 @@ func _make_par_proxy(name_or_node: String, param_name: String = "") -> Variant:
 		GNLogger.warn("CookEngine", msg + " (returning fallback)")
 		if editor_mode and _current_eval_node != null:
 			_current_eval_node.node_warning = msg
+			_note_node_status(_current_eval_node)
 		return p.fallback_value
 
 	# If the target param is an expression that hasn't been evaluated yet this
@@ -1897,7 +2167,10 @@ func network_connect(from_id: String, from_port: int,
 		to_id: String, to_port: int) -> bool:
 	if network == null:
 		return false
-	return network.connect_nodes(from_id, from_port, to_id, to_port)
+	var ok := network.connect_nodes(from_id, from_port, to_id, to_port)
+	if ok:
+		_record_side_effect(to_id, "", "network_connect")
+	return ok
 
 
 ## Removes a specific connection.  Returns true on success.
@@ -2265,13 +2538,11 @@ func _cook_single_node(node: GNNode) -> int:
 	var inputs: Array[GNData] = _gather_inputs(node)
 
 	# ── Input hash guard (Tier 2) ──
-	var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
-	# Skip when resolved params, input timestamps, and (if time_dependent)
-	# elapsed_time match the last cook — even if the node is dirty.
-	if cook_input_hash == node._last_cook_input_hash:
+	# Skip when resolved params and input timestamps match the last cook.
+	# Live nodes with a new elapsed_time cook without hashing parameters.
+	if _input_unchanged(node, inputs):
 		node.clear_dirty()
 		return 0
-	node._last_cook_input_hash = cook_input_hash
 
 	# Bypass: passthrough first non-null input
 	if node.bypass:
@@ -2294,6 +2565,7 @@ func _cook_single_node(node: GNNode) -> int:
 		if node.has_cpu_fallback():
 			if editor_mode and frame_count == 0:
 				node.node_warning = "Running CPU fallback (no compute shaders)"
+				_note_node_status(node)
 				GNLogger.info("CookEngine", "Node '%s' (%s) using CPU fallback" % [node.id, node.node_type])
 			var cpu_start := Time.get_ticks_usec()
 			var cpu_result: GNData = node._cook_cpu(inputs)
@@ -2311,6 +2583,7 @@ func _cook_single_node(node: GNNode) -> int:
 		else:
 			if editor_mode:
 				node.node_warning = "Requires compute shaders (unavailable on this renderer)"
+				_note_node_status(node)
 			if frame_count == 0:
 				var msg := "Node '%s' (%s) requires compute shaders — skipped" % [node.id, node.node_type]
 				GNLogger.warn("CookEngine", msg)
@@ -2326,6 +2599,7 @@ func _cook_single_node(node: GNNode) -> int:
 	if _supported.size() > 0 and not _supported.has(_current_renderer):
 		if editor_mode:
 			node.node_warning = "Not supported on '%s' renderer" % _current_renderer
+			_note_node_status(node)
 		if frame_count == 0:
 			var msg := "Node '%s' (%s) unsupported on '%s' renderer — skipped" % [
 				node.id, node.node_type, _current_renderer]
@@ -2342,6 +2616,7 @@ func _cook_single_node(node: GNNode) -> int:
 	if _plat_supported.size() > 0 and not _plat_supported.has(_current_platform):
 		if editor_mode:
 			node.node_warning = "Not supported on '%s' platform" % _current_platform
+			_note_node_status(node)
 		if frame_count == 0:
 			var msg := "Node '%s' (%s) unsupported on '%s' platform — skipped" % [
 				node.id, node.node_type, _current_platform]
@@ -2378,6 +2653,7 @@ func _cook_single_node(node: GNNode) -> int:
 		if has_any_input:
 			if editor_mode:
 				node.node_error = "cook returned null"
+				_note_node_status(node)
 			GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
 			cook_error.emit(node.id, "cook returned null")
 	else:
@@ -2403,12 +2679,12 @@ func _cook_cpu_batch_parallel(batch: Array) -> int:
 		node.project_dir = project_dir
 		_resolve_node_parameters(node)
 		var inputs: Array[GNData] = _gather_inputs(node)
-		var cook_input_hash: int = _compute_cook_input_hash(node, inputs)
 		# Skip when hash unchanged — same guard as _cook_single_node (see above).
-		if cook_input_hash == node._last_cook_input_hash:
+		if _input_unchanged(node, inputs):
 			node.clear_dirty()
 			continue
-		node._last_cook_input_hash = cook_input_hash
+		if node.output_ports.size() > 1:
+			_stamp_demanded_outputs(node)
 		var entry := {"node": node, "inputs": inputs}
 		if node.thread_safe:
 			parallel_prepared.append(entry)
@@ -2422,6 +2698,7 @@ func _cook_cpu_batch_parallel(batch: Array) -> int:
 			var n: GNNode = entry["node"]
 			var inp: Array[GNData] = entry["inputs"]
 			var tid := WorkerThreadPool.add_task(func():
+				n.keep_dirty_after_cook = false
 				var start_us := Time.get_ticks_usec()
 				var result: GNData = n._cook(inp)
 				n.cook_time_ms = (Time.get_ticks_usec() - start_us) / 1000.0
@@ -2430,7 +2707,12 @@ func _cook_cpu_batch_parallel(batch: Array) -> int:
 					result.timestamp = frame_count
 				n.cached_output = result
 				n.cook_valid = result != null
+				var keep: bool = n.keep_dirty_after_cook
+				n.keep_dirty_after_cook = false
 				n.clear_dirty()
+				if keep:
+					n.dirty = true
+					n._last_cook_input_hash = -1
 			)
 			task_ids.append(tid)
 
@@ -2438,19 +2720,12 @@ func _cook_cpu_batch_parallel(batch: Array) -> int:
 		for tid in task_ids:
 			WorkerThreadPool.wait_for_task_completion(tid)
 
-	# Phase 3b: Cook non-thread-safe nodes sequentially on main thread
+	# Phase 3b: Non-thread-safe nodes — use execute_cook so keep_dirty_after_cook
+	# (async ImageFileIn, etc.) is honored the same as the sequential path.
 	for entry in sequential_prepared:
 		var n: GNNode = entry["node"]
 		var inp: Array[GNData] = entry["inputs"]
-		var start_us := Time.get_ticks_usec()
-		var result: GNData = n._cook(inp)
-		n.cook_time_ms = (Time.get_ticks_usec() - start_us) / 1000.0
-		if result != null:
-			result.valid = true
-			result.timestamp = frame_count
-		n.cached_output = result
-		n.cook_valid = result != null
-		n.clear_dirty()
+		n.execute_cook(inp, frame_count)
 
 	# Phase 4: Post-cook (main thread) — emit signals, tag shared, track
 	for entry in parallel_prepared:
@@ -2460,7 +2735,7 @@ func _cook_cpu_batch_parallel(batch: Array) -> int:
 		_stamp_owned_output(n, n.cached_output, entry["inputs"])
 	for entry in sequential_prepared:
 		var n: GNNode = entry["node"]
-		n.node_cooked.emit(n.id)
+		# execute_cook already emitted node_cooked
 		_cooked_this_frame[n.id] = true
 		_stamp_owned_output(n, n.cached_output, entry["inputs"])
 

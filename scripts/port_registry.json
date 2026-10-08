@@ -3664,6 +3664,14 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/output/ffmpeg_out.gd"
   },
+  "FileCopyOUT": {
+    "class_name": "FileCopyOUT",
+    "family": "OUT",
+    "inputs": [],
+    "outputs": [],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/output/file_copy_out.gd"
+  },
   "ImageSaveOUT": {
     "class_name": "ImageSaveOUT",
     "family": "OUT",
@@ -7598,6 +7606,20 @@
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/resolution_top.gd"
   },
+  "RichTextTOP": {
+    "class_name": "RichTextTOP",
+    "family": "TOP",
+    "inputs": [],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/rich_text_top.gd"
+  },
   "RippleTOP": {
     "class_name": "RippleTOP",
     "family": "TOP",
@@ -7887,6 +7909,26 @@
     ],
     "dynamic_inputs": null,
     "file": "addons/gonodes/operators/top/toon_shade_top.gd"
+  },
+  "TouchPaintTOP": {
+    "class_name": "TouchPaintTOP",
+    "family": "TOP",
+    "inputs": [
+      {
+        "port": 0,
+        "name": "in",
+        "type": "TOP"
+      }
+    ],
+    "outputs": [
+      {
+        "port": 0,
+        "name": "out",
+        "type": "TOP"
+      }
+    ],
+    "dynamic_inputs": null,
+    "file": "addons/gonodes/operators/top/touch_paint_top.gd"
   },
   "TrailTOP": {
     "class_name": "TrailTOP",
@@ -12350,7 +12392,8 @@
       }
     ],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_native/operators/top/analyze_top_native.gd"
+    "file": "addons/gn_ext_native/operators/top/analyze_top_native.gd",
+    "inherits_from": "AnalyzeTOP"
   },
   "CHOPtoTOPNative": {
     "class_name": "CHOPtoTOPNative",
@@ -12390,7 +12433,8 @@
       }
     ],
     "dynamic_inputs": null,
-    "file": "addons/gn_ext_native/operators/top/optical_flow_top_native.gd"
+    "file": "addons/gn_ext_native/operators/top/optical_flow_top_native.gd",
+    "inherits_from": "OpticalFlowTOP"
   },
   "ParticleStateTOPNative": {
     "class_name": "ParticleStateTOPNative",

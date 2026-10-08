@@ -18,7 +18,7 @@ func _init_parameters() -> void:
 		PackedStringArray(["Parse", "Generate"]), 0,
 		"Mode", "Parse JSON string to table, or generate JSON from table"))
 	add_parameter(GNParameter.create_string("json_string", "The json string string",
-		"JSON String", "JSON text to parse (Parse mode only)"))
+		"JSON String", "JSON text to parse (Parse mode only)", true))
 	add_parameter(GNParameter.create_bool("pretty", true,
 		"Pretty Print", "Use indented JSON output (Generate mode only)"))
 

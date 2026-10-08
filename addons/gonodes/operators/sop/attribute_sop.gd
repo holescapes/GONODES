@@ -8,7 +8,12 @@ extends GNSopBase
 
 func _init() -> void:
 	node_type = "attribute"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	# 1 = Expression. Constant / position / random stay still until inputs change.
+	var source: int = get_param_value("source")
+	time_dependent = source == 1 and expression_uses_time(str(get_param_value("expression")))
 
 
 func _init_ports() -> void:

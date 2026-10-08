@@ -2,13 +2,15 @@ class_name ImageSequenceIMG
 extends GNImgBase
 ## Plays a numbered image sequence as animated CPU Images.
 ##
-## Pure CPU — no SubViewport, no GPU upload.  Images are loaded via
-## ResourceLoader and cached as CPU Images in memory.
+## Images are loaded via GNResourceLoader and cached as Image in memory.
+## Supports PNG/JPG/WebP and KTX/KTX2 (ETC2 VRAM-compressed when present).
+## Chain → ImgToTOP for GPU; compressed frames upload without pixel decode on
+## GLES/mobile GPUs that support the format (e.g. ETC2 on Raspberry Pi).
 ##
 ## Images must follow a numbered naming convention:
 ##   prefix0001.png, prefix0002.png, ...  (auto-detected padding)
 ##
-## Chain → ImgToTOP if you need a GPU texture downstream.
+## Leave resolution at (0,0) for KTX2 sequences so frames stay compressed.
 
 ## Base path used for the last discovery scan — avoids re-scanning.
 var _loaded_base_path: String = ""
@@ -22,10 +24,23 @@ var _frame_cache: Dictionary = {}
 ## Current frame index (persisted across cooks for pause state).
 var _current_frame_idx: int = -1
 
+## Async per-frame load (when async_load ON and preload_all OFF).
+var _async_frame_idx: int = -1
+var _async_pending: bool = false
+var _async_result: Image = null
+var _async_mutex: Mutex = Mutex.new()
+var _async_thread: Thread = null
+
 
 func _init() -> void:
 	node_type = "image_sequence"
-	time_dependent = true
+	thread_safe = false
+
+
+func update_time_dependency() -> void:
+	var manual_idx: int = get_param_value("index")
+	var playing: bool = get_param_value("play")
+	time_dependent = playing and manual_idx < 0
 
 
 func _init_ports() -> void:
@@ -34,10 +49,11 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_file("file", "Path to the file",
-		PackedStringArray(["*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.tga"]),
+		PackedStringArray(["*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.tga",
+			"*.ktx", "*.ktx2"]),
 		"", "Path to ANY frame in the sequence. Auto-discovers all numbered siblings."))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(0, 0),
-		"Resolution", "Resize frames to this size. (0, 0) = native."))
+		"Resolution", "Resize frames to this size. (0, 0) = native. Resizing decompresses KTX2/ETC2."))
 	add_parameter(GNParameter.create_bool("play", true, "Play", "Play / pause"))
 	add_parameter(GNParameter.create_float("speed", 1.0, 0.01, 10.0, 0.1, "Playback speed multiplier",
 		"Playback speed multiplier (1.0 ≈ 30 fps)"))
@@ -48,6 +64,8 @@ func _init_parameters() -> void:
 		0, "", "Behavior at sequence end"))
 	add_parameter(GNParameter.create_bool("preload_all", false, "Enable preload all",
 		"Load all frames into memory at startup (faster playback, more RAM)"))
+	add_parameter(GNParameter.create_bool("async_load", false,
+		"Async Load", "Load each frame on a worker thread; hold last frame until ready."))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
@@ -60,9 +78,10 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var manual_idx: int = get_param_value("index")
 	var loop_mode: int = get_param_value("loop_mode")
 	var do_preload: bool = get_param_value("preload_all")
+	var async_load: bool = get_param_value("async_load")
 
 	# Discover sequence if file path changed.
-	_discover_sequence(file_path, do_preload)
+	_discover_sequence(file_path, do_preload and not async_load)
 
 	if _frame_paths.is_empty():
 		return out
@@ -82,14 +101,25 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	frame_idx = _apply_loop_mode(frame_idx, total_frames, loop_mode)
 	_current_frame_idx = frame_idx
 
-	# Load the frame as a CPU Image.
-	var img := _get_frame_image(frame_idx)
-	if img == null:
-		return out
+	_poll_async_frame()
 
-	# Resize if requested.
+	# Load the frame as a CPU Image.
+	var img := _get_frame_image(frame_idx, async_load and not do_preload)
+	if _is_async_pending():
+		if not time_dependent:
+			request_keep_dirty()
+		node_warning = "Loading frame…"
+	elif img == null:
+		return out
+	else:
+		node_warning = ""
+
+	# Resize if requested. VRAM-compressed frames must decompress first.
 	if res != Vector2i.ZERO and Vector2i(img.get_width(), img.get_height()) != res:
-		img = img.duplicate() as Image
+		if img.is_compressed():
+			img = GNResourceLoader.ensure_cpu_editable_image(img)
+		else:
+			img = img.duplicate() as Image
 		img.resize(res.x, res.y, Image.INTERPOLATE_BILINEAR)
 
 	out.set_image(img)
@@ -197,19 +227,93 @@ func _preload_all_frames() -> void:
 # ─── Frame Loading ────────────────────────────────────────────────────────────
 
 ## Returns a CPU Image for the given frame index. Caches on first load.
-func _get_frame_image(idx: int) -> Image:
+func _get_frame_image(idx: int, use_async: bool = false) -> Image:
 	if idx < 0 or idx >= _frame_paths.size():
 		return null
 	if _frame_cache.has(idx):
 		var _ret0 := _frame_cache[idx] as Image
 		return _ret0
 
+	if use_async:
+		if not _is_async_pending():
+			_start_async_frame_load(idx)
+		# Hold previous frame in cache if any
+		for prev in range(idx - 1, -1, -1):
+			if _frame_cache.has(prev):
+				return _frame_cache[prev] as Image
+		return null
+
 	var path: String = _frame_paths[idx]
 	var img := GNResourceLoader.load_image(path, project_dir)
-
 	if img != null:
 		_frame_cache[idx] = img
 	return img
+
+
+func _is_async_pending() -> bool:
+	_async_mutex.lock()
+	var pending: bool = _async_pending
+	_async_mutex.unlock()
+	return pending
+
+
+func _start_async_frame_load(idx: int) -> void:
+	if idx < 0 or idx >= _frame_paths.size():
+		return
+	_cancel_async_frame()
+	var path: String = _frame_paths[idx]
+	var proj: String = project_dir
+	_async_mutex.lock()
+	_async_frame_idx = idx
+	_async_pending = true
+	_async_result = null
+	_async_mutex.unlock()
+	_async_thread = Thread.new()
+	_async_thread.start(func():
+		var img: Image = GNResourceLoader.load_image(path, proj)
+		_async_mutex.lock()
+		_async_result = img
+		_async_pending = false
+		_async_mutex.unlock()
+	)
+
+
+func _poll_async_frame() -> void:
+	_async_mutex.lock()
+	var pending: bool = _async_pending
+	var result: Image = _async_result
+	var idx: int = _async_frame_idx
+	_async_mutex.unlock()
+	if pending:
+		return
+	if _async_thread != null and not _async_thread.is_alive():
+		_async_thread.wait_to_finish()
+		_async_thread = null
+	if idx < 0:
+		return
+	if result != null:
+		_frame_cache[idx] = result
+	_async_mutex.lock()
+	_async_frame_idx = -1
+	_async_result = null
+	_async_mutex.unlock()
+
+
+func _cancel_async_frame() -> void:
+	if _async_thread != null:
+		if _async_thread.is_alive():
+			_async_thread.wait_to_finish()
+		_async_thread = null
+	_async_mutex.lock()
+	_async_pending = false
+	_async_result = null
+	_async_frame_idx = -1
+	_async_mutex.unlock()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_cancel_async_frame()
 
 
 # ─── Loop Mode ────────────────────────────────────────────────────────────────

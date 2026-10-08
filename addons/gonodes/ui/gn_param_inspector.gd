@@ -16,6 +16,12 @@ var _row_order: Array = []
 ## Reference to the network (for expression context display).
 var network: GNNetwork = null
 
+## Cook engine for runtime side-effect ledger (set from gn_editor.gd).
+var cook_engine: GNCookEngine = null
+
+## Whether the dependency summary block is shown (from GNSettings via editor).
+var deps_panel_visible: bool = true
+
 ## Shared undo/redo stack (passed from the graph editor via gn_editor.gd).
 var undo_redo: UndoRedo = null
 
@@ -25,6 +31,16 @@ var _vbox: VBoxContainer = null
 var _header_label: Label = null
 var _family_bar: ColorRect = null
 var _status_label: Label = null
+
+## Dependency summary (reads / writes / wired inputs).
+var _deps_sep: HSeparator = null
+var _deps_box: VBoxContainer = null
+var _deps_reads_label: Label = null
+var _deps_writes_label: Label = null
+var _deps_runtime_out_label: Label = null
+var _deps_runtime_in_label: Label = null
+var _deps_wired_label: Label = null
+var _deps_referenced_label: Label = null
 
 
 ## Preset toolbar elements
@@ -92,6 +108,34 @@ func apply_side_panel_min_width() -> void:
 	_status_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	header_box.add_child(_status_label)
+
+	_deps_sep = HSeparator.new()
+	_deps_sep.visible = false
+	header_box.add_child(_deps_sep)
+
+	_deps_box = VBoxContainer.new()
+	_deps_box.visible = false
+	_deps_box.add_theme_constant_override("separation", 1)
+	header_box.add_child(_deps_box)
+
+	var deps_title := Label.new()
+	deps_title.text = "Dependencies"
+	deps_title.add_theme_font_size_override("font_size", 11)
+	deps_title.add_theme_color_override("font_color", Color(0.55, 0.75, 0.95))
+	_deps_box.add_child(deps_title)
+
+	_deps_reads_label = _make_deps_line_label()
+	_deps_writes_label = _make_deps_line_label()
+	_deps_runtime_out_label = _make_deps_line_label()
+	_deps_runtime_in_label = _make_deps_line_label()
+	_deps_wired_label = _make_deps_line_label()
+	_deps_referenced_label = _make_deps_line_label()
+	_deps_box.add_child(_deps_reads_label)
+	_deps_box.add_child(_deps_writes_label)
+	_deps_box.add_child(_deps_runtime_out_label)
+	_deps_box.add_child(_deps_runtime_in_label)
+	_deps_box.add_child(_deps_wired_label)
+	_deps_box.add_child(_deps_referenced_label)
 
 	# Preset toolbar. A flow keeps Copy / Paste / Reset / Presets at their label
 	# width and moves them to the next line when the column is narrower than
@@ -183,6 +227,21 @@ func apply_side_panel_min_width() -> void:
 # Public API
 # ═══════════════════════════════════════════════════════════════════════════════
 
+## Toggle dependency panel visibility (brokered from gn_editor / preferences).
+func apply_dependency_settings(visible: bool) -> void:
+	deps_panel_visible = visible
+	_refresh_dependency_panel()
+
+
+func _make_deps_line_label() -> Label:
+	var lbl := Label.new()
+	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_color_override("font_color", Color(0.72, 0.72, 0.72))
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl.visible = false
+	return lbl
+
+
 ## Inspects a node by ID. Looks up in the bound network.
 func inspect_node(node_id: String) -> void:
 	if network == null:
@@ -202,6 +261,7 @@ func inspect(node: GNNode) -> void:
 		# parameter fields editable.
 		_header_label.text = "%s" % node.id
 		_apply_lock_state()
+		_refresh_dependency_panel()
 		return
 
 	_clear_rows()
@@ -300,8 +360,110 @@ func inspect(node: GNNode) -> void:
 	GNLogger.debug("Inspector", "Inspecting '%s' — %d parameters" % [
 		node.id, param_names.size()])
 
+	_refresh_dependency_panel()
+
 	# Populate full status (cook time, resolution) immediately from cached data
 	_on_node_cooked(node.id)
+
+
+func _refresh_dependency_panel() -> void:
+	var show_panel := deps_panel_visible and _current_node != null and network != null
+	if _deps_sep:
+		_deps_sep.visible = show_panel
+	if _deps_box:
+		_deps_box.visible = show_panel
+	if not show_panel:
+		for lbl in [_deps_reads_label, _deps_writes_label, _deps_runtime_out_label,
+				_deps_runtime_in_label, _deps_wired_label, _deps_referenced_label]:
+			if lbl:
+				lbl.visible = false
+		return
+
+	var node_id := _current_node.id
+	var summary: Dictionary = {}
+	if cook_engine != null:
+		summary = cook_engine.get_dependency_summary(node_id)
+	else:
+		var scan: Dictionary = GNReferenceScanner.scan_node(_current_node)
+		summary = {
+			"reads": scan["reads"],
+			"static_writes": scan["writes"],
+			"writes_to": [],
+			"written_by": [],
+		}
+
+	_set_deps_line(_deps_reads_label, "Reads",
+			_format_id_list(summary.get("reads", [])))
+	_set_deps_line(_deps_writes_label, "Writes (static)",
+			_format_write_list(summary.get("static_writes", [])))
+	_set_deps_line(_deps_runtime_out_label, "Writes (runtime)",
+			_format_runtime_list(summary.get("writes_to", [])))
+	_set_deps_line(_deps_runtime_in_label, "Written by (runtime)",
+			_format_runtime_list(summary.get("written_by", []), true))
+	_set_deps_line(_deps_wired_label, "Wired inputs",
+			_format_wired_inputs(node_id))
+	_set_deps_line(_deps_referenced_label, "Referenced by",
+			_format_id_list(GNReferenceScanner.find_readers_of(network, node_id)))
+
+
+func _set_deps_line(lbl: Label, prefix: String, body: String) -> void:
+	if lbl == null:
+		return
+	if body.is_empty():
+		lbl.visible = false
+	else:
+		lbl.text = "%s: %s" % [prefix, body]
+		lbl.visible = true
+
+
+func _format_id_list(ids: Array) -> String:
+	if ids.is_empty():
+		return ""
+	var parts: PackedStringArray = []
+	for id in ids:
+		parts.append(str(id))
+	return ", ".join(parts)
+
+
+func _format_write_list(entries: Array) -> String:
+	if entries.is_empty():
+		return ""
+	var parts: PackedStringArray = []
+	for entry in entries:
+		if entry is Dictionary:
+			var detail: String = str(entry.get("detail", entry.get("target_id", "")))
+			parts.append(detail)
+	return ", ".join(parts)
+
+
+func _format_runtime_list(recs: Array, show_writer: bool = false) -> String:
+	if recs.is_empty():
+		return ""
+	var parts: PackedStringArray = []
+	for rec in recs:
+		if rec is Dictionary:
+			var who: String = str(rec.get("writer_id" if show_writer else "target_id", ""))
+			var param: String = str(rec.get("param", ""))
+			var frame: int = int(rec.get("frame", 0))
+			var bit := who
+			if not param.is_empty():
+				bit += ".%s" % param
+			bit += " F%d" % frame
+			parts.append(bit)
+	return ", ".join(parts)
+
+
+func _format_wired_inputs(node_id: String) -> String:
+	if network == null:
+		return ""
+	var conns: Array = network.get_input_connections(node_id)
+	if conns.is_empty():
+		return ""
+	var parts: PackedStringArray = []
+	for conn in conns:
+		if conn is GNConnection:
+			parts.append("%s → in%d" % [conn.from_node, conn.to_port])
+	return ", ".join(parts)
 
 
 ## Clears the inspector (no node selected).
@@ -330,6 +492,8 @@ func _on_parameters_changed(node_id: String) -> void:
 func _on_node_cooked(node_id: String) -> void:
 	if _current_node == null or _current_node.id != node_id:
 		return
+
+	_refresh_dependency_panel()
 
 	# Sync param row visibility (operators may show/hide params based on mode)
 	for p_name in _param_rows:
@@ -456,6 +620,7 @@ func _show_empty_state() -> void:
 	_header_label.text = "Inspector"
 	_status_label.text = "No node selected"
 	_preset_bar.visible = false
+	_refresh_dependency_panel()
 
 
 ## Enables or disables parameter rows based on the node's locked state.

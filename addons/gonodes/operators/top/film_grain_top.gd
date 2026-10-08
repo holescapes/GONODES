@@ -5,7 +5,16 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "film_grain"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	if float(get_param_value("intensity")) <= 0.0:
+		time_dependent = false
+		return
+	if not bool(get_param_value("manual_time")):
+		time_dependent = true
+		return
+	time_dependent = param_expression_uses_time("time")
 
 
 func _init_ports() -> void:

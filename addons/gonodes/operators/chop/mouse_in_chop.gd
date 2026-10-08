@@ -3,9 +3,8 @@ extends GNChopBase
 ## Outputs mouse position, movement delta, button states, and scroll as CHOP
 ## channels.  Position can be raw pixels or normalized 0-1 by viewport size.
 ##
-## The optional "window" parameter binds this CHOP to a specific WindowOUT
-## by node name — reading position/buttons only from that window.
-## When empty, reads from the global Input singleton (all windows).
+## The Window menu binds this CHOP to a WindowOUT by node name. (none) reads
+## the global Input singleton.
 
 ## Previous mouse position for computing per-frame delta.
 var _prev_pos: Vector2 = Vector2.ZERO
@@ -40,8 +39,8 @@ func _init_parameters() -> void:
 		"Buttons", "Output mouse button channels (lmb, rmb, mmb)"))
 	add_parameter(GNParameter.create_bool("scroll", true,
 		"Scroll", "Output accumulated scroll wheel channel"))
-	add_parameter(GNParameter.create_string("window", "Window ID to capture from (0 = main)",
-		"Window", "WindowOUT node name to read from (empty = global)"))
+	add_parameter(GNParameter.create_node_ref("window", GNFamily.Type.OUT,
+		"Window", "WindowOUT to read. (none) uses global input.", "window"))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -58,6 +57,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	# Resolve target WindowOUT (null = global Input)
 	var win_out: WindowOUT = null
+	node_warning = ""
 	if not window_id.is_empty():
 		win_out = WindowOUT.get_window_by_id(window_id)
 		if win_out == null:
@@ -65,7 +65,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	# Update active window name
 	if win_out != null:
-		active_window_name = win_out.get_param_value("title") if win_out._input_has_focus else ""
+		active_window_name = win_out.get_param_value("title") if win_out.output_window_focused() else ""
 	else:
 		var last_id: String = WindowOUT._last_focused_window
 		var last_win: WindowOUT = WindowOUT.get_window_by_id(last_id) if not last_id.is_empty() else null
@@ -76,7 +76,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	var vp_size: Vector2 = Vector2.ONE
 
 	if win_out != null:
-		pos = win_out._input_mouse_pos
+		pos = win_out.pointer_local()
 		vp_size = win_out._input_window_size
 		if vp_size.x == 0.0:
 			vp_size.x = 1.0
@@ -119,9 +119,11 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# ── Buttons ────────────────────────────────────────────────────────────
 	if output_buttons:
 		if win_out != null:
-			out.set_single_value("lmb", 1.0 if win_out._input_mouse_buttons.get(MOUSE_BUTTON_LEFT, false) else 0.0)
-			out.set_single_value("rmb", 1.0 if win_out._input_mouse_buttons.get(MOUSE_BUTTON_RIGHT, false) else 0.0)
-			out.set_single_value("mmb", 1.0 if win_out._input_mouse_buttons.get(MOUSE_BUTTON_MIDDLE, false) else 0.0)
+			var over := win_out.pointer_over_window()
+			out.set_single_value("lmb", 1.0 if win_out.button_held(MOUSE_BUTTON_LEFT) or (over and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) else 0.0)
+			out.set_single_value("rmb", 1.0 if win_out.button_held(MOUSE_BUTTON_RIGHT) or (over and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)) else 0.0)
+			out.set_single_value("mmb", 1.0 if win_out.button_held(MOUSE_BUTTON_MIDDLE) or (over and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE)) else 0.0)
+			win_out.consume_button_latch()
 		else:
 			out.set_single_value("lmb", 1.0 if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) else 0.0)
 			out.set_single_value("rmb", 1.0 if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT) else 0.0)

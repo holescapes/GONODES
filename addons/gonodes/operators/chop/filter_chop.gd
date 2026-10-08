@@ -9,7 +9,10 @@ var _prev_values: Dictionary = {}  # channel_name -> float (state for IIR)
 
 func _init() -> void:
 	node_type = "filter"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	time_dependent = _temporal_moving
 
 
 func _init_ports() -> void:
@@ -37,6 +40,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	if do_reset:
 		_prev_values.clear()
+		_temporal_end_state.clear()
 
 	if _cached_channel_data == null:
 		_cached_channel_data = GNChannelData.new()
@@ -70,4 +74,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_prev_values[ch_name] = prev
 		_cached_channel_data.set_channel(ch_name, out_samples)
 
+	var moved := false
+	for ch_name in _prev_values:
+		if _temporal_sample_moved(ch_name, float(_prev_values[ch_name])):
+			moved = true
+	_finish_temporal_cook(moved)
 	return _cached_channel_data

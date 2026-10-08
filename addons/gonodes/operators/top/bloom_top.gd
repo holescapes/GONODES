@@ -129,14 +129,16 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 ## Override to schedule a second cook whenever the VP pipeline is rebuilt.
 ## On the first cook after creation/rebuild, the composite VP has never rendered
-## so downstream TOPs read an empty ViewportTexture.  A deferred mark_dirty()
+## so downstream TOPs read an empty ViewportTexture.  keep_dirty_after_cook
 ## forces a second cook on the next frame — by then the VPs have rendered and
 ## the downstream can sample valid content.
 func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 	var result := super.execute_cook(inputs, frame)
 	if _pipeline_dirty:
 		_pipeline_dirty = false
-		call_deferred("mark_dirty")
+		# super already cleared dirty; silent re-queue (same as keep_dirty_after_cook)
+		dirty = true
+		_last_cook_input_hash = -1
 	return result
 
 

@@ -11,7 +11,11 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "parameter"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	var target := referenced_node("node_path")
+	time_dependent = target != null and target.time_dependent
 
 
 func _init_ports() -> void:

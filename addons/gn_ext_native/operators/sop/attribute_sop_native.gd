@@ -7,10 +7,14 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	node_type = "attribute_native"
-	time_dependent = true
 	node_description = "Create/modify per-vertex point attributes — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeAttributeSop"):
 		_processor = ClassDB.instantiate("GNNativeAttributeSop")
+
+
+func update_time_dependency() -> void:
+	var source: int = get_param_value("source")
+	time_dependent = source == 1 and expression_uses_time(str(get_param_value("expression")))
 
 
 func _init_ports() -> void:

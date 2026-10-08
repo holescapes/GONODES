@@ -7,7 +7,11 @@ extends GNDatBase
 
 func _init() -> void:
 	node_type = "parameter"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	var target := referenced_node("node_id")
+	time_dependent = target != null and target.time_dependent
 
 
 func _init_ports() -> void:
@@ -15,7 +19,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("node_id", "The node id string",
+	add_parameter(GNParameter.create_node_ref("node_id", -1,
 		"Node", "ID of the node whose parameters to expose"))
 	add_parameter(GNParameter.create_bool("show_defaults", true,
 		"Show Defaults", "Include default values column"))

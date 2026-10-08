@@ -8,15 +8,13 @@ extends GNChopBase
 func _init() -> void:
 	node_type = "noise"
 
+
 ## Internal time accumulator for continuous noise evolution.
 var _time_accum: float = 0.0
 
 
-## Auto-set time_dependent based on the speed parameter.
-func _pre_cook(_delta: float) -> void:
+func update_time_dependency() -> void:
 	time_dependent = get_param_value("speed") != 0.0
-	if time_dependent:
-		mark_dirty()
 
 
 func _init_ports() -> void:

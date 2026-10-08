@@ -60,6 +60,43 @@ func test_texture_save_out_instantiate() -> void:
 	GNTestAssert.assert_eq(node.node_type, "texture_save", "node_type")
 
 
+func test_texture_save_out_pulse_once_mode() -> void:
+	var node := _make_node(TextureSaveOUT.new(), "texsave1") as TextureSaveOUT
+	GNTestAssert.assert_eq(node.get_param_value("mode"), 0, "default Continuous")
+	node.set_param_value("mode", 1)  # Pulse Once
+	GNTestAssert.assert_eq(node.get_param_value("mode"), 1, "Pulse Once")
+	# Build a CPU ImageTexture so cook path can run without a SubViewport
+	var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	img.fill(Color.RED)
+	var tex := ImageTexture.create_from_image(img)
+	var td := GNTextureData.new()
+	td.texture = tex
+	td.resolution = Vector2i(8, 8)
+	var inputs: Array[GNData] = [td]
+	node.set_param_value("active", false)
+	node.set_param_value("auto_number", false)
+	node.set_param_value("file_path", OS.get_cache_dir().path_join("gonodes_pulse_test"))
+	node.execute_cook(inputs, _engine.frame_count)
+	node.set_param_value("active", true)
+	node.execute_cook(inputs, _engine.frame_count)
+	# Held active: pulse-once must not re-enqueue every cook
+	var queued_after_rise: int = node._total_queued
+	node.execute_cook(inputs, _engine.frame_count)
+	node.execute_cook(inputs, _engine.frame_count)
+	GNTestAssert.assert_eq(node._total_queued, queued_after_rise, "no extra pulse enqueues")
+	node.set_param_value("active", false)
+	node.execute_cook(inputs, _engine.frame_count)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FileCopyOUT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_file_copy_out_instantiate_in_suite() -> void:
+	var node := _make_node(FileCopyOUT.new(), "copy1")
+	GNTestAssert.assert_eq(node.node_type, "file_copy", "node_type")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # TableSaveOUT
 # ═══════════════════════════════════════════════════════════════════════════════

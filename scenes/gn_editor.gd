@@ -345,6 +345,9 @@ func _setup_debug_panel() -> void:
 	if graph_editor.debug_overlay != null:
 		graph_editor.debug_overlay.cook_engine = cook_engine
 		graph_editor.debug_overlay.network = network
+	graph_editor.cook_engine_ref = cook_engine
+	if inspector != null:
+		inspector.cook_engine = cook_engine
 
 
 ## Creates the export compatibility report panel (docked below graph, hidden by default).
@@ -492,12 +495,12 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	# Update docked viewer panel with selected node's output (any family)
 	if not _viewer_node_id.is_empty() and viewer_panel != null:
 		var view_node: GNNode = network.get_node_by_id(_viewer_node_id)
-		if view_node != null:
-			viewer_panel.update_from_node(view_node)
-		else:
+		if view_node == null:
 			viewer_panel.clear()
+		elif view_node.cooked_this_frame:
+			viewer_panel.update_from_node(view_node)
 
-	# Update all floating viewer windows
+	# Floating viewers follow the same rule. Opening one refreshes immediately.
 	_update_viewer_windows()
 
 	# Build info text
@@ -573,6 +576,10 @@ func _on_setting_changed(key: String, value: Variant) -> void:
 		_configure_auto_save_timer(value as int)
 	elif key == "log_to_file":
 		_configure_log_file(value as bool)
+	elif key.begins_with("graph_ref_"):
+		graph_editor.apply_reference_settings()
+	elif key == "graph_inspector_deps_visible" and inspector != null:
+		inspector.apply_dependency_settings(value as bool)
 
 
 ## Called when graph_editor cycles wire style via W key — persist the change.
@@ -585,6 +592,10 @@ func _on_wire_style_cycled(idx: int) -> void:
 func _push_initial_preferences() -> void:
 	graph_editor.set_wire_style(GNSettings.get_value("wire_style", 0))
 	graph_editor.confirm_on_delete = GNSettings.get_value("confirm_on_delete", false)
+	graph_editor.apply_reference_settings()
+	if inspector != null:
+		inspector.apply_dependency_settings(
+				GNSettings.get_value("graph_inspector_deps_visible", true))
 	if viewer_panel:
 		viewer_panel.set_bg_color(GNSettings.get_value("viewer_bg_color",
 				Color(0.06, 0.06, 0.08)))
@@ -910,6 +921,9 @@ func _connect_floating_viewer_ports(vw: GNViewerWindow) -> void:
 	var panel: GNViewerPanel = vw.get_viewer_panel()
 	if panel != null and not panel.port_selection_changed.is_connected(_on_floating_viewer_port_selected):
 		panel.port_selection_changed.connect(_on_floating_viewer_port_selected)
+	var pinned: GNNode = network.get_node_by_id(vw.node_id) if network else null
+	if pinned != null:
+		vw.update_from_node(pinned)
 
 
 ## Called when a floating viewer window is closed by the user.
@@ -924,7 +938,8 @@ func _update_viewer_windows() -> void:
 		if not is_instance_valid(vw):
 			continue
 		var node: GNNode = network.get_node_by_id(vw.node_id)
-		vw.update_from_node(node)
+		if node != null and node.cooked_this_frame:
+			vw.update_from_node(node)
 
 
 ## Closes all floating viewer windows.

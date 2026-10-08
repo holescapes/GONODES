@@ -7,10 +7,14 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	node_type = "noise_native"
-	time_dependent = true
 	node_description = "Displace vertices with 3D noise — native C++ accelerated."
 	if ClassDB.class_exists("GNNativeNoiseSop"):
 		_processor = ClassDB.instantiate("GNNativeNoiseSop")
+
+
+func update_time_dependency() -> void:
+	time_dependent = float(get_param_value("speed")) > 0.0 \
+			or param_expression_uses_time("speed")
 
 
 func _init_ports() -> void:

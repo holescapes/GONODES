@@ -5,7 +5,11 @@ extends GNTopBase
 
 func _init() -> void:
 	node_type = "scan_line"
-	time_dependent = true
+
+
+## Jitter is the only term that advances with elapsed time.
+func update_time_dependency() -> void:
+	time_dependent = float(get_param_value("jitter")) > 0.0
 
 
 func _init_ports() -> void:

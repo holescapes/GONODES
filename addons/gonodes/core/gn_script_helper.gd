@@ -102,10 +102,28 @@ func sop(id: String) -> Variant:
 		return null
 	return _engine.sop(id)
 
+## DAT access:
+##   dat("table1")              → GNTableData (first DAT port)
+##   dat("table1", "out")       → by port name
+##   dat("table1", row, col)    → cell string (same as cell())
 func dat(id: String, row = null, col = null) -> Variant:
 	if _engine == null:
 		return null
-	return _engine.dat(id, row, col)
+	if col != null:
+		return _engine.cell(id, row, col)
+	if row != null:
+		return _engine.dat(id, row)
+	return _engine.dat(id)
+
+func cell(id: String, row = null, col = null) -> String:
+	if _engine == null:
+		return ""
+	return _engine.cell(id, row, col)
+
+func ncells(id: String) -> int:
+	if _engine == null:
+		return 0
+	return _engine.ncells(id)
 
 func set_par(name_or_node: String, param_or_value = null, value_arg = null) -> bool:
 	if _engine == null:
@@ -476,8 +494,14 @@ func run_cook(node: GNNode, inputs: Array[GNData], output: Variant,
 	_instance.dt = engine.current_delta
 	_instance._engine = engine
 
+	if engine is GNCookEngine:
+		(engine as GNCookEngine).begin_side_effect_scope(node.id)
+
 	# Run cook()
 	var cook_err := _safe_call(_instance, "cook", node)
+
+	if engine is GNCookEngine:
+		(engine as GNCookEngine).end_side_effect_scope()
 	if not cook_err.is_empty():
 		GNLogger.error("ScriptHelper", "'%s' cook() error: %s" % [node.id, cook_err])
 		return false

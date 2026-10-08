@@ -8,12 +8,9 @@ func _init() -> void:
 	node_type = "noise"
 
 
-## Auto-set time_dependent based on the speed parameter.
 ## When speed == 0 the noise is static — no reason to cook every frame.
-func _pre_cook(_delta: float) -> void:
+func update_time_dependency() -> void:
 	time_dependent = get_param_value("speed") != 0.0
-	if time_dependent:
-		mark_dirty()
 
 
 func _init_parameters() -> void:

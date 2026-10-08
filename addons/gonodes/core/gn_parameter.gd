@@ -107,6 +107,10 @@ var file_browse_mode: int = FileBrowseMode.OPEN_FILE
 ## read the value, act on it, then reset it to false (one-shot pulse).
 var is_pulse: bool = false
 
+## When true, STRING parameters use a multi-line TextEdit in the inspector
+## instead of a single-line LineEdit (e.g. TextTOP text, TextDAT, JSON body).
+var is_multiline: bool = false
+
 ## Optional display group tag.  Consecutive parameters sharing the same
 ## non-empty display_group are rendered side-by-side in one inspector row.
 @export var display_group: String = ""
@@ -130,6 +134,10 @@ var visibility_rule: Dictionary = {}
 ## (no operator override needed) and by the inspector UI to show a filtered
 ## node-picker dropdown.
 var node_ref_family: int = -2
+
+## When non-empty, the node picker only lists nodes of this node_type
+## (for example "window"), in addition to [member node_ref_family].
+var node_ref_type: String = ""
 
 # ─── Expression Mode (MVP) ────────────────────────────────────────────────────
 
@@ -373,9 +381,12 @@ static func create_color(p_name: String, p_default: Color,
 
 
 ## Factory method to create a STRING parameter.
+## [param p_multiline] — when true, the inspector shows a multi-line TextEdit
+## instead of a single-line LineEdit (newlines are preserved).
 static func create_string(p_name: String, p_default: String,
 		p_label: String = "",
-		p_description: String = "") -> GNParameter:
+		p_description: String = "",
+		p_multiline: bool = false) -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
@@ -385,6 +396,7 @@ static func create_string(p_name: String, p_default: String,
 	param.value = p_default
 	param.fallback_value = p_default
 	param.resolved_value = p_default
+	param.is_multiline = p_multiline
 	return param
 
 
@@ -394,9 +406,11 @@ static func create_string(p_name: String, p_default: String,
 ## needed) and by the inspector UI (filtered node-picker dropdown).
 ## [param p_ref_family] is a GNFamily.Type value for the expected target
 ## family, or -1 for "any family".
+## [param p_node_type] limits the picker to one operator type, such as "window".
 static func create_node_ref(p_name: String, p_ref_family: int,
 		p_label: String = "",
-		p_description: String = "") -> GNParameter:
+		p_description: String = "",
+		p_node_type: String = "") -> GNParameter:
 	var param := GNParameter.new()
 	param.param_name = p_name
 	param.label = p_label if not p_label.is_empty() else p_name.capitalize()
@@ -407,6 +421,7 @@ static func create_node_ref(p_name: String, p_ref_family: int,
 	param.fallback_value = ""
 	param.resolved_value = ""
 	param.node_ref_family = p_ref_family
+	param.node_ref_type = p_node_type
 	return param
 
 
@@ -1245,6 +1260,10 @@ func to_dict() -> Dictionary:
 	if is_pulse:
 		d["is_pulse"] = true
 
+	# Persist multiline flag (inspector TextEdit vs LineEdit)
+	if is_multiline:
+		d["is_multiline"] = true
+
 	return d
 
 
@@ -1294,3 +1313,7 @@ func from_dict(d: Dictionary) -> void:
 	# Restore pulse flag
 	if d.has("is_pulse"):
 		is_pulse = d["is_pulse"]
+
+	# Restore multiline flag
+	if d.has("is_multiline"):
+		is_multiline = d["is_multiline"]

@@ -24,7 +24,18 @@ var _pending_write_vp: SubViewport = null
 
 func _init() -> void:
 	node_type = "time_machine"
-	time_dependent = true
+
+
+## Speed and ramp advance with time. Position mode only moves when the
+## scrub or the input frame changes.
+func update_time_dependency() -> void:
+	var mode: int = get_param_value("mode")
+	if mode == MODE_POSITION:
+		time_dependent = false
+	elif mode == MODE_SPEED:
+		time_dependent = float(get_param_value("speed")) != 0.0
+	else:
+		time_dependent = true
 
 
 func _init_ports() -> void:

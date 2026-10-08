@@ -38,6 +38,11 @@ static func _format_name(fmt: Image.Format) -> String:
 		Image.FORMAT_RGBAH: return "RGBAH"
 		Image.FORMAT_RF: return "RF"
 		Image.FORMAT_RGF: return "RGF"
+		Image.FORMAT_DXT1: return "DXT1"
+		Image.FORMAT_DXT5: return "DXT5"
+		Image.FORMAT_ETC2_RGB8: return "ETC2_RGB8"
+		Image.FORMAT_ETC2_RGBA8: return "ETC2_RGBA8"
+		Image.FORMAT_ETC2_RGB8A1: return "ETC2_RGB8A1"
 		_: return "fmt:%d" % fmt
 
 

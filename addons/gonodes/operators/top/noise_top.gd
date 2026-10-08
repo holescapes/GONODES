@@ -15,7 +15,6 @@ var _shader: Shader = null
 
 func _init() -> void:
 	node_type = "noise"
-	time_dependent = true
 
 
 func _init_ports() -> void:
@@ -36,6 +35,12 @@ func _init_parameters() -> void:
 	add_parameter(GNParameter.create_float("gain", 0.5, 0.0, 1.0, 0.01, "Gain", "Amplitude multiplier per octave"))
 	add_parameter(GNParameter.create_bool("periodic", false, "Periodic", "Seamless tiling — output tiles perfectly when repeated"))
 	add_parameter(GNParameter.create_float("tile_size", 4.0, 1.0, 64.0, 0.1, "Tile Size", "Tile period in noise-space units (periodic mode)"))
+
+
+## The shader samples a constant time_offset. Live only while that param's
+## expression reads cook time (there is no separate anim rate).
+func update_time_dependency() -> void:
+	time_dependent = param_expression_uses_time("time_offset")
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:

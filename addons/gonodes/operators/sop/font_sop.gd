@@ -14,7 +14,7 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_string("text", "Hello",
-		"Text", "Text string to generate"))
+		"Text", "Text string to generate (supports multiple lines)", true))
 	add_parameter(GNParameter.create_float("font_size", 1.0, 0.1, 100.0, 0.1,
 		"Font Size", "Size of the text"))
 	add_parameter(GNParameter.create_float("depth", 0.1, 0.0, 10.0, 0.01,

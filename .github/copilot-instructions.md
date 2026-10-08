@@ -4,11 +4,11 @@
 > Cursor reads `.cursor/rules/gonodes.mdc`. Curated memories: `AI_MEMORY.md`.
 
 > Node-based visual programming framework on Godot 4.7 for real-time visual art.
-> 585 operators, 15 families (469 core + 116 extension), 131 native C++ accelerated variants, 25 extension folders (`addons/gn_ext_*/`).
+> 587 operators, 15 families (471 core + 116 extension), 131 native C++ accelerated variants, 25 extension folders (`addons/gn_ext_*/`).
 
 ## Architecture
 
-- **Families:** TOP (138), IMG (41), CHOP (107), DAT (51), SOP (85), POP (12), VOL (12), COMP (27), MAT (12), OUT (12), UI (33), SDF (29 — extension-defined), FIX (8 — extension-defined), SCRIPT (3), NET (15)
+- **Families:** TOP (139), IMG (41), CHOP (107), DAT (51), SOP (85), POP (12), VOL (12), COMP (27), MAT (12), OUT (13), UI (33), SDF (29 — extension-defined), FIX (8 — extension-defined), SCRIPT (3), NET (15)
 - **Cook engine:** Demand-driven DAG. Only nodes feeding active sinks cook. `time_dependent = true` means cook every frame.
 - **Data flow:** Each family has a `GNData` subclass (`GNTextureData`, `GNChannelData`, `GNGeoData`, `GNTableData`, `GNImageData`, etc.)
 - **Base classes:** `GNTopBase`, `GNImgBase`, `GNChopBase`, `GNDatBase`, `GNSopBase`, `GNCompBase`, `GNMatBase`, `GNPopBase`, `GNVolBase`, `GNUiBase`, `GNSdfBase`

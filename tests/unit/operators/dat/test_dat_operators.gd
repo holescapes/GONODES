@@ -412,6 +412,46 @@ func test_folder_dat_instantiate() -> void:
 	GNTestAssert.assert_eq(node.node_type, "folder", "node_type")
 
 
+func test_folder_dat_lists_and_sorts() -> void:
+	var tmp := OS.get_cache_dir().path_join("gonodes_folder_dat_%d" % Time.get_ticks_msec())
+	DirAccess.make_dir_recursive_absolute(tmp)
+	for name in ["c_last.png", "a_first.png", "b_mid.txt"]:
+		var f := FileAccess.open(tmp.path_join(name), FileAccess.WRITE)
+		if f != null:
+			f.store_string(name)
+			f.close()
+	var node := _make_node(FolderDAT.new(), "folder1")
+	node.set_param_value("path", tmp)
+	node.set_param_value("filter", "*.png")
+	node.set_param_value("include_dirs", false)
+	node.set_param_value("sort", 0)  # Name
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(out is GNTableData, "table out")
+	if out is GNTableData:
+		var tbl := out as GNTableData
+		GNTestAssert.assert_eq(tbl.num_rows(), 2, "png filter count")
+		if tbl.num_rows() >= 2:
+			GNTestAssert.assert_eq(tbl.cell_at(0, 0), "a_first.png", "name sort first")
+			GNTestAssert.assert_eq(tbl.cell_at(1, 0), "c_last.png", "name sort second")
+		# size column uses length, not full byte load — non-zero for written files
+		if tbl.num_rows() >= 1:
+			GNTestAssert.assert_true(int(tbl.cell_at(0, 3)) > 0, "size > 0")
+		# headers include modified
+		var headers: PackedStringArray = tbl.get_headers()
+		GNTestAssert.assert_true(Array(headers).has("modified"), "modified column present")
+	# cleanup
+	var d := DirAccess.open(tmp)
+	if d != null:
+		d.list_dir_begin()
+		var fn := d.get_next()
+		while fn != "":
+			if fn != "." and fn != "..":
+				d.remove(fn)
+			fn = d.get_next()
+		d.list_dir_end()
+	DirAccess.remove_absolute(tmp)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # ErrorDAT
 # ═══════════════════════════════════════════════════════════════════════════════

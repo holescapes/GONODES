@@ -37,10 +37,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 func _resolve_remote(target_id: String) -> GNData:
 	if _network_cache == null or not is_instance_valid(_network_cache):
-		var p = get_parent()
-		while p != null and not (p is GNNetwork):
-			p = p.get_parent()
-		_network_cache = p as GNNetwork
+		_network_cache = get_owning_network()
 	if _network_cache == null:
 		return null
 	var target: GNNode = _network_cache.get_node_by_id(target_id)

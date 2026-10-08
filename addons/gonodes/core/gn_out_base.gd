@@ -22,6 +22,13 @@ func _init() -> void:
 	is_sink = true
 
 
+## Ask the cook engine to re-queue this sink next frame (async readback, etc.).
+## Uses [method Object.set] so this compiles even if the class cache has not
+## yet picked up [member GNNode.keep_dirty_after_cook].
+func request_keep_dirty() -> void:
+	set("keep_dirty_after_cook", true)
+
+
 ## Ensures family and sink flag are set even when subclass _init() doesn't call super().
 func initialize(p_id: String) -> void:
 	if family != GNFamily.Type.NET:

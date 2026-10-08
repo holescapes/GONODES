@@ -1,0 +1,74 @@
+{
+  "annotations": [
+    {
+      "color": [1.0, 1.0, 1.0, 0.8],
+      "id": "ann_1",
+      "position": [-80.0, -180.0],
+      "size": [560.0, 170.0],
+      "text": "RichText TOP — Advanced\n\nTransparent background + margin for HUD-style overlays.\nWire Over a CompositeTOP in real patches.\nUsing: bg alpha 0, margin, shadow, left/top align.",
+      "type": "note"
+    }
+  ],
+  "app_version": "0.1.0-beta",
+  "connections": [
+    {"from": "noise1", "from_port": 0, "to": "comp1", "to_port": 0},
+    {"from": "richtext1", "from_port": 0, "to": "comp1", "to_port": 1},
+    {"from": "comp1", "from_port": 0, "to": "window1", "to_port": 0}
+  ],
+  "generator": "GONODES",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseTOP",
+      "position": [80.0, 80.0],
+      "parameters": {
+        "resolution": {
+          "value": {"_type": "Vector2i", "x": 512, "y": 512}
+        }
+      }
+    },
+    "richtext1": {
+      "type": "RichTextTOP",
+      "position": [80.0, 280.0],
+      "parameters": {
+        "text": {
+          "value": "[b]Archive[/b] [color=#ffdd88]12[/color]\n[font_size=22]Attention  3.4s[/font_size]"
+        },
+        "bbcode": {"value": true},
+        "font_size": {"value": 32},
+        "align_h": {"value": 0},
+        "align_v": {"value": 0},
+        "shadow": {"value": true},
+        "margin": {
+          "value": {"_type": "Vector2i", "x": 32, "y": 40}
+        },
+        "bg_color": {
+          "value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 0.0, "a": 0.0}
+        },
+        "resolution": {
+          "value": {"_type": "Vector2i", "x": 512, "y": 512}
+        }
+      }
+    },
+    "comp1": {
+      "type": "CompositeTOP",
+      "position": [360.0, 180.0],
+      "parameters": {
+        "operation": {"value": 2, "enum_label": "Over"},
+        "opacity": {"value": 1.0}
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [620.0, 180.0],
+      "parameters": {
+        "open": {"value": true},
+        "resolution": {
+          "value": {"_type": "Vector2i", "x": 512, "y": 512}
+        },
+        "title": {"value": "RichTextTOP Advanced"}
+      }
+    }
+  },
+  "version": "1.0.0",
+  "viewport": {"scroll_x": 0.0, "scroll_y": 0.0, "zoom": 0.65}
+}

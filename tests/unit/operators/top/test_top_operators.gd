@@ -84,6 +84,16 @@ func test_constant_top_resolution() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# TouchPaintTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_touch_paint_top_instantiate() -> void:
+	var node := _make_node(TouchPaintTOP.new(), "paint1")
+	GNTestAssert.assert_eq(node.node_type, "touch_paint", "node_type")
+	GNTestAssert.assert_true(node.time_dependent, "time_dependent")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # NoiseTOP
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -96,7 +106,14 @@ func test_noise_top_produces_texture() -> void:
 
 func test_noise_top_time_dependent() -> void:
 	var node := _make_node(NoiseTOP.new(), "noise1")
-	GNTestAssert.assert_true(node.time_dependent, "NoiseTOP is time-dependent")
+	node.update_time_dependency()
+	GNTestAssert.assert_false(node.time_dependent,
+			"constant time_offset is a still frame")
+	var p: GNParameter = node.parameters["time_offset"]
+	p.set_expression("time * 0.25")
+	node.update_time_dependency()
+	GNTestAssert.assert_true(node.time_dependent,
+			"time_offset expression that reads time is time-dependent")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -182,6 +199,18 @@ func test_text_top_produces_texture() -> void:
 	node.set_param_value("resolution", Vector2i(64, 64))
 	var out := _cook_no_input(node)
 	GNTestAssert.assert_not_null(out, "TextTOP output")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RichTextTOP
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_rich_text_top_produces_texture() -> void:
+	var node := _make_node(RichTextTOP.new(), "richtext1")
+	node.set_param_value("resolution", Vector2i(64, 64))
+	node.set_param_value("text", "[b]Hi[/b] [color=#ff0]there[/color]")
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_not_null(out, "RichTextTOP output")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

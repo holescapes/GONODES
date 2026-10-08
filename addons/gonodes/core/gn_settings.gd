@@ -98,4 +98,14 @@ const DEFAULTS: Dictionary = {
 	"default_resolution_y": 512,
 	"audio_output_device": "Default",
 	"ffmpeg_path": "",
+	# Graph reference overlay (reads / writes / wireless)
+	"graph_ref_reads_visible": true,
+	"graph_ref_writes_visible": true,
+	"graph_ref_runtime_writes_visible": true,
+	"graph_ref_wireless_hover_visible": true,
+	"graph_ref_read_color": Color(0.2, 0.85, 0.95, 0.55),
+	"graph_ref_write_color": Color(1.0, 0.55, 0.15, 0.55),
+	"graph_ref_runtime_color": Color(1.0, 0.35, 0.2, 0.65),
+	"graph_ref_wireless_color": Color(1.0, 0.65, 0.1, 0.45),
+	"graph_inspector_deps_visible": true,
 }

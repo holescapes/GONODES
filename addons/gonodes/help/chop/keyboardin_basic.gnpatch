@@ -8,7 +8,11 @@
                 100,
                 100
             ],
-            "parameters": {}
+            "parameters": {
+                "window": {
+                    "value": "window1"
+                }
+            }
         },
         "choptop1": {
             "type": "CHOPtoTOP",

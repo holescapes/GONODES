@@ -224,6 +224,34 @@ func test_image_file_in_img_no_file() -> void:
 	GNTestAssert.assert_true(out == null or out is GNImageData, "no crash")
 
 
+func test_image_file_in_img_async_load_param() -> void:
+	var node := _make_node(ImageFileInIMG.new(), "filein1") as ImageFileInIMG
+	GNTestAssert.assert_eq(node.get_param_value("async_load"), false, "async default off")
+
+	var path := "user://_test_img_async_unit_%d.png" % Time.get_ticks_usec()
+	var img := Image.create(4, 4, false, Image.FORMAT_RGBA8)
+	img.fill(Color.RED)
+	GNTestAssert.assert_eq(img.save_png(path), OK, "wrote temp png")
+
+	node.set_param_value("async_load", true)
+	node.set_param_value("file", path)
+	node.set_param_value("resolution", Vector2i(0, 0))
+	var out := _cook_no_input(node)
+	GNTestAssert.assert_true(out == null or out is GNImageData, "async cook no crash")
+	# First cook while pending must leave the node dirty for the next frame
+	# (keep_dirty_after_cook — not wiped by execute_cook clear_dirty).
+	if not node.is_load_ready():
+		GNTestAssert.assert_true(node.dirty, "keep_dirty_after_cook while async pending")
+	# Poll a few cooks until ready or timeout
+	for _i in range(30):
+		OS.delay_msec(20)
+		out = _cook_no_input(node)
+		if node.is_load_ready():
+			break
+	GNTestAssert.assert_true(node.is_load_ready(), "async eventually ready")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # ImageSequenceIMG
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -1,7 +1,7 @@
 # GONODES — Operator Reference
 
-> **585 operators** across 15 families: TOP (138), CHOP (107), SOP (85), DAT (51), IMG (41), UI (33), SDF (29), COMP (27), NET (15), MAT (12), POP (12), VOL (12), OUT (12), FIX (8), SCRIPT (3).
-> 469 are pure GDScript core operators. 116 are from the 23 bundled extensions.
+> **588 operators** across 15 families: TOP (140), CHOP (107), SOP (85), DAT (51), IMG (41), UI (33), SDF (29), COMP (27), NET (15), MAT (12), POP (12), VOL (12), OUT (13), FIX (8), SCRIPT (3).
+> 471 are pure GDScript core operators. 116 are from the 23 bundled extensions.
 > 131 of the core operators have native C++ accelerated equivalents in `gn_ext_native` that activate automatically when the native binary is present.
 
 ---
@@ -47,7 +47,7 @@
 
 TOPs process 2D textures on the GPU. Each TOP inherits from `GNTopBase`, which provides the shared viewport infrastructure: `_viewport` (SubViewport), `_material` (ShaderMaterial), `_canvas` (ColorRect/TextureRect), and `_cached_tex_data` (GNTextureData). Textures are passed between nodes as zero-copy GPU references (ViewportTexture). All texture processing happens entirely on the GPU — no CPU readback. SubViewports render exactly once per cook cycle via `UPDATE_ONCE` (not every frame).
 
-**Total: 138 operators.**
+**Total: 139 operators.**
 
 ### Generators
 
@@ -168,23 +168,78 @@ Solid color texture.
 
 ---
 
+#### TouchPaintTOP
+
+Accumulate a grayscale radial damage/attention mask from normalized touch coordinates. Optional TOP input seeds the mask after a resolution (re)create.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| resolution | Vector2i | 512×512 | — | Mask resolution in pixels |
+| cx | Float | 0.5 | 0.0–1.0 | Normalized touch X |
+| cy | Float | 0.5 | 0.0–1.0 | Normalized touch Y |
+| radius_px | Float | 80.0 | 1–2000 | Paint radius in pixels |
+| strength | Float | 0.1 | 0.0–1.0 | Intensity added per paint cook |
+| falloff | Enum | Smooth | Smooth, Gaussian | Radial falloff shape |
+| accumulate | Bool | true | — | Add into existing mask (off = clear then stroke) |
+| paint | Bool | false | — | Apply a stroke this cook (drive from touch) |
+| clear | Bool | false | — | Pulse: zero the mask, then auto-resets |
+
+**Input 0:** optional prior mask TOP. **Output:** L8 grayscale `ImageTexture` (0–1).
+
+**How it works:** Maintains a CPU `FORMAT_L8` buffer. While Paint is ON, paints a radial falloff at `(cx, cy)` and uploads via `ImageTexture.update`. Time-dependent while used as a live touch mask. Used as a CustomShader mask / energy region for exhibition pixel sorting.
+
+---
+
 #### TextTOP
 
 Renders text to a texture. Supports custom font loading from project resources.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| text | String | "Hello" | — | Text content |
+| text | String (multiline) | "Hello" | — | Text content (newlines supported; inspector uses a multi-line editor) |
 | resolution | Vector2i | 512×256 | — | Output resolution |
-| font_file | File | (none) | — | Font file path (TTF, OTF, WOFF, WOFF2, .tres/.res). Leave empty for default font. |
+| font_file | File | (none) | — | Font path (`project://`, `res://`, absolute). TTF/OTF/WOFF/WOFF2/.tres. Empty = default. Ship fonts beside the `.gnpatch` under the project folder for portable builds. |
 | font_size | Int | 48 | 8–256 | Font size in pixels |
 | font_color | Color | White | — | Text color |
 | bg_color | Color | Black | — | Background color |
 | align_h | Enum | Center | Left, Center, Right | Horizontal alignment |
 | align_v | Enum | Center | Top, Center, Bottom | Vertical alignment |
 | word_wrap | Bool | true | — | Wrap text at edges |
+| outline_size | Int | 0 | 0–64 | Glyph outline width in pixels (0 = off) |
+| outline_color | Color | Black | — | Outline color |
+| shadow | Bool | false | — | Enable drop shadow |
+| shadow_color | Color | Black 60% | — | Drop shadow color |
+| shadow_offset | Vector2i | (2, 2) | — | Drop shadow offset in pixels |
+| margin | Vector2i | (0, 0) | — | Inset from texture edges in pixels |
 
-**How it works:** Uses Godot's `Label` node inside a SubViewport. The Label handles text layout, wrapping, and alignment natively. Custom fonts are loaded via `ResourceLoader` and applied with `add_theme_font_override()`.
+**How it works:** Uses Godot's `Label` node inside a SubViewport (transparent background so `bg_color` alpha 0 can composite via Over). Outline and shadow use Label theme overrides (`outline_size`, `font_outline_color`, `font_shadow_color`, `shadow_offset_*`). `margin` insets the label from the edges. Custom fonts load via `GNResourceLoader`.
+
+---
+
+#### RichTextTOP
+
+Renders BBCode rich text to a texture (multiple styles in one string). Uses Godot's `RichTextLabel`.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| text | String (multiline) | `[b]Hello[/b] [color=#88ccff]GONODES[/color]` | — | BBCode or plain text (newlines supported) |
+| bbcode | Bool | true | — | Parse BBCode tags (`[b]`, `[color]`, `[font_size]`, …) |
+| resolution | Vector2i | 512×256 | — | Output resolution |
+| font_file | File | (none) | — | Default/normal font path. Empty = theme default |
+| font_size | Int | 48 | 8–256 | Default font size (`[font_size=N]` can override spans) |
+| font_color | Color | White | — | Default text color (`[color=…]` can override spans) |
+| bg_color | Color | Black | — | Background (alpha 0 for transparent overlays) |
+| align_h | Enum | Center | Left, Center, Right | Horizontal alignment |
+| align_v | Enum | Center | Top, Center, Bottom | Vertical alignment |
+| word_wrap | Bool | true | — | Wrap text at edges |
+| outline_size | Int | 0 | 0–64 | Default outline width (0 = off) |
+| outline_color | Color | Black | — | Default outline color |
+| shadow | Bool | false | — | Enable drop shadow |
+| shadow_color | Color | Black 60% | — | Drop shadow color |
+| shadow_offset | Vector2i | (2, 2) | — | Drop shadow offset |
+| margin | Vector2i | (0, 0) | — | Inset from texture edges |
+
+**How it works:** `RichTextLabel` inside a transparent SubViewport. With BBCode on, spans can mix bold/italic/color/size (and other Godot BBCode tags) in one string. Default font/size/color apply outside those tags. Same overlay/margin pattern as TextTOP for HUD compositing via Over.
 
 ---
 
@@ -194,7 +249,7 @@ Loads an image or texture resource from the project and outputs it as a TOP text
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| file | File | (none) | — | Image/texture path (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, .tres/.res) |
+| file | File | (none) | — | Image/texture path (PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, **KTX/KTX2**, .tres/.res) |
 | resolution | Vector2i | 512×512 | — | Output resolution |
 | fit_mode | Enum | Keep Aspect Centered | Stretch, Keep Aspect, Keep Aspect Centered, Keep Aspect Covered, Tile | How the image fits the output |
 | bg_color | Color | Black | — | Background color behind transparent or non-covering images |
@@ -202,11 +257,13 @@ Loads an image or texture resource from the project and outputs it as a TOP text
 
 **How it works:** Loads any Godot-importable image format via `ResourceLoader`. The loaded `Texture2D` is displayed in a `TextureRect` inside a SubViewport. Supports all Godot stretch modes. Non-texture `Image` resources are automatically converted to `ImageTexture`.
 
+> **Also:** [ImageFileInIMG](#imagefileinimg) loads the same formats (including KTX2/ETC2) as a CPU `Image` for the IMG pipeline; chain **ImgToTOP** to upload. Prefer IMG+ImgToTOP for ETC2 sequences so compression can survive to the GPU.
+
 ---
 
 #### MovieFileInTOP
 
-Plays a video file as a live texture stream. Similar to TouchDesigner's Movie File In TOP.
+Plays a video file as a live texture stream. Similar to TouchDesigner's Movie File In TOP. Cooks every frame while Play is on and Speed is not zero, and while the first frame size is still unknown. Paused or zero-speed playback holds the last frame.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -226,7 +283,22 @@ Plays a video file as a live texture stream. Similar to TouchDesigner's Movie Fi
 - **Theora (.ogv):** Built-in. CPU-decoded. No alpha channel support in Godot's decoder.
 - **H.264/VP8/VP9:** Available via community `godot-videodecoder` GDExtension (FFmpeg-based). No alpha.
 - **HAP / HAP Alpha / HAP Q:** Supported via `gn_ext_hap` extension (HapInTOP for GPU-direct DXT playback, HapOUT for encoding). See the HAP extension section.
-- **Image sequences:** For alpha-channel video content, use numbered PNG/WebP frame sequences with the ImageSequenceTOP operator.
+- **Image sequences:** For alpha-channel or Pi-friendly stills, use numbered PNG/WebP/**KTX2 (ETC2)** frames with ImageSequenceIMG → ImgToTOP. Leave resolution at native so ETC2 stays GPU-compressed on GLES.
+
+---
+
+#### ImageFileInIMG
+
+Loads an image file (or HTTP/HTTPS URL) as a CPU-side `Image`. Supports PNG, JPG, WebP, BMP, TGA, SVG, HDR, EXR, **KTX/KTX2**, and texture resources. Chain **ImgToTOP** to upload.
+
+| Parameter | Type | Default | Range | Description |
+|-----------|------|---------|-------|-------------|
+| file | File | (none) | — | Image path or URL |
+| resolution | Vector2i | 0×0 | — | Resize target; `(0,0)` = native (keeps KTX2 compressed) |
+| async_load | Bool | false | — | Load from disk on a worker thread; hold last good image until ready |
+| reload | Bool | false | — | Pulse: force reload on next cook (auto-resets) |
+
+**How it works:** Sync path uses `GNResourceLoader.load_image`. With **async_load**, a background thread loads the new path while the previous image continues to cook; while pending, the node sets `keep_dirty_after_cook` so the next `cook_frame` re-runs until the swap (and the input-hash guard cannot skip the follow-up). `is_load_ready()` becomes true when ready. URLs resolve through `GNUrlCache` (pending URL fetch also uses `keep_dirty_after_cook`).
 
 ---
 
@@ -234,12 +306,12 @@ Plays a video file as a live texture stream. Similar to TouchDesigner's Movie Fi
 
 *(Formerly documented as ImageSequenceTOP — this operator is IMG family.)*
 
-Plays a numbered image sequence as animated frames. Supports PNG, WebP, JPG, and other Godot-importable formats.
+Plays a numbered image sequence as animated frames. Supports PNG, WebP, JPG, **KTX/KTX2** (ETC2 and other VRAM formats when present), and other Godot-loadable formats.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | file | File | (none) | — | Path to ANY frame in the sequence (auto-discovers siblings) |
-| resolution | Vector2i | 512×512 | — | Output resolution (auto-set from first frame) |
+| resolution | Vector2i | 512×512 | — | Output resolution (auto-set from first frame). **(0,0) / native keeps KTX2 compressed** — resizing decompresses |
 | play | Bool | true | — | Play / pause |
 | speed | Float | 1.0 | 0.01–10.0 | Playback speed multiplier |
 | index | Int | -1 | -1–→ | Manual frame index override (-1 = auto time-based) |
@@ -247,8 +319,11 @@ Plays a numbered image sequence as animated frames. Supports PNG, WebP, JPG, and
 | fit_mode | Enum | Keep Aspect Centered | — | Stretch, Keep Aspect, Centered, Covered |
 | bg_color | Color | Black | — | Background behind transparent/non-covering frames |
 | preload_all | Bool | false | — | Load all frames at startup (faster playback, more RAM) |
+| async_load | Bool | false | — | Load each frame on a background thread (when preload_all is OFF) |
 
-**How it works:** Given any frame file (e.g., `render_0042.png`), the operator parses the filename to find the prefix and numbering pattern, then scans the directory for all matching files. Frames are lazy-loaded and cached on demand (or preloaded if the toggle is on). Supports expression-driven `index` for precise sequencing. The ping-pong mode reverses direction at sequence boundaries.
+**How it works:** Given any frame file (e.g., `render_0042.png` or `frame_0001.ktx2`), the operator parses the filename to find the prefix and numbering pattern, then scans the directory for all matching files. Frames are lazy-loaded and cached on demand (or preloaded if the toggle is on). With **async_load** ON and preload off, each frame read runs on a worker thread and the node stays dirty until the frame is ready. Supports expression-driven `index` for precise sequencing. The ping-pong mode reverses direction at sequence boundaries.
+
+**KTX2 / ETC2:** Godot's Image loader (libktx) can keep ETC2 compressed inside `Image`. Chain to **ImgToTOP** to upload; on GLES/mobile (including Raspberry Pi) ETC2 can stay GPU-native. Desktop may decompress at upload if the GPU lacks ETC2. Prefer native resolution — resize forces CPU decompress.
 
 **Naming convention:** Files must have a consistent prefix followed by digits: `myprefix0001.png`, `myprefix0002.png`, etc. Zero-padding width is flexible. Sorting is lexicographic (works correctly for zero-padded names).
 
@@ -1071,7 +1146,7 @@ Ring buffer — stores N frames with delay and freeze controls.
 
 #### TimeMachineTOP
 
-Playback controller over a frame buffer with speed, manual scrub, and curve-based time warp modes.
+Playback controller over a frame buffer with speed, manual scrub, and curve-based time warp modes. Speed mode cooks every frame when Speed is not zero. Ramp mode always advances with time. Position mode cooks when the scrub or the input frame changes.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
@@ -1197,9 +1272,9 @@ Reference a remote TOP node by name — outputs its texture without a wire conne
 **No inputs** — references by name instead of wire.
 **Output:** `out` (TOP) — the referenced node's texture (zero-copy GPU reference).
 
-**How it works:** Walks the scene tree to find the parent `GNNetwork`, looks up the target node by ID, validates that it is a TOP family operator, and returns its `cached_output` directly. If the target is not found or hasn't cooked yet, outputs nothing. Equivalent to TouchDesigner's Select TOP.
+**How it works:** Resolves the owning network via `get_owning_network()` (CookEngine parent), looks up the target by ID, and returns its `cached_output` directly (zero-copy). Not time-dependent — the cook engine dirties Select when the target cooks (`_wireless_consumer_map`) and includes the target's output in the input-hash. If the target is missing or hasn't cooked yet, outputs nothing. Equivalent to TouchDesigner's Select TOP.
 
-> **Tip:** Use SelectTOP to branch a texture to multiple consumers without forking wires. The referenced node is added to the active set automatically since GNNetwork tracks all dependencies.
+> **Tip:** Use SelectTOP + CacheTOP for one-frame feedback (wire cycles are rejected). Select is dirtied when its target cooks, so a first-frame null recovers automatically — no need to rewire.
 
 ---
 
@@ -1599,7 +1674,7 @@ CRT / VHS scan-line overlay with optional horizontal jitter and screen curvature
 | jitter | Float | 0.0 | 0.0–10.0 | Horizontal jitter per scan line (pixels) |
 | curvature | Float | 0.0 | 0.0–0.5 | CRT screen curvature |
 
-**Input:** `in` (TOP). **Time-dependent.** **Shader:** `scan_line.gdshader`.
+**Input:** `in` (TOP). Cooks every frame only while jitter is above 0. **Shader:** `scan_line.gdshader`.
 
 ---
 
@@ -1619,7 +1694,7 @@ Multi-layer digital glitch effect: block displacement, RGB channel shift, scan-l
 | noise | Float | 0.0 | 0.0–1.0 | Analog static / digital snow injection |
 | stale_frame | Float | 0.0 | 0.0–1.0 | V002-style: inject data from old frames into glitch blocks — higher values make the buffer more stale |
 
-**Input:** `in` (TOP). **Time-dependent.** **Shader:** `glitch.gdshader`.
+**Input:** `in` (TOP). Cooks every frame while intensity, channel shift, or tears are on. Intensity 0 with those layers off holds the input. **Shader:** `glitch.gdshader`.
 
 **Stale Frame** keeps an internal history buffer that updates less frequently as the value
 increases. At 1.0, the buffer updates only ~10% of frames, so glitched blocks may show
@@ -2409,7 +2484,7 @@ Low-pass or high-pass filter.
 | cutoff | Float | 0.1 | 0.001–1.0 | Cutoff frequency (normalized) |
 | reset | Bool | false | — | Reset filter state |
 
-**How it works:** Single-pole IIR filter. Low pass: `y = y_prev + α * (x - y_prev)`. High pass: `y = x - low_pass_result`. Alpha = clamped cutoff value. Maintains per-channel state across frames. Time-dependent.
+**How it works:** Single-pole IIR filter. Low pass: `y = y_prev + α * (x - y_prev)`. High pass: `y = x - low_pass_result`. Alpha = clamped cutoff value. Maintains per-channel state across frames. Cooks every frame while the output is still moving, then holds until the input changes.
 
 ---
 
@@ -2423,7 +2498,7 @@ Exponential smoothing with separate attack and release times.
 | release | Float | 0.2 | 0.0–10.0 | Fall time in seconds |
 | reset | Bool | false | — | Reset to current input value |
 
-**How it works:** Uses `1.0 - exp(-dt / tau)` for frame-rate independent smoothing. Attack time is used when the input is rising, release time when falling. Time-dependent.
+**How it works:** Uses `1.0 - exp(-dt / tau)` for frame-rate independent smoothing. Attack time is used when the input is rising, release time when falling. Cooks every frame while the output is still moving, then holds until the input changes.
 
 ---
 
@@ -2469,7 +2544,7 @@ Sample-and-hold. Captures input values on trigger and holds them.
 
 **Inputs:** `in` (CHOP — values to sample), `trigger` (CHOP — rising edge triggers capture).
 
-**How it works:** On rising edge of trigger input, captures current input values and holds them until the next trigger. Time-dependent.
+**How it works:** On rising edge of trigger input, captures current input values and holds them until the next trigger. Cooks when the input or the trigger changes.
 
 ---
 
@@ -2520,7 +2595,7 @@ Wireless reference — returns a named remote CHOP node's output directly. Use C
 | pattern | String | "*" | — | Channel name pattern (e.g., `*`, `tx,ty`, `chan*`) |
 | rename | String | "" | — | Comma-separated rename list (empty = keep names) |
 
-**How it works:** When `chop` is set, looks up the named node in the parent GNNetwork and uses its cached output. Otherwise reads from the wired input. Matches channel names against wildcard patterns (`*`, `prefix*`, `*suffix`). Optionally renames matched channels in order. The remote target is automatically included in the cook engine's active set and topological sort via `get_remote_dependencies()`.
+**How it works:** Looks up the named node via `get_owning_network()` and returns its cached CHOP output (wireless only — no wire input). The remote target is included in the active set / topo sort via `get_remote_dependencies()`. When the target cooks, the engine dirties this Select (`_wireless_consumer_map`) so feedback graphs refresh without blanket `time_dependent`.
 
 ---
 
@@ -2703,7 +2778,7 @@ Per-channel GDScript expression evaluation with time variables.
 
 **Input:** `in` (CHOP, optional).
 
-**How it works:** Uses Godot's `Expression` class. Variables: `v` (input value), `i` (sample index), `n` (sample count), `t` (elapsed time), `dt` (delta), `frame` (frame number), `ch` (channel dictionary). Evaluated per-sample per-channel.
+**How it works:** Uses Godot's `Expression` class. Variables: `v` (input value), `i` (sample index), `n` (sample count), `t` (elapsed time), `dt` (delta), `frame` (frame number), `ch` (channel dictionary). Evaluated per-sample per-channel. Cooks every frame only when the expression reads time, frame, or dt. A constant expression cooks when its input changes.
 
 ---
 
@@ -2723,7 +2798,7 @@ Biquad Butterworth IIR filter (low-pass, high-pass, band-pass).
 
 **Input:** `in` (CHOP).
 
-**How it works:** Implements a biquad filter with Butterworth coefficient calculation. Maintains 4 state variables per channel (_x1, _x2, _y1, _y2) for proper IIR feedback.
+**How it works:** Implements a biquad filter with Butterworth coefficient calculation. Maintains 4 state variables per channel (_x1, _x2, _y1, _y2) for proper IIR feedback. Cooks every frame while the output is still moving, then holds until the input changes.
 
 ---
 
@@ -2984,13 +3059,13 @@ Outputs keyboard key states as CHOP channels. Each tracked key becomes a channel
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| keys | String | "w a s d space" | Space-separated key names |
+| keys | String | "w a s d space" | Space-separated key names. Empty captures every key |
 | mode | Enum | Momentary | Toggle (flip on press), Momentary (held = 1) |
-| window | String | "" | WindowOUT node name to read from (empty = global Input) |
+| window | Node | (none) | WindowOUT menu. (none) reads global input |
 
-**Channels:** Per-key channels (1.0/0.0), plus `focused` (1.0 when target window has focus) when `window` is set.
+**Channels:** Per-key channels (1.0/0.0), plus `focused` (1.0 when target window has focus) when a window is selected. An empty Keys list names channels from the key that is down (`a`, `space`, `left`). A key that was just released stays at 0 for one cook, then the channel is dropped.
 
-**Time-dependent.** When `window` is empty, uses global `Input.is_key_pressed()`. When set, reads per-window key state tracked by WindowOUT's `_on_window_input()` handler.
+**Time-dependent.** (none) uses global `Input.is_key_pressed()`. A selected window reads that WindowOUT's key state.
 
 ---
 
@@ -3003,7 +3078,7 @@ Outputs mouse position, delta, buttons, and scroll as CHOP channels.
 | normalized | Bool | true | Normalize position to 0–1 by viewport/window size |
 | buttons | Bool | true | Output lmb, rmb, mmb channels |
 | scroll | Bool | true | Output scroll channel |
-| window | String | "" | WindowOUT node name to read from (empty = global Input) |
+| window | Node | (none) | WindowOUT menu. (none) reads global input |
 
 **Channels:** `tx`, `ty`, `dx`, `dy`, `lmb`, `rmb`, `mmb`, `scroll`, plus `focused` when `window` is set. When bound to a WindowOUT, position/delta are in that window's local coordinates and normalization uses the window's size.
 
@@ -3610,7 +3685,7 @@ Plain text storage.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| text | String | "" | — | Text content |
+| text | String (multiline) | "" | — | Text content |
 
 **How it works:** Stores plain text in text mode (`GNTableData.set_text()`). Not a table — just a string.
 
@@ -3784,8 +3859,9 @@ Read a file from disk (CSV, TSV, JSON, or text) into a table.
 | filepath | String | "" | Path to file (res:// or user://) |
 | mode | Enum | Auto | Auto, CSV, TSV, JSON, Text |
 | has_header | Bool | true | First row is header |
+| async_load | Bool | false | Read file on a background thread; hold last data until ready |
 
-**How it works:** Auto-detects format from extension. JSON arrays-of-objects become rows with dict keys as headers. CSV/TSV split by delimiter.
+**How it works:** Auto-detects format from extension. JSON arrays-of-objects become rows with dict keys as headers. CSV/TSV split by delimiter. With **async_load** ON, bytes are read on a worker thread and parsing runs on the cook thread once ready; previous table/text is held and the node stays dirty until load completes (`keep_dirty_after_cook`).
 
 ---
 
@@ -3796,7 +3872,7 @@ Parse JSON to table or generate JSON from table.
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | mode | Enum | Parse | Parse, Generate |
-| json_string | String | "" | JSON string for parse mode |
+| json_string | String (multiline) | "" | JSON string for parse mode |
 | pretty | Bool | true | Pretty-print generated JSON |
 
 **Input:** `in` (DAT, optional — for Generate mode).
@@ -3811,11 +3887,11 @@ Fetch data from a URL via HTTP GET/POST.
 |-----------|------|---------|-------------|
 | url | String | "" | Target URL |
 | method | Enum | GET | GET, POST |
-| body | String | "" | POST request body |
+| body | String (multiline) | "" | POST request body |
 | content_type | String | "application/json" | Content type header |
 | auto_parse | Bool | true | Auto-parse JSON responses |
 
-**How it works:** Uses Godot's HTTPRequest node. Returns cached last response (async fetch triggered per cook).
+**How it works:** Uses Godot's HTTPRequest node. Returns cached last response (async fetch triggered per cook). While a fetch is in flight the node sets `keep_dirty_after_cook` so the cook engine re-queues it on the next frame.
 
 ---
 
@@ -4037,18 +4113,19 @@ Captures system warnings and errors as a table by hooking GNLogger. Time-depende
 
 #### Folder DAT
 
-List directory contents as a table.
+List directory contents as a table. Resolves `project://` via `GNResourceLoader.resolve`.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| path | String | "res://" |  | Directory path to list |
+| path | String | "res://" |  | Directory path to list (supports `project://`) |
 | recursive | Bool | false |  | Include sub-directories recursively |
 | filter | String | "*" |  | Glob-style filter (e.g. *.png) |
 | include_dirs | Bool | true |  | Include directories in listing |
+| sort | Enum | Name | Name, Modified | Sort listing by file name or modified time |
 
-**Output:** DAT table (columns: name, path, extension, size, is_dir).
+**Output:** DAT table (columns: name, path, extension, size, is_dir, modified).
 
-**How it works:** Opens the given directory with `DirAccess`, iterates entries (optionally recursive), filters with `matchn()`, reads file sizes, and builds a table with name/path/extension/size/is_dir columns.
+**How it works:** Opens the given directory with `DirAccess`, iterates entries (optionally recursive), filters with `matchn()`, reads sizes via `FileAccess.get_length` (no full-byte load), and sorts by name or modified time.
 
 ---
 
@@ -4060,11 +4137,11 @@ Multi-touch screen input as table rows. Time-dependent.
 |-----------|------|---------|-------|-------------|
 | active | Bool | true |  | Enable / disable touch capture |
 | normalize | Bool | false |  | Output 01 normalized coords instead of pixels |
-| window | String | "" |  | WindowOUT node name to read from (empty = global) |
+| window | Node | (none) |  | WindowOUT menu. (none) reads global input |
 
 **Output:** DAT table (columns: id, x, y, pressure, rel_x, rel_y, phase, window). The `window` column shows the WindowOUT's title when bound to a specific window.
 
-**How it works:** When `window` is empty, maintains a `_touches` dictionary updated by `InputEventScreenTouch` (began/ended) and `InputEventScreenDrag` (moved). When `window` is set, reads from the target WindowOUT's per-window `_input_touches` state. Each cook outputs active touches as table rows. Optionally normalizes coordinates to viewport/window 01. Ended touches are removed after output.
+**How it works:** When Window is (none), maintains a `_touches` dictionary updated by `InputEventScreenTouch` (began/ended) and `InputEventScreenDrag` (moved). When a WindowOUT is selected, reads that window's touch state. Each cook outputs active touches as table rows. Optionally normalizes coordinates to viewport/window 01. Ended touches are removed after output.
 
 ---
 
@@ -4168,7 +4245,7 @@ Reads all parameters of a target node as a DAT table.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| target_node | String | — | Node ID to read parameters from |
+| node_id | Node ref | — | Node whose parameters to read |
 | show_defaults | Bool | false | Include default values column |
 
 **No inputs** — reads parameters from target node.
@@ -4774,7 +4851,7 @@ Generate 3D text mesh using Godot's TextMesh.
 
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
-| text | String | "Hello" | — | Text to render |
+| text | String (multiline) | "Hello" | — | Text to render |
 | font_size | Float | 1.0 | 0.1–100 | Font size multiplier |
 | depth | Float | 0.1 | 0–10 | Extrusion depth |
 | horizontal_align | Enum | Center | Left, Center, Right | Horizontal alignment |
@@ -6159,7 +6236,8 @@ Read a GPU texture back to CPU and save as PNG, WebP, or EXR (optional auto-numb
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| active | Bool | false | ON = queue a save every cook; OFF flushes the disk writer |
+| active | Bool | false | Continuous: save every cook while ON. Pulse Once: one save on rising edge. OFF flushes the writer |
+| mode | Enum | Continuous | Continuous or Pulse Once |
 | file_path | File | user://output/frame | Base path (format extension appended; existing ext stripped) |
 | format | Enum | PNG | PNG, WebP, or EXR |
 | quality | Float | 0.75 | WebP lossy quality (ignored for PNG/EXR) |
@@ -6168,7 +6246,25 @@ Read a GPU texture back to CPU and save as PNG, WebP, or EXR (optional auto-numb
 
 **Input 0:** `in` (TOP — texture to save).
 
-**How it works:** `get_image()` stays on the cook thread (GPU readback). Compress + disk write run on a **background thread** so sync `save_*` does not stutter the graph. Turning Active OFF waits for the queue to drain. For CPU-side Images use ImageSaveOUT; for a dedicated numbered sequence folder use MovieOUT; for a video container use FFmpegOUT.
+**How it works:** GPU readback stays on the cook thread. Compress + disk write run on a **background thread**. **Pulse Once** enqueues exactly one frame on the rising edge of Active (expression-friendly leave-image save). Paths are resolved via `GNResourceLoader` (`project://`, `user://`, absolute) before mkdir/write. Turning Active OFF waits for the queue to drain. For CPU-side Images use ImageSaveOUT; for a numbered sequence folder use MovieOUT; for a video container use FFmpegOUT.
+
+---
+
+#### FileCopyOUT
+
+Rising-edge file copy from source path to destination (atomic temp + rename when possible). Used to seed exhibition day folders from pristine display assets.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| active | Bool | false | Pulse / rising edge: perform one copy |
+| source | File | (none) | File to copy from (image filters + all-files) |
+| dest | File | (none) | Destination file path (image filters + all-files) |
+| overwrite | Bool | true | Replace destination if it already exists |
+| make_dirs | Bool | true | Create destination parent directories if missing |
+
+**Platforms:** non-web. **No data ports** — path-driven sink.
+
+**How it works:** On rising Active, resolves paths via `GNResourceLoader`, optionally creates parent dirs, writes to `dest.tmp_gonodes`, then renames into place.
 
 ---
 
@@ -6259,7 +6355,7 @@ An on/off toggle switch (CheckButton).
 
 ### LabelUI
 A read-only text label for display purposes.
-- **Parameters:** `text` (STRING), `font_size` (INT, 16), `color` (COLOR), `alignment` (MENU: Left/Center/Right)
+- **Parameters:** `text` (STRING, multiline), `font_size` (INT, 16), `color` (COLOR), `alignment` (MENU: Left/Center/Right)
 - **State channels:** none (display only)
 
 ### KnobUI
@@ -6324,7 +6420,7 @@ Color picker button. Opens full color picker dialog. Outputs RGBA as CHOP channe
 ### RichTextLabelUI
 BBCode rich text label. Optional DAT input for content.
 - **Inputs:** `dat` (DAT)
-- **Parameters:** `text` (STRING), `bbcode` (TOGGLE), `font_size` (INT), `fit_content` (TOGGLE), `scroll_active` (TOGGLE), `min_size` (VECTOR2I)
+- **Parameters:** `text` (STRING, multiline), `bbcode` (TOGGLE), `font_size` (INT), `fit_content` (TOGGLE), `scroll_active` (TOGGLE), `min_size` (VECTOR2I)
 - **State channels:** none (display only)
 
 ### ScrollContainerUI
@@ -6780,7 +6876,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 
 | Family | Count | Operators |
 |--------|-------|-----------|
-| **TOP** | 138 | Noise, Ramp, Circle, Rectangle, Constant, Text, MovieFileIn, CustomShader, GLSLMulti, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Select, Limit, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion, PointCloudRender |
+| **TOP** | 140 | Noise, Ramp, Circle, Rectangle, Constant, TouchPaint, Text, RichText, MovieFileIn, CustomShader, GLSLMulti, Level, Blur, Transform, HSVAdjust, Edge, Threshold, Flip, Tile, Crop, Feedback, Resolution, Render, MultiBufferRender, Composite, Cross, Displace, Lookup, ColorMap, Remap, Layout, ChromaKey, Pattern, Triangle, SVG, Analyze, Mono, Sharpen, NormalMap, Depth, ChannelMix, Convolution, DilateErode, LensDistort, LumaBlur, Slope, CornerPin, Projection, Fit, Cache, TimeMachine, Null, Switch, Select, Limit, Matte, Premultiply, Posterize, RadialBlur, AntiAlias, Palette, CHOPtoTOP, OpticalFlow, Glue, Emboss, CompositorEffect, GeometryBuffer, PostProcess, Panel, ComputeShader, Snapshot, Deform, Reorder, Fluid2D, ReactionDiffusion, PointCloudRender |
 | **CHOP** | 107 | LFO, Wave, Noise, Constant, Pattern, Timer, Ramp, Clock, Expression, Math, Filter, Lag, Limit, Trigger, Speed, Count, Hold, Select, Smooth, Spring, Delay, Envelope, Analyze, Lookup, Stretch, Resample, Trim, Extend, Logic, Merge, Cross, Interpolate, Join, Composite, Copy, Shuffle, Split, Fan, Delete, Null, Switch, Rename, DATtoCHOP, Physics, Script, OscIn, MidiIn, AudioIn, AudioSpectrum, AudioFileIn, AudioBand, KeyboardIn, MouseIn, Gamepad, Parameter, Trail, SOPtoCHOP, TOPtoCHOP, Beat, IK, Warp, Slope, AudioDynamics, Feedback, Blend, Perform, Transform, Keyframe, Sequence, Clip, Channel, Object, Skeleton, TabletIn, DmxOut, DmxIn |
 | **SOP** | 85 | Grid, Box, Sphere, Torus, Cylinder, Line, Circle, Tube, Font, Transform, Noise, Subdivide, Wireframe, Normal, Reverse, Peak, Sort, Facet, Delete, Point, Attribute, Clip, Mirror, Extrude, Merge, Copy, Scatter, Boolean, Sweep, Skin, Null, Switch, Script, Bend, Twist, Taper, Trail, TrailRibbon, UVProject, Divide, LSystem, Metaball, IsoSurface, Particle, Magnet, Carve, PolyReduce, CHOPtoSOP, DATtoSOP, TOPtoSOP, Fuse, Ray, Cap, Lattice, PolyLoft, Mountain, Heightfield, Select, FileIn, FileOut, Group, Primitive, Blend, Spring, Smooth, PolyBevel, Remesh, ObjectMerge (deprecated), Texture, PolyBridge, PolyPatch, PolySpline, PolyStitch, VoronoiShatter, SampleGeometry |
 | **DAT** | 51 | Constant, Text, Info, OscIn, MidiIn, Select, Sort, Transpose, Evaluate, Merge, Null, Switch, CHOPtoDAT, Script, Callback, FileIn, JSON, Web, WebServer, WebSocket, Substitute, Insert, Delete, FIFO, SOPtoDAT, TOPtoDAT, OPFind, Table, Network, XML, Error, Folder, MultiTouchIn, Serial, DMX (deprecated), Artnet, RenderPick, PanelExecute |
@@ -6792,10 +6888,10 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **MAT** | 12 | PBR, Shader, Constant, Wireframe, PointSprite, Depth, NormalMap, Line, FluidSurface, Null, Select |
 | **POP** | 12 | Source, Force, Turbulence, Collision, Attract, Limit, Advect, Boids, Instance, Render, Null, Select — *SSBO-based compute pipeline* |
 | **VOL** | 12 | Noise, Fluid, Advect, Analyze, Pyro, Merge, Math, Null, Select, Switch, Raymarch, MarchingCubes, GPUMarchingCubes, SOPtoVOL — *FluidVOL includes vorticity + obstacles; GPUMarchingCubes 10–100× faster via compute shader* |
-| **OUT** | 12 | Window, TextureSave, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
+| **OUT** | 13 | Window, TextureSave, FileCopy, ImageSave, TableSave, Movie, FFmpeg, AudioDevice, Record, OscOut |
 | **FIX** | 8 | StripFIX, GridFIX, MatrixFIX, CustomFIX, FileInFIX, SelectFIX, NullFIX, SwitchFIX |
 | **SCRIPT** | 3 | GDScriptSCRIPT, NativeSCRIPT, PythonSCRIPT |
-| **Total** | **585** | |
+| **Total** | **587** | |
 
 ### Extension Operators
 

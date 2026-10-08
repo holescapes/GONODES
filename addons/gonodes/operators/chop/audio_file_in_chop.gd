@@ -142,6 +142,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			"ready":
 				file_path = result.path
 			"pending":
+				request_keep_dirty()
 				return out
 			"error":
 				GNLogger.warn("AudioFileInCHOP", "'%s' — URL fetch error: %s" % [id, result.error])
@@ -163,6 +164,7 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 
 	# Memory decode still running on a worker — keep UI cooking lightly.
 	if _memory_load_busy:
+		request_keep_dirty()
 		_left_buf.resize(buf_size)
 		_left_buf.fill(0.0)
 		out.set_channel("left", _left_buf.duplicate())

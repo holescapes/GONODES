@@ -162,6 +162,30 @@ func test_active_set_expression_ref_activates_node() -> void:
 	GNTestAssert.assert_true(reader.is_active, "reader is active (sink)")
 
 
+func test_active_set_script_code_body_ref_activates_node() -> void:
+	## chop()/dat() inside GDScriptSCRIPT cook() body (STRING "code" param)
+	## must pull referenced nodes into the active set — same as expressions.
+	## (Value correctness of chop() helpers is covered by test_script_chop.)
+	var lfo := _make_constant("lfo1", "out", 0.5)
+	var script := _make(GDScriptSCRIPT, "script1")
+	# Demand scan matches static chop("id") literals in the STRING body
+	# (including comments). Keep cook() a no-op so this suite does not depend
+	# on SCRIPT data-factory / extension registry setup.
+	script.set_param_value("code", """# @output chop Result
+# wireless demand: chop("lfo1", "out", 0)
+
+func cook():
+	pass
+""".strip_edges())
+	script.set_param_value("time_dependent", false)
+
+	_engine.set_active_sinks(["script1"] as Array[String])
+	_cook()
+
+	GNTestAssert.assert_true(script.is_active, "script is active (sink)")
+	GNTestAssert.assert_true(lfo.is_active, "lfo1 activated by script code-body ref")
+
+
 func test_no_sinks_empty_active_set() -> void:
 	## When no sinks exist, no nodes are active — nothing cooks.
 	var a := _make_constant("a", "x", 1.0)
@@ -577,6 +601,74 @@ func test_frame_state_injected() -> void:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Wireless Select — demand + consumer dirty (no blanket time_dependent)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_select_chop_wireless_updates_without_time_dependent() -> void:
+	## SelectCHOP must pick up target value changes via wireless consumer dirty
+	## + input-hash remote deps — without cooking every frame as time_dependent.
+	var src := _make_constant("src", "v", 1.0)
+	var sel := _make(SelectCHOP, "sel")
+	sel.set_param_value("chop", "src")
+	GNTestAssert.assert_false(sel.time_dependent,
+		"SelectCHOP is not blanket time_dependent")
+	var sink_n := _make_null("out")
+	_network.connect_nodes("sel", 0, "out", 0)
+	_sink(["out"])
+
+	_cook()
+	GNTestAssert.assert_true(src.is_active, "src demanded by Select node_ref")
+	GNTestAssert.assert_not_null(_output(sel), "Select produced output")
+	if _output(sel) != null:
+		GNTestAssert.assert_approx(_output(sel).get_value("v", -1), 1.0, 0.01,
+			"Select reads initial src value")
+
+	src.set_param_value("value0", 7.0)
+	src.mark_dirty()
+	_engine.elapsed_time += _engine.current_delta
+	_cook()
+
+	GNTestAssert.assert_not_null(_output(sel), "Select still has output")
+	if _output(sel) != null:
+		GNTestAssert.assert_approx(_output(sel).get_value("v", -1), 7.0, 0.01,
+			"Select refreshed after src cooked (wireless dirty/hash)")
+
+
+func test_image_file_in_async_keep_dirty_via_cook_frame() -> void:
+	## async_load must re-queue through cook_frame (keep_dirty_after_cook),
+	## not rely on call_deferred("mark_dirty") fighting clear_dirty / hash skip.
+	var path := "user://_test_async_img_%d.png" % Time.get_ticks_usec()
+	var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0.2, 0.4, 0.6, 1.0))
+	var err := img.save_png(path)
+	GNTestAssert.assert_eq(err, OK, "wrote temp png")
+
+	var node := _make(ImageFileInIMG, "filein1") as ImageFileInIMG
+	node.set_param_value("async_load", true)
+	node.set_param_value("file", path)
+	node.set_param_value("resolution", Vector2i(0, 0))
+	_sink(["filein1"])
+
+	var ready := false
+	for _i in range(60):
+		_engine.elapsed_time += _engine.current_delta
+		_cook()
+		if node.is_load_ready():
+			ready = true
+			break
+		OS.delay_msec(10)
+
+	GNTestAssert.assert_true(ready, "async ImageFileIn became ready via cook_frame")
+	var out := node.cached_output as GNImageData
+	GNTestAssert.assert_not_null(out, "has GNImageData")
+	if out != null and out.image != null:
+		GNTestAssert.assert_eq(out.image.get_width(), 8, "loaded width")
+		GNTestAssert.assert_eq(out.image.get_height(), 8, "loaded height")
+
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Graph Mutation During Cooking Disabled (structural safety)
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -619,3 +711,70 @@ func test_remove_node_between_cooks() -> void:
 
 	# c now has no input → null output
 	GNTestAssert.assert_null(_output(c), "c output null after b removed")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Side-effect ledger + async keep_dirty (WebDAT / FileInDAT)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+func test_side_effect_ledger_records_script_set_par() -> void:
+	var target := _make_constant("target", "value0", 1.0)
+	var script := _make(GDScriptSCRIPT, "writer")
+	script.set_param_value("code", """
+func cook():
+	set_par("target", "value0", 2.0)
+""".strip_edges())
+	script.set_param_value("time_dependent", false)
+	_sink(["writer"])
+	_cook()
+
+	var target_summary := _engine.get_dependency_summary("target")
+	var written_by: Array = target_summary.get("written_by", [])
+	GNTestAssert.assert_true(written_by.size() > 0,
+			"target has runtime written_by entry")
+	if written_by.size() > 0:
+		GNTestAssert.assert_eq(written_by[0].get("writer_id", ""), "writer",
+				"writer recorded as side-effect source")
+
+	var writer_summary := _engine.get_dependency_summary("writer")
+	var writes_to: Array = writer_summary.get("writes_to", [])
+	GNTestAssert.assert_true(writes_to.size() > 0, "writer has writes_to entry")
+	GNTestAssert.assert_approx(target.get_param_value("value0"), 2.0, 0.001,
+			"set_par applied target value")
+
+
+func test_web_dat_keep_dirty_while_fetch_pending() -> void:
+	## Headless may fail to start HTTPRequest; simulate in-flight fetch directly.
+	var web := _make(WebDAT, "web1")
+	web.set_param_value("url", "https://example.com/")
+	web._request_pending = true
+	_sink(["web1"])
+	_cook()
+	GNTestAssert.assert_true(web.dirty,
+			"WebDAT stays dirty while HTTP fetch is pending")
+
+
+func test_file_in_dat_async_keep_dirty_via_cook_frame() -> void:
+	var path := "user://_test_async_dat_%d.csv" % Time.get_ticks_usec()
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	GNTestAssert.assert_not_null(f, "created temp csv")
+	f.store_string("x,y\n1,2\n")
+	f.close()
+
+	var node := _make(FileInDAT, "fin1") as FileInDAT
+	node.set_param_value("async_load", true)
+	node.set_param_value("filepath", path)
+	_sink(["fin1"])
+
+	var ready := false
+	for _i in range(60):
+		_engine.elapsed_time += _engine.current_delta
+		_cook()
+		var out := node.cached_output as GNTableData
+		if out != null and out.is_table and out.num_rows() > 0:
+			ready = true
+			break
+		OS.delay_msec(10)
+
+	GNTestAssert.assert_true(ready, "async FileInDAT loaded table via cook_frame")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))

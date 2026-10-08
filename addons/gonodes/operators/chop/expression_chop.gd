@@ -8,7 +8,10 @@ extends GNChopBase
 
 func _init() -> void:
 	node_type = "expression"
-	time_dependent = true
+
+
+func update_time_dependency() -> void:
+	time_dependent = GNNode.expression_uses_time(str(get_param_value("expr")))
 
 
 func _init_ports() -> void:

@@ -5,8 +5,15 @@ extends GNTopBase
 ##
 ## Uploads the input Image to an ImageTexture each cook.
 ## No SubViewport needed — direct ImageTexture creation.
+##
+## VRAM-compressed Images (ETC2/DXT/ASTC from KTX2, etc.) are uploaded as
+## compressed texture blocks when the GPU supports the format (GLES/mobile).
+## Desktop GPUs that lack ETC2 may decompress at upload — still correct, just
+## denser in VRAM.
 
 var _tex: ImageTexture = null
+var _last_size: Vector2i = Vector2i.ZERO
+var _last_format: int = -1
 
 
 func _init() -> void:
@@ -31,13 +38,19 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if img_data.image == null:
 		return null
 
-	# Upload CPU Image to GPU ImageTexture
-	if _tex == null:
-		_tex = ImageTexture.create_from_image(img_data.image)
-	else:
-		_tex.update(img_data.image)
+	var img: Image = img_data.image
+	var sz := Vector2i(img.get_width(), img.get_height())
+	var fmt: int = img.get_format() as int
 
-	# Ensure output infrastructure
+	# Compressed formats: recreate texture (update() is for uncompressed only).
+	# Uncompressed: update in place when size/format match.
+	if img.is_compressed() or _tex == null or sz != _last_size or fmt != _last_format:
+		_tex = ImageTexture.create_from_image(img)
+		_last_size = sz
+		_last_format = fmt
+	else:
+		_tex.update(img)
+
 	if _cached_tex_data == null:
 		_cached_tex_data = GNTextureData.new()
 

@@ -141,10 +141,14 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if parameters.has("resolution"):
 		res = get_param_value("resolution")
 
-	# If an input is connected, use its resolution
-	var tex0: GNTextureData = _get_input_top(inputs, 0)
-	if tex0 != null:
-		res = tex0.resolution
+	# Prefer the first connected input's resolution (any port). Port 0 is
+	# common, but feedback/Select wires are often on a later port and may be
+	# null on the first frames — don't leave the TOP without a size source.
+	for i in range(inputs.size()):
+		var tex_in: GNTextureData = _get_input_top(inputs, i)
+		if tex_in != null:
+			res = tex_in.resolution
+			break
 
 	_setup_viewport(res)
 
@@ -153,7 +157,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if code != _last_compiled_code:
 		_compile_shader(code)
 
-	if not _shader_ok:
+	if not _shader_ok or _material == null or _cached_tex_data == null:
 		# Return last good output (or null on first failure)
 		return _cached_tex_data if _cached_tex_data != null else null
 
@@ -206,14 +210,23 @@ func _compile_shader(code: String) -> void:
 		return
 
 	# Attempt compilation by setting the code on the Shader resource.
+	# Ensure viewport/material exist — from_dict and live edits can compile
+	# before the first cook has called _setup_viewport.
+	if _material == null or _viewport == null:
+		_setup_viewport(Vector2i(512, 512))
+
 	var new_shader := Shader.new()
 	new_shader.code = compile_code
 
 	_shader = new_shader
-	_material.shader = _shader
-	_shader_ok = true
+	if _material != null:
+		_material.shader = _shader
+	_shader_ok = _material != null
 	_last_compiled_code = code
-	GNLogger.info("CustomShaderTOP", "'%s' — shader compiled (%d chars)" % [id, compile_code.length()])
+	if _shader_ok:
+		GNLogger.info("CustomShaderTOP", "'%s' — shader compiled (%d chars)" % [id, compile_code.length()])
+	else:
+		GNLogger.error("CustomShaderTOP", "'%s' — compile aborted, material missing" % id)
 
 	# Rebuild input ports to match the sampler2D gn_tex<N> uniforms found in code
 	var tex_count := _count_shader_tex_inputs(compile_code)
@@ -585,22 +598,28 @@ func _rebuild_uniform_params(code: String) -> void:
 
 
 func _setup_viewport(size: Vector2i = Vector2i(512, 512)) -> void:
-	if _viewport != null:
+	if _viewport != null and _material != null and _cached_tex_data != null:
 		return
 
-	_shader = Shader.new()
-	_shader.code = DEFAULT_SHADER_CODE
+	if _shader == null:
+		_shader = Shader.new()
+		_shader.code = DEFAULT_SHADER_CODE
+		_last_compiled_code = DEFAULT_SHADER_CODE
 
-	_ensure_viewport(size)
+	if _viewport == null:
+		_ensure_viewport(size)
 
-	_material = ShaderMaterial.new()
-	_material.shader = _shader
+	if _material == null:
+		_material = ShaderMaterial.new()
+		_material.shader = _shader
 
-	_canvas = ColorRect.new()
-	_canvas.name = "Canvas"
-	_canvas.material = _material
-	_viewport.add_child(_canvas)
-	_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if _canvas == null or not is_instance_valid(_canvas):
+		_canvas = ColorRect.new()
+		_canvas.name = "Canvas"
+		_canvas.material = _material
+		_viewport.add_child(_canvas)
+		_canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	elif _canvas.material != _material:
+		_canvas.material = _material
 
 	_shader_ok = true
-	_last_compiled_code = DEFAULT_SHADER_CODE

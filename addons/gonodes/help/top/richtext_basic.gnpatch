@@ -1,0 +1,51 @@
+{
+  "annotations": [
+    {
+      "color": [1.0, 1.0, 1.0, 0.8],
+      "id": "ann_1",
+      "position": [-80.0, -160.0],
+      "size": [520.0, 150.0],
+      "text": "RichText TOP — Basic\n\nBBCode multi-style text rendered to a texture.\nUsing: bold + color spans, font_size=48, centered.",
+      "type": "note"
+    }
+  ],
+  "app_version": "0.1.0-beta",
+  "connections": [
+    {"from": "richtext1", "from_port": 0, "to": "window1", "to_port": 0}
+  ],
+  "generator": "GONODES",
+  "nodes": {
+    "richtext1": {
+      "type": "RichTextTOP",
+      "position": [120.0, 120.0],
+      "parameters": {
+        "text": {
+          "value": "[b]Hello[/b] [color=#88ccff]GONODES[/color]"
+        },
+        "bbcode": {"value": true},
+        "font_size": {"value": 48},
+        "align_h": {"value": 1},
+        "align_v": {"value": 1},
+        "bg_color": {
+          "value": {"_type": "Color", "r": 0.08, "g": 0.08, "b": 0.12, "a": 1.0}
+        },
+        "resolution": {
+          "value": {"_type": "Vector2i", "x": 512, "y": 256}
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [420.0, 140.0],
+      "parameters": {
+        "open": {"value": true},
+        "resolution": {
+          "value": {"_type": "Vector2i", "x": 512, "y": 512}
+        },
+        "title": {"value": "RichTextTOP Basic"}
+      }
+    }
+  },
+  "version": "1.0.0",
+  "viewport": {"scroll_x": 0.0, "scroll_y": 0.0, "zoom": 0.7}
+}

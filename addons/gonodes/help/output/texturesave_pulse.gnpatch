@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseTOP",
+      "position": [120, 160],
+      "parameters": {
+        "resolution": { "value": { "_type": "Vector2i", "x": 256, "y": 256 } }
+      }
+    },
+    "save1": {
+      "type": "TextureSaveOUT",
+      "position": [420, 300],
+      "parameters": {
+        "active": { "value": false },
+        "mode": { "value": 1 },
+        "file_path": { "value": "user://bitrots_pulse_frame" },
+        "format": { "value": 0 },
+        "auto_number": { "value": false }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [480, 160],
+      "parameters": {
+        "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+        "open": { "value": true }
+      }
+    }
+  },
+  "connections": [
+    { "from": "noise1", "from_port": 0, "to": "window1", "to_port": 0 },
+    { "from": "noise1", "from_port": 0, "to": "save1", "to_port": 0 }
+  ],
+  "annotations": [
+    {
+      "id": "ann_1",
+      "type": "note",
+      "text": "TextureSave OUT — Pulse Once\n\nMode=Pulse Once saves a single frame on\nthe rising edge of Active (async write).\nToggle Active to capture one PNG.",
+      "position": [-40, -100],
+      "size": [400, 140],
+      "color": [0.15, 0.35, 0.65, 0.7]
+    }
+  ]
+}

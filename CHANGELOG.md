@@ -9,6 +9,66 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-08 — Cook only when the node is actually live
+
+- **`GNNode.update_time_dependency()`** — operators set `time_dependent` from their own logic each frame (rate, playback, jitter, a time-dependent target). Not a user toggle. NoiseTOP is still unless `time_offset` reads time; NoiseSOP / Voronoi / Ripple / ScanLine / FilmGrain follow the same rule. ParameterCHOP, ParameterDAT, and ObjectCHOP follow the target. ErrorDAT dirties from the log sink. SystemDAT cooks every frame only while memory is shown. ImageSequence cooks every frame only while playing.
+- **Expression eval** — nodes with no expressions skip `_try_expression_dirty`. Time builtins re-eval; constant expressions do not.
+- **Active set** — a leftover expression string on a CONSTANT param no longer rebuilds topology. Topo rebuilds only when expression edges change.
+- **Parallel cook** stamps per-port demand before worker `_cook`.
+- **Editor** — reference overlay, previews, and status badges redraw only when their inputs change. Status badges update for nodes that cooked or whose warning text changed.
+- **One reference scan** — `GNReferenceScanner.scan_node` captures reads and call names together. Wireless family demand and the inspector reuse that cache. `MovieFileIn` cooks every frame only while playing at non-zero speed. `TimeMachine` cooks every frame in Speed (non-zero) and Ramp modes. `Glitch` cooks every frame only while intensity, channel shift, or tears are on.
+- **Active-set cook loop** — pre-cook and both cook paths iterate the active nodes only. Live nodes whose elapsed time moved skip the parameter hash. The editor clears warnings only on nodes that have one, and refreshes a viewer only when that node cooked.
+- **Component expressions** mark the node dirty when a single vector component changes. `ExpressionCHOP` is live only when its expression reads time. `HoldCHOP` cooks from its inputs. Lag, Filter, and Smooth stop cooking once their output settles.
+
+## 2026-10-07 — Graph dependency UX + async I/O rollout
+
+- **Graph reference overlay (A–D)** — read lines (cyan), static write lines (`set_par`, `network_connect`, `# @affects`), runtime side-effect lines from last cook, wireless hover refs. All on by default; toggles + colors in **Preferences → Graph References**.
+- **`GNReferenceScanner`** — shared static scan for cook demand and graph overlay; `# @affects node[:param]` in script/callback bodies.
+- **Runtime side-effect ledger** — `set_par` / `network_connect` recorded per cook frame; inspector **Dependencies** panel (Reads / Writes / Wired inputs / Referenced by).
+- **Async / keep_dirty** — FileInDAT `async_load`, ImageSequenceIMG per-frame async, WebDAT pending fetch, FileInSOP URL pending, AudioFileInCHOP, TextureSaveOUT GPU readback.
+- **Tests:** `test_reference_scanner`, cook pipeline side-effect ledger, WebDAT keep_dirty, FileInDAT async.
+
+## 2026-10-07 — Cook-chain hardening (async requeue, SCRIPT demand, Select wireless)
+
+- **`GNNode.keep_dirty_after_cook`** — operators that need a follow-up frame (async ImageFileIn, TOPtoIMG ViewportTexture lag, Bloom pipeline rebuild) set this during `_cook`; `execute_cook` restores dirty and invalidates the input-hash guard. Replaces fragile `call_deferred("mark_dirty")`.
+- **SCRIPT / Native / Python code bodies** — cook engine scans `code` / `py_source` / `cpp_source` STRING params for `chop()`/`dat()`/… so wireless demand and the active set match expression refs (no `@input`-only workaround).
+- **Select\*** — drop blanket `time_dependent`; rely on wireless consumer dirty + remote input hash. Resolve owning network via `get_owning_network()` (CookEngine parent).
+- **Tests:** `test_cook_pipeline` — script code-body demand, SelectCHOP wireless update, ImageFileIn async via `cook_frame`; img unit asserts keep-dirty while pending.
+
+## 2026-10-07 — RichTextTOP
+- **RichTextTOP** — BBCode multi-style text → texture via `RichTextLabel` (bold/color/size spans, outline/shadow/margin, transparent HUD overlays). 588 operators / TOP 140.
+
+## 2026-10-07 — Multiline string params in inspector
+- **GNParameter** — `create_string(..., multiline=true)` / `is_multiline` flag
+- **GNParamRow** — multiline strings use an editable `TextEdit` (not a one-line `LineEdit`)
+- Enabled for **TextTOP**, **TextDAT**, **JSONDAT** `json_string`, **WebDAT** `body`, **LabelUI**, **RichTextLabelUI**, **FontSOP**
+
+## 2026-10-07 — IMG viewer format mismatch on update
+- **GNImageRenderer** — recreate `ImageTexture` when image format changes (not only size). Fixes `ImageTexture.update()` error when switching JPG/RGB8 ↔ PNG/RGBA8 at the same resolution.
+
+## 2026-10-06 — Player READY smoke marker (WindowOUT)
+
+- Player logs `[GONODES_PLAYER_READY]` once open WindowOUT sinks cook with a texture and no cook errors (also `player_ready.ok` next to the exe). Failures/timeouts write `[GONODES_PLAYER_READY_FAIL]` / `[GONODES_PLAYER_READY_TIMEOUT]` + `player_ready.fail`.
+- **Export fix:** Player/Editor presets now `include_filter="*.cfg"` (and exclude `export_presets.cfg`) so `gn_core.cfg` / `gn_extension.cfg` ship in the `.pck`. Without this, exported Players loaded every operator as a placeholder.
+
+## 2026-10-06 — BitRots operators (TouchPaint, FileCopy, async ImageFileIn)
+
+### New operators
+- **TouchPaintTOP** — accumulate grayscale radial touch/damage mask for sort regions
+- **FileCopyOUT** — rising-edge atomic file copy (seed day folders from display assets)
+
+### Enhanced
+- **TextTOP** — outline + drop shadow via Godot Label theme overrides; transparent bg for overlays
+- **TextureSaveOUT** — Continuous | Pulse Once save modes; resolve `project://` before mkdir
+- **ImageFileInIMG** — `async_load` worker-thread preload holding last good frame (`keep_dirty_after_cook` requeue)
+- **FolderDAT** — `project://` resolve, Name/Modified sort, size via `get_length`, modified column
+- **File picker (GNParamRow)** — `*.*` means all files; keep current `project://` selection when scan misses
+
+### Exhibition
+- BitRots patch lives under `Projects/BIT ROTS/` (outside this repo). MouseIn + FolderDAT can use SCRIPT body `chop()`/`dat()` demand (no `@input` required for cook activation).
+
+---
+
 ## 2026-06-XX — libgonodes v2.5: Direct Bridge Architecture
 
 ### Architecture

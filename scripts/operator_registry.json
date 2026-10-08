@@ -259,16 +259,6 @@
         "name": "mute_output",
         "type": "bool",
         "default": false
-      },
-      {
-        "name": "output_device",
-        "type": "menu",
-        "default": null
-      },
-      {
-        "name": "refresh_devices",
-        "type": "bool",
-        "default": false
       }
     ]
   },
@@ -1485,11 +1475,6 @@
         "name": "mode",
         "type": "menu",
         "default": null
-      },
-      {
-        "name": "window",
-        "type": "string",
-        "default": "Window ID to capture from (0 = main)"
       }
     ]
   },
@@ -1794,11 +1779,6 @@
         "name": "scroll",
         "type": "bool",
         "default": true
-      },
-      {
-        "name": "window",
-        "type": "string",
-        "default": "Window ID to capture from (0 = main)"
       }
     ]
   },
@@ -4294,8 +4274,8 @@
       },
       {
         "name": "forced_lod",
-        "type": "int",
-        "default": 0
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -5552,6 +5532,11 @@
         "name": "include_dirs",
         "type": "bool",
         "default": true
+      },
+      {
+        "name": "sort",
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -5739,11 +5724,6 @@
         "name": "normalize",
         "type": "bool",
         "default": false
-      },
-      {
-        "name": "window",
-        "type": "string",
-        "default": "Window ID to capture from (0 = main)"
       }
     ]
   },
@@ -7314,8 +7294,8 @@
     "params": [
       {
         "name": "kernel",
-        "type": "int",
-        "default": 0
+        "type": "menu",
+        "default": null
       },
       {
         "name": "strength",
@@ -7528,6 +7508,11 @@
         "default": null
       },
       {
+        "name": "async_load",
+        "type": "bool",
+        "default": false
+      },
+      {
         "name": "reload",
         "type": "bool",
         "default": false
@@ -7634,8 +7619,8 @@
       },
       {
         "name": "type",
-        "type": "int",
-        "default": 0
+        "type": "menu",
+        "default": null
       },
       {
         "name": "scale",
@@ -7893,13 +7878,13 @@
     "params": [
       {
         "name": "direction",
-        "type": "int",
-        "default": 0
+        "type": "menu",
+        "default": null
       },
       {
         "name": "sort_mode",
-        "type": "int",
-        "default": 0
+        "type": "menu",
+        "default": null
       },
       {
         "name": "threshold_low",
@@ -8918,8 +8903,8 @@
       },
       {
         "name": "buffer_length",
-        "type": "float",
-        "default": 0.1
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -8979,6 +8964,40 @@
         "name": "progress",
         "type": "float",
         "default": 0.0
+      }
+    ]
+  },
+  {
+    "class_name": "FileCopyOUT",
+    "node_type": "file_copy",
+    "family": "output",
+    "file": "addons/gonodes/operators/output/file_copy_out.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "active",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "source",
+        "type": "file",
+        "default": null
+      },
+      {
+        "name": "dest",
+        "type": "file",
+        "default": null
+      },
+      {
+        "name": "overwrite",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "make_dirs",
+        "type": "bool",
+        "default": true
       }
     ]
   },
@@ -9260,6 +9279,11 @@
         "name": "active",
         "type": "bool",
         "default": false
+      },
+      {
+        "name": "mode",
+        "type": "menu",
+        "default": null
       },
       {
         "name": "file_path",
@@ -12969,8 +12993,8 @@
       },
       {
         "name": "uv_set",
-        "type": "int",
-        "default": 0
+        "type": "menu",
+        "default": null
       }
     ]
   },
@@ -16787,6 +16811,95 @@
     ]
   },
   {
+    "class_name": "RichTextTOP",
+    "node_type": "richtext",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/rich_text_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "text",
+        "type": "string",
+        "default": null
+      },
+      {
+        "name": "bbcode",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "font_file",
+        "type": "file",
+        "default": null
+      },
+      {
+        "name": "font_size",
+        "type": "int",
+        "default": 48
+      },
+      {
+        "name": "font_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "bg_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "align_h",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "align_v",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "word_wrap",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "outline_size",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "outline_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "shadow",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "shadow_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "shadow_offset",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "margin",
+        "type": "vector2i",
+        "default": null
+      }
+    ]
+  },
+  {
     "class_name": "RippleTOP",
     "node_type": "ripple",
     "family": "top",
@@ -17363,6 +17476,36 @@
         "name": "word_wrap",
         "type": "bool",
         "default": true
+      },
+      {
+        "name": "outline_size",
+        "type": "int",
+        "default": 0
+      },
+      {
+        "name": "outline_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "shadow",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "shadow_color",
+        "type": "color",
+        "default": null
+      },
+      {
+        "name": "shadow_offset",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "margin",
+        "type": "vector2i",
+        "default": null
       }
     ]
   },
@@ -17488,6 +17631,60 @@
     ]
   },
   {
+    "class_name": "TouchPaintTOP",
+    "node_type": "touch_paint",
+    "family": "top",
+    "file": "addons/gonodes/operators/top/touch_paint_top.gd",
+    "extension": null,
+    "params": [
+      {
+        "name": "resolution",
+        "type": "vector2i",
+        "default": null
+      },
+      {
+        "name": "cx",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "cy",
+        "type": "float",
+        "default": 0.5
+      },
+      {
+        "name": "radius_px",
+        "type": "float",
+        "default": 80.0
+      },
+      {
+        "name": "strength",
+        "type": "float",
+        "default": 0.1
+      },
+      {
+        "name": "falloff",
+        "type": "menu",
+        "default": null
+      },
+      {
+        "name": "accumulate",
+        "type": "bool",
+        "default": true
+      },
+      {
+        "name": "paint",
+        "type": "bool",
+        "default": false
+      },
+      {
+        "name": "clear",
+        "type": "bool",
+        "default": false
+      }
+    ]
+  },
+  {
     "class_name": "TrailTOP",
     "node_type": "trail",
     "family": "top",
@@ -17594,7 +17791,7 @@
       {
         "name": "strength",
         "type": "float",
-        "default": 3.0
+        "default": 172.0
       },
       {
         "name": "radius",
@@ -18627,8 +18824,8 @@
       },
       {
         "name": "fill_mode",
-        "type": "int",
-        "default": 0
+        "type": "menu",
+        "default": null
       },
       {
         "name": "min_size",

@@ -18,6 +18,16 @@
 
 ## Entries
 
+### 2026-10-08 — `time_dependent` is operator logic, not a user toggle
+
+- `GNNode.update_time_dependency()` runs at the start of `_pre_cook`. Override it when a node is only live while a rate, playback flag, jitter, or referenced node is changing. Clocks, devices, and GlitchTOP stay on because their output always moves with time. MovieFileIn holds when paused or speed is 0. TimeMachine holds in Position mode and in Speed mode at speed 0. The cook loop iterates the active set. Live nodes skip the parameter hash while elapsed time is moving. Lag, Filter, and Smooth drop time_dependent once their carried state settles.
+
+### 2026-10-07 — FIXED: ImageFileInIMG `async_load` + SCRIPT code-body demand + Select wireless
+
+- **`keep_dirty_after_cook`** on `GNNode`: async / one-frame lag operators set this in `_cook`; `execute_cook` re-dirties and clears `_last_cook_input_hash` so the hash guard cannot skip the follow-up. Used by ImageFileInIMG, TOPtoIMG, BloomTOP (replaces `call_deferred("mark_dirty")`).
+- **SCRIPT demand:** `_get_expression_refs` / `_build_wireless_demand_map` scan STRING script bodies (`code`, `py_source`, `cpp_source`) for `chop()`/`dat()`/etc. — same as expression params.
+- **Select\*:** removed blanket `time_dependent`; wireless refresh via `_wireless_consumer_map` + remote hash. All Select\* resolve network via `GNNode.get_owning_network()` (CookEngine parent), not a `GNNetwork` scene parent.
+
 ### 2026-09-23 — Hard Rule 25.46: multi-stage work must be resumable
 
 - Stage isn't done until findings + honest progress status + `## Resume here` block are written

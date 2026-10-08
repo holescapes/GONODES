@@ -47,6 +47,13 @@ func test_create_string() -> void:
 	var p := GNParameter.create_string("name", "hello", "Name", "Node name")
 	GNTestAssert.assert_eq(p.value_type, GNParameter.ValueType.STRING, "value_type")
 	GNTestAssert.assert_eq(p.value, "hello", "initial value")
+	GNTestAssert.assert_false(p.is_multiline, "default single-line")
+
+
+func test_create_string_multiline() -> void:
+	var p := GNParameter.create_string("text", "a\nb", "Text", "Body", true)
+	GNTestAssert.assert_true(p.is_multiline, "multiline flag")
+	GNTestAssert.assert_eq(p.value, "a\nb", "preserves newlines in value")
 
 
 func test_create_enum() -> void:

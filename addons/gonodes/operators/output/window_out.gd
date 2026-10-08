@@ -88,8 +88,16 @@ var _input_mouse_buttons: Dictionary = {}
 var _input_scroll: float = 0.0
 ## Touch points: finger index → {x, y, pressure, rel_x, rel_y, phase}.
 var _input_touches: Dictionary = {}
-## True while this window has OS keyboard/mouse focus.
+## True while this window has OS keyboard focus.
 var _input_has_focus: bool = false
+## True after a click on this window, until a click outside it.
+var _pointer_armed: bool = false
+## Last input event already recorded, so the relay and the picture do not apply it twice.
+var _last_input_event_id: int = 0
+## Keys that went down since Keyboard In last cooked.
+var _key_latch: Dictionary = {}
+## Mouse buttons pressed since Mouse In last cooked.
+var _button_latch: Dictionary = {}
 ## Window size (updated every cook so CHOPs can normalize).
 var _input_window_size: Vector2 = Vector2(512, 512)
 
@@ -150,6 +158,10 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	_embedded_mode = _is_single_window
 
 	_ensure_window()
+	if not _embedded_mode:
+		_ensure_key_relay()
+		_ensure_display_input()
+		_ensure_input_trace()
 
 	if _embedded_mode:
 		# Embedded mode — show/hide the fullscreen Control in the main viewport
@@ -188,6 +200,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	# Decay per-frame impulse values (scroll, ended touches)
 	_decay_input_state()
+	_poll_pointer_focus()
 
 	# Adopt interactive UI panel from port 1
 	_update_panel_layer(inputs)
@@ -217,13 +230,16 @@ func _ensure_window() -> void:
 	_window.window_input.connect(_on_window_input)
 	_window.focus_entered.connect(_on_window_focus_entered)
 	_window.focus_exited.connect(_on_window_focus_exited)
+	_ensure_key_relay()
 
 	# Background texture layer (z=0)
 	_display_rect = TextureRect.new()
 	_display_rect.name = "Display"
 	_display_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_display_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_display_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_display_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+	_display_rect.focus_mode = Control.FOCUS_ALL
+	_display_rect.gui_input.connect(_on_display_gui_input)
 	_window.add_child(_display_rect)
 	_display_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -423,12 +439,28 @@ func _on_window_close_requested() -> void:
 ## Tracks per-window input state for KeyboardInCHOP / MouseInCHOP / MultiTouchInDAT.
 ## ESC reverts fullscreen/borderless to windowed.
 func _on_window_input(event: InputEvent) -> void:
+	# Signal, the in-window relay, and the picture control can all see the same event.
+	var event_id := event.get_instance_id()
+	if event_id == _last_input_event_id:
+		return
+	_last_input_event_id = event_id
 	# ── Keyboard ──────────────────────────────────────────────────────────
 	if event is InputEventKey:
 		var ke: InputEventKey = event as InputEventKey
-		_input_keys[ke.keycode] = ke.pressed
+		if ke.echo:
+			return
+		var down := ke.pressed
+		if ke.keycode != KEY_NONE:
+			_remember_key(int(ke.keycode), down)
+		if ke.physical_keycode != KEY_NONE:
+			_remember_key(int(ke.physical_keycode), down)
+		if ke.keycode == KEY_NONE and ke.physical_keycode == KEY_NONE and ke.unicode != 0:
+			var mapped: Key = OS.find_keycode_from_string(String.chr(ke.unicode))
+			if mapped != KEY_NONE:
+				_remember_key(int(mapped), down)
 		# ESC: revert fullscreen/borderless to windowed
-		if ke.pressed and ke.keycode == KEY_ESCAPE:
+		var esc_code: int = int(ke.keycode if ke.keycode != KEY_NONE else ke.physical_keycode)
+		if down and esc_code == KEY_ESCAPE:
 			var mode_idx: int = get_param_value("window_mode")
 			if mode_idx != WindowMode.WINDOWED:
 				set_param_value("window_mode", WindowMode.WINDOWED)
@@ -437,14 +469,26 @@ func _on_window_input(event: InputEvent) -> void:
 
 	# ── Mouse motion ──────────────────────────────────────────────────────
 	elif event is InputEventMouseMotion:
-		_input_mouse_pos = (event as InputEventMouseMotion).position
+		var mm := event as InputEventMouseMotion
+		if _window != null and is_instance_valid(_window):
+			var sz := Vector2(_window.size)
+			# Some deliveries use screen coordinates and land far outside the window.
+			if mm.position.x < -1.0 or mm.position.y < -1.0 or mm.position.x > sz.x + 1.0 or mm.position.y > sz.y + 1.0:
+				return
+		_input_mouse_pos = mm.position
 
 	# ── Mouse buttons / scroll ────────────────────────────────────────────
 	elif event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and _window != null and is_instance_valid(_window):
+			_window.grab_focus()
+			if _display_rect != null:
+				_display_rect.grab_focus()
 		match mb.button_index:
 			MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE:
 				_input_mouse_buttons[mb.button_index] = mb.pressed
+				if mb.pressed:
+					_button_latch[mb.button_index] = true
 			MOUSE_BUTTON_WHEEL_UP:
 				if mb.pressed:
 					_input_scroll += 1.0
@@ -682,3 +726,146 @@ func get_overlay_rect() -> Rect2:
 			if child != _overlay_bg:
 				return child.get_global_rect()
 	return Rect2()
+
+
+## True while this output window is the one receiving keyboard input.
+## Cursor position in this window's pixels, sampled from the screen every cook.
+func pointer_local() -> Vector2:
+	if _window != null and is_instance_valid(_window) and _window.visible:
+		var local := Vector2(DisplayServer.mouse_get_position()) - Vector2(_window.position)
+		var sz := Vector2(_window.size)
+		if local.x >= -8.0 and local.y >= -8.0 and local.x <= sz.x + 8.0 and local.y <= sz.y + 8.0:
+			_input_mouse_pos = local
+			return local
+	return _input_mouse_pos
+
+
+func pointer_over_window() -> bool:
+	if _window == null or not is_instance_valid(_window) or not _window.visible:
+		return false
+	var local := Vector2(DisplayServer.mouse_get_position()) - Vector2(_window.position)
+	var sz := Vector2(_window.size)
+	return local.x >= 0.0 and local.y >= 0.0 and local.x <= sz.x and local.y <= sz.y
+
+
+func pointer_inside() -> bool:
+	if _window == null or not is_instance_valid(_window) or not _window.visible:
+		return false
+	var rect := Rect2(_window.position, Vector2(_window.size))
+	return rect.has_point(DisplayServer.mouse_get_position())
+
+
+func output_window_focused() -> bool:
+	if _pointer_armed:
+		return true
+	if _input_has_focus:
+		return true
+	if _window != null and is_instance_valid(_window) and _window.has_focus():
+		return true
+	if _display_rect != null and is_instance_valid(_display_rect) and _display_rect.has_focus():
+		return true
+	return false
+
+
+func _window_is_open() -> bool:
+	return _window != null and is_instance_valid(_window) and _window.visible
+
+
+func _remember_key(code: int, down: bool) -> void:
+	if code == KEY_NONE:
+		return
+	_input_keys[code] = down
+	if down:
+		_key_latch[code] = true
+
+
+func key_held(code: int) -> bool:
+	return bool(_input_keys.get(code, false)) or bool(_key_latch.get(code, false))
+
+
+func consume_key_latch() -> void:
+	_key_latch.clear()
+
+
+func button_held(button: int) -> bool:
+	return bool(_input_mouse_buttons.get(button, false)) or bool(_button_latch.get(button, false))
+
+
+func consume_button_latch() -> void:
+	_button_latch.clear()
+
+
+## A click on the picture selects this window for keyboard capture even when
+## the OS does not move keyboard focus away from the main editor window.
+func _poll_pointer_focus() -> void:
+	if _window == null or not is_instance_valid(_window) or not _window.visible:
+		_pointer_armed = false
+		return
+	if _window.has_focus():
+		_pointer_armed = true
+		return
+	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		return
+	var rect := Rect2i(_window.position, _window.size)
+	var inside := rect.has_point(Vector2i(DisplayServer.mouse_get_position()))
+	_pointer_armed = inside
+	if inside:
+		_window.grab_focus()
+
+
+func _on_window_signal(event: InputEvent) -> void:
+	_on_window_input(event)
+
+
+func _on_display_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
+		if _window != null and is_instance_valid(_window):
+			_window.grab_focus()
+		if _display_rect != null:
+			_display_rect.grab_focus()
+	_on_window_input(event)
+
+
+func _ensure_display_input() -> void:
+	if _display_rect == null or not is_instance_valid(_display_rect):
+		return
+	_display_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+	_display_rect.focus_mode = Control.FOCUS_ALL
+	if not _display_rect.gui_input.is_connected(_on_display_gui_input):
+		_display_rect.gui_input.connect(_on_display_gui_input)
+
+
+func _ensure_key_relay() -> void:
+	if _window == null or not is_instance_valid(_window):
+		return
+	var existing := _window.get_node_or_null("KeyRelay")
+	if existing != null and not existing.has_meta("gn_trace"):
+		existing.free()
+		existing = null
+	if existing != null:
+		return
+	var key_relay := _WindowKeyRelay.new(self)
+	key_relay.name = "KeyRelay"
+	key_relay.set_meta("gn_trace", true)
+	_window.add_child(key_relay)
+
+
+func _ensure_input_trace() -> void:
+	if _window == null or not is_instance_valid(_window):
+		return
+	if not _window.window_input.is_connected(_on_window_input):
+		_window.window_input.connect(_on_window_input)
+	if _window.window_input.is_connected(_on_window_signal):
+		_window.window_input.disconnect(_on_window_signal)
+
+
+class _WindowKeyRelay extends Node:
+	var host: WindowOUT
+
+	func _init(p_host: WindowOUT) -> void:
+		host = p_host
+		process_mode = Node.PROCESS_MODE_ALWAYS
+
+	func _input(event: InputEvent) -> void:
+		if host != null and is_instance_valid(host):
+			host._on_window_input(event)

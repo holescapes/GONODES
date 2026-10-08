@@ -19,14 +19,14 @@ If you've used TouchDesigner, Houdini, Max/MSP, vvvv, or VUO, you know the workf
 
 ## Features at a Glance
 
-**585 operators** across **15 families**, plus **131 native C++ accelerated variants** and **25 extension folders** (`addons/gn_ext_*/`; 23 distributable packs in the table below, plus `gn_ext_native` acceleration and internal `gn_ext_host_bridge` for LibGodot).
+**588 operators** across **15 families**, plus **131 native C++ accelerated variants** and **25 extension folders** (`addons/gn_ext_*/`; 23 distributable packs in the table below, plus `gn_ext_native` acceleration and internal `gn_ext_host_bridge` for LibGodot).
 Parallel level-based cook engine, named output ports, dot routing nodes, and keyframe animation.
 
 ### Operator Families
 
 | Family | Count | What It Processes | Examples |
 |--------|-------|-------------------|----------|
-| **TOP** | 138 | GPU texture processing | Noise, Composite, Blur, ChromaKey, Feedback, Render, GLSL, ISF, Shadertoy, Deform |
+| **TOP** | 139 | GPU texture processing | Noise, Composite, Blur, ChromaKey, Feedback, Render, GLSL, ISF, Shadertoy, TouchPaint |
 | **CHOP** | 107 | Signals, channels & audio | LFO, Audio synthesis, DMX, MIDI, OSC, Gamepad, Keyboard, Skeleton, State machine |
 | **SOP** | 85 | 3D geometry | Grid, Boolean, Extrude, Subdivide, Remesh, ClothSim, L-System, PolyBevel, HeightField |
 | **DAT** | 51 | Tables, text & data | JSON, WebSocket, MQTT, HTTP, ArtNet, Serial, OSC, QR, RenderPick, PanelExecute |
@@ -38,7 +38,7 @@ Parallel level-based cook engine, named output ports, dot routing nodes, and key
 | **MAT** | 12 | Materials & shaders | PBR, Custom GLSL, Wireframe, PointSprite, FluidSurface, NormalMap |
 | **POP** | 12 | GPU particles | Source, Force, Turbulence, Boids, Collision, Advect (VOL), Ribbon trail |
 | **VOL** | 12 | Volumetric 3D textures | Noise, Fluid sim (Navier-Stokes), Pyro, Marching Cubes, Raymarch |
-| **OUT** | 12 | Output & export | WindowOUT, SinkOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT, OscOUT, PixelDmxOUT |
+| **OUT** | 13 | Output & export | WindowOUT, SinkOUT, TextureSaveOUT, FileCopyOUT, MovieOUT, FFmpegOUT, AudioDeviceOUT |
 | **FIX** | 8 | LED fixture mapping | Strip, Grid, Matrix, Custom — define LED UV positions for GPU sampling and DMX routing |
 | **SCRIPT** | 3 | User scripting | GDScript, Python (NumPy), C++ — template-based, multi-family output |
 
@@ -330,7 +330,7 @@ Both formats work today. A dedicated asset browser and community sharing portal 
 │  UI Layer                                   │
 │  Node graph, Inspector, Viewer, Debug       │
 ├─────────────────────────────────────────────┤
-│  Operator Library (585)                     │
+│  Operator Library (587)                     │
 │  TOPs, CHOPs, SOPs, POPs, VOLs, DATs,      │
 │  MATs, COMPs, IMGs, OUTs, UIs              │
 ├─────────────────────────────────────────────┤

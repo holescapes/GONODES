@@ -443,6 +443,25 @@ else:
 > If you set a parameter on a node that hasn't cooked yet this frame, it will
 > pick up the new value when it cooks. Be mindful of circular dependencies.
 
+> **Graph overlay:** Static `set_par("node", …)` calls and `# @affects` annotations
+> draw orange dotted writer→target lines in the graph editor. Runtime calls from
+> the last cook also appear (red/orange) in the side-effect ledger overlay.
+> Toggle layers and colors under **Preferences → Graph References**.
+
+### `# @affects` annotations (script bodies)
+
+Document side effects that static analysis cannot see (dynamic node IDs, indirect
+writes). One annotation per line in `code` / callback params:
+
+```gdscript
+# @affects glow_comp:glow_intensity
+# @affects mixer
+func cook():
+    set_par(pick_target(), "level", 1.0)  # runtime line only; @affects covers static docs
+```
+
+These merge into the **Writes (static)** overlay and inspector dependency panel.
+
 ---
 
 ## Network API — Procedural Graph Construction
@@ -579,6 +598,8 @@ A → [C] 1.0
 ## Menus
 
 A dropdown stores its choice as an index, starting at 0. An expression on that parameter can return the index or the option name. On Noise Image, `1` and `"White"` are the same choice.
+
+A node menu, such as Keyboard In Window, stores the node name. `(none)` is an empty string, so an expression can return `""` or `"window1"`.
 
 ## Built-in GDScript Functions
 

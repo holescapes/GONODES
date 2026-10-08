@@ -1007,6 +1007,12 @@ func test_trigger_chop_fires_on_edge() -> void:
 func test_expression_chop_constant_expr() -> void:
 	var node := _make_node(ExpressionCHOP.new(), "expr1")
 	node.set_param_value("expr", "2.0 + 3.0")
+	node.update_time_dependency()
+	GNTestAssert.assert_false(node.time_dependent, "constant expr is not live")
+	node.set_param_value("expr", "sin(t)")
+	node.update_time_dependency()
+	GNTestAssert.assert_true(node.time_dependent, "time expr is live")
+	node.set_param_value("expr", "2.0 + 3.0")
 	node.set_param_value("samples", 1)
 	var out: GNChannelData = _cook_no_input(node) as GNChannelData
 	GNTestAssert.assert_not_null(out, "expr output")
@@ -1034,6 +1040,7 @@ func test_envelope_chop_peak() -> void:
 
 func test_hold_chop_captures_on_start() -> void:
 	var node := _make_node(HoldCHOP.new(), "hold1")
+	GNTestAssert.assert_false(node.time_dependent, "hold cooks from its inputs")
 	node.set_param_value("hold_on_start", true)
 	var input := _make_chop_data({"x": PackedFloat32Array([42.0])})
 	var trigger := _make_chop_data({"x": PackedFloat32Array([0.0])})

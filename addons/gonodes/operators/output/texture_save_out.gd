@@ -4,11 +4,14 @@ extends GNOutBase
 ##
 ## Activate the "active" toggle to start writing.
 ## Supports auto-numbering for image sequences.
+## Mode Continuous: save every cook while Active is ON.
+## Mode Pulse Once: on rising Active edge, enqueue exactly one save.
 ## GPU→CPU readback uses async readback on the cook thread; compress + disk
 ## write run on a background thread so sync save does not stutter the graph.
 ## Turning Active OFF flushes the write queue before idle.
 
 enum Format { PNG, WEBP, EXR }
+enum SaveMode { CONTINUOUS, PULSE_ONCE }
 
 ## Running frame counter for auto-numbering (advanced on enqueue).
 var _frame_counter: int = 0
@@ -21,6 +24,9 @@ var _total_queued: int = 0
 
 ## Frames successfully written by the worker.
 var _total_written: int = 0
+
+## After a Pulse Once save, ignore Active until it falls then rises again.
+var _pulse_done: bool = false
 
 ## Async disk writer (compress + IO off the cook thread).
 const _WRITE_QUEUE_MAX := 64
@@ -46,7 +52,10 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_bool("active", false,
-		"Active", "When enabled, queues texture saves every cook (disk write is async)"))
+		"Active", "Continuous: save every cook. Pulse Once: one save on rising edge."))
+	add_parameter(GNParameter.create_enum("mode",
+		PackedStringArray(["Continuous", "Pulse Once"]), 0,
+		"Mode", "Continuous = while Active ON. Pulse Once = single save per rising Active."))
 	add_parameter(GNParameter.create_file("file_path", "user://output/frame",
 		PackedStringArray(["*.png", "*.webp", "*.exr"]),
 		"File Path",
@@ -69,34 +78,53 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		return null
 
 	var active: bool = get_param_value("active")
+	var mode: int = int(get_param_value("mode"))
 
 	# Falling edge: flush pending writes before going idle
 	if _was_active and not active:
 		_stop_write_thread(false)
 		_was_active = false
+		_pulse_done = false
 		return null
 
 	# Rising edge: reset counter and start writer
-	if active and not _was_active:
+	var rising: bool = active and not _was_active
+	if rising:
 		_frame_counter = get_param_value("start_frame")
 		_total_queued = 0
 		_total_written = 0
 		_write_fail_count = 0
+		_pulse_done = false
 		_start_write_thread()
 	_was_active = active
 
 	if not active:
 		return null
 
+	# Pulse Once: only the rising-edge cook enqueues a frame
+	if mode == SaveMode.PULSE_ONCE:
+		if _pulse_done or not rising:
+			return null
+		_pulse_done = true
+
 	# GPU → CPU readback (async; must stay on cook / render thread)
 	var image: Image = tex_in.get_readback_image()
 	if image == null:
+		request_keep_dirty()
 		GNLogger.warn("TextureSaveOUT",
 			"'%s': readback returned null (texture may not be ready)" % id)
 		return null
 
-	# Build path
-	var base_path: String = str(get_param_value("file_path")).get_basename()
+	# Build path — resolve project:// (and globalize user:// / res://) before
+	# basename/mkdir.  Godot's get_base_dir() mangles "project://" into "project:/".
+	var raw_path: String = str(get_param_value("file_path"))
+	var resolved: String = GNResourceLoader.resolve(raw_path, project_dir)
+	if resolved.is_empty():
+		resolved = raw_path
+	if resolved.begins_with("user://") or resolved.begins_with("res://"):
+		resolved = ProjectSettings.globalize_path(resolved)
+
+	var base_path: String = resolved.get_basename()
 	var fmt: int = get_param_value("format")
 	var auto_num: bool = get_param_value("auto_number")
 	var quality: float = float(get_param_value("quality"))

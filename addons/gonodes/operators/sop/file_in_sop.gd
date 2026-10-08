@@ -46,6 +46,8 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			"ready":
 				path = result.path
 			"pending":
+				request_keep_dirty()
+				node_warning = "Downloading…"
 				return geo  # placeholder until download completes
 			"error":
 				GNLogger.warn("FileInSOP", "'%s' — URL fetch error: %s" % [id, result.error])

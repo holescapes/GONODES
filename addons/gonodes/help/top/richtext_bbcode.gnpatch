@@ -1,0 +1,56 @@
+{
+  "annotations": [
+    {
+      "color": [1.0, 1.0, 1.0, 0.8],
+      "id": "ann_1",
+      "position": [-80.0, -180.0],
+      "size": [540.0, 160.0],
+      "text": "RichText TOP — BBCode\n\nMixed sizes, colors, and italic/bold in one string.\nShowcasing: [font_size], [color], [i], [b].",
+      "type": "note"
+    }
+  ],
+  "app_version": "0.1.0-beta",
+  "connections": [
+    {"from": "richtext1", "from_port": 0, "to": "window1", "to_port": 0}
+  ],
+  "generator": "GONODES",
+  "nodes": {
+    "richtext1": {
+      "type": "RichTextTOP",
+      "position": [120.0, 120.0],
+      "parameters": {
+        "text": {
+          "value": "[font_size=56][b]BIT ROTS[/b][/font_size]\n[color=#bbbbbb][i]KINO, 2026[/i][/color]\n[font_size=28][color=#ffcc66]TOUCH[/color][/font_size]"
+        },
+        "bbcode": {"value": true},
+        "font_size": {"value": 36},
+        "align_h": {"value": 1},
+        "align_v": {"value": 1},
+        "word_wrap": {"value": true},
+        "outline_size": {"value": 4},
+        "outline_color": {
+          "value": {"_type": "Color", "r": 0.0, "g": 0.0, "b": 0.0, "a": 0.9}
+        },
+        "bg_color": {
+          "value": {"_type": "Color", "r": 0.05, "g": 0.05, "b": 0.08, "a": 1.0}
+        },
+        "resolution": {
+          "value": {"_type": "Vector2i", "x": 512, "y": 512}
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [420.0, 140.0],
+      "parameters": {
+        "open": {"value": true},
+        "resolution": {
+          "value": {"_type": "Vector2i", "x": 512, "y": 512}
+        },
+        "title": {"value": "RichTextTOP BBCode"}
+      }
+    }
+  },
+  "version": "1.0.0",
+  "viewport": {"scroll_x": 0.0, "scroll_y": 0.0, "zoom": 0.7}
+}

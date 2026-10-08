@@ -1,7 +1,8 @@
 class_name FolderDAT
 extends GNDatBase
 ## Lists files and sub-directories in a given folder path.
-## Outputs a table with name, extension, size, modified-date columns.
+## Outputs a table with name, path, extension, size, is_dir columns.
+## Supports project:// path tiers and optional name/modified sorting.
 
 func _init() -> void:
 	node_type = "folder"
@@ -18,33 +19,54 @@ func _init_ports() -> void:
 
 func _init_parameters() -> void:
 	add_parameter(GNParameter.create_folder("path", "res://", "Path",
-		"Directory path to list"))
+		"Directory path to list (supports project://)"))
 	add_parameter(GNParameter.create_bool("recursive", false, "Recursive",
 		"Include sub-directories recursively"))
 	add_parameter(GNParameter.create_string("filter", "*", "Filter",
 		"Glob-style filter (e.g. *.png)"))
 	add_parameter(GNParameter.create_bool("include_dirs", true, "Include Dirs",
 		"Include sub-directories in listing"))
+	add_parameter(GNParameter.create_enum("sort",
+		PackedStringArray(["Name", "Modified"]), 0,
+		"Sort", "Sort listing by file name or modified time"))
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
-	var dir_path: String = get_param_value("path").strip_edges()
+	var dir_path: String = str(get_param_value("path")).strip_edges()
 	var recursive: bool = get_param_value("recursive")
-	var filter_pat: String = get_param_value("filter").strip_edges()
+	var filter_pat: String = str(get_param_value("filter")).strip_edges()
 	var include_dirs: bool = get_param_value("include_dirs")
+	var sort_mode: int = int(get_param_value("sort"))
 
 	var tbl: GNTableData = _prepare_table(true)
-	tbl.set_headers(PackedStringArray(["name", "path", "extension", "size", "is_dir"]))
+	tbl.set_headers(PackedStringArray(["name", "path", "extension", "size", "is_dir", "modified"]))
 
 	if dir_path.is_empty():
 		return tbl
 
-	_scan_dir(dir_path, recursive, filter_pat, include_dirs, tbl)
+	var resolved := GNResourceLoader.resolve(dir_path, project_dir)
+	if resolved.is_empty():
+		resolved = dir_path
+
+	var rows: Array = []  # Array of {cols: PackedStringArray, modified: int, name: String}
+	_scan_dir(resolved, recursive, filter_pat, include_dirs, rows)
+
+	if sort_mode == 1:
+		rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return int(a.modified) < int(b.modified)
+		)
+	else:
+		rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+			return str(a.name).naturalnocasecmp_to(str(b.name)) < 0
+		)
+
+	for row in rows:
+		tbl.append_row(row.cols as PackedStringArray)
 	return tbl
 
 
 func _scan_dir(path: String, recursive: bool, filter_pat: String,
-		include_dirs: bool, tbl: GNTableData) -> void:
+		include_dirs: bool, rows: Array) -> void:
 	var dir := DirAccess.open(path)
 	if dir == null:
 		GNLogger.warn("FolderDAT", "'%s' — cannot open '%s'" % [id, path])
@@ -62,18 +84,33 @@ func _scan_dir(path: String, recursive: bool, filter_pat: String,
 
 		if is_dir:
 			if include_dirs:
-				tbl.append_row(PackedStringArray([
-					file_name, full_path, "", "0", "true"
-				]))
+				rows.append({
+					"name": file_name,
+					"modified": 0,
+					"cols": PackedStringArray([
+						file_name, full_path, "", "0", "true", "0"
+					]),
+				})
 			if recursive:
-				_scan_dir(full_path, true, filter_pat, include_dirs, tbl)
+				_scan_dir(full_path, true, filter_pat, include_dirs, rows)
 		else:
 			if _matches_filter(file_name, filter_pat):
 				var ext: String = file_name.get_extension()
-				var size_bytes: String = str(FileAccess.get_file_as_bytes(full_path).size()) if FileAccess.file_exists(full_path) else "0"
-				tbl.append_row(PackedStringArray([
-					file_name, full_path, ext, size_bytes, "false"
-				]))
+				var size_bytes: int = 0
+				var modified: int = 0
+				if FileAccess.file_exists(full_path):
+					var f := FileAccess.open(full_path, FileAccess.READ)
+					if f != null:
+						size_bytes = f.get_length() as int
+						f.close()
+					modified = int(FileAccess.get_modified_time(full_path))
+				rows.append({
+					"name": file_name,
+					"modified": modified,
+					"cols": PackedStringArray([
+						file_name, full_path, ext, str(size_bytes), "false", str(modified)
+					]),
+				})
 
 		file_name = dir.get_next()
 	dir.list_dir_end()

@@ -31,6 +31,15 @@ var _audio_out_option: OptionButton = null
 var _interface_scale_option: OptionButton = null
 var _wrap_sticky_notes_check: CheckButton = null
 var _side_panel_min_spin: SpinBox = null
+var _ref_reads_check: CheckButton = null
+var _ref_writes_check: CheckButton = null
+var _ref_runtime_check: CheckButton = null
+var _ref_wireless_check: CheckButton = null
+var _ref_read_color_picker: ColorPickerButton = null
+var _ref_write_color_picker: ColorPickerButton = null
+var _ref_runtime_color_picker: ColorPickerButton = null
+var _ref_wireless_color_picker: ColorPickerButton = null
+var _inspector_deps_check: CheckButton = null
 var _annotation_manager: GNAnnotationManager = null
 const _INTERFACE_SCALE_PERCENTS: Array[int] = [100, 125, 150, 175, 200]
 const _ExtensionsPanelScript := preload("res://addons/gonodes/ui/gn_extensions_panel.gd")
@@ -91,6 +100,9 @@ func _ready() -> void:
 
 	_build_section_header("Graph Editor")
 	_build_graph_settings()
+
+	_build_section_header("Graph References")
+	_build_graph_reference_settings()
 
 	_build_section_header("Viewer")
 	_build_viewer_settings()
@@ -380,6 +392,64 @@ func _build_graph_settings() -> void:
 		GNSettings.set_value("confirm_on_delete", val))
 	row3.add_child(_confirm_delete_check)
 	_content.add_child(row3)
+
+
+func _build_graph_reference_settings() -> void:
+	_ref_reads_check = _build_ref_toggle_row(
+			"Show read references",
+			"Cyan dashed lines: expression/script reads (source → consumer).",
+			"graph_ref_reads_visible", true)
+	_ref_writes_check = _build_ref_toggle_row(
+			"Show static write references",
+			"Orange dotted lines: set_par(), network_connect(), and # @affects (writer → target).",
+			"graph_ref_writes_visible", true)
+	_ref_runtime_check = _build_ref_toggle_row(
+			"Show runtime write references",
+			"Red/orange lines from the last cook's set_par / network_connect side effects.",
+			"graph_ref_runtime_writes_visible", true)
+	_ref_wireless_check = _build_ref_toggle_row(
+			"Show wireless hover references",
+			"Amber lines when hovering a node with node_ref parameters.",
+			"graph_ref_wireless_hover_visible", true)
+	_inspector_deps_check = _build_ref_toggle_row(
+			"Show dependency panel in inspector",
+			"Reads, writes, wired inputs, and referenced-by list on the selected node.",
+			"graph_inspector_deps_visible", true)
+
+	_ref_read_color_picker = _build_ref_color_row(
+			"Read line color", "graph_ref_read_color", Color(0.2, 0.85, 0.95, 0.55))
+	_ref_write_color_picker = _build_ref_color_row(
+			"Static write line color", "graph_ref_write_color", Color(1.0, 0.55, 0.15, 0.55))
+	_ref_runtime_color_picker = _build_ref_color_row(
+			"Runtime write line color", "graph_ref_runtime_color", Color(1.0, 0.35, 0.2, 0.65))
+	_ref_wireless_color_picker = _build_ref_color_row(
+			"Wireless hover line color", "graph_ref_wireless_color", Color(1.0, 0.65, 0.1, 0.45))
+
+
+func _build_ref_toggle_row(label_text: String, tip: String,
+		setting_key: String, default_val: bool) -> CheckButton:
+	var row := _make_row(label_text, tip)
+	var check := CheckButton.new()
+	check.button_pressed = GNSettings.get_value(setting_key, default_val)
+	check.toggled.connect(func(val: bool) -> void:
+		GNSettings.set_value(setting_key, val))
+	row.add_child(check)
+	_content.add_child(row)
+	return check
+
+
+func _build_ref_color_row(label_text: String, setting_key: String,
+		default_color: Color) -> ColorPickerButton:
+	var row := _make_row(label_text, "Overlay line color.")
+	var picker := ColorPickerButton.new()
+	picker.color = GNSettings.get_value(setting_key, default_color)
+	picker.custom_minimum_size = Vector2(60, 24)
+	picker.edit_alpha = true
+	picker.color_changed.connect(func(c: Color) -> void:
+		GNSettings.set_value(setting_key, c))
+	row.add_child(picker)
+	_content.add_child(row)
+	return picker
 
 
 func _build_viewer_settings() -> void:

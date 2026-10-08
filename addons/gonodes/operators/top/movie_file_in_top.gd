@@ -24,7 +24,14 @@ var _right_buf: PackedFloat32Array = PackedFloat32Array()
 
 func _init() -> void:
 	node_type = "movie_file_in"
-	time_dependent = true
+
+
+## Paused or zero-speed playback is a still frame. Keep cooking while the
+## first decoded size is still unknown.
+func update_time_dependency() -> void:
+	var playing: bool = get_param_value("play")
+	var spd: float = get_param_value("speed")
+	time_dependent = _awaiting_video_size or (playing and spd != 0.0)
 
 
 func _init_ports() -> void:

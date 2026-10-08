@@ -65,8 +65,15 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	if not active:
 		return null
 
-	# Build the full save path (strip any picked extension so Format can append)
-	var base_path: String = str(get_param_value("file_path")).get_basename()
+	# Resolve project:// / user:// before basename+mkdir (get_base_dir mangles project://).
+	var raw_path: String = str(get_param_value("file_path"))
+	var resolved: String = GNResourceLoader.resolve(raw_path, project_dir)
+	if resolved.is_empty():
+		resolved = raw_path
+	if resolved.begins_with("user://") or resolved.begins_with("res://"):
+		resolved = ProjectSettings.globalize_path(resolved)
+
+	var base_path: String = resolved.get_basename()
 	var fmt: int = get_param_value("format")
 	var auto_num: bool = get_param_value("auto_number")
 

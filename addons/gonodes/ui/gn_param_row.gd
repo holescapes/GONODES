@@ -485,6 +485,23 @@ func _create_string_control() -> Control:
 		vbox.add_child(edit)
 		return vbox
 
+	# Multi-line strings (TextTOP, TextDAT, JSON body, etc.)
+	if param.is_multiline:
+		var multi := TextEdit.new()
+		multi.text = str(param.value)
+		multi.size_flags_horizontal = SIZE_EXPAND_FILL
+		multi.custom_minimum_size = Vector2(0, 88)
+		multi.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+		multi.scroll_fit_content_height = false
+		if param.read_only:
+			multi.editable = false
+			multi.add_theme_color_override("font_readonly_color", Color(0.7, 0.7, 0.7, 0.8))
+		else:
+			# Live update while typing (mergeable undo); final commit on focus loss.
+			multi.text_changed.connect(_on_multiline_text_changed)
+			multi.focus_exited.connect(_on_string_multiline_focus_lost.bind(multi))
+		return multi
+
 	# One-line strings (IP, OSC address, labels, etc.)
 	var line := LineEdit.new()
 	line.text = str(param.value)
@@ -543,6 +560,7 @@ func _populate_node_ref_dropdown(ob: OptionButton) -> void:
 		return
 
 	var ref_family: int = param.node_ref_family
+	var ref_type: String = param.node_ref_type
 	var own_id: String = owner_node.id if owner_node != null else ""
 	var sorted_ids: Array = network.nodes.keys()
 	sorted_ids.sort()
@@ -551,7 +569,9 @@ func _populate_node_ref_dropdown(ob: OptionButton) -> void:
 		if n_id == own_id:
 			continue  # Don't list self
 		var n: GNNode = network.nodes[n_id]
-		if ref_family == -1 or n.family == ref_family:
+		var family_ok := ref_family == -1 or n.family == ref_family
+		var type_ok := ref_type.is_empty() or n.node_type == ref_type
+		if family_ok and type_ok:
 			ob.add_item(n_id)
 			ob.set_item_metadata(ob.item_count - 1, n_id)
 		elif n_id == cur_val:
@@ -913,12 +933,17 @@ func _populate_file_dropdown(option: OptionButton) -> void:
 		option.selected = selected_idx
 		return
 
-	# Collect matching extensions
+	# Collect matching extensions.  "*." / "*.*" / "*" mean "all files".
 	var extensions: Array[String] = []
+	var match_all := false
 	for f in param.file_filters:
-		var ext := f.trim_prefix("*.")
-		if not ext.is_empty():
-			extensions.append(ext.to_lower())
+		var ext := f.trim_prefix("*.").to_lower()
+		if ext.is_empty() or ext == "*":
+			match_all = true
+			break
+		extensions.append(ext)
+	if match_all:
+		extensions.clear()
 
 	# ── Patch Local: project folder beside the .gnpatch ──
 	var proj_dir: String = owner_node.project_dir if owner_node != null else ""
@@ -970,18 +995,22 @@ func _populate_file_dropdown(option: OptionButton) -> void:
 				selected_idx = item_idx
 			item_idx += 1
 
-	# ── External / save path not in either list above ──
+	# ── Current path not found in scan (keep selection; don't fall back to none) ──
 	if selected_idx == 0 and not current_path.is_empty():
 		var tier := GNResourceLoader.classify(current_path)
+		# Include PROJECT — otherwise project:// values vanish when the scan
+		# misses them (e.g. bad filters like *.* → ext "*"), and the dropdown
+		# snaps to "(none)" which looks like a clear.
 		if tier == GNResourceLoader.PathTier.ABSOLUTE \
+				or tier == GNResourceLoader.PathTier.PROJECT \
 				or param.file_browse_mode == GNParameter.FileBrowseMode.SAVE_FILE \
 				or current_path.begins_with("user://"):
-			option.add_separator("── External ──")
+			option.add_separator("── Current ──")
 			item_idx += 1
 			var display := current_path.get_file()
 			if display.is_empty():
 				display = current_path
-			option.add_item("⚠ " + display, item_idx)
+			option.add_item(display, item_idx)
 			option.set_item_metadata(item_idx, current_path)
 			option.set_item_tooltip(item_idx, "Path: " + current_path)
 			selected_idx = item_idx
@@ -1117,6 +1146,21 @@ func _on_string_submitted(text: String) -> void:
 
 ## Click-away / Tab away from a one-line string field — commit on focus loss.
 func _on_string_line_focus_lost(edit: LineEdit) -> void:
+	_commit_string_value(edit.text)
+
+
+## Live typing in a multi-line string field — mergeable undo for smooth preview.
+func _on_multiline_text_changed() -> void:
+	if _updating:
+		return
+	var edit := _control as TextEdit
+	if edit == null:
+		return
+	_set_value_with_undo(edit.text, true)
+
+
+## Click-away from a multi-line string field — ensure final text is committed.
+func _on_string_multiline_focus_lost(edit: TextEdit) -> void:
 	_commit_string_value(edit.text)
 
 
@@ -1843,6 +1887,10 @@ func _update_value_display() -> void:
 			if _code_edit != null:
 				if not _code_edit.has_focus():
 					_set_code_preview_text(str(param.get_resolved_value()))
+			elif _control is TextEdit:
+				var text_edit := _control as TextEdit
+				if not text_edit.has_focus():
+					text_edit.text = str(param.get_resolved_value())
 			elif _control is LineEdit:
 				var line_edit := _control as LineEdit
 				if not line_edit.has_focus():

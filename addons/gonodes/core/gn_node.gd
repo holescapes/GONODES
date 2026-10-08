@@ -43,7 +43,10 @@ var spare_parameters: Dictionary = {}
 ## True when this node needs to be re-cooked.
 var dirty: bool = true
 
-## Whether this node is time-dependent (always dirty each frame).
+## Whether this node must cook every frame.
+## Operators set this from their own logic in [method update_time_dependency]
+## (animation rate, playback, a time-dependent target). It is not a user toggle
+## unless a specific operator exposes one (CustomShader, SCRIPT).
 var time_dependent: bool = false
 
 ## Cached output data from the last successful cook.
@@ -71,6 +74,10 @@ var cooked_this_frame: bool = false
 ## when parameters and inputs haven't changed since the previous frame.
 ## -1 sentinel forces the first cook to always proceed.
 var _last_cook_input_hash: int = -1
+
+## Elapsed time at the last cook. Live nodes skip the parameter hash while
+## this differs from the engine clock, because that hash cannot match.
+var _last_cook_elapsed: float = -1.0
 
 # ─── Timing (set by GNCookEngine each frame before cooking) ────────────────────
 
@@ -106,6 +113,18 @@ var bypass: bool = false
 ## Default true.  Override to false in operators that call set_par(),
 ## network_add_node(), or use non-thread-safe I/O (StreamPeerTCP, AudioServer, etc.).
 var thread_safe: bool = true
+
+## Set true during [method _cook] when the node needs another cook next frame
+## (async disk load, ViewportTexture lag, etc.).  [method execute_cook] clears
+## dirty after _cook, then restores dirty when this flag is set — so callers
+## must not rely on [code]call_deferred("mark_dirty")[/code] fighting clear_dirty.
+var keep_dirty_after_cook: bool = false
+
+
+## Prefer this over assigning [member keep_dirty_after_cook] directly from
+## subclasses — clearer intent and avoids analyzer misses on stale class cache.
+func request_keep_dirty() -> void:
+	set("keep_dirty_after_cook", true)
 
 ## When true, the node is locked: parameter values cannot be changed by the user
 ## (inspector controls are disabled). Cook still proceeds normally.
@@ -382,9 +401,58 @@ func get_node_reference_params() -> Dictionary:
 ## them in topological order (so upstream caches are fresh), compares to the
 ## previous resolved value, and only marks dirty + propagates when a value
 ## actually changes.  See [method GNCookEngine._try_expression_dirty].
-func _pre_cook(delta: float) -> void:
+func _pre_cook(_delta: float) -> void:
+	update_time_dependency()
 	if time_dependent:
 		mark_dirty()
+
+
+## Recompute [member time_dependent] from this operator's parameters and targets.
+## Default keeps whatever [method _init] set. Override when the node is only
+## live while a rate, playback flag, expression, or referenced node is changing.
+func update_time_dependency() -> void:
+	pass
+
+
+static var _time_ident_regex: RegEx = null
+
+
+## True when [param text] reads cook time (`time`, `frame`, `dt`, `t`, `absTime`).
+static func expression_uses_time(text: String) -> bool:
+	if text.is_empty():
+		return false
+	if _time_ident_regex == null:
+		_time_ident_regex = RegEx.new()
+		_time_ident_regex.compile("\\b(time|frame|dt|absTime|t)\\b")
+	return _time_ident_regex.search(text) != null
+
+
+## True when [param param_name] is an expression that reads cook time.
+func param_expression_uses_time(param_name: String) -> bool:
+	var param: GNParameter = parameters.get(param_name, null)
+	if param == null or param.mode != GNParameter.Mode.EXPRESSION:
+		return false
+	return expression_uses_time(param.expression)
+
+
+## True when any of [param param_names] (plain expression strings, not Mode) reads time.
+func any_text_uses_time(param_names: PackedStringArray) -> bool:
+	for param_name in param_names:
+		var param: GNParameter = parameters.get(param_name, null)
+		if param != null and expression_uses_time(str(param.value)):
+			return true
+	return false
+
+
+## The node named by a string or node-ref parameter, or null.
+func referenced_node(param_name: String) -> GNNode:
+	var raw := str(get_param_value(param_name)).strip_edges()
+	if raw.is_empty():
+		return null
+	var net := get_owning_network()
+	if net == null:
+		return null
+	return net.nodes.get(raw, null) as GNNode
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -613,6 +681,19 @@ func get_output_port(index: int) -> GNPort:
 	if index < 0 or index >= output_ports.size():
 		return null
 	return output_ports[index]
+
+
+## Returns the GNNetwork that owns this node (via parent GNCookEngine).
+## Prefer this over walking for a GNNetwork in the scene tree — operators are
+## children of the cook engine, not of the network object.
+func get_owning_network() -> GNNetwork:
+	var p: Node = get_parent()
+	while p != null:
+		if p is GNCookEngine:
+			var eng: GNCookEngine = p as GNCookEngine
+			return eng.network
+		p = p.get_parent()
+	return null
 
 
 ## Returns the upstream GNNode connected to input [param port], or null.
@@ -947,6 +1028,8 @@ func _mutable_input(data: GNData) -> GNData:
 ## Executes the cook cycle for this node with the provided input data.
 ## Returns the cooked output GNData, or null on failure.
 func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
+	# Operators set this during _cook when they need a follow-up frame.
+	keep_dirty_after_cook = false
 	var start_time := Time.get_ticks_usec()
 	var result := _cook(inputs)
 	var end_time := Time.get_ticks_usec()
@@ -970,7 +1053,16 @@ func execute_cook(inputs: Array[GNData], frame: int) -> GNData:
 			cook_valid = false
 			GNLogger.debug("GNNode", "'%s' cook produced null output" % id)
 
+	var keep := keep_dirty_after_cook
+	keep_dirty_after_cook = false
 	clear_dirty()
+	# Silent re-dirty: next frame will cook again without cascading
+	# node_dirty listeners mid-frame (avoids storming the graph editor).
+	# Invalidate hash so the input-hash guard cannot skip the follow-up cook
+	# (params/inputs are unchanged while async work is in flight).
+	if keep:
+		dirty = true
+		_last_cook_input_hash = -1
 	node_cooked.emit(id)
 	return result
 

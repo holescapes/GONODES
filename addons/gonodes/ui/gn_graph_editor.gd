@@ -120,7 +120,27 @@ var _spare_param_dialog: AcceptDialog = null
 var _pre_move_positions: Dictionary = {}
 
 ## Whether expression reference lines are visible.
-var expr_refs_visible: bool = true
+var expr_refs_visible: bool = true  # Legacy alias for ref_reads_visible
+
+## Reference overlay toggles (from GNSettings).
+var ref_reads_visible: bool = true
+var ref_writes_visible: bool = true
+var ref_runtime_writes_visible: bool = true
+var ref_wireless_hover_visible: bool = true
+var ref_read_color: Color = Color(0.2, 0.85, 0.95, 0.55)
+var ref_write_color: Color = Color(1.0, 0.55, 0.15, 0.55)
+var ref_runtime_color: Color = Color(1.0, 0.35, 0.2, 0.65)
+var ref_wireless_color: Color = Color(1.0, 0.65, 0.1, 0.45)
+
+## Last runtime-ledger signature drawn on the overlay. Empty matches a quiet frame.
+var _runtime_ledger_sig: String = ""
+
+## Node ids whose status badge is currently visible. Next frame refreshes these
+## plus nodes that cooked or whose warning text changed.
+var _shown_status_badges: Dictionary = {}
+
+## Cook engine for runtime side-effect overlay lines.
+var cook_engine_ref: GNCookEngine = null
 
 ## Debug overlay for cook order, active chain dimming, reference arrows, sink labels.
 var debug_overlay: GNDebugOverlay = null
@@ -154,8 +174,12 @@ var _pending_connection: Dictionary = {}
 ## Empty dict = no ghost wire.  Drawn on _expr_ref_overlay.
 var _ghost_wire: Dictionary = {}  # { "node_id": String, "port": int, "release": Vector2, "direction": String, "color": Color }
 
-## Cached expression references: { from_node_id: [to_node_id, ...] }
+## Cached read references: { consumer_id: [source_id, ...] }
 var _expr_refs: Dictionary = {}
+## Static write refs: { writer_id: [{target_id, detail}, ...] }
+var _write_refs: Dictionary = {}
+## Runtime side-effect refs from last cook (same shape).
+var _runtime_write_refs: Dictionary = {}
 
 ## Wireless node-reference hover state.
 ## _wireless_refs: { consumer_id: [{"param_name": String, "target_id": String}, ...] }
@@ -330,6 +354,8 @@ func _ready() -> void:
 
 	# Wire dropped on empty space → open filtered palette for auto-connect
 	self.connection_to_empty.connect(_on_connection_to_empty)
+
+	apply_reference_settings()
 	self.connection_from_empty.connect(_on_connection_from_empty)
 
 	# Wire-drag tracking for edge-scroll
@@ -1235,7 +1261,9 @@ static func get_operator_registry() -> Dictionary:
 func update_previews() -> void:
 	for view_name in _node_views:
 		var view: GNNodeView = _node_views[view_name]
-		if view.gn_node != null and not view.gn_node.preview_enabled:
+		if view.gn_node == null or not view.gn_node.preview_enabled:
+			continue
+		if not view.gn_node.cooked_this_frame:
 			continue
 		view.update_preview()
 
@@ -1292,7 +1320,10 @@ func update_perf_overlays() -> void:
 		return
 	for view_name in _node_views:
 		var view: GNNodeView = _node_views[view_name]
-		view.update_perf_overlay()
+		if view.gn_node == null:
+			continue
+		if view.gn_node.cooked_this_frame or not view.gn_node.is_active:
+			view.update_perf_overlay()
 
 
 ## Toggles performance overlay visibility on all node views.
@@ -1306,12 +1337,24 @@ func set_perf_overlay_visible(enabled: bool) -> void:
 			view.hide_perf_overlay()
 
 
-## Updates warning/error status badges on all node views.
-## Called after each cook frame by the editor.
+## Updates warning/error status badges. Only nodes that cooked, changed
+## status text, or are still showing a badge are visited.
 func update_status_badges() -> void:
-	for view_name in _node_views:
-		var view: GNNodeView = _node_views[view_name]
+	var ids: Dictionary = _shown_status_badges.duplicate()
+	if cook_engine_ref != null:
+		for node_id in cook_engine_ref._cooked_this_frame:
+			ids[node_id] = true
+		for node_id in cook_engine_ref._status_refresh_ids:
+			ids[node_id] = true
+	var still: Dictionary = {}
+	for node_id in ids:
+		var view: GNNodeView = _node_views.get(node_id, null)
+		if view == null:
+			continue
 		view.update_status_badge()
+		if view.status_badge_shown():
+			still[node_id] = true
+	_shown_status_badges = still
 
 
 ## Selects one node and centers the graph on it. The camera moves before the
@@ -1589,45 +1632,60 @@ func _align_selected_vertical() -> void:
 static var _expr_ref_regex: RegEx = null
 
 
-## Scans all nodes' parameters for expression references (chop/op/top calls)
-## and caches them in [member _expr_refs] as `{ from_id: [to_id, ...] }`.
-## Also populates [member _expr_ref_details] with the full call text per edge.
+## Loads reference overlay toggles/colors from GNSettings.
+func apply_reference_settings() -> void:
+	ref_reads_visible = GNSettings.get_value("graph_ref_reads_visible", true)
+	ref_writes_visible = GNSettings.get_value("graph_ref_writes_visible", true)
+	ref_runtime_writes_visible = GNSettings.get_value("graph_ref_runtime_writes_visible", true)
+	ref_wireless_hover_visible = GNSettings.get_value("graph_ref_wireless_hover_visible", true)
+	ref_read_color = GNSettings.get_value("graph_ref_read_color", ref_read_color)
+	ref_write_color = GNSettings.get_value("graph_ref_write_color", ref_write_color)
+	ref_runtime_color = GNSettings.get_value("graph_ref_runtime_color", ref_runtime_color)
+	ref_wireless_color = GNSettings.get_value("graph_ref_wireless_color", ref_wireless_color)
+	expr_refs_visible = ref_reads_visible
+	_expr_refs_dirty = true
+	if _expr_ref_overlay != null:
+		_expr_ref_overlay.queue_redraw()
+
+
+## Scans expressions, script bodies, callbacks, and @affects annotations.
 func _scan_expr_references() -> void:
 	_expr_refs.clear()
+	_write_refs.clear()
+	_runtime_write_refs.clear()
 	_expr_ref_details.clear()
 	if network == null:
 		return
 
-	# Lazy-init regex — captures full call and first argument (node ID)
-	if _expr_ref_regex == null:
-		_expr_ref_regex = RegEx.new()
-		_expr_ref_regex.compile("((?:lookupf?|chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\([^)]*\\))")
+	var scan: Dictionary = GNReferenceScanner.scan_network(network)
+	_expr_refs = scan["reads"]
+	_write_refs = scan["writes"]
+	_expr_ref_details = scan["read_details"]
+	_collect_runtime_write_refs()
 
-	# Secondary regex to pull just the first string argument (node ID)
-	var _id_regex := RegEx.new()
-	_id_regex.compile("(?:lookupf?|chop[sfi]?|op|top|sop|dat|mat|vol|img|output|par[sfi]?|set_par|cellf?_by_name|cellf?)\\s*\\(\\s*\"([^\"]+)\"")
 
-	for node_id in network.nodes:
-		var node: GNNode = network.nodes[node_id]
-		var refs: Array[String] = []
-
-		for param_name in node.parameters:
-			var param: GNParameter = node.parameters[param_name]
-
-			# Check main expression
-			if param.mode == GNParameter.Mode.EXPRESSION and param.expression != "":
-				_extract_refs_from_with_details(param.expression, node_id, refs, _id_regex)
-
-			# Check per-component expressions
-			for i in range(param.component_expressions.size()):
-				if param.component_modes.size() > i and \
-						param.component_modes[i] == GNParameter.Mode.EXPRESSION:
-					var comp_expr: String = param.component_expressions[i]
-					if comp_expr != "":
-						_extract_refs_from_with_details(comp_expr, node_id, refs, _id_regex)
-
-		if refs.size() > 0:
-			_expr_refs[node_id] = refs
+## Builds runtime write overlay from this frame's side-effect ledger.
+## Dedupes to one edge per writer→target (ledger is already frame-scoped).
+func _collect_runtime_write_refs() -> void:
+	_runtime_write_refs.clear()
+	if cook_engine_ref == null:
+		return
+	for writer_id in cook_engine_ref.side_effect_by_writer:
+		var recs: Array = cook_engine_ref.side_effect_by_writer[writer_id]
+		var entries: Array = []
+		var seen: Dictionary = {}
+		for rec in recs:
+			var target_id: String = str(rec.get("target_id", ""))
+			if target_id.is_empty() or seen.has(target_id):
+				continue
+			seen[target_id] = true
+			var detail: String = str(rec.get("kind", "write"))
+			var param: String = str(rec.get("param", ""))
+			if not param.is_empty():
+				detail += "(%s)" % param
+			entries.append({"target_id": target_id, "detail": detail})
+		if not entries.is_empty():
+			_runtime_write_refs[writer_id] = entries
 
 
 ## Extracts referenced node IDs from an expression string and appends unique
@@ -1794,13 +1852,37 @@ func _rebuild_wireless_refs() -> void:
 		_wireless_refs[_hovered_node_id] = entries
 
 
-## Called every cook frame — the dirty flag avoids redundant full regex rescans.
+## Called every cook frame. Full rescan only when expressions changed.
+## Redraw only when static refs or the runtime ledger actually changed.
+## Selection, hover, and pan already queue their own redraws.
 func update_expr_refs() -> void:
-	if _expr_refs_dirty:
+	if not ref_reads_visible and not ref_writes_visible and not ref_runtime_writes_visible:
+		return
+	var redraw := false
+	if _expr_refs_dirty and (ref_reads_visible or ref_writes_visible):
 		_scan_expr_references()
 		_expr_refs_dirty = false
-	if _expr_ref_overlay != null:
+		redraw = true
+	if ref_runtime_writes_visible:
+		var sig := _runtime_ledger_signature()
+		if sig != _runtime_ledger_sig:
+			_runtime_ledger_sig = sig
+			_collect_runtime_write_refs()
+			redraw = true
+	if redraw and _expr_ref_overlay != null:
 		_expr_ref_overlay.queue_redraw()
+
+
+func _runtime_ledger_signature() -> String:
+	if cook_engine_ref == null:
+		return ""
+	var parts: PackedStringArray = []
+	for writer_id in cook_engine_ref.side_effect_by_writer:
+		var recs: Array = cook_engine_ref.side_effect_by_writer[writer_id]
+		for rec in recs:
+			parts.append("%s>%s:%s" % [
+				writer_id, str(rec.get("target_id", "")), str(rec.get("param", ""))])
+	return "|".join(parts)
 
 
 ## Draws dashed lines between nodes that reference each other via expressions,
@@ -1816,9 +1898,17 @@ func _draw_expr_ref_lines() -> void:
 	# --- Ghost wire (pending connection drop) ---
 	_draw_ghost_wire()
 
-	# --- Wireless node reference lines (amber, hover-only) ---
-	if not _wireless_refs.is_empty():
-		var wire_color := Color(1.0, 0.65, 0.1, 0.45)  # Amber, translucent
+	# --- Static write refs (script set_par / @affects) — writer → target ---
+	if ref_writes_visible and not _write_refs.is_empty():
+		_draw_ref_edges(_write_refs, ref_write_color, true, false)
+
+	# --- Runtime write refs (last cook set_par / network_connect) ---
+	if ref_runtime_writes_visible and not _runtime_write_refs.is_empty():
+		_draw_ref_edges(_runtime_write_refs, ref_runtime_color, true, true)
+
+	# --- Wireless node reference lines (hover-only) ---
+	if ref_wireless_hover_visible and not _wireless_refs.is_empty():
+		var wire_color := ref_wireless_color
 		for consumer_id in _wireless_refs:
 			var from_view: GNNodeView = _node_views.get(consumer_id, null)
 			if from_view == null:
@@ -1861,55 +1951,63 @@ func _draw_expr_ref_lines() -> void:
 
 
 
-	var line_color := Color(0.2, 0.85, 0.95, 0.55)  # Cyan, semi-transparent
-	var line_width := 1.5
-	var dash_length := 8.0
-	var gap_length := 4.0
-
-	for from_id in _expr_refs:
-		var from_view: GNNodeView = _node_views.get(from_id, null)
-		if from_view == null:
-			continue
-
-		var ref_ids: Array = _expr_refs[from_id]
-		for to_id in ref_ids:
-			var to_view: GNNodeView = _node_views.get(to_id, null)
-			if to_view == null:
+	# --- Read refs (expressions + script chop/dat) — source → consumer ---
+	if ref_reads_visible and not _expr_refs.is_empty():
+		for from_id in _expr_refs:
+			var from_view: GNNodeView = _node_views.get(from_id, null)
+			if from_view == null:
 				continue
+			var ref_ids: Array = _expr_refs[from_id]
+			for to_id in ref_ids:
+				var to_view: GNNodeView = _node_views.get(to_id, null)
+				if to_view == null:
+					continue
+				_draw_ref_line_pair(from_view, to_view, ref_read_color,
+						8.0, 4.0, 1.5, false)
 
-			# from_id = consumer (has the expression), to_id = source (referenced)
-			# Draw line from source → consumer so the arrow shows data flow direction
-			var consumer_center := from_view.position_offset + from_view.size / 2.0
-			var source_center := to_view.position_offset + to_view.size / 2.0
 
-			# Convert from graph-content space to overlay (screen) space
-			var p_src := (source_center - scroll_offset / zoom) * zoom
-			var p_dst := (consumer_center - scroll_offset / zoom) * zoom
+## Draws writer→target edges from a refs map { writer: [{target_id, detail}] }.
+func _draw_ref_edges(refs_map: Dictionary, color: Color,
+		writer_to_target: bool, dotted: bool) -> void:
+	for writer_id in refs_map:
+		var writer_view: GNNodeView = _node_views.get(writer_id, null)
+		if writer_view == null:
+			continue
+		for entry in refs_map[writer_id]:
+			var target_id: String = entry.get("target_id", "")
+			var target_view: GNNodeView = _node_views.get(target_id, null)
+			if target_view == null:
+				continue
+			var dash := 5.0 if dotted else 8.0
+			var gap := 4.0 if dotted else 4.0
+			if writer_to_target:
+				_draw_ref_line_pair(writer_view, target_view, color, dash, gap, 1.5, true)
+			else:
+				_draw_ref_line_pair(target_view, writer_view, color, dash, gap, 1.5, true)
 
-			_draw_dashed_line_on(_expr_ref_overlay, p_src, p_dst,
-					line_color, line_width, dash_length, gap_length)
 
-			# Compute visible segment (where line exits each node's rect)
-			# so the arrow sits on the visible portion, not hidden under a node
-			var src_rect := Rect2(
-				(to_view.position_offset - scroll_offset / zoom) * zoom,
-				to_view.size * zoom)
-			var dst_rect := Rect2(
-				(from_view.position_offset - scroll_offset / zoom) * zoom,
-				from_view.size * zoom)
-			var vis_start := _clip_line_to_rect_exit(p_src, p_dst, src_rect)
-			var vis_end := _clip_line_to_rect_exit(p_dst, p_src, dst_rect)
-			var vis_mid := (vis_start + vis_end) * 0.5
-
-			# Draw arrow at midpoint of visible segment
-			var dir := (p_dst - p_src).normalized()
-			var perp := Vector2(-dir.y, dir.x)
-			var arrow_size := 12.0  # constant screen pixels
-			var arrow_tip := vis_mid + dir * arrow_size * 0.6
-			var arrow_left := vis_mid - dir * arrow_size * 0.4 + perp * arrow_size * 0.5
-			var arrow_right := vis_mid - dir * arrow_size * 0.4 - perp * arrow_size * 0.5
-			_expr_ref_overlay.draw_colored_polygon(
-					PackedVector2Array([arrow_tip, arrow_left, arrow_right]), line_color)
+## Draws one reference line between two node views with arrow at midpoint.
+func _draw_ref_line_pair(from_view: GNNodeView, to_view: GNNodeView,
+		color: Color, dash_len: float, gap_len: float, width: float,
+		arrow_at_mid: bool) -> void:
+	var p_from := (from_view.position_offset + from_view.size / 2.0 - scroll_offset / zoom) * zoom
+	var p_to := (to_view.position_offset + to_view.size / 2.0 - scroll_offset / zoom) * zoom
+	_draw_dashed_line_on(_expr_ref_overlay, p_from, p_to, color, width, dash_len, gap_len)
+	if not arrow_at_mid:
+		return
+	var from_rect := Rect2((from_view.position_offset - scroll_offset / zoom) * zoom, from_view.size * zoom)
+	var to_rect := Rect2((to_view.position_offset - scroll_offset / zoom) * zoom, to_view.size * zoom)
+	var vis_start := _clip_line_to_rect_exit(p_from, p_to, from_rect)
+	var vis_end := _clip_line_to_rect_exit(p_to, p_from, to_rect)
+	var vis_mid := (vis_start + vis_end) * 0.5
+	var dir := (p_to - p_from).normalized()
+	var perp := Vector2(-dir.y, dir.x)
+	var arrow_size := 12.0
+	var arrow_tip := vis_mid + dir * arrow_size * 0.6
+	var arrow_left := vis_mid - dir * arrow_size * 0.4 + perp * arrow_size * 0.5
+	var arrow_right := vis_mid - dir * arrow_size * 0.4 - perp * arrow_size * 0.5
+	_expr_ref_overlay.draw_colored_polygon(
+			PackedVector2Array([arrow_tip, arrow_left, arrow_right]), color)
 
 
 ## Finds where the line from [param origin] to [param target] exits [param rect].

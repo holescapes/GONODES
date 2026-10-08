@@ -7,10 +7,13 @@ var _processor: RefCounted = null
 
 func _init() -> void:
 	node_type = "point_native"
-	time_dependent = true
 	node_description = "Per-vertex position expressions — native C++ accelerated."
 	if ClassDB.class_exists("GNNativePointSop"):
 		_processor = ClassDB.instantiate("GNNativePointSop")
+
+
+func update_time_dependency() -> void:
+	time_dependent = any_text_uses_time(PackedStringArray(["expr_x", "expr_y", "expr_z"]))
 
 
 func _init_ports() -> void:

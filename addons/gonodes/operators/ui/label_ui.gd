@@ -18,7 +18,7 @@ func _init_ports() -> void:
 
 
 func _init_parameters() -> void:
-	add_parameter(GNParameter.create_string("text", "Label", "Text", "Static label text"))
+	add_parameter(GNParameter.create_string("text", "Label", "Text", "Static label text", true))
 	add_parameter(GNParameter.create_int("font_size", 16, 8, 128, "Font Size", "Text size in pixels"))
 	add_parameter(GNParameter.create_color("font_color", Color.WHITE, "Color", "Text color"))
 	add_parameter(GNParameter.create_enum("h_align",

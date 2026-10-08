@@ -14,6 +14,12 @@ extends GNNode
 ## Reusable output data object (created once, cleared each cook).
 var _cached_channel_data: GNChannelData = null
 
+## Carried end-of-channel values for filters that should stop cooking once
+## the output has settled. Absent key means this channel has not cooked yet.
+const _TEMPORAL_SETTLE_EPS := 0.0001
+var _temporal_end_state: Dictionary = {}
+var _temporal_moving: bool = true
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Lifecycle
@@ -66,3 +72,28 @@ func _get_input_chop(inputs: Array[GNData], port: int = 0) -> GNChannelData:
 		var _ret0 := inputs[port] as GNChannelData
 		return _ret0
 	return null
+
+
+## True when this channel's carried value moved since the previous cook.
+## The first cook of a channel always counts as motion.
+func _temporal_sample_moved(channel: String, end_value: float) -> bool:
+	var had := _temporal_end_state.has(channel)
+	var prev := float(_temporal_end_state.get(channel, 0.0))
+	_temporal_end_state[channel] = end_value
+	if not had:
+		return true
+	return absf(end_value - prev) > _TEMPORAL_SETTLE_EPS
+
+
+## Last sample of a channel buffer, or 0 when the buffer is empty.
+func _temporal_end_sample(samples: PackedFloat32Array) -> float:
+	if samples.is_empty():
+		return 0.0
+	return samples[samples.size() - 1]
+
+
+## Stop cooking every frame once the filter output has stopped changing.
+## The next input cook dirties this node through its wires.
+func _finish_temporal_cook(moved: bool) -> void:
+	_temporal_moving = moved
+	time_dependent = moved

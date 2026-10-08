@@ -10,7 +10,6 @@ var _rows: Array[PackedStringArray] = []
 
 func _init() -> void:
 	node_type = "error"
-	time_dependent = true
 	GNLogger.log_sink = _on_log
 
 
@@ -60,6 +59,7 @@ func _on_log(level: GNLogger.Level, category: String, message: String) -> void:
 	_rows.append(PackedStringArray([level_name, category, message, ts]))
 	while _rows.size() > max_rows:
 		_rows.pop_front()
+	mark_dirty()
 
 
 func _notification(what: int) -> void:
