@@ -9,6 +9,13 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-09 — LayoutTOP spare input grows
+
+- **ParameterCHOP** finds its target through the cook engine. It was walking the scene tree for a GNNetwork, which operators are not parented to, so the channel list stayed empty and CHOPtoTOP cooked null.
+- **ImageSequenceIMG** uses the same resolution rule. `(0, 0)` stays native. A resize happens only when both sides are greater than 0.
+
+- **LayoutTOP** opts into dynamic inputs. Connecting the unnamed spare adds the next input, up to the 8 textures the shader can sample. It used to draw that spare and then ignore it.
+
 ## 2026-10-08 — Cook only when the node is actually live
 
 - **`GNNode.update_time_dependency()`** — operators set `time_dependent` from their own logic each frame (rate, playback, jitter, a time-dependent target). Not a user toggle. NoiseTOP is still unless `time_offset` reads time; NoiseSOP / Voronoi / Ripple / ScanLine / FilmGrain follow the same rule. ParameterCHOP, ParameterDAT, and ObjectCHOP follow the target. ErrorDAT dirties from the log sink. SystemDAT cooks every frame only while memory is shown. ImageSequence cooks every frame only while playing.

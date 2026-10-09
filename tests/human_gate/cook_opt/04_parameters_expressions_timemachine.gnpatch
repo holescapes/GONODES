@@ -1,0 +1,672 @@
+{
+	"annotations": [
+		{
+			"color": [
+				1.0,
+				0.949999988079071,
+				0.550000011920929,
+				0.920000016689301
+			],
+			"id": "note",
+			"position": [
+				-40.0,
+				-280.0
+			],
+			"size": [
+				720.0,
+				340.0
+			],
+			"text": "Cook opt 04 — component expressions, ParameterCHOP, TimeMachine\n\nWindow title: \"04 parameters\". Left to right, top row then bottom.\n\n1 ConstantTOP. Only the red component is the expression 0.5+0.5*sin(time). The color PULSES. Green and blue stay put. If this stays a flat dull blue, component expressions are not cooking.\n2 Circle radius expression. The orange circle BREATHES. A frozen circle means time expressions are not cooking.\n3 ParameterCHOP reading noise_live time_offset (sin(time)), trailed. The trace OSCILLATES.\n4 ParameterCHOP reading noise_still scale (4), trailed. A FLAT line near the middle. It must not wander.\n5 Still noise, time_offset 1. STILL.\n6 TimeMachine in Position mode on that still noise. The SAME still picture as cell 5. Not black.\n7 Noise with time_offset = sin(time). The pattern MOVES.\n8 TimeMachine in Speed mode at speed 1 on that live noise. The picture KEEPS CHANGING. It can lag cell 7. A freeze here means playback stopped.\n\nFail if the pulse or the breathing circle is frozen, cell 3 is flat while cell 7 moves, cell 6 is black, or cell 8 never changes.",
+			"type": "note"
+		}
+	],
+	"app_version": "0.1.0-beta",
+	"connections": [
+		{
+			"from": "noise_still",
+			"from_port": 0,
+			"to": "tm_pos",
+			"to_port": 0
+		},
+		{
+			"from": "noise_live",
+			"from_port": 0,
+			"to": "tm_speed",
+			"to_port": 0
+		},
+		{
+			"from": "parm_live",
+			"from_port": 0,
+			"to": "trail_parm_live",
+			"to_port": 0
+		},
+		{
+			"from": "trail_parm_live",
+			"from_port": 0,
+			"to": "view_parm_live",
+			"to_port": 0
+		},
+		{
+			"from": "parm_still",
+			"from_port": 0,
+			"to": "trail_parm_still",
+			"to_port": 0
+		},
+		{
+			"from": "trail_parm_still",
+			"from_port": 0,
+			"to": "view_parm_still",
+			"to_port": 0
+		},
+		{
+			"from": "const_pulse",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 0
+		},
+		{
+			"from": "circle_breathe",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 1
+		},
+		{
+			"from": "view_parm_live",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 2
+		},
+		{
+			"from": "view_parm_still",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 3
+		},
+		{
+			"from": "noise_still",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 4
+		},
+		{
+			"from": "tm_pos",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 5
+		},
+		{
+			"from": "noise_live",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 6
+		},
+		{
+			"from": "tm_speed",
+			"from_port": 0,
+			"to": "layout1",
+			"to_port": 7
+		},
+		{
+			"from": "layout1",
+			"from_port": 0,
+			"to": "window1",
+			"to_port": 0
+		}
+	],
+	"generator": "GONODES",
+	"nodes": {
+		"circle_breathe": {
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0799999982118607,
+						"g": 0.0500000007450581,
+						"r": 0.0500000007450581
+					}
+				},
+				"border_width": {
+					"value": 0.0
+				},
+				"center": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.5,
+						"y": 0.5
+					}
+				},
+				"fill_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.150000005960464,
+						"g": 0.449999988079071,
+						"r": 1.0
+					}
+				},
+				"radius": {
+					"expression": "0.2 + 0.18 * abs(sin(time))",
+					"mode": "EXPRESSION",
+					"value": 0.3
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"softness": {
+					"value": 0.005
+				}
+			},
+			"position": [
+				40.0,
+				240.0
+			],
+			"type": "CircleTOP"
+		},
+		"const_pulse": {
+			"parameters": {
+				"color": {
+					"component_expressions": [
+						{
+							"expression": "0.5 + 0.5 * sin(time)",
+							"mode": "EXPRESSION"
+						},
+						{
+							"expression": "",
+							"mode": "CONSTANT"
+						},
+						{
+							"expression": "",
+							"mode": "CONSTANT"
+						},
+						{
+							"expression": "",
+							"mode": "CONSTANT"
+						}
+					],
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.449999988079071,
+						"g": 0.119999997317791,
+						"r": 0.150000005960464
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				}
+			},
+			"position": [
+				40.0,
+				40.0
+			],
+			"type": "ConstantTOP"
+		},
+		"layout1": {
+			"dynamic_input_count": 8,
+			"parameters": {
+				"bg_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0,
+						"g": 0.0,
+						"r": 0.0
+					}
+				},
+				"columns": {
+					"value": 4
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 1280,
+						"y": 640
+					}
+				}
+			},
+			"position": [
+				1100.0,
+				200.0
+			],
+			"type": "LayoutTOP"
+		},
+		"noise_live": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": true
+				},
+				"noise_type": {
+					"value": 0
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 3
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"expression": "sin(time)",
+					"mode": "EXPRESSION",
+					"value": 0.0
+				}
+			},
+			"position": [
+				40.0,
+				460.0
+			],
+			"type": "NoiseTOP"
+		},
+		"noise_still": {
+			"parameters": {
+				"gain": {
+					"value": 0.5
+				},
+				"lacunarity": {
+					"value": 2.0
+				},
+				"monochrome": {
+					"value": true
+				},
+				"noise_type": {
+					"value": 0
+				},
+				"octaves": {
+					"value": 1
+				},
+				"offset": {
+					"value": {
+						"_type": "Vector2",
+						"x": 0.0,
+						"y": 0.0
+					}
+				},
+				"periodic": {
+					"value": false
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 256,
+						"y": 256
+					}
+				},
+				"scale": {
+					"value": 4.0
+				},
+				"seed": {
+					"value": 3
+				},
+				"tile_size": {
+					"value": 4.0
+				},
+				"time_offset": {
+					"value": 1.0
+				}
+			},
+			"position": [
+				40.0,
+				680.0
+			],
+			"type": "NoiseTOP"
+		},
+		"parm_live": {
+			"parameters": {
+				"node_path": {
+					"value": "noise_live"
+				},
+				"parameters": {
+					"value": "time_offset"
+				}
+			},
+			"position": [
+				340.0,
+				460.0
+			],
+			"type": "ParameterCHOP"
+		},
+		"parm_still": {
+			"parameters": {
+				"node_path": {
+					"value": "noise_still"
+				},
+				"parameters": {
+					"value": "scale"
+				}
+			},
+			"position": [
+				340.0,
+				680.0
+			],
+			"type": "ParameterCHOP"
+		},
+		"tm_pos": {
+			"parameters": {
+				"freeze": {
+					"value": false
+				},
+				"length": {
+					"value": 30
+				},
+				"mode": {
+					"value": 1
+				},
+				"position": {
+					"value": 0.0
+				},
+				"reset": {
+					"value": false
+				},
+				"speed": {
+					"value": 1.0
+				},
+				"time_ramp": {
+					"value": {
+						"_type": "Ramp",
+						"keys": [
+							{
+								"left_tangent": 0.0,
+								"pos": 0.0,
+								"right_tangent": 0.0,
+								"value": 0.0
+							},
+							{
+								"left_tangent": 0.0,
+								"pos": 1.0,
+								"right_tangent": 0.0,
+								"value": 1.0
+							}
+						]
+					}
+				},
+				"wrap_mode": {
+					"value": 1
+				}
+			},
+			"position": [
+				340.0,
+				40.0
+			],
+			"type": "TimeMachineTOP"
+		},
+		"tm_speed": {
+			"parameters": {
+				"freeze": {
+					"value": false
+				},
+				"length": {
+					"value": 30
+				},
+				"mode": {
+					"value": 0
+				},
+				"position": {
+					"value": 0.0
+				},
+				"reset": {
+					"value": false
+				},
+				"speed": {
+					"value": 1.0
+				},
+				"time_ramp": {
+					"value": {
+						"_type": "Ramp",
+						"keys": [
+							{
+								"left_tangent": 0.0,
+								"pos": 0.0,
+								"right_tangent": 0.0,
+								"value": 0.0
+							},
+							{
+								"left_tangent": 0.0,
+								"pos": 1.0,
+								"right_tangent": 0.0,
+								"value": 1.0
+							}
+						]
+					}
+				},
+				"wrap_mode": {
+					"value": 1
+				}
+			},
+			"position": [
+				340.0,
+				240.0
+			],
+			"type": "TimeMachineTOP"
+		},
+		"trail_parm_live": {
+			"parameters": {
+				"active": {
+					"value": true
+				},
+				"length": {
+					"value": 180
+				}
+			},
+			"position": [
+				600.0,
+				460.0
+			],
+			"type": "TrailCHOP"
+		},
+		"trail_parm_still": {
+			"parameters": {
+				"active": {
+					"value": true
+				},
+				"length": {
+					"value": 180
+				}
+			},
+			"position": [
+				600.0,
+				680.0
+			],
+			"type": "TrailCHOP"
+		},
+		"view_parm_live": {
+			"parameters": {
+				"auto_range": {
+					"value": false
+				},
+				"background": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0799999982118607,
+						"g": 0.0500000007450581,
+						"r": 0.0500000007450581
+					}
+				},
+				"color_scheme": {
+					"value": 1
+				},
+				"line_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.449999988079071,
+						"g": 0.949999988079071,
+						"r": 0.300000011920929
+					}
+				},
+				"line_width": {
+					"value": 3.0
+				},
+				"max_val": {
+					"value": 1.2
+				},
+				"mel_scale": {
+					"value": true
+				},
+				"min_val": {
+					"value": -1.2
+				},
+				"mode": {
+					"value": 0
+				},
+				"num_bands": {
+					"value": 64
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 320,
+						"y": 240
+					}
+				}
+			},
+			"position": [
+				860.0,
+				460.0
+			],
+			"type": "CHOPtoTOP"
+		},
+		"view_parm_still": {
+			"parameters": {
+				"auto_range": {
+					"value": false
+				},
+				"background": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.0799999982118607,
+						"g": 0.0500000007450581,
+						"r": 0.0500000007450581
+					}
+				},
+				"color_scheme": {
+					"value": 1
+				},
+				"line_color": {
+					"value": {
+						"_type": "Color",
+						"a": 1.0,
+						"b": 0.449999988079071,
+						"g": 0.949999988079071,
+						"r": 0.300000011920929
+					}
+				},
+				"line_width": {
+					"value": 3.0
+				},
+				"max_val": {
+					"value": 8.0
+				},
+				"mel_scale": {
+					"value": true
+				},
+				"min_val": {
+					"value": 0.0
+				},
+				"mode": {
+					"value": 0
+				},
+				"num_bands": {
+					"value": 64
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 320,
+						"y": 240
+					}
+				}
+			},
+			"position": [
+				860.0,
+				680.0
+			],
+			"type": "CHOPtoTOP"
+		},
+		"window1": {
+			"parameters": {
+				"always_on_top": {
+					"value": false
+				},
+				"monitor": {
+					"value": 0
+				},
+				"open": {
+					"value": true
+				},
+				"position": {
+					"value": {
+						"_type": "Vector2i",
+						"x": -1,
+						"y": -1
+					}
+				},
+				"resolution": {
+					"value": {
+						"_type": "Vector2i",
+						"x": 1280,
+						"y": 640
+					}
+				},
+				"title": {
+					"value": "04 parameters, expressions, time machine"
+				},
+				"vsync": {
+					"value": true
+				},
+				"window_mode": {
+					"value": 0
+				}
+			},
+			"position": [
+				1500.0,
+				200.0
+			],
+			"type": "WindowOUT"
+		}
+	},
+	"version": "1.0.0",
+	"viewport": {
+		"scroll_x": 298.0,
+		"scroll_y": -177.999938964844,
+		"zoom": 0.800000011920929
+	}
+}

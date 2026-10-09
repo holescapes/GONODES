@@ -53,7 +53,10 @@ func _init_parameters() -> void:
 			"*.ktx", "*.ktx2"]),
 		"", "Path to ANY frame in the sequence. Auto-discovers all numbered siblings."))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(0, 0),
-		"Resolution", "Resize frames to this size. (0, 0) = native. Resizing decompresses KTX2/ETC2."))
+		"Resolution", "Resize frames in pixels. (0, 0) keeps each frame's native size. Each side stays at 0 or above. Resizing decompresses KTX2/ETC2."))
+	var res_param := get_parameter("resolution")
+	if res_param != null:
+		res_param.min_value = 0
 	add_parameter(GNParameter.create_bool("play", true, "Play", "Play / pause"))
 	add_parameter(GNParameter.create_float("speed", 1.0, 0.01, 10.0, 0.1, "Playback speed multiplier",
 		"Playback speed multiplier (1.0 ≈ 30 fps)"))
@@ -114,8 +117,8 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	else:
 		node_warning = ""
 
-	# Resize if requested. VRAM-compressed frames must decompress first.
-	if res != Vector2i.ZERO and Vector2i(img.get_width(), img.get_height()) != res:
+	# Resize only when both sides are set. (0, 0) stays native and is not written back.
+	if res.x > 0 and res.y > 0 and Vector2i(img.get_width(), img.get_height()) != res:
 		if img.is_compressed():
 			img = GNResourceLoader.ensure_cpu_editable_image(img)
 		else:
@@ -168,7 +171,6 @@ func _discover_sequence(file_path: String, do_preload: bool) -> void:
 			"'%s': single frame (no numbering): %s" % [id, file_path])
 		if do_preload:
 			_preload_all_frames()
-		_auto_set_resolution()
 		return
 
 	# Scan directory for matching files.
@@ -200,21 +202,6 @@ func _discover_sequence(file_path: String, do_preload: bool) -> void:
 
 	if do_preload:
 		_preload_all_frames()
-	_auto_set_resolution()
-
-
-## Auto-sets resolution from the first frame's native dimensions.
-func _auto_set_resolution() -> void:
-	if _frame_paths.is_empty():
-		return
-	var img := _get_frame_image(0)
-	if img != null and img.get_width() > 0 and img.get_height() > 0:
-		var native := Vector2i(img.get_width(), img.get_height())
-		var current: Vector2i = get_param_value("resolution")
-		if current == Vector2i.ZERO:
-			set_param_value("resolution", native)
-			GNLogger.info("ImageSequenceIMG",
-				"'%s': resolution auto-set to %s" % [id, str(native)])
 
 
 func _preload_all_frames() -> void:

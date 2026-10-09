@@ -1155,6 +1155,15 @@ func _clamp_value(val: Variant) -> Variant:
 			return min_value
 		if max_value != null and val > max_value:
 			return max_value
+	if val is Vector2i and (min_value != null or max_value != null):
+		var vi := val as Vector2i
+		if min_value != null:
+			vi.x = maxi(vi.x, int(min_value))
+			vi.y = maxi(vi.y, int(min_value))
+		if max_value != null:
+			vi.x = mini(vi.x, int(max_value))
+			vi.y = mini(vi.y, int(max_value))
+		return vi
 	return val
 
 

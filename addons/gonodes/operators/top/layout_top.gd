@@ -9,10 +9,14 @@ func _init() -> void:
 
 
 func _init_ports() -> void:
-	# Dynamic ports — start with 2, grow on connect
-	add_input("in0", GNFamily.Type.TOP, false, "Input texture 0", "Input 0")
-	add_input("in1", GNFamily.Type.TOP, false, "Input texture 1", "Input 1")
-	add_input("", GNFamily.Type.TOP, false, "Additional input")  # trailing empty for auto-grow
+	# The network only grows ports when _dynamic_input is set. Two labeled
+	# inputs plus one unnamed spare. Connecting the spare adds the next input,
+	# up to the 8 samplers in layout.gdshader.
+	_dynamic_input = true
+	_dynamic_input_family = GNFamily.Type.TOP
+	_dynamic_input_prefix = "in"
+	_dynamic_input_desc = "Input"
+	_rebuild_layout_inputs(-1)
 	add_output("out", GNFamily.Type.TOP, "Mosaic texture", "Out")
 
 
@@ -26,27 +30,30 @@ func _init_parameters() -> void:
 
 
 func update_dynamic_inputs(connected_ports: PackedInt32Array) -> void:
-	# MergeSOP-style auto-grow / auto-shrink using connected_ports from the engine
-	var highest_connected: int = -1
+	var highest := -1
 	for p in connected_ports:
-		if p > highest_connected:
-			highest_connected = p
+		if p > highest:
+			highest = p
+	_rebuild_layout_inputs(highest)
 
-	var desired: int = clampi(highest_connected + 2, 2, 8)
 
-	while input_ports.size() > desired + 1:
-		input_ports.pop_back()
-	while input_ports.size() < desired + 1:
-		var idx: int = input_ports.size() - 1
-		input_ports.insert(idx, {"name": "in%d" % idx, "type": GNFamily.Type.TOP,
-			"required": false, "description": "Input texture %d" % idx})
-
-	# Trailing empty
-	if input_ports.size() > 0 and not input_ports[-1].name.is_empty():
-		input_ports.append({"name": "", "type": GNFamily.Type.TOP,
-			"required": false, "description": ""})
-
-	ports_changed.emit()
+## [param highest] is the highest connected port, or -1 when nothing is wired.
+## Always keeps Input 0 and Input 1. Adds one unnamed spare after the last
+## wire, and stops at 8 because the shader only samples tex0–tex7.
+func _rebuild_layout_inputs(highest: int) -> void:
+	var named := clampi(highest + 1, 2, 8)
+	var spare := named < 8
+	var total := named + (1 if spare else 0)
+	var last_is_spare := input_ports.size() > 0 and input_ports[-1].port_name.is_empty()
+	if input_ports.size() == total and last_is_spare == spare:
+		return
+	input_ports.clear()
+	for i in range(named):
+		add_input("in%d" % i, GNFamily.Type.TOP, false,
+			"Input texture %d" % i, "Input %d" % i)
+	if spare:
+		add_input("", GNFamily.Type.TOP, false, "Additional input")
+	ports_changed.emit(id)
 
 
 func _cook(inputs: Array[GNData]) -> GNData:

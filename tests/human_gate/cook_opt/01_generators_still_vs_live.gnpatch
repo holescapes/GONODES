@@ -1,0 +1,359 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "noise_still": {
+      "type": "NoiseTOP",
+      "position": [
+        80,
+        40
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 256,
+            "y": 256
+          }
+        },
+        "scale": {
+          "value": 4.0
+        },
+        "monochrome": {
+          "value": true
+        },
+        "seed": {
+          "value": 3
+        },
+        "time_offset": {
+          "value": 2.5
+        }
+      }
+    },
+    "noise_live": {
+      "type": "NoiseTOP",
+      "position": [
+        80,
+        220
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 256,
+            "y": 256
+          }
+        },
+        "scale": {
+          "value": 4.0
+        },
+        "monochrome": {
+          "value": true
+        },
+        "seed": {
+          "value": 3
+        },
+        "time_offset": {
+          "value": 0.0,
+          "mode": "EXPRESSION",
+          "expression": "time"
+        }
+      }
+    },
+    "voronoi_still": {
+      "type": "VoronoiTOP",
+      "position": [
+        80,
+        400
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 256,
+            "y": 256
+          }
+        },
+        "scale": {
+          "value": 8.0
+        },
+        "speed": {
+          "value": 0.0
+        }
+      }
+    },
+    "voronoi_live": {
+      "type": "VoronoiTOP",
+      "position": [
+        80,
+        580
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 256,
+            "y": 256
+          }
+        },
+        "scale": {
+          "value": 8.0
+        },
+        "speed": {
+          "value": 2.0
+        }
+      }
+    },
+    "circle1": {
+      "type": "CircleTOP",
+      "position": [
+        360,
+        300
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 256,
+            "y": 256
+          }
+        },
+        "fill_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.95,
+            "g": 0.85,
+            "b": 0.2,
+            "a": 1.0
+          }
+        },
+        "bg_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.08,
+            "g": 0.1,
+            "b": 0.16,
+            "a": 1.0
+          }
+        },
+        "radius": {
+          "value": 0.32
+        }
+      }
+    },
+    "ripple_still": {
+      "type": "RippleTOP",
+      "position": [
+        640,
+        40
+      ],
+      "parameters": {
+        "amplitude": {
+          "value": 0.05
+        },
+        "frequency": {
+          "value": 12.0
+        },
+        "speed": {
+          "value": 0.0
+        }
+      }
+    },
+    "ripple_live": {
+      "type": "RippleTOP",
+      "position": [
+        640,
+        220
+      ],
+      "parameters": {
+        "amplitude": {
+          "value": 0.05
+        },
+        "frequency": {
+          "value": 12.0
+        },
+        "speed": {
+          "value": 8.0
+        }
+      }
+    },
+    "scan_still": {
+      "type": "ScanLineTOP",
+      "position": [
+        640,
+        400
+      ],
+      "parameters": {
+        "line_spacing": {
+          "value": 6.0
+        },
+        "line_brightness": {
+          "value": 0.15
+        },
+        "jitter": {
+          "value": 0.0
+        }
+      }
+    },
+    "scan_live": {
+      "type": "ScanLineTOP",
+      "position": [
+        640,
+        580
+      ],
+      "parameters": {
+        "line_spacing": {
+          "value": 6.0
+        },
+        "line_brightness": {
+          "value": 0.15
+        },
+        "jitter": {
+          "value": 8.0
+        }
+      }
+    },
+    "layout1": {
+      "type": "LayoutTOP",
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1280,
+            "y": 640
+          }
+        },
+        "columns": {
+          "value": 4
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1500,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1280,
+            "y": 640
+          }
+        },
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "01 generators \u2014 still vs live"
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noise_still",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 0
+    },
+    {
+      "from": "noise_live",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 1
+    },
+    {
+      "from": "voronoi_still",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 2
+    },
+    {
+      "from": "voronoi_live",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 3
+    },
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "ripple_still",
+      "to_port": 0
+    },
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "ripple_live",
+      "to_port": 0
+    },
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "scan_still",
+      "to_port": 0
+    },
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "scan_live",
+      "to_port": 0
+    },
+    {
+      "from": "ripple_still",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 4
+    },
+    {
+      "from": "ripple_live",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 5
+    },
+    {
+      "from": "scan_still",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 6
+    },
+    {
+      "from": "scan_live",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 7
+    },
+    {
+      "from": "layout1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Cook opt 01 \u2014 generators, still vs live\n\nOpen this patch. A window titled \"01 generators\" should appear.\nGrid is left to right, top row then bottom row.\n\n1 NoiseTOP time_offset = 2.5. STILL noise. Not black.\n2 NoiseTOP time_offset = time. The pattern SCROLLS.\n3 Voronoi speed 0. STILL cells.\n4 Voronoi speed 2. Cells MOVE.\n5 Ripple speed 0 on a yellow circle. STILL.\n6 Ripple speed 8. The circle WARPS and keeps moving.\n7 Scan lines, jitter 0. STILL stripes on the circle.\n8 Scan lines, jitter 8. Stripes SHIMMER.\n\nFail if a \"still\" cell moves, a \"live\" cell is frozen, or any cell is black.",
+      "position": [
+        -40,
+        -280
+      ],
+      "size": [
+        720,
+        280
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

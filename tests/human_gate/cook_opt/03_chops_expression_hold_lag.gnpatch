@@ -1,0 +1,828 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "expr_live": {
+      "type": "ExpressionCHOP",
+      "position": [
+        40,
+        40
+      ],
+      "parameters": {
+        "expr": {
+          "value": "sin(t + i * 0.15)"
+        },
+        "samples": {
+          "value": 64
+        },
+        "channels": {
+          "value": "chan1"
+        }
+      }
+    },
+    "expr_flat": {
+      "type": "ExpressionCHOP",
+      "position": [
+        40,
+        200
+      ],
+      "parameters": {
+        "expr": {
+          "value": "0.5"
+        },
+        "samples": {
+          "value": 64
+        },
+        "channels": {
+          "value": "chan1"
+        }
+      }
+    },
+    "noise_still": {
+      "type": "NoiseCHOP",
+      "position": [
+        40,
+        360
+      ],
+      "parameters": {
+        "speed": {
+          "value": 0.0
+        },
+        "seed": {
+          "value": 2
+        }
+      }
+    },
+    "noise_live": {
+      "type": "NoiseCHOP",
+      "position": [
+        40,
+        500
+      ],
+      "parameters": {
+        "speed": {
+          "value": 2.0
+        },
+        "seed": {
+          "value": 2
+        }
+      }
+    },
+    "expr_sine": {
+      "type": "ExpressionCHOP",
+      "position": [
+        40,
+        660
+      ],
+      "parameters": {
+        "expr": {
+          "value": "0.6 + 0.4 * sin(t)"
+        },
+        "samples": {
+          "value": 1
+        },
+        "channels": {
+          "value": "chan1"
+        }
+      }
+    },
+    "const1": {
+      "type": "ConstantCHOP",
+      "position": [
+        40,
+        820
+      ],
+      "parameters": {
+        "count": {
+          "value": 1
+        },
+        "name0": {
+          "value": "chan1"
+        },
+        "value0": {
+          "value": 0.8
+        }
+      }
+    },
+    "hold1": {
+      "type": "HoldCHOP",
+      "position": [
+        320,
+        660
+      ],
+      "parameters": {
+        "hold_on_start": {
+          "value": true
+        }
+      }
+    },
+    "lag_const": {
+      "type": "LagCHOP",
+      "position": [
+        320,
+        820
+      ],
+      "parameters": {
+        "attack": {
+          "value": 0.45
+        },
+        "release": {
+          "value": 0.45
+        }
+      }
+    },
+    "lag_live": {
+      "type": "LagCHOP",
+      "position": [
+        320,
+        980
+      ],
+      "parameters": {
+        "attack": {
+          "value": 0.15
+        },
+        "release": {
+          "value": 0.15
+        }
+      }
+    },
+    "select1": {
+      "type": "SelectCHOP",
+      "position": [
+        320,
+        40
+      ],
+      "parameters": {
+        "chop": {
+          "value": "expr_live"
+        }
+      }
+    },
+    "trail_noise_still": {
+      "type": "TrailCHOP",
+      "position": [
+        320,
+        360
+      ],
+      "parameters": {
+        "length": {
+          "value": 180
+        }
+      }
+    },
+    "trail_noise_live": {
+      "type": "TrailCHOP",
+      "position": [
+        320,
+        500
+      ],
+      "parameters": {
+        "length": {
+          "value": 180
+        }
+      }
+    },
+    "trail_hold": {
+      "type": "TrailCHOP",
+      "position": [
+        560,
+        660
+      ],
+      "parameters": {
+        "length": {
+          "value": 180
+        }
+      }
+    },
+    "trail_lag_const": {
+      "type": "TrailCHOP",
+      "position": [
+        560,
+        820
+      ],
+      "parameters": {
+        "length": {
+          "value": 180
+        }
+      }
+    },
+    "trail_lag_live": {
+      "type": "TrailCHOP",
+      "position": [
+        560,
+        980
+      ],
+      "parameters": {
+        "length": {
+          "value": 180
+        }
+      }
+    },
+    "view_wave": {
+      "type": "CHOPtoTOP",
+      "position": [
+        860,
+        40
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 320,
+            "y": 240
+          }
+        },
+        "background": {
+          "value": {
+            "_type": "Color",
+            "r": 0.05,
+            "g": 0.05,
+            "b": 0.08,
+            "a": 1.0
+          }
+        },
+        "line_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.3,
+            "g": 0.95,
+            "b": 0.45,
+            "a": 1.0
+          }
+        },
+        "line_width": {
+          "value": 3.0
+        },
+        "min_val": {
+          "value": -1.2
+        },
+        "max_val": {
+          "value": 1.2
+        },
+        "auto_range": {
+          "value": false
+        }
+      }
+    },
+    "view_flat": {
+      "type": "CHOPtoTOP",
+      "position": [
+        860,
+        200
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 320,
+            "y": 240
+          }
+        },
+        "background": {
+          "value": {
+            "_type": "Color",
+            "r": 0.05,
+            "g": 0.05,
+            "b": 0.08,
+            "a": 1.0
+          }
+        },
+        "line_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.3,
+            "g": 0.95,
+            "b": 0.45,
+            "a": 1.0
+          }
+        },
+        "line_width": {
+          "value": 3.0
+        },
+        "min_val": {
+          "value": -1.2
+        },
+        "max_val": {
+          "value": 1.2
+        },
+        "auto_range": {
+          "value": false
+        }
+      }
+    },
+    "view_noise_still": {
+      "type": "CHOPtoTOP",
+      "position": [
+        860,
+        360
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 320,
+            "y": 240
+          }
+        },
+        "background": {
+          "value": {
+            "_type": "Color",
+            "r": 0.05,
+            "g": 0.05,
+            "b": 0.08,
+            "a": 1.0
+          }
+        },
+        "line_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.3,
+            "g": 0.95,
+            "b": 0.45,
+            "a": 1.0
+          }
+        },
+        "line_width": {
+          "value": 3.0
+        },
+        "min_val": {
+          "value": -1.2
+        },
+        "max_val": {
+          "value": 1.2
+        },
+        "auto_range": {
+          "value": false
+        }
+      }
+    },
+    "view_noise_live": {
+      "type": "CHOPtoTOP",
+      "position": [
+        860,
+        520
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 320,
+            "y": 240
+          }
+        },
+        "background": {
+          "value": {
+            "_type": "Color",
+            "r": 0.05,
+            "g": 0.05,
+            "b": 0.08,
+            "a": 1.0
+          }
+        },
+        "line_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.3,
+            "g": 0.95,
+            "b": 0.45,
+            "a": 1.0
+          }
+        },
+        "line_width": {
+          "value": 3.0
+        },
+        "min_val": {
+          "value": -1.2
+        },
+        "max_val": {
+          "value": 1.2
+        },
+        "auto_range": {
+          "value": false
+        }
+      }
+    },
+    "view_hold": {
+      "type": "CHOPtoTOP",
+      "position": [
+        860,
+        40
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 320,
+            "y": 240
+          }
+        },
+        "background": {
+          "value": {
+            "_type": "Color",
+            "r": 0.05,
+            "g": 0.05,
+            "b": 0.08,
+            "a": 1.0
+          }
+        },
+        "line_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.3,
+            "g": 0.95,
+            "b": 0.45,
+            "a": 1.0
+          }
+        },
+        "line_width": {
+          "value": 3.0
+        },
+        "min_val": {
+          "value": 0.0
+        },
+        "max_val": {
+          "value": 1.0
+        },
+        "auto_range": {
+          "value": false
+        }
+      }
+    },
+    "view_lag_const": {
+      "type": "CHOPtoTOP",
+      "position": [
+        860,
+        200
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 320,
+            "y": 240
+          }
+        },
+        "background": {
+          "value": {
+            "_type": "Color",
+            "r": 0.05,
+            "g": 0.05,
+            "b": 0.08,
+            "a": 1.0
+          }
+        },
+        "line_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.3,
+            "g": 0.95,
+            "b": 0.45,
+            "a": 1.0
+          }
+        },
+        "line_width": {
+          "value": 3.0
+        },
+        "min_val": {
+          "value": 0.0
+        },
+        "max_val": {
+          "value": 1.0
+        },
+        "auto_range": {
+          "value": false
+        }
+      }
+    },
+    "view_select": {
+      "type": "CHOPtoTOP",
+      "position": [
+        860,
+        360
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 320,
+            "y": 240
+          }
+        },
+        "background": {
+          "value": {
+            "_type": "Color",
+            "r": 0.05,
+            "g": 0.05,
+            "b": 0.08,
+            "a": 1.0
+          }
+        },
+        "line_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.3,
+            "g": 0.95,
+            "b": 0.45,
+            "a": 1.0
+          }
+        },
+        "line_width": {
+          "value": 3.0
+        },
+        "min_val": {
+          "value": -1.2
+        },
+        "max_val": {
+          "value": 1.2
+        },
+        "auto_range": {
+          "value": false
+        }
+      }
+    },
+    "view_lag_live": {
+      "type": "CHOPtoTOP",
+      "position": [
+        860,
+        520
+      ],
+      "parameters": {
+        "mode": {
+          "value": 0
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 320,
+            "y": 240
+          }
+        },
+        "background": {
+          "value": {
+            "_type": "Color",
+            "r": 0.05,
+            "g": 0.05,
+            "b": 0.08,
+            "a": 1.0
+          }
+        },
+        "line_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.3,
+            "g": 0.95,
+            "b": 0.45,
+            "a": 1.0
+          }
+        },
+        "line_width": {
+          "value": 3.0
+        },
+        "min_val": {
+          "value": 0.0
+        },
+        "max_val": {
+          "value": 1.0
+        },
+        "auto_range": {
+          "value": false
+        }
+      }
+    },
+    "layout1": {
+      "type": "LayoutTOP",
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1280,
+            "y": 640
+          }
+        },
+        "columns": {
+          "value": 4
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1500,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1280,
+            "y": 640
+          }
+        },
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "03 chops \u2014 expression, hold, lag"
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "noise_still",
+      "from_port": 0,
+      "to": "trail_noise_still",
+      "to_port": 0
+    },
+    {
+      "from": "noise_live",
+      "from_port": 0,
+      "to": "trail_noise_live",
+      "to_port": 0
+    },
+    {
+      "from": "expr_sine",
+      "from_port": 0,
+      "to": "hold1",
+      "to_port": 0
+    },
+    {
+      "from": "hold1",
+      "from_port": 0,
+      "to": "trail_hold",
+      "to_port": 0
+    },
+    {
+      "from": "const1",
+      "from_port": 0,
+      "to": "lag_const",
+      "to_port": 0
+    },
+    {
+      "from": "lag_const",
+      "from_port": 0,
+      "to": "trail_lag_const",
+      "to_port": 0
+    },
+    {
+      "from": "expr_sine",
+      "from_port": 0,
+      "to": "lag_live",
+      "to_port": 0
+    },
+    {
+      "from": "lag_live",
+      "from_port": 0,
+      "to": "trail_lag_live",
+      "to_port": 0
+    },
+    {
+      "from": "expr_live",
+      "from_port": 0,
+      "to": "view_wave",
+      "to_port": 0
+    },
+    {
+      "from": "expr_flat",
+      "from_port": 0,
+      "to": "view_flat",
+      "to_port": 0
+    },
+    {
+      "from": "trail_noise_still",
+      "from_port": 0,
+      "to": "view_noise_still",
+      "to_port": 0
+    },
+    {
+      "from": "trail_noise_live",
+      "from_port": 0,
+      "to": "view_noise_live",
+      "to_port": 0
+    },
+    {
+      "from": "trail_hold",
+      "from_port": 0,
+      "to": "view_hold",
+      "to_port": 0
+    },
+    {
+      "from": "trail_lag_const",
+      "from_port": 0,
+      "to": "view_lag_const",
+      "to_port": 0
+    },
+    {
+      "from": "select1",
+      "from_port": 0,
+      "to": "view_select",
+      "to_port": 0
+    },
+    {
+      "from": "trail_lag_live",
+      "from_port": 0,
+      "to": "view_lag_live",
+      "to_port": 0
+    },
+    {
+      "from": "view_wave",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 0
+    },
+    {
+      "from": "view_flat",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 1
+    },
+    {
+      "from": "view_noise_still",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 2
+    },
+    {
+      "from": "view_noise_live",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 3
+    },
+    {
+      "from": "view_hold",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 4
+    },
+    {
+      "from": "view_lag_const",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 5
+    },
+    {
+      "from": "view_select",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 6
+    },
+    {
+      "from": "view_lag_live",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 7
+    },
+    {
+      "from": "layout1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Cook opt 03 \u2014 CHOPs\n\nWindow title: \"03 chops\". Green traces. Left to right, top row then bottom.\nWait about 2 seconds before judging cells 5 and 8.\n\n1 ExpressionCHOP sin(t + i * 0.15). A wave that TRAVELS.\n2 ExpressionCHOP 0.5. A FLAT line, above the middle. It must not travel.\n3 NoiseCHOP speed 0, trailed. A FLAT trace.\n4 NoiseCHOP speed 2, trailed. A trace that KEEPS wandering.\n5 Sine into HoldCHOP (hold on start, no trigger), trailed. FLAT line near 0.6. It must not follow the sine.\n6 Constant 0.8 into Lag. The trace RISES and then goes FLAT near the top. It must not stay on the floor, and it must not keep wiggling after it arrives.\n7 SelectCHOP named expr_live. No wire. Same TRAVELING wave as cell 1. Not empty.\n8 The same sine into Lag. The trace KEEPS moving. A lag on a moving input must not freeze.\n\nFilterCHOP and SmoothCHOP use this same settle as Lag. Cell 6 is the check for that family.\nFail if a live trace freezes, a still trace wanders, Hold follows the sine, or Select is empty.",
+      "position": [
+        -40,
+        -280
+      ],
+      "size": [
+        720,
+        340
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

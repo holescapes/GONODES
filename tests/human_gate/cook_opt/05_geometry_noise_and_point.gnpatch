@@ -1,0 +1,668 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "grid_a": {
+      "type": "GridSOP",
+      "position": [
+        40,
+        40
+      ],
+      "parameters": {
+        "size_x": {
+          "value": 2.0
+        },
+        "size_z": {
+          "value": 2.0
+        },
+        "rows": {
+          "value": 18
+        },
+        "cols": {
+          "value": 18
+        },
+        "orientation": {
+          "value": 1
+        }
+      }
+    },
+    "grid_b": {
+      "type": "GridSOP",
+      "position": [
+        40,
+        280
+      ],
+      "parameters": {
+        "size_x": {
+          "value": 2.0
+        },
+        "size_z": {
+          "value": 2.0
+        },
+        "rows": {
+          "value": 18
+        },
+        "cols": {
+          "value": 18
+        },
+        "orientation": {
+          "value": 1
+        }
+      }
+    },
+    "grid_c": {
+      "type": "GridSOP",
+      "position": [
+        40,
+        520
+      ],
+      "parameters": {
+        "size_x": {
+          "value": 2.0
+        },
+        "size_z": {
+          "value": 2.0
+        },
+        "rows": {
+          "value": 18
+        },
+        "cols": {
+          "value": 18
+        },
+        "orientation": {
+          "value": 1
+        }
+      }
+    },
+    "grid_d": {
+      "type": "GridSOP",
+      "position": [
+        40,
+        760
+      ],
+      "parameters": {
+        "size_x": {
+          "value": 2.0
+        },
+        "size_z": {
+          "value": 2.0
+        },
+        "rows": {
+          "value": 18
+        },
+        "cols": {
+          "value": 18
+        },
+        "orientation": {
+          "value": 1
+        }
+      }
+    },
+    "noise_still": {
+      "type": "NoiseSOP",
+      "position": [
+        300,
+        40
+      ],
+      "parameters": {
+        "amplitude": {
+          "value": 0.35
+        },
+        "frequency": {
+          "value": 1.4
+        },
+        "speed": {
+          "value": 0.0
+        }
+      }
+    },
+    "noise_live": {
+      "type": "NoiseSOP",
+      "position": [
+        300,
+        280
+      ],
+      "parameters": {
+        "amplitude": {
+          "value": 0.35
+        },
+        "frequency": {
+          "value": 1.4
+        },
+        "speed": {
+          "value": 1.5
+        }
+      }
+    },
+    "point_still": {
+      "type": "PointSOP",
+      "position": [
+        300,
+        520
+      ],
+      "parameters": {
+        "expr_x": {
+          "value": "px"
+        },
+        "expr_y": {
+          "value": "py"
+        },
+        "expr_z": {
+          "value": "pz"
+        }
+      }
+    },
+    "point_live": {
+      "type": "PointSOP",
+      "position": [
+        300,
+        760
+      ],
+      "parameters": {
+        "expr_x": {
+          "value": "px"
+        },
+        "expr_y": {
+          "value": "py + sin(t) * 0.45"
+        },
+        "expr_z": {
+          "value": "pz"
+        }
+      }
+    },
+    "geo_a": {
+      "type": "GeometryCOMP",
+      "position": [
+        560,
+        40
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        }
+      }
+    },
+    "geo_b": {
+      "type": "GeometryCOMP",
+      "position": [
+        560,
+        280
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        }
+      }
+    },
+    "geo_c": {
+      "type": "GeometryCOMP",
+      "position": [
+        560,
+        520
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        }
+      }
+    },
+    "geo_d": {
+      "type": "GeometryCOMP",
+      "position": [
+        560,
+        760
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        }
+      }
+    },
+    "cam_a": {
+      "type": "CameraCOMP",
+      "position": [
+        560,
+        160
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 3.2
+        },
+        "rx": {
+          "value": 0.0
+        }
+      }
+    },
+    "cam_b": {
+      "type": "CameraCOMP",
+      "position": [
+        560,
+        400
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 3.2
+        },
+        "rx": {
+          "value": 0.0
+        }
+      }
+    },
+    "cam_c": {
+      "type": "CameraCOMP",
+      "position": [
+        560,
+        640
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 3.2
+        },
+        "rx": {
+          "value": 0.0
+        }
+      }
+    },
+    "cam_d": {
+      "type": "CameraCOMP",
+      "position": [
+        560,
+        880
+      ],
+      "parameters": {
+        "tx": {
+          "value": 0.0
+        },
+        "ty": {
+          "value": 0.0
+        },
+        "tz": {
+          "value": 3.2
+        },
+        "rx": {
+          "value": 0.0
+        }
+      }
+    },
+    "render_a": {
+      "type": "RenderTOP",
+      "position": [
+        820,
+        40
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 640,
+            "y": 360
+          }
+        },
+        "bg_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.08,
+            "g": 0.09,
+            "b": 0.12,
+            "a": 1.0
+          }
+        },
+        "use_environment": {
+          "value": false
+        },
+        "ambient_energy": {
+          "value": 1.4
+        },
+        "ambient_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.85,
+            "g": 0.85,
+            "b": 0.9,
+            "a": 1.0
+          }
+        },
+        "cook_every_frame": {
+          "value": true
+        }
+      }
+    },
+    "render_b": {
+      "type": "RenderTOP",
+      "position": [
+        820,
+        280
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 640,
+            "y": 360
+          }
+        },
+        "bg_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.08,
+            "g": 0.09,
+            "b": 0.12,
+            "a": 1.0
+          }
+        },
+        "use_environment": {
+          "value": false
+        },
+        "ambient_energy": {
+          "value": 1.4
+        },
+        "ambient_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.85,
+            "g": 0.85,
+            "b": 0.9,
+            "a": 1.0
+          }
+        },
+        "cook_every_frame": {
+          "value": true
+        }
+      }
+    },
+    "render_c": {
+      "type": "RenderTOP",
+      "position": [
+        820,
+        520
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 640,
+            "y": 360
+          }
+        },
+        "bg_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.08,
+            "g": 0.09,
+            "b": 0.12,
+            "a": 1.0
+          }
+        },
+        "use_environment": {
+          "value": false
+        },
+        "ambient_energy": {
+          "value": 1.4
+        },
+        "ambient_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.85,
+            "g": 0.85,
+            "b": 0.9,
+            "a": 1.0
+          }
+        },
+        "cook_every_frame": {
+          "value": true
+        }
+      }
+    },
+    "render_d": {
+      "type": "RenderTOP",
+      "position": [
+        820,
+        760
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 640,
+            "y": 360
+          }
+        },
+        "bg_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.08,
+            "g": 0.09,
+            "b": 0.12,
+            "a": 1.0
+          }
+        },
+        "use_environment": {
+          "value": false
+        },
+        "ambient_energy": {
+          "value": 1.4
+        },
+        "ambient_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.85,
+            "g": 0.85,
+            "b": 0.9,
+            "a": 1.0
+          }
+        },
+        "cook_every_frame": {
+          "value": true
+        }
+      }
+    },
+    "layout1": {
+      "type": "LayoutTOP",
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1280,
+            "y": 720
+          }
+        },
+        "columns": {
+          "value": 2
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1500,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1280,
+            "y": 720
+          }
+        },
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "05 geometry \u2014 noise and point"
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "grid_a",
+      "from_port": 0,
+      "to": "noise_still",
+      "to_port": 0
+    },
+    {
+      "from": "noise_still",
+      "from_port": 0,
+      "to": "geo_a",
+      "to_port": 0
+    },
+    {
+      "from": "geo_a",
+      "from_port": 0,
+      "to": "render_a",
+      "to_port": 0
+    },
+    {
+      "from": "cam_a",
+      "from_port": 0,
+      "to": "render_a",
+      "to_port": 1
+    },
+    {
+      "from": "grid_b",
+      "from_port": 0,
+      "to": "noise_live",
+      "to_port": 0
+    },
+    {
+      "from": "noise_live",
+      "from_port": 0,
+      "to": "geo_b",
+      "to_port": 0
+    },
+    {
+      "from": "geo_b",
+      "from_port": 0,
+      "to": "render_b",
+      "to_port": 0
+    },
+    {
+      "from": "cam_b",
+      "from_port": 0,
+      "to": "render_b",
+      "to_port": 1
+    },
+    {
+      "from": "grid_c",
+      "from_port": 0,
+      "to": "point_still",
+      "to_port": 0
+    },
+    {
+      "from": "point_still",
+      "from_port": 0,
+      "to": "geo_c",
+      "to_port": 0
+    },
+    {
+      "from": "geo_c",
+      "from_port": 0,
+      "to": "render_c",
+      "to_port": 0
+    },
+    {
+      "from": "cam_c",
+      "from_port": 0,
+      "to": "render_c",
+      "to_port": 1
+    },
+    {
+      "from": "grid_d",
+      "from_port": 0,
+      "to": "point_live",
+      "to_port": 0
+    },
+    {
+      "from": "point_live",
+      "from_port": 0,
+      "to": "geo_d",
+      "to_port": 0
+    },
+    {
+      "from": "geo_d",
+      "from_port": 0,
+      "to": "render_d",
+      "to_port": 0
+    },
+    {
+      "from": "cam_d",
+      "from_port": 0,
+      "to": "render_d",
+      "to_port": 1
+    },
+    {
+      "from": "render_a",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 0
+    },
+    {
+      "from": "render_b",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 1
+    },
+    {
+      "from": "render_c",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 2
+    },
+    {
+      "from": "render_d",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 3
+    },
+    {
+      "from": "layout1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Cook opt 05 \u2014 SOP cooks\n\nWindow title: \"05 geometry\". Four sheets, left to right, top row then bottom.\nEach sheet is a vertical grid in its own render.\n\n1 NoiseSOP speed 0. A BUMPY sheet that stays STILL.\n2 NoiseSOP speed 1.5. The same kind of bumps, and they KEEP MOVING.\n3 PointSOP expressions px, py, pz. A FLAT sheet that stays STILL.\n4 PointSOP Y = py + sin(t) * 0.45. The sheet BOBS up and down.\n\nAttributeSOP is the same rule as PointSOP: an expression that reads t cooks, a constant does not. There is no separate picture for it, because a point attribute does not move the sheet on its own.\nNoiseVOL has no simple picture in this set.\n\nFail if cell 1 crawls, cell 2 is frozen, cell 3 bobs, cell 4 is frozen, or a cell is an empty background.",
+      "position": [
+        -40,
+        -280
+      ],
+      "size": [
+        720,
+        280
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

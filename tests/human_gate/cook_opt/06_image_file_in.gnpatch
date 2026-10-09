@@ -1,0 +1,202 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "img_sync": {
+      "type": "ImageFileInIMG",
+      "position": [
+        40,
+        80
+      ],
+      "parameters": {
+        "file": {
+          "value": "res://icon.svg"
+        },
+        "async_load": {
+          "value": false
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 0,
+            "y": 0
+          }
+        }
+      }
+    },
+    "img_async": {
+      "type": "ImageFileInIMG",
+      "position": [
+        40,
+        280
+      ],
+      "parameters": {
+        "file": {
+          "value": "res://icon.svg"
+        },
+        "async_load": {
+          "value": true
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 0,
+            "y": 0
+          }
+        }
+      }
+    },
+    "img_resize": {
+      "type": "ImageFileInIMG",
+      "position": [
+        40,
+        480
+      ],
+      "parameters": {
+        "file": {
+          "value": "res://icon.svg"
+        },
+        "async_load": {
+          "value": true
+        },
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 128,
+            "y": 128
+          }
+        }
+      }
+    },
+    "top_sync": {
+      "type": "ImgToTOP",
+      "position": [
+        360,
+        80
+      ],
+      "parameters": {}
+    },
+    "top_async": {
+      "type": "ImgToTOP",
+      "position": [
+        360,
+        280
+      ],
+      "parameters": {}
+    },
+    "top_resize": {
+      "type": "ImgToTOP",
+      "position": [
+        360,
+        480
+      ],
+      "parameters": {}
+    },
+    "layout1": {
+      "type": "LayoutTOP",
+      "position": [
+        700,
+        240
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1200,
+            "y": 400
+          }
+        },
+        "columns": {
+          "value": 3
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1100,
+        240
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1200,
+            "y": 400
+          }
+        },
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "06 image file in"
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "img_sync",
+      "from_port": 0,
+      "to": "top_sync",
+      "to_port": 0
+    },
+    {
+      "from": "img_async",
+      "from_port": 0,
+      "to": "top_async",
+      "to_port": 0
+    },
+    {
+      "from": "img_resize",
+      "from_port": 0,
+      "to": "top_resize",
+      "to_port": 0
+    },
+    {
+      "from": "top_sync",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 0
+    },
+    {
+      "from": "top_async",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 1
+    },
+    {
+      "from": "top_resize",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 2
+    },
+    {
+      "from": "layout1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Cook opt 06 \u2014 ImageFileIn keep-dirty and resize\n\nWindow title: \"06 image file in\". Three copies of res://icon.svg (the Godot logo).\nThe async tiles may show up a frame later than the first. Give it a second.\n\n1 Sync load, resolution 0,0 (native size). The logo. Not black.\n2 Async load, resolution 0,0. The same logo. Not black, and it stays after it appears.\n3 Async load, resized to 128x128 before ImgToTOP. The logo again, not a blank or a garbage block.\n\nFail if any cell is still black after a second, or the resized cell is empty while the others show the logo.\n\nNot in this folder: MovieFileIn and ImageSequence. The repo has no sample movie or image sequence. SystemDAT, ErrorDAT, and ParameterDAT are tables, so they are not in a picture window. NoiseVOL has no simple viewer here.",
+      "position": [
+        -40,
+        -280
+      ],
+      "size": [
+        720,
+        280
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

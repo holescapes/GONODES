@@ -782,8 +782,8 @@ func _create_vector2i_control() -> Control:
 	var y_val: int = int(vec_val.y) if vec_val else 0
 
 	var x_field := GNIntField.new()
-	x_field.min_value = null
-	x_field.max_value = null
+	x_field.min_value = param.min_value
+	x_field.max_value = param.max_value
 	x_field.value = x_val
 	x_field.default_value = x_val
 	x_field.suffix = "  X"
@@ -792,8 +792,8 @@ func _create_vector2i_control() -> Control:
 	hbox.add_child(x_field)
 
 	var y_field := GNIntField.new()
-	y_field.min_value = null
-	y_field.max_value = null
+	y_field.min_value = param.min_value
+	y_field.max_value = param.max_value
 	y_field.value = y_val
 	y_field.default_value = y_val
 	y_field.suffix = "  Y"

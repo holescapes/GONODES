@@ -42,16 +42,13 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	if node_id.is_empty():
 		return out
 
-	# Walk up the tree to find the owning GNNetwork.
-	var network_node = get_parent()
-	while network_node != null and not (network_node is GNNetwork):
-		network_node = network_node.get_parent()
-
-	if network_node == null:
-		GNLogger.warn("ParameterCHOP", "'%s' — could not find parent GNNetwork" % id)
+	# Operators are children of the cook engine, not of the network.
+	var network := get_owning_network()
+	if network == null:
+		GNLogger.warn("ParameterCHOP", "'%s' — could not find owning network" % id)
 		return out
 
-	var target: GNNode = network_node.get_node_by_id(node_id)
+	var target: GNNode = network.nodes.get(node_id, null) as GNNode
 	if target == null:
 		GNLogger.warn("ParameterCHOP", "'%s' — target node '%s' not found" % [id, node_id])
 		return out

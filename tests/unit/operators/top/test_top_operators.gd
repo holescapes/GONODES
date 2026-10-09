@@ -659,6 +659,24 @@ func test_glue_top_instantiate() -> void:
 func test_layout_top_instantiate() -> void:
 	var node := _make_node(LayoutTOP.new(), "layout1")
 	GNTestAssert.assert_eq(node.node_type, "layout", "node_type")
+	GNTestAssert.assert_true(node._dynamic_input, "network will grow inputs")
+	GNTestAssert.assert_eq(node.input_ports.size(), 3, "Input 0, Input 1, and a spare")
+
+
+func test_layout_top_spare_input_grows() -> void:
+	var node := _make_node(LayoutTOP.new(), "layout1")
+	node.update_dynamic_inputs(PackedInt32Array([0, 1, 2]))
+	GNTestAssert.assert_eq(node.input_ports.size(), 4, "connecting the spare adds another port")
+	GNTestAssert.assert_eq(node.input_ports[2].port_name, "in2", "the connected spare becomes Input 2")
+	GNTestAssert.assert_eq(node.input_ports[3].port_name, "", "a new unnamed spare follows")
+	var full := PackedInt32Array()
+	for i in range(8):
+		full.append(i)
+	node.update_dynamic_inputs(full)
+	GNTestAssert.assert_eq(node.input_ports.size(), 8, "eight shader inputs, no ninth spare")
+	GNTestAssert.assert_eq(node.input_ports[7].port_name, "in7", "the last port is a real input")
+	node.update_dynamic_inputs(PackedInt32Array([0]))
+	GNTestAssert.assert_eq(node.input_ports.size(), 3, "disconnecting shrinks back to the spare")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

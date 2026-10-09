@@ -1401,6 +1401,17 @@ func test_parameter_chop_produces_output() -> void:
 	GNTestAssert.assert_not_null(out, "output exists")
 
 
+func test_parameter_chop_reads_target_through_cook_engine() -> void:
+	var target := _make_node(ConstantCHOP.new(), "const_src")
+	target.set_param_value("value0", 4.0)
+	var node := _make_node(ParameterCHOP.new(), "parameter_read")
+	node.set_param_value("node_path", "const_src")
+	node.set_param_value("parameters", "value0")
+	var out: GNChannelData = _cook_no_input(node) as GNChannelData
+	GNTestAssert.assert_true(out.channels.has("value0"), "exports the named parameter")
+	GNTestAssert.assert_approx(out.get_value("value0"), 4.0, 0.01, "channel matches the target")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  PhysicsCHOP
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,348 @@
+{
+  "version": "1.0.0",
+  "generator": "human_gate",
+  "nodes": {
+    "circle1": {
+      "type": "CircleTOP",
+      "position": [
+        80,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 256,
+            "y": 256
+          }
+        },
+        "fill_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.2,
+            "g": 0.75,
+            "b": 0.95,
+            "a": 1.0
+          }
+        },
+        "bg_color": {
+          "value": {
+            "_type": "Color",
+            "r": 0.05,
+            "g": 0.05,
+            "b": 0.08,
+            "a": 1.0
+          }
+        },
+        "radius": {
+          "value": 0.34
+        }
+      }
+    },
+    "glitch_off": {
+      "type": "GlitchTOP",
+      "position": [
+        360,
+        40
+      ],
+      "parameters": {
+        "intensity": {
+          "value": 0.0
+        },
+        "channel_shift": {
+          "value": 0.0
+        },
+        "tear_strength": {
+          "value": 0.0
+        }
+      }
+    },
+    "glitch_on": {
+      "type": "GlitchTOP",
+      "position": [
+        360,
+        220
+      ],
+      "parameters": {
+        "intensity": {
+          "value": 0.85
+        },
+        "channel_shift": {
+          "value": 0.02
+        },
+        "tear_strength": {
+          "value": 0.45
+        }
+      }
+    },
+    "grain_off": {
+      "type": "FilmGrainTOP",
+      "position": [
+        360,
+        400
+      ],
+      "parameters": {
+        "intensity": {
+          "value": 0.0
+        }
+      }
+    },
+    "grain_on": {
+      "type": "FilmGrainTOP",
+      "position": [
+        360,
+        580
+      ],
+      "parameters": {
+        "intensity": {
+          "value": 0.85
+        }
+      }
+    },
+    "noise_still": {
+      "type": "NoiseTOP",
+      "position": [
+        80,
+        460
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 256,
+            "y": 256
+          }
+        },
+        "scale": {
+          "value": 5.0
+        },
+        "monochrome": {
+          "value": true
+        },
+        "seed": {
+          "value": 3
+        },
+        "time_offset": {
+          "value": 1.25
+        }
+      }
+    },
+    "noise_live": {
+      "type": "NoiseTOP",
+      "position": [
+        80,
+        680
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 256,
+            "y": 256
+          }
+        },
+        "scale": {
+          "value": 5.0
+        },
+        "monochrome": {
+          "value": true
+        },
+        "seed": {
+          "value": 3
+        },
+        "time_offset": {
+          "value": 0.0,
+          "mode": "EXPRESSION",
+          "expression": "time"
+        }
+      }
+    },
+    "level1": {
+      "type": "LevelTOP",
+      "position": [
+        360,
+        760
+      ],
+      "parameters": {
+        "brightness": {
+          "value": 1.8
+        },
+        "contrast": {
+          "value": 1.4
+        }
+      }
+    },
+    "select_live": {
+      "type": "SelectTOP",
+      "position": [
+        640,
+        680
+      ],
+      "parameters": {
+        "top": {
+          "value": "noise_live"
+        }
+      }
+    },
+    "select_still": {
+      "type": "SelectTOP",
+      "position": [
+        640,
+        460
+      ],
+      "parameters": {
+        "top": {
+          "value": "noise_still"
+        }
+      }
+    },
+    "layout1": {
+      "type": "LayoutTOP",
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1280,
+            "y": 640
+          }
+        },
+        "columns": {
+          "value": 4
+        }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [
+        1500,
+        200
+      ],
+      "parameters": {
+        "resolution": {
+          "value": {
+            "_type": "Vector2i",
+            "x": 1280,
+            "y": 640
+          }
+        },
+        "open": {
+          "value": true
+        },
+        "title": {
+          "value": "02 effects, select, downstream"
+        }
+      }
+    }
+  },
+  "connections": [
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "glitch_off",
+      "to_port": 0
+    },
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "glitch_on",
+      "to_port": 0
+    },
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "grain_off",
+      "to_port": 0
+    },
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "grain_on",
+      "to_port": 0
+    },
+    {
+      "from": "noise_still",
+      "from_port": 0,
+      "to": "level1",
+      "to_port": 0
+    },
+    {
+      "from": "glitch_off",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 0
+    },
+    {
+      "from": "glitch_on",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 1
+    },
+    {
+      "from": "grain_off",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 2
+    },
+    {
+      "from": "grain_on",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 3
+    },
+    {
+      "from": "level1",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 4
+    },
+    {
+      "from": "select_live",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 5
+    },
+    {
+      "from": "select_still",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 6
+    },
+    {
+      "from": "circle1",
+      "from_port": 0,
+      "to": "layout1",
+      "to_port": 7
+    },
+    {
+      "from": "layout1",
+      "from_port": 0,
+      "to": "window1",
+      "to_port": 0
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note",
+      "type": "note",
+      "text": "Cook opt 02 \u2014 effects, wireless Select, downstream of a still node\n\nWindow title: \"02 effects, select, downstream\".\nLeft to right, top row then bottom row. Select cells have NO wires. They name their target.\n\n1 Glitch intensity 0, channel shift 0, tears 0. STILL cyan circle. Same as cell 8.\n2 Glitch intensity 0.85 with shift and tears. The circle BREAKS and keeps changing.\n3 Film grain intensity 0. STILL clean circle.\n4 Film grain 0.85. SPARKLE that keeps changing.\n5 LevelTOP on a still NoiseTOP (brighter). STILL noise, not black.\n6 SelectTOP named noise_live. SCROLLING noise, not black. No wire into the Select.\n7 SelectTOP named noise_still. STILL noise, not black.\n8 The plain cyan circle. STILL. Reference for cells 1 and 3.\n\nFail if Select is black, the level cell is black, a still cell moves, or a live cell freezes.",
+      "position": [
+        -40,
+        -280
+      ],
+      "size": [
+        720,
+        300
+      ],
+      "color": [
+        1.0,
+        0.95,
+        0.55,
+        0.92
+      ]
+    }
+  ]
+}

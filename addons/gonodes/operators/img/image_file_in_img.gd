@@ -51,7 +51,10 @@ func _init_parameters() -> void:
 			"*.svg", "*.hdr", "*.exr", "*.ktx", "*.ktx2", "*.tres", "*.res"]),
 		"File", "Image or texture file path (KTX/KTX2 keeps ETC2 when present)."))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(0, 0),
-		"Resolution", "Resize to this resolution. (0, 0) = native size."))
+		"Resolution", "Resize target in pixels. (0, 0) keeps the file's native size. Each side stays at 0 or above."))
+	var res_param := get_parameter("resolution")
+	if res_param != null:
+		res_param.min_value = 0
 	add_parameter(GNParameter.create_bool("async_load", false,
 		"Async Load", "Load from disk on a background thread; hold last image until ready."))
 	add_parameter(GNParameter.create_bool("reload", false,
@@ -103,11 +106,6 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 			_loaded_image = _load_image(file_path)
 			_loaded_file_path = file_path
 			_load_ready = _loaded_image != null
-			if _loaded_image != null and res == Vector2i.ZERO:
-				var native := Vector2i(_loaded_image.get_width(), _loaded_image.get_height())
-				if native.x > 0 and native.y > 0:
-					set_param_value("resolution", native)
-					res = native
 
 	# Not time_dependent — re-queue while a worker load is in flight.
 	# keep_dirty_after_cook survives execute_cook's clear_dirty (and resets
@@ -129,8 +127,8 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# Work on a copy so the cached source isn't mutated by resize.
 	var img := _loaded_image.duplicate() as Image
 
-	# Resize if a non-zero resolution is requested and differs from native.
-	if res != Vector2i.ZERO and Vector2i(img.get_width(), img.get_height()) != res:
+	# (0, 0) stays native. Resize only when both sides are greater than zero.
+	if res.x > 0 and res.y > 0 and Vector2i(img.get_width(), img.get_height()) != res:
 		img = GNResourceLoader.ensure_cpu_editable_image(img)
 		img.resize(res.x, res.y, Image.INTERPOLATE_BILINEAR)
 
@@ -211,11 +209,6 @@ func _poll_async() -> void:
 		_async_path = ""
 		_async_mutex.unlock()
 		_load_ready = true
-		var res: Vector2i = get_param_value("resolution")
-		if res == Vector2i.ZERO:
-			var native := Vector2i(_loaded_image.get_width(), _loaded_image.get_height())
-			if native.x > 0 and native.y > 0:
-				set_param_value("resolution", native)
 		GNLogger.info("ImageFileInIMG",
 			"'%s': async loaded %s (%dx%d)" % [
 				id, path, _loaded_image.get_width(), _loaded_image.get_height()])

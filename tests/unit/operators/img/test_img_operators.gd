@@ -216,6 +216,10 @@ func test_pixel_sort_img_no_input() -> void:
 func test_image_file_in_img_instantiate() -> void:
 	var node := _make_node(ImageFileInIMG.new(), "filein1")
 	GNTestAssert.assert_eq(node.node_type, "image_file_in", "node_type")
+	node.set_param_value("resolution", Vector2i(-1, -1))
+	GNTestAssert.assert_eq(node.get_param_value("resolution"), Vector2i(0, 0), "negative resolution clamps to 0")
+	node.set_param_value("resolution", Vector2i(128, 64))
+	GNTestAssert.assert_eq(node.get_param_value("resolution"), Vector2i(128, 64), "positive resolution kept")
 
 func test_image_file_in_img_no_file() -> void:
 	var node := _make_node(ImageFileInIMG.new(), "filein1")
@@ -249,6 +253,12 @@ func test_image_file_in_img_async_load_param() -> void:
 		if node.is_load_ready():
 			break
 	GNTestAssert.assert_true(node.is_load_ready(), "async eventually ready")
+	var kept: Vector2i = node.get_param_value("resolution")
+	GNTestAssert.assert_eq(kept, Vector2i(0, 0), "native sentinel stays 0,0")
+	var loaded := out as GNImageData
+	if loaded != null and loaded.image != null:
+		GNTestAssert.assert_eq(loaded.image.get_width(), 4, "cooked native width")
+		GNTestAssert.assert_eq(loaded.image.get_height(), 4, "cooked native height")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
 
@@ -259,6 +269,10 @@ func test_image_file_in_img_async_load_param() -> void:
 func test_image_sequence_img_instantiate() -> void:
 	var node := _make_node(ImageSequenceIMG.new(), "seq1")
 	GNTestAssert.assert_eq(node.node_type, "image_sequence", "node_type")
+	node.set_param_value("resolution", Vector2i(-1, -4))
+	GNTestAssert.assert_eq(node.get_param_value("resolution"), Vector2i(0, 0), "negative resolution clamps to 0")
+	node.set_param_value("resolution", Vector2i(64, 32))
+	GNTestAssert.assert_eq(node.get_param_value("resolution"), Vector2i(64, 32), "positive resolution kept")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

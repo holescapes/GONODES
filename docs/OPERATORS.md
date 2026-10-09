@@ -294,7 +294,7 @@ Loads an image file (or HTTP/HTTPS URL) as a CPU-side `Image`. Supports PNG, JPG
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | file | File | (none) | — | Image path or URL |
-| resolution | Vector2i | 0×0 | — | Resize target; `(0,0)` = native (keeps KTX2 compressed) |
+| resolution | Vector2i | 0×0 | 0– | Resize target in pixels. `(0,0)` keeps the file's native size and is not overwritten after load. Each side is 0 or a positive integer (keeps KTX2 compressed at native size) |
 | async_load | Bool | false | — | Load from disk on a worker thread; hold last good image until ready |
 | reload | Bool | false | — | Pulse: force reload on next cook (auto-resets) |
 
@@ -311,7 +311,7 @@ Plays a numbered image sequence as animated frames. Supports PNG, WebP, JPG, **K
 | Parameter | Type | Default | Range | Description |
 |-----------|------|---------|-------|-------------|
 | file | File | (none) | — | Path to ANY frame in the sequence (auto-discovers siblings) |
-| resolution | Vector2i | 512×512 | — | Output resolution (auto-set from first frame). **(0,0) / native keeps KTX2 compressed** — resizing decompresses |
+| resolution | Vector2i | 0×0 | 0– | Resize target in pixels. `(0,0)` keeps each frame's native size and is not overwritten after discovery. Each side is 0 or a positive integer. Resizing decompresses KTX2 |
 | play | Bool | true | — | Play / pause |
 | speed | Float | 1.0 | 0.01–10.0 | Playback speed multiplier |
 | index | Int | -1 | -1–→ | Manual frame index override (-1 = auto time-based) |
@@ -3112,7 +3112,7 @@ Reads another node's parameter values as CHOP channels.
 | node_path | String | "" | Target node ID |
 | parameters | String | "" | Space-separated param names (empty = all) |
 
-**How it works:** Walks up to the GNNetwork, finds the target node by ID, reads parameter values. Each float parameter becomes a single-value channel.
+**How it works:** Resolves the owning network through the cook engine, finds the target node by ID, and reads parameter values. Each float parameter becomes a single-value channel. Time-dependent only while the target node is time-dependent.
 
 ---
 
