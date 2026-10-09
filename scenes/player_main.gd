@@ -218,6 +218,8 @@ func _apply_runtime_settings() -> void:
 	cook_engine.parallel_cook_enabled = s.get("parallel_cook_enabled", false)
 	cook_engine.max_cooks_per_frame = s.get("max_cooks_per_frame", 0)
 	var log_lvl: int = s.get("log_level", 1)
+	GNLogger.install_godot_bridge()
+	GNLogger.enabled = true
 	GNLogger.level = log_lvl as GNLogger.Level
 
 	# File logging — explicit path wins, then boolean toggle

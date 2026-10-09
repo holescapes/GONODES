@@ -86,7 +86,9 @@ const DEFAULTS: Dictionary = {
 	"graph_snap_distance": 20,
 	"perf_overlay_enabled": false,
 	"log_level": 1,  # 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
-	"log_to_file": false,
+	"log_to_file": false,  # Player export. Editor uses log_file_name.
+	"log_file_name": "",  # Editor: file name beside the patch. Empty = no file.
+	"log_panel_lines": 50,
 	"parallel_cook_enabled": false,
 	"wire_style": 0,  # 0=Curved, 1=Straight, 2=Right-Angle
 	"viewer_bg_color": Color(0.06, 0.06, 0.08),

@@ -2657,7 +2657,8 @@ func _cook_single_node(node: GNNode) -> int:
 			GNLogger.warn("CookEngine", "Node '%s' (%s) cook returned null" % [node.id, node.node_type])
 			cook_error.emit(node.id, "cook returned null")
 	else:
-		GNLogger.debug("CookEngine", "Cooked '%s' (%s) in %.3fms" % [node.id, node.node_type, node.cook_time_ms])
+		if GNLogger.will_log(GNLogger.Level.DEBUG, "CookEngine"):
+			GNLogger.debug("CookEngine", "Cooked '%s' (%s) in %.3fms" % [node.id, node.node_type, node.cook_time_ms])
 
 	return 1
 

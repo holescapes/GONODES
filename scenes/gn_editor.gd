@@ -45,6 +45,9 @@ var _viewer_pinned: bool = false
 ## Path to the currently loaded/saved patch file (empty = unsaved).
 var _current_file_path: String = ""
 
+## Last rejected log file name, so a bad value is warned about once.
+var _rejected_log_name: String = ""
+
 ## Undo version at last save/load.  Compared against current version to
 ## detect whether undo-tracked changes have been made.
 var _saved_undo_version: int = 0
@@ -151,10 +154,12 @@ func _ready() -> void:
 	# Apply saved interface scale before building UI (user://gn_ui_prefs.cfg).
 	GNUiPrefs.apply_interface_scale(get_tree())
 
-	# Wire log toggle early so extension scan results are visible
+	# Wire log toggle early so extension scan results are visible.
+	# Debug is created later; restore applies the saved pair.
 	log_toggle.toggled.connect(_on_log_toggled)
-	GNLogger.enabled = log_toggle.button_pressed
-	GNLogger.level = GNLogger.Level.INFO
+	# Capture starts before the extension scan. The panel only draws later.
+	_apply_log_settings()
+	GNLogger.install_godot_bridge()
 
 	# Initialize extension registry — scan for gn_ext_* addon manifests
 	GNExtensionRegistry.instance().scan_extensions()
@@ -262,6 +267,7 @@ func _setup_network() -> void:
 			network = GNNetwork.new()
 	else:
 		network = GNNetwork.new()
+	_apply_log_settings()
 
 
 func _setup_cook_engine() -> void:
@@ -308,7 +314,7 @@ func _setup_viewer_panel() -> void:
 ## Creates the collapsible log panel between the graph area and the toolbar.
 func _setup_log_panel() -> void:
 	log_panel = GNLogPanel.new()
-	log_panel.visible = false  # hidden by default, toggled by LogToggle
+	_set_dock_panel_open(log_panel, false)
 	# Anchor to bottom, just above InfoBar (66px toolbar height)
 	log_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	add_child(log_panel)
@@ -321,19 +327,13 @@ const _LOG_PANEL_HEIGHT := 160.0
 
 ## Recalculates vertical offsets for HSplit, LogPanel, and InfoBar.
 func _layout_log_panel() -> void:
-	var _info_bar := $InfoBar as VBoxContainer
-	if log_panel.visible:
-		log_panel.offset_top = -((_TOOLBAR_HEIGHT) + _LOG_PANEL_HEIGHT)
-		log_panel.offset_bottom = -(_TOOLBAR_HEIGHT)
-		hsplit.offset_bottom = -((_TOOLBAR_HEIGHT) + _LOG_PANEL_HEIGHT)
-	else:
-		hsplit.offset_bottom = -(_TOOLBAR_HEIGHT)
+	_layout_bottom_panels()
 
 
 ## Creates the debug panel (docked below graph, hidden by default).
 func _setup_debug_panel() -> void:
 	debug_panel = GNDebugPanel.new()
-	debug_panel.visible = false
+	_set_dock_panel_open(debug_panel, false)
 	debug_panel.cook_engine = cook_engine
 	debug_panel.network = network
 	debug_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -353,7 +353,7 @@ func _setup_debug_panel() -> void:
 ## Creates the export compatibility report panel (docked below graph, hidden by default).
 func _setup_compat_panel() -> void:
 	compat_panel = GNCompatReportPanel.new()
-	compat_panel.visible = false
+	_set_dock_panel_open(compat_panel, false)
 	compat_panel.network = network
 	compat_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	compat_panel.node_selected.connect(_on_debug_node_selected)
@@ -365,7 +365,7 @@ func _setup_take_panel() -> void:
 	take_manager = GNTakeManager.new()
 	take_manager.network = network
 	take_panel = GNTakePanel.new()
-	take_panel.visible = false
+	_set_dock_panel_open(take_panel, false)
 	take_panel.setup(take_manager)
 	take_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	add_child(take_panel)
@@ -374,27 +374,29 @@ func _setup_take_panel() -> void:
 
 ## Handles take toggle — shows/hides take panel.
 func _on_take_toggled(enabled: bool) -> void:
-	take_panel.visible = enabled
-	_layout_debug_panel()
+	_set_dock_panel_open(take_panel, enabled)
+	if enabled:
+		take_panel._refresh_list()
+	_layout_bottom_panels()
 	_save_setting("take_enabled", enabled)
 
 
 ## Handles compat report toggle.
 func _on_compat_toggled(enabled: bool) -> void:
-	compat_panel.visible = enabled
+	_set_dock_panel_open(compat_panel, enabled)
 	if enabled:
 		compat_panel._scan()
-	_layout_debug_panel()
+	_layout_bottom_panels()
 	_save_setting("compat_enabled", enabled)
 
 
 ## Handles debug toggle — shows/hides debug panel and overlay.
 func _on_debug_toggled(enabled: bool) -> void:
-	debug_panel.visible = enabled
+	_set_dock_panel_open(debug_panel, enabled)
 	graph_editor.debug_overlay.set_debug_enabled(enabled)
 	if _debug_layers_container != null:
 		_debug_layers_container.visible = enabled
-	_layout_debug_panel()
+	_layout_bottom_panels()
 	_save_setting("debug_enabled", enabled)
 
 
@@ -414,24 +416,56 @@ func _on_debug_layer_toggled(enabled: bool, layer_idx: int) -> void:
 		overlay._apply_active_dimming()
 
 
+## Shows or hides a docked panel. A hidden panel does not process or take clicks.
+func _set_dock_panel_open(panel: Control, open: bool) -> void:
+	if panel == null:
+		return
+	panel.visible = open
+	panel.process_mode = Node.PROCESS_MODE_INHERIT if open else Node.PROCESS_MODE_DISABLED
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP if open else Control.MOUSE_FILTER_IGNORE
+
+
+## Stacks every open bottom panel on the toolbar and parks the graph above them.
+## Closing one panel drops the ones above it. Order from the toolbar up:
+## Logs, Debug, Compat, Takes.
+var _laying_out_bottom: bool = false
+
+
+func _layout_bottom_panels() -> void:
+	if _laying_out_bottom:
+		return
+	_laying_out_bottom = true
+	var info_bar := get_node_or_null("InfoBar") as Control
+	var bar_h := _TOOLBAR_HEIGHT
+	if info_bar != null:
+		bar_h = maxf(info_bar.size.y, info_bar.get_combined_minimum_size().y)
+		if bar_h <= 0.0:
+			bar_h = _TOOLBAR_HEIGHT
+		info_bar.offset_top = -bar_h
+	var cursor := bar_h
+	var rows: Array = []
+	if log_panel != null and log_panel.visible:
+		rows.append([log_panel, _LOG_PANEL_HEIGHT])
+	if debug_panel != null and debug_panel.visible:
+		rows.append([debug_panel, 180.0])
+	if compat_panel != null and compat_panel.visible:
+		rows.append([compat_panel, 200.0])
+	if take_panel != null and take_panel.visible:
+		rows.append([take_panel, 200.0])
+	for row in rows:
+		var panel: Control = row[0]
+		var height: float = row[1]
+		panel.offset_bottom = -cursor
+		panel.offset_top = -(cursor + height)
+		cursor += height
+	if hsplit != null:
+		hsplit.offset_bottom = -cursor
+	_laying_out_bottom = false
+
+
 ## Recalculates layout when debug/compat panel visibility changes.
 func _layout_debug_panel() -> void:
-	var bottom_offset := _TOOLBAR_HEIGHT
-	if log_panel.visible:
-		bottom_offset += _LOG_PANEL_HEIGHT
-	if debug_panel.visible:
-		debug_panel.offset_top = -(bottom_offset + 180.0)
-		debug_panel.offset_bottom = -(bottom_offset)
-		bottom_offset += 180.0
-	if compat_panel != null and compat_panel.visible:
-		compat_panel.offset_top = -(bottom_offset + 200.0)
-		compat_panel.offset_bottom = -(bottom_offset)
-		bottom_offset += 200.0
-	if take_panel != null and take_panel.visible:
-		take_panel.offset_top = -(bottom_offset + 200.0)
-		take_panel.offset_bottom = -(bottom_offset)
-		bottom_offset += 200.0
-	hsplit.offset_bottom = -(bottom_offset)
+	_layout_bottom_panels()
 
 
 ## Debug panel double-click: select that node in the graph and center it.
@@ -548,10 +582,10 @@ func _on_frame_cooked(frame: int, cook_time_ms: float) -> void:
 	# Update warning/error status badges on all nodes
 	graph_editor.update_status_badges()
 
-	# Update debug overlay and panel
-	if graph_editor.debug_overlay != null:
+	# Update debug overlay and panel only while that panel is open.
+	if graph_editor.debug_overlay != null and graph_editor.debug_overlay.debug_enabled:
 		graph_editor.debug_overlay.update_overlay()
-	if debug_panel != null:
+	if debug_panel != null and debug_panel.visible:
 		debug_panel.update_debug_info()
 
 
@@ -574,8 +608,8 @@ func _on_setting_changed(key: String, value: Variant) -> void:
 		viewer_panel.set_bg_color(value as Color)
 	elif key == "auto_save_interval":
 		_configure_auto_save_timer(value as int)
-	elif key == "log_to_file":
-		_configure_log_file(value as bool)
+	elif key == "log_to_file" or key == "log_file_name" or key == "log_level" or key == "log_panel_lines":
+		_apply_log_settings()
 	elif key.begins_with("graph_ref_"):
 		graph_editor.apply_reference_settings()
 	elif key == "graph_inspector_deps_visible" and inspector != null:
@@ -599,14 +633,47 @@ func _push_initial_preferences() -> void:
 	if viewer_panel:
 		viewer_panel.set_bg_color(GNSettings.get_value("viewer_bg_color",
 				Color(0.06, 0.06, 0.08)))
-	_configure_log_file(GNSettings.get_value("log_to_file", false))
+	_apply_log_settings()
 
 
-func _configure_log_file(enabled: bool) -> void:
-	if enabled:
-		GNLogger.set_log_file("user://gonodes.log")
-	else:
-		GNLogger.close_log_file()
+## Capture stays on. The log file, when named, is written beside the patch.
+func _apply_log_settings() -> void:
+	if not GNSettings.has_key("log_file_name") and bool(GNSettings.get_value("log_to_file", false)):
+		GNSettings.set_value("log_file_name", "gonodes.log")
+	GNLogger.enabled = true
+	var lvl := int(GNSettings.get_value("log_level", 1))
+	GNLogger.set_baseline_level(lvl as GNLogger.Level)
+	var lines := int(GNSettings.get_value("log_panel_lines", GNLogger.DEFAULT_PANEL_LINES))
+	GNLogger.set_panel_line_limit(lines)
+	if log_panel != null:
+		log_panel.max_lines = lines
+		if log_panel.wants_debug():
+			GNLogger.level = GNLogger.Level.DEBUG
+		if log_panel.visible:
+			log_panel.refresh_from_buffer()
+	_retarget_log_file()
+
+
+func _retarget_log_file() -> void:
+	var raw := str(GNSettings.get_value("log_file_name", ""))
+	var path := GNLogger.log_path_beside_patch(_current_file_path, raw)
+	if path.is_empty():
+		if not raw.strip_edges().is_empty() and GNLogger.sanitize_log_file_name(raw).is_empty():
+			var rejected := raw.strip_edges()
+			if _rejected_log_name != rejected:
+				_rejected_log_name = rejected
+				GNLogger.warn("Editor",
+					"Log file name must be a file name, not a path ('%s')" % rejected)
+			GNLogger.close_log_file()
+			return
+		_rejected_log_name = ""
+		if raw.strip_edges().is_empty():
+			GNLogger.close_log_file()
+		else:
+			GNLogger.arm_log_file()
+		return
+	_rejected_log_name = ""
+	GNLogger.set_log_file(path)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -679,15 +746,12 @@ func _on_node_renamed(old_id: String, new_id: String) -> void:
 
 
 func _on_log_toggled(pressed: bool) -> void:
-	GNLogger.enabled = pressed
 	_save_setting("log_enabled", pressed)
 	if log_panel:
-		log_panel.visible = pressed
-		_layout_log_panel()
-	if pressed:
-		print("[GONODES] Logging ENABLED")
-	else:
-		print("[GONODES] Logging DISABLED")
+		_set_dock_panel_open(log_panel, pressed)
+		_layout_bottom_panels()
+		if pressed:
+			log_panel.refresh_from_buffer()
 
 
 func _on_preview_toggled(pressed: bool) -> void:
@@ -1395,6 +1459,7 @@ func _on_new_confirmed() -> void:
 	_current_file_path = ""
 	_project.clear()
 	cook_engine.project_dir = ""
+	_retarget_log_file()
 
 	# Rebind everything
 	graph_editor.bind_network(network)
@@ -1530,6 +1595,7 @@ func _do_save_to_path(path: String) -> void:
 		_push_recent(path)
 		_clear_modified()
 		print("[GONODES] Saved patch: %s" % path)
+		_retarget_log_file()
 	else:
 		push_error("[GONODES] Failed to save patch to '%s' (error %d)" % [path, err])
 
@@ -1559,6 +1625,7 @@ func _load_from_path(path: String) -> void:
 	_current_file_path = path
 	_save_setting("last_patch_path", path)
 	_push_recent(path)
+	_retarget_log_file()
 
 	# Set up project folder for this patch
 	_project.set_from_patch_path(path)
@@ -1649,28 +1716,9 @@ func _notification(what: int) -> void:
 		_sync_hsplit_to_infobar()
 
 
-## Guard against resized ↔ sync re-entrancy (preset/offset changes emit resized).
-var _syncing_hsplit_infobar: bool = false
-
-
-## Match HSplit bottom inset to the live InfoBar height (toolbar is built at runtime).
+## Match the graph and docked panels to the live InfoBar height.
 func _sync_hsplit_to_infobar() -> void:
-	if _syncing_hsplit_infobar:
-		return
-	var info_bar := get_node_or_null("InfoBar") as Control
-	if info_bar == null or hsplit == null:
-		return
-	var bar_h: float = maxf(info_bar.size.y, info_bar.get_combined_minimum_size().y)
-	if bar_h <= 0.0:
-		bar_h = 98.0
-	# Skip no-op updates so we don't bounce on every parent resize.
-	if is_equal_approx(hsplit.offset_bottom, -bar_h) and is_equal_approx(info_bar.offset_top, -bar_h):
-		return
-	_syncing_hsplit_infobar = true
-	# Offsets only — re-applying anchor presets emits resized and can recurse.
-	hsplit.offset_bottom = -bar_h
-	info_bar.offset_top = -bar_h
-	_syncing_hsplit_infobar = false
+	_layout_bottom_panels()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1828,10 +1876,11 @@ func _restore_ui_state() -> void:
 
 	var saved_log: bool = _load_setting("log_enabled", false)
 	log_toggle.set_pressed_no_signal(saved_log)
-	GNLogger.enabled = saved_log
 	if log_panel:
-		log_panel.visible = saved_log
-		_layout_log_panel()
+		_set_dock_panel_open(log_panel, saved_log)
+		_layout_bottom_panels()
+		if saved_log:
+			log_panel.refresh_from_buffer()
 
 	# Non-Realtime mode
 	var saved_nrt: bool = _load_setting("nrt_enabled", false)

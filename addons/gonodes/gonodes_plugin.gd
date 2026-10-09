@@ -5,6 +5,9 @@ extends EditorPlugin
 
 
 func _enter_tree() -> void:
+	# Before extension scan prints. Godot's own boot lines already happened.
+	GNLogger.install_godot_bridge()
+
 	# Ensure OpenGL fallback is enabled so Compatibility renderer works on old GPUs/WebGL2.
 	# Godot strips this from project.godot when it matches the default, so we enforce it here.
 	ProjectSettings.set_setting("rendering/rendering_device/fallback_to_opengl3", true)

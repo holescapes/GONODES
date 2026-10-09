@@ -9,6 +9,15 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-09 — Logs keep every line, including Godot's
+
+- **Logs** are captured whether or not the log panel is open. The panel only draws, and it keeps the latest 50 lines unless Preferences changes that. Debug cook lines stay off until the DBG filter or Log Level asks for them.
+- **Log file name** in Preferences (empty by default) writes the full log next to the current patch. An unsaved patch holds those lines until the first save.
+- **Log lines** are colored by severity. The panel hides DBG by default.
+- **Bottom panels** restack from the toolbar whenever Logs, Debug, Compat, or Takes is toggled. A closed panel does not process, scan, or draw.
+- **Startup lines** are captured from plugin load onward, including the extension scan. Godot's version and GPU line are rebuilt. Its codec list is printed before any addon runs, so it is not copied.
+- **Godot's own prints, warnings, and errors** are copied into that same log under the Godot category. They are not printed again.
+
 ## 2026-10-09 — LayoutTOP spare input grows
 
 - **ParameterCHOP** finds its target through the cook engine. It was walking the scene tree for a GNNetwork, which operators are not parented to, so the channel list stayed empty and CHOPtoTOP cooked null.

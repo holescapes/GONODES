@@ -61,8 +61,8 @@ GONODESPlayer.exe
 | `patch` | string | `""` | Path to `.gnpatch` file, relative to exe directory or absolute |
 | `patch_url` | string | `""` | URL or relative path for web builds (HTTP fetch) |
 | `renderer` | string | `""` | Rendering backend --- see Rendering Backend section below |
-| `settings.log_level` | int | `1` | Minimum log severity: 0=Debug, 1=Info, 2=Warn, 3=Error |
-| `settings.log_to_file` | bool | `false` | Write all log output to `gonodes.log` next to the exe |
+| `settings.log_level` | int | `1` | Minimum log severity: 0=Debug, 1=Info, 2=Warn, 3=Error. The player always captures. 0 keeps every GONODES line. |
+| `settings.log_to_file` | bool | `false` | Write GONODES and Godot engine logs to `gonodes.log` next to the exe |
 | `settings.parallel_cook_enabled` | bool | `false` | Cook independent nodes on worker threads (experimental) |
 | `settings.max_cooks_per_frame` | int | `0` | Max nodes to cook per frame. 0 = unlimited |
 

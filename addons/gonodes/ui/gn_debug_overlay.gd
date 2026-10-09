@@ -50,6 +50,7 @@ const _SINK_COLORS: Array[Color] = [
 func _init() -> void:
 	name = "DebugOverlay"
 	mouse_filter = MOUSE_FILTER_IGNORE
+	visible = false
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 
 
@@ -69,10 +70,12 @@ func update_overlay() -> void:
 ## Toggle the master debug mode on or off.
 func set_debug_enabled(enabled: bool) -> void:
 	debug_enabled = enabled
+	visible = enabled
 	if not enabled:
 		_reset_node_modulation()
 		_dirty_flash.clear()
-	queue_redraw()
+	else:
+		queue_redraw()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

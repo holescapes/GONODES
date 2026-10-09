@@ -21,7 +21,8 @@ var _viewer_bg_picker: ColorPickerButton = null
 var _default_res_x_spin: SpinBox = null
 var _default_res_y_spin: SpinBox = null
 var _log_level_option: OptionButton = null
-var _log_to_file_check: CheckButton = null
+var _log_file_name_edit: LineEdit = null
+var _log_panel_lines_spin: SpinBox = null
 var _parallel_cook_check: CheckButton = null
 var _max_cooks_spin: SpinBox = null
 var _recent_count_spin: SpinBox = null
@@ -467,7 +468,7 @@ func _build_viewer_settings() -> void:
 
 func _build_log_settings() -> void:
 	var row := _make_row("Log Level",
-		"Minimum severity shown in the log panel. 0 = Debug, 1 = Info, 2 = Warn, 3 = Error.")
+		"Minimum severity captured. The log panel draws lines only while it is open.")
 	_log_level_option = OptionButton.new()
 	_log_level_option.add_item("Debug", 0)
 	_log_level_option.add_item("Info", 1)
@@ -480,15 +481,33 @@ func _build_log_settings() -> void:
 	row.add_child(_log_level_option)
 	_content.add_child(row)
 
-	# Log to file
-	var row2 := _make_row("Write log to file",
-		"Append all log output to user://gonodes.log. Useful for diagnosing exported apps.")
-	_log_to_file_check = CheckButton.new()
-	_log_to_file_check.button_pressed = GNSettings.get_value("log_to_file", false)
-	_log_to_file_check.toggled.connect(func(val: bool):
-		GNSettings.set_value("log_to_file", val))
-	row2.add_child(_log_to_file_check)
-	_content.add_child(row2)
+	var row_name := _make_row("Log file name",
+		"File name written next to the current patch. Empty means no file. A path is not accepted.")
+	_log_file_name_edit = LineEdit.new()
+	_log_file_name_edit.text = str(GNSettings.get_value("log_file_name", ""))
+	_log_file_name_edit.placeholder_text = "empty = no file"
+	_log_file_name_edit.custom_minimum_size.x = 180
+	_log_file_name_edit.text_submitted.connect(func(text: String) -> void:
+		GNSettings.set_value("log_file_name", text.strip_edges()))
+	_log_file_name_edit.focus_exited.connect(func() -> void:
+		var text := _log_file_name_edit.text.strip_edges()
+		if text != str(GNSettings.get_value("log_file_name", "")):
+			GNSettings.set_value("log_file_name", text))
+	row_name.add_child(_log_file_name_edit)
+	_content.add_child(row_name)
+
+	var row_lines := _make_row("Log panel lines",
+		"How many lines the log panel shows. Capture and the log file keep going past this.")
+	_log_panel_lines_spin = SpinBox.new()
+	_log_panel_lines_spin.min_value = 10
+	_log_panel_lines_spin.max_value = 2000
+	_log_panel_lines_spin.step = 10
+	_log_panel_lines_spin.value = GNSettings.get_value("log_panel_lines", 50)
+	_log_panel_lines_spin.custom_minimum_size.x = 100
+	_log_panel_lines_spin.value_changed.connect(func(v: float) -> void:
+		GNSettings.set_value("log_panel_lines", int(v)))
+	row_lines.add_child(_log_panel_lines_spin)
+	_content.add_child(row_lines)
 
 
 func _build_performance_settings() -> void:

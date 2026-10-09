@@ -52,8 +52,8 @@ Parsed by `player_main.gd::_parse_config()` via `JSON.parse()`.
 | `patch` | `_parse_config()` | Resolved relative to exe dir |
 | `patch_url` | `_parse_config()` | Web builds — fetched via HTTP |
 | `renderer` | `_check_renderer_mismatch()` | If active renderer doesn't match, Player re-launches with `--rendering-method` |
-| `settings.log_level` | `_apply_runtime_settings()` | Sets `GNLogger.level` |
-| `settings.log_to_file` | `_apply_runtime_settings()` | Enables file logging |
+| `settings.log_level` | `_apply_runtime_settings()` | Sets `GNLogger.level`. Capture is on. 0 keeps every GONODES line. |
+| `settings.log_to_file` | `_apply_runtime_settings()` | Enables file logging, including Godot's own output |
 | `settings.parallel_cook_enabled` | `_apply_runtime_settings()` | Sets `cook_engine.parallel_cook_enabled` |
 | `settings.max_cooks_per_frame` | `_apply_runtime_settings()` | Sets `cook_engine.max_cooks_per_frame` |
 

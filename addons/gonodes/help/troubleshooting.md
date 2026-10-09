@@ -80,9 +80,21 @@ many TOPs.
 ### GNLogger
 
 GONODES uses an internal logging system. Categories include CookEngine,
-Editor, Network, Extensions, etc. Errors route to Godot's `push_error()`,
-warnings to `push_warning()`, and info/debug to `print()`. Check the
-Godot Output panel for messages.
+Editor, Network, Extensions, etc. Capture stays on while the editor runs.
+The **Logs** button only opens the panel, which draws the latest lines
+(50 by default, **Preferences → Log panel lines**). Lines are colored by
+severity: blue info, amber warning, red error, gray debug. Debug lines
+stay hidden until the **DBG** filter is checked, and per-cook debug is
+skipped until that filter or **Log Level** is Debug.
+
+**Log file name** in Preferences is empty by default. A file name (not a
+path) writes the full log beside the current patch and appends on the
+next launch. Nothing is written until the patch has been saved.
+
+Godot's own prints, warnings, and errors are copied into that same log.
+Lines from startup, including the extension scan, are already there when
+you open **Logs**. Godot's codec list is printed before GONODES loads, so
+it is not copied. The version and GPU lines are.
 
 ### Debug Panel (F2)
 

@@ -27,7 +27,6 @@ const _RENDERER_LABELS := ["Forward+", "Mobile", "Compatibility"]
 func _ready() -> void:
 	custom_minimum_size.y = 200
 	_build_ui()
-	_scan()
 
 
 func _build_ui() -> void:

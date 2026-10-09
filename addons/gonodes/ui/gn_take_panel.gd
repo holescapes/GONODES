@@ -144,7 +144,7 @@ func _build_ui() -> void:
 
 
 func _refresh_list() -> void:
-	if _take_list == null or take_manager == null:
+	if not visible or _take_list == null or take_manager == null:
 		return
 	_take_list.clear()
 	for tname in take_manager.get_take_names():
