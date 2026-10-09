@@ -186,6 +186,9 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		if _display_rect.texture != tex_in.texture:
 			_display_rect.texture = tex_in.texture
 			GNLogger.debug("WindowOUT", "'%s' texture assigned" % id)
+		# In-place ImageTexture.update() keeps the same resource. The output
+		# window still needs a redraw or the picture stays on the first frame.
+		_display_rect.queue_redraw()
 		_display_rect.visible = true
 	elif _display_rect != null:
 		_display_rect.visible = false

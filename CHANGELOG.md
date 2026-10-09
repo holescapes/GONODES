@@ -9,6 +9,11 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-09 — CHOPtoTOP follows key and mouse channels
+
+- **KeyboardIn and MouseIn** no longer emit a `window_name` channel hashed from the window title. That value sat near two billion, so CHOPtoTOP auto-range crushed every 0–1 line onto one pixel and the output window looked frozen.
+- **CHOPtoTOP** keeps one Image and one ImageTexture. It redraws only when the samples, style, or fitted range change. It does not create a SubViewport. WindowOUT redraws when that texture is updated in place.
+
 ## 2026-10-09 — Logs keep every line, including Godot's
 
 - **Logs** are captured whether or not the log panel is open. The panel only draws, and it keeps the latest 50 lines unless Preferences changes that. Debug cook lines stay off until the DBG filter or Log Level asks for them.
@@ -17,6 +22,8 @@ For the full development journal with implementation details, see
 - **Bottom panels** restack from the toolbar whenever Logs, Debug, Compat, or Takes is toggled. A closed panel does not process, scan, or draw.
 - **Startup lines** are captured from plugin load onward, including the extension scan. Godot's version and GPU line are rebuilt. Its codec list is printed before any addon runs, so it is not copied.
 - **Godot's own prints, warnings, and errors** are copied into that same log under the Godot category. They are not printed again.
+- **ErrorDAT** connects to the logger when the node is initialized. A startup probe was connecting a copy that had no parameters, so the next log line warned `unknown parameter 'level_filter'`.
+- **A null cook** is logged only when the node received real input. An image or texture that has no pixels yet is a load still in flight, so ImgToTOP stays quiet until the file arrives.
 
 ## 2026-10-09 — LayoutTOP spare input grows
 
@@ -82,6 +89,17 @@ For the full development journal with implementation details, see
 
 ### Exhibition
 - BitRots patch lives under `Projects/BIT ROTS/` (outside this repo). MouseIn + FolderDAT can use SCRIPT body `chop()`/`dat()` demand (no `@input` required for cook activation).
+
+---
+
+## 2026-10-02 — Degrees match the inspector, and a window cooks on open
+
+- **PatternTOP, TriangleTOP, TransformTOP, ProjectionTOP, FeedbackTOP, and TwirlTOP** rotation and twist values are degrees, matching the inspector.
+- **Opening a patch** cooks its WindowOUT without selecting a node first.
+- **FeedbackTOP** keeps the previous frame on a second viewport.
+- **BoidsPOP** samples up to 48 other particles instead of every particle.
+- **Menu parameters** accept an expression that returns the option index or the option name.
+- **Expression compile** no longer writes a cast on the same line as `return`, which was stopping the editor.
 
 ---
 

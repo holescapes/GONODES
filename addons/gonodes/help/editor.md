@@ -548,7 +548,7 @@ always-on with no toggle required.
 
 | Sink Type               | When active                                       |
 |--------------------------|---------------------------------------------------|
-| **Viewer panel**         | The node you last clicked (if it's a TOP)         |
+| **Viewer panel**         | The node you last clicked, any family. A WindowOUT cooks when the patch opens, without that click |
 | **Floating viewer window** | Each pinned viewer window targets a specific node |
 | **is_sink operators**    | Any node with `is_sink = true` (WindowOUT, future SpoutOut, MIDIOut, OSCOut, NDIOut, etc.) |
 
@@ -593,6 +593,10 @@ godot --rendering-method gl_compatibility
 
 ---
 
+## Logs
+
+The **Logs** button opens the log panel. Capture is already on; the panel only draws the latest lines (50 by default). **DBG** stays off until you check it. **Preferences → Log file name** is empty by default. A file name, not a path, appends the full log beside the current patch. **Preferences → Log Level** sets what is captured. The Debug button does not turn logging on. See [troubleshooting.md](troubleshooting.md).
+
 ## Debug Panel & Overlay
 
 Press **F2** or click the **Debug** toolbar button to toggle the debug system.
@@ -619,8 +623,10 @@ scroll to that node.
 | **inactive** | Dim gray | Not in any active chain (no sink downstream) |
 
 A static node (e.g. ConstantTOP) will show "⟳ cooking" once on creation, then
-settle to "— cached" on every subsequent frame. A time-dependent node (e.g.
-RenderTOP, MovieFileInTOP) shows "⟳ cooking" every frame while active.
+settle to "— cached" on every subsequent frame. A node cooks every frame only
+while its own logic says it is live: MovieFileInTOP while it is playing at a
+non-zero speed, NoiseTOP while its time offset reads time. RenderTOP cooks
+every frame while it is in the active chain.
 
 **Multi-select:** Ctrl+click or Shift+click to select multiple rows in any tab.
 
@@ -670,6 +676,7 @@ Three context menu entries for sharing node networks and debug information:
 Editor state is saved to `user://gonodes_settings.cfg` via `_save_setting()` / `_load_setting()`. Persisted values include:
 
 - Toggle states (Previews, Perf, Log, NRT)
+- Log level, log file name, and how many lines the log panel draws (**Preferences**)
 - NRT target FPS
 - Split container offsets (panel sizes)
 - Last opened patch path

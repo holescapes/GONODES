@@ -10,11 +10,15 @@ extends GNTopBase
 ##   • Graph — Similar to waveform but fills underneath each line with a
 ##     semi-transparent gradient.
 ##
-## The texture is created on the CPU via Image (no SubViewport), which
-## keeps things simple and portable.  Later C++ porting can optimise this.
+## The texture is created on the CPU via Image (no SubViewport).
+## One Image and one ImageTexture are reused. The pixels are redrawn only
+## when the samples, style, or fitted range actually change.
 
 var _smooth_min: float = INF
 var _smooth_max: float = -INF
+var _img: Image = null
+var _tex: ImageTexture = null
+var _last_picture_key: int = 0
 
 
 func _init() -> void:
@@ -122,9 +126,15 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		_smooth_min = INF
 		_smooth_max = -INF
 
-	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	# Fill background
-	img.fill(bg)
+	var picture_key := _picture_key(channels, ch_names, mode, w, h, bg, line_col, lw, min_v, max_v)
+	if picture_key == _last_picture_key and _tex != null and _cached_tex_data != null:
+		return _cached_tex_data
+
+	if _img == null or _img.get_width() != w or _img.get_height() != h \
+			or _img.get_format() != Image.FORMAT_RGBA8:
+		_img = Image.create(w, h, false, Image.FORMAT_RGBA8)
+	_img.fill(bg)
+	var img := _img
 
 	match mode:
 		0:
@@ -136,15 +146,43 @@ func _cook(inputs: Array[GNData]) -> GNData:
 		3:
 			_draw_spectrogram(img, channels, ch_names, w, h, min_v, max_v)
 
-	# Create texture from image
-	var tex := ImageTexture.create_from_image(img)
+	if _tex == null or _tex.get_width() != w or _tex.get_height() != h:
+		_tex = ImageTexture.create_from_image(img)
+	else:
+		_tex.update(img)
+	_last_picture_key = picture_key
 
-	# Ensure cached tex data exists
 	if _cached_tex_data == null:
 		_cached_tex_data = GNTextureData.new()
-	_cached_tex_data.texture = tex
+	_cached_tex_data.texture = _tex
 	_cached_tex_data.resolution = res
 	return _cached_tex_data
+
+
+func _picture_key(channels: Dictionary, ch_names: Array, mode: int, w: int, h: int,
+		bg: Color, line_col: Color, lw: float, min_v: float, max_v: float) -> int:
+	var key := mode
+	key = key * 31 + w
+	key = key * 31 + h
+	key = key * 31 + hash(bg)
+	key = key * 31 + hash(line_col)
+	key = key * 31 + hash(lw)
+	key = key * 31 + int(round(min_v * 10000.0))
+	key = key * 31 + int(round(max_v * 10000.0))
+	key = key * 31 + int(get_param_value("num_bands"))
+	key = key * 31 + int(bool(get_param_value("mel_scale")))
+	key = key * 31 + int(get_param_value("color_scheme"))
+	for ch_name in ch_names:
+		key = key * 31 + hash(str(ch_name))
+		key = key * 31 + _hash_samples(channels[ch_name])
+	return key
+
+
+static func _hash_samples(data: PackedFloat32Array) -> int:
+	var h := data.size() * 16777619
+	for v in data:
+		h = (h * 16777619) ^ int(round(v * 100000.0))
+	return h
 
 
 func _val_to_y(val: float, min_v: float, max_v: float, h: int) -> int:

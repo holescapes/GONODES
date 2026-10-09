@@ -256,7 +256,7 @@ var dirty: bool = true
 var cached_output: GNData = null
 var cook_time_ms: float = 0.0      # Profiling
 var cook_valid: bool = false
-var time_dependent: bool = false    # Always dirty each frame (LFO, Noise, etc.)
+var time_dependent: bool = false    # Set by the operator via update_time_dependency(). Not a user toggle.
 
 # Active chain cooking
 var is_sink: bool = false           # True for output operators (WindowOUT, SpoutOut, MIDIOut, etc.)
@@ -621,9 +621,8 @@ drops, no jitter, deterministic output regardless of scene complexity.
 
 ### Logging & Warning System (Editor-Only)
 
-Two-layer diagnostics architecture for the GONODES editor. All logging is
-gated behind `GNCookEngine.editor_mode` — exported player builds have zero
-logging overhead.
+Two-layer diagnostics. Per-node badges are an editor overlay. Log capture
+runs in the editor and in the player.
 
 **Layer 1 — Per-Node Warning / Error Badges:**
 - `GNNode.node_warning` (String) — yellow ⚠ badge, recoverable issues
@@ -638,14 +637,15 @@ logging overhead.
 - `GNLogger` singleton: `.debug()`, `.info()`, `.warn()`, `.error()`
 - `GNLogger.log_sink` — `Callable` set by `GNLogPanel._ready()` (editor-only)
 - `GNLogger.toast_sink` — `Callable` set by graph editor; auto-forwards WARN/ERROR as transient toasts
-- 500-entry ring buffer, DBG/INF/WRN/ERR filter buttons, color-coded output
-- `GNLogger.enabled` defaults to `false` — player never enables it
+- The panel draws the latest lines (50 by default). Capture continues while it is closed
+- An optional log file name writes the full session beside the patch
+- `GNLogger.enabled` defaults to `true`. The player sets the level from config
 
 **`log()` bridge (user-facing):**
 - Script preamble injects `log()`, `log_debug()`, `log_warn()`, `log_error()`
 - Each routes to `GNLogger.info/debug/warn/error` with `me.id` as category
 - Expression context exposes `log(message)` (INFO level) via CookEngine method
-- No-op in player builds (GNLogger.enabled stays false)
+- The player captures these when its log level allows them
 
 **Editor-only guard (`editor_mode`):**
 ```
@@ -3655,7 +3655,7 @@ GNLogger is a static utility class (`extends RefCounted`, `class_name GNLogger`)
 ### Design
 
 - **Static API** — call from anywhere without instantiation: `GNLogger.info("Category", "message")`
-- **Master toggle** — `GNLogger.enabled` (off by default, no output when disabled)
+- **Master toggle** — `GNLogger.enabled` (on by default). Closing the log panel does not turn capture off
 - **Level filtering** — `GNLogger.level` with `DEBUG`, `INFO`, `WARN`, `ERROR`, `NONE`
 - **Category muting** — `GNLogger.muted_categories["CookEngine"] = true` to silence a subsystem
 - **Routing** — `WARN` → `push_warning()`, `ERROR` → `push_error()`, others → `print()`
@@ -3685,9 +3685,9 @@ GNLogger.error("Parameter", "Expression compile failed")
 | CHOP operators | Missing input warnings |
 | GNParameter | Expression compile success/failure |
 
-### UI Toggle
+### UI
 
-The test scene includes a `CheckButton` (top-right corner, "Debug Log") that toggles `GNLogger.enabled` at runtime.
+The editor **Logs** button opens the panel and draws the latest lines. **Preferences** sets the level, the on-screen line count, and an optional file name beside the patch. The player has no panel; it captures at `settings.log_level` and can write a file from config.
 
 ---
 

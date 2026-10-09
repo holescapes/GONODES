@@ -351,3 +351,14 @@ func test_resolve_node_not_found() -> void:
 func test_resolve_node_empty_path() -> void:
 	var found := _engine.resolve_node("")
 	GNTestAssert.assert_null(found, "empty path returns null")
+
+
+func test_empty_image_is_not_a_cook_payload() -> void:
+	var empty := GNImageData.new()
+	GNTestAssert.assert_false(GNCookEngine.input_has_payload(empty), "image shell is not ready")
+	var img := Image.create(2, 2, false, Image.FORMAT_RGBA8)
+	empty.set_image(img)
+	GNTestAssert.assert_true(GNCookEngine.input_has_payload(empty), "pixels count as input")
+	GNTestAssert.assert_false(GNCookEngine.input_has_payload(null), "missing input is not a payload")
+	var tex := GNTextureData.new()
+	GNTestAssert.assert_false(GNCookEngine.input_has_payload(tex), "texture shell is not ready")

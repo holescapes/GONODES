@@ -169,3 +169,19 @@ func test_logger_file_beside_patch_and_backlog() -> void:
 
 	GNLogger.enabled = prev_enabled
 	GNLogger.level = prev_level
+
+
+func test_logger_error_dat_probe_does_not_warn() -> void:
+	var prev_sink := GNLogger.log_sink
+	var prev_enabled := GNLogger.enabled
+	var prev_level := GNLogger.level
+	GNLogger.enabled = true
+	GNLogger.level = GNLogger.Level.INFO
+	var probe := ErrorDAT.new()
+	var took_log := GNLogger.log_sink.is_valid() and GNLogger.log_sink.get_object() == probe
+	GNTestAssert.assert_false(took_log, "a bare ErrorDAT does not take the log")
+	GNLogger.info("Test", "probe-ok-%d" % Time.get_ticks_usec())
+	probe.free()
+	GNLogger.enabled = prev_enabled
+	GNLogger.level = prev_level
+	GNLogger.log_sink = prev_sink

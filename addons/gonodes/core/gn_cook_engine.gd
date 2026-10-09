@@ -2642,15 +2642,15 @@ func _cook_single_node(node: GNNode) -> int:
 	_stamp_owned_output(node, result, inputs)
 
 	if result == null and node.output_ports.size() > 0:
-		# Null is expected when a filter node has no connected input — don't flag
-		# it as an error.  Only warn if the node actually received data on at
-		# least one input port (meaning the cook itself failed).
-		var has_any_input := false
+		# Null with no usable input is a loader that is not ready yet, or a
+		# disconnected port. Only a cook that received real data and still
+		# returned null is a failure.
+		var has_payload := false
 		for inp in inputs:
-			if inp != null:
-				has_any_input = true
+			if input_has_payload(inp):
+				has_payload = true
 				break
-		if has_any_input:
+		if has_payload:
 			if editor_mode:
 				node.node_error = "cook returned null"
 				_note_node_status(node)
@@ -2661,6 +2661,20 @@ func _cook_single_node(node: GNNode) -> int:
 			GNLogger.debug("CookEngine", "Cooked '%s' (%s) in %.3fms" % [node.id, node.node_type, node.cook_time_ms])
 
 	return 1
+
+
+## True when this input is worth cooking against. A connected image or
+## texture with no pixels yet is a load still in flight, not a payload.
+static func input_has_payload(data: GNData) -> bool:
+	if data == null:
+		return false
+	if data is GNImageData:
+		var img_data: GNImageData = data
+		return img_data.image != null and not img_data.image.is_empty()
+	if data is GNTextureData:
+		var tex_data: GNTextureData = data
+		return tex_data.texture != null
+	return true
 
 
 ## Cooks a batch of CPU-family nodes in parallel using WorkerThreadPool.

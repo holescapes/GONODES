@@ -10,7 +10,6 @@ var _rows: Array[PackedStringArray] = []
 
 func _init() -> void:
 	node_type = "error"
-	GNLogger.log_sink = _on_log
 
 
 func _init_ports() -> void:
@@ -25,6 +24,10 @@ func _init_parameters() -> void:
 		"Max Rows", "Maximum log entries to keep"))
 	add_parameter(GNParameter.create_bool("clear", false, "Clear",
 		"Pulse to clear the log"))
+	# After parameters exist. A bare constructor (deprecation probe, port
+	# cache) must not take the log: it has no level_filter yet, and the
+	# next log line would warn about that missing parameter.
+	GNLogger.log_sink = _on_log
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
@@ -46,6 +49,8 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 # ─── Logger sink ─────────────────────────────────────────────────────────────
 
 func _on_log(level: GNLogger.Level, category: String, message: String) -> void:
+	if get_parameter("level_filter") == null:
+		return
 	var filter_idx: int = get_param_value("level_filter")
 	# 0 = Errors Only (ERROR=3), 1 = Warnings & Errors (WARN=2), 2 = All
 	var min_level: int = [GNLogger.Level.ERROR, GNLogger.Level.WARN, GNLogger.Level.DEBUG][filter_idx]

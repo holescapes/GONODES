@@ -1073,7 +1073,7 @@ Tile up to 8 input textures into a grid mosaic.
 | columns | Int | 2 | 1–8 | Grid columns |
 | bg_color | Color | Black | — | Background fill |
 
-**Inputs:** Up to 8 dynamic TOP inputs (auto-grow/shrink). **How it works:** Shader tiles N inputs into a grid. Rows auto-calculated from input count and columns.
+**Inputs:** Input 0 and Input 1 are always present. Connecting the unnamed spare adds the next input, up to 8. **How it works:** Shader tiles the connected inputs into a grid. Rows are calculated from the input count and columns.
 
 ---
 
@@ -1406,7 +1406,7 @@ Render CHOP channels as a texture — waveform oscilloscope, heatmap, or graph.
 
 **Input:** `in` (CHOP — source channels).
 
-**How it works:** CPU-based Image rendering (no SubViewport). Reads channel samples and draws into an `Image`, then converts to `ImageTexture`. Waveform mode draws lines between samples; Heatmap maps values to a red-blue gradient; Graph draws filled bars. Auto-range scans the data for min/max each cook.
+**How it works:** CPU-based Image rendering (no SubViewport). One `Image` and one `ImageTexture` are kept and updated in place. Pixels are redrawn only when the samples, style, or fitted range change. Waveform mode draws lines between samples; Heatmap maps values to a red-blue gradient; Graph draws filled bars. Auto-range scans every channel, so one channel with a huge value pins the scale and the rest of the lines sit on the same pixel.
 
 ---
 
@@ -4107,7 +4107,7 @@ Captures system warnings and errors as a table by hooking GNLogger. Time-depende
 
 **Output:** DAT table (columns: level, category, message, timestamp).
 
-**How it works:** Hooks `GNLogger.log_sink` at init so all `GNLogger.warn`/`GNLogger.error` calls are captured. The `_on_log` callback filters by severity and appends rows. Cook trims to `max_rows` and outputs the accumulated table. Unhooks on deletion.
+**How it works:** Hooks `GNLogger.log_sink` once its parameters exist, so a bare constructor does not capture. `GNLogger.warn` and `GNLogger.error` are filtered by severity and appended as rows. Cook trims to `max_rows` and outputs the table. Unhooks on deletion.
 
 ---
 
@@ -6754,10 +6754,11 @@ GNLogger.error("MyOp", "Failure: %s" % err)
 
 **Log panel features:**
 
-- 500-entry ring buffer (oldest entries drop automatically)
-- Filter buttons: DBG / INF / WRN / ERR (toggle individually)
-- Color-coded output (gray, white, yellow, red)
-- Clear button to reset all entries
+- The panel draws the latest lines only (50 by default, **Preferences → Log panel lines**). Older lines stay in the log file when a file name is set
+- Capture stays on while the editor runs. Closing the panel stops drawing, not capture
+- Filter buttons: DBG / INF / WRN / ERR. DBG is off until checked. Debug cook lines are skipped until DBG or Log Level is Debug
+- Color-coded output (gray debug, blue info, amber warning, red error)
+- Clear drops the on-screen window. It does not erase the log file
 - Each line shows `[LEVEL] category: message`
 
 **`log()` — User Script & Expression Bridge:**

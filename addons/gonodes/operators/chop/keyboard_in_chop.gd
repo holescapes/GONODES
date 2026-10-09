@@ -87,7 +87,6 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# Focused channel — 1.0 when the target window has keyboard focus
 	if win_out != null:
 		out.set_single_value("focused", 1.0 if win_out._input_has_focus else 0.0)
-		out.set_single_value("window_name", float(hash(win_out.get_param_value("title")) & 0x7FFFFFFF))
 		win_out.consume_key_latch()
 
 	return out
