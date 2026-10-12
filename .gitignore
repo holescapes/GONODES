@@ -60,7 +60,8 @@ addons/gn_ext_ml/models/
 # NDI SDK — proprietary, manual download required
 addons/gn_ext_ndi/native/ndi_sdk/
 
-# Depth sensor SDKs — proprietary / user-supplied, manual download required
+# Depth sensor SDKs — Azure Kinect and Ultraleap are proprietary.
+# RealSense is Apache 2.0; the Windows package is an installer the user runs.
 addons/gn_ext_depth_sensor/native/azure_kinect_sdk/
 addons/gn_ext_depth_sensor/native/realsense_sdk/
 addons/gn_ext_depth_sensor/native/ultraleap_sdk/

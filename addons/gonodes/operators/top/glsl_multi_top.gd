@@ -160,6 +160,10 @@ func _notification(what: int) -> void:
 		_cleanup_mrt()
 
 
+func _restores_dynamic_parameters() -> bool:
+	return true
+
+
 func from_dict(d: Dictionary) -> void:
 	super.from_dict(d)
 	var code: String = get_param_value("shader_code")

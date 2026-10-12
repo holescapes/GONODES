@@ -60,11 +60,13 @@ def parse_build_cfg(cfg_path: str) -> dict:
 
     setup = ""
     vendor_clone = ""
+    download_only = False
     if cp.has_section("library"):
         setup = cp.get("library", "setup", fallback="").strip()
         if not setup:
             setup = cp.get("library", "vendor_setup", fallback="").strip()
         vendor_clone = cp.get("library", "vendor_clone", fallback="").strip()
+        download_only = cp.getboolean("library", "download_only", fallback=False)
 
     cfg = {
         "lib_name": cp.get("library", "name", fallback="") if cp.has_section("library") else "",
@@ -74,6 +76,7 @@ def parse_build_cfg(cfg_path: str) -> dict:
         "optional": optional,
         "setup": setup,
         "vendor_clone": vendor_clone,
+        "download_only": download_only,
         "platforms": get_list("library", "platforms") or list(ALL_PLATFORMS),
         "library_dest": cp.get("library", "library_dest", fallback="").strip() if cp.has_section("library") else "",
         "sources": get_list("sources", "cpp", "src/*.cpp"),
@@ -192,6 +195,9 @@ def should_build_extension(
 
     Returns (should_build, reason).
     """
+    if cfg.get("download_only"):
+        return False, "download only (prebuilt SDK, nothing to compile)"
+
     if ext and ext_name != ext:
         return False, f"filtered (ext={ext})"
 

@@ -10,6 +10,12 @@ extends GNTopBase
 ## If the target is not found or has no output, this TOP outputs nothing.
 
 var _network_cache: GNNetwork = null
+## Target exists but has not produced a texture yet (feedback first frame).
+var _output_pending: bool = false
+
+
+func null_output_is_pending() -> bool:
+	return _output_pending
 
 
 func _init() -> void:
@@ -29,6 +35,7 @@ func _init_parameters() -> void:
 
 
 func _cook(_inputs: Array[GNData]) -> GNData:
+	_output_pending = false
 	var target_id: String = get_param_value("top")
 	if target_id.is_empty():
 		node_warning = "No target TOP specified"
@@ -51,7 +58,13 @@ func _cook(_inputs: Array[GNData]) -> GNData:
 	# Check data type, not node family — SubNetworkNode/GNCustomOperator can output valid TOP data
 	var tex_data: GNTextureData = target.cached_output as GNTextureData if target.cached_output is GNTextureData else null
 	if tex_data == null or tex_data.texture == null:
-		node_warning = "Target '%s' does not output texture data" % target_id
+		# A CHOP (or anything that already cooked a non-texture) is a bad target.
+		# A TOP that simply has not cooked yet is the feedback buffer's first frame.
+		if target.cached_output != null and not (target.cached_output is GNTextureData):
+			node_warning = "Target '%s' does not output texture data" % target_id
+			return null
+		_output_pending = true
+		node_warning = ""
 		return null
 
 	node_warning = ""

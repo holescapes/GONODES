@@ -1,9 +1,10 @@
 THIRD-PARTY LICENSE NOTICES — gn_ext_user_python
 ==================================================
 
-This extension does NOT bundle any third-party code.
-Users must obtain the following dependencies separately
-(automated via setup_python.py or manually).
+The git repository does not contain CPython or NumPy.
+`setup_python.py --bundle` downloads them, and release builds ship that
+folder with GONODES. Keep this notice and the LICENSE file inside the
+runtime folder with every copy.
 
 
 1. CPython (Python Software Foundation)

@@ -8,6 +8,8 @@ supporting H.264, H.265, VP9, AV1, and many more codecs.
 This extension requires the **EIRTeam.FFmpeg** GDExtension:
 <https://github.com/EIRTeam/EIRTeam.FFmpeg>
 
+A normal GONODES build treats this extension as `tier = extension` (`native/build.cfg`). Nothing here is compiled. The LGPL libraries are not downloaded.
+
 ### Setup
 
 1. Download or build the EIRTeam.FFmpeg GDExtension from the repository above.

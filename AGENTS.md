@@ -19,6 +19,7 @@
 | New operator checklist | `dev_docs/NEW_OPERATOR_CHECKLIST.md` |
 | New native extension checklist | `dev_docs/NEW_EXTENSION_CHECKLIST.md` |
 | Curated memories | `AI_MEMORY.md` |
+| Patch writing for outside models | `llms.txt` |
 
 ## Tool mapping
 

@@ -1476,6 +1476,22 @@ If the resume block does not meet that bar, the stage is not finished.
 
 Current instance: `PRE-BETA_AUDIT.md`.
 
+### 25.47 -- `llms.txt` Stays True
+
+`llms.txt` at the repo root is the brief other people's language models read to write a `.gnpatch`. It is plain Markdown so every model can use it. There is no Cursor, Copilot, or Claude copy of the same text.
+
+Update it in the same change when a sentence in it would be wrong afterward: the patch JSON shape, which families can connect, expressions, script annotations, feedback, sinks, or an operator the file names. Do not paste new operators or the operator count into it. The catalog remains `docs/OPERATORS.md`. A new parameter is documented there; `llms.txt` already tells the model to look it up.
+
+### 25.48 -- Build Scripts and Guides Stay in Step
+
+Changing how a library is fetched, where a probe looks, a `setup` or `vendor_clone` line, or a GitHub Actions download step is incomplete until the script and the written guide match. Do that in the same change.
+
+**Scripts:** `setup_deps.py`, `scripts/show_manual_sdks.py`, `scripts/clone_vendor_sdk.py`, the extension `setup_*.py`, `native/build.cfg`, and `.github/workflows/release.yml` plus `build-extensions.yml`.
+
+**Guides:** `dev_docs/BUILD.md`, the extension README, and `dev_docs/EXTENSIONS_AND_LICENSING.md` when one of its sentences would become false.
+
+The paths printed by `scripts/show_manual_sdks.py` must be the same files `build.cfg` probes. Local setup and GitHub Actions both read `setup` (or `vendor_setup` when that older key is set) and `vendor_clone`.
+
 ---
 
 ## 12. Pull Request Checklist
@@ -1511,6 +1527,7 @@ Before submitting, verify every item:
 
 - [ ] `docs/OPERATORS.md` parameter table and "How it works" updated
 - [ ] `.cfg` `description=` still accurate
+- [ ] `llms.txt` updated if a sentence in it is now false (Rule 25.47)
 - [ ] `python scripts/verify_new_operator.py <ClassName>` passes
 - [ ] Help patches still valid if ports/params changed meaningfully
 
@@ -1519,8 +1536,15 @@ Before submitting, verify every item:
 - [ ] Unit tests covering the change
 - [ ] No regressions in existing tests
 - [ ] `GONODES_CONTEXT.md` updated if architecture changed
+- [ ] `llms.txt` updated if a sentence in it is now false (Rule 25.47)
 - [ ] Hard rules respected (especially 25.13 lazy cook, 25.20 separation, 25.38 no graph walking)
 - [ ] If adding a new rule, CONTRIBUTING.md §11 updated with human-readable entry (Rule 25.39)
+
+### Build or SDK PR
+
+- [ ] Download script, `build.cfg` probe, and guide updated together (Rule 25.48)
+- [ ] `scripts/show_manual_sdks.py` paths match `build.cfg` probes
+- [ ] GitHub Actions still run the same `setup` / `vendor_clone` lines as `setup_deps.py`
 
 ---
 

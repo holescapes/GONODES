@@ -85,8 +85,6 @@ permissively licensed. Users do nothing — operators just work.
 | gn_ext_blackmagic | DeckLink drivers + Desktop Video | Proprietary (free) |
 | gn_ext_ndi | NDI Runtime (`Processing.NDI.Lib.x64.dll`) | Proprietary (free SDK) |
 | gn_ext_depth_sensor | k4a.dll / realsense2.dll / LeapC.dll | Proprietary / Apache 2.0 |
-| gn_ext_opencv | OpenCV runtime | Apache 2.0 |
-| gn_ext_syphon | Syphon Framework | BSD-3 |
 
 **We ship our DLL** (MIT-licensed wrapper we compiled). The **vendor's runtime
 DLL** is NOT bundled — the user installs vendor software (drivers, SDK runtime)
@@ -97,15 +95,30 @@ If the vendor runtime is not installed:
 - The extension's operators show "not available" warnings
 - Everything else keeps working
 
-### Tier 5 — User Downloads SDK + Builds From Source
+### Tier 5 — Downloaded by the release build, not committed to git
 
-| Extension | SDK needed | License |
-|-----------|-----------|---------|
-| gn_ext_ml | ONNX Runtime | MIT |
-| gn_ext_user_python | Embeddable CPython + NumPy | PSF-2.0 / BSD-3 |
+| Extension | What the release downloads | License |
+|-----------|---------------------------|---------|
+| gn_ext_user_python | CPython 3.10 + NumPy | PSF-2.0 / BSD-3 |
+| gn_ext_ml | ONNX Runtime (not YOLOv8 weights) | MIT |
+| gn_ext_opencv | OpenCV SDK on Windows; distro package on Linux and macOS | Apache 2.0 |
+| gn_ext_syphon | Syphon Framework source clone | BSD-3 |
+| gn_ext_spout | Spout2 source clone | BSD |
+| gn_ext_webrender | prebuilt CEF | MIT/BSD |
 
-**Not shipped in the editor.** The user runs a setup script to download the SDK,
-then builds the DLL, or uses a pre-built binary from our releases page.
+`python setup_deps.py` and the GitHub Actions build both read `setup` and
+`vendor_clone` from each `native/build.cfg`. The bytes land in gitignored
+folders. YOLOv8 weights are AGPL-3.0 and that download does not include them.
+
+Python is also copied next to a release player for the OS that ran the build.
+The interpreter is not committed to the repository.
+
+Building GONODES from source does not grant a right the license withholds.
+NDI, Blackmagic Desktop Video, Ultraleap, and Azure Kinect are proprietary
+runtimes. A from-source GONODES still needs those vendor installers.
+RealSense is Apache 2.0, but the Windows package is an installer this repo
+does not unpack. `python scripts/show_manual_sdks.py` prints the download
+page and the folder each probe expects.
 
 ---
 
@@ -220,19 +233,15 @@ These scenarios assume the user is running a **pre-built GONODES editor**.
 
 #### OpenCV
 
-1. Download [OpenCV 4.x](https://opencv.org/releases/) and add its `bin/` to PATH
-   (or build from source)
-2. Launch GONODES — OpenCV operators appear
+`python setup_deps.py` downloads the Windows SDK. On Linux and macOS, install
+the distro package (`libopencv-dev` or `brew install opencv`). GitHub Actions
+installs that package itself. Then build and launch — OpenCV operators appear.
 
 #### Syphon (macOS only)
 
-1. Build the Syphon Framework from source:
-   ```
-   cd addons/gn_ext_syphon/native
-   git clone https://github.com/Syphon/Syphon-Framework.git
-   ```
-2. Build the gn_ext_syphon DLL (see [BUILD.md](BUILD.md))
-3. Launch GONODES — `SyphonInTOP` and `SyphonOutTOP` appear
+`python setup_deps.py` clones the Syphon Framework into
+`addons/gn_ext_syphon/native/Syphon-Framework/`. Build the extension
+(see [BUILD.md](BUILD.md)), then launch. `SyphonInTOP` and `SyphonOutTOP` appear.
 
 ### Tier 5 — SDK + Build From Source
 
@@ -240,18 +249,21 @@ These scenarios assume the user is running a **pre-built GONODES editor**.
 
 ```bash
 cd addons/gn_ext_ml
-python setup_ml.py            # Downloads ONNX Runtime + model weights
-cd native && scons             # Builds the DLL
+python setup_ml.py --sdk-only   # ONNX Runtime only. YOLOv8 weights are AGPL.
+cd native && scons              # Builds the DLL
 ```
 
-Then launch GONODES — ML operators (YOLOv8, MediaPipe, MiDaS, etc.) appear.
+Then launch GONODES — ML operators appear. Export your own `.onnx` files for
+the model nodes.
 
 #### Python Scripting
 
+A release download already contains the runtime. A from-source build fetches it with:
+
 ```bash
 cd addons/gn_ext_user_python
-python setup_python.py         # Downloads embeddable CPython + NumPy
-cd native && scons             # Builds the DLL
+python setup_python.py --bundle   # CPython 3.10 + NumPy, redistributable
+cd native && scons                # Builds the DLL against that Python
 ```
 
 ---
@@ -266,7 +278,8 @@ What's included out of the box:
 |----------|-----------|
 | **Always works** | All Tier 1 (GDScript) + All Tier 2 (shipped DLLs) + Tier 3 (FFmpeg, WebRender) |
 | **Works after vendor install** | Tier 4 — user installs free vendor software, operators auto-detect |
-| **Not included** | Tier 5 — user must download SDK and build (or get pre-built from releases) |
+| **Included in the release** | Python nodes (CPython 3.10 + NumPy), downloaded at build time |
+| **Not included** | ONNX Runtime and model weights — `setup_ml.py` |
 
 The shipped editor includes:
 - Core GONODES engine
@@ -376,14 +389,14 @@ that depends only on its own vendor runtime.
 | gn_ext_gpu_encode | 2 | N/A | Yes (Win/Mac) | No | No |
 | gn_ext_video_capture | 2 | N/A | Yes | No | No |
 | gn_ext_ffmpeg | 3 | MIT + **LGPL** | Yes | No | No |
-| gn_ext_webrender | 3 | MIT/BSD | Yes | No | Setup script |
+| gn_ext_webrender | 5 | MIT/BSD | Yes | No | `setup_cef.py` via `setup_deps.py` |
 | gn_ext_blackmagic | 4 | Proprietary | Yes (our DLL) | DeckLink drivers | No |
 | gn_ext_ndi | 4 | Proprietary | Yes (our DLL) | NDI Runtime | No |
 | gn_ext_depth_sensor | 4 | Mixed | Yes (3 DLLs) | Sensor vendor SW | No |
-| gn_ext_opencv | 4 | Apache 2.0 | Yes (our DLL) | OpenCV runtime | No |
-| gn_ext_syphon | 4 | BSD-3 | Yes (Mac) | Syphon Framework | Build required |
+| gn_ext_opencv | 5 | Apache 2.0 | Yes (our DLL) | OpenCV runtime | `setup_opencv.py` via `setup_deps.py` |
+| gn_ext_syphon | 5 | BSD-3 | Yes (Mac) | Syphon Framework | cloned by `setup_deps.py` |
 | gn_ext_ml | 5 | MIT + **AGPL** | No | ONNX Runtime | `setup_ml.py` + `scons` |
-| gn_ext_user_python | 5 | PSF/BSD | No | Embeddable Python | `setup_python.py` + `scons` |
+| gn_ext_user_python | 5 | PSF/BSD | Yes (release build) | No | `setup_python.py --bundle` |
 | gn_ext_user_native | 5 | N/A | Yes (scaffold) | C++ compiler | User writes code |
 
 ---

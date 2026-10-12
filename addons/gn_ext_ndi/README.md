@@ -27,29 +27,29 @@ After installing or extracting the SDK, copy the required files into:
 
 ```
 addons/gn_ext_ndi/native/ndi_sdk/
-├── include/
-│   └── Processing.NDI.Lib.h       ← main header
+├── Include/
+│   └── Processing.NDI.Lib.h
+├── Lib/
+│   └── x64/
+│       └── Processing.NDI.Lib.x64.lib    (Windows)
 └── lib/
-    ├── windows/
-    │   └── Processing.NDI.Lib.x64.lib
-    ├── linux/
-    │   └── libndi.so
-    └── macos/
-        └── libndi.dylib
+    ├── x86_64-linux/
+    │   └── libndi.so                     (Linux)
+    └── libndi.dylib                      (macOS)
 ```
 
 **Windows** — The SDK installer typically places files in
 `C:\Program Files\NDI\NDI 6 SDK\`.  Copy:
-- `Include\Processing.NDI.Lib.h` → `ndi_sdk/include/`
-- `Lib\x64\Processing.NDI.Lib.x64.lib` → `ndi_sdk/lib/windows/`
+- `Include\Processing.NDI.Lib.h` → `ndi_sdk/Include/`
+- `Lib\x64\Processing.NDI.Lib.x64.lib` → `ndi_sdk/Lib/x64/`
 
 **Linux** — After running the SDK installer:
-- `include/Processing.NDI.Lib.h` → `ndi_sdk/include/`
-- `lib/x86_64-linux-gnu/libndi.so` → `ndi_sdk/lib/linux/`
+- `include/Processing.NDI.Lib.h` → `ndi_sdk/Include/`
+- `lib/x86_64-linux-gnu/libndi.so` → `ndi_sdk/lib/x86_64-linux/`
 
 **macOS** — After running the SDK installer:
-- `include/Processing.NDI.Lib.h` → `ndi_sdk/include/`
-- `lib/macOS/libndi.dylib` → `ndi_sdk/lib/macos/`
+- `include/Processing.NDI.Lib.h` → `ndi_sdk/Include/`
+- `lib/macOS/libndi.dylib` → `ndi_sdk/lib/libndi.dylib`
 
 ### 3  Build the Extension
 

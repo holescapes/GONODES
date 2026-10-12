@@ -3,10 +3,11 @@ MIT License
 The source code in this extension is part of the GONODES project and is
 licensed under the MIT License (full text below).
 
-This extension requires third-party libraries or SDKs that are NOT
-included in this repository due to licensing restrictions. See the
-THIRD_PARTY_LICENSES file in this directory for details about external
-dependencies and their respective licenses.
+This extension links CPython and NumPy. Those runtimes are not committed
+to the git repository. A release build and `setup_python.py --bundle`
+download them and ship them with GONODES. Both licenses allow that.
+See THIRD_PARTY_LICENSES in this directory. The license files inside the
+downloaded runtime travel with every copy.
 
 ---
 

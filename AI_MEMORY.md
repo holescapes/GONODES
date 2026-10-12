@@ -28,6 +28,10 @@
 - **SCRIPT demand:** `_get_expression_refs` / `_build_wireless_demand_map` scan STRING script bodies (`code`, `py_source`, `cpp_source`) for `chop()`/`dat()`/etc. — same as expression params.
 - **Select\*:** removed blanket `time_dependent`; wireless refresh via `_wireless_consumer_map` + remote hash. All Select\* resolve network via `GNNode.get_owning_network()` (CookEngine parent), not a `GNNetwork` scene parent.
 
+### 2026-10-11 — Hard Rule 25.48: build scripts and guides stay in step
+
+- A download, probe path, `setup`/`vendor_clone` line, or Actions step updates the script and `dev_docs/BUILD.md` (plus the extension README) in the same change
+
 ### 2026-09-23 — Hard Rule 25.46: multi-stage work must be resumable
 
 - Stage isn't done until findings + honest progress status + `## Resume here` block are written

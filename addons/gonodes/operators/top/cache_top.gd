@@ -33,7 +33,7 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	var tex_in: GNTextureData = _get_input_top(inputs, 0)
 	if tex_in == null:
-		GNLogger.warn("CacheTOP", "'%s' — no valid input" % id)
+		GNLogger.debug("CacheTOP", "'%s' — no valid input" % id)
 		return null
 
 	var res: Vector2i = tex_in.resolution

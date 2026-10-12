@@ -201,6 +201,19 @@ Any change that alters operator **parameters**, ports, behavior, supported forma
 ### 25.46 — Multi-Stage Work Must Be Resumable At Every Stage
 Any task spanning more than one working session (audits, migrations, family-wide refactors, build campaigns) MUST maintain a resume record, and **a stage is not complete until its record is written** — including when the stage fails or stops early. Each stage closes with: (1) findings appended to the task's own doc, every claim citing a file path or command output; (2) a progress table row set to the honest status (`DONE` / `PARTIAL` / `BLOCKED` / `UNVERIFIED` — never `DONE` on incomplete evidence); (3) a `## Resume here` block, overwritten each time, holding last completed stage, next stage plus its first concrete action, exact commands with working directory, files created/modified, **environment state that cost real time to reach** (which extensions are built, which templates exist, long-running processes), open questions, and any deviation from plan with its reason. Keep the log in the task doc; put only a one-line pointer in `AI_MEMORY.md`, which every session loads and must stay compact. Acceptance test: a fresh agent given only the task doc and the repo must resume without re-deriving prior work or repeating expensive builds. Current instance: `PRE-BETA_AUDIT.md`.
 
+### 25.47 — `llms.txt` Stays True
+`llms.txt` (repo root) is the plain-Markdown brief outside models use to write `.gnpatch` files. No tool-specific copy. Update it in the **same change** when a sentence in it would become false: `.gnpatch` schema, families, wire rules, expression or script-node surface, feedback, sinks, or an operator the file names. Do **not** copy the operator catalog or counts into it — those stay in `docs/OPERATORS.md` (25.40, 25.45). A new parameter that the brief already says to look up in the catalog is not an `llms.txt` edit.
+
+### 25.48 — Build Scripts and Guides Stay in Step
+A change to how a library is fetched, where a probe looks, a `setup` or `vendor_clone` line, or a GitHub Actions download/stage step is incomplete until the script and the guide match, in the **same change**.
+
+Update whichever of these the change touches:
+
+- Scripts: `setup_deps.py`, `scripts/show_manual_sdks.py`, `scripts/clone_vendor_sdk.py`, the extension `setup_*.py`, `native/build.cfg` (`setup`, `vendor_clone`, `probe`, `lib_dirs`), and the matching steps in `.github/workflows/release.yml` and `build-extensions.yml`.
+- Guides: `dev_docs/BUILD.md`, that extension's `README.md`, and `dev_docs/EXTENSIONS_AND_LICENSING.md` when a sentence there would become false.
+
+`scripts/show_manual_sdks.py` paths must match the `probe` and `lib_dirs` in `build.cfg`. Do not document a download the script does not perform, and do not add a download the guide does not name. Local `setup_deps.py` and GitHub Actions keep using the same lines: `build/ci_discover.py` reads `vendor_setup` if set, otherwise `setup`.
+
 ## Operator Structure
 
 ```gdscript
@@ -252,6 +265,7 @@ Signature: `func get_device_menu() -> PackedStringArray`. Used by: BlackmagicInI
 4. Add or **update** the entry in `docs/OPERATORS.md` (parameter table, I/O, "How it works") — **required for param/behavior changes, not only new operators** (Rule 25.45)
 5. Update operator counts in: README.md, docs/OPERATORS.md, dev_docs/TESTING.md, dev_docs/GONODES_VS_THE_REST.md (when adding/removing ops)
 6. Run `python scripts/verify_new_operator.py <ClassName>`
+7. If the change makes a sentence in `llms.txt` false, update that file in the same change (Rule 25.47). Do not add the operator to `llms.txt` just because it is new.
 
 ## Build System
 
@@ -259,7 +273,7 @@ All build steps MUST be scripted and reproducible. A fresh clone should get to a
 
 ```bash
 # Full build from fresh clone:
-python setup_deps.py --core                           # 1. Fetch godot-cpp + SDKs
+python setup_deps.py --core                           # 1. Fetch godot-cpp only. Drop --core to also fetch permissive SDKs.
 cd addons/gn_ext_native/native/godot-cpp
 scons platform=windows arch=x86_64 target=template_release -j8   # 2. Build godot-cpp
 cd ../../../..
@@ -298,7 +312,8 @@ Checklist: `dev_docs/NEW_EXTENSION_CHECKLIST.md`.
 | OpenCV | `addons/gn_ext_opencv/setup_opencv.py` | Downloads OpenCV SDK (Windows) |
 | Python | `addons/gn_ext_user_python/setup_python.py` | Downloads embeddable CPython + NumPy |
 | Spout | `vendor_clone` in build.cfg | Clones Spout2 SDK |
-| WebRender/CEF | `addons/gn_ext_webrender/setup_cef.py` | Downloads gdCEF (no build.cfg yet) |
+| Syphon | `vendor_clone` in build.cfg | Clones Syphon-Framework (macOS) |
+| WebRender/CEF | `addons/gn_ext_webrender/setup_cef.py` | Downloads gdCEF. `download_only` in `native/build.cfg` — nothing to compile |
 
 Run via `setup_deps.py` or `python scripts/run_extension_setups.py --for-build --tier all`.
 

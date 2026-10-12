@@ -601,9 +601,10 @@ func _compute_topological_order() -> Array[GNNode]:
 	# included.  Kahn leaves those nodes out — append them so they still cook
 	# (they read one-frame-stale cached_output, which is the intended model).
 	if sorted.size() < nodes.size():
-		GNLogger.warn("Network",
-			"Topo cycle (%d/%d sorted) — appending remaining nodes for feedback cook" % [
-				sorted.size(), nodes.size()])
+		if GNLogger.will_log(GNLogger.Level.DEBUG, "Network"):
+			GNLogger.debug("Network",
+				"Topo cycle (%d/%d sorted) — appending remaining nodes for feedback cook" % [
+					sorted.size(), nodes.size()])
 		for node_id in nodes:
 			if sorted_ids.has(node_id):
 				continue

@@ -106,6 +106,10 @@ func _pre_cook(delta: float) -> void:
 	super._pre_cook(delta)
 
 
+func _restores_dynamic_parameters() -> bool:
+	return true
+
+
 ## Override from_dict to rebuild dynamic params from the restored shader code
 ## BEFORE trying to restore the dynamic param values from the save file.
 func from_dict(d: Dictionary) -> void:

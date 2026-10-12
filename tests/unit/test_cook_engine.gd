@@ -362,3 +362,13 @@ func test_empty_image_is_not_a_cook_payload() -> void:
 	GNTestAssert.assert_false(GNCookEngine.input_has_payload(null), "missing input is not a payload")
 	var tex := GNTextureData.new()
 	GNTestAssert.assert_false(GNCookEngine.input_has_payload(tex), "texture shell is not ready")
+	var ready := GNTextureData.new()
+	ready.texture = PlaceholderTexture2D.new()
+	GNTestAssert.assert_false(GNCookEngine.null_cook_is_fault([null, ready]), "one empty port is still warming up")
+	GNTestAssert.assert_true(GNCookEngine.null_cook_is_fault([ready]), "a real texture and a null cook is a fault")
+	GNTestAssert.assert_false(GNCookEngine.null_cook_is_fault([GNImageData.new()]), "an image with no pixels is still loading")
+	var waiting := SelectTOP.new()
+	waiting._output_pending = true
+	GNTestAssert.assert_true(waiting.null_output_is_pending(), "select waiting on its target")
+	var generator := GNNode.new()
+	GNTestAssert.assert_false(generator.null_output_is_pending(), "a generator null cook is not pending")

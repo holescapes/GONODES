@@ -1,0 +1,113 @@
+# GONODES
+
+> Godot node graph for realtime visuals, audio, and data. A patch is a `.gnpatch` JSON file. This file is the brief a language model needs to write one. It is plain Markdown. Any model can read it. Do not look for a tool-specific twin.
+
+Read this file once. Before you set any parameter, port, or enum, open that operator's section in `docs/OPERATORS.md`. The header of that file is the current family list and operator count. Do not memorize the count, and do not invent an operator, parameter, or port that the catalog does not list. If the name is missing, say so.
+
+Help examples for a real operator live in `addons/gonodes/help/<family>/` and `addons/gn_ext_*/help/`. Copy their shape when you are unsure. `GONODES_CONTEXT.md` is engine internals. You do not need it to write a patch.
+
+## What a patch is
+
+A `.gnpatch` is JSON. Opening `Show.gnpatch` sets the project folder to the sibling directory `Show/`. Paths inside the patch should be `project://...` relative to that folder, not absolute disk paths.
+
+```json
+{
+  "version": "1.0.0",
+  "generator": "GONODES",
+  "nodes": {
+    "noise1": {
+      "type": "NoiseTOP",
+      "position": [100, 100],
+      "parameters": {
+        "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+        "monochrome": { "value": true },
+        "time_offset": { "value": 0.0, "mode": "EXPRESSION", "expression": "time" }
+      }
+    },
+    "window1": {
+      "type": "WindowOUT",
+      "position": [450, 100],
+      "parameters": {
+        "resolution": { "value": { "_type": "Vector2i", "x": 512, "y": 512 } },
+        "open": { "value": true }
+      }
+    }
+  },
+  "connections": [
+    { "from": "noise1", "from_port": 0, "to": "window1", "to_port": 0 }
+  ],
+  "annotations": []
+}
+```
+
+- `nodes` is a dictionary keyed by the node id you invent (`noise1`). Ids are unique strings.
+- `type` is the class name (`NoiseTOP`, `WindowOUT`), never the short `node_type` slug (`noise`, `window`).
+- Connection keys are `from`, `from_port`, `to`, `to_port`. Ports are integers starting at 0, in the order `docs/OPERATORS.md` lists that operator's inputs or outputs. Not port names.
+- Omit a parameter to keep its default. A constant value is `{ "value": ... }`.
+- An expression is GDScript, one expression, no statements: add `"mode": "EXPRESSION"` and `"expression": "..."`. `time` is seconds. `abs()`, `sin()`, `clamp()`, `min()`, `max()`, `lerp()` are available.
+- `chop("lfo1", "chan")` reads one channel. `par("noise1", "scale")` reads another node's parameter. `par("scale")` reads the parameter on the node that owns the expression.
+- Vectors and colors are objects: `Vector2`, `Vector2i`, `Vector3`, `Vector4` use `x,y,z,w`. `Color` uses `r,g,b,a`. Each object has `"_type"`.
+- Enums are integer indexes, starting at 0, in the order the catalog lists the labels. Do not write the label string as the value.
+- Only write values that differ from the defaults you just read. Do not dump every parameter.
+
+## Families and wires
+
+A wire is valid only when the output family matches the input family.
+
+| Family | Data | Shown on screen by |
+|---|---|---|
+| TOP | GPU texture | WindowOUT |
+| IMG | CPU image | ImgToTOP, then WindowOUT |
+| CHOP | numeric channels | CHOPtoTOP, then WindowOUT |
+| DAT | tables and text | TextTOP, then WindowOUT |
+| SOP | 3D surfaces | GeometryCOMP + CameraCOMP, then RenderTOP, then WindowOUT |
+| MAT | material | onto a GeometryCOMP, then the SOP chain |
+| UI | widgets | PanelTOP, then WindowOUT |
+| POP | points / particles | the particle render chain in the catalog |
+| VOL | 3D texture | the volume render chain in the catalog |
+| COMP | scene or container | RenderTOP when it is a 3D scene |
+| OUT | files, displays, devices | already a sink |
+| SCRIPT | user code | whatever families its `@output` lines declare |
+
+Extension families (SDF and others) are in the same catalog. Cross GPU and CPU only through the bridge operators `TOPtoIMG` and `ImgToTOP`. Do not treat an IMG as a TOP.
+
+The cook reaches a node only if that node is upstream of a sink (WindowOUT, a file or device output, or another node something displays). A node with no path to a sink does not cook. A COMP that should run must sit on that path, not beside it.
+
+Wire cycles are rejected. One-frame feedback is a Select of the matching family (`SelectTOP`, `SelectCHOP`, …) pointed at a Cache that is downstream of the node reading the Select. Select nodes are the only wireless references. Every other operator needs a wire.
+
+## Script nodes
+
+`GDScriptSCRIPT` is the usual script node. `PythonSCRIPT` and `NativeSCRIPT` exist. Declare ports and parameters in comments, then implement `cook()`:
+
+```gdscript
+# @input chop Mouse
+# @output chop Control channels
+# @param float speed 1.0 Speed
+
+func cook():
+	var src = inputs[0]
+	var v := 0.0
+	if src != null:
+		v = float(src.get_value("tx"))
+	op.sample_rate = 60.0
+	op.set_single_value("out", sin(time * par("speed")) + v)
+```
+
+- Families in annotations are lowercase: `chop`, `top`, `sop`, `dat`, `img`, `mat`.
+- `me` is this node. `inputs` is the wired data, in port order. `op` is the first output. `time`, `frame`, and `dt` are the clock.
+- `par("name")` reads this node's parameter. `set_par("node_id", "param", value)` writes another node.
+- Call `set_par` when the value changes. Calling it every cook with the same value marks that node dirty every frame.
+- `chop("id")` / `dat("id")` inside `cook()` do not pull that node into the cook. Wire it to an `@input` if this script needs it to run.
+
+## Making a patch
+
+1. Name the result the person should see, and the sink that displays it.
+2. Look up each operator in `docs/OPERATORS.md`. Use its class name, parameter names, port order, and enum order from that section.
+3. Prefer a generator (no input required) when the graph needs a source. Noise, constants, movies, devices, and scripts are typical sources. Check the catalog for which one exists.
+4. Connect port indexes. Stop at the sink.
+5. Put files next to the patch: `MyShow.gnpatch` and a folder `MyShow/` for `project://` assets.
+6. If an operator you want is not in the catalog, do not rename a different one to match. Say it is missing.
+
+## Keeping this file true
+
+This file states how a patch is written. It does not list operators. When a change makes a sentence here false — patch JSON, families, wires, expressions, script annotations, feedback, or an operator this file names — update this file in the same change. A new parameter that belongs only in `docs/OPERATORS.md` does not belong here.

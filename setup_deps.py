@@ -111,6 +111,10 @@ def main():
             include_optional_setups=True,
             dry_run=True,
         )
+        subprocess.run(
+            [sys.executable, os.path.join(ROOT, "scripts", "show_manual_sdks.py")],
+            check=False,
+        )
         return
 
     header("Core dependencies")
@@ -126,6 +130,13 @@ def main():
         )
     else:
         print("\n  --core flag: skipping extension SDKs")
+
+    if not args.list:
+        header("SDKs you install yourself")
+        subprocess.run(
+            [sys.executable, os.path.join(ROOT, "scripts", "show_manual_sdks.py")],
+            check=False,
+        )
 
     header("Setup complete")
     print("  Next: run extension setups for your build tier, then compile:")

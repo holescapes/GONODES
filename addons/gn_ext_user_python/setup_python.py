@@ -29,7 +29,11 @@ import zipfile
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-PYTHON_VERSION = "3.10.11"  # Must match libgn_python.dll — compiled against Python 3.10
+PYTHON_VERSION = "3.10.11"  # Windows embeddable. DLL name is python310.dll.
+# Linux and macOS ship a 3.10.x standalone build. Same ABI as 3.10.11.
+PBS_TAG = "20261009"
+PBS_VERSION = "3.10.22"
+NUMPY_CONSTRAINT = "numpy<2"
 
 EXT_DIR = os.path.dirname(os.path.abspath(__file__))
 TOOLCHAIN_DIR = os.path.join(EXT_DIR, "toolchain", "python")
@@ -318,6 +322,309 @@ def setup_macos(version, skip_numpy):
     return False
 
 
+# ── Relocatable Linux / macOS runtime ─────────────────────────────────────────
+
+def _host_arch():
+    machine = platform.machine().lower()
+    if machine in ("aarch64", "arm64"):
+        return "arm64"
+    return "x86_64"
+
+
+def bundle_asset_name(system, arch):
+    """Filename of the python-build-standalone install_only archive."""
+    triples = {
+        ("Linux", "x86_64"): "x86_64-unknown-linux-gnu",
+        ("Linux", "arm64"): "aarch64-unknown-linux-gnu",
+        ("Darwin", "x86_64"): "x86_64-apple-darwin",
+        ("Darwin", "arm64"): "aarch64-apple-darwin",
+    }
+    triple = triples.get((system, arch))
+    if not triple:
+        return ""
+    return (
+        f"cpython-{PBS_VERSION}+{PBS_TAG}-{triple}-install_only_stripped.tar.gz"
+    )
+
+
+def bundle_url(system, arch):
+    name = bundle_asset_name(system, arch)
+    if not name:
+        return ""
+    from urllib.parse import quote
+    return (
+        "https://github.com/astral-sh/python-build-standalone/releases/download/"
+        f"{PBS_TAG}/{quote(name)}"
+    )
+
+
+def _bundled_python_exe():
+    if platform.system() == "Windows":
+        return os.path.join(TOOLCHAIN_DIR, "python.exe")
+    return os.path.join(TOOLCHAIN_DIR, "bin", "python3")
+
+
+def _write_bundle_notice():
+    notice = os.path.join(TOOLCHAIN_DIR, "GONODES_PYTHON_NOTICE.txt")
+    text = (
+        "This folder is an unmodified CPython build plus NumPy, shipped inside\n"
+        "GONODES so Python nodes work without a separate install.\n"
+        "\n"
+        "CPython is under the Python Software Foundation License. Keep the\n"
+        "LICENSE file in this folder with every copy.\n"
+        "NumPy is BSD 3-Clause. Its license is in the numpy *.dist-info folder.\n"
+        "\n"
+        "GONODES does not change CPython. Do not use the Python name, or the\n"
+        "Python Software Foundation name, to endorse GONODES.\n"
+    )
+    with open(notice, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(text)
+
+
+def setup_standalone(system, arch, skip_numpy):
+    """Download a relocatable CPython 3.10 prefix and install NumPy into it."""
+    exe = _bundled_python_exe()
+    if os.path.isfile(exe):
+        log(f"Bundled Python already present at {TOOLCHAIN_DIR}")
+        if not skip_numpy:
+            _install_numpy_prefix(exe)
+        _write_bundle_notice()
+        return True
+
+    url = bundle_url(system, arch)
+    if not url:
+        log(f"No redistributable CPython build for {system} {arch}.")
+        return False
+
+    archive_name = bundle_asset_name(system, arch)
+    tmp_archive = os.path.join(EXT_DIR, "toolchain", archive_name)
+    if not download(url, tmp_archive, f"CPython {PBS_VERSION} ({system} {arch})"):
+        return False
+
+    log(f"Extracting {archive_name}...")
+    os.makedirs(TOOLCHAIN_PARENT, exist_ok=True)
+    if os.path.isdir(TOOLCHAIN_DIR):
+        shutil.rmtree(TOOLCHAIN_DIR)
+    with tarfile.open(tmp_archive, "r:gz") as archive:
+        archive.extractall(TOOLCHAIN_PARENT)
+    os.remove(tmp_archive)
+
+    if not os.path.isfile(exe):
+        log(f"Python executable missing after extract: {exe}")
+        return False
+
+    if not skip_numpy and not _install_numpy_prefix(exe):
+        return False
+    _write_bundle_notice()
+    return True
+
+
+def _install_numpy_prefix(python_exe):
+    result = subprocess.run(
+        [python_exe, "-c",
+         "import numpy; v=tuple(int(x) for x in numpy.__version__.split('.')[:2]); "
+         "raise SystemExit(0 if v < (2, 0) else 1)"],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        shown = subprocess.run(
+            [python_exe, "-c", "import numpy; print(numpy.__version__)"],
+            capture_output=True, text=True,
+        )
+        log(f"NumPy already installed (compatible): {shown.stdout.strip()}")
+        return True
+
+    log(f"Installing {NUMPY_CONSTRAINT}...")
+    pip = subprocess.run(
+        [python_exe, "-m", "pip", "install", NUMPY_CONSTRAINT,
+         "--no-warn-script-location"],
+        capture_output=True, text=True,
+    )
+    if pip.returncode != 0:
+        boot = subprocess.run(
+            [python_exe, "-m", "ensurepip", "--upgrade"],
+            capture_output=True, text=True,
+        )
+        if boot.returncode != 0:
+            log(f"NumPy install failed: {pip.stderr}")
+            return False
+        pip = subprocess.run(
+            [python_exe, "-m", "pip", "install", NUMPY_CONSTRAINT,
+             "--no-warn-script-location"],
+            capture_output=True, text=True,
+        )
+        if pip.returncode != 0:
+            log(f"NumPy install failed: {pip.stderr}")
+            return False
+    shown = subprocess.run(
+        [python_exe, "-c", "import numpy; print(numpy.__version__)"],
+        capture_output=True, text=True,
+    )
+    if shown.returncode == 0:
+        log(f"NumPy installed: {shown.stdout.strip()}")
+    return shown.returncode == 0
+
+
+# ── Ship the runtime beside an export, or pack it for CI ─────────────────────
+
+_RUNTIME_LIB_NAMES = {
+    "python3.dll",
+    "python310.dll",
+    "vcruntime140.dll",
+    "vcruntime140_1.dll",
+    "libffi-8.dll",
+    "libpython3.10.so.1.0",
+    "libpython3.10.dylib",
+}
+
+
+def _runtime_lib_dirs():
+    return [
+        os.path.join(EXT_DIR, "bin", "win64"),
+        os.path.join(EXT_DIR, "bin", "linux64"),
+        os.path.join(EXT_DIR, "bin", "macos"),
+        os.path.join(EXT_DIR, "native", "bin", "linux64"),
+        os.path.join(EXT_DIR, "native", "bin", "macos"),
+    ]
+
+
+def _copy_runtime_lib(src, dest_dir):
+    os.makedirs(dest_dir, exist_ok=True)
+    dest = os.path.join(dest_dir, os.path.basename(src))
+    shutil.copy2(src, dest)
+    if platform.system() == "Darwin" and dest.endswith(".dylib"):
+        subprocess.run(
+            ["install_name_tool", "-id", "@rpath/libpython3.10.dylib", dest],
+            capture_output=True,
+        )
+    log(f"Copied {os.path.basename(src)} -> {dest_dir}")
+
+
+def export_runtime(dest_dir):
+    """Copy the bundled tree into dest_dir for a CI artifact."""
+    if not os.path.isdir(TOOLCHAIN_DIR):
+        log(f"Nothing to export. {TOOLCHAIN_DIR} is missing.")
+        return False
+    python_dest = os.path.join(dest_dir, "toolchain", "python")
+    if os.path.isdir(python_dest):
+        shutil.rmtree(python_dest)
+    shutil.copytree(TOOLCHAIN_DIR, python_dest)
+    for folder in _runtime_lib_dirs():
+        if not os.path.isdir(folder):
+            continue
+        rel = os.path.relpath(folder, EXT_DIR)
+        out_dir = os.path.join(dest_dir, rel)
+        for name in os.listdir(folder):
+            if name not in _RUNTIME_LIB_NAMES:
+                continue
+            os.makedirs(out_dir, exist_ok=True)
+            shutil.copy2(os.path.join(folder, name), os.path.join(out_dir, name))
+    log(f"Exported Python runtime to {dest_dir}")
+    return True
+
+
+def _find_python_tree(src_dir):
+    direct = os.path.join(src_dir, "toolchain", "python")
+    if os.path.isdir(direct):
+        return direct
+    for root, _dirs, _files in os.walk(src_dir):
+        if os.path.basename(root) != "python":
+            continue
+        if (os.path.isfile(os.path.join(root, "python.exe"))
+                or os.path.isfile(os.path.join(root, "bin", "python3"))):
+            return root
+    return ""
+
+
+def import_runtime(src_dir):
+    """Copy a CI artifact back into this extension."""
+    python_src = _find_python_tree(src_dir)
+    if not python_src:
+        log(f"No toolchain/python in {src_dir}")
+        return False
+    if os.path.isdir(TOOLCHAIN_DIR):
+        shutil.rmtree(TOOLCHAIN_DIR)
+    shutil.copytree(python_src, TOOLCHAIN_DIR)
+    for dirpath, _dirnames, filenames in os.walk(src_dir):
+        for name in filenames:
+            if name not in _RUNTIME_LIB_NAMES:
+                continue
+            rel_dir = os.path.relpath(dirpath, src_dir)
+            if rel_dir == "." or rel_dir.startswith("toolchain"):
+                continue
+            _copy_runtime_lib(
+                os.path.join(dirpath, name),
+                os.path.join(EXT_DIR, rel_dir),
+            )
+    log(f"Imported Python runtime from {src_dir}")
+    return True
+
+
+def _ignore_stage(directory, names):
+    skip = {"include", "libs", "__pycache__", "test", "tests"}
+    return [name for name in names if name in skip or name.endswith(".pdb")]
+
+
+def stage_runtime(export_path):
+    """Place the runtime at <exe_dir>/python so an exported player can see it."""
+    if not os.path.isdir(TOOLCHAIN_DIR):
+        log("No bundled Python to stage. Run with --bundle first.")
+        return False
+    path = os.path.abspath(export_path)
+    if path.lower().endswith(".zip") and os.path.isfile(path):
+        return _stage_into_zip(path)
+    dest = _stage_destination(path)
+    if os.path.isdir(dest):
+        shutil.rmtree(dest)
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    shutil.copytree(TOOLCHAIN_DIR, dest, ignore=_ignore_stage)
+    log(f"Staged Python runtime at {dest}")
+    return True
+
+
+def _stage_destination(path):
+    if path.endswith(".app") and os.path.isdir(path):
+        return os.path.join(path, "Contents", "MacOS", "python")
+    if os.path.isdir(path):
+        apps = [name for name in os.listdir(path) if name.endswith(".app")]
+        if len(apps) == 1:
+            return os.path.join(path, apps[0], "Contents", "MacOS", "python")
+        return os.path.join(path, "python")
+    return os.path.join(os.path.dirname(path), "python")
+
+
+def _stage_into_zip(zip_path):
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="gonodes-python-stage-")
+    try:
+        with zipfile.ZipFile(zip_path) as archive:
+            archive.extractall(tmp)
+        dest = _stage_destination(tmp)
+        # A zip of one .app extracts to tmp/<Name>.app
+        apps = []
+        for root, dirs, _files in os.walk(tmp):
+            for name in dirs:
+                if name.endswith(".app"):
+                    apps.append(os.path.join(root, name))
+        if len(apps) == 1:
+            dest = os.path.join(apps[0], "Contents", "MacOS", "python")
+        if os.path.isdir(dest):
+            shutil.rmtree(dest)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        shutil.copytree(TOOLCHAIN_DIR, dest, ignore=_ignore_stage)
+        tmp_zip = zip_path + ".staging"
+        with zipfile.ZipFile(tmp_zip, "w", compression=zipfile.ZIP_DEFLATED) as out:
+            for folder, _dirs, files in os.walk(tmp):
+                for name in files:
+                    full = os.path.join(folder, name)
+                    out.write(full, os.path.relpath(full, tmp))
+        os.replace(tmp_zip, zip_path)
+        log(f"Staged Python runtime inside {zip_path}")
+        return True
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _write_toolchain_env(py_exe):
@@ -355,33 +662,48 @@ def enable_gdextension():
 
 
 def link_python_dlls():
-    """Copy Python DLLs next to the extension binary so Windows can find them.
+    """Copy libpython next to the extension binary.
 
-    Godot loads the .gdextension DLL at engine startup, before any GDScript
-    runs. The DLL is linked against python310.lib, so Windows needs python310.dll
-    in the DLL's own directory (or on PATH). We copy from toolchain/python/
-    into bin/win64/ (outside native/, which Godot cannot res://).
+    Godot loads the GDExtension before any script runs. The loader finds
+    libpython beside that binary ($ORIGIN / the Windows DLL directory), and
+    Python home points at the full prefix for the standard library.
     """
-    if platform.system() != "Windows":
-        return  # Linux/macOS use rpath or system library paths
-
-    dll_names = ["python3.dll", "python310.dll"]
-    if not any(os.path.isfile(os.path.join(TOOLCHAIN_DIR, n)) for n in dll_names):
-        return  # Toolchain not set up yet
-
-    os.makedirs(BIN_WIN64_DIR, exist_ok=True)
-
-    for dll_name in dll_names:
-        src = os.path.join(TOOLCHAIN_DIR, dll_name)
-        dst = os.path.join(BIN_WIN64_DIR, dll_name)
-        if os.path.isfile(src) and not os.path.isfile(dst):
-            shutil.copy2(src, dst)
-            log(f"Copied {dll_name} \u2192 bin/win64/")
-        elif os.path.isfile(dst):
-            # Check if toolchain version is newer
-            if os.path.isfile(src) and os.path.getmtime(src) > os.path.getmtime(dst):
+    system = platform.system()
+    if system == "Windows":
+        dll_names = ["python3.dll", "python310.dll", "vcruntime140.dll",
+                     "vcruntime140_1.dll", "libffi-8.dll"]
+        if not any(os.path.isfile(os.path.join(TOOLCHAIN_DIR, n)) for n in dll_names):
+            return
+        os.makedirs(BIN_WIN64_DIR, exist_ok=True)
+        for dll_name in dll_names:
+            src = os.path.join(TOOLCHAIN_DIR, dll_name)
+            if not os.path.isfile(src):
+                continue
+            dst = os.path.join(BIN_WIN64_DIR, dll_name)
+            if (not os.path.isfile(dst)
+                    or os.path.getmtime(src) > os.path.getmtime(dst)):
                 shutil.copy2(src, dst)
-                log(f"Updated {dll_name} \u2192 bin/win64/")
+                log(f"Copied {dll_name} -> bin/win64/")
+        return
+
+    if system == "Linux":
+        src = os.path.join(TOOLCHAIN_DIR, "lib", "libpython3.10.so.1.0")
+        dests = [
+            os.path.join(EXT_DIR, "bin", "linux64"),
+            os.path.join(EXT_DIR, "native", "bin", "linux64"),
+        ]
+    elif system == "Darwin":
+        src = os.path.join(TOOLCHAIN_DIR, "lib", "libpython3.10.dylib")
+        dests = [
+            os.path.join(EXT_DIR, "bin", "macos"),
+            os.path.join(EXT_DIR, "native", "bin", "macos"),
+        ]
+    else:
+        return
+    if not os.path.isfile(src):
+        return
+    for dest in dests:
+        _copy_runtime_lib(src, dest)
 
 
 # ── Verify ────────────────────────────────────────────────────────────────────
@@ -395,11 +717,7 @@ def verify_toolchain() -> int:
         log(f"    Run without --verify to download.")
         return 1
 
-    # Check python executable
-    if platform.system() == "Windows":
-        python_exe = os.path.join(TOOLCHAIN_DIR, "python.exe")
-    else:
-        python_exe = os.path.join(TOOLCHAIN_DIR, "bin", "python3")
+    python_exe = _bundled_python_exe()
 
     if os.path.isfile(python_exe):
         result = subprocess.run(
@@ -472,26 +790,54 @@ def main():
                         help="Don't rename .gdextension.disabled")
     parser.add_argument("--verify", action="store_true",
                         help="Check existing toolchain only, don't install")
+    parser.add_argument("--bundle", action="store_true",
+                        help="Download a redistributable CPython + NumPy for this OS")
+    parser.add_argument("--print-bundle-url", action="store_true",
+                        help="Print the standalone archive URL and exit")
+    parser.add_argument("--export-runtime", metavar="DIR",
+                        help="Copy the bundled runtime into DIR for a CI artifact")
+    parser.add_argument("--import-runtime", metavar="DIR",
+                        help="Copy a CI runtime artifact back into this extension")
+    parser.add_argument("--stage", metavar="EXPORT",
+                        help="Copy the runtime next to an exported player or into a .app/.zip")
     args = parser.parse_args()
 
     print("=" * 60)
     print("GONODES gn_ext_user_python — Automated Setup")
     print("=" * 60)
 
+    if args.print_bundle_url:
+        url = bundle_url(platform.system(), _host_arch())
+        if not url:
+            log("This OS uses the Windows embeddable package, or has no bundle.")
+            return 0 if platform.system() == "Windows" else 1
+        print(url)
+        return 0
+
     if args.verify:
         return verify_toolchain()
+
+    if args.export_runtime:
+        return 0 if export_runtime(args.export_runtime) else 1
+    if args.import_runtime:
+        return 0 if import_runtime(args.import_runtime) else 1
+    if args.stage:
+        return 0 if stage_runtime(args.stage) else 1
 
     system = platform.system()
     ok = False
 
-    if system == "Windows":
-        log(f"Platform: Windows (embeddable package)")
+    if args.bundle and system in ("Linux", "Darwin"):
+        log(f"Platform: {system} (redistributable CPython {PBS_VERSION})")
+        ok = setup_standalone(system, _host_arch(), args.skip_numpy)
+    elif system == "Windows":
+        log("Platform: Windows (embeddable package)")
         ok = setup_windows(args.python_version, args.skip_numpy)
     elif system == "Linux":
-        log(f"Platform: Linux (system Python)")
+        log("Platform: Linux (system Python)")
         ok = setup_linux(args.python_version, args.skip_numpy)
     elif system == "Darwin":
-        log(f"Platform: macOS")
+        log("Platform: macOS")
         ok = setup_macos(args.python_version, args.skip_numpy)
     else:
         log(f"Unsupported platform: {system}")
@@ -509,9 +855,11 @@ def main():
         log("Enabling GDExtension...")
         enable_gdextension()
 
-    # Copy Python DLLs next to extension binary (even if already enabled)
+    # Copy libpython next to the extension binary.
     if ok:
         link_python_dlls()
+        if os.path.isfile(_bundled_python_exe()):
+            _write_bundle_notice()
 
     # Set GONODES_PYTHON_HOME for Windows embeddable
     if system == "Windows" and ok and os.path.isdir(TOOLCHAIN_DIR):

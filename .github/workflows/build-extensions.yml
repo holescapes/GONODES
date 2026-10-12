@@ -79,7 +79,10 @@ jobs:
           VENDOR_SETUP='${{ fromJson(needs.discover.outputs.vendor_setup || '{}')[matrix.ext] }}'
           if [ -n "$VENDOR_SETUP" ]; then
             EXT_BASE=$(echo '${{ matrix.ext }}' | cut -d/ -f1)
-            python3 "addons/${EXT_BASE}/${VENDOR_SETUP}"
+            set -- $VENDOR_SETUP
+            SCRIPT="addons/${EXT_BASE}/$1"
+            shift
+            python3 "$SCRIPT" "$@"
           fi
 
       - name: Build ${{ matrix.ext }} (Linux x86_64)
@@ -135,7 +138,10 @@ jobs:
           VENDOR_SETUP='${{ fromJson(needs.discover.outputs.vendor_setup || '{}')[matrix.ext] }}'
           if [ -n "$VENDOR_SETUP" ]; then
             EXT_BASE=$(echo '${{ matrix.ext }}' | cut -d/ -f1)
-            python3 "addons/${EXT_BASE}/${VENDOR_SETUP}"
+            set -- $VENDOR_SETUP
+            SCRIPT="addons/${EXT_BASE}/$1"
+            shift
+            python3 "$SCRIPT" "$@"
           fi
 
       - name: Build ${{ matrix.ext }} (Linux ARM64)
@@ -164,6 +170,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Clone vendor SDK (if needed)
+        env:
+          VENDOR_CLONE_JSON: ${{ needs.discover.outputs.vendor_clone }}
+          EXT_KEY: ${{ matrix.ext }}
+        run: python3 scripts/clone_vendor_sdk.py
+
       - name: Clone godot-cpp
         run: git clone --depth 1 --branch $GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
 
@@ -188,7 +200,10 @@ jobs:
           VENDOR_SETUP='${{ fromJson(needs.discover.outputs.vendor_setup || '{}')[matrix.ext] }}'
           if [ -n "$VENDOR_SETUP" ]; then
             EXT_BASE=$(echo '${{ matrix.ext }}' | cut -d/ -f1)
-            python3 "addons/${EXT_BASE}/${VENDOR_SETUP}"
+            set -- $VENDOR_SETUP
+            SCRIPT="addons/${EXT_BASE}/$1"
+            shift
+            python3 "$SCRIPT" "$@"
           fi
 
       - name: Build ${{ matrix.ext }} (macOS arm64)

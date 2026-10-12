@@ -82,7 +82,7 @@ $env:PYTHONUTF8 = "1"
 | 1. Fetch deps | `python setup_deps.py` | Clones godot-cpp; runs extension `setup` / `vendor_clone` from `build.cfg` |
 | 1b. Setups for build tier | `python scripts/run_extension_setups.py --for-build --tier all` | Same setups scoped to the tier you will compile (also run by `build_windows.ps1`) |
 | 2–3. Compile | `.\scripts\build_windows.ps1` | Injects MSVC env, builds godot-cpp + `build/scons tier=all` |
-| 2–3. Faster subset | `.\scripts\build_windows.ps1 -Shipped` | Core + extension tiers only (skips optional OpenCV/depth/NDI/…) |
+| 2–3. Faster subset | `.\scripts\build_windows.ps1 -Shipped` | Core + extension tiers only (skips optional depth/NDI/Blackmagic) |
 | 4. Verify DLLs | `python scripts/check_builds.py` | Lists which native libs exist |
 | 5. Activate | `python scripts/sync_gdextensions.py` | Renames `.gdextension.disabled` ↔ `.gdextension` when binaries exist (also runs post-`scons`) |
 | 6. Import + test | `& $env:GONODES_GODOT --headless --path . --import` then `-s res://tests/test_runner.gd` | Register `class_name`s; run suite |
@@ -136,8 +136,9 @@ cd build
 scons platform=windows arch=x86_64 target=template_release -j8
 cd ..
 # Post-build hook automatically runs sync_gdextensions.py to activate extensions.
-# Extensions whose SDKs are missing are SKIPPED (not fatal) — e.g. NDI, OpenCV
-# on Windows if setup_opencv.py was not run or NDI SDK not installed.
+# Extensions whose SDKs are missing are SKIPPED (not fatal) — e.g. NDI when
+# the SDK is absent, or OpenCV on Linux/macOS until the system package is
+# installed (setup_opencv.py writes native/opencv_sdk/.system_found).
 # Runtime DLLs declared in build.cfg (runtime_dlls field) are auto-copied to their
 # destination (bin/ for most; runtime/ for extensions that need Godot [dependencies]
 # pre-loading, since native/ is .gdignored and invisible to res:// paths).
@@ -153,14 +154,30 @@ python scripts/bundle_toolchain.py
 > `setup_opencv.py` (Windows). You do **not** need a separate step before
 > building `gn_ext_user_python` or `gn_ext_opencv`.
 
-### Optional extensions (skipped when SDK missing)
+### What `setup_deps.py` downloads
 
-| Extension | SDK | Setup |
-|-----------|-----|-------|
-| `gn_ext_ndi` | NDI SDK (proprietary) | Manual — see `addons/gn_ext_ndi/README.md` |
-| `gn_ext_opencv` | OpenCV 4.10 (Windows) | `python addons/gn_ext_opencv/setup_opencv.py` (auto via `setup_deps.py`) |
-| `gn_ext_depth_sensor` | Azure Kinect / RealSense / Ultraleap | Manual per backend — see extension README |
-| `gn_ext_webrender` | CEF (~550 MB) | `python addons/gn_ext_webrender/setup_cef.py` |
+These stay out of git. The same `setup` and `vendor_clone` lines run locally and in GitHub Actions.
+
+| Library | License | How it arrives |
+|---------|---------|----------------|
+| CPython 3.10 + NumPy | PSF / BSD | `setup_python.py --bundle` |
+| ONNX Runtime | MIT | `setup_ml.py --sdk-only` (YOLOv8 weights are AGPL and are not downloaded) |
+| OpenCV | Apache 2.0 | Windows: official SDK zip. Linux and macOS: `libopencv-dev` / `brew install opencv` (the CI build installs that package) |
+| Spout2 | BSD | git clone on Windows |
+| Syphon | BSD-3 | git clone on macOS |
+| CEF | MIT/BSD | `setup_cef.py` prebuilt binaries |
+
+### SDKs you install yourself
+
+`python scripts/show_manual_sdks.py` prints which of these are missing and the folder the build probe expects. A missing one does not stop the rest of the build.
+
+| SDK | Why it is not fetched | Where to read the steps |
+|-----|------------------------|-------------------------|
+| NDI | Proprietary | `addons/gn_ext_ndi/README.md` |
+| Blackmagic DeckLink | Proprietary | `addons/gn_ext_blackmagic/README.md` |
+| Azure Kinect, Ultraleap | Proprietary device SDKs | `addons/gn_ext_depth_sensor/README.md` |
+| Intel RealSense | Apache 2.0, shipped as an installer | same depth-sensor README |
+| FFmpeg | LGPL shared libraries, no fetch script in this repo | `addons/gn_ext_ffmpeg/README.md` |
 
 Unified `build/scons` continues when optional extensions are skipped.
 
@@ -171,7 +188,7 @@ Unified `build/scons` continues when optional extensions are skipped.
 | `scons` | **Shipped:** `tier=core` + `tier=extension` + `gn_ext_native`. Skips optional tier, wrong platform, and missing SDKs |
 | `scons tier=all` | All tiers (optional included when SDK probes pass) |
 | `scons tier=core` | Core tier + `gn_ext_native` |
-| `scons tier=optional` | Optional tier only (NDI, OpenCV, depth backends, …) |
+| `scons tier=optional` | Optional tier only (NDI, Blackmagic, depth backends, …) |
 | `scons tier=minimal` | `default=true` extensions only (fast subset) |
 | `scons exts=a,b,c` | Explicit list |
 | `scons ext=gn_ext_hap` | Single extension |
@@ -541,7 +558,7 @@ The build scripts control GDExtension handling via the `-GDExtensions` /
 
 | Mode               | Behaviour |
 |--------------------|----------|
-| `auto` (default)   | Smart filter: keeps each `.gdextension` library entry whose file exists on disk, comments out missing entries.  If **all** entries are missing the extension is deleted entirely so Godot doesn't attempt to load it. |
+| `auto` (default)   | Smart filter: keeps each `.gdextension` library entry whose file exists on disk, comments out missing entries.  If **all** entries are missing the extension is deleted entirely so Godot doesn't attempt to load it.  Each platform export also excludes any addon folder that has no library for that OS and architecture, so the player does not log missing-library errors for binaries it cannot load. |
 | `all`              | Leave everything as-is.  If a referenced library is missing for a target platform that export will fail. |
 | `none`             | Delete every `.gdextension` file during the build.  Zero native dependencies; base GONODES always builds cleanly. |
 | `name,name,...`    | Named addons (matched by folder name under `addons/`) get `auto` treatment; everything else is deleted. |
@@ -1217,7 +1234,7 @@ GONODES has three workflow files in `.github/workflows/`:
 ### Quick summary
 
 - **Dev cycle:** push code → `tests.yml` compiles Linux extensions, runs 1,355 tests headless.
-- **Release:** push a `v*` tag → `release.yml` builds everything, creates a GitHub Release with downloads.
+- **Release:** push a `v*` tag → `release.yml` builds everything, downloads CPython 3.10 and NumPy for that OS, places that runtime in the editor package and beside the player, and creates a GitHub Release with downloads.
 - **Native-only:** `build-extensions.yml` runs when only native C++ code changes, skips Player export.
 
 ### Native Library CI

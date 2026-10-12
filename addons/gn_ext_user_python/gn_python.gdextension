@@ -14,3 +14,5 @@ macos.release = "res://addons/gn_ext_user_python/native/bin/macos/libgn_python.m
 
 [dependencies]
 windows.x86_64 = {"res://addons/gn_ext_user_python/bin/win64/python310.dll": "", "res://addons/gn_ext_user_python/bin/win64/python3.dll": ""}
+linux.x86_64 = {"res://addons/gn_ext_user_python/native/bin/linux64/libpython3.10.so.1.0": ""}
+macos = {"res://addons/gn_ext_user_python/native/bin/macos/libpython3.10.dylib": ""}

@@ -198,6 +198,26 @@ jobs:
           sudo apt-get install -y -qq python3 python3-pip g++ g++-aarch64-linux-gnu pkg-config
           pip3 install scons
 
+      - name: Setup vendor SDK (if needed)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          VENDOR_SETUP='${{ fromJson(needs.discover.outputs.vendor_setup || '{}')[matrix.ext] }}'
+          if [ -n "$VENDOR_SETUP" ]; then
+            EXT_BASE=$(echo '${{ matrix.ext }}' | cut -d/ -f1)
+            set -- $VENDOR_SETUP
+            SCRIPT="addons/${EXT_BASE}/$1"
+            shift
+            python3 "$SCRIPT" "$@"
+          fi
+
+      - name: Upload CEF artifacts
+        if: steps.check.outputs.supported == 'true' && matrix.ext == 'gn_ext_webrender'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cef-artifacts
+          path: addons/gn_ext_webrender/cef_artifacts/
+          retention-days: 1
+
       - name: Download godot-cpp (x86_64)
         if: steps.check.outputs.supported == 'true'
         uses: actions/download-artifact@v4
@@ -210,6 +230,18 @@ jobs:
         run: |
           cd build
           scons ext=${{ matrix.ext }} platform=linux arch=x86_64 $SCONS_FLAGS
+
+      - name: Export Python runtime
+        if: steps.check.outputs.supported == 'true' && matrix.ext == 'gn_ext_user_python'
+        run: python3 addons/gn_ext_user_python/setup_python.py --export-runtime "${{ runner.temp }}/python-runtime"
+
+      - name: Upload Python runtime
+        if: steps.check.outputs.supported == 'true' && matrix.ext == 'gn_ext_user_python'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-runtime-linux
+          path: ${{ runner.temp }}/python-runtime
+          retention-days: 1
 
       - name: Build (Linux ARM64)
         if: steps.check.outputs.supported == 'true'
@@ -236,6 +268,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Clone vendor SDK (if needed)
+        env:
+          VENDOR_CLONE_JSON: ${{ needs.discover.outputs.vendor_clone }}
+          EXT_KEY: ${{ matrix.ext }}
+        run: python3 scripts/clone_vendor_sdk.py
+
       - name: Clone godot-cpp
         run: git clone --depth 1 --branch $GODOTCPP_BRANCH https://github.com/godotengine/godot-cpp.git addons/gn_ext_native/native/godot-cpp
 
@@ -254,6 +292,18 @@ jobs:
         if: steps.check.outputs.supported == 'true'
         run: pip3 install scons
 
+      - name: Setup vendor SDK (if needed)
+        if: steps.check.outputs.supported == 'true'
+        run: |
+          VENDOR_SETUP='${{ fromJson(needs.discover.outputs.vendor_setup || '{}')[matrix.ext] }}'
+          if [ -n "$VENDOR_SETUP" ]; then
+            EXT_BASE=$(echo '${{ matrix.ext }}' | cut -d/ -f1)
+            set -- $VENDOR_SETUP
+            SCRIPT="addons/${EXT_BASE}/$1"
+            shift
+            python3 "$SCRIPT" "$@"
+          fi
+
       - name: Download godot-cpp (arm64)
         if: steps.check.outputs.supported == 'true'
         uses: actions/download-artifact@v4
@@ -267,6 +317,18 @@ jobs:
           cd build
           scons ext=${{ matrix.ext }} platform=macos arch=arm64 $SCONS_FLAGS
           scons ext=${{ matrix.ext }} platform=macos arch=x86_64 $SCONS_FLAGS
+
+      - name: Export Python runtime
+        if: steps.check.outputs.supported == 'true' && matrix.ext == 'gn_ext_user_python'
+        run: python3 addons/gn_ext_user_python/setup_python.py --export-runtime "${{ runner.temp }}/python-runtime"
+
+      - name: Upload Python runtime
+        if: steps.check.outputs.supported == 'true' && matrix.ext == 'gn_ext_user_python'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-runtime-macos
+          path: ${{ runner.temp }}/python-runtime
+          retention-days: 1
 
       - name: Create universal binaries
         if: steps.check.outputs.supported == 'true'
@@ -334,6 +396,19 @@ jobs:
         if: steps.check.outputs.supported == 'true'
         run: pip install scons
 
+      - name: Setup vendor SDK (if needed)
+        if: steps.check.outputs.supported == 'true'
+        shell: python
+        run: |
+          import json, subprocess, sys, os
+          vs = json.loads(r'''${{ needs.discover.outputs.vendor_setup || '{}' }}''')
+          setup_cmd = vs.get('${{ matrix.ext }}', '')
+          if setup_cmd:
+              parts = setup_cmd.split()
+              ext_base = '${{ matrix.ext }}'.split('/')[0]
+              script = os.path.join('addons', ext_base, parts[0])
+              subprocess.run([sys.executable, script] + parts[1:], check=True)
+
       - name: Download godot-cpp (x86_64)
         if: steps.check.outputs.supported == 'true'
         uses: actions/download-artifact@v4
@@ -346,6 +421,18 @@ jobs:
         run: |
           cd build
           scons ext=${{ matrix.ext }} platform=windows arch=x86_64 $env:SCONS_FLAGS
+
+      - name: Export Python runtime
+        if: steps.check.outputs.supported == 'true' && matrix.ext == 'gn_ext_user_python'
+        run: python addons/gn_ext_user_python/setup_python.py --export-runtime "$env:RUNNER_TEMP\python-runtime"
+
+      - name: Upload Python runtime
+        if: steps.check.outputs.supported == 'true' && matrix.ext == 'gn_ext_user_python'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-runtime-windows
+          path: ${{ runner.temp }}/python-runtime
+          retention-days: 1
 
       - name: Build (Windows ARM64)
         if: steps.check.outputs.supported == 'true'
@@ -430,7 +517,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────
 
   export-player-windows:
-    needs: [test, build-native, build-extensions-windows]
+    needs: [test, build-native, build-extensions-windows, build-extensions-linux]
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -469,6 +556,21 @@ jobs:
             }
           }
 
+      - name: Download CEF
+        uses: actions/download-artifact@v4
+        with:
+          name: cef-artifacts
+          path: addons/gn_ext_webrender/cef_artifacts
+
+      - name: Download Python runtime
+        uses: actions/download-artifact@v4
+        with:
+          name: python-runtime-windows
+          path: _python_runtime
+
+      - name: Install Python runtime
+        run: python addons/gn_ext_user_python/setup_python.py --import-runtime _python_runtime
+
       - name: Export Player (Windows x86_64)
         shell: pwsh
         run: |
@@ -481,6 +583,9 @@ jobs:
           # Export
           New-Item -ItemType Directory -Force -Path "dist/windows_x86_64" | Out-Null
           .\godot.exe --headless --export-release "Player Windows x86_64" "dist/windows_x86_64/GONODESPlayer.exe"
+
+      - name: Stage Python runtime
+        run: python addons/gn_ext_user_python/setup_python.py --stage dist/windows_x86_64/GONODESPlayer.exe
 
       - name: Package
         shell: pwsh
@@ -531,6 +636,21 @@ jobs:
             fi
           done
 
+      - name: Download CEF
+        uses: actions/download-artifact@v4
+        with:
+          name: cef-artifacts
+          path: addons/gn_ext_webrender/cef_artifacts
+
+      - name: Download Python runtime
+        uses: actions/download-artifact@v4
+        with:
+          name: python-runtime-linux
+          path: _python_runtime
+
+      - name: Install Python runtime
+        run: python3 addons/gn_ext_user_python/setup_python.py --import-runtime _python_runtime
+
       - name: Export Player (Linux x86_64)
         run: |
           # Swap main scene to player
@@ -540,6 +660,9 @@ jobs:
           # Export
           mkdir -p dist/linux_x86_64
           ./godot --headless --export-release "Player Linux x86_64" "dist/linux_x86_64/GONODESPlayer"
+
+      - name: Stage Python runtime
+        run: python3 addons/gn_ext_user_python/setup_python.py --stage dist/linux_x86_64/GONODESPlayer
 
       - name: Package
         run: |
@@ -591,12 +714,24 @@ jobs:
             fi
           done
 
+      - name: Download Python runtime
+        uses: actions/download-artifact@v4
+        with:
+          name: python-runtime-macos
+          path: _python_runtime
+
+      - name: Install Python runtime
+        run: python3 addons/gn_ext_user_python/setup_python.py --import-runtime _python_runtime
+
       - name: Export Player (macOS universal)
         run: |
           sed -i '' 's|run/main_scene="res://scenes/gn_editor.tscn"|run/main_scene="res://scenes/player_main.tscn"|' project.godot
           ./godot --headless --import . 2>/dev/null || true
           mkdir -p dist/macos
           ./godot --headless --export-release "Player macOS" "dist/macos/GONODESPlayer.zip"
+
+      - name: Stage Python runtime
+        run: python3 addons/gn_ext_user_python/setup_python.py --stage dist/macos/GONODESPlayer.zip
 
       - name: Upload
         uses: actions/upload-artifact@v4
@@ -638,6 +773,22 @@ jobs:
             fi
           done
 
+      - name: Download CEF
+        if: matrix.platform != 'macos'
+        uses: actions/download-artifact@v4
+        with:
+          name: cef-artifacts
+          path: addons/gn_ext_webrender/cef_artifacts
+
+      - name: Download Python runtime
+        uses: actions/download-artifact@v4
+        with:
+          name: python-runtime-${{ matrix.platform }}
+          path: _python_runtime
+
+      - name: Install Python runtime
+        run: python3 addons/gn_ext_user_python/setup_python.py --import-runtime _python_runtime
+
       - name: Remove build artifacts not needed in distribution
         run: |
           # Remove C++ source code (binaries are sufficient)
@@ -653,9 +804,9 @@ jobs:
         run: |
           DIST_NAME="GONODES-${{ matrix.platform }}"
           if [ "${{ matrix.ext }}" = "zip" ]; then
-            cd .. && zip -r "Gonodes/$DIST_NAME.zip" Gonodes/ -x "Gonodes/.git/*" "Gonodes/_bins/*" "Gonodes/_tpl_tmp/*"
+            cd .. && zip -r "Gonodes/$DIST_NAME.zip" Gonodes/ -x "Gonodes/.git/*" "Gonodes/_bins/*" "Gonodes/_tpl_tmp/*" "Gonodes/_python_runtime/*"
           else
-            cd .. && tar czf "Gonodes/$DIST_NAME.tar.gz" --exclude='.git' --exclude='_bins' --exclude='_tpl_tmp' Gonodes/
+            cd .. && tar czf "Gonodes/$DIST_NAME.tar.gz" --exclude='.git' --exclude='_bins' --exclude='_tpl_tmp' --exclude='_python_runtime' Gonodes/
           fi
 
       - name: Upload
@@ -729,7 +880,9 @@ jobs:
           The Player is a standalone runtime — download, unzip, place your `.gnpatch` file alongside it with a `config.json`, and run. No Godot editor needed.
 
           ### Editor
-          Full GONODES project with pre-compiled native extension binaries. Open in Godot ${{ env.GODOT_VERSION }}. Includes all 545 operators, 1,355 tests, and 18 extensions.
+          Full GONODES project with pre-compiled native extension binaries and a bundled Python 3.10 runtime (NumPy included) for Python nodes. Open in Godot ${{ env.GODOT_VERSION }}.
+
+          NDI, Blackmagic, depth-sensor, and similar device runtimes are not in the download. Those vendors do not allow GONODES to ship their libraries. Install the vendor runtime on the machine that uses those nodes.
 
           ### Requirements
           - **Godot ${{ env.GODOT_VERSION }}** (for the Editor distribution)

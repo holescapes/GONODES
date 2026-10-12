@@ -24,7 +24,7 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	var tex_b: GNTextureData = _get_input_top(inputs, 1)
 
 	if tex_a == null:
-		GNLogger.warn("CrossTOP", "'%s' — no valid input on port A" % id)
+		GNLogger.debug("CrossTOP", "'%s' — no valid input on port A" % id)
 		return null
 
 	var res: Vector2i = tex_a.resolution

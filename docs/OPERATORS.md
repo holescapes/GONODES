@@ -1004,7 +1004,7 @@ Linear crossfade between two textures.
 
 **Inputs:** `A` (TOP), `B` (TOP).
 
-**How it works:** Shader does `mix(A, B, cross)` per pixel.
+**How it works:** Shader does `mix(A, B, cross)` per pixel. A missing input is the chain warming up and is not a warning.
 
 ---
 
@@ -1272,7 +1272,7 @@ Reference a remote TOP node by name — outputs its texture without a wire conne
 **No inputs** — references by name instead of wire.
 **Output:** `out` (TOP) — the referenced node's texture (zero-copy GPU reference).
 
-**How it works:** Resolves the owning network via `get_owning_network()` (CookEngine parent), looks up the target by ID, and returns its `cached_output` directly (zero-copy). Not time-dependent — the cook engine dirties Select when the target cooks (`_wireless_consumer_map`) and includes the target's output in the input-hash. If the target is missing or hasn't cooked yet, outputs nothing. Equivalent to TouchDesigner's Select TOP.
+**How it works:** Resolves the owning network via `get_owning_network()` (CookEngine parent), looks up the target by ID, and returns its `cached_output` directly (zero-copy). Not time-dependent — the cook engine dirties Select when the target cooks (`_wireless_consumer_map`) and includes the target's output in the input-hash. If the target is missing, or it cooked something that is not a texture, that is a cook error. If the target exists but has not cooked a texture yet, the output stays empty and the cook is not an error. Equivalent to TouchDesigner's Select TOP.
 
 > **Tip:** Use SelectTOP + CacheTOP for one-frame feedback (wire cycles are rejected). Select is dirtied when its target cooks, so a first-frame null recovers automatically — no need to rewire.
 

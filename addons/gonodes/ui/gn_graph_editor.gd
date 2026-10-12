@@ -5221,6 +5221,9 @@ func show_toast(message: String, type: int = ToastType.INFO, duration: float = 3
 	_toast_container.add_child(panel)
 
 	var tw := create_tween()
+	if tw == null:
+		panel.modulate.a = 1.0
+		return
 	tw.tween_property(panel, "modulate:a", 1.0, 0.15)
 	tw.tween_interval(duration)
 	tw.tween_property(panel, "modulate:a", 0.0, 0.3)

@@ -27,32 +27,61 @@ GNPythonRuntime::~GNPythonRuntime() {
 
 // ── Interpreter lifecycle ───────────────────────────────────
 
+static bool _is_python_prefix(const String &dir) {
+    if (dir.is_empty()) {
+        return false;
+    }
+    // Windows embeddable keeps the DLL at the prefix root. The Linux and
+    // macOS redistributable builds keep libpython under lib/.
+    const char *marks[] = {
+        "/python3.dll",
+        "/python310.dll",
+        "/lib/libpython3.10.so.1.0",
+        "/lib/libpython3.10.dylib",
+        nullptr,
+    };
+    for (int i = 0; marks[i] != nullptr; i++) {
+        if (FileAccess::file_exists(dir + marks[i])) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void _apply_python_home(const String &dir) {
+    std::wstring whome(dir.ptr(), dir.ptr() + dir.length());
+    Py_SetPythonHome(whome.c_str());
+}
+
 bool GNPythonRuntime::initialize() {
     if (_initialized) return true;
 
-    // Set Python home to our bundled embeddable package if present.
     // Discovery order:
-    //   1. <extension_dir>/toolchain/python/   (bundled)
-    //   2. GONODES_PYTHON_HOME env var
-    //   3. System Python (whatever is on PATH)
-    String ext_dir = ProjectSettings::get_singleton()->globalize_path(
-        "res://addons/gn_ext_user_python/");
-    String bundled = ext_dir + "toolchain/python";
-
-    if (FileAccess::file_exists(String(bundled + "/python3.dll")) ||
-        FileAccess::file_exists(String(bundled + "/libpython3.so")) ||
-        FileAccess::file_exists(String(bundled + "/libpython3.dylib"))) {
-        // Use bundled Python
-        std::wstring whome(bundled.ptr(), bundled.ptr() + bundled.length());
-        Py_SetPythonHome(whome.c_str());
-    } else {
-        // Check env var
-        String env_home = OS::get_singleton()->get_environment("GONODES_PYTHON_HOME");
-        if (!env_home.is_empty()) {
-            std::wstring whome(env_home.ptr(), env_home.ptr() + env_home.length());
-            Py_SetPythonHome(whome.c_str());
+    //   1. <exe_dir>/python/          (player and editor exports)
+    //   2. res://.../toolchain/python (editor project on disk)
+    //   3. GONODES_PYTHON_HOME
+    //   4. System Python
+    String home;
+    String exe_dir = OS::get_singleton()->get_executable_path().get_base_dir();
+    String sidecar = exe_dir.path_join("python");
+    if (_is_python_prefix(sidecar)) {
+        home = sidecar;
+    }
+    if (home.is_empty()) {
+        String bundled = ProjectSettings::get_singleton()->globalize_path(
+            "res://addons/gn_ext_user_python/toolchain/python");
+        if (_is_python_prefix(bundled)) {
+            home = bundled;
         }
-        // else: fall back to system Python
+    }
+    if (home.is_empty()) {
+        String env_home = OS::get_singleton()->get_environment("GONODES_PYTHON_HOME");
+        if (_is_python_prefix(env_home)) {
+            home = env_home;
+        }
+    }
+    if (!home.is_empty()) {
+        _apply_python_home(home);
     }
 
     Py_Initialize();

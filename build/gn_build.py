@@ -102,6 +102,24 @@ def is_cross_compile(target_arch):
     return target_arch != detect_host_arch()
 
 
+def _toolchain_python_exe(root):
+    """Return the interpreter inside a bundled prefix, or '' if it is absent."""
+    if not root or not os.path.isdir(root):
+        return ""
+    names = (
+        "python.exe",
+        "python3.exe",
+        "bin/python3",
+        "bin/python",
+        "python3",
+    )
+    for name in names:
+        path = os.path.join(root, *name.split("/"))
+        if os.path.isfile(path):
+            return path
+    return ""
+
+
 # parse_build_cfg, discover_extensions — see gn_ext_plan.py
 
 
@@ -145,18 +163,18 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
     python_cfg = None
     python_config_script = os.path.join(native_dir, "python_config.py")
     if os.path.isfile(python_config_script):
-        # Use GONODES_PYTHON_HOME or the toolchain embeddable if available
-        _py_bin = "python.exe" if sys.platform == "win32" else "python3"
-        toolchain_python = os.path.abspath(
-            os.path.join(native_dir, "..", "toolchain", "python", _py_bin)
-        )
+        # Prefer the bundled toolchain (embeddable on Windows, a prefix on
+        # Linux/macOS) so the binary links the same Python the release ships.
         py_exe = os.environ.get("GONODES_PYTHON_HOME", "")
-        if py_exe:
-            py_exe = os.path.join(py_exe, _py_bin) if os.path.isdir(py_exe) else py_exe
-        elif os.path.isfile(toolchain_python):
-            py_exe = toolchain_python
-        else:
-            py_exe = sys.executable  # fallback to current Python
+        if py_exe and os.path.isdir(py_exe):
+            py_exe = _toolchain_python_exe(py_exe)
+        elif not py_exe or not os.path.isfile(py_exe):
+            bundled_root = os.path.abspath(
+                os.path.join(native_dir, "..", "toolchain", "python")
+            )
+            py_exe = _toolchain_python_exe(bundled_root)
+        if not py_exe or not os.path.isfile(py_exe):
+            py_exe = sys.executable
         py_exe = os.path.abspath(py_exe)
 
         try:
@@ -318,8 +336,19 @@ def make_env(plat, target, arch, godotcpp_root, cfg, native_dir):
             env.Append(LIBPATH=[lib_dir])
         lib_name = python_cfg.get("lib_name", "")
         if lib_name:
-            # Override the hardcoded lib from build.cfg with the discovered one
+            # LDLIBRARY is often "libpython3.10.so.1.0". The linker wants the
+            # short name so it records the SONAME, not a second "lib" prefix.
+            if plat != "windows" and lib_name.startswith("lib"):
+                lib_name = lib_name[3:]
+                for _suffix in (".dylib", ".so.1.0", ".so"):
+                    if lib_name.endswith(_suffix):
+                        lib_name = lib_name[: -len(_suffix)]
+                        break
             env.Append(LIBS=[lib_name])
+        if plat == "linux":
+            env.Append(LINKFLAGS=["-Wl,-rpath,$$ORIGIN"])
+        elif plat == "macos":
+            env.Append(LINKFLAGS=["-Wl,-rpath,@loader_path"])
         np_inc = python_cfg.get("numpy_include", "")
         if np_inc and os.path.isdir(np_inc):
             env.Append(CPPPATH=[np_inc])
@@ -361,6 +390,30 @@ def collect_sources(env, cfg, native_dir, plat):
 
 
 # ── Build orchestration ────────────────────────────────────────────────────────
+
+def _rewrite_macos_libpython(lib_path):
+    """Point a macOS extension at @rpath/libpython3.10.dylib beside itself.
+
+    A Python.framework or absolute toolchain path would break once the
+    download is opened on another machine.
+    """
+    if sys.platform != "darwin" or not os.path.isfile(lib_path):
+        return
+    listed = subprocess.run(
+        ["otool", "-L", lib_path], capture_output=True, text=True
+    )
+    if listed.returncode != 0:
+        return
+    for line in listed.stdout.splitlines()[1:]:
+        dep = line.strip().split(" (", 1)[0]
+        if "libpython3.10" not in dep or dep.startswith("@rpath/"):
+            continue
+        subprocess.run(
+            ["install_name_tool", "-change", dep,
+             "@rpath/libpython3.10.dylib", lib_path],
+            check=False,
+        )
+
 
 def copy_built_library(cfg, plat, native_dir, lib_target_path):
     """Copy built library to library_dest if configured in build.cfg."""
@@ -475,6 +528,11 @@ def build_extension(native_dir=None, plat=None, target=None, arch=None):
             lambda target, source, env, _cfg=cfg, _plat=plat, _native=native_dir: copy_built_library(
                 _cfg, _plat, _native, str(target[0])
             ),
+        )
+    if plat == "macos":
+        env.AddPostAction(
+            library,
+            lambda target, source, env: _rewrite_macos_libpython(str(target[0])),
         )
     copy_runtime_dlls(cfg, plat, native_dir, out_dir)
 

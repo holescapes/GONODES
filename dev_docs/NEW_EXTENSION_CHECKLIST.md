@@ -44,9 +44,9 @@ probe = mysdk/lib/mysdk.lib   # optional — auto-derived from libs+lib_dirs if 
 
 | `tier` | Fresh-clone `scons` (shipped mode) | When to use |
 |--------|-----------------------------------|-------------|
-| `core` | **Yes** — always attempted | HAP, MIDI, Spout, ML, user_python, … |
-| `extension` | **Yes** — attempted on matching platform | Syphon (macOS), host_bridge, … |
-| `optional` | **No** — only with `tier=all` or `tier=optional` | NDI, OpenCV, Blackmagic, depth_sensor backends |
+| `core` | **Yes** — always attempted, including `scons tier=core` | HAP, MIDI, ML, host_bridge, user_python, … |
+| `extension` | **Yes** on a normal shipped build. Left out of `scons tier=core` | Syphon, Spout, OpenCV, FFmpeg, web renderer |
+| `optional` | **No** — only with `tier=all` or `tier=optional` | NDI, Blackmagic, depth_sensor backends |
 
 **Rules:**
 

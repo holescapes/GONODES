@@ -198,6 +198,10 @@ func _rebuild_output_ports(code: String) -> void:
 # Serialization
 # ═══════════════════════════════════════════════════════════════════════════════
 
+func _restores_dynamic_parameters() -> bool:
+	return true
+
+
 ## Override from_dict to rebuild dynamic params and ports from saved code.
 func from_dict(d: Dictionary) -> void:
 	super.from_dict(d)

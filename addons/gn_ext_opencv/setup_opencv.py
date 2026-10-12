@@ -145,16 +145,66 @@ def setup_windows(version: str) -> bool:
     return True
 
 
+# Written when the system OpenCV dev package is present. build.cfg probes
+# this on Linux and macOS so a shipped build skips the extension instead of
+# failing the link.
+UNIX_STAMP_REL = "opencv_sdk/.system_found"
+
+
+def _system_opencv_present() -> bool:
+    for name in ("opencv4", "opencv"):
+        found = subprocess.run(
+            ["pkg-config", "--exists", name],
+            capture_output=True,
+        )
+        if found.returncode == 0:
+            return True
+    return False
+
+
+def _write_unix_stamp(present: bool) -> None:
+    path = os.path.join(NATIVE_DIR, UNIX_STAMP_REL)
+    if present:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write("opencv\n")
+        return
+    if os.path.isfile(path):
+        os.remove(path)
+
+
 def setup_unix() -> bool:
     system = platform.system()
-    if system == "Linux":
-        log("Linux: install system OpenCV development packages, then build:")
+    # GitHub Actions sets CI=true. Install the distro package there so the
+    # build can link OpenCV. A local machine only gets the command to run.
+    if os.environ.get("CI", "").lower() == "true":
+        if system == "Linux":
+            log("CI: installing libopencv-dev")
+            update = subprocess.run(["sudo", "apt-get", "update", "-qq"])
+            install = subprocess.run(
+                ["sudo", "apt-get", "install", "-y", "-qq", "libopencv-dev"])
+            if update.returncode != 0 or install.returncode != 0:
+                _write_unix_stamp(False)
+                return False
+        elif system == "Darwin":
+            log("CI: installing opencv")
+            install = subprocess.run(["brew", "install", "opencv"])
+            if install.returncode != 0:
+                _write_unix_stamp(False)
+                return False
+    elif system == "Linux":
+        log("Linux: install the Apache-licensed OpenCV packages, then build:")
         log("  sudo apt install libopencv-dev        # Debian/Ubuntu")
         log("  sudo dnf install opencv-devel         # Fedora")
     else:
         log("macOS: install OpenCV via Homebrew, then build:")
         log("  brew install opencv")
-    log("No SDK files are copied into native/opencv_sdk/ on this platform.")
+    present = _system_opencv_present()
+    _write_unix_stamp(present)
+    if present:
+        log("System OpenCV development package found.")
+    else:
+        log("System OpenCV not found. The OpenCV extension will be skipped until it is installed.")
     return True
 
 

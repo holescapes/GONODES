@@ -67,8 +67,10 @@
     Controls how third-party GDExtension native libraries are handled.
     Accepted values:
       auto  (default)  Smart filter: keeps library entries whose files exist
-            on disk, removes entries for missing files.  If ALL of an
-            extension's libraries are missing it is disabled entirely.
+            on disk, removes entries for missing files.  Each platform
+            export also leaves out any extension folder that has no
+            library for that OS and architecture, so the player does not
+            log "library not found" for binaries it cannot load.
             The base GONODES project always builds cleanly in this mode.
       all   Include everything as-is.  Exports will fail if a referenced
             library is missing for the target platform.
@@ -520,6 +522,31 @@ function Restore-GDExtensions([string]$project) {
 
 # --- Godot Export --------------------------------------------------------------
 
+function Update-ExtensionExportFilter([string]$project, [string]$presetName, [string]$platform) {
+    # -GDExtensions all keeps every config, including ones this OS cannot load.
+    if ($GDExtensions -eq 'all') { return }
+    $py = Join-Path $project "scripts\strip_unsupported_extensions.py"
+    if (-not (Test-Path $py)) {
+        Write-Warn "strip_unsupported_extensions.py is missing. This export keeps every extension."
+        return
+    }
+    $output = & python $py --project $project --platform $platform --preset $presetName --apply 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warn "Could not strip unsupported extensions for $platform. This export keeps every extension."
+        if ($output) { Write-Warn ($output | Out-String).Trim() }
+        return
+    }
+    foreach ($line in $output) {
+        Write-Ok $line
+    }
+}
+
+function Restore-ExtensionExportFilter([string]$project) {
+    $py = Join-Path $project "scripts\strip_unsupported_extensions.py"
+    if (-not (Test-Path $py)) { return }
+    & python $py --project $project --restore | Out-Null
+}
+
 function Invoke-GodotExport([string]$godot, [string]$project, [string]$presetName, [string]$outputPath) {
     Write-Host "    Exporting '$presetName' -> $outputPath"
 
@@ -689,6 +716,40 @@ if ($GDExtensions -eq 'all') {
     Disable-GDExtensions $ProjectPath $GDExtensions
 }
 
+# --- Python runtime ------------------------------------------------------------
+
+$script:PythonBundled = $false
+
+function Update-PythonBundle {
+    $py = Join-Path $ProjectPath "addons\gn_ext_user_python\setup_python.py"
+    if (-not (Test-Path $py)) { return }
+    Write-Step "Bundling CPython + NumPy for this OS..."
+    & python $py --bundle --no-enable
+    if ($LASTEXITCODE -eq 0) {
+        $script:PythonBundled = $true
+        Write-Ok "Python runtime ready"
+    } else {
+        Write-Warn "Python runtime was not bundled. This export will not include Python nodes."
+    }
+}
+
+function Add-PythonRuntime([string]$exportPath, [string]$plat) {
+    if (-not $script:PythonBundled) { return }
+    if ($plat -ne (Get-HostPlatform)) {
+        Write-Warn "The Python runtime matches $(Get-HostPlatform) only. The $plat export does not include it."
+        return
+    }
+    $py = Join-Path $ProjectPath "addons\gn_ext_user_python\setup_python.py"
+    & python $py --stage $exportPath
+    if ($LASTEXITCODE -eq 0) {
+        Write-Ok "Python runtime placed next to the export"
+    } else {
+        Write-Warn "Could not place the Python runtime next to the export"
+    }
+}
+
+Update-PythonBundle
+
 # ==============================================================================
 # Build Loop
 # ==============================================================================
@@ -714,7 +775,9 @@ try {
         $playerOut = Join-Path $platDir $playerFn
 
         Write-Step "Player - $plat"
+        Update-ExtensionExportFilter $ProjectPath $info.player $plat
         if (Invoke-GodotExport $godot $ProjectPath $info.player $playerOut) {
+            Add-PythonRuntime $playerOut $plat
             $successCount++
         } else {
             $failCount++
@@ -745,7 +808,9 @@ try {
             $editorOut = Join-Path $platDir $editorFn
 
             Write-Step "Editor - $plat"
+            Update-ExtensionExportFilter $ProjectPath $info.editor $plat
             if (Invoke-GodotExport $godot $ProjectPath $info.editor $editorOut) {
+                Add-PythonRuntime $editorOut $plat
                 $successCount++
             } else {
                 $failCount++
@@ -758,6 +823,7 @@ catch {
     $failCount++
 }
 finally {
+    Restore-ExtensionExportFilter $ProjectPath
     # Always restore GDExtension files first (before main scene, in case
     # the user opens Godot immediately after).
     if ($script:ModifiedGDExtFiles.Count -gt 0) {

@@ -485,6 +485,36 @@ restore_gdextensions() {
 
 # ─── Godot Export ──────────────────────────────────────────────────────────────
 
+# Drop extension folders that have no library for this platform from the
+# named export preset. --gdext all leaves every config in place.
+update_extension_export_filter() {
+    local project="$1" preset="$2" platform="$3"
+    [[ "$GDEXT_MODE" == "all" ]] && return 0
+    local py="$project/scripts/strip_unsupported_extensions.py"
+    if [[ ! -f "$py" ]]; then
+        warn "strip_unsupported_extensions.py is missing. This export keeps every extension."
+        return 0
+    fi
+    local pybin="python3"
+    command -v python3 >/dev/null 2>&1 || pybin="python"
+    local output
+    if ! output="$("$pybin" "$py" --project "$project" --platform "$platform" --preset "$preset" --apply 2>&1)"; then
+        warn "Could not strip unsupported extensions for $platform. This export keeps every extension."
+        warn "$output"
+        return 0
+    fi
+    [[ -n "$output" ]] && ok "$output"
+}
+
+restore_extension_export_filter() {
+    local project="$1"
+    local py="$project/scripts/strip_unsupported_extensions.py"
+    [[ -f "$py" ]] || return 0
+    local pybin="python3"
+    command -v python3 >/dev/null 2>&1 || pybin="python"
+    "$pybin" "$py" --project "$project" --restore >/dev/null 2>&1 || true
+}
+
 invoke_godot_export() {
     local godot="$1" project="$2" preset="$3" output="$4"
     printf "    Exporting '%s' → %s\n" "$preset" "$output"
@@ -637,6 +667,43 @@ else
     disable_gdextensions "$PROJECT_PATH" "$GDEXT_MODE"
 fi
 
+# ── Python runtime ────────────────────────────────────────────────────────────
+
+PYTHON_BUNDLED=false
+bundle_python_runtime() {
+    local py="$PROJECT_PATH/addons/gn_ext_user_python/setup_python.py"
+    if [[ ! -f "$py" ]]; then
+        return
+    fi
+    step "Bundling CPython + NumPy for this OS..."
+    if python3 "$py" --bundle --no-enable || python "$py" --bundle --no-enable; then
+        PYTHON_BUNDLED=true
+        ok "Python runtime ready"
+    else
+        warn "Python runtime was not bundled. This export will not include Python nodes."
+    fi
+}
+
+stage_python_runtime() {
+    local export_path="$1"
+    local plat="$2"
+    local py="$PROJECT_PATH/addons/gn_ext_user_python/setup_python.py"
+    if [[ "$PYTHON_BUNDLED" != true ]]; then
+        return
+    fi
+    if [[ "$plat" != "$(detect_host_platform)" ]]; then
+        warn "The Python runtime matches $(detect_host_platform) only. The $plat export does not include it."
+        return
+    fi
+    if python3 "$py" --stage "$export_path" || python "$py" --stage "$export_path"; then
+        ok "Python runtime placed next to the export"
+    else
+        warn "Could not place the Python runtime next to the export"
+    fi
+}
+
+bundle_python_runtime
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Build Loop
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -646,6 +713,7 @@ FAIL_COUNT=0
 
 # Trap: always restore main scene on exit (normal, error, or signal)
 cleanup() {
+    restore_extension_export_filter "$PROJECT_PATH"
     # Restore GDExtension files first
     if [[ ${#MODIFIED_GDEXT_FILES[@]} -gt 0 ]]; then
         step "Restoring GDExtension files..."
@@ -678,7 +746,9 @@ for plat in "${PLATFORM_LIST[@]}"; do
     player_out="$plat_dir/GONODESPlayer${ext}"
 
     step "Player · $plat"
+    update_extension_export_filter "$PROJECT_PATH" "$preset" "$plat"
     if invoke_godot_export "$GODOT" "$PROJECT_PATH" "$preset" "$player_out"; then
+        stage_python_runtime "$player_out" "$plat"
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
     else
         FAIL_COUNT=$((FAIL_COUNT + 1))
@@ -709,7 +779,9 @@ if $INCLUDE_EDITOR; then
         editor_out="$plat_dir/GONODES${ext}"
 
         step "Editor · $plat"
+        update_extension_export_filter "$PROJECT_PATH" "$preset" "$plat"
         if invoke_godot_export "$GODOT" "$PROJECT_PATH" "$preset" "$editor_out"; then
+            stage_python_runtime "$editor_out" "$plat"
             SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
         else
             FAIL_COUNT=$((FAIL_COUNT + 1))

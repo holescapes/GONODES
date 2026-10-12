@@ -293,6 +293,13 @@ func _cook(inputs: Array[GNData]) -> GNData:
 	return null
 
 
+## True when this cook's null output is the node waiting on something that
+## is not an input wire (SelectTOP's target has not cooked yet). A generator
+## that fails still returns false, so an empty cook stays an error.
+func null_output_is_pending() -> bool:
+	return false
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Switch / Null Shared Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1196,6 +1203,13 @@ func to_dict() -> Dictionary:
 	return d
 
 
+## True when this operator builds parameters from saved code after [method from_dict].
+## Those names are not on the node yet during the first restore pass. The operator
+## applies the saved values itself once the parameters exist.
+func _restores_dynamic_parameters() -> bool:
+	return false
+
+
 ## Restores parameter values and graph position from a serialized Dictionary.
 ## Call AFTER initialize() so parameters and ports already exist.
 func from_dict(d: Dictionary) -> void:
@@ -1226,7 +1240,8 @@ func from_dict(d: Dictionary) -> void:
 		for param_name in params_dict:
 			var param: GNParameter = parameters.get(param_name, null)
 			if param == null:
-				GNLogger.warn("GNNode", "'%s': skipping unknown parameter '%s' during load" % [id, param_name])
+				if not _restores_dynamic_parameters():
+					GNLogger.warn("GNNode", "'%s': skipping unknown parameter '%s' during load" % [id, param_name])
 				continue
 			param.from_dict(params_dict[param_name])
 

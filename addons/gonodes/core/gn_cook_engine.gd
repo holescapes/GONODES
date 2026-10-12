@@ -2644,13 +2644,12 @@ func _cook_single_node(node: GNNode) -> int:
 	if result == null and node.output_ports.size() > 0:
 		# Null with no usable input is a loader that is not ready yet, or a
 		# disconnected port. Only a cook that received real data and still
-		# returned null is a failure.
-		var has_payload := false
-		for inp in inputs:
-			if input_has_payload(inp):
-				has_payload = true
-				break
-		if has_payload:
+		# returned null is a failure. Select waiting on a target that has
+		# not cooked yet is the same warmup, even though it has no wires.
+		if node.null_output_is_pending():
+			if GNLogger.will_log(GNLogger.Level.DEBUG, "CookEngine"):
+				GNLogger.debug("CookEngine", "Node '%s' (%s) output still pending" % [node.id, node.node_type])
+		elif null_cook_is_fault(inputs):
 			if editor_mode:
 				node.node_error = "cook returned null"
 				_note_node_status(node)
@@ -2661,6 +2660,19 @@ func _cook_single_node(node: GNNode) -> int:
 			GNLogger.debug("CookEngine", "Cooked '%s' (%s) in %.3fms" % [node.id, node.node_type, node.cook_time_ms])
 
 	return 1
+
+
+## True when a null cook had every input already carrying data.
+## A missing port, or a picture that has not loaded, is the chain warming up.
+## One ready input beside an empty one (a title texture over a picture that
+## is not ready) is the same case.
+static func null_cook_is_fault(inputs: Array) -> bool:
+	if inputs.is_empty():
+		return true
+	for inp in inputs:
+		if not input_has_payload(inp):
+			return false
+	return true
 
 
 ## True when this input is worth cooking against. A connected image or

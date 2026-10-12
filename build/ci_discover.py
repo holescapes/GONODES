@@ -10,8 +10,9 @@ Output format (to GITHUB_OUTPUT):
   vendor_setup={"gn_ext_ml":"setup_ml.py --sdk-only --no-enable",...}
   vendor_clone={"gn_ext_spout":"https://...git Spout2",...}
 
-Vendor setup keys are read from build.cfg [library] section:
-  vendor_setup = setup_ml.py --sdk-only --no-enable
+Vendor keys are read from build.cfg [library]:
+  setup = setup_opencv.py --no-enable
+  vendor_setup = setup_ml.py --sdk-only --no-enable   (older name; wins if both exist)
   vendor_clone = https://github.com/.../Spout2.git Spout2
 """
 
@@ -25,14 +26,25 @@ addons_dir = os.path.abspath(addons_dir)
 
 
 def _parse_vendor_keys(cfg_path):
-    """Read vendor_setup and vendor_clone from a build.cfg file."""
+    """Read the same setup lines local builds use.
+
+    `setup` is the command. `vendor_setup` is an older name for the same
+    thing and wins when both are set. `vendor_clone` is a git URL plus a
+    directory under native/.
+    """
     cp = configparser.ConfigParser()
     cp.read(cfg_path, encoding="utf-8")
     result = {}
-    if cp.has_option("library", "vendor_setup"):
-        result["vendor_setup"] = cp.get("library", "vendor_setup").strip()
-    if cp.has_option("library", "vendor_clone"):
-        result["vendor_clone"] = cp.get("library", "vendor_clone").strip()
+    if not cp.has_section("library"):
+        return result
+    setup = cp.get("library", "vendor_setup", fallback="").strip()
+    if not setup:
+        setup = cp.get("library", "setup", fallback="").strip()
+    if setup:
+        result["vendor_setup"] = setup
+    clone = cp.get("library", "vendor_clone", fallback="").strip()
+    if clone:
+        result["vendor_clone"] = clone
     return result
 
 

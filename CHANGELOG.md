@@ -9,6 +9,44 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-12 — OpenCV and Spout join the extension tier
+
+- **OpenCV** and **Spout** stay in a normal shipped build and drop out of `scons tier=core`. OpenCV on Linux and macOS is skipped until the system package is installed.
+- **FFmpeg** has a `native/build.cfg` at `tier = extension` with nothing to compile. The LGPL libraries stay a manual install.
+
+## 2026-10-11 — Permissive SDKs download at build time
+
+- **setup_deps.py and GitHub Actions** use the same `setup` and `vendor_clone` lines. Python, ONNX Runtime, OpenCV, Spout2, Syphon, and CEF are fetched into gitignored folders. YOLOv8 weights are not part of that download.
+- **NDI, Blackmagic, Azure Kinect, Ultraleap, and RealSense** stay a manual install. `python scripts/show_manual_sdks.py` prints the download page and the folder the build looks for.
+- **Rule 25.48:** a change to a download script, probe path, or Actions step updates the guide in the same change.
+
+## 2026-10-11 — Release builds ship the Python runtime
+
+- **Python nodes** in a GitHub release and in a template export include CPython 3.10 and NumPy. The build downloads them. They are not committed to the repository. NDI, Blackmagic, and the other device runtimes stay out of the download. Those vendors do not allow us to ship their libraries, and compiling GONODES does not change that.
+
+## 2026-10-11 — A background image load cannot crash the editor
+
+- **Logging** from a worker thread is handed to the main thread before it touches the log panel or a toast. A missing picture no longer kills the editor while the graph is opening.
+
+## 2026-10-10 — Outside models get a patch-writing brief
+
+- **`llms.txt`** at the repo root is the plain-Markdown brief for writing a `.gnpatch`. The operator catalog stays in `docs/OPERATORS.md`. Rule 25.47: update the brief in the same change when one of its sentences would become false.
+
+## 2026-10-10 — A feedback Select is not a cook error on the first frame
+
+- **CrossTOP** treats a missing input as the chain warming up. It is a debug line, same as Fit, Cache, and Composite.
+- **SelectTOP** with a target that exists but has not cooked yet outputs nothing and does not raise a cook error. A missing target, or a target that is not a texture, still does.
+
+## 2026-10-10 — Player exports omit native extensions the target cannot load
+
+- **Template builds** (`auto`, the default) leave an extension out of a platform export when that OS and architecture has no library on the build machine. The project tree is restored afterward. `-GDExtensions all` still packs every config.
+
+## 2026-10-09 — Opening a patch no longer warns about its own parameters
+
+- **Script and shader nodes** build `@param` and uniform parameters after the file is read, then put the saved values back. Load no longer warns that those names are unknown.
+- **A null cook** is an error only when every input already had data. A composite whose picture is not ready yet, with a title texture on the other port, stays quiet.
+- **Feedback loops** and a Cache, Fit, or Composite that is still waiting on its input are debug lines.
+
 ## 2026-10-09 — CHOPtoTOP follows key and mouse channels
 
 - **KeyboardIn and MouseIn** no longer emit a `window_name` channel hashed from the window title. That value sat near two billion, so CHOPtoTOP auto-range crushed every 0–1 line onto one pixel and the output window looked frozen.

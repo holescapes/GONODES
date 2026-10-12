@@ -12,8 +12,8 @@ Run standalone:
     python setup_cef.py --force       # re-download even if already present
     python setup_cef.py --clean       # remove cef_artifacts/ directory
 
-Called automatically by the top-level setup_deps.py when it discovers
-this script via its 'gn_ext_*/setup_*.py' glob pattern.
+Called by setup_deps.py and by GitHub Actions from the setup line in
+native/build.cfg. That file is download_only, so nothing here is compiled.
 """
 import argparse
 import io
@@ -67,7 +67,7 @@ def download_and_extract(version: str, godot_ver: str, force: bool = False) -> b
     installed = _current_version()
     if installed == version and not force:
         print(f"  [skip] gdCEF {version} already installed at {os.path.relpath(CEF_DIR, PROJECT_ROOT)}")
-        return False
+        return True
 
     if installed and installed != version:
         print(f"  Upgrading gdCEF {installed} → {version}")
@@ -205,7 +205,8 @@ def main():
         print("    GDCEF_GODOT=4.5")
         sys.exit(1)
 
-    download_and_extract(gdcef_ver, gdcef_godot, force=args.force)
+    if not download_and_extract(gdcef_ver, gdcef_godot, force=args.force):
+        sys.exit(1)
 
 
 if __name__ == "__main__":
