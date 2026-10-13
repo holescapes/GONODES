@@ -5,17 +5,7 @@ These sample files are included for testing and demonstration purposes.
 All are under permissive open-source licenses that allow redistribution.
 
 
-1. big_buck_bunny_480p.ogv
-   ────────────────────────
-   Title:       Big Buck Bunny
-   Author:      Blender Foundation (peach.blender.org)
-   License:     Creative Commons Attribution 3.0 (CC BY 3.0)
-   URL:         https://peach.blender.org
-   Attribution: © 2008 Blender Foundation | www.bigbuckbunny.org
-   Note:        Theora/Ogg format for Godot's built-in VideoStreamPlayer.
-
-
-2. godot_icon.svg
+1. godot_icon.svg
    ───────────────
    Title:       Godot Engine Logo
    Author:      Andrea Calabró / Godot Engine contributors
@@ -25,7 +15,7 @@ All are under permissive open-source licenses that allow redistribution.
                 contributors. Licensed under CC BY 4.0.
 
 
-3. kloofendal_48d_partly_cloudy_1k.hdr
+2. kloofendal_48d_partly_cloudy_1k.hdr
    ────────────────────────────────────
    Title:       Kloofendal 48d Partly Cloudy (Pure Sky)
    Author:      Greg Zaal (Poly Haven)
@@ -35,7 +25,7 @@ All are under permissive open-source licenses that allow redistribution.
    Note:        1K equirectangular HDR panorama for CubeMapTOP testing.
 
 
-4. meshes/suzanne/ (Suzanne.gltf, Suzanne.bin, textures)
+3. meshes/suzanne/ (Suzanne.gltf, Suzanne.bin, textures)
    ──────────────────────────────────────────────────────
    Title:       Suzanne (Blender Monkey Head)
    Author:      Norbert Nopper / UX3D
@@ -45,7 +35,7 @@ All are under permissive open-source licenses that allow redistribution.
    Note:        Classic CG test mesh from the Khronos glTF Sample Assets repo.
 
 
-5. meshes/fox.glb
+4. meshes/fox.glb
    ───────────────
    Title:       Fox (Animated)
    Authors:     PixelMannen (model, CC0), tomkranis (rigging & animation, CC BY 4.0),
@@ -58,7 +48,7 @@ All are under permissive open-source licenses that allow redistribution.
                 From the Khronos glTF Sample Assets repo.
 
 
-6. meshes/duck.glb
+5. meshes/duck.glb
    ────────────────
    Title:       Duck
    Author:      Sony Computer Entertainment Inc.
@@ -68,7 +58,7 @@ All are under permissive open-source licenses that allow redistribution.
    Note:        Classic glTF test model from the Khronos glTF Sample Assets repo.
 
 
-7. meshes/teapot.glb
+6. meshes/teapot.glb
    ──────────────────
    Title:       Utah Teapot
    Author:      Martin Newell (University of Utah, 1975)
@@ -79,7 +69,7 @@ All are under permissive open-source licenses that allow redistribution.
                 no rig. Converted from OBJ to GLB via trimesh.
 
 
-8. meshes/damaged_helmet.glb
+7. meshes/damaged_helmet.glb
    ──────────────────────────
    Title:       Damaged Helmet
    Author:      theblueturtle_ (original), ctxwing (conversion to glTF)

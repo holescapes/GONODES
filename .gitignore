@@ -50,6 +50,9 @@ addons/gn_ext_*/native/bin/
 addons/gn_ext_*/bin/
 addons/gn_ext_*/runtime/
 
+# Project-level copies of built extension DLLs
+/addons/bin/
+
 # ── Downloaded SDKs & vendor libraries (re-downloaded by setup scripts / CI) ──
 # gdCEF / Chromium Embedded Framework — downloaded/cloned at build time
 addons/gn_ext_webrender/cef_artifacts/
