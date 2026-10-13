@@ -14,6 +14,7 @@ and the rules contributors must follow when making changes that affect docs.
 | `README.md` | Public page — what GONODES is, how to start, links onward. No operator or extension tables |
 | `ai/README.md` | Shared brief for any language model, including the setup prompt |
 | `ai/RULES.md` | Hard rules. The only full copy |
+| `ai/context-ignore.txt` | Paths a model should skip. Each tool copies this into its own ignore file |
 | `llms.txt` | Patch-writing brief for any model. Stays at the repo root |
 | `GONODES_CONTEXT.md` | Comprehensive architecture reference — every class, file, pattern, and design decision |
 | `CHANGELOG.md` | Release-level change log (user-facing) |

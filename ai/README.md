@@ -1,17 +1,21 @@
 # AI resources
 
-This folder is the shared brief for any language model working on GONODES. Do not copy these files into a tool-specific set.
+This folder is the brief for any editor and any language model. Nothing in here is written for Cursor, VS Code, or Copilot. A tool does not get its own copy of the rules in the repository.
 
-`.cursor/` and `.vscode/` are personal. Both are gitignored. A clone does not contain them, and Cursor does not create them from this folder on its own.
+`.cursor/`, `.vscode/`, and a tool's context-ignore file are personal. They are gitignored. A clone does not contain them.
+
+`.editorconfig` stays at the root. That file is the cross-editor standard for charset. `AGENTS.md` stays at the root as a four-line pointer, because many agents open that path and no other. `llms.txt` stays at the root because models look for `/llms.txt`.
 
 ## Prompt to paste
 
-Give this to a fresh agent in Cursor, VS Code, or any other tool. It sets the agent up and catches it up.
+Give this to a fresh agent. It catches the agent up, and it writes the local files that tool needs. Those local files are not committed.
 
 ```
 Read ai/README.md, then ai/RULES.md, then ai/MEMORY.md, and follow them. When you disagree, follow ai/pushback.md.
 
-If you are running inside Cursor, create these two local files. Do not commit them. .cursor is gitignored.
+Copy ai/context-ignore.txt into this tool's context-ignore file, if it has one. Do not commit that file. Usual names are .cursorignore, .copilotignore, .clineignore, and .aiderignore.
+
+If this tool loads project rules from a local folder, write rules that only point at ai/. Do not paste ai/RULES.md into them. For Cursor, create these two files and do not commit them:
 
 .cursor/rules/gonodes.mdc
 ---
@@ -27,10 +31,10 @@ alwaysApply: true
 ---
 Read and follow ai/pushback.md. Do not agree just to be agreeable.
 
+If you create a .vscode folder, add an empty .vscode/.gdignore so Godot does not import it. Do not commit .vscode.
+
 If you are writing or editing a .gnpatch, stop after llms.txt and the one operator in docs/OPERATORS.md. You do not need the engine rules for that job.
 ```
-
-Copilot in VS Code already loads `.github/copilot-instructions.md`, which only points at `ai/RULES.md`. Do not paste the rules into a second file.
 
 ## Developing GONODES
 
@@ -50,9 +54,7 @@ Use this when the agent will write or edit a `.gnpatch`. It does not need the en
 2. Before setting a parameter, port, or enum, read that operator in `docs/OPERATORS.md`.
 3. When the shape is unclear, copy a help patch under `addons/gonodes/help/` or `addons/gn_ext_*/help/`.
 
-`llms.txt` stays at the root on purpose. Models look for `/llms.txt`. Do not move it into this folder, and do not paste the operator catalog into it.
-
-`AGENTS.md` stays at the root as a four-line pointer, because some agents open that path and no other. The brief is this file.
+Do not paste the operator catalog into `llms.txt`.
 
 ## Files
 
@@ -62,9 +64,8 @@ Use this when the agent will write or edit a `.gnpatch`. It does not need the en
 | `ai/RULES.md` | Hard rules, operator patterns, build. The only copy. |
 | `ai/MEMORY.md` | Short dated decisions. Add a line. Do not paste a work log. |
 | `ai/pushback.md` | Disagree in the open when an idea is weaker than another. |
+| `ai/context-ignore.txt` | Paths a model should not load. Copy into the tool's own ignore file. |
 | `llms.txt` | How to write a valid patch. Root file, any model. |
-| `AGENTS.md` | Root pointer. It sends the agent here. |
-| `.github/copilot-instructions.md` | Copilot's required path. It only says to read `ai/RULES.md`. |
+| `AGENTS.md` | Root pointer. It sends every agent here. |
 | `docs/OPERATORS.md` | Operator catalog. Read the one operator you are about to set. |
 | `GONODES_CONTEXT.md` | Engine internals, by section. |
-| `.cursorignore`, `.copilotignore` | Paths agents should not pull into context. |

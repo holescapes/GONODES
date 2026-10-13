@@ -1,0 +1,24 @@
+# Paths a model should not load as project context.
+# This is not a gitignore. Git still tracks source that .gitignore allows.
+# If your tool has its own ignore file, copy these patterns into it locally
+# and do not commit that file.
+
+.godot/
+.import/
+templates/
+**/godot-cpp/
+**/*.pck
+**/*.import
+**/*.uid
+**/*.png
+**/*.jpg
+**/*.wav
+**/*.mp4
+**/*.ogv
+**/*.obj
+**/*.dll
+**/*.so
+**/*.dylib
+**/*.exp
+**/*.lib
+**/bin/

@@ -2,7 +2,6 @@
 
 > Canonical hard rules for any model changing this repo. Start at `ai/README.md`.
 > Memories: `ai/MEMORY.md`. Patch writing: root `llms.txt`.
-> `.github/copilot-instructions.md` only points here so Copilot has a file at the path it loads.
 
 > Node-based visual programming framework on Godot 4.7 for real-time visual art.
 > 587 operators, 15 families (471 core + 116 extension), 131 native C++ accelerated variants, 25 extension folders (`addons/gn_ext_*/`).

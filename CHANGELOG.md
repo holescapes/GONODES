@@ -12,7 +12,7 @@ For the full development journal with implementation details, see
 ## 2026-10-13 — Editor settings stay local
 
 - **README** keeps the Godot essay and a one-line note that every operator has help. Image slots are unchanged.
-- **Editor folders:** `.cursor` and `.vscode` are personal and gitignored. The shared brief is `ai/`. Hard rules live in `ai/RULES.md`.
+- **Editor folders:** `.cursor`, `.vscode`, `.cursorignore`, and `.copilotignore` are not part of the repo. Any model starts from `ai/`. Context paths to skip are in `ai/context-ignore.txt`.
 - **Audit notes** moved to `dev_docs/PRE-BETA_AUDIT.md` and `dev_docs/HUMAN_GATE.md`.
 
 ## 2026-10-13 — The public page points onward, and agent notes share one folder

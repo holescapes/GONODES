@@ -145,13 +145,15 @@ parse_fails.py
 /test_run*.txt
 
 # ── Personal editor settings ──────────────────────────────────────────────────
-# .vscode is each person's machine (Godot path, watcher excludes). .gdignore
-# stays so Godot does not import that folder.
-# .cursor is personal too. The shared brief is ai/. A setup prompt in
-# ai/README.md tells an agent how to write local Cursor rules.
-.vscode/*
-!.vscode/.gdignore
+# .cursor and .vscode are each person's machine. The shared brief is ai/.
+# The setup prompt in ai/README.md writes local rules and a context-ignore
+# file for whatever tool the person uses. Do not commit those.
+.vscode/
 .cursor/
+.cursorignore
+.copilotignore
+.clineignore
+.aiderignore
 
 # ── OS files ──────────────────────────────────────────────────────────────────
 Thumbs.db
