@@ -11,7 +11,9 @@ and the rules contributors must follow when making changes that affect docs.
 
 | File | Purpose |
 |------|---------|
-| `README.md` | Public-facing overview — operator counts, family list, feature highlights, quick start |
+| `README.md` | Public page — what GONODES is, how to start, links onward. No operator or extension tables |
+| `ai/README.md` | Shared brief for any language model. Engine work and patch writing split here |
+| `llms.txt` | Patch-writing brief for any model. Stays at the repo root |
 | `GONODES_CONTEXT.md` | Comprehensive architecture reference — every class, file, pattern, and design decision |
 | `CHANGELOG.md` | Release-level change log (user-facing) |
 | `LICENSE` | Project license |
@@ -69,7 +71,7 @@ Each extension has its own README documenting:
 ### When Adding a New Operator
 
 1. **`docs/OPERATORS.md`** — Add the operator to its family section with full port/parameter table
-2. **`README.md`** — Update the per-family operator count and total count
+2. **`docs/OPERATORS.md`** is the count. The root `README.md` does not list operator totals. Do not add them back
 3. **`dev_docs/TESTING.md`** — Update total test count and file count after adding tests
 4. **`dev_docs/GONODES_VS_THE_REST.md`** — Update the operator count row
 5. **`GONODES_CONTEXT.md`** — Update section 35.11 totals if counts changed
@@ -106,7 +108,7 @@ All of the above, plus:
 
 1. **Extension `README.md`** — Create or update
 2. **`dev_docs/EXTENSIONS.md`** — Update if extension system mechanics changed
-3. **`README.md`** — Update extension count if a new extension was added
+3. **`addons/gonodes/help/extensions.md`** — Update if the user-facing extension guide changed. The root `README.md` does not list extensions
 
 ### When Changing Method Names or API
 

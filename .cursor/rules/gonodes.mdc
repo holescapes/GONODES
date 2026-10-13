@@ -5,21 +5,23 @@ alwaysApply: true
 
 # GONODES
 
-This is a Godot 4.7 node-based visual programming framework (588 operators).
+This is a Godot 4.7 node-based visual programming framework.
 
-## Required reading (in order)
+## Required reading
 
-1. `AGENTS.md` — cross-tool entry point
-2. `.github/copilot-instructions.md` — **canonical rules** (hard rules, operator structure, build)
-3. `AI_MEMORY.md` — curated project memories
-4. `GONODES_CONTEXT.md` — deep architecture (read specific sections on demand)
+1. `ai/README.md` — how to brief an agent, and where every AI file lives
+2. `.github/copilot-instructions.md` — hard rules, operator structure, build
+3. `ai/MEMORY.md` — short dated decisions
+4. `GONODES_CONTEXT.md` — architecture, one section at a time
+
+To write a `.gnpatch`, read `llms.txt` and `docs/OPERATORS.md` instead of the engine rules.
 
 ## Behavior
 
 - Follow all Hard Rules in copilot-instructions (§25.x). Violations break the engine.
 - Never import `ui/` from `core/` or `operators/`.
 - Check family base classes before duplicating helper logic.
-- Run verification scripts after adding/modifying operators (`verify_new_operator.py`).
-- **Docs stay in sync (25.45):** same change that adds/changes params, ports, formats, or behavior must update `docs/OPERATORS.md` + `.cfg` description (and context notes if architectural). Do not leave docs for a follow-up.
+- Run verification scripts after adding or modifying operators (`verify_new_operator.py`).
+- **Docs stay in sync (25.45):** the same change that adds or changes params, ports, formats, or behavior must update `docs/OPERATORS.md` and the `.cfg` description. Do not leave docs for a follow-up.
 - **`llms.txt` (25.47):** if that change makes a sentence in the root patch-writing brief false, update `llms.txt` in the same change. Do not copy the operator catalog into it.
 - **Build scripts and guides (25.48):** a change to a download, probe path, `setup`/`vendor_clone` line, or Actions step updates the script and the guide in the same change (`dev_docs/BUILD.md`, the extension README, `scripts/show_manual_sdks.py` when the path is manual). Do not leave either side for a follow-up.

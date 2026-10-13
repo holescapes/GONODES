@@ -1,6 +1,8 @@
 # GONODES
 
 > Godot node graph for realtime visuals, audio, and data. A patch is a `.gnpatch` JSON file. This file is the brief a language model needs to write one. It is plain Markdown. Any model can read it. Do not look for a tool-specific twin.
+>
+> This file is only for writing a patch. To change the GONODES program itself, start at `ai/README.md`.
 
 Read this file once. Before you set any parameter, port, or enum, open that operator's section in `docs/OPERATORS.md`. The header of that file is the current family list and operator count. Do not memorize the count, and do not invent an operator, parameter, or port that the catalog does not list. If the name is missing, say so.
 

@@ -1376,10 +1376,11 @@ explanation. Both must stay in sync.
 ### 25.40 -- Single Source of Operator Counts
 
 Operator totals and per-family counts must come from `python scripts/scan_operators.py`
-(and `scripts/operator_registry.json`). Do not hand-edit marketing totals in README,
-TESTING, competitor audits, or the copilot header without re-running the scanner.
-After adding or removing operators, update all count surfaces in one pass. Canonical
-human-facing totals live in the `docs/OPERATORS.md` header.
+(and `scripts/operator_registry.json`). The root `README.md` does not publish those
+totals. Do not add a count table back to it, and do not hand-edit totals in TESTING,
+competitor audits, or the copilot header without re-running the scanner. After adding
+or removing operators, update the catalog and the other count surfaces in one pass.
+Canonical human-facing totals live in the `docs/OPERATORS.md` header.
 
 ---
 
@@ -1414,7 +1415,7 @@ See [EDITOR.md](EDITOR.md) and [EXTENSIONS.md](EXTENSIONS.md).
 
 Each `gn_ext_*/README.md` Operators table must list exactly the operators in that
 extension's `gn_extension.cfg` (same class names; no operators from other
-extensions). Top-level README extension op counts must match the same source.
+extensions). The root `README.md` does not list extensions. Do not add that table back.
 
 ---
 
@@ -1434,7 +1435,7 @@ APIs is incomplete until the docs match — in the **same** change, not later.
 **Update at least:**
 1. `docs/OPERATORS.md` — parameter table, I/O, and "How it works" for that operator
 2. The operator's `.cfg` `description=` if the summary is now wrong
-3. `GONODES_CONTEXT.md` / `AI_MEMORY.md` when the change is architectural
+3. `GONODES_CONTEXT.md` / `ai/MEMORY.md` when the change is architectural
 
 This applies to **modifying** existing operators (e.g. adding `load_mode`), not
 only creating new ones. Verify with:
@@ -1466,7 +1467,7 @@ until that record is written**, including when the stage fails or stops early.
    - open questions awaiting the user
    - any deviation from the plan, with the reason
 
-Keep the log in the task doc. Put only a **one-line pointer** in `AI_MEMORY.md` —
+Keep the log in the task doc. Put only a **one-line pointer** in `ai/MEMORY.md` —
 that file loads into every future session and must stay compact, so duplicating
 task detail there taxes every unrelated piece of work.
 

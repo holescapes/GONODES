@@ -9,6 +9,11 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-13 — The public page points onward, and agent notes share one folder
+
+- **README** is the public page: what GONODES is, how to start, and links to the user help and the dev docs. Operator and extension tables stay in `docs/OPERATORS.md` and each extension README. Named image slots are `hero`, `patch`, `player`, and `display`.
+- **`ai/`** is the brief any model can read. Engine work starts there and then follows the hard rules. Patch writing stays in root `llms.txt`.
+
 ## 2026-10-12 — GitHub Actions artifacts expire sooner
 
 - **Extension builds** are kept for 7 days. **Release bundles** are kept for 1 day. The GitHub Release still holds the player and editor downloads. CEF is still uploaded once per Release and already expired after a day.

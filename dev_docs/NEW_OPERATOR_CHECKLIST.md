@@ -113,9 +113,7 @@ python scripts/verify_new_operator.py --counts    # Verify doc counts match
   - Update family operator count in the section header
   - Update total operator count in the file header
 
-- [ ] `README.md` — Update:
-  - Header operator count (`**N operators**`)
-  - Family count in the table if the family total changed (e.g., `OUT (14)`)
+- [ ] Root `README.md` does not list operator totals. Do not add a count or a family table back.
 
 - [ ] Other docs that state the operator count:
   - `dev_docs/TESTING.md` — "All N operators"

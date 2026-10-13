@@ -1,7 +1,7 @@
 # GONODES — Copilot Instructions
 
-> **Cross-tool:** `AGENTS.md` is the shared entry point. Copilot reads this file;
-> Cursor reads `.cursor/rules/gonodes.mdc`. Curated memories: `AI_MEMORY.md`.
+> **Cross-tool:** start at `ai/README.md`. Copilot reads this file.
+> Cursor reads `.cursor/rules/gonodes.mdc`. Curated memories: `ai/MEMORY.md`.
 
 > Node-based visual programming framework on Godot 4.7 for real-time visual art.
 > 587 operators, 15 families (471 core + 116 extension), 131 native C++ accelerated variants, 25 extension folders (`addons/gn_ext_*/`).
@@ -181,7 +181,7 @@ NEVER walk the scene tree or network connections to find a specific upstream nod
 Every rule in this file's Hard Rules section must have a corresponding human-readable entry in `dev_docs/CONTRIBUTING.md` §11 (Hard Rules). When adding a new rule: (1) add the terse imperative version here, (2) add the human-readable entry in CONTRIBUTING.md §11 with rationale and a code example where helpful, (3) link to the relevant dev_doc if one exists. The copilot file is the machine-readable contract; CONTRIBUTING.md §11 is the human-readable explanation.
 
 ### 25.40 — Single Source of Operator Counts
-Operator totals and per-family counts MUST come from `python scripts/scan_operators.py` / `scripts/operator_registry.json` (and `docs/OPERATORS.md` header regenerated from that). Do NOT hand-edit totals in README, TESTING, competitor audits, or this file's header without re-running the scanner. After adding/removing operators, update all marketing/count surfaces in one pass.
+Operator totals and per-family counts MUST come from `python scripts/scan_operators.py` / `scripts/operator_registry.json` (and the `docs/OPERATORS.md` header regenerated from that). The root `README.md` does not publish those totals. Do NOT add a count table back to it, and do NOT hand-edit totals in TESTING, competitor audits, or this file's header without re-running the scanner. After adding/removing operators, update the catalog and the other count surfaces in one pass.
 
 ### 25.41 — Core Must Not Type `ui/` class_names
 `core/` and `operators/` must not declare typed references to classes defined under `ui/` (e.g. `var x: GNInteractivePanel`). Prefer a core-owned protocol/base (or untyped `Control`) with the concrete interactive Control living in `ui/`. Softens 25.20 for class_name globals that still couple layers at parse time. See `GNTopInteractiveBase` / `GNInteractivePanel`.
@@ -190,16 +190,16 @@ Operator totals and per-family counts MUST come from `python scripts/scan_operat
 Secondary `panel` UI outputs on TOPs MUST be demand-gated via `is_output_demanded(panel_port)`. Prefer `GNTopInteractiveBase` + `add_panel_output()`. **Node params are the sole source of truth.** The viewer overlay and WindowOUT each own a separate `GNInteractivePanel` instance (N interactive views, one model). Dragging either view writes params, then all live views refresh from params. Do **not** reparent one Control between hosts or clear the viewer overlay merely because the panel port is demanded.
 
 ### 25.43 — Extension README Operator Tables Match `gn_extension.cfg`
-Every `gn_ext_*/README.md` Operators table MUST list exactly the operators declared in that extension's `gn_extension.cfg` (same class names, no extras from other extensions). Counts in the top-level README extension table must match.
+Every `gn_ext_*/README.md` Operators table MUST list exactly the operators declared in that extension's `gn_extension.cfg` (same class names, no extras from other extensions). The root `README.md` does not list extensions. Do not add that table back.
 
 ### 25.44 — GPU/CPU Family Boundary (TOP vs IMG)
 Operators that require GPU→CPU readback (histogram, blob detect, pixel sort, etc.) belong in **IMG**, never TOP. Cross the boundary only via explicit bridges (`TOPtoIMG` / `ImgToTOP`). Do not silently read back textures inside a TOP `_cook()`.
 
 ### 25.45 — Docs Must Stay In Sync With Code
-Any change that alters operator **parameters**, ports, behavior, supported formats, or public APIs MUST update the matching docs in the **same change** (not a follow-up). Minimum surfaces: `docs/OPERATORS.md` parameter table / "How it works", the operator's `.cfg` `description=`, and any stale notes in `GONODES_CONTEXT.md` / `AI_MEMORY.md` when architecture changed. New operators still follow the full checklist below; **modifying** an existing operator is not exempt. Run `python scripts/verify_new_operator.py <ClassName>` after doc edits. Leaving docs stale is a Hard Rule violation.
+Any change that alters operator **parameters**, ports, behavior, supported formats, or public APIs MUST update the matching docs in the **same change** (not a follow-up). Minimum surfaces: `docs/OPERATORS.md` parameter table / "How it works", the operator's `.cfg` `description=`, and any stale notes in `GONODES_CONTEXT.md` / `ai/MEMORY.md` when architecture changed. New operators still follow the full checklist below; **modifying** an existing operator is not exempt. Run `python scripts/verify_new_operator.py <ClassName>` after doc edits. Leaving docs stale is a Hard Rule violation.
 
 ### 25.46 — Multi-Stage Work Must Be Resumable At Every Stage
-Any task spanning more than one working session (audits, migrations, family-wide refactors, build campaigns) MUST maintain a resume record, and **a stage is not complete until its record is written** — including when the stage fails or stops early. Each stage closes with: (1) findings appended to the task's own doc, every claim citing a file path or command output; (2) a progress table row set to the honest status (`DONE` / `PARTIAL` / `BLOCKED` / `UNVERIFIED` — never `DONE` on incomplete evidence); (3) a `## Resume here` block, overwritten each time, holding last completed stage, next stage plus its first concrete action, exact commands with working directory, files created/modified, **environment state that cost real time to reach** (which extensions are built, which templates exist, long-running processes), open questions, and any deviation from plan with its reason. Keep the log in the task doc; put only a one-line pointer in `AI_MEMORY.md`, which every session loads and must stay compact. Acceptance test: a fresh agent given only the task doc and the repo must resume without re-deriving prior work or repeating expensive builds. Current instance: `PRE-BETA_AUDIT.md`.
+Any task spanning more than one working session (audits, migrations, family-wide refactors, build campaigns) MUST maintain a resume record, and **a stage is not complete until its record is written** — including when the stage fails or stops early. Each stage closes with: (1) findings appended to the task's own doc, every claim citing a file path or command output; (2) a progress table row set to the honest status (`DONE` / `PARTIAL` / `BLOCKED` / `UNVERIFIED` — never `DONE` on incomplete evidence); (3) a `## Resume here` block, overwritten each time, holding last completed stage, next stage plus its first concrete action, exact commands with working directory, files created/modified, **environment state that cost real time to reach** (which extensions are built, which templates exist, long-running processes), open questions, and any deviation from plan with its reason. Keep the log in the task doc; put only a one-line pointer in `ai/MEMORY.md`, which every session loads and must stay compact. Acceptance test: a fresh agent given only the task doc and the repo must resume without re-deriving prior work or repeating expensive builds. Current instance: `PRE-BETA_AUDIT.md`.
 
 ### 25.47 — `llms.txt` Stays True
 `llms.txt` (repo root) is the plain-Markdown brief outside models use to write `.gnpatch` files. No tool-specific copy. Update it in the **same change** when a sentence in it would become false: `.gnpatch` schema, families, wire rules, expression or script-node surface, feedback, sinks, or an operator the file names. Do **not** copy the operator catalog or counts into it — those stay in `docs/OPERATORS.md` (25.40, 25.45). A new parameter that the brief already says to look up in the catalog is not an `llms.txt` edit.
@@ -263,7 +263,7 @@ Signature: `func get_device_menu() -> PackedStringArray`. Used by: BlackmagicInI
 2. Run `python scripts/scan_operators.py` and `python scripts/build_port_registry.py`
 3. Run `python scripts/generate_help_patches.py --operator <node_type>` (new ops; refresh if ports/params change meaningfully)
 4. Add or **update** the entry in `docs/OPERATORS.md` (parameter table, I/O, "How it works") — **required for param/behavior changes, not only new operators** (Rule 25.45)
-5. Update operator counts in: README.md, docs/OPERATORS.md, dev_docs/TESTING.md, dev_docs/GONODES_VS_THE_REST.md (when adding/removing ops)
+5. Update operator counts in `docs/OPERATORS.md`, `dev_docs/TESTING.md`, and `dev_docs/GONODES_VS_THE_REST.md` when adding or removing ops. The root `README.md` does not carry those counts.
 6. Run `python scripts/verify_new_operator.py <ClassName>`
 7. If the change makes a sentence in `llms.txt` false, update that file in the same change (Rule 25.47). Do not add the operator to `llms.txt` just because it is new.
 

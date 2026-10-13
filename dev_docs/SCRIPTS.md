@@ -407,4 +407,4 @@ python scripts/validate_all_patches.py
 
 Don't forget to also:
 - Add the operator to `docs/OPERATORS.md`
-- Update operator counts in README.md, TESTING.md, GONODES_VS_THE_REST.md, release.yml
+- Update operator counts in `docs/OPERATORS.md`, TESTING.md, GONODES_VS_THE_REST.md, and release.yml. The root README does not carry them.
