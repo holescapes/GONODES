@@ -130,6 +130,7 @@ def main():
     print(f"GONODES app version (from project.godot): {app_ver}")
 
     errors = check_workflows(versions)
+    errors.extend(check_template_source(versions))
 
     # libgonodes version consistency
     lib_ver = versions.get("LIBGONODES_VERSION")
@@ -147,6 +148,22 @@ def main():
         sys.exit(1)
     else:
         print("All versions consistent ✓")
+
+
+def check_template_source(versions: dict) -> list:
+    """template_source.cfg godot_version must match versions.env."""
+    errors = []
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import template_release
+    found = template_release.read_source_cfg()
+    expected = versions.get("GODOT_VERSION", "")
+    got = found.get("godot_version", "")
+    if got != expected:
+        errors.append(
+            "addons/gonodes/template_source.cfg: godot_version is '%s', "
+            "expected '%s' (from versions.env)" % (got, expected)
+        )
+    return errors
 
 
 if __name__ == "__main__":

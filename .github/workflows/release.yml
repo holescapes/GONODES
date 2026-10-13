@@ -6,7 +6,7 @@
 #   1. Native C++ extensions (all platforms)
 #   2. gn_ext_native (godot-cpp operators)
 #   3. Headless test suite
-#   4. Player templates (Godot export for 5 desktop targets)
+#   4. Player templates (desktop x86_64, desktop ARM64, macOS, web) and standalone editors
 #   5. Editor + Player release packages
 #   6. GitHub Release with all artifacts
 #
@@ -243,8 +243,16 @@ jobs:
           path: ${{ runner.temp }}/python-runtime
           retention-days: 1
 
+      - name: Download godot-cpp (ARM64)
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-linux-arm64
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+
       - name: Build (Linux ARM64)
         if: steps.check.outputs.supported == 'true'
+        continue-on-error: true
         run: |
           cd build
           scons ext=${{ matrix.ext }} platform=linux arch=arm64 $SCONS_FLAGS
@@ -434,8 +442,16 @@ jobs:
           path: ${{ runner.temp }}/python-runtime
           retention-days: 1
 
+      - name: Download godot-cpp (ARM64)
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-windows-arm64
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+
       - name: Build (Windows ARM64)
         if: steps.check.outputs.supported == 'true'
+        continue-on-error: true
         run: |
           cd build
           scons ext=${{ matrix.ext }} platform=windows arch=arm64 $env:SCONS_FLAGS
@@ -517,7 +533,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────
 
   export-player-windows:
-    needs: [test, build-native, build-extensions-windows, build-extensions-linux]
+    needs: [version, test, build-native, build-extensions-windows, build-extensions-linux]
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -571,36 +587,29 @@ jobs:
       - name: Install Python runtime
         run: python addons/gn_ext_user_python/setup_python.py --import-runtime _python_runtime
 
-      - name: Export Player (Windows x86_64)
+      - name: Record template download source
+        shell: pwsh
+        run: python scripts/template_release.py write-source --repository "${{ github.repository }}" --tag "${{ needs.version.outputs.tag }}"
+
+      - name: Export players and editors
         shell: pwsh
         run: |
-          # Swap main scene to player
-          $proj = Get-Content project.godot -Raw -Encoding UTF8
-          $proj = $proj -replace 'run/main_scene="res://scenes/gn_editor.tscn"', 'run/main_scene="res://scenes/player_main.tscn"'
-          Set-Content project.godot -Value $proj -Encoding UTF8
-          # Import project
           .\godot.exe --headless --import . 2>$null; $true
-          # Export
-          New-Item -ItemType Directory -Force -Path "dist/windows_x86_64" | Out-Null
-          .\godot.exe --headless --export-release "Player Windows x86_64" "dist/windows_x86_64/GONODESPlayer.exe"
+          .\scripts\build_templates.ps1 -GodotPath (Resolve-Path .\godot.exe).Path -Platforms windows_x86_64,windows_arm64 -IncludeEditor
 
-      - name: Stage Python runtime
-        run: python addons/gn_ext_user_python/setup_python.py --stage dist/windows_x86_64/GONODESPlayer.exe
-
-      - name: Package
+      - name: Stage release bundles
         shell: pwsh
-        run: |
-          Compress-Archive -Path "dist/windows_x86_64/*" -DestinationPath "GONODESPlayer-windows-x86_64.zip"
+        run: python scripts/template_release.py stage --tag "${{ needs.version.outputs.tag }}"
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: player-windows-x86_64
-          path: GONODESPlayer-windows-x86_64.zip
-          retention-days: 7
+          name: release-windows
+          path: dist/release/
+          retention-days: 1
 
   export-player-linux:
-    needs: [test, build-native, build-extensions-linux]
+    needs: [version, test, build-native, build-extensions-linux]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -651,33 +660,26 @@ jobs:
       - name: Install Python runtime
         run: python3 addons/gn_ext_user_python/setup_python.py --import-runtime _python_runtime
 
-      - name: Export Player (Linux x86_64)
+      - name: Record template download source
+        run: python3 scripts/template_release.py write-source --repository "${{ github.repository }}" --tag "${{ needs.version.outputs.tag }}"
+
+      - name: Export players and editors
         run: |
-          # Swap main scene to player
-          sed -i 's|run/main_scene="res://scenes/gn_editor.tscn"|run/main_scene="res://scenes/player_main.tscn"|' project.godot
-          # Import
           ./godot --headless --import . 2>/dev/null || true
-          # Export
-          mkdir -p dist/linux_x86_64
-          ./godot --headless --export-release "Player Linux x86_64" "dist/linux_x86_64/GONODESPlayer"
+          bash scripts/build_templates.sh --godot "$PWD/godot" --platforms linux_x86_64,linux_arm64,web --include-editor
 
-      - name: Stage Python runtime
-        run: python3 addons/gn_ext_user_python/setup_python.py --stage dist/linux_x86_64/GONODESPlayer
-
-      - name: Package
-        run: |
-          cd dist/linux_x86_64
-          tar czf ../../GONODESPlayer-linux-x86_64.tar.gz *
+      - name: Stage release bundles
+        run: python3 scripts/template_release.py stage --tag "${{ needs.version.outputs.tag }}"
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: player-linux-x86_64
-          path: GONODESPlayer-linux-x86_64.tar.gz
-          retention-days: 7
+          name: release-linux
+          path: dist/release/
+          retention-days: 1
 
   export-player-macos:
-    needs: [test, build-native, build-extensions-macos]
+    needs: [version, test, build-native, build-extensions-macos]
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
@@ -723,22 +725,23 @@ jobs:
       - name: Install Python runtime
         run: python3 addons/gn_ext_user_python/setup_python.py --import-runtime _python_runtime
 
-      - name: Export Player (macOS universal)
-        run: |
-          sed -i '' 's|run/main_scene="res://scenes/gn_editor.tscn"|run/main_scene="res://scenes/player_main.tscn"|' project.godot
-          ./godot --headless --import . 2>/dev/null || true
-          mkdir -p dist/macos
-          ./godot --headless --export-release "Player macOS" "dist/macos/GONODESPlayer.zip"
+      - name: Record template download source
+        run: python3 scripts/template_release.py write-source --repository "${{ github.repository }}" --tag "${{ needs.version.outputs.tag }}"
 
-      - name: Stage Python runtime
-        run: python3 addons/gn_ext_user_python/setup_python.py --stage dist/macos/GONODESPlayer.zip
+      - name: Export player and editor
+        run: |
+          ./godot --headless --import . 2>/dev/null || true
+          bash scripts/build_templates.sh --godot "$PWD/godot" --platforms macos --include-editor
+
+      - name: Stage release bundles
+        run: python3 scripts/template_release.py stage --tag "${{ needs.version.outputs.tag }}"
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: player-macos
-          path: dist/macos/GONODESPlayer.zip
-          retention-days: 7
+          name: release-macos
+          path: dist/release/
+          retention-days: 1
 
   # ─────────────────────────────────────────────────────────────────────────
   # PHASE 4: Package Editor distribution (source + binaries)
@@ -814,7 +817,7 @@ jobs:
         with:
           name: editor-${{ matrix.platform }}
           path: GONODES-${{ matrix.platform }}.${{ matrix.ext }}
-          retention-days: 7
+          retention-days: 1
 
   # ─────────────────────────────────────────────────────────────────────────
   # PHASE 5: Create GitHub Release
@@ -842,18 +845,20 @@ jobs:
       - name: Collect release files
         run: |
           mkdir -p release_files
-          # Player builds
-          cp release_artifacts/player-windows-x86_64/*.zip release_files/ 2>/dev/null || true
-          cp release_artifacts/player-linux-x86_64/*.tar.gz release_files/ 2>/dev/null || true
-          cp release_artifacts/player-macos/*.zip release_files/ 2>/dev/null || true
-          # Editor builds
+          cp release_artifacts/release-windows/* release_files/ 2>/dev/null || true
+          cp release_artifacts/release-linux/* release_files/ 2>/dev/null || true
+          cp release_artifacts/release-macos/* release_files/ 2>/dev/null || true
+          # Source project archives for people who compile.
           for f in release_artifacts/editor-*/*; do
             cp "$f" release_files/ 2>/dev/null || true
           done
-          # Rename with version
+          # Rename source archives that do not already carry the tag.
           TAG="${{ needs.version.outputs.tag }}"
           cd release_files
           for f in *; do
+            if echo "$f" | grep -q "$TAG"; then
+              continue
+            fi
             NEW_NAME=$(echo "$f" | sed "s/GONODES/GONODES-${TAG}/")
             if [ "$f" != "$NEW_NAME" ]; then
               mv "$f" "$NEW_NAME"
@@ -870,23 +875,30 @@ jobs:
 
           ### Downloads
 
-          | Platform | Player (runtime) | Editor (full project) |
-          |----------|-------------------|----------------------|
-          | **Windows x86_64** | `GONODESPlayer-*-windows-x86_64.zip` | `GONODES-*-windows.zip` |
-          | **Linux x86_64** | `GONODESPlayer-*-linux-x86_64.tar.gz` | `GONODES-*-linux.tar.gz` |
-          | **macOS (universal)** | `GONODESPlayer-*-macos.zip` | `GONODES-*-macos.tar.gz` |
+          | Platform | Player (run a patch) | Editor (author a patch) |
+          |----------|----------------------|-------------------------|
+          | **Windows x86_64** | `GONODESPlayer-*-windows_x86_64.zip` | `GONODESEditor-*-windows_x86_64.zip` |
+          | **Windows ARM64** | `GONODESPlayer-*-windows_arm64.zip` | `GONODESEditor-*-windows_arm64.zip` |
+          | **Linux x86_64** | `GONODESPlayer-*-linux_x86_64.zip` | `GONODESEditor-*-linux_x86_64.zip` |
+          | **Linux ARM64** | `GONODESPlayer-*-linux_arm64.zip` | `GONODESEditor-*-linux_arm64.zip` |
+          | **macOS (universal)** | `GONODESPlayer-*-macos.zip` | `GONODESEditor-*-macos.zip` |
+          | **Web** | `GONODESPlayer-*-web.zip` | |
 
           ### Player
-          The Player is a standalone runtime — download, unzip, place your `.gnpatch` file alongside it with a `config.json`, and run. No Godot editor needed.
+          The Player is a standalone runtime. Unzip it, place your `.gnpatch` beside it with a `config.json`, and run. Godot is inside that program. You do not install Godot.
 
           ### Editor
-          Full GONODES project with pre-compiled native extension binaries and a bundled Python 3.10 runtime (NumPy included) for Python nodes. Open in Godot ${{ env.GODOT_VERSION }}.
+          The Editor is a standalone program for authoring patches. Godot is inside it. Unzip it and run `GONODES`. It includes the player for that same OS, so exporting for this machine works offline. The first export to another desktop OS, the other desktop architecture, or the web downloads that player from this release.
+
+          Android and iOS players are not in this download. Build those with `scripts/build_templates` on a machine that has the Android SDK or Xcode. An iOS package still has to be re-signed before it installs. The steps are in the in-editor Building help.
+
+          `GONODES-*-windows.zip`, `GONODES-*-linux.tar.gz`, and `GONODES-*-macos.tar.gz` are the project source with compiled libraries, for people who compile GONODES. Open that project in Godot ${{ env.GODOT_VERSION }}.
 
           NDI, Blackmagic, depth-sensor, and similar device runtimes are not in the download. Those vendors do not allow GONODES to ship their libraries. Install the vendor runtime on the machine that uses those nodes.
 
           ### Requirements
-          - **Godot ${{ env.GODOT_VERSION }}** (for the Editor distribution)
           - **GPU:** Vulkan/D3D12/Metal recommended (Forward+). OpenGL 3.3 works but GPU particles and volumes are unavailable.
+          - People who compile from the source archive need **Godot ${{ env.GODOT_VERSION }}**. The standalone editor and player do not.
 
           See [CHANGELOG.md](CHANGELOG.md) for what's new.
           NOTES_EOF

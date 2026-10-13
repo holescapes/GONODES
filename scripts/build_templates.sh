@@ -13,11 +13,11 @@
 #   ./scripts/build_templates.sh --restore-only
 #
 # Prerequisites:
-#   - Godot 4.6.x editor binary (with export templates installed)
+#   - Godot editor binary matching versions.env (with export templates installed)
 #   - Export templates matching your Godot version
 #   - export_presets.cfg with presets for each target platform
 #
-# Godot Version: 4.6.1 stable (update export templates when upgrading Godot)
+# Godot version: versions.env GODOT_VERSION (update export templates when upgrading Godot)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 set -euo pipefail
@@ -25,7 +25,14 @@ set -euo pipefail
 # ─── Constants ─────────────────────────────────────────────────────────────────
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-GODOT_VERSION_EXPECTED="4.6"
+GODOT_VERSION_EXPECTED="4.7"
+if [[ -f "$SCRIPT_DIR/../versions.env" ]]; then
+    _ver_line="$(grep -E '^GODOT_VERSION=' "$SCRIPT_DIR/../versions.env" | head -1 || true)"
+    _ver_value="${_ver_line#GODOT_VERSION=}"
+    if [[ "$_ver_value" =~ ^([0-9]+\.[0-9]+) ]]; then
+        GODOT_VERSION_EXPECTED="${BASH_REMATCH[1]}"
+    fi
+fi
 EDITOR_MAIN_SCENE='res://scenes/gn_editor.tscn'
 PLAYER_MAIN_SCENE='res://scenes/player_main.tscn'
 
@@ -610,6 +617,8 @@ check_godot_version "$GODOT"
 if [[ -z "$OUTPUT_DIR" ]]; then
     OUTPUT_DIR="$PROJECT_PATH/templates"
 fi
+# Editors land outside templates/ so Quick Build does not copy the editor into a player.
+EDITOR_OUTPUT_DIR="$PROJECT_PATH/editor_dist"
 
 # -- BuildAll shortcut ----------------------------------------------------------
 
@@ -749,6 +758,8 @@ for plat in "${PLATFORM_LIST[@]}"; do
     update_extension_export_filter "$PROJECT_PATH" "$preset" "$plat"
     if invoke_godot_export "$GODOT" "$PROJECT_PATH" "$preset" "$player_out"; then
         stage_python_runtime "$player_out" "$plat"
+        python3 "$PROJECT_PATH/scripts/template_release.py" write-stamp --dir "$plat_dir" \
+            || warn "Could not write TEMPLATE_VERSION.txt for $plat"
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
     else
         FAIL_COUNT=$((FAIL_COUNT + 1))
@@ -775,7 +786,7 @@ if $INCLUDE_EDITOR; then
             continue
         fi
         ext="$(platform_ext "$plat")"
-        plat_dir="$OUTPUT_DIR/$plat"
+        plat_dir="$EDITOR_OUTPUT_DIR/$plat"
         editor_out="$plat_dir/GONODES${ext}"
 
         step "Editor · $plat"

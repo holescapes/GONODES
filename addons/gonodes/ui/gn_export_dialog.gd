@@ -93,6 +93,10 @@ var _dir_dialog: FileDialog
 ## Currently active exporter (null when idle).
 var _exporter: RefCounted = null
 
+## Downloads a missing player before Quick Build. Null when idle.
+var _download: HTTPRequest = null
+var _download_platform: String = ""
+
 ## Patch path set by the editor before showing.
 var patch_path: String = ""
 
@@ -296,31 +300,12 @@ func _update_template_hint() -> void:
 
 	var plat_id: String = _PLATFORM_IDS[_platform_btn.selected]
 	var plat_label: String = _PLATFORM_LABELS[_platform_btn.selected]
-
-	# Use the same search logic as GNPatchExporter._find_template_dir()
-	var found := false
-	var search_roots: PackedStringArray = []
-	search_roots.append(ProjectSettings.globalize_path("res://"))
-	search_roots.append(OS.get_executable_path().get_base_dir())
-
-	for root in search_roots:
-		var candidate := root.path_join("templates").path_join(plat_id)
-		if DirAccess.dir_exists_absolute(candidate):
-			var d := DirAccess.open(candidate)
-			if d != null:
-				d.list_dir_begin()
-				var first := d.get_next()
-				d.list_dir_end()
-				if not first.is_empty():
-					found = true
-					break
-
-	if found:
+	var hint := GNTemplateStore.hint_text(plat_id, plat_label)
+	if hint.is_empty():
 		_template_hint.text = ""
 		_template_hint.add_theme_color_override("font_color", Color(0.5, 0.8, 0.5))
 	else:
-		_template_hint.text = ("No template found for %s. "
-			+ "Build it first: scripts/build_templates -Platforms %s") % [plat_label, plat_id]
+		_template_hint.text = hint
 		_template_hint.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
 
 
@@ -510,12 +495,25 @@ func _on_build_pressed() -> void:
 
 	_build_btn.disabled = true
 	_progress_label.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0))
-	_progress_label.text = "Starting build..."
 
 	var platform_id: String = _PLATFORM_IDS[_platform_btn.selected]
 	var renderer_id: String = _RENDERER_IDS[_get_selected_renderer_index()]
+	var template_dir := GNTemplateStore.install_root().path_join(platform_id)
+	if GNTemplateStore.is_usable(template_dir):
+		_progress_label.text = "Starting build..."
+		_start_quick_build(out_dir, platform_id, renderer_id)
+		return
+	if not GNTemplateStore.can_download(platform_id):
+		_build_btn.disabled = false
+		_progress_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+		_progress_label.text = GNTemplateStore.hint_text(platform_id, _PLATFORM_LABELS[_platform_btn.selected])
+		return
+	_download_platform = platform_id
+	_progress_label.text = "Downloading %s player..." % _PLATFORM_LABELS[_platform_btn.selected]
+	_begin_download(platform_id, out_dir, renderer_id)
 
-	# Configure exporter
+
+func _start_quick_build(out_dir: String, platform_id: String, renderer_id: String) -> void:
 	_exporter = GNPatchExporter.new()
 	_exporter.patch_path = patch_path
 	_exporter.output_dir = out_dir
@@ -523,9 +521,71 @@ func _on_build_pressed() -> void:
 	_exporter.target_renderer = renderer_id
 	_exporter.progress.connect(_on_export_progress)
 	_exporter.completed.connect(_on_export_completed)
-
-	# Run the build
 	_exporter.quick_build()
+
+
+func _begin_download(platform_id: String, out_dir: String, renderer_id: String) -> void:
+	if _download == null:
+		_download = HTTPRequest.new()
+		_download.timeout = 600
+		_download.use_threads = true
+		add_child(_download)
+		_download.request_completed.connect(_on_download_completed)
+	var root := GNTemplateStore.install_root()
+	DirAccess.make_dir_recursive_absolute(root)
+	_download.download_file = root.path_join(platform_id + ".zip")
+	_download.set_meta("output_dir", out_dir)
+	_download.set_meta("renderer_id", renderer_id)
+	var err := _download.request(
+		GNTemplateStore.configured_download_url(platform_id),
+		["User-Agent: GONODES"])
+	if err != OK:
+		_fail_download("Could not start the player download (error %d)." % err)
+
+
+func _on_download_completed(result: int, response_code: int, _headers: PackedStringArray, _body: PackedByteArray) -> void:
+	var platform_id := _download_platform
+	var out_dir := str(_download.get_meta("output_dir"))
+	var renderer_id := str(_download.get_meta("renderer_id"))
+	var zip_path := str(_download.download_file)
+	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
+		_fail_download("Player download failed (HTTP %d)." % response_code)
+		return
+	var dest := GNTemplateStore.install_root().path_join(platform_id)
+	_remove_dir(dest)
+	var extract_err := GNTemplateStore.extract_zip(zip_path, dest)
+	DirAccess.remove_absolute(zip_path)
+	if extract_err != OK or not GNTemplateStore.is_usable(dest):
+		_fail_download("The downloaded player could not be unpacked.")
+		return
+	_progress_label.text = "Starting build..."
+	_start_quick_build(out_dir, platform_id, renderer_id)
+
+
+func _fail_download(message: String) -> void:
+	_build_btn.disabled = false
+	_progress_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+	_progress_label.text = message
+	_download_platform = ""
+
+
+func _remove_dir(path: String) -> void:
+	if not DirAccess.dir_exists_absolute(path):
+		return
+	var listing := DirAccess.open(path)
+	if listing == null:
+		return
+	listing.list_dir_begin()
+	var name := listing.get_next()
+	while name != "":
+		var child := path.path_join(name)
+		if listing.current_is_dir():
+			_remove_dir(child)
+		else:
+			DirAccess.remove_absolute(child)
+		name = listing.get_next()
+	listing.list_dir_end()
+	DirAccess.remove_absolute(path)
 
 
 func _on_export_progress(message: String) -> void:

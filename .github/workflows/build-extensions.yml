@@ -97,11 +97,11 @@ jobs:
         with:
           name: ${{ matrix.ext }}-linux-x86_64
           path: addons/${{ matrix.ext }}/native/bin/linux64/
-          retention-days: 90
+          retention-days: 7
 
   # ── Linux ARM64 (cross-compiled) ──────────────────────────────────────────
   build-linux-arm64:
-    needs: discover
+    needs: [discover, build-native-linux-arm64]
     if: ${{ needs.discover.outputs.matrix != '[]' }}
     runs-on: ubuntu-22.04
     strategy:
@@ -144,8 +144,16 @@ jobs:
             python3 "$SCRIPT" "$@"
           fi
 
+      - name: Download godot-cpp (Linux ARM64)
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-linux-arm64
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+
       - name: Build ${{ matrix.ext }} (Linux ARM64)
         if: steps.check.outputs.supported == 'true'
+        continue-on-error: true
         run: |
           cd build
           scons ext=${{ matrix.ext }} platform=linux arch=arm64 $SCONS_FLAGS
@@ -156,7 +164,7 @@ jobs:
         with:
           name: ${{ matrix.ext }}-linux-arm64
           path: addons/${{ matrix.ext }}/native/bin/linux64/
-          retention-days: 90
+          retention-days: 7
 
   # ── macOS (universal via lipo) ────────────────────────────────────────────
   build-macos:
@@ -240,7 +248,7 @@ jobs:
         with:
           name: ${{ matrix.ext }}-macos
           path: addons/${{ matrix.ext }}/native/bin/macos/
-          retention-days: 90
+          retention-days: 7
 
   # ── Windows x86_64 ────────────────────────────────────────────────────────
   build-windows-x86_64:
@@ -311,11 +319,11 @@ jobs:
         with:
           name: ${{ matrix.ext }}-windows-x86_64
           path: addons/${{ matrix.ext }}/native/bin/win64/
-          retention-days: 90
+          retention-days: 7
 
   # ── Windows ARM64 ─────────────────────────────────────────────────────────
   build-windows-arm64:
-    needs: discover
+    needs: [discover, build-native-windows-arm64]
     if: ${{ needs.discover.outputs.matrix != '[]' }}
     runs-on: windows-2022
     strategy:
@@ -370,8 +378,16 @@ jobs:
               script = os.path.join('addons', ext_base, parts[0])
               subprocess.run([sys.executable, script] + parts[1:], check=True)
 
+      - name: Download godot-cpp (Windows ARM64)
+        if: steps.check.outputs.supported == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: godot-cpp-windows-arm64
+          path: addons/gn_ext_native/native/godot-cpp/bin/
+
       - name: Build ${{ matrix.ext }} (Windows ARM64)
         if: steps.check.outputs.supported == 'true'
+        continue-on-error: true
         run: |
           cd build
           scons ext=${{ matrix.ext }} platform=windows arch=arm64 $env:SCONS_FLAGS
@@ -382,7 +398,7 @@ jobs:
         with:
           name: ${{ matrix.ext }}-windows-arm64
           path: addons/${{ matrix.ext }}/native/bin/win64/
-          retention-days: 90
+          retention-days: 7
 
   # ── gn_ext_native (uses godot-cpp SConstruct — separate build) ────────────
   build-native-linux-x86_64:
@@ -396,7 +412,7 @@ jobs:
           pip3 install scons
       - run: cd addons/gn_ext_native/native && scons platform=linux arch=x86_64 $SCONS_FLAGS
       - uses: actions/upload-artifact@v4
-        with: { name: gn_ext_native-linux-x86_64, path: addons/gn_ext_native/native/bin/linux64/, retention-days: 90 }
+        with: { name: gn_ext_native-linux-x86_64, path: addons/gn_ext_native/native/bin/linux64/, retention-days: 7 }
 
   build-native-linux-arm64:
     runs-on: ubuntu-22.04
@@ -409,7 +425,9 @@ jobs:
           pip3 install scons
       - run: cd addons/gn_ext_native/native && scons platform=linux arch=arm64 $SCONS_FLAGS
       - uses: actions/upload-artifact@v4
-        with: { name: gn_ext_native-linux-arm64, path: addons/gn_ext_native/native/bin/linux64/, retention-days: 90 }
+        with: { name: godot-cpp-linux-arm64, path: addons/gn_ext_native/native/godot-cpp/bin/, retention-days: 7 }
+      - uses: actions/upload-artifact@v4
+        with: { name: gn_ext_native-linux-arm64, path: addons/gn_ext_native/native/bin/linux64/, retention-days: 7 }
 
   build-native-macos:
     runs-on: macos-14
@@ -430,7 +448,7 @@ jobs:
             lipo -create "$ARM_LIB" "$X86_LIB" -output "$UNIVERSAL"
           fi
       - uses: actions/upload-artifact@v4
-        with: { name: gn_ext_native-macos, path: addons/gn_ext_native/native/bin/macos/, retention-days: 90 }
+        with: { name: gn_ext_native-macos, path: addons/gn_ext_native/native/bin/macos/, retention-days: 7 }
 
   build-native-windows-x86_64:
     runs-on: windows-2022
@@ -441,7 +459,7 @@ jobs:
       - run: pip install scons
       - run: cd addons/gn_ext_native/native && scons platform=windows arch=x86_64 $env:SCONS_FLAGS
       - uses: actions/upload-artifact@v4
-        with: { name: gn_ext_native-windows-x86_64, path: addons/gn_ext_native/native/bin/win64/, retention-days: 90 }
+        with: { name: gn_ext_native-windows-x86_64, path: addons/gn_ext_native/native/bin/win64/, retention-days: 7 }
 
   build-native-windows-arm64:
     runs-on: windows-2022
@@ -452,4 +470,6 @@ jobs:
       - run: pip install scons
       - run: cd addons/gn_ext_native/native && scons platform=windows arch=arm64 $env:SCONS_FLAGS
       - uses: actions/upload-artifact@v4
-        with: { name: gn_ext_native-windows-arm64, path: addons/gn_ext_native/native/bin/win64/, retention-days: 90 }
+        with: { name: godot-cpp-windows-arm64, path: addons/gn_ext_native/native/godot-cpp/bin/, retention-days: 7 }
+      - uses: actions/upload-artifact@v4
+        with: { name: gn_ext_native-windows-arm64, path: addons/gn_ext_native/native/bin/win64/, retention-days: 7 }

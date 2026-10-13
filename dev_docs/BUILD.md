@@ -299,12 +299,13 @@ python scripts/check_versions.py
 
 The script scans every `.yml`/`.yaml` file under `.github/workflows/` for
 `GODOT_VERSION:` and `GODOTCPP_BRANCH:` entries and verifies they match
-`versions.env`.  Run it in CI as a pre-flight check to prevent version drift.
+`versions.env`. It also checks `addons/gonodes/template_source.cfg`.
+Run it in CI as a pre-flight check to prevent version drift.
 
 
 ## Prerequisites
 
-1. **Godot 4.6.x editor binary** --- can be the standard editor or a console
+1. **Godot editor binary matching `versions.env`** --- can be the standard editor or a console
    build (console build recommended for CI, produces better log output).
 
 2. **Godot export templates** --- install via `Editor --> Manage Export Templates`
@@ -1229,13 +1230,32 @@ GONODES has three workflow files in `.github/workflows/`:
 |----------|---------|---------|
 | `build-extensions.yml` | Extension/build file changes | Incremental native library builds (all platforms) |
 | `tests.yml` | Push to main/dev/release, PRs | Build native libs (Linux) → run headless test suite |
-| `release.yml` | Version tags (`v*`), manual | Full release: native libs (all platforms) → tests → Player exports → Editor packages → GitHub Release |
+| `release.yml` | Version tags (`v*`), manual | Full release: native libs → tests → desktop and web players → standalone editors → GitHub Release |
 
 ### Quick summary
 
 - **Dev cycle:** push code → `tests.yml` compiles Linux extensions, runs 1,355 tests headless.
-- **Release:** push a `v*` tag → `release.yml` builds everything, downloads CPython 3.10 and NumPy for that OS, places that runtime in the editor package and beside the player, and creates a GitHub Release with downloads.
+- **Release:** push a `v*` tag → `release.yml` builds native libraries, exports standalone editors and players for Windows x86_64, Windows ARM64, Linux x86_64, Linux ARM64, macOS, and a web player, and creates a GitHub Release. Each editor archive contains the player for that same OS. Android and iOS players are not in that release. `scripts/template_release.py stage` packs the zips the Build dialog downloads.
 - **Native-only:** `build-extensions.yml` runs when only native C++ code changes, skips Player export.
+
+### Release strategy
+
+These workflows assume a **public** GitHub repository and the standard hosted runners (`ubuntu-22.04`, `windows-2022`, `macos-14`). Minutes on those runners are free, with no monthly cap. The workflows do not request larger runners. Those are billed even for a public repository.
+
+The Free-plan limit this pipeline is written around is **Actions artifact storage: 500 MB**, averaged across the month. A file kept for one day counts as about one-thirtieth of its size. Files attached to a **GitHub Release** are a different store. That page is what people download, and it is what the editor fetches the first time it exports for another platform. Each Release file can be up to 2 GB.
+
+Retention follows from that split:
+
+| What is uploaded | Workflow | Kept | Why |
+|---|---|---|---|
+| CEF, Python runtimes, godot-cpp, and per-extension binaries produced during a release | `release.yml` | 1 day | Later jobs in the same run download them. CEF is about 550 MB and is uploaded once, from the Linux extension job. One day of that file is about 18 MB of the monthly average. |
+| Player, editor, and source-archive zips | `release.yml` | 1 day | The last job attaches those same files to the GitHub Release. That copy is the one that lasts. The Windows and Linux packages contain CEF again, so leaving the artifact copy up for a week would use most of the 500 MB by itself. |
+| Extension and `gn_ext_native` binaries | `build-extensions.yml` | 7 days | Long enough to download a pull-request build. A 90-day copy counted the full size for three months. |
+| Test log | `tests.yml` | 30 days | A text file. The native binaries from that workflow expire after 1 day. |
+
+Run `release.yml` about **once a month**, from a `v*` tag or the Run workflow button. Leave `tests.yml` on every push to `main`, `dev`, and `release/**`. Leave `build-extensions.yml` on native-code changes only. Another full release in the same month does not spend minutes, and it does add another set of CEF-sized zips to that month's storage average.
+
+Android and iOS players are not part of this workflow. They are built by hand where the Android SDK or Xcode is available. The steps are in `addons/gonodes/help/building.md`.
 
 ### Native Library CI
 
@@ -1279,8 +1299,8 @@ cd addons/gn_ext_native/native
 scons platform=<PLATFORM> arch=<ARCH> target=template_release -j4
 ```
 
-Artifacts are uploaded with 90-day retention. Adding a new extension with
-a `build.cfg` automatically appears in the next CI run — no workflow edits.
+Adding a new extension with a `build.cfg` automatically appears in the next
+CI run — no workflow edits. Artifact lifetimes are in [Release strategy](#release-strategy).
 
 #### GitLab CI (`.gitlab-ci.yml`)
 
@@ -1411,10 +1431,12 @@ writing it back produces mojibake: `—` (em-dash) becomes `Ã¢â‚¬â€`,
 
 | File                                          | Purpose                              |
 |-----------------------------------------------|--------------------------------------|
-| `scripts/build_templates.ps1`                 | PowerShell build script (all OSes)   |
+| `scripts/build_templates.ps1`                 | PowerShell build script (all OSes). Players go to `templates/`. Editors go to `editor_dist/`. |
 | `scripts/build_templates.sh`                  | Bash build script (Linux/macOS)      |
+| `scripts/template_release.py`                 | Version stamp, GitHub release record, and editor/player zip layout |
 | `export_presets.cfg`                          | Godot export preset definitions      |
-| `templates/`                                  | Built Player/Editor binaries (.gitignored) |
+| `templates/`                                  | Built Player binaries (.gitignored)  |
+| `editor_dist/`                                | Built Editor binaries (.gitignored)  |
 | `addons/gonodes/core/gn_patch_exporter.gd`   | Quick Build copy logic (runtime)     |
 | **Unified native build system** | |
 | `build/gn_build.py`                          | Shared build logic (platform detection, env setup, source collection) |

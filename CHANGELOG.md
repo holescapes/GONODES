@@ -9,6 +9,16 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-12 — GitHub Actions artifacts expire sooner
+
+- **Extension builds** are kept for 7 days. **Release bundles** are kept for 1 day. The GitHub Release still holds the player and editor downloads. CEF is still uploaded once per Release and already expired after a day.
+
+## 2026-10-12 — Standalone editors download players on first export
+
+- **Release editors** are standalone programs. Godot is packed inside the executable. Each editor ships with the player for its own OS. The first Build for another desktop target or the web downloads that player from the matching GitHub release.
+- **Players** in the release cover Windows x86_64, Windows ARM64, Linux x86_64, Linux ARM64, macOS, and web. Android and iOS stay a manual `build_templates` run. A `TEMPLATE_VERSION.txt` stamp makes an editor replace a player from a different Godot or GONODES version.
+- **Windows and Linux ARM64 extension builds** download the matching `godot-cpp` library before they link.
+
 ## 2026-10-12 — OpenCV and Spout join the extension tier
 
 - **OpenCV** and **Spout** stay in a normal shipped build and drop out of `scons tier=core`. OpenCV on Linux and macOS is skipped until the system package is installed.

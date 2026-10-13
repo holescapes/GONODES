@@ -29,7 +29,7 @@
     -RestoreOnly to fix project.godot.
 
     PREREQUISITES:
-    - Godot 4.6.x editor binary (with export templates installed)
+    - Godot editor binary matching versions.env (with export templates installed)
     - Export templates matching your Godot version:
           Editor > Manage Export Templates > Download for Current Version
     - Export presets defined in export_presets.cfg for each target platform
@@ -93,7 +93,7 @@
     an interrupted build).
 
 .EXAMPLE
-    .\build_templates.ps1 -GodotPath "C:\Godot\Godot_v4.6.1-stable_win64_console.exe"
+    .\build_templates.ps1 -GodotPath "C:\Godot\Godot_v4.7.2-stable_win64_console.exe"
 
 .EXAMPLE
     .\build_templates.ps1 -Platforms "all"
@@ -112,7 +112,7 @@
 
 .NOTES
     GONODES Build System
-    Godot Version: 4.6.1 stable (update export templates when upgrading Godot)
+    Godot version: versions.env GODOT_VERSION (update export templates when upgrading Godot)
 #>
 
 [CmdletBinding()]
@@ -661,6 +661,8 @@ if (-not (Test-GodotVersion $godot)) { exit 1 }
 # -- Resolve settings ----------------------------------------------------------
 
 if (-not $OutputDir) { $OutputDir = Join-Path $ProjectPath "templates" }
+# Editors land outside templates/ so Quick Build does not copy the editor into a player.
+$EditorOutputDir = Join-Path $ProjectPath "editor_dist"
 
 # Auto-detect host platform if none specified
 # -- BuildAll shortcut ----------------------------------------------------------
@@ -778,6 +780,10 @@ try {
         Update-ExtensionExportFilter $ProjectPath $info.player $plat
         if (Invoke-GodotExport $godot $ProjectPath $info.player $playerOut) {
             Add-PythonRuntime $playerOut $plat
+            & python (Join-Path $ProjectPath "scripts\template_release.py") write-stamp --dir $platDir
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warn "Could not write TEMPLATE_VERSION.txt for $plat"
+            }
             $successCount++
         } else {
             $failCount++
@@ -803,7 +809,7 @@ try {
                 Write-Ok "Skipping Editor for $plat (no editor preset)"
                 continue
             }
-            $platDir   = Join-Path $OutputDir $plat
+            $platDir   = Join-Path $EditorOutputDir $plat
             $editorFn  = "GONODES$($info.ext)"
             $editorOut = Join-Path $platDir $editorFn
 

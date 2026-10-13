@@ -20,7 +20,50 @@ This guide covers building GONODES Player templates for all supported platforms 
 
 ## Overview
 
-GONODES uses a **Quick Build** paradigm: pre-built Player binaries are stored in `templates/`. When you click **Build** in the editor, the Export Patch dialog opens. You pick a target platform, a renderer, and an output folder. The exporter copies the correct Player template + your `.gnpatch` + assets + `config.json` to the output folder. No Godot export templates are needed at runtime.
+GONODES uses a **Quick Build** paradigm: pre-built Player binaries are stored in `templates/`. When you click **Build** in the editor, the Export Patch dialog opens. You pick a target platform, a renderer, and an output folder. The exporter copies the correct Player template + your `.gnpatch` + assets + `config.json` to the output folder. No Godot export templates are needed at that moment.
+
+
+## Standalone editor and players
+
+A release **editor** is its own program. Godot is packed inside that executable. You author patches there. You do not install Godot.
+
+A release **player** is a second program. Godot is packed inside it too. You run a finished patch with the player. You do not install Godot.
+
+Each editor download includes the player for that same operating system, in `templates/` next to the editor. Exporting for the machine you are on works with no network.
+
+The first time you export for another desktop system, the other desktop architecture, or the web, the Build dialog downloads that player from the GitHub release that matches this editor and stores it under `templates/`. A `TEMPLATE_VERSION.txt` file in that folder records the Godot version and the GONODES version. A later editor refuses a player from a different version and downloads the matching one.
+
+These players are in the release:
+
+| Platform | Folder |
+|----------|--------|
+| Windows x86_64 | `templates/windows_x86_64/` |
+| Windows ARM64 | `templates/windows_arm64/` |
+| Linux x86_64 | `templates/linux_x86_64/` |
+| Linux ARM64 | `templates/linux_arm64/` |
+| macOS | `templates/macos/` |
+| Web | `templates/web/` |
+
+### Android and iOS
+
+Android and iOS players are not produced by the release, and the editor will not download them. Authoring still uses the standalone editor. What you build by hand is only the player template.
+
+1. Use the Godot version in `versions.env` (`GODOT_VERSION`). Install that editor and its export templates (Editor, Manage Export Templates, Download for Current Version). The people who only run the standalone editor skip this step.
+2. **Android:** install the Android SDK and JDK, then set them in Godot under Editor, Editor Settings, Export, Android.
+3. **iOS:** use a Mac with Xcode. This template cannot be created on Windows or Linux. After export, re-sign the `.ipa` with your Apple developer certificate before it will install.
+4. From the GONODES project, build just that player:
+
+```powershell
+.\scripts\build_templates.ps1 -GodotPath "C:\path\to\Godot_v4.7.2-stable_win64_console.exe" -Platforms android
+```
+
+```bash
+./scripts/build_templates.sh --godot /path/to/godot --platforms ios
+```
+
+5. The player lands in `templates/android/` or `templates/ios/`, with `TEMPLATE_VERSION.txt`. Copy that folder next to any standalone editor, under the same `templates/<platform>/` path. Build then copies it like any other player.
+
+Editors are written to `editor_dist/<platform>/`, not into `templates/`, so a player export does not pick up the editor executable. `scripts/template_release.py stage` packs a release editor with its matching player already nested under `templates/`.
 
 
 ## The Export Patch Dialog
@@ -58,11 +101,7 @@ The dialog suggests a sensible default per platform, but the final choice is you
 
 ### Template Availability
 
-If no pre-built template exists for the selected platform, an orange hint appears:
-
-> *No template found for Linux ARM64. Build it first: scripts/build_templates -Platforms linux_arm64*
-
-See [Building Templates](#building-templates) below.
+If the selected player is missing, an orange hint appears. On a release editor the hint says the player will download when you press Build. Android and iOS tell you to build that player yourself. A source checkout with no release recorded in `template_source.cfg` still points at `scripts/build_templates`.
 
 ### Compatibility Check
 
@@ -134,7 +173,7 @@ Templates are the pre-built Player binaries that Quick Build copies into your ou
 
 ### Prerequisites
 
-1. **Godot 4.6.x editor binary** (console build recommended --- produces better log output)
+1. **Godot editor binary matching `versions.env`** (console build recommended --- produces better log output)
 2. **Godot export templates** for each target platform:
    - Open Godot --> **Editor --> Manage Export Templates --> Download for Current Version**
    - This downloads templates for **all** platforms at once (desktop, mobile, web)
@@ -181,7 +220,7 @@ Templates are the pre-built Player binaries that Quick Build copies into your ou
 
 Rebuild the templates whenever you:
 
-- **Upgrade Godot** --- export templates are version-locked. A Player built with Godot 4.6.1 won't load a `.pck` from 4.7.
+- **Upgrade Godot** --- export templates are version-locked. A Player built with one Godot version will not load a `.pck` from another. Rebuild templates after changing `versions.env`.
 - **Make a GONODES release** --- ensures the Player binaries include any new operators, cook engine changes, or scene modifications.
 - **Add or change export presets** --- new architecture, code-signing, etc.
 
@@ -344,7 +383,7 @@ Exit code = number of failed exports (0 = all succeeded).
 | Android build missing           | Install Android SDK + JDK, configure in Godot Editor Settings |
 | iOS build fails on Windows      | iOS templates can only be built on macOS with Xcode   |
 | PS execution policy error       | Use `powershell -ExecutionPolicy Bypass -File ...`    |
-| "No template found" in dialog   | Run the build script for that platform first          |
+| "No template found" in dialog   | Desktop and web players download when a release is configured. Android and iOS: run the build script, then copy `templates/<platform>/` next to the editor |
 
 
 ## Key Files
@@ -354,6 +393,9 @@ Exit code = number of failed exports (0 = all succeeded).
 | `scripts/build_templates.ps1`               | PowerShell build script            |
 | `scripts/build_templates.sh`                | Bash build script                  |
 | `export_presets.cfg`                        | Godot export preset definitions    |
-| `templates/`                                | Built Player/Editor binaries       |
+| `scripts/template_release.py`               | Version stamp and release zip layout |
+| `templates/`                                | Built Player binaries              |
+| `editor_dist/`                              | Built Editor binaries              |
+| `addons/gonodes/core/gn_template_store.gd` | Template stamp check and download  |
 | `addons/gonodes/core/gn_patch_exporter.gd` | Quick Build copy logic (runtime)   |
 | `addons/gonodes/ui/gn_export_dialog.gd`    | Export Patch dialog (UI)           |
