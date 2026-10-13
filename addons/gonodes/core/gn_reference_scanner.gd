@@ -19,7 +19,6 @@ static var _read_id_regex: RegEx = null
 static var _write_set_par_regex: RegEx = null
 static var _write_connect_regex: RegEx = null
 static var _affects_regex: RegEx = null
-static var _call_text_regex: RegEx = null
 ## Alternation of call names. Empty uses the built-in list. Cook engine
 ## extends this with the expression-function registry so one regex serves
 ## both read-ids and family demand.
@@ -45,7 +44,6 @@ static func configure_call_funcs(func_names: PackedStringArray) -> bool:
 		return false
 	_call_alt = alt
 	_read_id_regex = null
-	_call_text_regex = null
 	_ensure_regex()
 	return true
 
@@ -66,9 +64,6 @@ static func _ensure_regex() -> void:
 		"network_(?:connect|disconnect)\\s*\\(\\s*\"([^\"]+)\"[^)]*,[^)]*,\\s*\"([^\"]+)\"")
 	_affects_regex = RegEx.new()
 	_affects_regex.compile("^\\s*#\\s*@affects\\s+(.+)$")
-	_call_text_regex = RegEx.new()
-	_call_text_regex.compile(
-		"((?:%s|set_par|network_connect|network_disconnect)\\s*\\([^)]*\\))" % alt)
 
 
 static func is_code_body_param(param: GNParameter) -> bool:
@@ -202,14 +197,17 @@ static func _writes_has(writes: Array, target_id: String) -> bool:
 
 
 ## Edge detail strings for tooltips: key "consumer→source" → [call texts].
+## Each call stays on the node id inside that same call. Pairing the two
+## regexes by index shifts the label onto the next node when a call contains
+## another call, such as set_par("node", "param", str(par("x"))).
 static func build_read_edge_details(text: String, consumer_id: String) -> Dictionary:
 	_ensure_regex()
 	var details: Dictionary = {}
-	var full_matches := _call_text_regex.search_all(text)
-	var id_matches := _read_id_regex.search_all(text)
-	for i in range(mini(full_matches.size(), id_matches.size())):
-		var ref_id: String = id_matches[i].get_string(2)
-		var call_text: String = full_matches[i].get_string(1)
+	for m in _read_id_regex.search_all(text):
+		var ref_id: String = m.get_string(2)
+		if ref_id == consumer_id:
+			continue
+		var call_text := _balanced_call_from(text, m.get_start())
 		var edge_key := "%s→%s" % [consumer_id, ref_id]
 		if not details.has(edge_key):
 			details[edge_key] = []
@@ -217,6 +215,34 @@ static func build_read_edge_details(text: String, consumer_id: String) -> Dictio
 		if not arr.has(call_text):
 			arr.append(call_text)
 	return details
+
+
+## Call text starting at a function name, through the matching close paren.
+static func _balanced_call_from(text: String, start: int) -> String:
+	var paren := text.find("(", start)
+	if paren < 0:
+		return text.substr(start)
+	var depth := 0
+	var in_string := false
+	var i := paren
+	while i < text.length():
+		var c := text.unicode_at(i)
+		if in_string:
+			if c == 92:
+				i += 2
+				continue
+			if c == 34:
+				in_string = false
+		elif c == 34:
+			in_string = true
+		elif c == 40:
+			depth += 1
+		elif c == 41:
+			depth -= 1
+			if depth == 0:
+				return text.substr(start, i - start + 1)
+		i += 1
+	return text.substr(start)
 
 
 ## Scan entire network into overlay-friendly maps.

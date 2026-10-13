@@ -51,3 +51,21 @@ func cook():
 
 	var readers := GNReferenceScanner.find_readers_of(net, "lfo1")
 	GNTestAssert.assert_true(readers.has("reader"), "lfo1 referenced by reader")
+
+
+func test_read_edge_details_stay_on_the_call_that_names_the_node() -> void:
+	GNReferenceScanner.configure_call_funcs(PackedStringArray(["set_par"]))
+	var code := """func cook():
+	set_par("folder_display", "path", str(par("assets_root")).rstrip("/"))
+	set_par("hud_comp_meta", "opacity", _meta_op)
+	set_par("hud_title", "text", "BIT ROTS")
+	set_par("hud_meta", "text", meta_txt)
+"""
+	var details := GNReferenceScanner.build_read_edge_details(code, "controller")
+	var meta: Array = details["controller→hud_comp_meta"]
+	GNTestAssert.assert_eq(meta.size(), 1, "one call on hud_comp_meta")
+	GNTestAssert.assert_true(str(meta[0]).contains("\"opacity\""), "hud_comp_meta gets opacity")
+	GNTestAssert.assert_false(str(meta[0]).contains("\"text\""), "hud_comp_meta does not get text")
+	var title: Array = details["controller→hud_title"]
+	GNTestAssert.assert_eq(title.size(), 1, "one call on hud_title")
+	GNTestAssert.assert_true(str(title[0]).contains("\"text\""), "hud_title gets text")
