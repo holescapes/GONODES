@@ -3,7 +3,7 @@ extends Node
 ##
 ## Sections covered: 1.4, 2.4, 3.1–3.5, 4.1–4.4, 5.2–5.5, 6.1–6.5.
 ## A failure here is either an engine bug or a stale doc row. Do not weaken
-## an assertion to match a surprise result without recording it in PRE-BETA_AUDIT.md.
+## an assertion to match a surprise result without recording it in dev_docs/PRE-BETA_AUDIT.md.
 
 
 func _chans() -> PackedStringArray:

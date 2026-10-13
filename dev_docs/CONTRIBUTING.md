@@ -956,8 +956,8 @@ func test_my_operator_basic_cook():
 ## 11. Hard Rules -- Non-Negotiable
 
 These rules are absolute constraints discovered during development. Violations will block acceptance.
-The machine-readable terse form lives in `.github/copilot-instructions.md` §25.
-**Rule 25.39:** Every rule in copilot-instructions.md must have a human-readable entry here.
+The machine-readable terse form lives in `ai/RULES.md` §25.
+**Rule 25.39:** Every rule in `ai/RULES.md` must have a human-readable entry here.
 
 ---
 
@@ -1362,9 +1362,9 @@ See [DATA_TYPES.md](DATA_TYPES.md) §Sideband Metadata.
 
 ### 25.39 -- Rules Must Be Reflected in CONTRIBUTING.md
 
-Every rule in `.github/copilot-instructions.md §25` must have a corresponding
+Every rule in `ai/RULES.md` §25 must have a corresponding
 human-readable entry in this section (§11 of CONTRIBUTING.md). When adding a new rule:
-1. Add the terse imperative version to `copilot-instructions.md`.
+1. Add the terse imperative version to `ai/RULES.md`.
 2. Add the human-readable entry here with rationale and, where helpful, a code example.
 3. Link to the relevant `dev_docs/` file for deeper context if one exists.
 
@@ -1475,7 +1475,7 @@ task detail there taxes every unrelated piece of work.
 able to resume without re-deriving prior findings or repeating an expensive build.
 If the resume block does not meet that bar, the stage is not finished.
 
-Current instance: `PRE-BETA_AUDIT.md`.
+Current instance: `dev_docs/PRE-BETA_AUDIT.md`.
 
 ### 25.47 -- `llms.txt` Stays True
 

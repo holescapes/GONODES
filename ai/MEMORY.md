@@ -12,14 +12,14 @@
 
 ## Active long-running work
 
-- **Pre-Beta Audit — WRITTEN, remediation started.** B-12, B-13, and B-8 are fixed (see `PRE-BETA_AUDIT.md`
+- **Pre-Beta Audit — WRITTEN, remediation started.** B-12, B-13, and B-8 are fixed (see `dev_docs/PRE-BETA_AUDIT.md`
   Resume). 4n and live audio/MIDI/OSC/DMX are still UNVERIFIED. Do not duplicate findings here.
 
 ## Entries
 
 ### 2026-10-13 — Agent docs live in `ai/`
 
-- Brief an agent from `ai/README.md`. Engine work then follows `.github/copilot-instructions.md`. Patch writing follows root `llms.txt`.
+- Brief an agent from `ai/README.md`. Engine work then follows `ai/RULES.md`. Patch writing follows root `llms.txt`.
 - `origin` is `git@github.com:holescapes/GONODES.git`. The GitLab remote is named `gitlab` and is not the push target.
 
 ### 2026-10-08 — `time_dependent` is operator logic, not a user toggle

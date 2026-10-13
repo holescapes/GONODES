@@ -21,6 +21,24 @@ GONODES is for people who already think in nodes: TouchDesigner, Houdini, Max, v
 
 Godot already renders, exports, and runs scripts. GONODES adds the operator graph, the cook, and the parameters. When Godot gains a renderer or a platform, this project follows.
 
+## On the Shoulders of Giants
+
+GONODES does not replace Godot. It completes it for a different audience. Every capability we needed, we asked whether Godot already did it. Almost always, yes.
+
+**Rendering.** Godot's `RenderingDevice` and `RenderingServer` handle every pixel. TOP textures are Godot `RID` handles. The 3D pipeline runs in a live `SubViewport`. GPU particles use Godot's compute pipeline. When Godot ships a new rendering feature, GONODES gets it for free.
+
+**Editor.** The node graph is a Godot `GraphEdit`. The inspector is a `Control` tree. Theming, input handling, font rendering, and accessibility are inherited.
+
+**Export.** Godot's export system is untouched. A GONODES patch becomes a standalone app through the same templates any Godot game uses. LibGodot means a patch can be embedded in a VJ host, an installation controller, or a broadcast graphics engine.
+
+**Scripting.** Expressions compile and run on Godot's GDScript VM. That virtual machine is production-grade, sandboxed, and hot-reloadable.
+
+**Native code.** GDExtension gives access to FFmpeg, RtMidi, Spout, and custom C++ operators through Godot's stable ABI.
+
+Godot's roadmap is our roadmap. Renderer improvements, WebAssembly, and XR integration become available to GONODES when Godot ships them. We focus on the operator model, the cook engine, and the parameter system, and borrow everything else from one of the most active open-source engines in the world.
+
+Building on Godot is not a constraint. It is the point.
+
 ## What you can wire
 
 | Family | What moves on the wire |
@@ -53,6 +71,7 @@ chop("lfo1", "out") * 10.0
 - Ctrl+G groups a selection into a subnetwork. Enter dives in. Backspace comes back out.
 - Spare parameters and saved presets stay with the patch. A subnetwork can be saved as a `.gnasset` and appear in the palette.
 - Build writes a standalone app. Each WindowOUT can open its own display.
+- Every operator has a **?** button. It opens that node's docs, and an example patch opens beside your work.
 
 Extensions add MIDI, Spout, Syphon, NDI, OpenCV, and FFmpeg, along with video capture, machine learning, depth sensors, and projection mapping. What each one needs is in [Extensions](addons/gonodes/help/extensions.md).
 

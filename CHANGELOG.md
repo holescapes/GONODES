@@ -9,6 +9,12 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-13 — Editor settings stay local
+
+- **README** keeps the Godot essay and a one-line note that every operator has help. Image slots are unchanged.
+- **Editor folders:** `.cursor` and `.vscode` are personal and gitignored. The shared brief is `ai/`. Hard rules live in `ai/RULES.md`.
+- **Audit notes** moved to `dev_docs/PRE-BETA_AUDIT.md` and `dev_docs/HUMAN_GATE.md`.
+
 ## 2026-10-13 — The public page points onward, and agent notes share one folder
 
 - **README** is the public page: what GONODES is, how to start, and links to the user help and the dev docs. Operator and extension tables stay in `docs/OPERATORS.md` and each extension README. Named image slots are `hero`, `patch`, `player`, and `display`.

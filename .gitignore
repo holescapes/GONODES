@@ -137,6 +137,21 @@ parse_fails.py
 # ── Scratch / one-off files (underscore-prefixed at root) ────────────────────
 /_*.txt
 /_*.py
+/_*.log
+/_*.json
+/build_*.txt
+/build_*.log
+/test_output*.txt
+/test_run*.txt
+
+# ── Personal editor settings ──────────────────────────────────────────────────
+# .vscode is each person's machine (Godot path, watcher excludes). .gdignore
+# stays so Godot does not import that folder.
+# .cursor is personal too. The shared brief is ai/. A setup prompt in
+# ai/README.md tells an agent how to write local Cursor rules.
+.vscode/*
+!.vscode/.gdignore
+.cursor/
 
 # ── OS files ──────────────────────────────────────────────────────────────────
 Thumbs.db

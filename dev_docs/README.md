@@ -30,6 +30,8 @@ This folder contains architecture references, build internals, testing infrastru
 | [GPU_ARCHITECTURE.md](GPU_ARCHITECTURE.md) | **Core developers** | **GPU architecture decision** — single shared RenderingDevice (main RD) for all operators, Texture2DRD zero-copy output, migration checklist from local RDs, rationale, risks |
 | [API_REFERENCE.md](API_REFERENCE.md) | **All contributors** | **Operator API cheat sheet** — every public method, property, and signal on GNNode and family base classes, parameter/port definition, cook helpers, expression functions |
 | [DOCUMENTATION_GUIDE.md](DOCUMENTATION_GUIDE.md) | **All contributors** | **Documentation map and update rules** — what each doc covers, which files to update when adding operators/changing API/making releases |
+| [PRE-BETA_AUDIT.md](PRE-BETA_AUDIT.md) | Core developers | Pre-beta audit log and resume block. Historical findings stay in this file |
+| [HUMAN_GATE.md](HUMAN_GATE.md) | Anyone running the editor by hand | The manual walkthrough rows. Run these in the editor, not headless |
 
 
 ## Relationship to Help System
