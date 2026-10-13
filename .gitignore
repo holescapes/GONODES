@@ -70,6 +70,7 @@ addons/gn_ext_ndi/native/ndi_sdk/
 addons/gn_ext_depth_sensor/native/azure_kinect_sdk/
 addons/gn_ext_depth_sensor/native/realsense_sdk/
 addons/gn_ext_depth_sensor/native/ultraleap_sdk/
+addons/gn_ext_depth_sensor/native/*/bin/
 
 # Blackmagic DeckLink SDK — proprietary, manual download required
 addons/gn_ext_blackmagic/native/decklink_sdk/
