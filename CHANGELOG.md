@@ -9,6 +9,10 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-13 — .gnpatch opens in the editor that was run last
+
+- A release editor registers `.gnpatch` to its own executable. Opening another copy later points the extension at that copy. Double-click loads the patch. A program chosen in Windows Settings is left as the default.
+
 ## 2026-10-13 — Editor settings stay local
 
 - **README** keeps the Godot essay and a one-line note that every operator has help. Image slots are unchanged.

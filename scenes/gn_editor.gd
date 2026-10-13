@@ -144,6 +144,8 @@ func _ready() -> void:
 	# Prevent the engine from quitting immediately on window close so we can
 	# show the unsaved-changes dialog first.
 	get_tree().auto_accept_quit = false
+	# Point .gnpatch at this executable when a different editor currently owns it.
+	GNFileAssociation.claim_for_this_executable()
 
 	# Root Control fills the viewport via full-rect anchors (see gn_editor.tscn).
 	# If maximize leaves a letterboxed 1280×720 UI, that is Godot 4.4+ Game
@@ -253,7 +255,9 @@ func _ready() -> void:
 
 ## Sets up the network — restores the last opened patch or starts empty.
 func _setup_network() -> void:
-	var last_path := _load_setting("last_patch_path", "") as String
+	var last_path := GNFileAssociation.patch_path_from_args()
+	if last_path.is_empty():
+		last_path = _load_setting("last_patch_path", "") as String
 	if not last_path.is_empty() and FileAccess.file_exists(last_path):
 		network = GNNetwork.new()
 		var err := network.load_from_file(last_path)

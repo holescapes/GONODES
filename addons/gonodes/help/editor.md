@@ -12,9 +12,11 @@ mouse interaction, and inspector control in the GONODES editor.
 | Shortcut           | Action                          |
 |--------------------|---------------------------------|
 | **Ctrl + N**       | New patch (clears everything)   |
-| **Ctrl + O**       | Open patch file (.gonodes)      |
+| **Ctrl + O**       | Open patch file (.gnpatch)      |
 | **Ctrl + S**       | Save current patch              |
 | **Ctrl + Shift + S** | Save As… (pick new file)     |
+
+Double-clicking a `.gnpatch` opens this editor. A release editor registers that extension to itself when it runs. Opening a newer copy later points `.gnpatch` at the newer copy. On Windows, a program you picked yourself in Settings stays the default.
 
 ### Graph Editing
 
