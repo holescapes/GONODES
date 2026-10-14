@@ -2,9 +2,9 @@ class_name PoseDetectCHOP
 extends GNChopBase
 ## Body pose estimation via BlazePose ONNX model.
 ##
-## Accepts a TOP input (camera/image), runs pose detection, and outputs
+## Accepts an IMG input (camera/image), runs pose detection, and outputs
 ## 33 body keypoints as CHOP channels: joint_name:x, joint_name:y,
-## joint_name:z, joint_name:v (visibility).
+## joint_name:z, joint_name:v (visibility). Wire TOPtoIMG in front of a TOP.
 ##
 ## Requires the gn_ext_ml GDExtension (GNOnnxInference class) and
 ## a BlazePose ONNX model in the models/ directory.
@@ -24,9 +24,7 @@ const POSE_LANDMARKS := [
 ]
 
 
-var _onnx: RefCounted = null
-var _model_loaded := false
-var _last_model: String = ""
+var _session := GNMlSession.new()
 
 
 # Input image dimensions expected by BlazePose
@@ -38,7 +36,6 @@ const MODEL_H := 256
 
 func _init() -> void:
 	node_type = "posedetect"
-	time_dependent = true
 	node_description = "Body pose estimation — 33 keypoints as CHOP channels. Requires gn_ext_ml."
 
 
@@ -47,7 +44,7 @@ func supported_platforms() -> PackedStringArray:
 
 
 func _init_ports() -> void:
-	add_input("image", GNFamily.Type.TOP, true, "Camera / video input", "Image")
+	add_input("image", GNFamily.Type.IMG, true, "Camera or still image. Use TOPtoIMG when the source is a TOP.", "Image")
 	add_output("out", GNFamily.Type.CHOP, "Pose keypoint channels", "Out")
 
 
@@ -67,67 +64,32 @@ func _init_parameters() -> void:
 
 
 func _cook(inputs: Array[GNData]) -> GNData:
-	if not _is_ml_available():
-		GNLogger.warn("PoseDetectCHOP", "'%s': gn_ext_ml not loaded" % id)
-		return null
-
-
 	if not get_param_value("active"):
 		return _cached_channel_data
 
-
-	var in_tex: GNTextureData = _get_input_top(inputs, 0)
-	if in_tex == null or in_tex.texture == null:
+	node_warning = ""
+	var in_img: GNImageData = GNMlSession.image_input(inputs)
+	if in_img == null or in_img.image == null:
 		return null
 
-
-	_ensure_onnx()
-	if _onnx == null:
-		return null
-
-
-	# Load / switch model
 	var model_path: String = get_param_value("model_path")
-	if model_path != _last_model:
-		_onnx.release()
-		var providers := ["cpu", "directml", "cuda", "coreml"]
-		_onnx.set_execution_provider(providers[get_param_value("provider")])
-		_model_loaded = _onnx.load_model(model_path)
-		_last_model = model_path
-		if not _model_loaded:
-			GNLogger.error("PoseDetectCHOP", "'%s': failed to load model '%s'" % [id, model_path])
-
-
-	if not _model_loaded:
+	if not _session.begin(int(get_param_value("provider")), model_path, project_dir):
+		node_warning = _session.last_error
+		GNLogger.error("PoseDetectCHOP", "'%s': %s" % [id, _session.last_error])
 		return null
 
-
-	# Get input image
-	var img: Image = in_tex.texture.get_image()
-	if img == null:
+	if not _session.run_image(in_img.image, MODEL_W, MODEL_H):
+		node_warning = _session.last_error
+		GNLogger.error("PoseDetectCHOP", "'%s': %s" % [id, _session.last_error])
 		return null
-
-
-	# Set input tensor (NCHW, normalized to [0,1])
-	var input_names: PackedStringArray = _onnx.get_input_names()
-	if input_names.is_empty():
-		return null
-	_onnx.set_input_from_image(input_names[0], img, MODEL_W, MODEL_H)
-
-
-	# Run inference
-	if not _onnx.run():
-		return null
-
 
 	# Parse output — BlazePose outputs landmarks as [1, 33, 5] or [1, 195]
 	# (33 × 5: x, y, z, visibility, presence) or similar flat layout
-	var output_names: PackedStringArray = _onnx.get_output_names()
+	var output_names: PackedStringArray = _session.output_names()
 	if output_names.is_empty():
 		return null
 
-
-	var raw: PackedFloat32Array = _onnx.get_output_float(output_names[0])
+	var raw: PackedFloat32Array = _session.output_float(output_names[0])
 	if raw.is_empty():
 		return null
 
@@ -165,29 +127,3 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 
 	return out
-
-
-
-
-func _get_input_top(inputs: Array[GNData], idx: int) -> GNTextureData:
-	if idx >= inputs.size():
-		return null
-	var _ret0 := inputs[idx] as GNTextureData
-	return _ret0
-
-
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-
-static func _is_ml_available() -> bool:
-	return ClassDB.class_exists(&"GNOnnxInference")
-
-
-func _ensure_onnx() -> void:
-	if _onnx != null:
-		return
-	_onnx = ClassDB.instantiate(&"GNOnnxInference")
-	if _onnx == null:
-		GNLogger.error("PoseDetectCHOP", "'%s': failed to instantiate GNOnnxInference" % id)

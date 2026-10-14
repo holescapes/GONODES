@@ -17,6 +17,10 @@
 
 ## Entries
 
+### 2026-10-14 — First-beta ML session
+
+- The ML operators use `GNMlSession` (`addons/gn_ext_ml/gn_ml_session.gd`). A later AI job holds that session. It does not subclass it.
+
 ### 2026-10-13 — Agent docs live in `ai/`
 
 - Brief an agent from `ai/README.md`. Engine work then follows `ai/RULES.md`. Patch writing follows root `llms.txt`.

@@ -10,14 +10,6 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
         "detect1": {
             "type": "ObjectDetectDAT",
             "position": [
@@ -96,12 +88,6 @@
         {
             "from": "webcam1",
             "from_port": 0,
-            "to": "bridge1",
-            "to_port": 0
-        },
-        {
-            "from": "bridge1",
-            "from_port": 0,
             "to": "detect1",
             "to_port": 0
         },
@@ -134,7 +120,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Object Detect \u2014 Confidence Heatmap\n\nDetections sorted by confidence -> DAT to CHOP.\nCHOPtoTOP heatmap visualizes detection confidence.\nBright spots = high-confidence detections.",
+            "text": "Object Detect — Confidence Heatmap\n\nDetections sorted by confidence -> DAT to CHOP.\nCHOPtoTOP heatmap visualizes detection confidence.\nBright spots = high-confidence detections.",
             "position": [
                 -100.0,
                 -100.0

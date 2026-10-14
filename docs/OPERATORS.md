@@ -6912,6 +6912,7 @@ When two `WindowOUT` nodes are connected to the same UI operator, Godot's single
 | **gn_ext_blackmagic** | BlackmagicInIMG, BlackmagicOutIMG, BlackmagicDAT | Professional SDI/HDMI video I/O via DeckLink SDK. Capture and output with timecode, device enum. Windows COM-based |
 | **gn_ext_depth_sensor** | DepthSensorIMG, DepthSensorDAT | Unified depth sensor: image + skeleton + hands + point cloud. Azure Kinect, RealSense, Ultraleap backends |
 | **gn_ext_audio** | AudioOscillatorCHOP, AudioFilterCHOP, AudioParaEQCHOP, AudioMixCHOP, AudioMovieCHOP, AudioRenderCHOP, AudioStreamInCHOP, AudioStreamOutCHOP, AudioReverbCHOP, AudioDelayCHOP, AudioPitchCHOP, AudioEnvelopeCHOP, AudioGateCHOP | Audio synthesis, effects, and processing — 13 pure-GDScript operators covering waveform generation, biquad filtering, parametric EQ, mixing, reverb, delay, pitch shift, envelope following |
+| **gn_ext_ml** | PoseDetectCHOP, HandDetectCHOP, FaceDetectCHOP, DepthEstimateIMG, StyleTransferIMG, SegmentationIMG, ObjectDetectDAT | ONNX Runtime. Pose, hand, face, and object detection take an IMG. StyleTransferIMG is a style menu. Parameters and model licenses are in `addons/gn_ext_ml/README.md` |
 
 > **Note:** SDF (29), NET (15), and SCRIPT (3) are core families. See the SDF, NET, and SCRIPT sections above.
 

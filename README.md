@@ -108,6 +108,7 @@ The first patch, the editor, expressions, and export are in the in-editor help, 
 | You want | Read |
 |----------|------|
 | Use the editor | [Getting Started](addons/gonodes/help/getting_started.md), [Editor](addons/gonodes/help/editor.md) |
+| ML, particles, SDFs | [Machine Learning](addons/gonodes/help/ml.md), [Particles](addons/gonodes/help/pop.md), [Signed distance fields](addons/gonodes/help/sdf.md) |
 | Expressions, scripts, subnetworks | [Expressions](addons/gonodes/help/expressions.md), [Scripting](addons/gonodes/help/scripting.md), [Sub-networks](addons/gonodes/help/sub_networks.md) |
 | Run a finished patch | [Player](addons/gonodes/help/player.md) |
 | Build or export | [Building](addons/gonodes/help/building.md). Internals: [dev_docs/BUILD.md](dev_docs/BUILD.md) |

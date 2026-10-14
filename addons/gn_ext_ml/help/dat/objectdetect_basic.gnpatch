@@ -10,14 +10,6 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
         "detect1": {
             "type": "ObjectDetectDAT",
             "position": [
@@ -33,10 +25,29 @@
                 }
             }
         },
+        "text1": {
+            "type": "TextTOP",
+            "position": [
+                850,
+                100
+            ],
+            "parameters": {
+                "resolution": {
+                    "value": {
+                        "_type": "Vector2i",
+                        "x": 512,
+                        "y": 512
+                    }
+                },
+                "font_size": {
+                    "value": 14
+                }
+            }
+        },
         "window1": {
             "type": "WindowOUT",
             "position": [
-                850,
+                1100,
                 100
             ],
             "parameters": {
@@ -57,17 +68,17 @@
         {
             "from": "webcam1",
             "from_port": 0,
-            "to": "bridge1",
-            "to_port": 0
-        },
-        {
-            "from": "bridge1",
-            "from_port": 0,
             "to": "detect1",
             "to_port": 0
         },
         {
-            "from": "bridge1",
+            "from": "detect1",
+            "from_port": 0,
+            "to": "text1",
+            "to_port": 0
+        },
+        {
+            "from": "text1",
             "from_port": 0,
             "to": "window1",
             "to_port": 0
@@ -77,7 +88,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Object Detect DAT — Basic\n\nObject detection — outputs a table of detected objects with bounding boxes and confidence scores.\nUsing: confidence=0.25, max_detections=20.",
+            "text": "Object Detect DAT — Basic\n\nWebcam image into YOLO. The table feeds Text TOP so the detector cooks.\nYou supply the ONNX file. Ultralytics YOLOv8 weights are not downloaded.\nUsing: confidence=0.25, max_detections=20.",
             "position": [
                 -100.0,
                 -100.0

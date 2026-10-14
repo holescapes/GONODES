@@ -10,14 +10,6 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
         "face1": {
             "type": "FaceDetectCHOP",
             "position": [
@@ -68,12 +60,6 @@
     "connections": [
         {
             "from": "webcam1",
-            "from_port": 0,
-            "to": "bridge1",
-            "to_port": 0
-        },
-        {
-            "from": "bridge1",
             "from_port": 0,
             "to": "face1",
             "to_port": 0

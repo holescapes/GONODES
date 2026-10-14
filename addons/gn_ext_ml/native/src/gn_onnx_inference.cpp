@@ -1,5 +1,7 @@
 #include "gn_onnx_inference.h"
 
+#include <godot_cpp/classes/file_access.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
@@ -7,6 +9,8 @@
 #include <onnxruntime_cxx_api.h>
 
 #include <cstring>
+#include <exception>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -15,8 +19,15 @@ using namespace godot;
 
 // ── Internal state ───────────────────────────────────────────────────────────
 
+static Ort::Env &shared_env() {
+    static std::unique_ptr<Ort::Env> env;
+    if (!env) {
+        env = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "GNOnnxInference");
+    }
+    return *env;
+}
+
 struct GNOnnxInference::OrtState {
-    std::unique_ptr<Ort::Env> env;
     std::unique_ptr<Ort::Session> session;
     Ort::MemoryInfo mem_info = Ort::MemoryInfo::CreateCpu(
             OrtArenaAllocator, OrtMemTypeDefault);
@@ -46,6 +57,8 @@ struct GNOnnxInference::OrtState {
 
 void GNOnnxInference::_bind_methods() {
     ClassDB::bind_method(D_METHOD("load_model", "path"), &GNOnnxInference::load_model);
+    ClassDB::bind_method(D_METHOD("set_project_dir", "dir"), &GNOnnxInference::set_project_dir);
+    ClassDB::bind_method(D_METHOD("get_last_error"), &GNOnnxInference::get_last_error);
     ClassDB::bind_method(D_METHOD("release"), &GNOnnxInference::release);
     ClassDB::bind_method(D_METHOD("is_loaded"), &GNOnnxInference::is_loaded);
 
@@ -87,42 +100,105 @@ GNOnnxInference::~GNOnnxInference() {
 
 // ── Model Lifecycle ──────────────────────────────────────────────────────────
 
+void GNOnnxInference::set_project_dir(const String &p_dir) {
+    _project_dir = p_dir;
+}
+
+String GNOnnxInference::get_last_error() const {
+    return _last_error;
+}
+
+String GNOnnxInference::_resolve_model_path(const String &p_path) {
+    if (p_path.is_empty()) {
+        _last_error = "No model path";
+        return String();
+    }
+    if (p_path.begins_with("res://") || p_path.begins_with("user://")) {
+        ProjectSettings *settings = ProjectSettings::get_singleton();
+        if (settings == nullptr) {
+            _last_error = "ProjectSettings is not available";
+            return String();
+        }
+        return settings->globalize_path(p_path);
+    }
+    if (p_path.begins_with("project://")) {
+        if (_project_dir.is_empty()) {
+            _last_error = "Cannot resolve project:// without a project directory";
+            return String();
+        }
+        return _project_dir.path_join(p_path.trim_prefix("project://"));
+    }
+    return p_path;
+}
+
+bool GNOnnxInference::_attach_provider(Ort::SessionOptions &p_options) {
+    if (_provider == "cpu" || _provider.is_empty()) {
+        return true;
+    }
+    try {
+        if (_provider == "directml") {
+#ifdef _WIN32
+            p_options.AppendExecutionProvider("DML");
+            return true;
+#else
+            _last_error = "DirectML is only available on Windows";
+            return false;
+#endif
+        }
+        if (_provider == "cuda") {
+            OrtCUDAProviderOptions cuda_opts{};
+            p_options.AppendExecutionProvider_CUDA(cuda_opts);
+            return true;
+        }
+        if (_provider == "coreml") {
+#ifdef __APPLE__
+            p_options.AppendExecutionProvider("CoreML");
+            return true;
+#else
+            _last_error = "CoreML is only available on macOS";
+            return false;
+#endif
+        }
+        _last_error = "Unknown execution provider: " + _provider;
+        return false;
+    } catch (const Ort::Exception &e) {
+        _last_error = String(e.what());
+        return false;
+    }
+}
+
 bool GNOnnxInference::load_model(const String &p_path) {
+    _last_error = String();
+    String resolved = _resolve_model_path(p_path);
+    if (resolved.is_empty()) {
+        return false;
+    }
+    if (!FileAccess::file_exists(p_path) && !FileAccess::file_exists(resolved)) {
+        _last_error = "Model file not found: " + p_path;
+        return false;
+    }
     release();
 
     try {
         _state = new OrtState();
-        _state->env = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "GNOnnxInference");
 
         Ort::SessionOptions opts;
         opts.SetIntraOpNumThreads(2);
         opts.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 
-        // Execution provider setup
-        if (_provider == "directml") {
-#ifdef _WIN32
-            opts.AppendExecutionProvider("DML");
-#endif
-        } else if (_provider == "cuda") {
-            OrtCUDAProviderOptions cuda_opts{};
-            opts.AppendExecutionProvider_CUDA(cuda_opts);
-        } else if (_provider == "coreml") {
-#ifdef __APPLE__
-            opts.AppendExecutionProvider("CoreML");
-#endif
+        if (!_attach_provider(opts)) {
+            release();
+            return false;
         }
-        // "cpu" is always the fallback — no special configuration needed.
-
-        // Convert Godot path to OS path
-        CharString utf8 = p_path.utf8();
-        std::string model_path(utf8.get_data(), utf8.length());
 
 #ifdef _WIN32
-        // ONNX Runtime on Windows uses wide strings
-        std::wstring wpath(model_path.begin(), model_path.end());
-        _state->session = std::make_unique<Ort::Session>(*_state->env, wpath.c_str(), opts);
+        Char16String utf16 = resolved.utf16();
+        _state->session = std::make_unique<Ort::Session>(
+                shared_env(), (const wchar_t *)utf16.get_data(), opts);
 #else
-        _state->session = std::make_unique<Ort::Session>(*_state->env, model_path.c_str(), opts);
+        CharString utf8 = resolved.utf8();
+        std::string model_path(utf8.get_data(), utf8.length());
+        _state->session = std::make_unique<Ort::Session>(shared_env(), model_path.c_str(), opts);
 #endif
 
         // Cache input / output names
@@ -140,7 +216,13 @@ bool GNOnnxInference::load_model(const String &p_path) {
 
         return true;
     } catch (const Ort::Exception &e) {
-        UtilityFunctions::printerr(String("GNOnnxInference: ONNX error: ") + e.what());
+        _last_error = String(e.what());
+        UtilityFunctions::printerr(String("GNOnnxInference: ONNX error: ") + _last_error);
+        release();
+        return false;
+    } catch (const std::exception &e) {
+        _last_error = String(e.what());
+        UtilityFunctions::printerr(String("GNOnnxInference: ") + _last_error);
         release();
         return false;
     }
@@ -237,7 +319,11 @@ void GNOnnxInference::set_input_from_image_normalized(const String &p_name,
 // ── Inference ────────────────────────────────────────────────────────────────
 
 bool GNOnnxInference::run() {
-    if (!is_loaded()) return false;
+    _last_error = String();
+    if (!is_loaded()) {
+        _last_error = "Model is not loaded";
+        return false;
+    }
 
     try {
         _state->outputs.clear();
@@ -248,8 +334,8 @@ bool GNOnnxInference::run() {
         for (auto &name : _state->input_names) {
             auto it = _state->inputs.find(name);
             if (it == _state->inputs.end()) {
-                UtilityFunctions::printerr(
-                        String("GNOnnxInference: missing input '") + name.c_str() + "'");
+                _last_error = String("Missing input '") + name.c_str() + "'";
+                UtilityFunctions::printerr(String("GNOnnxInference: ") + _last_error);
                 return false;
             }
             in_names.push_back(name.c_str());
@@ -301,7 +387,12 @@ bool GNOnnxInference::run() {
 
         return true;
     } catch (const Ort::Exception &e) {
-        UtilityFunctions::printerr(String("GNOnnxInference: run error: ") + e.what());
+        _last_error = String(e.what());
+        UtilityFunctions::printerr(String("GNOnnxInference: run error: ") + _last_error);
+        return false;
+    } catch (const std::exception &e) {
+        _last_error = String(e.what());
+        UtilityFunctions::printerr(String("GNOnnxInference: run error: ") + _last_error);
         return false;
     }
 }

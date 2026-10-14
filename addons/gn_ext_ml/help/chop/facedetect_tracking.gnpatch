@@ -10,14 +10,6 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
         "face1": {
             "type": "FaceDetectCHOP",
             "position": [
@@ -111,12 +103,6 @@
         {
             "from": "webcam1",
             "from_port": 0,
-            "to": "bridge1",
-            "to_port": 0
-        },
-        {
-            "from": "bridge1",
-            "from_port": 0,
             "to": "face1",
             "to_port": 0
         },
@@ -143,7 +129,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Face Detect \u2014 Head Tracking Transform\n\nNose position drives texture translation.\nMouth width drives scale (smile = zoom).\nFace tracking mapped to visual parameters via expressions.",
+            "text": "Face Detect — Head Tracking Transform\n\nNose position drives texture translation.\nMouth width drives scale (smile = zoom).\nFace tracking mapped to visual parameters via expressions.",
             "position": [
                 -100.0,
                 -100.0

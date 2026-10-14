@@ -47,9 +47,16 @@ public:
 
     // ── Model Lifecycle ──────────────────────────────────────────────
 
-    /// Load an ONNX model from the given file path.
-    /// Returns true on success.
+    /// Load an ONNX model. res:// and user:// are globalized. project://
+    /// joins [method set_project_dir]. Returns false and sets
+    /// [method get_last_error] when the file or the chosen provider fails.
     bool load_model(const String &p_path);
+
+    /// Folder that project:// paths are relative to.
+    void set_project_dir(const String &p_dir);
+
+    /// Empty after a successful load or run. Otherwise the reason for the last failure.
+    String get_last_error() const;
 
     /// Release the loaded model and free memory.
     void release();
@@ -123,6 +130,11 @@ private:
     struct OrtState;
     OrtState *_state = nullptr;
     String _provider = "cpu";
+    String _project_dir;
+    String _last_error;
+
+    String _resolve_model_path(const String &p_path);
+    bool _attach_provider(Ort::SessionOptions &p_options);
 };
 
 #endif // GN_ONNX_INFERENCE_H

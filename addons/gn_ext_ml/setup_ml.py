@@ -3,8 +3,9 @@
 setup_ml.py — Download ONNX Runtime SDK and pre-trained models for gn_ext_ml.
 
 Downloads the ONNX Runtime C API library for the current platform, extracts
-it into native/onnxruntime/, downloads the default ONNX models into models/,
-and enables the .gdextension file.
+it into native/onnxruntime/, and can download the permissive ONNX models
+into models/. The build calls this script with --sdk-only, so a normal
+build does not fetch weights. models/ is gitignored.
 
 Usage:
   python addons/gn_ext_ml/setup_ml.py                # SDK + all models
@@ -75,50 +76,63 @@ PLATFORM_MAP = {
     },
 }
 
-# ONNX models with direct download URLs.
-# NOTE: These are stable public URLs. If any go offline, update the URL here.
+# ONNX models with a real ONNX download. Google does not publish the
+# MediaPipe landmark or selfie models as ONNX, so those are not fetched.
+# Ultralytics YOLOv8 weights are AGPL-3.0 and are not fetched either.
+NOT_FETCHED = [
+    (
+        "pose_landmark_lite.onnx",
+        "MediaPipe does not publish BlazePose as ONNX. Convert it yourself and place the file here.",
+    ),
+    (
+        "hand_landmark_lite.onnx",
+        "MediaPipe does not publish the hand landmarker as ONNX. Convert it yourself and place the file here.",
+    ),
+    (
+        "face_landmark.onnx",
+        "MediaPipe does not publish the face landmarker as ONNX. Convert it yourself and place the file here.",
+    ),
+    (
+        "selfie_segmentation.onnx",
+        "MediaPipe does not publish the selfie segmenter as ONNX. Convert it yourself and place the file here.",
+    ),
+    (
+        "yolov8n.onnx",
+        "Ultralytics YOLOv8 weights are AGPL-3.0. This script does not download them. Supply your own YOLO ONNX file.",
+    ),
+]
+
 MODELS = [
     {
-        "file": "pose_landmark_lite.onnx",
-        "url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
-        "description": "MediaPipe BlazePose (lite) — body pose estimation",
-    },
-    {
-        "file": "hand_landmark_lite.onnx",
-        "url": "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task",
-        "description": "MediaPipe Hands (lite) — hand landmark tracking",
-    },
-    {
-        "file": "face_landmark.onnx",
-        "url": "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task",
-        "description": "MediaPipe Face Mesh — facial landmarks",
-    },
-    {
         "file": "midas_v21_small_256.onnx",
-        "url": "https://github.com/isl-org/MiDaS/releases/download/v2_1/midas_v21_small_256.onnx",
-        "description": "MiDaS v2.1 Small — monocular depth estimation",
+        "url": "https://github.com/isl-org/MiDaS/releases/download/v2_1/model-small.onnx",
+        "description": "MiDaS v2.1 Small — monocular depth estimation (MIT)",
     },
     {
         "file": "style_mosaic.onnx",
-        "url": "https://github.com/onnx/models/raw/main/validated/vision/style_transfer/fast_neural_style/model/mosaic-9.onnx",
-        "description": "Fast Neural Style — mosaic",
+        "url": "https://huggingface.co/onnxmodelzoo/mosaic-9/resolve/main/mosaic-9.onnx",
+        "description": "Fast neural style — mosaic (BSD-3-Clause)",
     },
     {
         "file": "style_candy.onnx",
-        "url": "https://github.com/onnx/models/raw/main/validated/vision/style_transfer/fast_neural_style/model/candy-9.onnx",
-        "description": "Fast Neural Style — candy",
+        "url": "https://huggingface.co/onnxmodelzoo/candy-9/resolve/main/candy-9.onnx",
+        "description": "Fast neural style — candy (BSD-3-Clause)",
     },
     {
         "file": "style_udnie.onnx",
-        "url": "https://github.com/onnx/models/raw/main/validated/vision/style_transfer/fast_neural_style/model/udnie-9.onnx",
-        "description": "Fast Neural Style — udnie",
+        "url": "https://huggingface.co/onnxmodelzoo/udnie-9/resolve/main/udnie-9.onnx",
+        "description": "Fast neural style — udnie (BSD-3-Clause)",
     },
     {
-        "file": "selfie_segmentation.onnx",
-        "url": "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite",
-        "description": "MediaPipe Selfie Segmentation — person/background mask",
+        "file": "style_rain_princess.onnx",
+        "url": "https://huggingface.co/onnxmodelzoo/rain-princess-9/resolve/main/rain-princess-9.onnx",
+        "description": "Fast neural style — rain princess (BSD-3-Clause)",
     },
-    # YOLOv8n requires export via ultralytics — we provide a script instead
+    {
+        "file": "style_pointilism.onnx",
+        "url": "https://huggingface.co/onnxmodelzoo/pointilism-9/resolve/main/pointilism-9.onnx",
+        "description": "Fast neural style — pointillism (BSD-3-Clause)",
+    },
 ]
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -297,13 +311,9 @@ def setup_models():
         else:
             failed += 1
 
-    # YOLOv8n requires ultralytics export
-    yolo_dest = os.path.join(MODELS_DIR, "yolov8n.onnx")
-    if not os.path.isfile(yolo_dest):
-        log("YOLOv8n model requires export via ultralytics:")
-        log("  pip install ultralytics")
-        log("  yolo export model=yolov8n.pt format=onnx")
-        log(f"  Then copy yolov8n.onnx to {MODELS_DIR}/")
+    for filename, reason in NOT_FETCHED:
+        log(f"Not downloaded: {filename}")
+        log(f"  {reason}")
 
     log(f"Models: {success} downloaded, {skipped} already present, {failed} failed (optional)")
     if failed:

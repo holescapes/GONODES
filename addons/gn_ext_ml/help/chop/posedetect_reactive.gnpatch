@@ -101,7 +101,7 @@
             "to_port": 0
         },
         {
-            "from": "bridge1",
+            "from": "webcam1",
             "from_port": 0,
             "to": "pose1",
             "to_port": 0
@@ -135,7 +135,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Pose Detect \u2014 Reactive Displacement\n\nNose X position drives noise displacement amount\nvia parameter expression. SmoothCHOP filters jitter.\nBody movement controls visual distortion intensity.",
+            "text": "Pose Detect — Reactive Displacement\n\nNose X position drives noise displacement amount\nvia parameter expression. SmoothCHOP filters jitter.\nBody movement controls visual distortion intensity.",
             "position": [
                 -100.0,
                 -100.0

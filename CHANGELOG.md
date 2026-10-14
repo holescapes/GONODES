@@ -9,6 +9,12 @@ For the full development journal with implementation details, see
 
 ---
 
+## 2026-10-14 — ML operators share one session, and style is a menu
+
+- **GNMlSession** loads the ONNX model for the seven ML operators. Pose, hand, face, and object detection take an IMG. A missing model or a provider that cannot attach is reported. It does not fall back to CPU.
+- **StyleTransferIMG** Style is Mosaic, Candy, Udnie, Rain Princess, Pointillism, or Custom. Those models take a 224×224 image. `setup_ml.py` fetches them and MiDaS. It does not fetch MediaPipe ONNX files or Ultralytics YOLOv8 weights (AGPL-3.0). The build copies `onnxruntime.dll` next to the extension library.
+- **User guide** pages for machine learning, particles, and signed distance fields. The ML page says the runtime ships and the weights do not.
+
 ## 2026-10-13 — .gnpatch opens in the editor that was run last
 
 - A release editor registers `.gnpatch` to its own executable. Opening another copy later points the extension at that copy. Double-click loads the patch. A program chosen in Windows Settings is left as the default.

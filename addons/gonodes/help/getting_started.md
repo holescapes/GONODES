@@ -26,6 +26,14 @@ GONODES organizes operators into families based on the type of data they process
 | **SDF**  | Signed distance field operators — primitives, booleans, modifiers |
 | **SCRIPT** | User scripting operators — GDScript, Python, C++ |
 
+A few categories have their own page, because they need a download or a chain that is not obvious from one operator:
+
+- [Machine Learning](ml.md) — the runtime ships, the weights do not
+- [Particles](pop.md) — SourcePOP to a window
+- [Signed Distance Fields](sdf.md) — a shape, a boolean, a raymarch
+
+There is no AI page yet. Those operators are not in this build.
+
 ---
 
 ## Your First Patch

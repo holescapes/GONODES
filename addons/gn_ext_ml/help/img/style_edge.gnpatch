@@ -28,6 +28,9 @@
                     "value": 1.0,
                     "expression": "abs(sin(time * 2.0))",
                     "mode": "EXPRESSION"
+                },
+                "style": {
+                    "value": 0
                 }
             }
         },
@@ -108,12 +111,6 @@
             "to_port": 0
         },
         {
-            "from": "style1",
-            "from_port": 0,
-            "to": "img2top_style1",
-            "to_port": 0
-        },
-        {
             "from": "edge1",
             "from_port": 0,
             "to": "comp1",
@@ -148,7 +145,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Style Transfer \u2014 Edge Composite\n\nStyled image + edge detection composited together.\nCreates a painterly look with visible brush strokes.\nLevel adjustment enhances contrast and vibrancy.",
+            "text": "Style Transfer — Edge Composite\n\nStyled image + edge detection composited together.\nCreates a painterly look with visible brush strokes.\nLevel adjustment enhances contrast and vibrancy.\nStyle menu: Mosaic, Candy, Udnie, Rain Princess, Pointillism, or Custom.",
             "position": [
                 -100.0,
                 -100.0

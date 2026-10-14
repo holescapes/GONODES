@@ -8,9 +8,7 @@ extends GNImgBase
 ##
 ## Requires the gn_ext_ml GDExtension (GNOnnxInference class).
 
-var _onnx: RefCounted = null
-var _model_loaded := false
-var _last_model: String = ""
+var _session := GNMlSession.new()
 
 const MODEL_W := 256
 const MODEL_H := 256
@@ -49,50 +47,32 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	var out := _prepare_image()
 
-	if not _is_ml_available():
-		GNLogger.warn("SegmentationIMG", "'%s': gn_ext_ml not loaded" % id)
-		return null
-
 	if not get_param_value("active"):
 		return out
 
-	var in_img: GNImageData = _get_input_img(inputs, 0)
+	node_warning = ""
+	var in_img: GNImageData = GNMlSession.image_input(inputs)
 	if in_img == null or in_img.image == null:
 		return null
 
-	_ensure_onnx()
-	if _onnx == null:
-		return null
-
 	var model_path: String = get_param_value("model_path")
-	if model_path != _last_model:
-		_onnx.release()
-		var providers := ["cpu", "directml", "cuda", "coreml"]
-		_onnx.set_execution_provider(providers[get_param_value("provider")])
-		_model_loaded = _onnx.load_model(model_path)
-		_last_model = model_path
-		if not _model_loaded:
-			GNLogger.error("SegmentationIMG", "'%s': failed to load '%s'" % [id, model_path])
-
-	if not _model_loaded:
+	if not _session.begin(int(get_param_value("provider")), model_path, project_dir):
+		node_warning = _session.last_error
+		GNLogger.error("SegmentationIMG", "'%s': %s" % [id, _session.last_error])
 		return null
 
-	var img: Image = in_img.image
-
-	var input_names: PackedStringArray = _onnx.get_input_names()
-	if input_names.is_empty():
-		return null
-	_onnx.set_input_from_image(input_names[0], img, MODEL_W, MODEL_H)
-
-	if not _onnx.run():
+	if not _session.run_image(in_img.image, MODEL_W, MODEL_H):
+		node_warning = _session.last_error
+		GNLogger.error("SegmentationIMG", "'%s': %s" % [id, _session.last_error])
 		return null
 
-	var output_names: PackedStringArray = _onnx.get_output_names()
+	var output_names: PackedStringArray = _session.output_names()
+
 	if output_names.is_empty():
 		return null
 
 	# Selfie segmentation outputs [1, 1, 256, 256] or [1, 256, 256] probability
-	var raw: PackedFloat32Array = _onnx.get_output_float(output_names[0])
+	var raw: PackedFloat32Array = _session.output_float(output_names[0])
 	if raw.is_empty():
 		return null
 
@@ -126,16 +106,3 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	out.set_image(mask_img)
 	return out
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-static func _is_ml_available() -> bool:
-	return ClassDB.class_exists(&"GNOnnxInference")
-
-func _ensure_onnx() -> void:
-	if _onnx != null:
-		return
-	_onnx = ClassDB.instantiate(&"GNOnnxInference")
-	if _onnx == null:
-		GNLogger.error("SegmentationIMG", "'%s': failed to instantiate GNOnnxInference" % id)

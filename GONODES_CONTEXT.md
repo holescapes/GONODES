@@ -5644,13 +5644,13 @@ Total: **396 operators** (88 TOP, 14 IMG, 81 CHOP, 39 DAT, 75 SOP, 11 POP, 13 VO
 | NDIOutTOP | TOP (ext) | Send texture as NDI video to network. Requires gn_ext_ndi GDExtension |
 | NDIAudioInCHOP | CHOP (ext) | Receive NDI audio as CHOP channels — multi-channel, configurable sample rate |
 | NDIAudioOutCHOP | CHOP (ext) | Send CHOP channels as NDI audio — interleaved float, multi-channel |
-| PoseDetectCHOP | CHOP (ext) | Body pose estimation via BlazePose — 33 keypoints (x/y/z/visibility). Requires gn_ext_ml |
-| HandDetectCHOP | CHOP (ext) | Hand landmark tracking — 21 points per hand. Requires gn_ext_ml |
-| FaceDetectCHOP | CHOP (ext) | Face mesh landmarks — 468 points (or key subset). Requires gn_ext_ml |
-| DepthEstimateIMG | IMG (ext) | Monocular depth estimation via MiDaS — grayscale depth map image. Requires gn_ext_ml |
-| StyleTransferIMG | IMG (ext) | Neural style transfer — apply artistic styles to images. Requires gn_ext_ml |
-| SegmentationIMG | IMG (ext) | Person/background segmentation — binary/soft mask image. Requires gn_ext_ml |
-| ObjectDetectDAT | DAT (ext) | Object detection via YOLOv8 — table of bounding boxes + COCO labels. Requires gn_ext_ml |
+| PoseDetectCHOP | CHOP (ext) | Body pose, IMG in, 33 keypoints. The ONNX file is not shipped. Requires gn_ext_ml |
+| HandDetectCHOP | CHOP (ext) | Hand landmarks, IMG in, 21 points per hand. The ONNX file is not shipped. Requires gn_ext_ml |
+| FaceDetectCHOP | CHOP (ext) | Face mesh, IMG in. The ONNX file is not shipped. Requires gn_ext_ml |
+| DepthEstimateIMG | IMG (ext) | MiDaS depth map. The weight is a separate download, not shipped. Requires gn_ext_ml |
+| StyleTransferIMG | IMG (ext) | Johnson style menu. The five weights are a separate download, not shipped. Requires gn_ext_ml |
+| SegmentationIMG | IMG (ext) | Person/background mask. The ONNX file is not shipped. Requires gn_ext_ml |
+| ObjectDetectDAT | DAT (ext) | YOLO table. You supply the ONNX file. Ultralytics YOLOv8 weights are not downloaded. Requires gn_ext_ml |
 | DepthSensorTOP | TOP (ext) | Depth sensor image streams (depth/color/IR/player index) — Azure Kinect + RealSense. Requires gn_ext_depth_sensor |
 | DepthSkeletonCHOP | CHOP (ext) | Hardware skeleton joint tracking — 32 joints per body, positions/rotations/confidence. Requires gn_ext_depth_sensor |
 | DepthPointCloudSOP | SOP (ext) | Dense 3D point cloud mesh from depth sensor with per-point color. Requires gn_ext_depth_sensor |

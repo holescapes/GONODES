@@ -100,7 +100,7 @@ If the vendor runtime is not installed:
 | Extension | What the release downloads | License |
 |-----------|---------------------------|---------|
 | gn_ext_user_python | CPython 3.10 + NumPy | PSF-2.0 / BSD-3 |
-| gn_ext_ml | ONNX Runtime (not YOLOv8 weights) | MIT |
+| gn_ext_ml | ONNX Runtime library only. No model weights | MIT |
 | gn_ext_opencv | OpenCV SDK on Windows; distro package on Linux and macOS | Apache 2.0 |
 | gn_ext_syphon | Syphon Framework source clone | BSD-3 |
 | gn_ext_spout | Spout2 source clone | BSD |
@@ -108,7 +108,7 @@ If the vendor runtime is not installed:
 
 `python setup_deps.py` and the GitHub Actions build both read `setup` and
 `vendor_clone` from each `native/build.cfg`. The bytes land in gitignored
-folders. YOLOv8 weights are AGPL-3.0 and that download does not include them.
+folders. The ML line is `--sdk-only`, so that download is the ONNX Runtime library and not the weights. MiDaS and the five Johnson styles are `setup_ml.py --models-only`. MediaPipe ONNX files and Ultralytics YOLOv8 weights are never fetched.
 
 Python is also copied next to a release player for the OS that ran the build.
 The interpreter is not committed to the repository.
@@ -249,7 +249,9 @@ installs that package itself. Then build and launch — OpenCV operators appear.
 
 ```bash
 cd addons/gn_ext_ml
-python setup_ml.py --sdk-only   # ONNX Runtime only. YOLOv8 weights are AGPL.
+python setup_ml.py --sdk-only   # ONNX Runtime only.
+# Model fetch is MiDaS and five Johnson styles. MediaPipe ONNX files and
+# Ultralytics YOLOv8 weights (AGPL-3.0) are not downloaded.
 cd native && scons              # Builds the DLL
 ```
 
@@ -279,12 +281,12 @@ What's included out of the box:
 | **Always works** | All Tier 1 (GDScript) + All Tier 2 (shipped DLLs) + Tier 3 (FFmpeg, WebRender) |
 | **Works after vendor install** | Tier 4 — user installs free vendor software, operators auto-detect |
 | **Included in the release** | Python nodes (CPython 3.10 + NumPy), downloaded at build time |
-| **Not included** | ONNX Runtime and model weights — `setup_ml.py` |
+| **Not included** | ML weight files. The ONNX Runtime library is fetched at build time (`setup_ml.py --sdk-only`) and ships with the extension. Weights do not |
 
 The shipped editor includes:
 - Core GONODES engine
 - All GDScript extensions
-- Pre-built DLLs for: native, hap, midi, spout, gpu_encode, video_capture, ffmpeg, webrender
+- Pre-built DLLs for: native, hap, midi, spout, gpu_encode, video_capture, ffmpeg, webrender, ml (ONNX Runtime library, no weights)
 - Pre-built DLLs for: blackmagic, ndi, depth_sensor (all three backends), opencv, syphon
   — these load only if vendor runtime is installed
 
@@ -363,13 +365,13 @@ that depends only on its own vendor runtime.
 ### Scenario 5: User wants ML operators
 
 1. Run `python addons/gn_ext_ml/setup_ml.py` to download:
-   - ONNX Runtime (MIT — can redistribute freely)
-   - Model weights (varies: MIT, Apache 2.0, **AGPL-3.0 for YOLOv8**)
+   - ONNX Runtime (MIT)
+   - MiDaS v2.1 Small (MIT) and five Johnson style models (BSD-3-Clause)
 2. Build: `cd addons/gn_ext_ml/native && scons`
-3. **WARNING**: YOLOv8 model weights are AGPL-3.0. If the user ships a project
-   using YOLOv8 detection, AGPL may require open-sourcing the entire project.
-   Alternative: use a YOLOv8 model with a different license, or use MediaPipe
-   (Apache 2.0) / MiDaS (MIT) operators instead.
+3. MediaPipe landmark and selfie models are not published as ONNX, so the
+   script does not download them. Ultralytics YOLOv8 weights are AGPL-3.0
+   and are not downloaded. ObjectDetectDAT decodes a YOLO file you supply.
+   Shipping that file can make the AGPL apply to the project.
 
 ---
 
@@ -395,7 +397,7 @@ that depends only on its own vendor runtime.
 | gn_ext_depth_sensor | 4 | Mixed | Yes (3 DLLs) | Sensor vendor SW | No |
 | gn_ext_opencv | 5 | Apache 2.0 | Yes (our DLL) | OpenCV runtime | `setup_opencv.py` via `setup_deps.py` |
 | gn_ext_syphon | 5 | BSD-3 | Yes (Mac) | Syphon Framework | cloned by `setup_deps.py` |
-| gn_ext_ml | 5 | MIT + **AGPL** | No | ONNX Runtime | `setup_ml.py` + `scons` |
+| gn_ext_ml | 5 | MIT | Yes (runtime DLL, no weights) | No | `setup_ml.py --sdk-only` via `setup_deps.py` |
 | gn_ext_user_python | 5 | PSF/BSD | Yes (release build) | No | `setup_python.py --bundle` |
 | gn_ext_user_native | 5 | N/A | Yes (scaffold) | C++ compiler | User writes code |
 

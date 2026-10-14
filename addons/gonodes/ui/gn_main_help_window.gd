@@ -31,6 +31,9 @@ const HELP_DIR := "res://addons/gonodes/help"
 ## Category icons for sidebar tree items.
 const _SECTION_ICONS := {
 	"getting_started": "📖",
+	"ml": "🧪",
+	"pop": "✨",
+	"sdf": "🔷",
 	"editor": "🔧",
 	"expressions": "📐",
 	"operators": "📋",
@@ -50,6 +53,9 @@ const _SECTION_ICONS := {
 ## Map of sidebar keys → markdown file paths (relative to HELP_DIR).
 const _SECTION_FILES := {
 	"getting_started": "getting_started.md",
+	"ml": "ml.md",
+	"pop": "pop.md",
+	"sdf": "sdf.md",
 	"editor": "editor.md",
 	"expressions": "expressions.md",
 	"takes": "takes.md",
@@ -195,6 +201,9 @@ func _build_sidebar() -> void:
 
 	# Sections with inline TOC from markdown headings
 	_add_section_with_toc("getting_started", "%s  Getting Started" % _SECTION_ICONS["getting_started"])
+	_add_section_with_toc("ml", "%s  Machine Learning" % _SECTION_ICONS["ml"])
+	_add_section_with_toc("pop", "%s  Particles" % _SECTION_ICONS["pop"])
+	_add_section_with_toc("sdf", "%s  Signed Distance Fields" % _SECTION_ICONS["sdf"])
 	_add_section_with_toc("editor", "%s  Editor Guide" % _SECTION_ICONS["editor"])
 	_add_section_with_toc("expressions", "%s  Expressions & Scripting" % _SECTION_ICONS["expressions"])
 

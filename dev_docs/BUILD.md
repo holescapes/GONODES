@@ -161,7 +161,7 @@ These stay out of git. The same `setup` and `vendor_clone` lines run locally and
 | Library | License | How it arrives |
 |---------|---------|----------------|
 | CPython 3.10 + NumPy | PSF / BSD | `setup_python.py --bundle` |
-| ONNX Runtime | MIT | `setup_ml.py --sdk-only` (YOLOv8 weights are AGPL and are not downloaded) |
+| ONNX Runtime | MIT | `setup_ml.py --sdk-only` (the `build.cfg` line). Weights are not part of this download |
 | OpenCV | Apache 2.0 | Windows: official SDK zip. Linux and macOS: `libopencv-dev` / `brew install opencv` (the CI build installs that package) |
 | Spout2 | BSD | git clone on Windows |
 | Syphon | BSD-3 | git clone on macOS |
@@ -1457,7 +1457,7 @@ writing it back produces mojibake: `—` (em-dash) becomes `Ã¢â‚¬â€`,
 | `setup_deps.py`                               | Root setup — clones godot-cpp; runs extension `setup` / `vendor_clone` from `build.cfg` |
 | `build/gn_ext_setup.py`                       | Shared setup planner/runner (used by `setup_deps.py` and `run_extension_setups.py`) |
 | `scripts/run_extension_setups.py`             | Targeted pre-build SDK fetch matching scons tier |
-| `addons/gn_ext_ml/setup_ml.py`                | Downloads ONNX Runtime SDK + pre-trained models |
+| `addons/gn_ext_ml/setup_ml.py`                | `--sdk-only` (what the build runs) fetches the ONNX Runtime SDK. A full run also fetches MiDaS and five Johnson styles into `models/`, which is gitignored. MediaPipe ONNX files and YOLOv8 weights are never fetched |
 | `addons/gn_ext_opencv/setup_opencv.py`        | Downloads OpenCV SDK (Windows) |
 | `addons/gn_ext_user_python/setup_python.py`   | Downloads embeddable CPython + NumPy |
 | `scripts/build_windows.ps1`                   | All-in-one Windows build (`tier=all` default; `-Shipped` for subset) |

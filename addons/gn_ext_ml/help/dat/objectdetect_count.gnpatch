@@ -97,7 +97,7 @@
             "to_port": 0
         },
         {
-            "from": "bridge1",
+            "from": "webcam1",
             "from_port": 0,
             "to": "detect1",
             "to_port": 0
@@ -119,13 +119,19 @@
             "from_port": 0,
             "to": "window1",
             "to_port": 0
+        },
+        {
+            "from": "detect1",
+            "from_port": 0,
+            "to": "text1",
+            "to_port": 0
         }
     ],
     "annotations": [
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Object Detect \u2014 Count Overlay\n\nDetection count displayed as text over webcam.\nExpression reads dat row_count() for live count.\nUseful for people counting, traffic monitoring.",
+            "text": "Object Detect — Count Overlay\n\nDetection count displayed as text over webcam.\nExpression reads dat row_count() for live count.\nUseful for people counting, traffic monitoring.",
             "position": [
                 -100.0,
                 -100.0

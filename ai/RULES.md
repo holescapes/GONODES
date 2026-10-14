@@ -308,7 +308,7 @@ Checklist: `dev_docs/NEW_EXTENSION_CHECKLIST.md`.
 
 | Extension | Script | What it does |
 |-----------|--------|-------------|
-| ML/ONNX | `addons/gn_ext_ml/setup_ml.py` | Downloads ONNX Runtime |
+| ML/ONNX | `addons/gn_ext_ml/setup_ml.py` | The build runs `--sdk-only` (ONNX Runtime). Weights are a separate `--models-only` and are not shipped |
 | OpenCV | `addons/gn_ext_opencv/setup_opencv.py` | Downloads OpenCV SDK (Windows) |
 | Python | `addons/gn_ext_user_python/setup_python.py` | Downloads embeddable CPython + NumPy |
 | Spout | `vendor_clone` in build.cfg | Clones Spout2 SDK |

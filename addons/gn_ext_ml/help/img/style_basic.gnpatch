@@ -26,6 +26,9 @@
                 },
                 "strength": {
                     "value": 1.0
+                },
+                "style": {
+                    "value": 0
                 }
             }
         },
@@ -81,7 +84,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Webcam IMG \u2014 Basic\n\nLive webcam/camera feed as CPU Image. Chain \u2192 ImgToTOP for GPU.",
+            "text": "Style Transfer IMG — Basic\n\nWebcam into a fast style model, then ImgToTOP into the window.\nStyle menu: Mosaic, Candy, Udnie, Rain Princess, Pointillism, or Custom.",
             "position": [
                 -100.0,
                 -100.0

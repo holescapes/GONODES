@@ -2,6 +2,11 @@
 entry_symbol = "gn_ml_init"
 compatibility_minimum = 4.1
 
+[dependencies]
+windows.x86_64 = {"res://addons/gn_ext_ml/native/bin/win64/onnxruntime.dll": ""}
+linux.x86_64 = {"res://addons/gn_ext_ml/native/bin/linux64/libonnxruntime.so": ""}
+macos = {"res://addons/gn_ext_ml/native/bin/macos/libonnxruntime.dylib": ""}
+
 [libraries]
 windows.x86_64.debug = "res://addons/gn_ext_ml/native/bin/win64/libgn_ml.windows.template_release.x86_64.dll"
 windows.x86_64.release = "res://addons/gn_ext_ml/native/bin/win64/libgn_ml.windows.template_release.x86_64.dll"

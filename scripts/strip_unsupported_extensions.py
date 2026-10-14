@@ -140,7 +140,11 @@ def folders_to_omit(project: Path, platform: str) -> list[str]:
 
 
 def exclude_patterns(folders: list[str]) -> str:
-    parts = ["export_presets.cfg"]
+    parts = [
+        "export_presets.cfg",
+        "addons/gn_ext_ml/models/*",
+        "res://addons/gn_ext_ml/models/*",
+    ]
     for folder in folders:
         parts.append(f"addons/{folder}/*")
         parts.append(f"res://addons/{folder}/*")

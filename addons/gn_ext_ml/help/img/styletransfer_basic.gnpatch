@@ -40,6 +40,9 @@
                 },
                 "active": {
                     "value": true
+                },
+                "style": {
+                    "value": 0
                 }
             }
         },
@@ -95,7 +98,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Style Transfer TOP \u2014 Basic\n\nApply artistic style transfer using an ML model.\nstrength controls blend between original and stylized output.\nSet model_path to your style ONNX model. Uses ONNX Runtime.",
+            "text": "Style Transfer IMG — Noise\n\nNoise image into a fast style model, then ImgToTOP into the window.\nStyle menu: Mosaic, Candy, Udnie, Rain Princess, Pointillism, or Custom. Custom uses the model file.",
             "position": [
                 -100,
                 -100

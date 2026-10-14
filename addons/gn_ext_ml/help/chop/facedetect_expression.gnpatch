@@ -101,7 +101,7 @@
             "to_port": 0
         },
         {
-            "from": "bridge1",
+            "from": "webcam1",
             "from_port": 0,
             "to": "face1",
             "to_port": 0
@@ -135,7 +135,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Face Detect \u2014 Expression-Driven Color\n\nEye position (blink detection) drives hue rotation.\nLook up = warm colors, look down = cool colors.\nFacial expressions control live video color grading.",
+            "text": "Face Detect — Expression-Driven Color\n\nEye position (blink detection) drives hue rotation.\nLook up = warm colors, look down = cool colors.\nFacial expressions control live video color grading.",
             "position": [
                 -100.0,
                 -100.0

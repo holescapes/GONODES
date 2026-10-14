@@ -10,14 +10,6 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
         "hand1": {
             "type": "HandDetectCHOP",
             "position": [
@@ -131,12 +123,6 @@
         {
             "from": "webcam1",
             "from_port": 0,
-            "to": "bridge1",
-            "to_port": 0
-        },
-        {
-            "from": "bridge1",
-            "from_port": 0,
             "to": "hand1",
             "to_port": 0
         },
@@ -181,7 +167,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Hand Detect \u2014 Finger Painting\n\nIndex fingertip position drives a circle with feedback.\nCreates a persistent drawing trail as you move your hand.\nFeedback + Level brightness fade gives a painting effect.",
+            "text": "Hand Detect — Finger Painting\n\nIndex fingertip position drives a circle with feedback.\nCreates a persistent drawing trail as you move your hand.\nFeedback + Level brightness fade gives a painting effect.",
             "position": [
                 -100.0,
                 -100.0

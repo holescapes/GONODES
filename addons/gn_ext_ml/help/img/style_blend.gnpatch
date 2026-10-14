@@ -28,6 +28,9 @@
                     "value": 0.0,
                     "expression": "abs(sin(time * 2.0))",
                     "mode": "EXPRESSION"
+                },
+                "style": {
+                    "value": 0
                 }
             }
         },
@@ -83,7 +86,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Style Transfer \u2014 Animated Blend\n\nStrength oscillates via sine expression.\nSmoothly crossfades between original and stylized.\nGreat for VJ transitions and live performance.",
+            "text": "Style Transfer — Animated Blend\n\nStrength oscillates via sine expression.\nSmoothly crossfades between original and stylized.\nGreat for VJ transitions and live performance.\nStyle menu: Mosaic, Candy, Udnie, Rain Princess, Pointillism, or Custom.",
             "position": [
                 -100.0,
                 -100.0

@@ -7,12 +7,24 @@ extends GNImgBase
 ##
 ## Requires the gn_ext_ml GDExtension (GNOnnxInference class).
 
-var _onnx: RefCounted = null
-var _model_loaded := false
-var _last_model: String = ""
+var _session := GNMlSession.new()
 
-const MODEL_W := 256
-const MODEL_H := 256
+const MODEL_W := 224
+const MODEL_H := 224
+const STYLE_FILES := [
+	"style_mosaic.onnx",
+	"style_candy.onnx",
+	"style_udnie.onnx",
+	"style_rain_princess.onnx",
+	"style_pointilism.onnx",
+]
+
+
+## Built-in Johnson styles, or the custom file when [param style_idx] is past that list.
+static func model_for_style(style_idx: int, custom_path: String) -> String:
+	if style_idx < 0 or style_idx >= STYLE_FILES.size():
+		return custom_path
+	return "res://addons/gn_ext_ml/models/" + STYLE_FILES[style_idx]
 
 
 func _init() -> void:
@@ -27,9 +39,12 @@ func _init_ports() -> void:
 	add_output("out", GNFamily.Type.IMG, "Stylized image", "Out")
 
 func _init_parameters() -> void:
+	add_parameter(GNParameter.create_enum("style",
+		PackedStringArray(["Mosaic", "Candy", "Udnie", "Rain Princess", "Pointillism", "Custom"]), 0,
+		"Style", "Fast style trained on one picture. Custom uses the model file."))
 	add_parameter(GNParameter.create_file("model_path", "res://addons/gn_ext_ml/models/style_mosaic.onnx",
 		PackedStringArray(["*.onnx"]),
-		"Model", "Path to style transfer ONNX model"))
+		"Model", "ONNX file used when Style is Custom. The built-in styles ignore this path."))
 	add_parameter(GNParameter.create_vector2i("resolution", Vector2i(512, 512), "Output resolution",
 		"Output resolution"))
 	add_parameter(GNParameter.create_float("strength", 1.0, 0.0, 1.0,
@@ -44,55 +59,37 @@ func _init_parameters() -> void:
 func _cook(inputs: Array[GNData]) -> GNData:
 	var out := _prepare_image()
 
-	if not _is_ml_available():
-		GNLogger.warn("StyleTransferIMG", "'%s': gn_ext_ml not loaded" % id)
-		return null
-
 	if not get_param_value("active"):
 		return out
 
-	var in_img: GNImageData = _get_input_img(inputs, 0)
+	node_warning = ""
+	var in_img: GNImageData = GNMlSession.image_input(inputs)
 	if in_img == null or in_img.image == null:
 		return null
 
-	_ensure_onnx()
-	if _onnx == null:
+	var model_path := model_for_style(int(get_param_value("style")), str(get_param_value("model_path")))
+	if not _session.begin(int(get_param_value("provider")), model_path, project_dir):
+		node_warning = _session.last_error
+		GNLogger.error("StyleTransferIMG", "'%s': %s" % [id, _session.last_error])
 		return null
 
-	var model_path: String = get_param_value("model_path")
-	if model_path != _last_model:
-		_onnx.release()
-		var providers := ["cpu", "directml", "cuda", "coreml"]
-		_onnx.set_execution_provider(providers[get_param_value("provider")])
-		_model_loaded = _onnx.load_model(model_path)
-		_last_model = model_path
-		if not _model_loaded:
-			GNLogger.error("StyleTransferIMG", "'%s': failed to load '%s'" % [id, model_path])
-
-	if not _model_loaded:
+	var model_size := _session.image_size(MODEL_W, MODEL_H)
+	if not _session.run_image(in_img.image, model_size.x, model_size.y):
+		node_warning = _session.last_error
+		GNLogger.error("StyleTransferIMG", "'%s': %s" % [id, _session.last_error])
 		return null
 
-	var img: Image = in_img.image
+	var output_names: PackedStringArray = _session.output_names()
 
-	# Style transfer models typically expect [0, 255] or [0, 1] NCHW
-	var input_names: PackedStringArray = _onnx.get_input_names()
-	if input_names.is_empty():
-		return null
-	_onnx.set_input_from_image(input_names[0], img, MODEL_W, MODEL_H)
-
-	if not _onnx.run():
-		return null
-
-	var output_names: PackedStringArray = _onnx.get_output_names()
 	if output_names.is_empty():
 		return null
 
 	# Output: [1, 3, H, W] float — NCHW, values in [0, 255] or similar
-	var raw: PackedFloat32Array = _onnx.get_output_float(output_names[0])
+	var raw: PackedFloat32Array = _session.output_float(output_names[0])
 	if raw.is_empty():
 		return null
 
-	var shape: PackedInt32Array = _onnx.get_output_shape(output_names[0])
+	var shape: PackedInt32Array = _session.output_shape(output_names[0])
 	var out_h: int = shape[2] if shape.size() >= 4 else MODEL_H
 	var out_w: int = shape[3] if shape.size() >= 4 else MODEL_W
 	var num_px := out_w * out_h
@@ -148,16 +145,3 @@ func _cook(inputs: Array[GNData]) -> GNData:
 
 	out.set_image(result_img)
 	return out
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-static func _is_ml_available() -> bool:
-	return ClassDB.class_exists(&"GNOnnxInference")
-
-func _ensure_onnx() -> void:
-	if _onnx != null:
-		return
-	_onnx = ClassDB.instantiate(&"GNOnnxInference")
-	if _onnx == null:
-		GNLogger.error("StyleTransferIMG", "'%s': failed to instantiate GNOnnxInference" % id)

@@ -10,14 +10,6 @@
             ],
             "parameters": {}
         },
-        "bridge1": {
-            "type": "ImgToTOP",
-            "position": [
-                350,
-                100
-            ],
-            "parameters": {}
-        },
         "pose1": {
             "type": "PoseDetectCHOP",
             "position": [
@@ -80,12 +72,6 @@
         {
             "from": "webcam1",
             "from_port": 0,
-            "to": "bridge1",
-            "to_port": 0
-        },
-        {
-            "from": "bridge1",
-            "from_port": 0,
             "to": "pose1",
             "to_port": 0
         },
@@ -112,7 +98,7 @@
         {
             "id": "ann_1",
             "type": "note",
-            "text": "Pose Detect \u2014 Motion Trail\n\nCaptures 120 frames of pose keypoint history using TrailCHOP.\nVisualizes movement trajectories over time.\nLower confidence threshold shows all detections.",
+            "text": "Pose Detect — Motion Trail\n\nCaptures 120 frames of pose keypoint history using TrailCHOP.\nVisualizes movement trajectories over time.\nLower confidence threshold shows all detections.",
             "position": [
                 -100.0,
                 -100.0
